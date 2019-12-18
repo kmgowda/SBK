@@ -26,17 +26,17 @@ At the end of the performance benchmarking, this tool outputs the 50th, 75th, 95
 Checkout the source code:
 
 ```
-git clone https://github.com/pravega/pravega-benchmark
-cd pravega-benchmark
+git clone https://github.com/kmgowda/DSB.git
+cd DSB
 ```
 
-Build the Pravega benchmark Tool:
+Build the DSB Tool:
 
 ```
 ./gradlew build
 ```
 
-untar the Pravega benchmark tool to local folder
+untar the DSB tool to local folder
 
 ```
 tar -xvf ./build/distributions/DSB.tar -C ./run
