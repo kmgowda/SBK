@@ -114,7 +114,7 @@ in the case you want to write/read the certain number of events use the -events 
 ```
 
 ### 2 - Throughput Mode
-In this mode, the Pravega benchmark tool pushes the messages to the Pravega client with specified approximate maximum throughput in terms of Mega Bytes/second (MB/s).
+In this mode, the DSB tool pushes the messages to the Pravega client with specified approximate maximum throughput in terms of Mega Bytes/second (MB/s).
 This mode is used to find the least latency that can be obtained from the Pravega cluster for given throughput.
 This mode is used only for write operation.
 
