@@ -8,7 +8,7 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 -->
 
-# Pravega Benchmark Tool
+# Distributed Storage Benchmark Tool
 
 The Pravega benchmark tool used for the performance benchmarking of pravega  and Kafka streaming storage clusters.
 This tool performs the throughput and latency analysis for the multi producers/writers and consumers/readers of pravega.
@@ -39,13 +39,13 @@ Build the Pravega benchmark Tool:
 untar the Pravega benchmark tool to local folder
 
 ```
-tar -xvf ./build/distributions/pravega-benchmark.tar -C ./run
+tar -xvf ./build/distributions/DSB.tar -C ./run
 ```
 
 Running Pravega benchmark tool locally:
 
 ```
-<dir>/pravega-benchmark$ ./run/pravega-benchmark/bin/pravega-benchmark  -help
+<dir>/DSBk$ ./run/pravega-benchmark/bin/pravega-benchmark  -help
  -consumers <arg>               Number of consumers
  -controller <arg>              Controller URI
  -events <arg>                  Number of events/records if 'time' not
