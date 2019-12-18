@@ -11,7 +11,7 @@ You may obtain a copy of the License at
 # Distributed Storage Benchmark Tool
 
 The Distributed Storage Benchmark (DSB) tool used for the performance benchmarking of Distributed Storage Systems.
-Currently it suport benchmarking of pravega  and Kafka streaming storage clusters and in future benchmark of more streaming storage will be added. This tool performs the throughput and latency analysis for the multi producers/writers and consumers/readers of pravega.
+Currently it suports benchmarking of pravega  and Kafka streaming storage clusters and in future benchmark of more streaming storage will be added. This tool performs the throughput and latency analysis for the multi producers/writers and consumers/readers of pravega.
 it also validates the end to end latency. The write and/or read latencies can be stored in a CSV file for later analysis.
 At the end of the performance benchmarking, this tool outputs the 50th, 75th, 95th , 99th, 99.9th and 99.99th latency percentiles.
 
