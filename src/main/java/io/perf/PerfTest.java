@@ -64,7 +64,7 @@ import java.util.Locale;
  * Performance benchmark for Pravega.
  * Data format is in comma separated format as following: {TimeStamp, Sensor Id, Location, TempValue }.
  */
-public class PravegaPerfTest {
+public class PerfTest {
     final static String BENCHMARKNAME = "pravega-benchmark";
 
     public static void main(String[] args) {
