@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf.drivers.pravega;
 
 import java.net.URI;
 import java.util.List;
@@ -52,7 +52,7 @@ public class PravegaStreamHandler {
     ReaderGroupManager readerGroupManager;
     ReaderGroupConfig rdGrpConfig;
 
-    PravegaStreamHandler(String scope, String stream,
+    public PravegaStreamHandler(String scope, String stream,
                          String rdGrpName,
                          String uri, int segs,
                          int timeout, ControllerImpl contrl,
@@ -72,11 +72,11 @@ public class PravegaStreamHandler {
                 .build();
     }
 
-    boolean create() {
+    public boolean create() {
         return streamManager.createStream(scope, stream, streamconfig);
     }
 
-    void scale() throws InterruptedException, ExecutionException, TimeoutException {
+    public void scale() throws InterruptedException, ExecutionException, TimeoutException {
         StreamSegments segments = controller.getCurrentSegments(scope, stream).join();
         final int nseg = segments.getSegments().size();
         System.out.println("Current segments of the stream: " + stream + " = " + nseg);
@@ -122,7 +122,7 @@ public class PravegaStreamHandler {
                         .get().getSegments().size());
     }
 
-    void recreate() throws InterruptedException, ExecutionException, TimeoutException {
+    public void recreate() throws InterruptedException, ExecutionException, TimeoutException {
         System.out.println("Sealing and Deleteing the stream : " + stream + " and then recreating the same");
         CompletableFuture<Boolean> sealStatus = controller.sealStream(scope, stream);
         if (!sealStatus.get(timeout, TimeUnit.SECONDS)) {
@@ -139,7 +139,7 @@ public class PravegaStreamHandler {
         }
     }
 
-    ReaderGroup createReaderGroup(boolean reset) throws URISyntaxException {
+    public ReaderGroup createReaderGroup(boolean reset) throws URISyntaxException {
         if (readerGroupManager == null) {
             readerGroupManager = ReaderGroupManager.withScope(scope,
                     ClientConfig.builder().controllerURI(new URI(controllerUri)).build());
@@ -154,7 +154,7 @@ public class PravegaStreamHandler {
         return rdGroup;
     }
 
-    void deleteReaderGroup() {
+    public void deleteReaderGroup() {
         try {
             readerGroupManager.deleteReaderGroup(rdGrpName);
         } catch (RuntimeException e) {

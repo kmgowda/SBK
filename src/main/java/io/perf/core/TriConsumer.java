@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf.core;
 
 public interface TriConsumer {
     void accept(long a, long b, int c);

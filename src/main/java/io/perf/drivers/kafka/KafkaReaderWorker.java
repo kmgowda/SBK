@@ -7,7 +7,9 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.pravega.perf;
+package io.perf.drivers.kafka;
+import io.perf.core.ReaderWorker;
+import io.perf.core.PerfStats;
 
 import java.util.Properties;
 import java.util.Arrays;
@@ -21,7 +23,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 public class KafkaReaderWorker extends ReaderWorker {
     final private KafkaConsumer<byte[], byte[]> consumer;
 
-    KafkaReaderWorker(int readerId, int events, int secondsToRun,
+    public KafkaReaderWorker(int readerId, int events, int secondsToRun,
                       long start, PerfStats stats, String partition,
                       int timeout, boolean writeAndRead, Properties consumerProps) {
         super(readerId, events, secondsToRun, start, stats, partition, timeout, writeAndRead);
