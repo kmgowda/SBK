@@ -26,8 +26,8 @@ At the end of the performance benchmarking, this tool outputs the 50th, 75th, 95
 Checkout the source code:
 
 ```
-git clone https://github.com/kmgowda/DSB.git
-cd DSB
+git clone https://github.com/kmgowda/dsb.git
+cd dsb
 ```
 
 Build the DSB Tool:
