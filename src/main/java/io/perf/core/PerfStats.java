@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.pravega.perf;
+package io.perf.core;;
 
 import java.io.IOException;
 import java.util.ArrayList;

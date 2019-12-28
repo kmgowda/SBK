@@ -8,7 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf.drivers.pravega;
+import io.perf.core.ReaderWorker;
+import io.perf.core.PerfStats;
 
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.ClientFactory;
@@ -22,7 +24,7 @@ import io.pravega.client.stream.ReinitializationRequiredException;
 public class PravegaReaderWorker extends ReaderWorker {
     private final EventStreamReader<byte[]> reader;
 
-    PravegaReaderWorker(int readerId, int events, int secondsToRun,
+    public PravegaReaderWorker(int readerId, int events, int secondsToRun,
                         long start, PerfStats stats, String readergrp,
                         int timeout, boolean writeAndRead, ClientFactory factory) {
         super(readerId, events, secondsToRun, start, stats, readergrp, timeout, writeAndRead);

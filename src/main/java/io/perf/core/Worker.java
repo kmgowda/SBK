@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf.core;
 
 /**
  * Abstract class for Writers and Readers.
@@ -16,14 +16,14 @@ package io.pravega.perf;
 public abstract class Worker {
     final static int TIME_HEADER_SIZE = 8;
 
-    final int workerID;
-    final int events;
-    final int messageSize;
-    final int timeout;
-    final String streamName;
-    final long startTime;
-    final PerfStats stats;
-    final int secondsToRun;
+    public final int workerID;
+    public final int events;
+    public final int messageSize;
+    public final int timeout;
+    public final String streamName;
+    public final long startTime;
+    public final PerfStats stats;
+    public final int secondsToRun;
 
     Worker(int sensorId, int events, int secondsToRun,
            int messageSize, long start, PerfStats stats,

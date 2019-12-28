@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf.core;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -23,7 +23,7 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
     final private Performance perf;
     final private boolean writeAndRead;
 
-    ReaderWorker(int readerId, int events, int secondsToRun, long start,
+    public ReaderWorker(int readerId, int events, int secondsToRun, long start,
                  PerfStats stats, String readerGrp, int timeout, boolean writeAndRead) {
         super(readerId, events, secondsToRun, 0, start, stats, readerGrp, timeout);
 

@@ -8,7 +8,18 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf;
+import io.perf.core.ReaderWorker;
+import io.perf.core.WriterWorker;
+import io.perf.core.PerfStats;
+
+import io.perf.drivers.pravega.PravegaStreamHandler;
+import io.perf.drivers.pravega.PravegaTransactionWriterWorker;
+import io.perf.drivers.pravega.PravegaWriterWorker;
+import io.perf.drivers.pravega.PravegaReaderWorker;
+
+import io.perf.drivers.kafka.KafkaReaderWorker;
+import io.perf.drivers.kafka.KafkaWriterWorker;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;

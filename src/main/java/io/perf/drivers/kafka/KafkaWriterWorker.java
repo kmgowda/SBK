@@ -7,8 +7,10 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.pravega.perf;
-
+package io.perf.drivers.kafka;
+import io.perf.core.WriterWorker;
+import io.perf.core.PerfStats;
+import io.perf.core.TriConsumer;
 import java.util.Properties;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -20,7 +22,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 public class KafkaWriterWorker extends WriterWorker {
     final private KafkaProducer<byte[], byte[]> producer;
 
-    KafkaWriterWorker(int sensorId, int events, int flushEvents,
+    public KafkaWriterWorker(int sensorId, int events, int flushEvents,
                       int secondsToRun, boolean isRandomKey, int messageSize,
                       long start, PerfStats stats, String streamName,
                       int eventsPerSec, boolean writeAndRead, Properties producerProps) {

@@ -36,7 +36,7 @@ buildscript {
 
         runtime "org.slf4j:slf4j-simple:1.7.14"
     }
-mainClassName = "io.pravega.perf.PravegaPerfTest"
+mainClassName = "io.perf.PravegaPerfTest"
 startScripts {
     doLast {
         unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')

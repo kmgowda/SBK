@@ -8,7 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf.drivers.pravega;
+import io.perf.core.WriterWorker;
+import io.perf.core.PerfStats;
+import io.perf.core.TriConsumer;
 
 import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.Transaction;
@@ -25,7 +28,7 @@ public class PravegaTransactionWriterWorker extends PravegaWriterWorker {
     @GuardedBy("this")
     private Transaction<byte[]> transaction;
 
-    PravegaTransactionWriterWorker(int sensorId, int events,
+    public PravegaTransactionWriterWorker(int sensorId, int events,
                                    int secondsToRun, boolean isRandomKey,
                                    int messageSize, long start,
                                    PerfStats stats, String streamName, int eventsPerSec, boolean writeAndRead,

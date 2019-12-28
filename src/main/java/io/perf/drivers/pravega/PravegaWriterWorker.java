@@ -8,8 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
-
+package io.perf.drivers.pravega;
+import io.perf.core.WriterWorker;
+import io.perf.core.PerfStats;
+import io.perf.core.TriConsumer;
 import java.util.concurrent.CompletableFuture;
 
 import io.pravega.client.stream.EventStreamWriter;
@@ -23,7 +25,7 @@ import io.pravega.client.stream.EventWriterConfig;
 public class PravegaWriterWorker extends WriterWorker {
     final EventStreamWriter<byte[]> producer;
 
-    PravegaWriterWorker(int sensorId, int events, int EventsPerFlush, int secondsToRun,
+    public PravegaWriterWorker(int sensorId, int events, int EventsPerFlush, int secondsToRun,
                         boolean isRandomKey, int messageSize, long start,
                         PerfStats stats, String streamName, int eventsPerSec,
                         boolean writeAndRead, ClientFactory factory) {

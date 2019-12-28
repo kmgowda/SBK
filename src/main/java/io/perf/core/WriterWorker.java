@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.pravega.perf;
+package io.perf.core;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public abstract class WriterWorker extends Worker implements Callable<Void> {
     final private int EventsPerFlush;
     final private boolean writeAndRead;
 
-    WriterWorker(int sensorId, int events, int EventsPerFlush, int secondsToRun,
+    public WriterWorker(int sensorId, int events, int EventsPerFlush, int secondsToRun,
                  boolean isRandomKey, int messageSize, long start,
                  PerfStats stats, String streamName, int eventsPerSec, boolean writeAndRead) {
 
