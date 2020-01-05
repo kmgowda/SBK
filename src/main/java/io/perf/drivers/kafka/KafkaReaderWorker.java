@@ -26,7 +26,7 @@ public class KafkaReaderWorker extends ReaderWorker {
     public KafkaReaderWorker(int readerId, int events, int secondsToRun,
                       long start, PerfStats stats, String partition,
                       int timeout, boolean writeAndRead, Properties consumerProps) {
-        super(readerId, events, secondsToRun, start, stats, partition, timeout, writeAndRead);
+        super(readerId, events, secondsToRun, start, stats, null, partition, timeout, writeAndRead);
 
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(partition));

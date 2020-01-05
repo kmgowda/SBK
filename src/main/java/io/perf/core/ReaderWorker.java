@@ -24,8 +24,8 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
     final private boolean writeAndRead;
 
     public ReaderWorker(int readerId, int events, int secondsToRun, long start,
-                 PerfStats stats, String readerGrp, int timeout, boolean writeAndRead) {
-        super(readerId, events, secondsToRun, 0, start, stats, readerGrp, timeout);
+                 PerfStats stats, String streamName, String readerGrp, int timeout, boolean writeAndRead) {
+        super(readerId, events, secondsToRun, 0, start, stats, streamName, readerGrp, timeout);
 
         this.writeAndRead = writeAndRead;
         this.perf = createBenchmark();
@@ -46,12 +46,12 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
     /**
      * read the data.
      */
-    public abstract byte[] readData();
+    public abstract byte[] readData() throws IOException;
 
     /**
      * close the consumer/reader.
      */
-    public abstract void close();
+    public abstract void close() throws IOException;
 
     @Override
     public Void call() throws InterruptedException, ExecutionException, IOException {

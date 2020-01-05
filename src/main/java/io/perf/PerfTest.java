@@ -143,10 +143,22 @@ public class PerfTest {
                         executor.awaitTermination(1, TimeUnit.SECONDS);
                         perfTest.shutdown(System.currentTimeMillis());
                         if (consumers != null) {
-                            consumers.forEach(ReaderWorker::close);
+                            consumers.forEach(c-> {
+                                try {
+                                    c.close();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                            });
                         }
                         if (producers != null) {
-                            producers.forEach(WriterWorker::close);
+                            producers.forEach(c-> {
+                                try {
+                                    c.close();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                            });
                         }
                         perfTest.closeReaderGroup();
                     } catch (InterruptedException ex) {
@@ -160,10 +172,22 @@ public class PerfTest {
             executor.awaitTermination(1, TimeUnit.SECONDS);
             perfTest.shutdown(System.currentTimeMillis());
             if (consumers != null) {
-                consumers.forEach(ReaderWorker::close);
+                consumers.forEach(c-> {
+                    try {
+                       c.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                });
             }
             if (producers != null) {
-                producers.forEach(WriterWorker::close);
+                producers.forEach(c-> {
+                    try {
+                        c.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                });
             }
             perfTest.closeReaderGroup();
         } catch (Exception ex) {
@@ -418,7 +442,7 @@ public class PerfTest {
                             .map(i -> new PravegaTransactionWriterWorker(i, eventsPerProducer,
                                     runtimeSec, false,
                                     messageSize, startTime,
-                                    produceStats, streamName,
+                                    produceStats, streamName, TIMEOUT,
                                     eventsPerSec, writeAndRead, factory,
                                     transactionPerCommit))
                             .collect(Collectors.toList());
@@ -428,7 +452,7 @@ public class PerfTest {
                             .map(i -> new PravegaWriterWorker(i, eventsPerProducer,
                                     EventsPerFlush, runtimeSec, false,
                                     messageSize, startTime, produceStats,
-                                    streamName, eventsPerSec, writeAndRead, factory))
+                                    streamName, TIMEOUT, eventsPerSec, writeAndRead, factory))
                             .collect(Collectors.toList());
                 }
             } else {
@@ -445,7 +469,7 @@ public class PerfTest {
                         .boxed()
                         .map(i -> new PravegaReaderWorker(i, eventsPerConsumer,
                                 runtimeSec, startTime, consumeStats,
-                                rdGrpName, TIMEOUT, writeAndRead, factory))
+                                streamName, rdGrpName, TIMEOUT, writeAndRead, factory))
                         .collect(Collectors.toList());
             } else {
                 readers = null;
@@ -519,8 +543,8 @@ public class PerfTest {
                             .boxed()
                             .map(i -> new KafkaWriterWorker(i, eventsPerProducer,
                                     EventsPerFlush, runtimeSec, false,
-                                    messageSize, startTime, produceStats,
-                                    streamName, eventsPerSec, writeAndRead, producerConfig))
+                                    messageSize, startTime, produceStats, streamName,
+                                    TIMEOUT, eventsPerSec, writeAndRead, producerConfig))
                             .collect(Collectors.toList());
                 }
             } else {
