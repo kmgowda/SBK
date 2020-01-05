@@ -8,7 +8,7 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 -->
 
-# Distributed Storage Benchmark Tool
+# Distributed Storage Benchmark Tool [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Version](https://img.shields.io/github/release/pravega/pravega.svg)](https://github.com/kmgowda/dsb/releases)
 
 The Distributed Storage Benchmark (DSB) tool used for the performance benchmarking of Distributed Storage Systems.
 Currently it suports benchmarking of pravega  and Kafka streaming storage clusters and in future benchmark of more streaming storage will be added. This tool performs the throughput and latency analysis for the multi producers/writers and consumers/readers of pravega.
