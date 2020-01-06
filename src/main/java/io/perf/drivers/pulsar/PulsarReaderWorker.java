@@ -19,6 +19,7 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.SubscriptionType;
 import org.apache.pulsar.client.api.PulsarClientException;
+import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 
 /**
  * Class for Pulsar reader/consumer.
@@ -37,9 +38,12 @@ public class PulsarReaderWorker extends ReaderWorker {
                     .topic(streamName)
                     // Allow multiple consumers to attach to the same subscription
                     // and get messages dispatched as a queue
-                    .subscriptionType(SubscriptionType.Shared)
+                    .subscriptionType(SubscriptionType.Exclusive)
                     .subscriptionName(subscriptionName)
+                    .subscriptionInitialPosition(SubscriptionInitialPosition.Earliest)
+                    .receiverQueueSize(1)
                     .subscribe();
+
         } catch (PulsarClientException ex){
             throw new IOException(ex);
         }

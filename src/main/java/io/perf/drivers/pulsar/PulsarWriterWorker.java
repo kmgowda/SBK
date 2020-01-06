@@ -34,8 +34,9 @@ public class PulsarWriterWorker extends WriterWorker {
                 secondsToRun, isRandomKey, messageSize,
                 start, stats, streamName, timeout, eventsPerSec, writeAndRead);
         try {
-            this.producer = client.newProducer().enableBatching(true)
-                    .topic(streamName).sendTimeout(timeout, TimeUnit.SECONDS)
+            this.producer = client.newProducer()
+                    .enableBatching(true)
+                    .topic(streamName)
                     .blockIfQueueFull(true).create();
         } catch (PulsarClientException ex){
             throw new IOException(ex);
