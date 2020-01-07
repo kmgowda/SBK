@@ -21,19 +21,21 @@ public abstract class Worker {
     public final int messageSize;
     public final int timeout;
     public final String streamName;
+    public final String groupName;
     public final long startTime;
     public final PerfStats stats;
     public final int secondsToRun;
 
-    Worker(int sensorId, int events, int secondsToRun,
+    Worker(int workerID, int events, int secondsToRun,
            int messageSize, long start, PerfStats stats,
-           String streamName, int timeout) {
-        this.workerID = sensorId;
+           String streamName, String groupName, int timeout) {
+        this.workerID = workerID;
         this.events = events;
         this.secondsToRun = secondsToRun;
         this.startTime = start;
         this.stats = stats;
         this.streamName = streamName;
+        this.groupName = groupName;
         this.messageSize = messageSize;
         this.timeout = timeout;
     }

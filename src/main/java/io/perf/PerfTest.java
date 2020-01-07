@@ -21,6 +21,9 @@ import io.perf.drivers.pravega.PravegaReaderWorker;
 import io.perf.drivers.kafka.KafkaReaderWorker;
 import io.perf.drivers.kafka.KafkaWriterWorker;
 
+import io.perf.drivers.pulsar.PulsarWriterWorker;
+import io.perf.drivers.pulsar.PulsarReaderWorker;
+
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.ReaderGroup;
@@ -33,6 +36,8 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.requests.IsolationLevel;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+
+import org.apache.pulsar.client.api.PulsarClient;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -59,6 +64,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Properties;
 import java.util.Locale;
+import java.io.IOException;
 
 /**
  * Performance benchmark for Pravega.
@@ -102,6 +108,7 @@ public class PerfTest {
         options.addOption("readcsv", true, "CSV file to record read latencies");
         options.addOption("fork", true, "Use Fork join Pool");
         options.addOption("kafka", true, "Kafka Benchmarking");
+        options.addOption("pulsar", true, "Pulsar Benchmarking");
 
         options.addOption("help", false, "Help message");
 
@@ -143,10 +150,22 @@ public class PerfTest {
                         executor.awaitTermination(1, TimeUnit.SECONDS);
                         perfTest.shutdown(System.currentTimeMillis());
                         if (consumers != null) {
-                            consumers.forEach(ReaderWorker::close);
+                            consumers.forEach(c-> {
+                                try {
+                                    c.close();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                            });
                         }
                         if (producers != null) {
-                            producers.forEach(WriterWorker::close);
+                            producers.forEach(c-> {
+                                try {
+                                    c.close();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                            });
                         }
                         perfTest.closeReaderGroup();
                     } catch (InterruptedException ex) {
@@ -160,10 +179,22 @@ public class PerfTest {
             executor.awaitTermination(1, TimeUnit.SECONDS);
             perfTest.shutdown(System.currentTimeMillis());
             if (consumers != null) {
-                consumers.forEach(ReaderWorker::close);
+                consumers.forEach(c-> {
+                    try {
+                       c.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                });
             }
             if (producers != null) {
-                producers.forEach(WriterWorker::close);
+                producers.forEach(c-> {
+                    try {
+                        c.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                });
             }
             perfTest.closeReaderGroup();
         } catch (Exception ex) {
@@ -178,7 +209,12 @@ public class PerfTest {
             if (runKafka) {
                 return new KafkaTest(startTime, commandline);
             } else {
-                return new PravegaTest(startTime, commandline);
+                boolean runPulsar = Boolean.parseBoolean(commandline.getOptionValue("pulsar", "false"));
+                if (runPulsar) {
+                    return new PulsarTest(startTime,commandline);
+                } else {
+                    return new PravegaTest(startTime, commandline);
+                }
             }
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
@@ -367,7 +403,7 @@ public class PerfTest {
 
         public abstract void closeReaderGroup();
 
-        public abstract List<WriterWorker> getProducers();
+        public abstract List<WriterWorker> getProducers() throws IOException;
 
         public abstract List<ReaderWorker> getConsumers() throws URISyntaxException;
 
@@ -418,7 +454,7 @@ public class PerfTest {
                             .map(i -> new PravegaTransactionWriterWorker(i, eventsPerProducer,
                                     runtimeSec, false,
                                     messageSize, startTime,
-                                    produceStats, streamName,
+                                    produceStats, streamName, TIMEOUT,
                                     eventsPerSec, writeAndRead, factory,
                                     transactionPerCommit))
                             .collect(Collectors.toList());
@@ -428,7 +464,7 @@ public class PerfTest {
                             .map(i -> new PravegaWriterWorker(i, eventsPerProducer,
                                     EventsPerFlush, runtimeSec, false,
                                     messageSize, startTime, produceStats,
-                                    streamName, eventsPerSec, writeAndRead, factory))
+                                    streamName, TIMEOUT, eventsPerSec, writeAndRead, factory))
                             .collect(Collectors.toList());
                 }
             } else {
@@ -445,7 +481,7 @@ public class PerfTest {
                         .boxed()
                         .map(i -> new PravegaReaderWorker(i, eventsPerConsumer,
                                 runtimeSec, startTime, consumeStats,
-                                rdGrpName, TIMEOUT, writeAndRead, factory))
+                                streamName, rdGrpName, TIMEOUT, writeAndRead, factory))
                         .collect(Collectors.toList());
             } else {
                 readers = null;
@@ -519,8 +555,8 @@ public class PerfTest {
                             .boxed()
                             .map(i -> new KafkaWriterWorker(i, eventsPerProducer,
                                     EventsPerFlush, runtimeSec, false,
-                                    messageSize, startTime, produceStats,
-                                    streamName, eventsPerSec, writeAndRead, producerConfig))
+                                    messageSize, startTime, produceStats, streamName,
+                                    TIMEOUT, eventsPerSec, writeAndRead, producerConfig))
                             .collect(Collectors.toList());
                 }
             } else {
@@ -549,5 +585,71 @@ public class PerfTest {
         public void closeReaderGroup() {
          }
     }
+
+
+    static private class PulsarTest extends Test {
+        final PulsarClient client;
+
+        PulsarTest(long startTime, CommandLine commandline) throws
+                IllegalArgumentException, URISyntaxException, InterruptedException, Exception {
+            super(startTime, commandline);
+            client = PulsarClient.builder().serviceUrl(controllerUri).build();
+        }
+
+        public List<WriterWorker> getProducers() throws IOException {
+            final List<WriterWorker> writers;
+
+            if (producerCount > 0) {
+                if (transactionPerCommit > 0) {
+                    throw new IllegalArgumentException("Pulsar Transactions are not supported");
+                } else {
+                    writers = IntStream.range(0, producerCount)
+                            .boxed()
+                            .map(i -> {
+                                try {
+                                    return new PulsarWriterWorker(i, eventsPerProducer,
+                                            EventsPerFlush, runtimeSec, false,
+                                            messageSize, startTime, produceStats,
+                                            streamName, TIMEOUT, eventsPerSec, writeAndRead, client);
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                    return null;
+                            }
+                            }).collect(Collectors.toList());
+                }
+            } else {
+                writers = null;
+            }
+
+            return writers;
+        }
+
+        public List<ReaderWorker> getConsumers() throws URISyntaxException {
+            final List<ReaderWorker> readers;
+            if (consumerCount > 0) {
+                readers = IntStream.range(0, consumerCount)
+                        .boxed()
+                        .map(i -> {
+                            try {
+                                return new PulsarReaderWorker(i, eventsPerConsumer,
+                                    runtimeSec, startTime, consumeStats,
+                                    streamName, rdGrpName, TIMEOUT, writeAndRead, client);
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                                return null;
+                            }
+                        }).collect(Collectors.toList());
+            } else {
+                readers = null;
+            }
+            return readers;
+        }
+
+        @Override
+        public void closeReaderGroup() {
+
+        }
+    }
+
 
 }

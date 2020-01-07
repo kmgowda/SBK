@@ -27,12 +27,12 @@ public class PravegaWriterWorker extends WriterWorker {
 
     public PravegaWriterWorker(int sensorId, int events, int EventsPerFlush, int secondsToRun,
                         boolean isRandomKey, int messageSize, long start,
-                        PerfStats stats, String streamName, int eventsPerSec,
+                        PerfStats stats, String streamName, int timeout, int eventsPerSec,
                         boolean writeAndRead, ClientFactory factory) {
 
         super(sensorId, events, EventsPerFlush,
                 secondsToRun, isRandomKey, messageSize, start,
-                stats, streamName, eventsPerSec, writeAndRead);
+                stats, streamName, timeout, eventsPerSec, writeAndRead);
 
         this.producer = factory.createEventWriter(streamName,
                 new ByteArraySerializer(),

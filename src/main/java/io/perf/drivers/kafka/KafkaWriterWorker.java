@@ -24,12 +24,12 @@ public class KafkaWriterWorker extends WriterWorker {
 
     public KafkaWriterWorker(int sensorId, int events, int flushEvents,
                       int secondsToRun, boolean isRandomKey, int messageSize,
-                      long start, PerfStats stats, String streamName,
+                      long start, PerfStats stats, String streamName, int timeout,
                       int eventsPerSec, boolean writeAndRead, Properties producerProps) {
 
         super(sensorId, events, flushEvents,
                 secondsToRun, isRandomKey, messageSize,
-                start, stats, streamName, eventsPerSec, writeAndRead);
+                start, stats, streamName, timeout, eventsPerSec, writeAndRead);
 
         this.producer = new KafkaProducer<>(producerProps);
     }

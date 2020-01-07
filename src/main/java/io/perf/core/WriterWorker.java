@@ -30,9 +30,9 @@ public abstract class WriterWorker extends Worker implements Callable<Void> {
 
     public WriterWorker(int sensorId, int events, int EventsPerFlush, int secondsToRun,
                  boolean isRandomKey, int messageSize, long start,
-                 PerfStats stats, String streamName, int eventsPerSec, boolean writeAndRead) {
+                 PerfStats stats, String streamName, int timeout, int eventsPerSec, boolean writeAndRead) {
 
-        super(sensorId, events, secondsToRun, messageSize, start, stats, streamName, 0);
+        super(sensorId, events, secondsToRun, messageSize, start, stats, streamName, null, timeout);
         this.eventsPerSec = eventsPerSec;
         this.EventsPerFlush = EventsPerFlush;
         this.writeAndRead = writeAndRead;
@@ -97,12 +97,12 @@ public abstract class WriterWorker extends Worker implements Callable<Void> {
     /**
      * Flush the producer data.
      */
-    public abstract void flush();
+    public abstract void flush() throws IOException;
 
     /**
      * Flush the producer data.
      */
-    public abstract void close();
+    public abstract void close() throws IOException;
 
 
     @Override
