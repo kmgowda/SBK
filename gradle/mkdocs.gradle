@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Dell Inc., or its subsidiaries. All Rights Reserved.
+ * Copyright (c) 2020 KMG. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ remotes {
     webServer {
         host = hostname
         user = username
-        identity = file("$rootDir/pravegaio.pem")
+        identity = file("$rootDir/dsb.pem")
     }
 }
 
@@ -33,7 +33,7 @@ task deploy {
     doLast {
         ssh.run {
             session(remotes.webServer) {
-                put from: "$rootDir/documentation/generated/$pravegaVersion", into: '/var/www/pravega.io/docs'
+                put from: "$rootDir/documentation/generated/$DSBVersion", into: '/var/www/github.com/kmgowda/dsb/docs'
             }
         }
     }

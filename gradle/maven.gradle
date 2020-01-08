@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Dell Inc., or its subsidiaries. All Rights Reserved.
+ * Copyright (c) 2020 KMG. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,15 +39,15 @@ plugins.withId('maven') {
                     }
                 }
 
-                pom.artifactId = "pravega" + project.path.replace(':', '-')
+                pom.artifactId = "dsb" + project.path.replace(':', '-')
                 pom.project {
-                    name "Pravega"
-                    url "http://pravega.io"
-                    description "Streaming Storage Platform"
+                    name "dsb"
+                    url "https://github.com/kmgowda/dsb"
+                    description "Data Storage Benchmark"
                     scm {
-                        url 'https://github.com/pravega/pravega/tree/master'
-                        connection 'scm:git:git://github.com/pravega/pravega.git'
-                        developerConnection 'scm:git:https://github.com/pravega/pravega.git'
+                        url 'https://github.com/kmgowda/dsb/tree/master'
+                        connection 'scm:git:git://github.com/kmgowda/dsb.git'
+                        developerConnection 'scm:git:https://github.com/kmgowda/dsb.git'
                     }
                     licenses {
                         license {
@@ -57,8 +57,8 @@ plugins.withId('maven') {
                     }
                     developers {
                         developer {
-                            id 'fpj'
-                            name 'Flavio Junqueira'
+                            id 'KMG'
+                            name 'Keshava Munegowda'
                         }
                     }
                 }
@@ -76,7 +76,7 @@ plugins.withId('maven') {
     install {
         repositories {
             mavenInstaller {
-                pom.artifactId = "pravega" + project.path.replace(':', '-')
+                pom.artifactId = "dsb" + project.path.replace(':', '-')
             }
         }
     }
