@@ -24,8 +24,8 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
     final private boolean writeAndRead;
 
     public ReaderWorker(int readerId, int events, int secondsToRun, long start,
-                 PerfStats stats, String streamName, String readerGrp, int timeout, boolean writeAndRead) {
-        super(readerId, events, secondsToRun, 0, start, stats, streamName, readerGrp, timeout);
+                 PerfStats stats, int timeout, boolean writeAndRead) {
+        super(readerId, events, secondsToRun, 0, start, stats, timeout);
 
         this.writeAndRead = writeAndRead;
         this.perf = createBenchmark();

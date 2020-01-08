@@ -32,7 +32,7 @@ public class PulsarWriterWorker extends WriterWorker {
 
         super(sensorId, events, flushEvents,
                 secondsToRun, isRandomKey, messageSize,
-                start, stats, streamName, timeout, eventsPerSec, writeAndRead);
+                start, stats, timeout, eventsPerSec, writeAndRead);
         try {
             this.producer = client.newProducer()
                     .enableBatching(true)
