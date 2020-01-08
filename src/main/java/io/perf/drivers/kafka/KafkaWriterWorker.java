@@ -21,22 +21,23 @@ import org.apache.kafka.clients.producer.ProducerRecord;
  */
 public class KafkaWriterWorker extends WriterWorker {
     final private KafkaProducer<byte[], byte[]> producer;
+    final private String topicName;
 
     public KafkaWriterWorker(int sensorId, int events, int flushEvents,
                       int secondsToRun, boolean isRandomKey, int messageSize,
-                      long start, PerfStats stats, String streamName, int timeout,
+                      long start, PerfStats stats, String topicName, int timeout,
                       int eventsPerSec, boolean writeAndRead, Properties producerProps) {
 
         super(sensorId, events, flushEvents,
                 secondsToRun, isRandomKey, messageSize,
-                start, stats, streamName, timeout, eventsPerSec, writeAndRead);
-
+                start, stats, timeout, eventsPerSec, writeAndRead);
+        this.topicName = topicName;
         this.producer = new KafkaProducer<>(producerProps);
     }
 
     public long recordWrite(byte[] data, TriConsumer record) {
         final long time = System.currentTimeMillis();
-        producer.send(new ProducerRecord<>(streamName, data), (metadata, exception) -> {
+        producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = System.currentTimeMillis();
             record.accept(time, endTime, data.length);
         });
@@ -45,7 +46,7 @@ public class KafkaWriterWorker extends WriterWorker {
 
     @Override
     public void writeData(byte[] data) {
-        producer.send(new ProducerRecord<>(streamName, data));
+        producer.send(new ProducerRecord<>(topicName, data));
     }
 
 

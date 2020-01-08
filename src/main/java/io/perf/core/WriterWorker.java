@@ -30,9 +30,9 @@ public abstract class WriterWorker extends Worker implements Callable<Void> {
 
     public WriterWorker(int sensorId, int events, int EventsPerFlush, int secondsToRun,
                  boolean isRandomKey, int messageSize, long start,
-                 PerfStats stats, String streamName, int timeout, int eventsPerSec, boolean writeAndRead) {
+                 PerfStats stats, int timeout, int eventsPerSec, boolean writeAndRead) {
 
-        super(sensorId, events, secondsToRun, messageSize, start, stats, streamName, null, timeout);
+        super(sensorId, events, secondsToRun, messageSize, start, stats, timeout);
         this.eventsPerSec = eventsPerSec;
         this.EventsPerFlush = EventsPerFlush;
         this.writeAndRead = writeAndRead;

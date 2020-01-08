@@ -30,7 +30,7 @@ public class PulsarReaderWorker extends ReaderWorker {
     public PulsarReaderWorker(int readerId, int events, int secondsToRun,
                       long start, PerfStats stats, String streamName, String subscriptionName,
                       int timeout, boolean writeAndRead, PulsarClient client) throws  IOException {
-        super(readerId, events, secondsToRun, start, stats, streamName, subscriptionName, timeout, writeAndRead);
+        super(readerId, events, secondsToRun, start, stats, timeout, writeAndRead);
 
         try {
 

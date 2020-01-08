@@ -24,12 +24,12 @@ public class KafkaReaderWorker extends ReaderWorker {
     final private KafkaConsumer<byte[], byte[]> consumer;
 
     public KafkaReaderWorker(int readerId, int events, int secondsToRun,
-                      long start, PerfStats stats, String partition,
+                      long start, PerfStats stats, String topicName,
                       int timeout, boolean writeAndRead, Properties consumerProps) {
-        super(readerId, events, secondsToRun, start, stats, null, partition, timeout, writeAndRead);
+        super(readerId, events, secondsToRun, start, stats, timeout, writeAndRead);
 
         this.consumer = new KafkaConsumer<>(consumerProps);
-        this.consumer.subscribe(Arrays.asList(partition));
+        this.consumer.subscribe(Arrays.asList(topicName));
     }
 
     @Override
