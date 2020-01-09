@@ -100,6 +100,7 @@ public class PerfStats {
             long time = startTime;
             long idleCount = 0;
             TimeStamp t;
+            System.out.println("KMG : started : "+action);
 
             while (doWork) {
                 t = queue.poll();
@@ -111,7 +112,7 @@ public class PerfStats {
                         window.record(t.bytes, latency);
                         latencyRecorder.record(t.startTime, t.bytes, latency);
                     }
-                    time = t.endTime;
+                    time =  t.endTime;
                     if (window.windowTimeMS(time) > windowInterval) {
                         window.print(time);
                         window.reset(time);
@@ -258,9 +259,11 @@ public class PerfStats {
         }
 
         public void record(int bytes, int latency) {
-            assert latency < latencies.length : "Invalid latency";
-            totalBytes += bytes;
-            latencies[latency]++;
+           /* assert latency < latencies.length : "Invalid latency"; */
+            if (latency  < latencies.length) {
+                totalBytes += bytes;
+                latencies[latency]++;
+            }
         }
 
         public void record(long start, int bytes, int latency) {
@@ -336,6 +339,7 @@ public class PerfStats {
      */
     public synchronized void start(long startTime) {
         if (this.ret == null) {
+            System.out.println("KMG : starting : "+action);
             this.ret = executor.submit(new QueueProcessor(startTime));
         }
     }

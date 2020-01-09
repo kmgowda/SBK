@@ -9,8 +9,9 @@
  */
 package io.perf.drivers.Pulsar;
 
-import io.perf.core.ReaderWorker;
-import io.perf.core.PerfStats;
+import io.perf.core.Reader;
+import io.perf.core.TriConsumer;
+import io.perf.core.Parameters;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -24,21 +25,20 @@ import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 /**
  * Class for Pulsar reader/consumer.
  */
-public class PulsarReaderWorker extends ReaderWorker {
+public class PulsarReader extends Reader {
     final private Consumer<byte[]> consumer;
 
-    public PulsarReaderWorker(int readerId, int events, int secondsToRun,
-                      long start, PerfStats stats, String streamName, String subscriptionName,
-                      int timeout, boolean writeAndRead, PulsarClient client) throws  IOException {
-        super(readerId, events, secondsToRun, start, stats, timeout, writeAndRead);
+    public PulsarReader(int readerId, TriConsumer recordTime, Parameters params,
+                              String topicName, String subscriptionName, PulsarClient client) throws  IOException {
+        super(readerId, recordTime, params);
 
         try {
 
             this.consumer = client.newConsumer()
-                    .topic(streamName)
+                    .topic(topicName)
                     // Allow multiple consumers to attach to the same subscription
                     // and get messages dispatched as a queue
-                    .subscriptionType(SubscriptionType.Exclusive)
+                    .subscriptionType(SubscriptionType.Shared)
                     .subscriptionName(subscriptionName)
                     .subscriptionInitialPosition(SubscriptionInitialPosition.Earliest)
                     .receiverQueueSize(1)
@@ -50,9 +50,9 @@ public class PulsarReaderWorker extends ReaderWorker {
     }
 
     @Override
-    public byte[] readData() throws IOException {
+    public byte[] read() throws IOException {
         try {
-            return consumer.receive(timeout, TimeUnit.SECONDS).getData();
+            return consumer.receive(params.timeout, TimeUnit.SECONDS).getData();
         } catch (PulsarClientException ex){
             throw new IOException(ex);
         }

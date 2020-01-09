@@ -8,9 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.perf.drivers.Pulsar;
-import io.perf.core.WriterWorker;
-import io.perf.core.PerfStats;
+import io.perf.core.Writer;
 import io.perf.core.TriConsumer;
+import io.perf.core.Parameters;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -22,41 +22,30 @@ import org.apache.pulsar.client.api.PulsarClientException;
 /**
  * Class for Pulsar writer/producer.
  */
-public class PulsarWriterWorker extends WriterWorker {
+public class PulsarWriter extends Writer {
     final private Producer<byte[]> producer;
 
-    public PulsarWriterWorker(int sensorId, int events, int flushEvents,
-                      int secondsToRun, boolean isRandomKey, int messageSize,
-                      long start, PerfStats stats, String streamName, int timeout,
-                      int eventsPerSec, boolean writeAndRead, PulsarClient client) throws IOException{
-
-        super(sensorId, events, flushEvents,
-                secondsToRun, isRandomKey, messageSize,
-                start, stats, timeout, eventsPerSec, writeAndRead);
+    public PulsarWriter(int writerID, TriConsumer recordTime, Parameters params,
+                              String topicName, PulsarClient client) throws IOException{
+        super(writerID, recordTime, params);
         try {
             this.producer = client.newProducer()
                     .enableBatching(true)
-                    .topic(streamName)
+                    .topic(topicName)
                     .blockIfQueueFull(true).create();
         } catch (PulsarClientException ex){
             throw new IOException(ex);
         }
     }
 
-    public long recordWrite(byte[] data, TriConsumer record) {
-        CompletableFuture ret;
-        final long time = System.currentTimeMillis();
-        ret = producer.sendAsync(data);
-        ret.thenAccept(d -> {
-            final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, data.length);
-        });
-        return time;
+    @Override
+    public void write(byte[] data) throws IOException {
+        producer.send(data);
     }
 
     @Override
-    public void writeData(byte[] data) {
-        producer.sendAsync(data);
+    public CompletableFuture writeAsync(byte[] data) {
+        return producer.sendAsync(data);
     }
 
 
