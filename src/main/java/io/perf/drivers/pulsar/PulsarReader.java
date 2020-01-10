@@ -31,19 +31,18 @@ public class PulsarReader extends Reader {
     public PulsarReader(int readerId, TriConsumer recordTime, Parameters params,
                               String topicName, String subscriptionName, PulsarClient client) throws  IOException {
         super(readerId, recordTime, params);
-
+        final  SubscriptionInitialPosition position = params.writeAndRead ? SubscriptionInitialPosition.Latest :
+                                                    SubscriptionInitialPosition.Earliest;
         try {
-
             this.consumer = client.newConsumer()
                     .topic(topicName)
                     // Allow multiple consumers to attach to the same subscription
                     // and get messages dispatched as a queue
-                    .subscriptionType(SubscriptionType.Shared)
+                    .subscriptionType(SubscriptionType.Exclusive)
                     .subscriptionName(subscriptionName)
-                    .subscriptionInitialPosition(SubscriptionInitialPosition.Earliest)
+                    .subscriptionInitialPosition(position)
                     .receiverQueueSize(1)
                     .subscribe();
-
         } catch (PulsarClientException ex){
             throw new IOException(ex);
         }

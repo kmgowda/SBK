@@ -100,7 +100,6 @@ public class PerfStats {
             long time = startTime;
             long idleCount = 0;
             TimeStamp t;
-            System.out.println("KMG : started : "+action);
 
             while (doWork) {
                 t = queue.poll();
@@ -209,6 +208,7 @@ public class PerfStats {
         final int messageSize;
         final long startTime;
         final int[] latencies;
+        int discard;
         long count;
         long totalLatency;
         long maxLatency;
@@ -220,6 +220,7 @@ public class PerfStats {
             this.messageSize = messageSize;
             this.startTime = startTime;
             this.latencies = new int[MS_PER_HR];
+            this.discard = 0;
             this.latencyRanges = null;
             this.totalLatency = 0;
             this.maxLatency = 0;
@@ -259,10 +260,11 @@ public class PerfStats {
         }
 
         public void record(int bytes, int latency) {
-           /* assert latency < latencies.length : "Invalid latency"; */
             if (latency  < latencies.length) {
                 totalBytes += bytes;
                 latencies[latency]++;
+            } else {
+                discard++;
             }
         }
 
@@ -276,12 +278,19 @@ public class PerfStats {
             final double recsPerSec = count / elapsed;
             final double mbPerSec = (this.totalBytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
-
-            System.out.printf(
-                    "%d records %s, %.3f records/sec, %d bytes record size, %.2f MB/sec, %.1f ms avg latency, %.1f ms max latency" +
-                            ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th.\n",
-                    count, action, recsPerSec, messageSize, mbPerSec, totalLatency / ((double) count), (double) maxLatency,
-                    percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
+            if (discard > 0) {
+                System.out.printf(
+                        "%d records %s, %.3f records/sec, %d bytes record size, %.2f MB/sec, %.1f ms avg latency, %.1f ms max latency" +
+                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th. %d discarded latencies.\n",
+                        count, action, recsPerSec, messageSize, mbPerSec, totalLatency / ((double) count), (double) maxLatency,
+                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5], discard);
+            } else {
+                System.out.printf(
+                        "%d records %s, %.3f records/sec, %d bytes record size, %.2f MB/sec, %.1f ms avg latency, %.1f ms max latency" +
+                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th.\n",
+                        count, action, recsPerSec, messageSize, mbPerSec, totalLatency / ((double) count), (double) maxLatency,
+                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
+            }
         }
     }
 
@@ -339,7 +348,6 @@ public class PerfStats {
      */
     public synchronized void start(long startTime) {
         if (this.ret == null) {
-            System.out.println("KMG : starting : "+action);
             this.ret = executor.submit(new QueueProcessor(startTime));
         }
     }

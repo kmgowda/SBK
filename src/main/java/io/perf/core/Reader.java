@@ -104,7 +104,6 @@ public abstract class Reader extends WorkerNew implements Callable<Void> {
         final long msToRun = params.secondsToRun * MS_PER_SEC;
         byte[] ret = null;
         long time = System.currentTimeMillis();
-        System.out.println("KMG : "+"RecordsTimeReader");
         try {
             while ((time - params.startTime) < msToRun) {
                 time = System.currentTimeMillis();
@@ -124,7 +123,6 @@ public abstract class Reader extends WorkerNew implements Callable<Void> {
         final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         byte[] ret = null;
         long time = System.currentTimeMillis();
-        System.out.println("KMG : "+"RecordsTimeReaderRW");
         try {
             while ((time - params.startTime) < msToRun) {
                 ret = read();
