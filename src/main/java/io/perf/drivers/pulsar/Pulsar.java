@@ -8,11 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.perf.drivers.Pulsar;
-import io.perf.core.Benchmark;
-import io.perf.core.TriConsumer;
-import io.perf.core.Parameters;
-import io.perf.core.Writer;
-import io.perf.core.Reader;
+import io.perf.core.*;
 
 import java.io.IOException;
 
@@ -32,24 +28,29 @@ public class Pulsar extends Benchmark {
         params.addOption("broker", true, "Broker URI");
  }
 
-    public boolean parseArgs(final Parameters params) {
+    public void parseArgs(final Parameters params) throws IllegalArgumentException {
         topicname =  params.getOptionValue("topic", null);
         brokerUri = params.getOptionValue("broker", null);
-        return true;
+        if (brokerUri == null) {
+            throw new IllegalArgumentException("Error: Must specify Broker IP address");
+        }
+
+        if (topicname == null) {
+            throw new IllegalArgumentException("Error: Must specify Topic Name");
+        }
     }
 
-    public boolean openStorage() {
+    public void openStorage(final Parameters params) throws  IOException {
         try {
             client = PulsarClient.builder().serviceUrl(brokerUri).build();
         } catch (PulsarClientException ex) {
             ex.printStackTrace();
-            return false;
+            throw new IOException(ex);
         }
-        return true;
     }
 
-    public  boolean closeStorage() {
-        return true;
+    public void closeStorage(final Parameters params) throws IOException {
+
     }
 
     public Writer createWriter(final int id, TriConsumer recordTime , final Parameters params) {

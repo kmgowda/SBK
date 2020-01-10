@@ -9,8 +9,6 @@
  */
 package io.perf.core;
 
-import java.util.Arrays;
-
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Option;
@@ -20,18 +18,20 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
 /**
- * class for Input parameters.
+ * class for Basic parameters.
  */
-public class Parameters {
+final public class Parameters {
     static final int MAXTIME = 60 * 60 * 24;
+    static final int TIMEOUT = 1000;
 
     final private String benchmarkName;
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
+    private CommandLine commandline;
+
     final public long startTime;
     final public int timeout;
-    private CommandLine commandline;
 
     public int records;
     public int recordSize;
@@ -55,10 +55,10 @@ public class Parameters {
         parser = new DefaultParser();
         benchmarkName = name;
         commandline = null;
+        this.timeout = TIMEOUT;
         this.startTime = startTime;
-        this.timeout = 1000;
 
-        options.addOption("class", true, "Benchmark class");
+        options.addOption("class", true, "Benchmark class (refer to drivers folder)");
         options.addOption("writers", true, "Number of writers");
         options.addOption("readers", true, "Number of readers");
         options.addOption("records", true,
@@ -69,8 +69,6 @@ public class Parameters {
                 "Each producer calls flush after writing <arg> number of of events/records; " +
                         "Not applicable, if both producers and consumers are specified");
         options.addOption("time", true, "Number of seconds the code runs");
-        options.addOption("transactionspercommit", true,
-                "Number of events before a transaction is committed");
         options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +
@@ -120,6 +118,10 @@ public class Parameters {
 
     public void parseArgs(String[] args) throws ParseException {
         commandline = parser.parse(options, args);
+        if (commandline.hasOption("help")) {
+            printHelp();
+            return;
+        }
         writersCount = Integer.parseInt(commandline.getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(commandline.getOptionValue("readers", "0"));
 
@@ -173,10 +175,9 @@ public class Parameters {
         }
 
         if (readersCount > 0) {
-           recordsPerReader = records / readersCount;
+            recordsPerReader = records / readersCount;
         } else {
-           recordsPerReader = 0;
+            recordsPerReader = 0;
         }
     }
-
 }

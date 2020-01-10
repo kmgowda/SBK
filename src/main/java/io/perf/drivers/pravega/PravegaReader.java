@@ -9,25 +9,28 @@
  */
 
 package io.perf.drivers.Pravega;
-import io.perf.core.ReaderWorker;
-import io.perf.core.PerfStats;
 
+import io.perf.core.Parameters;
+import io.perf.core.Reader;
+
+import io.perf.core.TriConsumer;
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.pravega.client.stream.ReaderConfig;
 import io.pravega.client.stream.ReinitializationRequiredException;
 
+import java.io.IOException;
+
 /**
  * Class for Pravega reader/consumer.
  */
-public class PravegaReaderWorker extends ReaderWorker {
+public class PravegaReader extends Reader {
     private final EventStreamReader<byte[]> reader;
 
-    public PravegaReaderWorker(int readerId, int events, int secondsToRun,
-                        long start, PerfStats stats, String streamName, String readergrp,
-                        int timeout, boolean writeAndRead, ClientFactory factory) {
-        super(readerId, events, secondsToRun, start, stats, timeout, writeAndRead);
+    public PravegaReader(int readerId, TriConsumer recordTime, Parameters params,
+                         String streamName, String readergrp, ClientFactory factory) throws IOException {
+        super(readerId, recordTime, params);
 
         final String readerSt = Integer.toString(readerId);
         reader = factory.createReader(
@@ -35,11 +38,11 @@ public class PravegaReaderWorker extends ReaderWorker {
     }
 
     @Override
-    public byte[] readData() {
+    public byte[] read() throws IOException {
         try {
-            return reader.readNextEvent(timeout).getEvent();
+            return reader.readNextEvent(params.timeout).getEvent();
         } catch (ReinitializationRequiredException e) {
-            throw new IllegalStateException(e);
+            throw new IOException(e);
         }
     }
 

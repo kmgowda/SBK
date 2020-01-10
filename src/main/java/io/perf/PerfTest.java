@@ -57,8 +57,8 @@ public class PerfTest {
         CommandLine commandline = null;
         String className = null;
         Benchmark obj = null;
-        Parameters params;
-        ExecutorService executor;
+        final Parameters params;
+        final ExecutorService executor;
         final PerfStats writeStats;
         final PerfStats readStats;
         final TriConsumer writeTime;
@@ -71,8 +71,13 @@ public class PerfTest {
             ex.printStackTrace();
             System.exit(0);
         }
+        className = commandline.getOptionValue("class", null);
+        if (className == null){
+            new Parameters(BENCHMARKNAME, startTime).printHelp();
+            System.exit(0);
+        }
+
         try {
-            className = commandline.getOptionValue("class", null);
             obj = (Benchmark) Class.forName("io.perf.drivers." + className+"."+className).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
@@ -84,7 +89,7 @@ public class PerfTest {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params= new Parameters(BENCHMARKNAME, startTime);
+        params= new Parameters(BENCHMARKNAME +" "+ className, startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
@@ -92,19 +97,26 @@ public class PerfTest {
             ex.printStackTrace();
             System.exit(0);
         }
-        if (!benchmark.parseArgs(params)) {
-            System.out.println("Parsing Error");
-            params.printHelp();
+        try {
+            benchmark.parseArgs(params);
+        } catch (IllegalArgumentException ex){
+            if (!params.hasOption("help")) {
+                ex.printStackTrace();
+            }
             System.exit(0);
         }
+
         if (params.hasOption("help")) {
             params.printHelp();
             System.exit(0);
         }
-        if (!benchmark.openStorage()){
-            System.out.println("open Storage failure");
+        try {
+            benchmark.openStorage(params);
+        } catch (IOException ex) {
+            ex.printStackTrace();
             System.exit(0);
         }
+
         final int threadCount = params.writersCount + params.readersCount + 6;
         if (params.fork) {
             executor = new ForkJoinPool(threadCount);
@@ -181,8 +193,8 @@ public class PerfTest {
                                 }
                             });
                         }
-
-                    } catch (ExecutionException | InterruptedException ex) {
+                        benchmark.closeStorage(params);
+                    } catch (ExecutionException | InterruptedException | IOException ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -222,7 +234,7 @@ public class PerfTest {
                     }
                 });
             }
-
+            benchmark.closeStorage(params);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -13,10 +13,10 @@ import io.perf.core.ReaderWorker;
 import io.perf.core.WriterWorker;
 import io.perf.core.PerfStats;
 
-import io.perf.drivers.pravega.PravegaStreamHandler;
-import io.perf.drivers.pravega.PravegaTransactionWriterWorker;
-import io.perf.drivers.pravega.PravegaWriterWorker;
-import io.perf.drivers.pravega.PravegaReaderWorker;
+import io.perf.drivers.Pravega.PravegaStreamHandler;
+import io.perf.drivers.Pravega.PravegaTransactionWriterWorker;
+import io.perf.drivers.Pravega.PravegaWriterWorker;
+import io.perf.drivers.Pravega.PravegaReaderWorker;
 
 import io.perf.drivers.kafka.KafkaReaderWorker;
 import io.perf.drivers.kafka.KafkaWriterWorker;

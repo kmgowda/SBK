@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perf.drivers.pravega;
+package io.perf.drivers.Pravega;
 import io.perf.core.WriterWorker;
 import io.perf.core.PerfStats;
 import io.perf.core.TriConsumer;
