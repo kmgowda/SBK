@@ -33,14 +33,6 @@ public abstract class Writer extends WorkerNew implements Callable<Void> {
     }
 
     /**
-     * Writes the data.
-     * its blocking call
-     *
-     * @param data data to write
-     */
-    public abstract void write(byte[] data) throws IOException;
-
-   /**
      * Asynchronously Writes the data .
      *
      * @param data data to write
@@ -77,10 +69,15 @@ public abstract class Writer extends WorkerNew implements Callable<Void> {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
-        ret.thenAccept(d -> {
+        if (ret == null) {
             final long endTime = System.currentTimeMillis();
             record.accept(time, endTime, data.length);
-        });
+        } else {
+            ret.thenAccept(d -> {
+                final long endTime = System.currentTimeMillis();
+                record.accept(time, endTime, data.length);
+            });
+        }
         return time;
     }
 

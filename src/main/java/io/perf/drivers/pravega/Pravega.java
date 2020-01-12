@@ -45,7 +45,7 @@ public class Pravega extends Benchmark {
     private ClientFactory factory;
     private ReaderGroup readerGroup;
 
-
+    @Override
     public void addArgs(final Parameters params) {
         params.addOption("scope", true, "Scope name");
         params.addOption("stream", true, "Stream name");
@@ -55,6 +55,7 @@ public class Pravega extends Benchmark {
                 "If the stream is already existing, delete and recreate the same");
     }
 
+    @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         scopeName = params.getOptionValue("scope",DEFAULT_SCOPE);
         streamName =  params.getOptionValue("stream", null);
@@ -80,6 +81,7 @@ public class Pravega extends Benchmark {
 
     }
 
+    @Override
     public void openStorage(final Parameters params) throws IOException {
         try {
             final ScheduledExecutorService bgExecutor = Executors.newScheduledThreadPool(10);
@@ -112,12 +114,14 @@ public class Pravega extends Benchmark {
         }
     }
 
+    @Override
     public  void closeStorage(final Parameters params) throws IOException {
         if (readerGroup != null) {
             readerGroup.close();
         }
     }
 
+    @Override
     public Writer createWriter(final int id, TriConsumer recordTime , final Parameters params) {
         try {
             return new PravegaWriter(id, recordTime, params, streamName, factory);
@@ -128,6 +132,7 @@ public class Pravega extends Benchmark {
 
     }
 
+    @Override
     public Reader createReader(final int id, TriConsumer recordTime, final Parameters params) {
         try {
             return new PravegaReader(id, recordTime, params, streamName, rdGrpName, factory);

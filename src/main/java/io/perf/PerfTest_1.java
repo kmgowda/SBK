@@ -18,8 +18,8 @@ import io.perf.drivers.Pravega.PravegaTransactionWriterWorker;
 import io.perf.drivers.Pravega.PravegaWriterWorker;
 import io.perf.drivers.Pravega.PravegaReaderWorker;
 
-import io.perf.drivers.kafka.KafkaReaderWorker;
-import io.perf.drivers.kafka.KafkaWriterWorker;
+import io.perf.drivers.Kafka.KafkaReaderWorker;
+import io.perf.drivers.Kafka.KafkaWriterWorker;
 
 import io.perf.drivers.Pulsar.PulsarWriterWorker;
 import io.perf.drivers.Pulsar.PulsarReaderWorker;

@@ -33,10 +33,25 @@ public class PravegaWriter extends Writer {
                 EventWriterConfig.builder().build());
     }
 
+    /**
+     * Writes the data and benchmark.
+     *
+     * @param data   data to write
+     * @param record to call for benchmarking
+     * @return time return the data sent time
+     */
     @Override
-    public void write(byte[] data) throws IOException {
-        throw new IOException("Synchronous Writes are not implemented for Pravega");
+    public long recordWrite(byte[] data, TriConsumer record) {
+        CompletableFuture ret;
+        final long time = System.currentTimeMillis();
+        ret = writeAsync(data);
+        ret.thenAccept(d -> {
+            final long endTime = System.currentTimeMillis();
+            record.accept(time, endTime, data.length);
+        });
+        return time;
     }
+
 
     @Override
     public CompletableFuture writeAsync(byte[] data) {

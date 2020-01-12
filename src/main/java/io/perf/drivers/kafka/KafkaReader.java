@@ -8,34 +8,35 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.perf.drivers.Kafka;
-import io.perf.core.ReaderWorker;
-import io.perf.core.PerfStats;
 
+import io.perf.core.Parameters;
+import io.perf.core.Reader;
+import io.perf.core.TriConsumer;
+
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Arrays;
 
-import io.perf.core.TriConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 /**
  * Class for Kafka reader/consumer.
  */
-public class KafkaReaderWorker extends ReaderWorker {
+public class KafkaReader extends Reader {
     final private KafkaConsumer<byte[], byte[]> consumer;
 
-    public KafkaReaderWorker(int readerId, int events, int secondsToRun,
-                      long start, PerfStats stats, String topicName,
-                      int timeout, boolean writeAndRead, Properties consumerProps) {
-        super(readerId, events, secondsToRun, start, stats, timeout, writeAndRead);
+    public KafkaReader(int readerId, TriConsumer recordTime, Parameters params,
+                       String topicName, Properties consumerProps) throws IOException {
+        super(readerId, recordTime, params);
 
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
     }
 
     @Override
-    public byte[] readData() {
-        final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeout);
+    public byte[] read() {
+        final ConsumerRecords<byte[], byte[]> records = consumer.poll(params.timeout);
         if (records.isEmpty()) {
             return null;
         }

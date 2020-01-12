@@ -39,11 +39,6 @@ public class PulsarWriter extends Writer {
     }
 
     @Override
-    public void write(byte[] data) throws IOException {
-        producer.send(data);
-    }
-
-    @Override
     public CompletableFuture writeAsync(byte[] data) {
         return producer.sendAsync(data);
     }
