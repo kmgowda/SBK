@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Abstract class for Writers.
  */
-public abstract class Writer extends WorkerNew implements Callable<Void> {
+public abstract class Writer extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
     final private Performance perf;
     final private byte[] payload;

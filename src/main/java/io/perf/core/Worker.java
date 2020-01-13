@@ -17,22 +17,12 @@ public abstract class Worker {
     final static int TIME_HEADER_SIZE = 8;
 
     public final int workerID;
-    public final int events;
-    public final int messageSize;
-    public final int timeout;
-    public final long startTime;
-    public final PerfStats stats;
-    public final int secondsToRun;
+    public final TriConsumer recordTime;
+    public final Parameters params;
 
-    Worker(int workerID, int events, int secondsToRun,
-           int messageSize, long start, PerfStats stats,
-           int timeout) {
+    Worker(int workerID, TriConsumer recordTime, Parameters params) {
         this.workerID = workerID;
-        this.events = events;
-        this.secondsToRun = secondsToRun;
-        this.startTime = start;
-        this.stats = stats;
-        this.messageSize = messageSize;
-        this.timeout = timeout;
+        this.recordTime = recordTime;
+        this.params = params;
     }
 }

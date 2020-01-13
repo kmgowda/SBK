@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * An Abstract class for Readers.
  */
-public abstract class Reader extends WorkerNew implements Callable<Void> {
+public abstract class Reader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
     final private Performance perf;
 

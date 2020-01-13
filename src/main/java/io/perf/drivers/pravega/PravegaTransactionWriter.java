@@ -9,7 +9,8 @@
  */
 
 package io.perf.drivers.Pravega;
-import io.perf.core.WriterWorker;
+import io.perf.core.Parameters;
+import io.perf.core.Writer;
 import io.perf.core.PerfStats;
 import io.perf.core.TriConsumer;
 
@@ -18,8 +19,9 @@ import io.pravega.client.stream.Transaction;
 import io.pravega.client.stream.TxnFailedException;
 
 import javax.annotation.concurrent.GuardedBy;
+import java.io.IOException;
 
-public class PravegaTransactionWriterWorker extends PravegaWriterWorker {
+public class PravegaTransactionWriter extends PravegaWriter {
     private final int transactionsPerCommit;
 
     @GuardedBy("this")
@@ -28,15 +30,10 @@ public class PravegaTransactionWriterWorker extends PravegaWriterWorker {
     @GuardedBy("this")
     private Transaction<byte[]> transaction;
 
-    public PravegaTransactionWriterWorker(int sensorId, int events,
-                                   int secondsToRun, boolean isRandomKey,
-                                   int messageSize, long start,
-                                   PerfStats stats, String streamName, int timeout,
-                                   int eventsPerSec, boolean writeAndRead,
-                                   ClientFactory factory, int transactionsPerCommit) {
+    public PravegaTransactionWriter(int writerID, TriConsumer recordTime, Parameters params,
+                                          String streamName, int transactionsPerCommit, ClientFactory factory) throws IOException {
 
-        super(sensorId, events, Integer.MAX_VALUE, secondsToRun, isRandomKey,
-                messageSize, start, stats, streamName, timeout, eventsPerSec, writeAndRead, factory);
+        super(writerID, recordTime, params, streamName, factory);
 
         this.transactionsPerCommit = transactionsPerCommit;
         eventCount = 0;
@@ -50,7 +47,7 @@ public class PravegaTransactionWriterWorker extends PravegaWriterWorker {
             synchronized (this) {
                 time = System.currentTimeMillis();
                 transaction.writeEvent(data);
-                record.accept(time, System.currentTimeMillis(), messageSize);
+                record.accept(time, System.currentTimeMillis(), params.recordSize);
                 eventCount++;
                 if (eventCount >= transactionsPerCommit) {
                     eventCount = 0;
