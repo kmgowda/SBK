@@ -13,7 +13,7 @@ package io.perf.drivers.Pravega;
 import io.perf.core.Parameters;
 import io.perf.core.Reader;
 
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.impl.ByteArraySerializer;
@@ -28,7 +28,7 @@ import java.io.IOException;
 public class PravegaReader extends Reader {
     private final EventStreamReader<byte[]> reader;
 
-    public PravegaReader(int readerId, TriConsumer recordTime, Parameters params,
+    public PravegaReader(int readerId, QuadConsumer recordTime, Parameters params,
                          String streamName, String readergrp, ClientFactory factory) throws IOException {
         super(readerId, recordTime, params);
 

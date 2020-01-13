@@ -12,7 +12,7 @@ package io.perf.drivers.Pravega;
 import io.perf.core.Parameters;
 import io.perf.core.Writer;
 import io.perf.core.PerfStats;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 
 import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.Transaction;
@@ -30,7 +30,7 @@ public class PravegaTransactionWriter extends PravegaWriter {
     @GuardedBy("this")
     private Transaction<byte[]> transaction;
 
-    public PravegaTransactionWriter(int writerID, TriConsumer recordTime, Parameters params,
+    public PravegaTransactionWriter(int writerID, QuadConsumer recordTime, Parameters params,
                                           String streamName, int transactionsPerCommit, ClientFactory factory) throws IOException {
 
         super(writerID, recordTime, params, streamName, factory);
@@ -41,13 +41,13 @@ public class PravegaTransactionWriter extends PravegaWriter {
     }
 
     @Override
-    public long recordWrite(byte[] data, TriConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) {
         long time = 0;
         try {
             synchronized (this) {
                 time = System.currentTimeMillis();
                 transaction.writeEvent(data);
-                record.accept(time, System.currentTimeMillis(), params.recordSize);
+                record.accept(time, System.currentTimeMillis(), params.recordSize, 1);
                 eventCount++;
                 if (eventCount >= transactionsPerCommit) {
                     eventCount = 0;

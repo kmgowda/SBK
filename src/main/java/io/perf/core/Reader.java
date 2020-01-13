@@ -22,7 +22,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
     final private Performance perf;
 
-    public Reader(int readerId, TriConsumer recordTime, Parameters params) {
+    public Reader(int readerId, QuadConsumer recordTime, Parameters params) {
         super(readerId, recordTime, params);
         this.perf = createBenchmark();
     }
@@ -68,7 +68,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                 ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    recordTime.accept(startTime, endTime, ret.length);
+                    recordTime.accept(startTime, endTime, ret.length,1);
                     i++;
                 }
             }
@@ -90,7 +90,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                     timeBuffer.clear();
                     timeBuffer.put(ret, 0, TIME_HEADER_SIZE);
                     final long start = timeBuffer.getLong(0);
-                    recordTime.accept(start, endTime, ret.length);
+                    recordTime.accept(start, endTime, ret.length, 1);
                     i++;
                 }
             }
@@ -110,7 +110,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                 ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    recordTime.accept(time, endTime, ret.length);
+                    recordTime.accept(time, endTime, ret.length, 1);
                 }
             }
         } finally {
@@ -131,7 +131,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                     timeBuffer.clear();
                     timeBuffer.put(ret, 0, TIME_HEADER_SIZE);
                     final long start = timeBuffer.getLong(0);
-                    recordTime.accept(start, time, ret.length);
+                    recordTime.accept(start, time, ret.length, 1);
                 }
             }
         } finally {

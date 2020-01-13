@@ -10,7 +10,7 @@
 package io.perf.drivers.Pulsar;
 import io.perf.core.Benchmark;
 import io.perf.core.Parameters;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 import io.perf.core.Writer;
 import io.perf.core.Reader;
 
@@ -62,7 +62,7 @@ public class Pulsar extends Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, TriConsumer recordTime , final Parameters params) {
+    public Writer createWriter(final int id, QuadConsumer recordTime , final Parameters params) {
         try {
             return new PulsarWriter(id, recordTime, params, topicName, client);
         } catch (IOException ex) {
@@ -72,7 +72,7 @@ public class Pulsar extends Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, TriConsumer recordTime, final Parameters params) {
+    public Reader createReader(final int id, QuadConsumer recordTime, final Parameters params) {
         try {
             return new PulsarReader(id, recordTime, params, topicName, topicName+"rdGrp", client);
         } catch (IOException ex) {

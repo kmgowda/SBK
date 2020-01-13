@@ -24,7 +24,7 @@ public abstract class Benchmark {
 
     public abstract void closeStorage(final Parameters params) throws IOException;
 
-    public abstract Writer createWriter(final int id, TriConsumer recordTime , final Parameters params);
+    public abstract Writer createWriter(final int id, QuadConsumer recordTime , final Parameters params);
 
-    public abstract Reader createReader(final int id, TriConsumer recordTime, final Parameters params);
+    public abstract Reader createReader(final int id, QuadConsumer recordTime, final Parameters params);
 }

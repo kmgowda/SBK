@@ -10,7 +10,7 @@
 package io.perf.drivers.Pravega;
 
 import io.perf.core.Parameters;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 import io.perf.core.Writer;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ import io.pravega.client.stream.EventWriterConfig;
 public class PravegaWriter extends Writer {
     final EventStreamWriter<byte[]> producer;
 
-    public PravegaWriter(int writerID, TriConsumer recordTime, Parameters params,
+    public PravegaWriter(int writerID, QuadConsumer recordTime, Parameters params,
                         String streamName, ClientFactory factory) throws IOException {
         super(writerID, recordTime, params);
         this.producer = factory.createEventWriter(streamName,
@@ -41,13 +41,13 @@ public class PravegaWriter extends Writer {
      * @return time return the data sent time
      */
     @Override
-    public long recordWrite(byte[] data, TriConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         ret.thenAccept(d -> {
             final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, data.length);
+            record.accept(time, endTime, data.length, 1);
         });
         return time;
     }

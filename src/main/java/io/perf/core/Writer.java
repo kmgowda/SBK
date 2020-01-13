@@ -26,7 +26,7 @@ public abstract class Writer extends Worker implements Callable<Void> {
     final private Performance perf;
     final private byte[] payload;
 
-    public Writer(int writerID, TriConsumer recordTime, Parameters params) {
+    public Writer(int writerID, QuadConsumer recordTime, Parameters params) {
         super(writerID, recordTime, params);
         this.payload = createPayload(params.recordSize);
         this.perf = createBenchmark();
@@ -65,17 +65,17 @@ public abstract class Writer extends Worker implements Callable<Void> {
      * @param record to call for benchmarking
      * @return time return the data sent time
      */
-    public long recordWrite(byte[] data, TriConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         if (ret == null) {
             final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, data.length);
+            record.accept(time, endTime, data.length, 1);
         } else {
             ret.thenAccept(d -> {
                 final long endTime = System.currentTimeMillis();
-                record.accept(time, endTime, data.length);
+                record.accept(time, endTime, data.length, 1);
             });
         }
         return time;

@@ -9,7 +9,7 @@
  */
 package io.perf.drivers.Pulsar;
 import io.perf.core.Writer;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 import io.perf.core.Parameters;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ import org.apache.pulsar.client.api.PulsarClientException;
 public class PulsarWriter extends Writer {
     final private Producer<byte[]> producer;
 
-    public PulsarWriter(int writerID, TriConsumer recordTime, Parameters params,
+    public PulsarWriter(int writerID, QuadConsumer recordTime, Parameters params,
                               String topicName, PulsarClient client) throws IOException{
         super(writerID, recordTime, params);
         try {

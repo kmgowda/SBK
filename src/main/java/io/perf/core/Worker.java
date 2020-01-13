@@ -17,10 +17,10 @@ public abstract class Worker {
     final static int TIME_HEADER_SIZE = 8;
 
     public final int workerID;
-    public final TriConsumer recordTime;
+    public final QuadConsumer recordTime;
     public final Parameters params;
 
-    Worker(int workerID, TriConsumer recordTime, Parameters params) {
+    Worker(int workerID, QuadConsumer recordTime, Parameters params) {
         this.workerID = workerID;
         this.recordTime = recordTime;
         this.params = params;

@@ -13,7 +13,7 @@ package io.perf.drivers.Pravega;
 
 import io.perf.core.Benchmark;
 import io.perf.core.Parameters;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 import io.perf.core.Writer;
 import io.perf.core.Reader;
 
@@ -122,7 +122,7 @@ public class Pravega extends Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, TriConsumer recordTime , final Parameters params) {
+    public Writer createWriter(final int id, QuadConsumer recordTime , final Parameters params) {
         try {
             return new PravegaWriter(id, recordTime, params, streamName, factory);
         } catch (IOException ex) {
@@ -133,7 +133,7 @@ public class Pravega extends Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, TriConsumer recordTime, final Parameters params) {
+    public Reader createReader(final int id, QuadConsumer recordTime, final Parameters params) {
         try {
             return new PravegaReader(id, recordTime, params, streamName, rdGrpName, factory);
         } catch (IOException ex) {

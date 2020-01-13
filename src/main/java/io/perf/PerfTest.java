@@ -14,7 +14,7 @@ import io.perf.core.Writer;
 import io.perf.core.PerfStats;
 import io.perf.core.Parameters;
 import io.perf.core.Benchmark;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -61,8 +61,8 @@ public class PerfTest {
         final ExecutorService executor;
         final PerfStats writeStats;
         final PerfStats readStats;
-        final TriConsumer writeTime;
-        final TriConsumer readTime;
+        final QuadConsumer writeTime;
+        final QuadConsumer readTime;
 
         options.addOption("class", true, "Benchmark class");
         try {

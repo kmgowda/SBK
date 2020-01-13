@@ -10,7 +10,7 @@
 package io.perf.drivers.Kafka;
 import io.perf.core.Parameters;
 import io.perf.core.Writer;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -26,7 +26,7 @@ public class KafkaWriter extends Writer {
     final private KafkaProducer<byte[], byte[]> producer;
     final private String topicName;
 
-    public KafkaWriter(int writerID, TriConsumer recordTime, Parameters params,
+    public KafkaWriter(int writerID, QuadConsumer recordTime, Parameters params,
                              String topicName, Properties producerProps) throws IOException {
         super(writerID, recordTime, params);
         this.topicName = topicName;
@@ -34,11 +34,11 @@ public class KafkaWriter extends Writer {
     }
 
     @Override
-    public long recordWrite(byte[] data, TriConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) {
         final long time = System.currentTimeMillis();
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, data.length);
+            record.accept(time, endTime, data.length, 1);
         });
         return time;
     }

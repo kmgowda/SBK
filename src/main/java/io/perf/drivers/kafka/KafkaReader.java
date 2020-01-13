@@ -11,7 +11,7 @@ package io.perf.drivers.Kafka;
 
 import io.perf.core.Parameters;
 import io.perf.core.Reader;
-import io.perf.core.TriConsumer;
+import io.perf.core.QuadConsumer;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -26,7 +26,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 public class KafkaReader extends Reader {
     final private KafkaConsumer<byte[], byte[]> consumer;
 
-    public KafkaReader(int readerId, TriConsumer recordTime, Parameters params,
+    public KafkaReader(int readerId, QuadConsumer recordTime, Parameters params,
                        String topicName, Properties consumerProps) throws IOException {
         super(readerId, recordTime, params);
 
