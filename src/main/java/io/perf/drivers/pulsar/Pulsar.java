@@ -23,14 +23,37 @@ import org.apache.pulsar.client.api.PulsarClientException;
  * Abstract class for Benchmarking.
  */
 public class Pulsar extends Benchmark {
+    static final String DEFAULT_NAMESPACE = null;
+    static final String DEFAULT_TENANT = null;
+    static final String DEFAULT_CLUSTER = null;
+
     private String topicName;
     private String brokerUri;
+    private String nameSpace;
+    private String cluster;
+    private String tenant;
+    private String adminUri;
+    private int partitions;
+    private int ensembleSize;
+    private int writeQuorum;
+    private int ackQuorum;
+    private boolean deduplication;
     private PulsarClient client;
+    private PulsarTopicHandler topicHandler;
+
 
     @Override
     public void addArgs(final Parameters params) {
+        params.addOption("cluster", true, "Cluster name");
         params.addOption("topic", true, "Topic name");
         params.addOption("broker", true, "Broker URI");
+        params.addOption("admin", true, "Admin URI");
+        params.addOption("partitions", true, "Number of partitions of the topic");
+
+        params.addOption("ensembleSize", true, "ensembleSize");
+        params.addOption("writeQuorum", true, "writeQuorum");
+        params.addOption("ackQuorum", true, "ackQuorum");
+        params.addOption("deduplication", true, "Enable or Disable Deduplication; by deafult disabled");
     }
 
     @Override
@@ -44,6 +67,27 @@ public class Pulsar extends Benchmark {
         if (topicName == null) {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
+
+        adminUri = params.getOptionValue("admin", null);
+        cluster =  params.getOptionValue("cluster", DEFAULT_CLUSTER);
+        partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
+        ensembleSize = Integer.parseInt(params.getOptionValue("ensembleSize", "1"));
+        writeQuorum = Integer.parseInt(params.getOptionValue("writeQuorum", "1"));
+        ackQuorum = Integer.parseInt(params.getOptionValue("ackQuorum", "1"));
+        deduplication = Boolean.parseBoolean(params.getOptionValue("recreate", "false"));
+
+        final String[] names = topicName.split("[/]");
+        try {
+            nameSpace = names[names.length-2];
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            nameSpace = DEFAULT_NAMESPACE;
+        }
+        try {
+            tenant = names[names.length-3];
+        } catch ( ArrayIndexOutOfBoundsException ex) {
+            tenant = DEFAULT_TENANT;
+        }
+
     }
 
     @Override
@@ -54,6 +98,14 @@ public class Pulsar extends Benchmark {
             ex.printStackTrace();
             throw new IOException(ex);
         }
+        if (adminUri != null) {
+            topicHandler = new PulsarTopicHandler(adminUri, brokerUri, tenant, cluster, nameSpace,
+                    topicName, partitions,ensembleSize, writeQuorum, ackQuorum, deduplication);
+            topicHandler.createTopic(params.writersCount > 0);
+        } else {
+            topicHandler = null;
+        }
+
     }
 
     @Override
