@@ -20,6 +20,9 @@ import java.util.concurrent.locks.LockSupport;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVParser;
@@ -33,6 +36,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance statistics.
  */
 public class PerfStats {
+    private static Logger log = LoggerFactory.getLogger("DSB");
+
     final private String action;
     final private String csvFile;
     final private int messageSize;
@@ -186,8 +191,8 @@ public class PerfStats {
             final double recsPerSec = count / elapsed;
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
 
-            System.out.printf("%8d records %s, %9.1f records/sec, %6.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency\n",
-                    count, action, recsPerSec, mbPerSec, totalLatency / (double) count, (double) maxLatency);
+            log.info(String.format("%8d records %s, %9.1f records/sec, %6.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency",
+                    count, action, recsPerSec, mbPerSec, totalLatency / (double) count, (double) maxLatency));
         }
 
         /**
@@ -281,17 +286,17 @@ public class PerfStats {
             final double mbPerSec = (this.totalBytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
             if (discard > 0) {
-                System.out.printf(
+                log.info(String.format(
                         "%d records %s, %.3f records/sec, %d bytes record size, %.2f MB/sec, %.1f ms avg latency, %.1f ms max latency" +
-                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th. %d discarded latencies.\n",
+                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th. %d discarded latencies.",
                         count, action, recsPerSec, messageSize, mbPerSec, totalLatency / ((double) count), (double) maxLatency,
-                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5], discard);
+                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5], discard));
             } else {
-                System.out.printf(
+                log.info(String.format(
                         "%d records %s, %.3f records/sec, %d bytes record size, %.2f MB/sec, %.1f ms avg latency, %.1f ms max latency" +
-                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th.\n",
+                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th.",
                         count, action, recsPerSec, messageSize, mbPerSec, totalLatency / ((double) count), (double) maxLatency,
-                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
+                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]));
             }
         }
     }
