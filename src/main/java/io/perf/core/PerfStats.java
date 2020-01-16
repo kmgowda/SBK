@@ -36,14 +36,13 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance statistics.
  */
 public class PerfStats {
-    private static Logger log = LoggerFactory.getLogger("DSB");
-
     final private String action;
     final private String csvFile;
     final private int messageSize;
     final private int windowInterval;
     final private ConcurrentLinkedQueue<TimeStamp> queue;
     final private ExecutorService executor;
+    final private ResultLogger logger;
 
     @GuardedBy("this")
     private Future<Void> ret;
@@ -73,12 +72,14 @@ public class PerfStats {
         }
     }
 
-    public PerfStats(String action, int reportingInterval, int messageSize, String csvFile, ExecutorService executor) {
+    public PerfStats(String action, int reportingInterval, int messageSize,
+                     String csvFile, ExecutorService executor, ResultLogger logger) {
         this.action = action;
         this.messageSize = messageSize;
         this.windowInterval = reportingInterval;
         this.csvFile = csvFile;
         this.executor = executor;
+        this.logger = logger;
         this.queue = new ConcurrentLinkedQueue<>();
         this.ret = null;
     }
@@ -120,7 +121,7 @@ public class PerfStats {
                     }
                     time =  t.endTime;
                     if (window.windowTimeMS(time) > windowInterval) {
-                        window.print(time);
+                        window.print(time, logger);
                         window.reset(time);
                     }
                 } else {
@@ -130,13 +131,13 @@ public class PerfStats {
                         time = System.currentTimeMillis();
                         idleCount = 0;
                         if (window.windowTimeMS(time) > windowInterval) {
-                            window.print(time);
+                            window.print(time, logger);
                             window.reset(time);
                         }
                     }
                 }
             }
-            latencyRecorder.printTotal(time);
+            latencyRecorder.printTotal(time, logger);
             return null;
         }
     }
@@ -184,15 +185,14 @@ public class PerfStats {
         /**
          * Print the window statistics
          */
-        private void print(long time) {
+        private void print(long time, ResultLogger logger) {
             this.lastTime = time;
             assert this.lastTime > this.startTime : "Invalid Start and EndTime";
             final double elapsed = (this.lastTime - this.startTime) / 1000.0;
             final double recsPerSec = count / elapsed;
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
 
-            log.info(String.format("%8d records %s, %9.1f records/sec, %6.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency",
-                    count, action, recsPerSec, mbPerSec, totalLatency / (double) count, (double) maxLatency));
+            logger.print(action, count, recsPerSec, mbPerSec, totalLatency / (double) count, maxLatency);
         }
 
         /**
@@ -279,25 +279,16 @@ public class PerfStats {
             this.record(bytes, events, latency);
         }
 
-        public void printTotal(long endTime) {
+        public void printTotal(long endTime, ResultLogger logger) {
             countLatencies();
             final double elapsed = (endTime - startTime) / 1000.0;
             final double recsPerSec = count / elapsed;
             final double mbPerSec = (this.totalBytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
-            if (discard > 0) {
-                log.info(String.format(
-                        "%d records %s, %.3f records/sec, %d bytes record size, %.2f MB/sec, %.1f ms avg latency, %.1f ms max latency" +
-                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th. %d discarded latencies.",
-                        count, action, recsPerSec, messageSize, mbPerSec, totalLatency / ((double) count), (double) maxLatency,
-                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5], discard));
-            } else {
-                log.info(String.format(
-                        "%d records %s, %.3f records/sec, %d bytes record size, %.2f MB/sec, %.1f ms avg latency, %.1f ms max latency" +
-                                ", %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th.",
-                        count, action, recsPerSec, messageSize, mbPerSec, totalLatency / ((double) count), (double) maxLatency,
-                        percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]));
-            }
+
+            logger.print(action+" (Total) ", count, recsPerSec, mbPerSec, totalLatency / (double) count, maxLatency);
+            logger.printLatencies(action +" Latencies", percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
+            logger.printDiscardedLatencies(action + "Discarded Latencies:", discard);
         }
     }
 
@@ -337,14 +328,14 @@ public class PerfStats {
         }
 
         @Override
-        public void printTotal(long endTime) {
+        public void printTotal(long endTime, ResultLogger logger) {
             try {
                 csvPrinter.close();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
             readCSV();
-            super.printTotal(endTime);
+            super.printTotal(endTime, logger);
         }
     }
 

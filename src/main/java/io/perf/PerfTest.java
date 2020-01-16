@@ -9,12 +9,7 @@
  */
 
 package io.perf;
-import io.perf.core.Reader;
-import io.perf.core.Writer;
-import io.perf.core.PerfStats;
-import io.perf.core.Parameters;
-import io.perf.core.Benchmark;
-import io.perf.core.QuadConsumer;
+import io.perf.core.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -117,6 +112,8 @@ public class PerfTest {
             System.exit(0);
         }
 
+        final ResultLogger logger = new sl4jResultLogger();
+
         final int threadCount = params.writersCount + params.readersCount + 6;
         if (params.fork) {
             executor = new ForkJoinPool(threadCount);
@@ -126,7 +123,8 @@ public class PerfTest {
 
 
         if (params.writersCount > 0 && !params.writeAndRead) {
-            writeStats = new PerfStats("Writing", REPORTINGINTERVAL, params.recordSize, params.writeFile, executor);
+            writeStats = new PerfStats("Writing", REPORTINGINTERVAL, params.recordSize,
+                                params.writeFile, executor, logger);
             writeTime = writeStats::recordTime;
         } else {
             writeStats = null;
@@ -140,7 +138,8 @@ public class PerfTest {
               } else {
                 action = "Reading";
             }
-            readStats = new PerfStats(action, REPORTINGINTERVAL, params.recordSize, params.readFile, executor);
+            readStats = new PerfStats(action, REPORTINGINTERVAL, params.recordSize,
+                            params.readFile, executor, logger);
             readTime = readStats::recordTime;
         } else {
             readStats = null;
