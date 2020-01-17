@@ -7,7 +7,7 @@ public class SystemResultLogger implements ResultLogger {
     }
 
     public void print(String action, long records, double recsPerSec, double mbPerSec, double avglatency, double maxlatency) {
-        System.out.printf("%s %10d records, %9.1f records/sec, %6.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency\n",
+        System.out.printf("%s %10d records, %9.1f records/sec, %7.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency\n",
                 action, records, recsPerSec, mbPerSec, avglatency, maxlatency);
     }
 

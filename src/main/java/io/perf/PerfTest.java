@@ -112,7 +112,7 @@ public class PerfTest {
             System.exit(0);
         }
 
-        final ResultLogger logger = new sl4jResultLogger();
+        final ResultLogger logger = new SystemResultLogger();
 
         final int threadCount = params.writersCount + params.readersCount + 6;
         if (params.fork) {

@@ -13,15 +13,15 @@ package io.perf.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class sl4jResultLogger implements ResultLogger {
+public class Sl4jResultLogger implements ResultLogger {
     final private Logger log;
 
-    public sl4jResultLogger() {
+    public Sl4jResultLogger() {
         log = LoggerFactory.getLogger("DSB");
     }
 
     public void print(String action, long records, double recsPerSec, double mbPerSec, double avglatency, double maxlatency) {
-        log.info(String.format("%s %10d records, %9.1f records/sec, %6.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency",
+        log.info(String.format("%s %10d records, %9.1f records/sec, %7.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency",
                 action, records, recsPerSec, mbPerSec, avglatency, maxlatency));
     }
 
