@@ -14,7 +14,6 @@ import io.perf.core.Parameters;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
@@ -26,14 +25,14 @@ public class PulsarWriter extends Writer {
     final private Producer<byte[]> producer;
 
     public PulsarWriter(int writerID, QuadConsumer recordTime, Parameters params,
-                              String topicName, PulsarClient client) throws IOException{
+                              String topicName, PulsarClient client) throws IOException {
         super(writerID, recordTime, params);
         try {
             this.producer = client.newProducer()
                     .enableBatching(true)
                     .topic(topicName)
                     .blockIfQueueFull(true).create();
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }
@@ -48,7 +47,7 @@ public class PulsarWriter extends Writer {
     public void flush() throws IOException {
         try {
             producer.flush();
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }
@@ -57,7 +56,7 @@ public class PulsarWriter extends Writer {
     public synchronized void close() throws IOException {
         try {
             producer.close();
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }

@@ -11,7 +11,6 @@ package io.perf.core;
 
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -23,12 +22,6 @@ import org.apache.commons.cli.ParseException;
 final public class Parameters {
     static final int MAXTIME = 60 * 60 * 24;
     static final int TIMEOUT = 1000;
-
-    final private String benchmarkName;
-    final private Options options;
-    final private HelpFormatter formatter;
-    final private CommandLineParser parser;
-    private CommandLine commandline;
 
     final public long startTime;
     final public int timeout;
@@ -48,6 +41,11 @@ final public class Parameters {
     public boolean writeAndRead;
     public boolean fork;
 
+    final private String benchmarkName;
+    final private Options options;
+    final private HelpFormatter formatter;
+    final private CommandLineParser parser;
+    private CommandLine commandline;
 
     public Parameters(String name, long startTime) {
         options = new Options();
@@ -130,9 +128,9 @@ final public class Parameters {
         }
 
         records = Integer.parseInt(commandline.getOptionValue("records", "0"));
-        recordSize = Integer.parseInt(commandline.getOptionValue("size","0"));
+        recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
         fork = Boolean.parseBoolean(commandline.getOptionValue("fork", "true"));
-        writeFile = commandline.getOptionValue("writecsv",null);
+        writeFile = commandline.getOptionValue("writecsv", null);
         readFile = commandline.getOptionValue("readcsv", null);
         int flushRecords = Integer.parseInt(commandline.getOptionValue("flush", "0"));
         if (flushRecords > 0) {

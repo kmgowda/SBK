@@ -7,8 +7,8 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perf.core;
 
+package io.perf.core;
 import java.io.IOException;
 
 /**
@@ -18,13 +18,13 @@ public abstract class Benchmark {
 
     public abstract void addArgs(final Parameters params);
 
-    public abstract void parseArgs(final Parameters params) throws IllegalArgumentException ;
+    public abstract void parseArgs(final Parameters params) throws IllegalArgumentException;
 
     public abstract void openStorage(final Parameters params) throws IOException;
 
     public abstract void closeStorage(final Parameters params) throws IOException;
 
-    public abstract Writer createWriter(final int id, QuadConsumer recordTime , final Parameters params);
+    public abstract Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params);
 
     public abstract Reader createReader(final int id, QuadConsumer recordTime, final Parameters params);
 }

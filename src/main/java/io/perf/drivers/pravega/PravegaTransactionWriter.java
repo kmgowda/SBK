@@ -10,8 +10,6 @@
 
 package io.perf.drivers.Pravega;
 import io.perf.core.Parameters;
-import io.perf.core.Writer;
-import io.perf.core.PerfStats;
 import io.perf.core.QuadConsumer;
 
 import io.pravega.client.ClientFactory;

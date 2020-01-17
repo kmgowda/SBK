@@ -43,7 +43,7 @@ public class PulsarReader extends Reader {
                     .subscriptionInitialPosition(position)
                     .receiverQueueSize(1)
                     .subscribe();
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }
@@ -52,7 +52,7 @@ public class PulsarReader extends Reader {
     public byte[] read() throws IOException {
         try {
             return consumer.receive(params.timeout, TimeUnit.SECONDS).getData();
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }
@@ -61,7 +61,7 @@ public class PulsarReader extends Reader {
     public void close() throws IOException {
         try {
             consumer.close();
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }

@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perf.core;;
+package io.perf.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,9 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -116,7 +113,7 @@ public class PerfStats {
                         doWork = false;
                     } else {
                         final int latency = (int) (t.endTime - t.startTime);
-                        window.record(t.bytes, t.records,latency);
+                        window.record(t.bytes, t.records, latency);
                         latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
                     }
                     time =  t.endTime;
@@ -176,7 +173,7 @@ public class PerfStats {
          * @param latency latency in ms.
          */
         private void record(long bytes, int records, int latency) {
-            this.count+=records;
+            this.count += records;
             this.totalLatency += latency;
             this.bytes += bytes;
             this.maxLatency = Math.max(this.maxLatency, latency);
@@ -269,7 +266,7 @@ public class PerfStats {
         public void record(int bytes, int events, int latency) {
             if (latency  < latencies.length) {
                 totalBytes += bytes;
-                latencies[latency]+=events;
+                latencies[latency] += events;
             } else {
                 discard++;
             }
@@ -372,7 +369,7 @@ public class PerfStats {
      * @param startTime starting time
      * @param endTime   End time
      * @param bytes     number of bytes written or read
-     * @param bytes     number of records written or read
+     * @param records   number of records written or read
      **/
     public void recordTime(long startTime, long endTime, int bytes, int records) {
         queue.add(new TimeStamp(startTime, endTime, bytes, records));

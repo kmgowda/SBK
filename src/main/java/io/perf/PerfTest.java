@@ -9,20 +9,23 @@
  */
 
 package io.perf;
-import io.perf.core.*;
+
+import io.perf.core.Benchmark;
+import io.perf.core.Parameters;
+import io.perf.core.QuadConsumer;
+import io.perf.core.PerfStats;
+import io.perf.core.Writer;
+import io.perf.core.Reader;
+import io.perf.core.ResultLogger;
+import io.perf.core.SystemResultLogger;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
-import java.net.URI;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.IntStream;
@@ -31,12 +34,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
-import java.util.Properties;
-import java.util.Locale;
-import java.io.IOException;
 
 /**
  * Performance benchmark for Pravega.
@@ -44,9 +43,9 @@ import java.io.IOException;
  */
 public class PerfTest {
     final static String BENCHMARKNAME = "DSB";
+    final static int REPORTINGINTERVAL = 5000;
 
     public static void main(final String[] args) {
-        final int REPORTINGINTERVAL = 5000;
         final long startTime = System.currentTimeMillis();
         final Options options = new Options();
         CommandLine commandline = null;
@@ -61,13 +60,13 @@ public class PerfTest {
 
         options.addOption("class", true, "Benchmark class");
         try {
-            commandline = new DefaultParser().parse(options, args,true);
+            commandline = new DefaultParser().parse(options, args, true);
         } catch (ParseException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
         className = commandline.getOptionValue("class", null);
-        if (className == null){
+        if (className == null) {
             new Parameters(BENCHMARKNAME, startTime).printHelp();
             System.exit(0);
         }
@@ -84,7 +83,7 @@ public class PerfTest {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params= new Parameters(BENCHMARKNAME +" "+ className, startTime);
+        params = new Parameters(BENCHMARKNAME +" "+ className, startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
@@ -94,7 +93,7 @@ public class PerfTest {
         }
         try {
             benchmark.parseArgs(params);
-        } catch (IllegalArgumentException ex){
+        } catch (IllegalArgumentException ex) {
             if (!params.hasOption("help")) {
                 ex.printStackTrace();
             }
@@ -120,7 +119,6 @@ public class PerfTest {
         } else {
             executor = Executors.newFixedThreadPool(threadCount);
         }
-
 
         if (params.writersCount > 0 && !params.writeAndRead) {
             writeStats = new PerfStats("Writing", REPORTINGINTERVAL, params.recordSize,
@@ -175,7 +173,7 @@ public class PerfTest {
                             readStats.shutdown(System.currentTimeMillis());
                         }
                         if (readers != null) {
-                            readers.forEach(c-> {
+                            readers.forEach(c -> {
                                 try {
                                     c.close();
                                 } catch (IOException ex) {
@@ -184,7 +182,7 @@ public class PerfTest {
                             });
                         }
                         if (writers != null) {
-                            writers.forEach(c-> {
+                            writers.forEach(c -> {
                                 try {
                                     c.close();
                                 } catch (IOException ex) {
@@ -216,7 +214,7 @@ public class PerfTest {
                 readStats.shutdown(System.currentTimeMillis());
             }
             if (readers != null) {
-                readers.forEach(c-> {
+                readers.forEach(c -> {
                     try {
                        c.close();
                     } catch (IOException ex) {
@@ -225,7 +223,7 @@ public class PerfTest {
                 });
             }
             if (writers != null) {
-                writers.forEach(c-> {
+                writers.forEach(c -> {
                     try {
                         c.close();
                     } catch (IOException ex) {

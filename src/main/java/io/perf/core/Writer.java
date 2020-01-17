@@ -36,16 +36,19 @@ public abstract class Writer extends Worker implements Callable<Void> {
      * Asynchronously Writes the data .
      *
      * @param data data to write
+     * @return CompletableFuture completable future.
      */
     public abstract CompletableFuture writeAsync(byte[] data);
 
     /**
      * Flush the  data.
+     * @throws IOException If an exception occurred.
      */
     public abstract void flush() throws IOException;
 
     /**
-     * Flush the  data.
+     * Close the  Writer.
+     * @throws IOException If an exception occurred.
      */
     public abstract void close() throws IOException;
 
@@ -178,13 +181,13 @@ public abstract class Writer extends Worker implements Callable<Void> {
             byte[] bytes = timeBuffer.putLong(0, System.currentTimeMillis()).array();
             System.arraycopy(bytes, 0, payload, 0, bytes.length);
             writeAsync(payload);
-                /*
-                flush is required here for following reasons:
-                1. The writeData is called for End to End latency mode; hence make sure that data is sent.
-                2. In case of kafka benchmarking, the buffering makes too many writes;
-                   flushing moderates the kafka producer.
-                3. If the flush called after several iterations, then flush may take too much of time.
-                */
+            /*
+              flush is required here for following reasons:
+              1. The writeData is called for End to End latency mode; hence make sure that data is sent.
+              2. In case of kafka benchmarking, the buffering makes too many writes;
+                 flushing moderates the kafka producer.
+              3. If the flush called after several iterations, then flush may take too much of time.
+            */
             flush();
             eCnt.control(i);
         }
@@ -202,13 +205,13 @@ public abstract class Writer extends Worker implements Callable<Void> {
             byte[] bytes = timeBuffer.putLong(0, time).array();
             System.arraycopy(bytes, 0, payload, 0, bytes.length);
             writeAsync(payload);
-                /*
-                flush is required here for following reasons:
-                1. The writeData is called for End to End latency mode; hence make sure that data is sent.
-                2. In case of kafka benchmarking, the buffering makes too many writes;
-                   flushing moderates the kafka producer.
-                3. If the flush called after several iterations, then flush may take too much of time.
-                */
+            /*
+              flush is required here for following reasons:
+              1. The writeData is called for End to End latency mode; hence make sure that data is sent.
+              2. In case of kafka benchmarking, the buffering makes too many writes;
+                 flushing moderates the kafka producer.
+              3. If the flush called after several iterations, then flush may take too much of time.
+            */
             flush();
             eCnt.control(i);
         }

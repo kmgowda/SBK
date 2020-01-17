@@ -27,7 +27,7 @@ public class Sl4jResultLogger implements ResultLogger {
 
     public void printLatencies(String action, int one, int two, int three, int four, int five, int six) {
         log.info(String.format("%s %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th.",
-                action, one, two, three,four, five, six));
+                action, one, two, three, four, five, six));
     }
 
     public void printDiscardedLatencies(String action, int discard) {

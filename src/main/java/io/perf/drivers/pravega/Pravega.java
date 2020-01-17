@@ -57,7 +57,7 @@ public class Pravega extends Benchmark {
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        scopeName = params.getOptionValue("scope",DEFAULT_SCOPE);
+        scopeName = params.getOptionValue("scope", DEFAULT_SCOPE);
         streamName =  params.getOptionValue("stream", null);
         controllerUri = params.getOptionValue("controller", null);
         segmentCount = Integer.parseInt(params.getOptionValue("segments", "1"));
@@ -122,7 +122,7 @@ public class Pravega extends Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, QuadConsumer recordTime , final Parameters params) {
+    public Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params) {
         try {
             return new PravegaWriter(id, recordTime, params, streamName, factory);
         } catch (IOException ex) {

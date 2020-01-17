@@ -15,9 +15,6 @@ import io.perf.core.QuadConsumer;
 import io.perf.core.Writer;
 import io.perf.core.Reader;
 
-import io.perf.drivers.Kafka.KafkaReader;
-import io.perf.drivers.Kafka.KafkaWriter;
-
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Properties;
@@ -103,7 +100,7 @@ public class Kafka extends Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, QuadConsumer recordTime , final Parameters params) {
+    public Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params) {
         try {
             return new KafkaWriter(id, recordTime, params, topicName, producerConfig);
         } catch (IOException ex) {

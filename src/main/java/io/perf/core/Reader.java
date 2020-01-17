@@ -29,11 +29,14 @@ public abstract class Reader extends Worker implements Callable<Void> {
 
     /**
      * read the data.
+     * @return byte[] return the data.
+     * @throws IOException If an exception occurred.
      */
     public abstract byte[] read() throws IOException;
 
     /**
      * close the consumer/reader.
+     * @throws IOException If an exception occurred.
      */
     public abstract void close() throws IOException;
 
@@ -68,7 +71,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                 ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    recordTime.accept(startTime, endTime, ret.length,1);
+                    recordTime.accept(startTime, endTime, ret.length, 1);
                     i++;
                 }
             }

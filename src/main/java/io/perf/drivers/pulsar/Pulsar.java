@@ -100,7 +100,7 @@ public class Pulsar extends Benchmark {
         }
         if (adminUri != null) {
             topicHandler = new PulsarTopicHandler(adminUri, brokerUri, tenant, cluster, nameSpace,
-                    topicName, partitions,ensembleSize, writeQuorum, ackQuorum, deduplication);
+                    topicName, partitions, ensembleSize, writeQuorum, ackQuorum, deduplication);
             topicHandler.createTopic(params.writersCount > 0);
         } else {
             topicHandler = null;
@@ -114,7 +114,7 @@ public class Pulsar extends Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, QuadConsumer recordTime , final Parameters params) {
+    public Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params) {
         try {
             return new PulsarWriter(id, recordTime, params, topicName, client);
         } catch (IOException ex) {
