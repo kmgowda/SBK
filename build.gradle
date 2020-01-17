@@ -9,6 +9,8 @@
  *
  */
 
+import org.gradle.internal.jvm.Jvm
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
@@ -25,8 +27,12 @@ checkstyleMain {
 
 
 buildscript {
+    println "Build JVM Version is : " + Jvm.current()
     repositories {
         jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 }
 
