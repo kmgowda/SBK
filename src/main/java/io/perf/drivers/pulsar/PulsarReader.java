@@ -7,10 +7,11 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perf.drivers.pulsar;
+package io.perf.drivers.Pulsar;
 
-import io.perf.core.ReaderWorker;
-import io.perf.core.PerfStats;
+import io.perf.core.Reader;
+import io.perf.core.QuadConsumer;
+import io.perf.core.Parameters;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -24,36 +25,34 @@ import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 /**
  * Class for Pulsar reader/consumer.
  */
-public class PulsarReaderWorker extends ReaderWorker {
+public class PulsarReader extends Reader {
     final private Consumer<byte[]> consumer;
 
-    public PulsarReaderWorker(int readerId, int events, int secondsToRun,
-                      long start, PerfStats stats, String streamName, String subscriptionName,
-                      int timeout, boolean writeAndRead, PulsarClient client) throws  IOException {
-        super(readerId, events, secondsToRun, start, stats, timeout, writeAndRead);
-
+    public PulsarReader(int readerId, QuadConsumer recordTime, Parameters params,
+                              String topicName, String subscriptionName, PulsarClient client) throws  IOException {
+        super(readerId, recordTime, params);
+        final  SubscriptionInitialPosition position = params.writeAndRead ? SubscriptionInitialPosition.Latest :
+                                                    SubscriptionInitialPosition.Earliest;
         try {
-
             this.consumer = client.newConsumer()
-                    .topic(streamName)
+                    .topic(topicName)
                     // Allow multiple consumers to attach to the same subscription
                     // and get messages dispatched as a queue
                     .subscriptionType(SubscriptionType.Exclusive)
                     .subscriptionName(subscriptionName)
-                    .subscriptionInitialPosition(SubscriptionInitialPosition.Earliest)
+                    .subscriptionInitialPosition(position)
                     .receiverQueueSize(1)
                     .subscribe();
-
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }
 
     @Override
-    public byte[] readData() throws IOException {
+    public byte[] read() throws IOException {
         try {
-            return consumer.receive(timeout, TimeUnit.SECONDS).getData();
-        } catch (PulsarClientException ex){
+            return consumer.receive(params.timeout, TimeUnit.SECONDS).getData();
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }
@@ -62,7 +61,7 @@ public class PulsarReaderWorker extends ReaderWorker {
     public void close() throws IOException {
         try {
             consumer.close();
-        } catch (PulsarClientException ex){
+        } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }
     }

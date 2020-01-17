@@ -18,38 +18,25 @@ import java.util.concurrent.ExecutionException;
 /**
  * An Abstract class for Readers.
  */
-public abstract class ReaderWorker extends Worker implements Callable<Void> {
+public abstract class Reader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
     final private Performance perf;
-    final private boolean writeAndRead;
 
-    public ReaderWorker(int readerId, int events, int secondsToRun, long start,
-                 PerfStats stats, int timeout, boolean writeAndRead) {
-        super(readerId, events, secondsToRun, 0, start, stats, timeout);
-
-        this.writeAndRead = writeAndRead;
+    public Reader(int readerId, QuadConsumer recordTime, Parameters params) {
+        super(readerId, recordTime, params);
         this.perf = createBenchmark();
-
     }
-
-    private Performance createBenchmark() {
-        final Performance perfReader;
-        if (secondsToRun > 0) {
-            perfReader = writeAndRead ? this::EventsTimeReaderRW : this::EventsTimeReader;
-        } else {
-            perfReader = writeAndRead ? this::EventsReaderRW : this::EventsReader;
-        }
-        return perfReader;
-    }
-
 
     /**
      * read the data.
+     * @return byte[] return the data.
+     * @throws IOException If an exception occurred.
      */
-    public abstract byte[] readData() throws IOException;
+    public abstract byte[] read() throws IOException;
 
     /**
      * close the consumer/reader.
+     * @throws IOException If an exception occurred.
      */
     public abstract void close() throws IOException;
 
@@ -64,17 +51,27 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
         return null;
     }
 
+    final private Performance createBenchmark() {
+        final Performance perfReader;
+        if (params.secondsToRun > 0) {
+            perfReader = params.writeAndRead ? this::RecordsTimeReaderRW : this::RecordsTimeReader;
+        } else {
+            perfReader = params.writeAndRead ? this::RecordsReaderRW : this::RecordsReader;
+        }
+        return perfReader;
+    }
 
-    public void EventsReader() throws IOException {
+
+    final public void RecordsReader() throws IOException {
         byte[] ret = null;
         try {
             int i = 0;
-            while (i < events) {
+            while (i < params.records) {
                 final long startTime = System.currentTimeMillis();
-                ret = readData();
+                ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    stats.recordTime(startTime, endTime, ret.length);
+                    recordTime.accept(startTime, endTime, ret.length, 1);
                     i++;
                 }
             }
@@ -84,19 +81,19 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
     }
 
 
-    public void EventsReaderRW() throws IOException {
+    final public void RecordsReaderRW() throws IOException {
         final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         byte[] ret = null;
         try {
             int i = 0;
-            while (i < events) {
-                ret = readData();
+            while (i < params.records) {
+                ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
                     timeBuffer.clear();
                     timeBuffer.put(ret, 0, TIME_HEADER_SIZE);
                     final long start = timeBuffer.getLong(0);
-                    stats.recordTime(start, endTime, ret.length);
+                    recordTime.accept(start, endTime, ret.length, 1);
                     i++;
                 }
             }
@@ -106,18 +103,17 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
     }
 
 
-    public void EventsTimeReader() throws IOException {
-        final long msToRun = secondsToRun * MS_PER_SEC;
+    final public void RecordsTimeReader() throws IOException {
+        final long msToRun = params.secondsToRun * MS_PER_SEC;
         byte[] ret = null;
         long time = System.currentTimeMillis();
-
         try {
-            while ((time - startTime) < msToRun) {
+            while ((time - params.startTime) < msToRun) {
                 time = System.currentTimeMillis();
-                ret = readData();
+                ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    stats.recordTime(time, endTime, ret.length);
+                    recordTime.accept(time, endTime, ret.length, 1);
                 }
             }
         } finally {
@@ -125,21 +121,20 @@ public abstract class ReaderWorker extends Worker implements Callable<Void> {
         }
     }
 
-
-    public void EventsTimeReaderRW() throws IOException {
-        final long msToRun = secondsToRun * MS_PER_SEC;
+    final public void RecordsTimeReaderRW() throws IOException {
+        final long msToRun = params.secondsToRun * MS_PER_SEC;
         final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         byte[] ret = null;
         long time = System.currentTimeMillis();
         try {
-            while ((time - startTime) < msToRun) {
-                ret = readData();
+            while ((time - params.startTime) < msToRun) {
+                ret = read();
                 time = System.currentTimeMillis();
                 if (ret != null) {
                     timeBuffer.clear();
                     timeBuffer.put(ret, 0, TIME_HEADER_SIZE);
                     final long start = timeBuffer.getLong(0);
-                    stats.recordTime(start, time, ret.length);
+                    recordTime.accept(start, time, ret.length, 1);
                 }
             }
         } finally {

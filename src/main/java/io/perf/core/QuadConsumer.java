@@ -10,6 +10,6 @@
 
 package io.perf.core;
 
-public interface TriConsumer {
-    void accept(long a, long b, int c);
+public interface QuadConsumer {
+    void accept(long startTime, long endTime, int dataSize, int records);
 }

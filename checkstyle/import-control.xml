@@ -1,7 +1,7 @@
 <!DOCTYPE import-control PUBLIC
         "-//Puppy Crawl//DTD Import Control 1.1//EN"
         "http://www.puppycrawl.com/dtds/import_control_1_1.dtd">
-<import-control pkg="io.pravega">
+<import-control pkg="io.perf">
 
     <!-- THINK HARD ABOUT THE LAYERING OF THE PROJECT BEFORE CHANGING THIS FILE -->
 
@@ -18,6 +18,7 @@
     <allow pkg="javax.security"/>
     <allow pkg="org.ietf.jgss"/>
     <allow pkg="com.google"/>
+    <allow pkg="io.perf"/>
     <allow pkg="io.pravega"/>
     <allow pkg="lombok"/>
     <allow pkg="ch.qos.logback"/>
