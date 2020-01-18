@@ -10,3 +10,5 @@
  */
 
 rootProject.name = 'DSB'
+include 'dsb-api'
+

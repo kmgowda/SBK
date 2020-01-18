@@ -19,6 +19,7 @@
     <allow pkg="org.ietf.jgss"/>
     <allow pkg="com.google"/>
     <allow pkg="io.perf"/>
+    <allow pkg="io.dsb"/>
     <allow pkg="io.pravega"/>
     <allow pkg="lombok"/>
     <allow pkg="ch.qos.logback"/>

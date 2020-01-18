@@ -10,10 +10,10 @@
 
 package io.perf.drivers.Pravega;
 
-import io.perf.core.Parameters;
-import io.perf.core.Reader;
+import io.dsb.api.Parameters;
+import io.dsb.api.Reader;
 
-import io.perf.core.QuadConsumer;
+import io.dsb.api.QuadConsumer;
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.impl.ByteArraySerializer;

@@ -8,9 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.perf.drivers.Pulsar;
-import io.perf.core.Writer;
-import io.perf.core.QuadConsumer;
-import io.perf.core.Parameters;
+import io.dsb.api.Writer;
+import io.dsb.api.QuadConsumer;
+import io.dsb.api.Parameters;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;

@@ -9,9 +9,9 @@
  */
 package io.perf.drivers.Pravega;
 
-import io.perf.core.Parameters;
-import io.perf.core.QuadConsumer;
-import io.perf.core.Writer;
+import io.dsb.api.Parameters;
+import io.dsb.api.QuadConsumer;
+import io.dsb.api.Writer;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;

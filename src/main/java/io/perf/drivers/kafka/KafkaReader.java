@@ -9,9 +9,9 @@
  */
 package io.perf.drivers.Kafka;
 
-import io.perf.core.Parameters;
-import io.perf.core.Reader;
-import io.perf.core.QuadConsumer;
+import io.dsb.api.Parameters;
+import io.dsb.api.Reader;
+import io.dsb.api.QuadConsumer;
 
 import java.io.IOException;
 import java.util.Properties;
