@@ -60,7 +60,7 @@ buildscript {
 	println "Build JVM Version is : " + Jvm.current()
 }
 
-mainClassName = "io.perf.main.DsbMain"
+mainClassName = "io.dsb.main.DsbMain"
 startScripts {
     doLast {
         unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')

@@ -9,7 +9,7 @@
  */
 
 
-package io.driver.Pravega;
+package io.dsb.Pravega;
 
 import io.dsb.api.Benchmark;
 import io.dsb.api.Parameters;
@@ -23,12 +23,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.ReaderGroup;
 import io.pravega.client.stream.impl.ControllerImpl;
 import io.pravega.client.stream.impl.ControllerImplConfig;
-import io.pravega.client.stream.impl.ClientFactoryImpl;
-
+import io.pravega.client.EventStreamClientFactory;
 
 /**
  * Abstract class for Benchmarking.
@@ -42,7 +40,7 @@ public class Pravega extends Benchmark {
     private int segmentCount;
     private boolean recreate;
     private PravegaStreamHandler streamHandle;
-    private ClientFactory factory;
+    private EventStreamClientFactory factory;
     private ReaderGroup readerGroup;
 
     @Override
@@ -108,7 +106,8 @@ public class Pravega extends Benchmark {
                 readerGroup = null;
             }
 
-            factory = new ClientFactoryImpl(scopeName, controller);
+            factory = EventStreamClientFactory.withScope(scopeName, ClientConfig.builder()
+                                        .controllerURI(new URI(controllerUri)).build());
         } catch (Exception ex) {
              throw new IOException(ex);
         }

@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.driver.Kafka;
+package io.dsb.Kafka;
 
 import io.dsb.api.Parameters;
 import io.dsb.api.Reader;

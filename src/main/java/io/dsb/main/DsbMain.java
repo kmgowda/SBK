@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perf.main;
+package io.dsb.main;
 
 import io.dsb.api.Benchmark;
 import io.dsb.api.Parameters;
@@ -72,7 +72,7 @@ public class DsbMain {
         }
 
         try {
-            obj = (Benchmark) Class.forName("io.driver." + className+"."+className).newInstance();
+            obj = (Benchmark) Class.forName("io.dsb." + className+"."+className).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(0);

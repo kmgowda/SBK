@@ -8,17 +8,17 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.driver.Pravega;
+package io.dsb.Pravega;
 
 import io.dsb.api.Parameters;
 import io.dsb.api.Reader;
 
 import io.dsb.api.QuadConsumer;
 import io.pravega.client.stream.EventStreamReader;
-import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.pravega.client.stream.ReaderConfig;
 import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.EventStreamClientFactory;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class PravegaReader extends Reader {
     private final EventStreamReader<byte[]> reader;
 
     public PravegaReader(int readerId, QuadConsumer recordTime, Parameters params,
-                         String streamName, String readergrp, ClientFactory factory) throws IOException {
+                         String streamName, String readergrp, EventStreamClientFactory factory) throws IOException {
         super(readerId, recordTime, params);
 
         final String readerSt = Integer.toString(readerId);

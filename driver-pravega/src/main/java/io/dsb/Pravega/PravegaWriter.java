@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.driver.Pravega;
+package io.dsb.Pravega;
 
 import io.dsb.api.Parameters;
 import io.dsb.api.QuadConsumer;
@@ -17,16 +17,16 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import io.pravega.client.stream.EventStreamWriter;
-import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.pravega.client.stream.EventWriterConfig;
+import io.pravega.client.EventStreamClientFactory;
 
 
 public class PravegaWriter extends Writer {
     final EventStreamWriter<byte[]> producer;
 
     public PravegaWriter(int writerID, QuadConsumer recordTime, Parameters params,
-                        String streamName, ClientFactory factory) throws IOException {
+                        String streamName, EventStreamClientFactory factory) throws IOException {
         super(writerID, recordTime, params);
         this.producer = factory.createEventWriter(streamName,
                 new ByteArraySerializer(),
