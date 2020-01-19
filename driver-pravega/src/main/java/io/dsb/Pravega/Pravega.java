@@ -31,7 +31,7 @@ import io.pravega.client.EventStreamClientFactory;
 /**
  * Abstract class for Benchmarking.
  */
-public class Pravega extends Benchmark {
+public class Pravega implements Benchmark {
     static final String DEFAULT_SCOPE = "Scope";
     private String scopeName;
     private String streamName;

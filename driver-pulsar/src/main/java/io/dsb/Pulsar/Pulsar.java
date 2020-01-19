@@ -22,7 +22,7 @@ import org.apache.pulsar.client.api.PulsarClientException;
 /**
  * Abstract class for Benchmarking.
  */
-public class Pulsar extends Benchmark {
+public class Pulsar implements Benchmark {
     static final String DEFAULT_NAMESPACE = null;
     static final String DEFAULT_TENANT = null;
     static final String DEFAULT_CLUSTER = null;
