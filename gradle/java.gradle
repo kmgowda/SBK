@@ -10,7 +10,6 @@
  */
 plugins.withId('java') {
     apply plugin: 'checkstyle'
-    apply plugin: 'com.github.spotbugs'
     apply plugin: 'jacoco'
     apply plugin: 'signing'
     apply plugin: 'maven'
@@ -29,7 +28,7 @@ plugins.withId('java') {
         ])
     }
 
-    archivesBaseName = "pravega" + project.path.replace(':', '-')
+    archivesBaseName = "dsb" + project.path.replace(':', '-')
 
     task sourceJar(type: Jar) {
         classifier = 'sources'

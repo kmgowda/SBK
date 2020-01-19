@@ -6,12 +6,12 @@
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
  */
 
-rootProject.name = 'DSB'
-include 'dsb-api'
-include 'driver-pulsar'
-include 'driver-kafka'
-include 'driver-pravega'
+package io.dsb.api;
 
+import java.io.IOException;
+
+public interface Performance {
+     void benchmark() throws InterruptedException, IOException;
+}

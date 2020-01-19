@@ -6,12 +6,10 @@
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
  */
 
-rootProject.name = 'DSB'
-include 'dsb-api'
-include 'driver-pulsar'
-include 'driver-kafka'
-include 'driver-pravega'
+package io.dsb.api;
 
+public interface QuadConsumer {
+    void accept(long startTime, long endTime, int dataSize, int records);
+}
