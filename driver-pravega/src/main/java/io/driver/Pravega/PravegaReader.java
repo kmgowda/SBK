@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perf.drivers.Pravega;
+package io.driver.Pravega;
 
 import io.dsb.api.Parameters;
 import io.dsb.api.Reader;
@@ -33,8 +33,8 @@ public class PravegaReader extends Reader {
         super(readerId, recordTime, params);
 
         final String readerSt = Integer.toString(readerId);
-        reader = factory.createReader(
-                readerSt, readergrp, new ByteArraySerializer(), ReaderConfig.builder().build());
+        reader = factory.createReader(readerSt, readergrp,
+                        new ByteArraySerializer(), ReaderConfig.builder().build());
     }
 
     @Override

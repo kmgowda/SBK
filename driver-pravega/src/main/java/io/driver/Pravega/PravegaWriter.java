@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perf.drivers.Pravega;
+package io.driver.Pravega;
 
 import io.dsb.api.Parameters;
 import io.dsb.api.QuadConsumer;

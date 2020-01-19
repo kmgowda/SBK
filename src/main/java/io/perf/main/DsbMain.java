@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perf;
+package io.perf.main;
 
 import io.dsb.api.Benchmark;
 import io.dsb.api.Parameters;
@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutorService;
  * Performance benchmark for Pravega.
  * Data format is in comma separated format as following: {TimeStamp, Sensor Id, Location, TempValue }.
  */
-public class PerfTest {
+public class DsbMain {
     final static String BENCHMARKNAME = "DSB";
     final static int REPORTINGINTERVAL = 5000;
 
@@ -72,7 +72,7 @@ public class PerfTest {
         }
 
         try {
-            obj = (Benchmark) Class.forName("io.perf.drivers." + className+"."+className).newInstance();
+            obj = (Benchmark) Class.forName("io.driver." + className+"."+className).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(0);

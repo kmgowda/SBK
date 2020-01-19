@@ -1,7 +1,7 @@
 <!DOCTYPE import-control PUBLIC
         "-//Puppy Crawl//DTD Import Control 1.1//EN"
         "http://www.puppycrawl.com/dtds/import_control_1_1.dtd">
-<import-control pkg="io.perf">
+<import-control pkg="io.perf.main">
 
     <!-- THINK HARD ABOUT THE LAYERING OF THE PROJECT BEFORE CHANGING THIS FILE -->
 
@@ -18,8 +18,9 @@
     <allow pkg="javax.security"/>
     <allow pkg="org.ietf.jgss"/>
     <allow pkg="com.google"/>
-    <allow pkg="io.perf"/>
-    <allow pkg="io.dsb"/>
+    <allow pkg="io.perf.main"/>
+    <allow pkg="io.dsb.api"/>
+    <allow pkg="io.driver"/>
     <allow pkg="io.pravega"/>
     <allow pkg="lombok"/>
     <allow pkg="ch.qos.logback"/>

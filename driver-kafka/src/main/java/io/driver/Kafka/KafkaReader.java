@@ -7,13 +7,14 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perf.drivers.Kafka;
+package io.driver.Kafka;
 
 import io.dsb.api.Parameters;
 import io.dsb.api.Reader;
 import io.dsb.api.QuadConsumer;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
 import java.util.Arrays;
 
@@ -25,6 +26,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
  */
 public class KafkaReader extends Reader {
     final private KafkaConsumer<byte[], byte[]> consumer;
+    final private Duration timeoutDuration;
 
     public KafkaReader(int readerId, QuadConsumer recordTime, Parameters params,
                        String topicName, Properties consumerProps) throws IOException {
@@ -32,11 +34,12 @@ public class KafkaReader extends Reader {
 
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
+        this.timeoutDuration = Duration.ofMillis(params.timeout);
     }
 
     @Override
     public byte[] read() {
-        final ConsumerRecords<byte[], byte[]> records = consumer.poll(params.timeout);
+        final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
         if (records.isEmpty()) {
             return null;
         }

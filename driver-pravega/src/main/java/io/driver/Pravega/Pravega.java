@@ -9,7 +9,7 @@
  */
 
 
-package io.perf.drivers.Pravega;
+package io.driver.Pravega;
 
 import io.dsb.api.Benchmark;
 import io.dsb.api.Parameters;

@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perf.drivers.Pravega;
+package io.driver.Pravega;
 
 import java.net.URI;
 import java.util.List;
@@ -67,9 +67,7 @@ public class PravegaStreamHandler {
         this.bgexecutor = bgexecutor;
         streamManager = StreamManager.create(new URI(uri));
         streamManager.createScope(scope);
-        streamconfig = StreamConfiguration.builder().scope(scope).streamName(stream)
-                .scalingPolicy(ScalingPolicy.fixed(segCount))
-                .build();
+        streamconfig = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(segCount)).build();
     }
 
     public boolean create() {
