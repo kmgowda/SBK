@@ -36,9 +36,10 @@ public abstract class Writer extends Worker implements Callable<Void> {
      * Asynchronously Writes the data .
      *
      * @param data data to write
-     * @return CompletableFuture completable future.
+     * @return CompletableFuture completable future. null if the write completed
+     * @throws IOException If an exception occurred
      */
-    public abstract CompletableFuture writeAsync(byte[] data);
+    public abstract CompletableFuture writeAsync(byte[] data) throws IOException;
 
     /**
      * Flush the  data.
@@ -67,8 +68,9 @@ public abstract class Writer extends Worker implements Callable<Void> {
      * @param data   data to write
      * @param record to call for benchmarking
      * @return time return the data sent time
+     * @throws IOException If an exception occurred.
      */
-    public long recordWrite(byte[] data, QuadConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);

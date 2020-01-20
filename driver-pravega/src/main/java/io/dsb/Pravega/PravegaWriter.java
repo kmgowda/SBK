@@ -41,7 +41,7 @@ public class PravegaWriter extends Writer {
      * @return time return the data sent time
      */
     @Override
-    public long recordWrite(byte[] data, QuadConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
@@ -54,7 +54,7 @@ public class PravegaWriter extends Writer {
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) {
+    public CompletableFuture writeAsync(byte[] data) throws IOException {
         return producer.writeEvent(data);
     }
 

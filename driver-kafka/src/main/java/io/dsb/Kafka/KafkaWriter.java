@@ -57,7 +57,7 @@ public class KafkaWriter extends Writer {
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) {
+    public CompletableFuture writeAsync(byte[] data) throws IOException {
         producer.send(new ProducerRecord<>(topicName, data));
         return null;
     }
