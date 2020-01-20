@@ -14,11 +14,11 @@ import org.gradle.internal.jvm.Jvm
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'application'
 apply plugin: 'checkstyle'
 
 allprojects {
 	apply plugin: 'java'
+	apply plugin: 'application'
 
 	repositories {
 		mavenLocal()
@@ -46,6 +46,14 @@ allprojects {
 	apply from: "$rootDir/gradle/java.gradle"
 	apply from: "$rootDir/gradle/maven.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
+
+	mainClassName = "io.dsb.main.DsbMain"
+	startScripts {
+		doLast {
+			unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')
+			windowsScript.text = windowsScript.text.replace('SERVER_APP_HOME', '%~dp0..')
+		}
+	}
 }
 
 dependencies {
@@ -57,12 +65,4 @@ dependencies {
 
 buildscript {
 	println "Build JVM Version is : " + Jvm.current()
-}
-
-mainClassName = "io.dsb.main.DsbMain"
-startScripts {
-    doLast {
-        unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')
-        windowsScript.text = windowsScript.text.replace('SERVER_APP_HOME', '%~dp0..')
-    }
 }
