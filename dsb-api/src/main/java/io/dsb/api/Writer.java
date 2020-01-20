@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public abstract class Writer extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
-    final private Performance perf;
+    final private RunBenchmark perf;
     final private byte[] payload;
 
     public Writer(int writerID, QuadConsumer recordTime, Parameters params) {
@@ -89,7 +89,7 @@ public abstract class Writer extends Worker implements Callable<Void> {
     @Override
     public Void call() throws InterruptedException, ExecutionException, IOException {
         try {
-            perf.benchmark();
+            perf.run();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -98,8 +98,8 @@ public abstract class Writer extends Worker implements Callable<Void> {
     }
 
 
-    final private Performance createBenchmark() {
-        final Performance perfWriter;
+    final private RunBenchmark createBenchmark() {
+        final RunBenchmark perfWriter;
         if (params.secondsToRun > 0) {
             if (params.writeAndRead) {
                 perfWriter = this::RecordsWriterTimeRW;

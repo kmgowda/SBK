@@ -12,6 +12,6 @@ package io.dsb.api;
 
 import java.io.IOException;
 
-public interface Performance {
-     void benchmark() throws InterruptedException, IOException;
+public interface RunBenchmark {
+     void run() throws InterruptedException, IOException;
 }
