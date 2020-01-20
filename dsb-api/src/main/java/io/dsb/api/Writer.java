@@ -26,8 +26,8 @@ public abstract class Writer extends Worker implements Callable<Void> {
     final private RunBenchmark perf;
     final private byte[] payload;
 
-    public Writer(int writerID, QuadConsumer recordTime, Parameters params) {
-        super(writerID, recordTime, params);
+    public Writer(int writerID, Parameters params, QuadConsumer recordTime) {
+        super(writerID, params, recordTime);
         this.payload = createPayload(params.recordSize);
         this.perf = createBenchmark();
     }

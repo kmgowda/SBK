@@ -24,7 +24,7 @@ public interface  Benchmark {
 
     public void closeStorage(final Parameters params) throws IOException;
 
-    public Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params);
+    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime);
 
-    public Reader createReader(final int id, QuadConsumer recordTime, final Parameters params);
+    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime);
 }

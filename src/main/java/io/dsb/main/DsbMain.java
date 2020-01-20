@@ -147,12 +147,12 @@ public class DsbMain {
         try {
             final List<Writer> writers =  IntStream.range(0, params.writersCount)
                                             .boxed()
-                                            .map(i -> benchmark.createWriter(i, writeTime, params))
+                                            .map(i -> benchmark.createWriter(i, params, writeTime))
                                             .collect(Collectors.toList());
 
             final List<Reader> readers = IntStream.range(0, params.readersCount)
                                             .boxed()
-                                            .map(i -> benchmark.createReader(i, readTime, params))
+                                            .map(i -> benchmark.createReader(i, params, readTime))
                                             .collect(Collectors.toList());
 
             final List<Callable<Void>> workers = Stream.of(readers, writers)

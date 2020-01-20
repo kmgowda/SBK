@@ -114,9 +114,9 @@ public class Pulsar implements Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params) {
+    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime) {
         try {
-            return new PulsarWriter(id, recordTime, params, topicName, client);
+            return new PulsarWriter(id, params, recordTime, topicName, client);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -124,9 +124,9 @@ public class Pulsar implements Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, QuadConsumer recordTime, final Parameters params) {
+    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime) {
         try {
-            return new PulsarReader(id, recordTime, params, topicName, topicName+"rdGrp", client);
+            return new PulsarReader(id, params, recordTime, topicName, topicName+"rdGrp", client);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

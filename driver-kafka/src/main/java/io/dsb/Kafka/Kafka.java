@@ -100,9 +100,9 @@ public class Kafka implements Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params) {
+    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime) {
         try {
-            return new KafkaWriter(id, recordTime, params, topicName, producerConfig);
+            return new KafkaWriter(id, params, recordTime, topicName, producerConfig);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -110,9 +110,9 @@ public class Kafka implements Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, QuadConsumer recordTime, final Parameters params) {
+    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime) {
         try {
-            return new KafkaReader(id, recordTime, params, topicName, consumerConfig);
+            return new KafkaReader(id, params, recordTime, topicName, consumerConfig);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

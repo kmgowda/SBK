@@ -28,9 +28,9 @@ public class KafkaReader extends Reader {
     final private KafkaConsumer<byte[], byte[]> consumer;
     final private Duration timeoutDuration;
 
-    public KafkaReader(int readerId, QuadConsumer recordTime, Parameters params,
+    public KafkaReader(int readerId, Parameters params, QuadConsumer recordTime,
                        String topicName, Properties consumerProps) throws IOException {
-        super(readerId, recordTime, params);
+        super(readerId, params, recordTime);
 
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));

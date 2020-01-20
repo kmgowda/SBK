@@ -24,9 +24,9 @@ import org.apache.pulsar.client.api.PulsarClientException;
 public class PulsarWriter extends Writer {
     final private Producer<byte[]> producer;
 
-    public PulsarWriter(int writerID, QuadConsumer recordTime, Parameters params,
+    public PulsarWriter(int writerID, Parameters params, QuadConsumer recordTime,
                               String topicName, PulsarClient client) throws IOException {
-        super(writerID, recordTime, params);
+        super(writerID, params, recordTime);
         try {
             this.producer = client.newProducer()
                     .enableBatching(true)

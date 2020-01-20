@@ -16,11 +16,11 @@ package io.dsb.api;
 public abstract class Worker {
     final static int TIME_HEADER_SIZE = 8;
 
-    public final int workerID;
-    public final QuadConsumer recordTime;
-    public final Parameters params;
+    protected final int workerID;
+    protected final Parameters params;
+    protected final QuadConsumer recordTime;
 
-    Worker(int workerID, QuadConsumer recordTime, Parameters params) {
+    Worker(int workerID, Parameters params, QuadConsumer recordTime) {
         this.workerID = workerID;
         this.recordTime = recordTime;
         this.params = params;

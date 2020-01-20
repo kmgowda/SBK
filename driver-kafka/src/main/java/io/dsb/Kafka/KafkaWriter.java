@@ -26,9 +26,9 @@ public class KafkaWriter extends Writer {
     final private KafkaProducer<byte[], byte[]> producer;
     final private String topicName;
 
-    public KafkaWriter(int writerID, QuadConsumer recordTime, Parameters params,
+    public KafkaWriter(int writerID, Parameters params, QuadConsumer recordTime,
                              String topicName, Properties producerProps) throws IOException {
-        super(writerID, recordTime, params);
+        super(writerID, params, recordTime);
         this.topicName = topicName;
         this.producer = new KafkaProducer<>(producerProps);
     }

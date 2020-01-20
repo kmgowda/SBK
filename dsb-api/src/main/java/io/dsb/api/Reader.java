@@ -22,8 +22,8 @@ public abstract class Reader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
     final private RunBenchmark perf;
 
-    public Reader(int readerId, QuadConsumer recordTime, Parameters params) {
-        super(readerId, recordTime, params);
+    public Reader(int readerId,  Parameters params, QuadConsumer recordTime) {
+        super(readerId, params, recordTime);
         this.perf = createBenchmark();
     }
 

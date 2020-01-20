@@ -28,9 +28,9 @@ import java.io.IOException;
 public class PravegaReader extends Reader {
     private final EventStreamReader<byte[]> reader;
 
-    public PravegaReader(int readerId, QuadConsumer recordTime, Parameters params,
+    public PravegaReader(int readerId, Parameters params, QuadConsumer recordTime,
                          String streamName, String readergrp, EventStreamClientFactory factory) throws IOException {
-        super(readerId, recordTime, params);
+        super(readerId, params, recordTime);
 
         final String readerSt = Integer.toString(readerId);
         reader = factory.createReader(readerSt, readergrp,
