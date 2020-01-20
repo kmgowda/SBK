@@ -20,10 +20,10 @@ import java.util.concurrent.ExecutionException;
  */
 public abstract class Reader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
-    final private Performance perf;
+    final private RunBenchmark perf;
 
-    public Reader(int readerId, QuadConsumer recordTime, Parameters params) {
-        super(readerId, recordTime, params);
+    public Reader(int readerId,  Parameters params, QuadConsumer recordTime) {
+        super(readerId, params, recordTime);
         this.perf = createBenchmark();
     }
 
@@ -43,7 +43,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
     @Override
     public Void call() throws InterruptedException, ExecutionException, IOException {
         try {
-            perf.benchmark();
+            perf.run();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -51,8 +51,8 @@ public abstract class Reader extends Worker implements Callable<Void> {
         return null;
     }
 
-    final private Performance createBenchmark() {
-        final Performance perfReader;
+    final private RunBenchmark createBenchmark() {
+        final RunBenchmark perfReader;
         if (params.secondsToRun > 0) {
             perfReader = params.writeAndRead ? this::RecordsTimeReaderRW : this::RecordsTimeReader;
         } else {

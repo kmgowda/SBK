@@ -25,9 +25,9 @@ import io.pravega.client.EventStreamClientFactory;
 public class PravegaWriter extends Writer {
     final EventStreamWriter<byte[]> producer;
 
-    public PravegaWriter(int writerID, QuadConsumer recordTime, Parameters params,
+    public PravegaWriter(int writerID, Parameters params, QuadConsumer recordTime,
                         String streamName, EventStreamClientFactory factory) throws IOException {
-        super(writerID, recordTime, params);
+        super(writerID, params, recordTime);
         this.producer = factory.createEventWriter(streamName,
                 new ByteArraySerializer(),
                 EventWriterConfig.builder().build());
@@ -41,7 +41,7 @@ public class PravegaWriter extends Writer {
      * @return time return the data sent time
      */
     @Override
-    public long recordWrite(byte[] data, QuadConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
@@ -54,7 +54,7 @@ public class PravegaWriter extends Writer {
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) {
+    public CompletableFuture writeAsync(byte[] data) throws IOException {
         return producer.writeEvent(data);
     }
 

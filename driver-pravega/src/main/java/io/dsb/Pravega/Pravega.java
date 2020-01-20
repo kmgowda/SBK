@@ -31,7 +31,7 @@ import io.pravega.client.EventStreamClientFactory;
 /**
  * Abstract class for Benchmarking.
  */
-public class Pravega extends Benchmark {
+public class Pravega implements Benchmark {
     static final String DEFAULT_SCOPE = "Scope";
     private String scopeName;
     private String streamName;
@@ -121,9 +121,9 @@ public class Pravega extends Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params) {
+    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime) {
         try {
-            return new PravegaWriter(id, recordTime, params, streamName, factory);
+            return new PravegaWriter(id, params, recordTime, streamName, factory);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -132,9 +132,9 @@ public class Pravega extends Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, QuadConsumer recordTime, final Parameters params) {
+    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime) {
         try {
-            return new PravegaReader(id, recordTime, params, streamName, rdGrpName, factory);
+            return new PravegaReader(id, params, recordTime, streamName, rdGrpName, factory);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

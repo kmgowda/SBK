@@ -20,6 +20,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import lombok.Synchronized;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVParser;
@@ -32,7 +33,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 /**
  * Class for Performance statistics.
  */
-public class PerfStats {
+final public class Dsb implements Performance {
     final private String action;
     final private String csvFile;
     final private int messageSize;
@@ -69,8 +70,8 @@ public class PerfStats {
         }
     }
 
-    public PerfStats(String action, int reportingInterval, int messageSize,
-                     String csvFile, ExecutorService executor, ResultLogger logger) {
+    public Dsb(String action, int reportingInterval, int messageSize,
+               String csvFile, ExecutorService executor, ResultLogger logger) {
         this.action = action;
         this.messageSize = messageSize;
         this.windowInterval = reportingInterval;
@@ -336,25 +337,17 @@ public class PerfStats {
         }
     }
 
-    /**
-     * Start the performance statistics.
-     *
-     * @param startTime start time time
-     */
-    public synchronized void start(long startTime) {
+    @Override
+    @Synchronized
+    public void start(long startTime) {
         if (this.ret == null) {
             this.ret = executor.submit(new QueueProcessor(startTime));
         }
     }
 
-    /**
-     * End the final performance statistics.
-     *
-     * @param endTime End time
-     * @throws ExecutionException   If an exception occurred.
-     * @throws InterruptedException If an exception occurred.
-     */
-    public synchronized void shutdown(long endTime) throws ExecutionException, InterruptedException {
+    @Override
+    @Synchronized
+    public void shutdown(long endTime) throws ExecutionException, InterruptedException {
         if (this.ret != null) {
             queue.add(new TimeStamp(endTime));
             ret.get();
@@ -363,14 +356,7 @@ public class PerfStats {
         }
     }
 
-    /**
-     * Record the data write/read time of data.
-     *
-     * @param startTime starting time
-     * @param endTime   End time
-     * @param bytes     number of bytes written or read
-     * @param records   number of records written or read
-     **/
+    @Override
     public void recordTime(long startTime, long endTime, int bytes, int records) {
         queue.add(new TimeStamp(startTime, endTime, bytes, records));
     }

@@ -14,17 +14,17 @@ import java.io.IOException;
 /**
  * Abstract class for Benchmarking.
  */
-public abstract class Benchmark {
+public interface  Benchmark {
 
-    public abstract void addArgs(final Parameters params);
+    public void addArgs(final Parameters params);
 
-    public abstract void parseArgs(final Parameters params) throws IllegalArgumentException;
+    public void parseArgs(final Parameters params) throws IllegalArgumentException;
 
-    public abstract void openStorage(final Parameters params) throws IOException;
+    public void openStorage(final Parameters params) throws IOException;
 
-    public abstract void closeStorage(final Parameters params) throws IOException;
+    public void closeStorage(final Parameters params) throws IOException;
 
-    public abstract Writer createWriter(final int id, QuadConsumer recordTime, final Parameters params);
+    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime);
 
-    public abstract Reader createReader(final int id, QuadConsumer recordTime, final Parameters params);
+    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime);
 }

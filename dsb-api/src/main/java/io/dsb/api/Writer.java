@@ -23,11 +23,11 @@ import java.util.concurrent.CompletableFuture;
  */
 public abstract class Writer extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
-    final private Performance perf;
+    final private RunBenchmark perf;
     final private byte[] payload;
 
-    public Writer(int writerID, QuadConsumer recordTime, Parameters params) {
-        super(writerID, recordTime, params);
+    public Writer(int writerID, Parameters params, QuadConsumer recordTime) {
+        super(writerID, params, recordTime);
         this.payload = createPayload(params.recordSize);
         this.perf = createBenchmark();
     }
@@ -36,9 +36,10 @@ public abstract class Writer extends Worker implements Callable<Void> {
      * Asynchronously Writes the data .
      *
      * @param data data to write
-     * @return CompletableFuture completable future.
+     * @return CompletableFuture completable future. null if the write completed
+     * @throws IOException If an exception occurred
      */
-    public abstract CompletableFuture writeAsync(byte[] data);
+    public abstract CompletableFuture writeAsync(byte[] data) throws IOException;
 
     /**
      * Flush the  data.
@@ -67,8 +68,9 @@ public abstract class Writer extends Worker implements Callable<Void> {
      * @param data   data to write
      * @param record to call for benchmarking
      * @return time return the data sent time
+     * @throws IOException If an exception occurred.
      */
-    public long recordWrite(byte[] data, QuadConsumer record) {
+    public long recordWrite(byte[] data, QuadConsumer record) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
@@ -87,7 +89,7 @@ public abstract class Writer extends Worker implements Callable<Void> {
     @Override
     public Void call() throws InterruptedException, ExecutionException, IOException {
         try {
-            perf.benchmark();
+            perf.run();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -96,8 +98,8 @@ public abstract class Writer extends Worker implements Callable<Void> {
     }
 
 
-    final private Performance createBenchmark() {
-        final Performance perfWriter;
+    final private RunBenchmark createBenchmark() {
+        final RunBenchmark perfWriter;
         if (params.secondsToRun > 0) {
             if (params.writeAndRead) {
                 perfWriter = this::RecordsWriterTimeRW;

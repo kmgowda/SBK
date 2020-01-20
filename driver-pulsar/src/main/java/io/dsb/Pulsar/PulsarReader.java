@@ -28,9 +28,9 @@ import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 public class PulsarReader extends Reader {
     final private Consumer<byte[]> consumer;
 
-    public PulsarReader(int readerId, QuadConsumer recordTime, Parameters params,
+    public PulsarReader(int readerId, Parameters params, QuadConsumer recordTime,
                               String topicName, String subscriptionName, PulsarClient client) throws  IOException {
-        super(readerId, recordTime, params);
+        super(readerId, params, recordTime);
         final  SubscriptionInitialPosition position = params.writeAndRead ? SubscriptionInitialPosition.Latest :
                                                     SubscriptionInitialPosition.Earliest;
         try {
