@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 
 # Data Store Benchmark Kit [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Version](https://img.shields.io/badge/release-0.5-blue)](https://github.com/kmgowda/dsb/releases)
 
-The DSB (Data Store Benchmark Kit) is a software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then DSB is the right tool for you. The DSB itself a very high-performance benchmark tool too. It massively writes the data to storage system. This tool supports multi writers and readers. This tool also supports End to End latency.
+The DSB (Data Store Benchmark Kit) is a software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then DSB is the right tool for you. The DSB itself a very high-performance benchmark tool too. It massively writes the data to storage system. This tool supports multi writers and readers. This tool also supports End to End latency. The percentile is calculated for complete data written/read without any sampling ; hence the percentiles are 100% accurate.
 
 ### Prerequisites
 
@@ -73,7 +73,6 @@ Writing      73151 records,   14621.4 records/sec,   13.94 MB/sec,    62.8 ms av
 ```
 
 At the end of the benchmarking session, DSB outputs the total data written/read , average throughput and latency , maximum latency  and the percentiles 50th, 75th, 95th, 99th , 99.9th and 99.99th for the complete data records written/read.
-The percentile is calculated for complete data written/read without any sampling ; hence the percentiles are 100% accurate.
 An example  final output is show as below:
 
 ```
