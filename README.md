@@ -10,10 +10,7 @@ You may obtain a copy of the License at
 
 # Data Store Benchmark Kit [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Version](https://img.shields.io/badge/release-0.5-blue)](https://github.com/kmgowda/dsb/releases)
 
-The Data Store Benchmark (DSB) Kit is for the performance benchmarking of any storage system. Currently it supports benchmarking of Distriuted storage systems pravega and Kafka streaming storage clusters and in future benchmark of more streaming storage will be added. This tool performs the throughput and latency analysis for the multi producers/writers and consumers/readers of pravega.
-it also validates the end to end latency. The write and/or read latencies can be stored in a CSV file for later analysis.
-At the end of the performance benchmarking, this tool outputs the 50th, 75th, 95th , 99th, 99.9th and 99.99th latency percentiles.
-
+The DSB (Data Store Benchmark Kit) is a software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then DSB is the right tool for you. The DSB itself a very high-performance benchmark tool too. It massively writes the data to storage system. This tool supports multi writers and readers. This tool also supports End to End latency.
 
 ### Prerequisites
 
@@ -65,6 +62,25 @@ Running DSB Kit locally:
 ```
 
 ## Running Performance benchmarking
+
+DSB outputs the number of records written/read , throughput in terms of MB/s and the average and maximum latency for every 5 seconds time interval as show in below.
+
+```
+Writing     152372 records,   30328.8 records/sec,   28.92 MB/sec,    35.4 ms avg latency,  1238.0 ms max latency
+Writing     178680 records,   35382.2 records/sec,   33.74 MB/sec,    26.2 ms avg latency,   189.0 ms max latency
+Writing     176365 records,   35160.5 records/sec,   33.53 MB/sec,    27.2 ms avg latency,   197.0 ms max latency
+Writing      73151 records,   14621.4 records/sec,   13.94 MB/sec,    62.8 ms avg latency,   399.0 ms max latency
+```
+
+At the end of the benchmarking session, DSB outputs the total data written/read , average throughput and latency , maximum latency  and the percentiles 50th, 75th, 95th, 99th , 99.9th and 99.99th for the complete data records written/read.
+The percentile is calculated for complete data written/read without any sampling ; hence the percentiles are 100% accurate.
+An example  final output is show as below:
+
+```
+Writing (Total)      641805 records,   20696.0 records/sec,   19.74 MB/sec,    32.7 ms avg latency,  1238.0 ms max latency
+Writing Latencies 22 ms 50th, 31 ms 75th, 90 ms 95th, 168 ms 99th, 1064 ms 99.9th, 1099 ms 99.99th.
+```
+
 
 The DSB tool can be executed to
  - write/read specific amount of events/records to/from the Pravega cluster
