@@ -45,35 +45,23 @@ Running DSB Kit locally:
 
 ```
 <dir>/DSB$ ./run/DSB/bin/DSB  -help
- -consumers <arg>               Number of consumers
- -controller <arg>              Controller URI
- -events <arg>                  Number of events/records if 'time' not
-                                specified;
-                                otherwise, Maximum events per second by
-                                producer(s) and/or Number of events per
-                                consumer
- -flush <arg>                   Each producer calls flush after writing
-                                <arg> number of of events/records; Not
-                                applicable, if both producers and
-                                consumers are specified
- -fork <arg>                    Use Fork join Pool
- -help                          Help message
- -kafka <arg>                   Kafka Benchmarking
- -producers <arg>               Number of producers
- -readcsv <arg>                 CSV file to record read latencies
- -recreate <arg>                If the stream is already existing, delete
-                                and recreate the same
- -scope <arg>                   Scope name
- -segments <arg>                Number of segments
- -size <arg>                    Size of each message (event or record)
- -stream <arg>                  Stream name
- -throughput <arg>              if > 0 , throughput in MB/s
-                                if 0 , writes 'events'
-                                if -1, get the maximum throughput
- -time <arg>                    Number of seconds the code runs
- -transactionspercommit <arg>   Number of events before a transaction is
-                                committed
- -writecsv <arg>                CSV file to record write latencies
+ usage: DSB
+ -class <arg>        Benchmark class (refer to driver-* folder)
+ -csv <arg>          CSV file to record write/read latencies
+ -flush <arg>        Each Writer calls flush after writing <arg> number of
+                     of events(records); Not applicable, if both writers
+                     and readers are specified
+ -help               Help message
+ -readers <arg>      Number of readers
+ -records <arg>      Number of records(events) if 'time' not specified;
+                     otherwise, Maximum records per second by writer(s)
+                     and/or Number of records per reader
+ -size <arg>         Size of each message (event or record)
+ -throughput <arg>   if > 0 , throughput in MB/s
+                     if 0 , writes 'events'
+                     if -1, get the maximum throughput
+ -time <arg>         Number of seconds the DSB runs (24hrs by default)
+ -writers <arg>      Number of writers
 ```
 
 ## Running Performance benchmarking
