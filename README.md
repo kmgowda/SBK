@@ -12,7 +12,12 @@ You may obtain a copy of the License at
 
 The DSB (Data Store Benchmark Kit) is an open source software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then DSB is the right tool for you. The DSB itself a very high-performance benchmark tool too. It massively writes the data to storage system. This tool supports multi writers and readers. This tool also supports End to End latency. The percentile is calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
 
-Currently DSB supports benchmarking of Apache Kafka, Pulsar and Pravega distributed streaming storages. In future, many more storage storage systems drivers will be plugged in. Refer to :   [[Add your driver](https://github.com/kmgowda/dsb/blob/master/README.md#add-your-driver-to-dsb-kit )] to know how to add your driver/storage device for performance benchmarking.  we welcome if you are interested in contributing this open source by adding a driver your storage device and any features to DSB. Refer to : 
+Currently DSB supports benchmarking of Apache Kafka, Pulsar and Pravega distributed streaming storages. In future, many more storage storage systems drivers will be plugged in. Refer to :   [[Add your driver](https://github.com/kmgowda/dsb/blob/master/README.md#add-your-driver-to-dsb-kit )] to know how to add your driver/storage device for performance benchmarking.
+
+we welcome if you are interested in contributing this open source by adding a driver your storage device and any features to DSB. Refer to : 
+
+
+## Build DSB
 
 ### Prerequisites
 
