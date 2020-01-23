@@ -123,7 +123,7 @@ public class DsbMain {
 
         if (params.writersCount > 0 && !params.writeAndRead) {
             writeStats = new Dsb("Writing", REPORTINGINTERVAL, params.recordSize,
-                                params.writeFile, executor, logger);
+                                params.csvFile, logger, executor);
             writeTime = writeStats::recordTime;
         } else {
             writeStats = null;
@@ -138,7 +138,7 @@ public class DsbMain {
                 action = "Reading";
             }
             readStats = new Dsb(action, REPORTINGINTERVAL, params.recordSize,
-                            params.readFile, executor, logger);
+                            params.csvFile, logger, executor);
             readTime = readStats::recordTime;
         } else {
             readStats = null;

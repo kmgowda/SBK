@@ -36,8 +36,7 @@ final public class Parameters {
     public int writersCount;
     public int readersCount;
     public double throughput;
-    public String writeFile;
-    public String readFile;
+    public String csvFile;
     public boolean writeAndRead;
     public boolean fork;
 
@@ -72,8 +71,7 @@ final public class Parameters {
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes 'events'\n" +
                         "if -1, get the maximum throughput");
-        options.addOption("writecsv", true, "CSV file to record write latencies");
-        options.addOption("readcsv", true, "CSV file to record read latencies");
+        options.addOption("csv", true, "CSV file to record write/read latencies");
         options.addOption("fork", true, "Use Fork join Pool");
         options.addOption("help", false, "Help message");
     }
@@ -130,8 +128,7 @@ final public class Parameters {
         records = Integer.parseInt(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
         fork = Boolean.parseBoolean(commandline.getOptionValue("fork", "true"));
-        writeFile = commandline.getOptionValue("writecsv", null);
-        readFile = commandline.getOptionValue("readcsv", null);
+        csvFile = commandline.getOptionValue("csv", null);
         int flushRecords = Integer.parseInt(commandline.getOptionValue("flush", "0"));
         if (flushRecords > 0) {
             recordsPerFlush = flushRecords;

@@ -39,8 +39,8 @@ final public class Dsb implements Performance {
     final private int messageSize;
     final private int windowInterval;
     final private ConcurrentLinkedQueue<TimeStamp> queue;
-    final private ExecutorService executor;
     final private ResultLogger logger;
+    final private ExecutorService executor;
 
     @GuardedBy("this")
     private Future<Void> ret;
@@ -71,13 +71,13 @@ final public class Dsb implements Performance {
     }
 
     public Dsb(String action, int reportingInterval, int messageSize,
-               String csvFile, ExecutorService executor, ResultLogger logger) {
+               String csvFile, ResultLogger logger, ExecutorService executor) {
         this.action = action;
         this.messageSize = messageSize;
         this.windowInterval = reportingInterval;
         this.csvFile = csvFile;
-        this.executor = executor;
         this.logger = logger;
+        this.executor = executor;
         this.queue = new ConcurrentLinkedQueue<>();
         this.ret = null;
     }
