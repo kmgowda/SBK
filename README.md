@@ -17,7 +17,7 @@ Currently DSB supports benchmarking of Apache Kafka, Pulsar and Pravega distribu
 we welcome if you are interested in contributing this open source by adding a driver your storage device and any features to DSB. Refer to : 
 
 
-## Build DSB
+## Build DSB Kit
 
 ### Prerequisites
 
