@@ -12,6 +12,15 @@ package io.dsb.api;
 
 import java.io.IOException;
 
+/**
+ * Interface for executing writers/readers benchmarks.
+ */
 public interface RunBenchmark {
+
+     /**
+      * Run writers/readers benchmarks.
+      * @throws IOException If an exception occurred.
+      * @throws InterruptedException If an exception occurred.
+      */
      void run() throws InterruptedException, IOException;
 }

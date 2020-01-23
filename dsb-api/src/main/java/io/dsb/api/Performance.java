@@ -11,13 +11,16 @@ package io.dsb.api;
 
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Interface for performance Statistics.
+ */
 public interface Performance {
     /**
      * Start the performance statistics.
      *
      * @param startTime start time time
      */
-    public  void start(long startTime);
+    void start(long startTime);
 
     /**
      * End the final performance statistics.
@@ -26,7 +29,7 @@ public interface Performance {
      * @throws ExecutionException   If an exception occurred.
      * @throws InterruptedException If an exception occurred.
      */
-    public void shutdown(long endTime) throws ExecutionException, InterruptedException;
+    void shutdown(long endTime) throws ExecutionException, InterruptedException;
 
     /**
      * Record the data write/read time of data.
@@ -36,6 +39,6 @@ public interface Performance {
      * @param bytes     number of bytes written or read
      * @param records   number of records written or read
      **/
-    public void recordTime(long startTime, long endTime, int bytes, int records);
+    void recordTime(long startTime, long endTime, int bytes, int records);
 
 }

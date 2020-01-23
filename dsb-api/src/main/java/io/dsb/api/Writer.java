@@ -34,9 +34,8 @@ public abstract class Writer extends Worker implements Callable<Void> {
 
     /**
      * Asynchronously Writes the data .
-     *
      * @param data data to write
-     * @return CompletableFuture completable future. null if the write completed
+     * @return CompletableFuture completable future. null if the write completed synchronously .
      * @throws IOException If an exception occurred
      */
     public abstract CompletableFuture writeAsync(byte[] data) throws IOException;
@@ -53,14 +52,6 @@ public abstract class Writer extends Worker implements Callable<Void> {
      */
     public abstract void close() throws IOException;
 
-    private byte[] createPayload(int size) {
-        Random random = new Random();
-        byte[] bytes = new byte[size];
-        for (int i = 0; i < size; ++i) {
-            bytes[i] = (byte) (random.nextInt(26) + 65);
-        }
-        return bytes;
-    }
 
     /**
      * Writes the data and benchmark.
@@ -85,6 +76,18 @@ public abstract class Writer extends Worker implements Callable<Void> {
         }
         return time;
     }
+
+
+    private byte[] createPayload(int size) {
+        Random random = new Random();
+        byte[] bytes = new byte[size];
+        for (int i = 0; i < size; ++i) {
+            bytes[i] = (byte) (random.nextInt(26) + 65);
+        }
+        return bytes;
+    }
+
+
 
     @Override
     public Void call() throws InterruptedException, ExecutionException, IOException {

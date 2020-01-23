@@ -40,6 +40,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
      */
     public abstract void close() throws IOException;
 
+
     @Override
     public Void call() throws InterruptedException, ExecutionException, IOException {
         try {
