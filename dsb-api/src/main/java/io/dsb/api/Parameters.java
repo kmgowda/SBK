@@ -54,25 +54,25 @@ final public class Parameters {
         commandline = null;
         this.timeout = TIMEOUT;
         this.startTime = startTime;
+        this.fork = true;
 
-        options.addOption("class", true, "Benchmark class (refer to drivers folder)");
+        options.addOption("class", true, "Benchmark class (refer to driver-* folder)");
         options.addOption("writers", true, "Number of writers");
         options.addOption("readers", true, "Number of readers");
         options.addOption("records", true,
-                "Number of records/events if 'time' not specified;\n" +
-                        "otherwise, Maximum records per second by producer(s) " +
-                        "and/or Number of records per consumer");
+                "Number of records(events) if 'time' not specified;\n" +
+                        "otherwise, Maximum records per second by writer(s) " +
+                        "and/or Number of records per reader");
         options.addOption("flush", true,
-                "Each producer calls flush after writing <arg> number of of events/records; " +
-                        "Not applicable, if both producers and consumers are specified");
-        options.addOption("time", true, "Number of seconds the code runs");
+                "Each Writer calls flush after writing <arg> number of of events(records); " +
+                        "Not applicable, if both writers and readers are specified");
+        options.addOption("time", true, "Number of seconds the DSB runs (24hrs by default)");
         options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes 'events'\n" +
                         "if -1, get the maximum throughput");
         options.addOption("csv", true, "CSV file to record write/read latencies");
-        options.addOption("fork", true, "Use Fork join Pool");
         options.addOption("help", false, "Help message");
     }
 
@@ -127,7 +127,6 @@ final public class Parameters {
 
         records = Integer.parseInt(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
-        fork = Boolean.parseBoolean(commandline.getOptionValue("fork", "true"));
         csvFile = commandline.getOptionValue("csv", null);
         int flushRecords = Integer.parseInt(commandline.getOptionValue("flush", "0"));
         if (flushRecords > 0) {
