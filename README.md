@@ -178,18 +178,19 @@ User can use the options "-writecsv  <file name>" to record the latencies of wri
 in case of End to End latency mode, if the user can supply only -readcsv to get the end to end latency in to the csv file.
     
 ## Add your driver to DSB kit
-1. Create the gradle subproject prefarble with the name driver-<your driver/storage device name> ; Example: driver-pulsar
+1. Create the gradle subproject prefarble with the name driver-<your driver/storage device name>.
+        See the Example: [[Pulsar driver](https://github.com/kmgowda/dsb/tree/master/driver-pravega)]   
 2. create the package io.dsb.< your driver name>
-3. In your driver package you have to implement the Interface:
-     you have to implement the methods:
-     
+    See the Example: [[Pulsar driver package](https://github.com/kmgowda/dsb/tree/master/driver-pulsar/src/main/java/io/dsb/Pulsar)]   
+    
+3. In your driver package you have to implement the Interface: [[Benchmark](https://github.com/kmgowda/dsb/blob/master/dsb-api/src/main/java/io/dsb/api/Benchmark.java)]
+   See the Example:  [[Pulsar class](https://github.com/kmgowda/dsb/blob/master/driver-pulsar/src/main/java/io/dsb/Pulsar/Pulsar.java)]
+    
+
+4. Extend the class Writer: [[Writer](https://github.com/kmgowda/dsb/blob/master/dsb-api/src/main/java/io/dsb/api/Writer.java)]
 
 
-
-4. Extend the class Writer: 
-
-
-5. Extend the class Reader:
+5. Extend the class Reader: [[Reader](https://github.com/kmgowda/dsb/blob/master/dsb-api/src/main/java/io/dsb/api/Reader.java)]
     
 
 6. Thats all ; Build the DSB with your driver with the command:
