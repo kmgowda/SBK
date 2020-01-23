@@ -10,13 +10,37 @@
 package io.dsb.api;
 
 /**
- * Interface for recoding results.
+ * Interface for recoding/printing results.
  */
 public interface ResultLogger {
 
-    public void print(String action, long records, double recsPerSec, double mbPerSec, double avglatency, double maxlatency);
+    /**
+     * Print the performance results.
+     * @param action  Name of the action/operation.
+     * @param records data to write.
+     * @param recsPerSec  records per second.
+     * @param mbPerSec Throughput value in terms of MB (Mega Bytes) per Second.
+     * @param avgLatency Average Latency.
+     * @param maxLatency Maximum Latency.
+     */
+    void print(String action, long records, double recsPerSec, double mbPerSec, double avgLatency, double maxLatency);
 
-    public void printLatencies(String action, int one, int two, int three, int four, int five, int six);
+    /**
+     * Print the Latency values.
+     * @param action  Name of the action/operation.
+     * @param one 50th Percentile.
+     * @param two  75th Percentile.
+     * @param three 95th Percentile.
+     * @param four 99th Percentile
+     * @param five 99.9th Percentile
+     * @param six  99.99th Percentile
+     */
+    void printLatencies(String action, int one, int two, int three, int four, int five, int six);
 
-    public void printDiscardedLatencies(String action, int discard);
+    /**
+     * Print the number of discarded latency values .
+     * @param action  Name of the action/operation.
+     * @param discard number of discarded latencies.
+     */
+    void printDiscardedLatencies(String action, int discard);
 }

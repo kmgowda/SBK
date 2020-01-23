@@ -45,6 +45,18 @@ final public class Dsb implements Performance {
     @GuardedBy("this")
     private Future<Void> ret;
 
+    public Dsb(String action, int reportingInterval, int messageSize,
+               String csvFile, ResultLogger logger, ExecutorService executor) {
+        this.action = action;
+        this.messageSize = messageSize;
+        this.windowInterval = reportingInterval;
+        this.csvFile = csvFile;
+        this.logger = logger;
+        this.executor = executor;
+        this.queue = new ConcurrentLinkedQueue<>();
+        this.ret = null;
+    }
+
     /**
      * Private class for start and end time.
      */
@@ -68,18 +80,6 @@ final public class Dsb implements Performance {
         private boolean isEnd() {
             return this.records == 0 && this.startTime == -1;
         }
-    }
-
-    public Dsb(String action, int reportingInterval, int messageSize,
-               String csvFile, ResultLogger logger, ExecutorService executor) {
-        this.action = action;
-        this.messageSize = messageSize;
-        this.windowInterval = reportingInterval;
-        this.csvFile = csvFile;
-        this.logger = logger;
-        this.executor = executor;
-        this.queue = new ConcurrentLinkedQueue<>();
-        this.ret = null;
     }
 
     /**

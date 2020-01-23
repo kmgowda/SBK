@@ -76,18 +76,38 @@ final public class Parameters {
         options.addOption("help", false, "Help message");
     }
 
-    public Options addOption(String name, boolean hasarg, String description) {
-        return options.addOption(name, hasarg, description);
+    /**
+     * Add the driver specific command line arguments.
+     * @param name Name of the parameter to add.
+     * @param hasArg flag signalling if an argument is required after this option.
+     * @param description Self-documenting description.
+     * @return Options return the added options
+     */
+    public Options addOption(String name, boolean hasArg, String description) {
+        return options.addOption(name, hasArg, description);
     }
 
+    /**
+     * Add the driver specific command line arguments.
+     * @param name Name of the parameter to add.
+     * @param description Self-documenting description.
+     */
     public Options addOption(String name, String description) {
         return options.addOption(name, description);
     }
 
+    /**
+     * Print the -help output.
+     */
     public void printHelp() {
         formatter.printHelp(benchmarkName, options);
     }
 
+    /**
+     * Returns whether the named Option is a member of this Parameters.
+     * @param name name of the parameter option
+     * @return  true if the named Option is a member of this Options
+     */
     public boolean hasOption(String name) {
         if (commandline != null) {
             return commandline.hasOption(name);
@@ -96,6 +116,11 @@ final public class Parameters {
         }
     }
 
+    /**
+     * Retrieve the Option matching the parameter name specified.
+     * @param name Name of the parameter.
+     * @return  parameter value
+     */
     public String getOptionValue(String name) {
         if (commandline != null) {
             return commandline.getOptionValue(name);
@@ -104,6 +129,12 @@ final public class Parameters {
         }
     }
 
+    /**
+     * Retrieve the Option matching the parameter name specified.
+     * @param name Name of the parameter.
+     * @param defaultValue default value if the parameter not found
+     * @return   parameter value
+     */
     public String getOptionValue(String name, String defaultValue) {
         if (commandline != null) {
             return commandline.getOptionValue(name, defaultValue);
@@ -112,6 +143,11 @@ final public class Parameters {
         }
     }
 
+    /**
+     * Parse the command line arguments.
+     * @param args list of command line arguments.
+     * @throws ParseException If an exception occurred.
+     */
     public void parseArgs(String[] args) throws ParseException {
         commandline = parser.parse(options, args);
         if (commandline.hasOption("help")) {

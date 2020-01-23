@@ -10,6 +10,16 @@
 
 package io.dsb.api;
 
+/**
+ * Interface for recording benchmarking data.
+ */
 public interface QuadConsumer {
+    /**
+     * accept the benchmarking data.
+     * @param startTime Start time
+     * @param endTime End Time.
+     * @param dataSize  size of the data in bytes.
+     * @param records records number of records/events/messages.
+     */
     void accept(long startTime, long endTime, int dataSize, int records);
 }

@@ -20,9 +20,9 @@ public class Sl4jResultLogger implements ResultLogger {
         log = LoggerFactory.getLogger("DSB");
     }
 
-    public void print(String action, long records, double recsPerSec, double mbPerSec, double avglatency, double maxlatency) {
+    public void print(String action, long records, double recsPerSec, double mbPerSec, double avgLatency, double maxLatency) {
         log.info(String.format("%s %10d records, %9.1f records/sec, %7.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency",
-                action, records, recsPerSec, mbPerSec, avglatency, maxlatency));
+                action, records, recsPerSec, mbPerSec, avgLatency, maxLatency));
     }
 
     public void printLatencies(String action, int one, int two, int three, int four, int five, int six) {
