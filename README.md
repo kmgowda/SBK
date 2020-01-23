@@ -177,6 +177,65 @@ The -throughput -1 specifies the writes tries to write the events at the maximum
 User can use the options "-writecsv  <file name>" to record the latencies of writers and "-readcsv <file name>" for readers.
 in case of End to End latency mode, if the user can supply only -readcsv to get the end to end latency in to the csv file.
     
-### Kafka Benchmarking
-User can set the option "-kafka true" for Kafka Benchmarking. User should create the topics manually before running this for kafka benchmarking. Unlike Pravega benchmarking, this tool does not create the topic automatically. This tools treats stream name as a topic name.
+## Add your driver to DSB kit
+1. Create the gradle subproject prefarble with the name driver-<your driver/storage device name> ; Example: driver-pulsar
+2. create the package io.dsb.< your driver name>
+3. In your driver package you have to implement the Interface:
+     you have to implement the methods:
+     
+
+
+
+4. Extend the class Writer: 
+
+
+5. Extend the class Reader:
     
+
+6. Thats all ; Build the DSB with your driver with the command:
+```
+./gradlew build
+```
+
+untar the DSB tool to local folder
+
+```
+tar -xvf ./build/distributions/DSB.tar -C ./run
+```
+
+7.  to invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
+
+Example: For pulsar driver
+```
+<DSB directory>/run/DSB/bin/DSB  -class Pulsar -help
+usage: DSB Pulsar
+ -ackQuorum <arg>       ackQuorum
+ -admin <arg>           Admin URI
+ -broker <arg>          Broker URI
+ -class <arg>           Benchmark class (refer to driver-* folder)
+ -cluster <arg>         Cluster name
+ -csv <arg>             CSV file to record write/read latencies
+ -deduplication <arg>   Enable or Disable Deduplication; by deafult
+                        disabled
+ -ensembleSize <arg>    ensembleSize
+ -flush <arg>           Each Writer calls flush after writing <arg> number
+                        of of events(records); Not applicable, if both
+                        writers and readers are specified
+ -help                  Help message
+ -partitions <arg>      Number of partitions of the topic
+ -readers <arg>         Number of readers
+ -records <arg>         Number of records(events) if 'time' not specified;
+                        otherwise, Maximum records per second by writer(s)
+                        and/or Number of records per reader
+ -size <arg>            Size of each message (event or record)
+ -throughput <arg>      if > 0 , throughput in MB/s
+                        if 0 , writes 'events'
+                        if -1, get the maximum throughput
+ -time <arg>            Number of seconds the DSB runs (24hrs by default)
+ -topic <arg>           Topic name
+ -writeQuorum <arg>     writeQuorum
+ -writers <arg>         Number of writers
+```
+
+
+
