@@ -66,7 +66,7 @@ final public class Parameters {
         options.addOption("flush", true,
                 "Each Writer calls flush after writing <arg> number of of events(records); " +
                         "Not applicable, if both writers and readers are specified");
-        options.addOption("time", true, "Number of seconds the DSB runs (24hrs by default)");
+        options.addOption("time", true, "Number of seconds this SBK runs (24hrs by default)");
         options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +

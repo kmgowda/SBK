@@ -35,8 +35,8 @@ plugins.withId('application') {
 
     startScripts {
         doLast {
-            unixScript.text = unixScript.text.replace('DSB_APP_HOME', '\$APP_HOME')
-            windowsScript.text = windowsScript.text.replace('DSB_APP_HOME', '%~dp0..')
+            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
+            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             // Replace the classpath on windows with the pathing JAR and the main archive
             windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
                     "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))

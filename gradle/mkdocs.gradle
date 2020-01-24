@@ -24,7 +24,7 @@ remotes {
     webServer {
         host = hostname
         user = username
-        identity = file("$rootDir/dsb.pem")
+        identity = file("$rootDir/sbk.pem")
     }
 }
 
@@ -33,7 +33,7 @@ task deploy {
     doLast {
         ssh.run {
             session(remotes.webServer) {
-                put from: "$rootDir/documentation/generated/$DSBVersion", into: '/var/www/github.com/kmgowda/dsb/docs'
+                put from: "$rootDir/documentation/generated/$SBKVersion", into: '/var/www/github.com/kmgowda/sbk/docs'
             }
         }
     }
