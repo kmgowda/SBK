@@ -29,7 +29,7 @@ we welcome if you are interested in contributing this open source by adding a dr
 Checkout the source code:
 
 ```
-git clone https://github.com/kmgowda/dsb.git
+git clone https://github.com/kmgowda/sbk.git
 cd dsb
 ```
 
@@ -185,18 +185,18 @@ in case of End to End latency mode, if the user can supply only -readcsv to get 
     
 ## Add your driver to SBK
 1. Create the gradle subproject prefarble with the name driver-<your driver/storage device name>.
-        See the Example: [[Pulsar driver](https://github.com/kmgowda/dsb/tree/master/driver-pravega)]   
-2. create the package io.dsb.< your driver name>
-    See the Example: [[Pulsar driver package](https://github.com/kmgowda/dsb/tree/master/driver-pulsar/src/main/java/io/dsb/Pulsar)]   
+        See the Example: [[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pravega)]   
+2. create the package io.sbk.< your driver name>
+    See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
     
-3. In your driver package you have to implement the Interface: [[Benchmark](https://github.com/kmgowda/dsb/blob/master/dsb-api/src/main/java/io/dsb/api/Benchmark.java)]
-   See the Example:  [[Pulsar class](https://github.com/kmgowda/dsb/blob/master/driver-pulsar/src/main/java/io/dsb/Pulsar/Pulsar.java)]
+3. In your driver package you have to implement the Interface: [[Benchmark](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java)]
+   See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
     
 
-4. Extend the class Writer: [[Writer](https://github.com/kmgowda/dsb/blob/master/dsb-api/src/main/java/io/dsb/api/Writer.java)]
+4. Extend the class Writer: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
 
 
-5. Extend the class Reader: [[Reader](https://github.com/kmgowda/dsb/blob/master/dsb-api/src/main/java/io/dsb/api/Reader.java)]
+5. Extend the class Reader: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
     
 
 6. Thats all ; Build the SBK with your driver with the command:
