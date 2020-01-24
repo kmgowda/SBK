@@ -9,8 +9,8 @@
  *
  */
 
-rootProject.name = 'DSB'
-include 'dsb-api'
+rootProject.name = 'sbk'
+include 'sbk-api'
 include 'driver-pulsar'
 include 'driver-kafka'
 include 'driver-pravega'

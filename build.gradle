@@ -47,7 +47,7 @@ allprojects {
 	apply from: "$rootDir/gradle/maven.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
-	mainClassName = "io.dsb.main.DsbMain"
+	mainClassName = "io.sbk.main.SbkMain"
 	startScripts {
 		doLast {
 			unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')
@@ -57,7 +57,7 @@ allprojects {
 }
 
 dependencies {
-	compile project(":dsb-api")
+	compile project(":sbk-api")
 	compile project(":driver-pulsar")
 	compile project(":driver-kafka")
 	compile project(":driver-pravega")
