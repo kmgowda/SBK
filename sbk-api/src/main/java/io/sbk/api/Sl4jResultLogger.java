@@ -17,7 +17,7 @@ public class Sl4jResultLogger implements ResultLogger {
     final private Logger log;
 
     public Sl4jResultLogger() {
-        log = LoggerFactory.getLogger("DSB");
+        log = LoggerFactory.getLogger("SBK");
     }
 
     public void print(String action, long records, double recsPerSec, double mbPerSec, double avgLatency, double maxLatency) {

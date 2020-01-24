@@ -39,15 +39,15 @@ plugins.withId('maven') {
                     }
                 }
 
-                pom.artifactId = "dsb" + project.path.replace(':', '-')
+                pom.artifactId = "sbk" + project.path.replace(':', '-')
                 pom.project {
-                    name "dsb"
-                    url "https://github.com/kmgowda/dsb"
-                    description "Data Storage Benchmark"
+                    name "sbk"
+                    url "https://github.com/kmgowda/sbk"
+                    description "Storage Benchmark Kit"
                     scm {
-                        url 'https://github.com/kmgowda/dsb/tree/master'
-                        connection 'scm:git:git://github.com/kmgowda/dsb.git'
-                        developerConnection 'scm:git:https://github.com/kmgowda/dsb.git'
+                        url 'https://github.com/kmgowda/sbk/tree/master'
+                        connection 'scm:git:git://github.com/kmgowda/sbk.git'
+                        developerConnection 'scm:git:https://github.com/kmgowda/sbk.git'
                     }
                     licenses {
                         license {
@@ -76,7 +76,7 @@ plugins.withId('maven') {
     install {
         repositories {
             mavenInstaller {
-                pom.artifactId = "dsb" + project.path.replace(':', '-')
+                pom.artifactId = "sbk" + project.path.replace(':', '-')
             }
         }
     }

@@ -28,7 +28,7 @@ plugins.withId('java') {
         ])
     }
 
-    archivesBaseName = "dsb" + project.path.replace(':', '-')
+    archivesBaseName = "sbk" + project.path.replace(':', '-')
 
     task sourceJar(type: Jar) {
         classifier = 'sources'
