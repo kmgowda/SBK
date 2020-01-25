@@ -73,7 +73,7 @@ public class SbkMain {
         }
 
         try {
-            obj = (Benchmark) Class.forName("io.sbk." + className+"."+className).newInstance();
+            obj = (Benchmark) Class.forName("io.sbk." + className + "." + className).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(0);
@@ -84,27 +84,26 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new Parameters(BENCHMARKNAME +" "+ className, startTime);
+        params = new Parameters(BENCHMARKNAME +" -class "+ className, startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
         }  catch (ParseException ex) {
             ex.printStackTrace();
-            System.exit(0);
-        }
-        try {
-            benchmark.parseArgs(params);
-        } catch (IllegalArgumentException ex) {
-            if (!params.hasOption("help")) {
-                ex.printStackTrace();
-            }
-            System.exit(0);
-        }
-
-        if (params.hasOption("help")) {
             params.printHelp();
             System.exit(0);
         }
+        if (params.hasOption("help")) {
+            System.exit(0);
+        }
+
+        try {
+            benchmark.parseArgs(params);
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+            System.exit(0);
+        }
+
         try {
             benchmark.openStorage(params);
         } catch (IOException ex) {

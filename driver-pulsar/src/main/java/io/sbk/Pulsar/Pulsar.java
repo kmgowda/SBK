@@ -44,16 +44,16 @@ public class Pulsar implements Benchmark {
 
     @Override
     public void addArgs(final Parameters params) {
-        params.addOption("cluster", true, "Cluster name");
+        params.addOption("cluster", true, "Cluster name (optional parameter)");
         params.addOption("topic", true, "Topic name");
         params.addOption("broker", true, "Broker URI");
-        params.addOption("admin", true, "Admin URI");
-        params.addOption("partitions", true, "Number of partitions of the topic");
+        params.addOption("admin", true, "Admin URI, required to create the partitioned topic");
+        params.addOption("partitions", true, "Number of partitions of the topic (default: 1)");
 
-        params.addOption("ensembleSize", true, "ensembleSize");
-        params.addOption("writeQuorum", true, "writeQuorum");
-        params.addOption("ackQuorum", true, "ackQuorum");
-        params.addOption("deduplication", true, "Enable or Disable Deduplication; by deafult disabled");
+        params.addOption("ensembleSize", true, "ensembleSize (default: 1)");
+        params.addOption("writeQuorum", true, "writeQuorum (default: 1)");
+        params.addOption("ackQuorum", true, "ackQuorum (default: 1) ");
+        params.addOption("deduplication", true, "Enable or Disable Deduplication; by default disabled");
     }
 
     @Override
