@@ -86,10 +86,6 @@ final public class SbkPerformance implements Performance {
      * Private class for start and end time.
      */
     final private class QueueProcessor implements Callable {
-        final private static int NS_PER_MICRO = 1000;
-        final private static int MICROS_PER_MS = 1000;
-        final private static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
-        final private static int PARK_NS = NS_PER_MS;
         final private long startTime;
 
         private QueueProcessor(long startTime) {
@@ -97,14 +93,11 @@ final public class SbkPerformance implements Performance {
         }
 
         public Void call() throws IOException {
-            final TimeWindow window = new TimeWindow(action, startTime);
+            final TimeWindow window = new TimeWindow(action, startTime, windowInterval);
             final LatencyWriter latencyRecorder = csvFile == null ? new LatencyWriter(action, messageSize, startTime) :
                     new CSVLatencyWriter(action, messageSize, startTime, csvFile);
-            final int minWaitTimeMS = windowInterval / 10;
-            final long totalIdleCount = (NS_PER_MS / PARK_NS) * minWaitTimeMS;
             boolean doWork = true;
             long time = startTime;
-            long idleCount = 0;
             TimeStamp t;
 
             while (doWork) {
@@ -123,16 +116,7 @@ final public class SbkPerformance implements Performance {
                         window.reset(time);
                     }
                 } else {
-                    LockSupport.parkNanos(PARK_NS);
-                    idleCount++;
-                    if (idleCount > totalIdleCount) {
-                        time = System.currentTimeMillis();
-                        idleCount = 0;
-                        if (window.windowTimeMS(time) > windowInterval) {
-                            window.print(time, logger);
-                            window.reset(time);
-                        }
-                    }
+                        window.busyWaitPrint(logger);
                 }
             }
             latencyRecorder.printTotal(time, logger);
@@ -141,11 +125,60 @@ final public class SbkPerformance implements Performance {
     }
 
     /**
+     * Private class for counter implementation to reduce System.currentTimeMillis() invocation.
+     */
+    @NotThreadSafe
+    final static private class ElasticCounter {
+        final private static int NS_PER_MICRO = 1000;
+        final private static int MICROS_PER_MS = 1000;
+        final private static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
+        final private static int PARK_NS = NS_PER_MS;
+        final private int minWindowInterval;
+        final private int minWaitTimeMS;
+        final private long minIdleCount;
+        private long elasticCount;
+        private long idleCount;
+        private long totalCount;
+
+        private ElasticCounter(int interval) {
+            minWindowInterval = interval;
+            minWaitTimeMS = interval / 50;
+            minIdleCount = (NS_PER_MS / PARK_NS) * minWaitTimeMS;
+            elasticCount = minIdleCount;
+            idleCount = 0;
+            totalCount = 0;
+        }
+
+        private boolean canPrint() {
+            LockSupport.parkNanos(PARK_NS);
+            idleCount++;
+            totalCount++;
+            return idleCount > elasticCount;
+        }
+
+        private void reset() {
+            idleCount = 0;
+        }
+
+        private void updateElastic(long diffTime) {
+            elasticCount = Math.max((NS_PER_MS / PARK_NS) * (minWindowInterval - diffTime), minWaitTimeMS);
+        }
+
+        private void setElastic(long diffTime) {
+            elasticCount =  (totalCount * minWindowInterval) / diffTime;
+            totalCount = 0;
+        }
+    }
+
+
+    /**
      * Private class for Performance statistics within a given time window.
      */
     @NotThreadSafe
     final static private class TimeWindow {
         final private String action;
+        final private ElasticCounter counter;
+        final private int windowInterval;
         private long startTime;
         private long lastTime;
         private long count;
@@ -153,8 +186,10 @@ final public class SbkPerformance implements Performance {
         private int maxLatency;
         private long totalLatency;
 
-        private TimeWindow(String action, long start) {
+        private TimeWindow(String action, long start, int interval) {
             this.action = action;
+            this.counter = new ElasticCounter(interval);
+            this.windowInterval = interval;
             reset(start);
         }
 
@@ -165,6 +200,7 @@ final public class SbkPerformance implements Performance {
             this.bytes = 0;
             this.maxLatency = 0;
             this.totalLatency = 0;
+            this.counter.reset();
         }
 
         /**
@@ -201,6 +237,21 @@ final public class SbkPerformance implements Performance {
         private long windowTimeMS(long time) {
             return time - startTime;
         }
+
+        private void busyWaitPrint(ResultLogger logger) {
+            if (counter.canPrint()) {
+                final long time = System.currentTimeMillis();
+                final long diffTime = windowTimeMS(time);
+                if (diffTime > windowInterval) {
+                    print(time, logger);
+                    reset(time);
+                    counter.setElastic(diffTime);
+                } else {
+                    counter.updateElastic(diffTime);
+                }
+            }
+        }
+
     }
 
     @NotThreadSafe
