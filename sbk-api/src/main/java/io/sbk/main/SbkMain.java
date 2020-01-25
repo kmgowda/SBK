@@ -47,7 +47,7 @@ public class SbkMain {
     final static int REPORTINGINTERVAL = 5000;
 
     public static void main(final String[] args) {
-        final long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         final Options options = new Options();
         CommandLine commandline = null;
         String className = null;
@@ -197,7 +197,7 @@ public class SbkMain {
                     }
                 }
             });
-
+            startTime = System.currentTimeMillis();
             if (writeStats != null && !params.writeAndRead) {
                 writeStats.start(startTime);
             }
