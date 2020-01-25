@@ -187,7 +187,7 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
-2. create the package io.sbk.< your driver name>
+2. Create the package io.sbk.< your driver name>
 
     * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
     
@@ -195,7 +195,7 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
 
     * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
         
-    * you have to implement the following methods:
+    * you have to implement the following methods of Benchmark Interface:
         
       a). Add the Addtional parameters for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
         
@@ -212,7 +212,7 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
 4. Extend the class Writer: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java
     
-    * you have to implement the following methods:
+    * you have to implement the following methods of Writer class:
         
       a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L41
         
@@ -226,7 +226,7 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
 
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java
 
-    * you have to implement the following methods:
+    * you have to implement the following methods of Reader class:
         
       a). Read Data (synchronous reades): https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L35
         
