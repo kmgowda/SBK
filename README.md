@@ -184,26 +184,26 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
     
 ## Add your driver to SBK
 1. Create the gradle sub project preferable with the name driver-<your driver/storage device name>.
-        See the Example: [[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
+       ..* See the Example: [[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
 2. create the package io.sbk.< your driver name>
-        See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
+        ..* See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
     
 3. In your driver package you have to implement the Interface: [[Benchmark](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java)]
-        See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
-        you have to implement the following methods:
+        ..*See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+        ..*you have to implement the following methods:
         
-        a) Add the Addtional parameters for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
+        ...a). Add the Addtional parameters for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
         
-        b) Parse your driver specific paramters: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L30
+        ...b). Parse your driver specific paramters: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L30
         
-        c) Open the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L37
+        ...c). Open the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L37
         
-        d) Close the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L44
+        ...d). Close the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L44
         
-        e) Create the writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
+        ...e). Create the writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
         
-        f) Create the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
+        ...f). Create the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
     
 4. Extend the class Writer: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
 
