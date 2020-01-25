@@ -215,21 +215,22 @@ tar -xvf ./build/distributions/sbk.tar -C ./run
 Example: For pulsar driver
 ```
 <SBK directory>/run/sbk/bin/sbk  -class Pulsar -help
-usage: sbk Pulsar
- -ackQuorum <arg>       ackQuorum
- -admin <arg>           Admin URI
+ usage: sbk -class Pulsar
+ -ackQuorum <arg>       ackQuorum (default: 1)
+ -admin <arg>           Admin URI, required to create the partitioned
+                        topic
  -broker <arg>          Broker URI
  -class <arg>           Benchmark class (refer to driver-* folder)
- -cluster <arg>         Cluster name
+ -cluster <arg>         Cluster name (optional parameter)
  -csv <arg>             CSV file to record write/read latencies
- -deduplication <arg>   Enable or Disable Deduplication; by deafult
+ -deduplication <arg>   Enable or Disable Deduplication; by default
                         disabled
- -ensembleSize <arg>    ensembleSize
+ -ensembleSize <arg>    ensembleSize (default: 1)
  -flush <arg>           Each Writer calls flush after writing <arg> number
                         of of events(records); Not applicable, if both
                         writers and readers are specified
  -help                  Help message
- -partitions <arg>      Number of partitions of the topic
+ -partitions <arg>      Number of partitions of the topic (default: 1)
  -readers <arg>         Number of readers
  -records <arg>         Number of records(events) if 'time' not specified;
                         otherwise, Maximum records per second by writer(s)
@@ -238,11 +239,8 @@ usage: sbk Pulsar
  -throughput <arg>      if > 0 , throughput in MB/s
                         if 0 , writes 'events'
                         if -1, get the maximum throughput
- -time <arg>            Number of seconds the SBK runs (24hrs by default)
+ -time <arg>            Number of seconds this SBK runs (24hrs by default)
  -topic <arg>           Topic name
- -writeQuorum <arg>     writeQuorum
+ -writeQuorum <arg>     writeQuorum (default: 1)
  -writers <arg>         Number of writers
 ```
-
-
-
