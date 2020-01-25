@@ -180,26 +180,24 @@ The -throughput -1 specifies the writes tries to write the events at the maximum
 ```
 
 ### Recording the latencies to CSV files
-User can use the options "-writecsv  <file name>" to record the latencies of writers and "-readcsv <file name>" for readers.
-in case of End to End latency mode, if the user can supply only -readcsv to get the end to end latency in to the csv file.
+User can use the option "-csv <file name>" to record the latencies of writers/readers.
     
 ## Add your driver to SBK
-1. Create the gradle subproject prefarble with the name driver-<your driver/storage device name>.
+1. Create the gradle sub project preferable with the name driver-<your driver/storage device name>.
         See the Example: [[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pravega)]   
+
 2. create the package io.sbk.< your driver name>
-    See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
+        See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
     
 3. In your driver package you have to implement the Interface: [[Benchmark](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java)]
-   See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+        See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
     
-
 4. Extend the class Writer: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
 
-
 5. Extend the class Reader: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
-    
 
-6. Thats all ; Build the SBK with your driver with the command:
+6. That's all ; Now, Build the SBK with your driver with the command:
+
 ```
 ./gradlew build
 ```
@@ -210,7 +208,7 @@ untar the SBK  to local folder
 tar -xvf ./build/distributions/sbk.tar -C ./run
 ```
 
-7.  to invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
+7.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
 
 Example: For pulsar driver
 ```
