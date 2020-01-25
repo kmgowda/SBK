@@ -185,7 +185,7 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
 ## Add your driver to SBK
 1. Create the gradle sub project preferable with the name driver-<your driver/storage device name>.
 
-       ..* See the Example: [[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
+       .* See the Example: [[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
 2. create the package io.sbk.< your driver name>
 
