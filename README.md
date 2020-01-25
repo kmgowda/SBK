@@ -183,7 +183,7 @@ The -throughput -1 specifies the writes tries to write the events at the maximum
 User can use the option "-csv <file name>" to record the latencies of writers/readers.
     
 ## Add your driver to SBK
-1. Create the gradle sub project preferable with the name driver-<your driver/storage device name>.
+1. Create the gradle sub project preferable with the name driver-<your driver(storage device) name>.
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
 2. create the package io.sbk.< your driver name>
@@ -207,10 +207,24 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
       f). Create the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
     
 4. Extend the class Writer: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
-
+    * you have to implement the following methods:
+        
+      a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L41
+        
+      b). flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L47
+        
+      c). Close the Writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L53
+        
+      d). In case , if you want to have your own recordWrite implemenation to write data and record the start and end time, then you can override: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L64
+        
 5. Extend the class Reader: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
-
-6. That's all ; Now, Build the SBK with your driver with the command:
+    * you have to implement the following methods:
+        
+      a). Read Data (synchronous reades): https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L35
+        
+      b). Close the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L41 
+          
+6. That's all ; Now, Build the SBK included your driver with the command:
 
 ```
 ./gradlew build
