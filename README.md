@@ -42,7 +42,7 @@ Build the SBK:
 untar the SBK  to local folder
 
 ```
-tar -xvf ./build/distributions/sbk.tar -C ./run
+tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
 Running SBK locally:
@@ -241,7 +241,7 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
 untar the SBK  to local folder
 
 ```
-tar -xvf ./build/distributions/sbk.tar -C ./run
+tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
 7.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
