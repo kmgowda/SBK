@@ -24,14 +24,16 @@ import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 /**
  * Class for Pulsar reader/consumer.
  */
-public class PulsarReader extends Reader {
+public class PulsarReader implements Reader {
     final private Consumer<byte[]> consumer;
+    final private Parameters params;
 
     public PulsarReader(int readerId, Parameters params, String topicName,
                         String subscriptionName, PulsarClient client) throws  IOException {
-        super(readerId, params);
+        this.params = params;
         final  SubscriptionInitialPosition position = params.writeAndRead ? SubscriptionInitialPosition.Latest :
                                                     SubscriptionInitialPosition.Earliest;
+
         try {
             this.consumer = client.newConsumer()
                     .topic(topicName)

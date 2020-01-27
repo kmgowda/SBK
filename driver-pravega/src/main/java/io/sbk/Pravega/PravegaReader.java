@@ -21,17 +21,18 @@ import io.pravega.client.EventStreamClientFactory;
 
 import java.io.IOException;
 
+
 /**
  * Class for Pravega reader/consumer.
  */
-public class PravegaReader extends Reader {
+public class PravegaReader implements Reader {
+    private final Parameters params;
     private final EventStreamReader<byte[]> reader;
 
-    public PravegaReader(int readerId, Parameters params, String streamName,
+    public PravegaReader(int id, Parameters params, String streamName,
                          String readergrp, EventStreamClientFactory factory) throws IOException {
-        super(readerId, params);
-
-        final String readerSt = Integer.toString(readerId);
+        final String readerSt = Integer.toString(id);
+        this.params = params;
         reader = factory.createReader(readerSt, readergrp,
                         new ByteArraySerializer(), ReaderConfig.builder().build());
     }

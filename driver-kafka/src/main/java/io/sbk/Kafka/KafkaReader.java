@@ -23,14 +23,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 /**
  * Class for Kafka reader/consumer.
  */
-public class KafkaReader extends Reader {
+public class KafkaReader implements Reader {
     final private KafkaConsumer<byte[], byte[]> consumer;
     final private Duration timeoutDuration;
 
-    public KafkaReader(int readerId, Parameters params,
-                       String topicName, Properties consumerProps) throws IOException {
-        super(readerId, params);
-
+    public KafkaReader(int id, Parameters params, String topicName, Properties consumerProps) throws IOException {
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
         this.timeoutDuration = Duration.ofMillis(params.timeout);

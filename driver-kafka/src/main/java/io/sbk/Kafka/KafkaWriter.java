@@ -23,13 +23,11 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 /**
  * Class for Kafka writer/producer.
  */
-public class KafkaWriter extends Writer {
+public class KafkaWriter implements Writer {
     final private KafkaProducer<byte[], byte[]> producer;
     final private String topicName;
 
-    public KafkaWriter(int writerID, Parameters params,
-                             String topicName, Properties producerProps) throws IOException {
-        super(writerID, params);
+    public KafkaWriter(int id, Parameters params, String topicName, Properties producerProps) throws IOException {
         this.topicName = topicName;
         this.producer = new KafkaProducer<>(producerProps);
     }

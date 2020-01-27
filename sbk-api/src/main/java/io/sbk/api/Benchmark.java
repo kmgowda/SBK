@@ -44,7 +44,7 @@ public interface  Benchmark {
     void closeStorage(final Parameters params) throws IOException;
 
     /**
-     * Create the Writer.
+     * Create a Single Writer.
      * @param id Writer id
      * @param params configuration parameters.
      * @return Writer return the Writer , null in case of failure
@@ -52,8 +52,8 @@ public interface  Benchmark {
     Writer createWriter(final int id, final Parameters params);
 
     /**
-     * Create the Reader.
-     * @param id Writer id
+     * Create a Single Reader.
+     * @param id Reader id
      * @param params configuration parameters.
      * @return Reader return the Reader , null in case of failure
      */

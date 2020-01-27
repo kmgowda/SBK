@@ -39,8 +39,6 @@ final public class Parameters {
     public String csvFile;
     public boolean writeAndRead;
     public boolean fork;
-    public QuadConsumer recordWrite;
-    public QuadConsumer recordRead;
 
     final private String benchmarkName;
     final private Options options;
