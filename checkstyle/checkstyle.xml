@@ -8,7 +8,7 @@
 
     <!-- header -->
     <module name="RegexpHeader">
-        <property name="header" value="/\*\*\n *"/>
+        <property name="header" value="/\*\*\n * Copyright \(c\) KMG\. All Rights Reserved\."/>
     </module>
     <module name="SuppressionFilter">
         <property name="file" value="checkstyle/suppressions.xml"/>
