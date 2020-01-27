@@ -188,7 +188,7 @@ The -throughput -1 specifies the writes tries to write the events at the maximum
 ```
 
 ## Recording the latencies to CSV files
-User can use the option "-csv <file name>" to record the latencies of writers/readers.
+User can use the option "-csv [file name]" to record the latencies of writers/readers.
     
 ## Add your driver to SBK
 1. Create the gradle sub project preferable with the name driver-<your driver(storage device) name>.
