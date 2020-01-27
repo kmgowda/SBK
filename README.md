@@ -107,7 +107,7 @@ This mode can be used for both writers and readers.
 By default, the SBK runs in Burst mode.
 
 ```
-For example: The througput mode for pulsar single writer as follows
+For example: The Burst mode for pulsar single writer as follows
 
 <SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 1 -size 1000  -time 60 -throughput -1
 
@@ -132,7 +132,7 @@ This mode is used to find the least latency that can be obtained from the storag
 This mode is used only for write operation.
 
 ```
-For example:
+For example:  The througput mode for pulsar 5 writers as follows
 <SBK directory> ./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 5 -size 1000  -time 120  -throughput 10
 
 The -throughput <positive number>  indicates the Throughput mode.
@@ -158,7 +158,8 @@ This mode is used to find the least latency  that can be obtained from the stora
 This mode is used only for write operation.
 
 ```
-For example:
+For example:  The Rate limiter Mode for pulsar 5 writers as follows
+
 <SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broke
 r tcp://localhost:6650 -topic topic-k-225  -partitions 10  -writers 5 -size 100  -time 60  -records 1000
 
@@ -178,7 +179,8 @@ in this mode user must specify both the number of writers and readers.
 The -throughput option (Throughput mode) or -records (late limiter) can used to limit the writers throughput or records rate.
 
 ```
-For example:
+For example: The End to End latency of between single writer and single reader of pulsar is as follows:
+
 <SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-km-1  -partitions 1  -writers 1 -readers 1 -size 1000 -throughput -1 -time 60 
 
 The user should specify both writers and readers count for write to read or End to End latency mode.
