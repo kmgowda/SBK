@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 
 # Storage Benchmark Kit (SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Version](https://img.shields.io/badge/release-0.5-blue)](https://github.com/kmgowda/dsb/releases)
 
-The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then SBK is the right  for you. The SBK itself a very high-performance benchmark  too. It massively writes the data to storage system. This  supports multi writers and readers. This  also supports End to End latency. The percentile is calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
+The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  too. It massively writes the data to storage system. This  supports multi writers and readers. This  also supports End to End latency. The percentile is calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
 
 Currently SBK supports benchmarking of Apache Kafka, Pulsar and Pravega distributed streaming storages. In future, many more storage storage systems drivers will be plugged in. Refer to :   [[Add your storage driver](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver/storage device for performance benchmarking.
 
@@ -47,8 +47,8 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 Running SBK locally:
 
 ```
-<dir>/SBK$ ./run/SBK/bin/sbk  -help
- usage: sbk
+<dir>/sbk$ ./build/distributions/sbk/bin/sbk  -help
+usage: sbk
  -class <arg>        Benchmark class (refer to driver-* folder)
  -csv <arg>          CSV file to record write/read latencies
  -flush <arg>        Each Writer calls flush after writing <arg> number of
@@ -63,13 +63,13 @@ Running SBK locally:
  -throughput <arg>   if > 0 , throughput in MB/s
                      if 0 , writes 'events'
                      if -1, get the maximum throughput
- -time <arg>         Number of seconds the SBK runs (24hrs by default)
+ -time <arg>         Number of seconds this SBK runs (24hrs by default)
  -writers <arg>      Number of writers
 ```
 
 ## Running Performance benchmarking
 
-SBK outputs the number of records written/read , throughput in terms of MB/s and the average and maximum latency for every 5 seconds time interval as show in below.
+SBK outputs the number of records written/read, throughput in terms of MB/s and the average and maximum latency for every 5 seconds time interval as show in below.
 
 ```
 Writing     152372 records,   30328.8 records/sec,   28.92 MB/sec,    35.4 ms avg latency,  1238.0 ms max latency
@@ -93,93 +93,101 @@ The SBK  can be executed to
 
 The SBK can be executed in the following modes:
 ```
-1. Burst Mode
+1. Burst Mode (Max rate mode)
 2. Throughput Mode
-3. OPS Mode or  Events Rate / Rate limiter Mode
+3. Rate limiter Mode (Recrods Rate or Events Rate Mode)
 4. End to End Latency Mode
 ```
 
-### 1 - Burst Mode
-In this mode, the SBK pushes/pulls the messages to/from the Pravega client as much as possible.
-This mode is used to find the maximum and throughput that can be obtained from the Pravega cluster.
-This mode can be used for both producers and consumers.
+### 1 - Burst Mode / Max Rate Mode
+In this mode, the SBK pushes/pulls the messages to/from the storage client(device/driver) as much as possible.
+This mode is used to find the maximum and throughput that can be obtained from the storage device or storage cluster (server).
+This mode can be used for both writers and readers.
+By default, the SBK runs in Burst mode.
 
 ```
-For example:
-<SBK directory>/run/SBK/bin/SBK  -controller tcp://127.0.0.1:9090  -stream streamname1  -segments 1  -producers 1  -size 100   -throughput -1   -time 60
+For example: The Burst mode for pulsar single writer as follows
 
-The -throughput -1  indicates the burst mode.
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 1 -size 1000  -time 60 -throughput -1
+
+
+The -throughput -1  indicates the burst mode. Note that, you dont supply the parameter -throughput then also its burst mode.
 This test will executed for 60 seconds because option -time 60 is used.
-This test tries to write and read events of size 100 bytes to/from the stream 'streamname1'.
-The option '-controller tcp://127.0.0.1:9090' specifies the pravega controller IP address and port number.
+This test tries to write and read events of size 1000 bytes to/from the topic 'topic-k-223'.
+The option '-broker tcp://localhost:6650' specifies the Pulsar broker IP address and port number for write operations.
+The option '-admin http://localhost:8080' specifies the Pulsar admin IP and port number for topic creation and deletion.
 Note that -producers 1 indicates 1 producer/writers.
 
-in the case you want to write/read the certain number of events use the -events option without -time option as follows
+in the case you want to write/read the certain number of records.events use the -records option without -time option as follows
 
-<SBK directory>/run/SBK/bin/SBK -controller tcp://127.0.0.1:9090  -stream streamname1  -segments 1  -producers 1  -size 100   -throughput -1   -events 1000000
+<SBK directory>/build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 1 -size 1000  -records 100000 -throughput -1
 
--events <number> indicates that total <number> of events to write/read
+-records <number> indicates that total <number> of records to write/read
 ```
 
 ### 2 - Throughput Mode
-In this mode, the SBK  pushes the messages to the Pravega client with specified approximate maximum throughput in terms of Mega Bytes/second (MB/s).
-This mode is used to find the least latency that can be obtained from the Pravega cluster for given throughput.
+In this mode, the SBK  pushes the messages to the storage client(device/driver) with specified approximate maximum throughput in terms of Mega Bytes/second (MB/s).
+This mode is used to find the least latency that can be obtained from the storage device or storage cluster (server) for given throughput.
 This mode is used only for write operation.
 
 ```
-For example:
-<SBK directory>/run/SBK/bin/SBK   -controller tcp://127.0.0.1:9090  -stream streamname5  -segments 5  -producers 5   -size 100   -throughput 10   -time 300
+For example:  The througput mode for pulsar 5 writers as follows
+<SBK directory> ./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 5 -size 1000  -time 120  -throughput 10
 
 The -throughput <positive number>  indicates the Throughput mode.
 
 This test will be executed with approximate max throughput of 10MB/sec.
-This test will executed for 300 seconds (5 minutes) because option -time 60 is used.
-This test tries to write and read events of size 100 bytes to/from the stream 'streamname5' of 5 segments.
-If the stream 'streamname5' is not existing , then it will be created with the 5 segments.
-if the steam is already existing then it will be scaled up/down to 5 segments.
-Note that -producers 5 indicates 5 producers/writers .
+This test will executed for 120 seconds (2 minutes) because option -time 120 is used.
+This test tries to write and read events of size 1000 bytes to/from the topic 'topic-k-223' of 1 partition.
+If the toic 'topic-k-223' is not existing , then it will be created with  1 segment.
+if the steam is already existing then it will be deleted and recreated with 1 segment.
+Note that -writers 5 indicates 5 producers/writers .
 
-in the case you want to write/read the certain number of events use the -events option without -time option as follows
+in the case you want to write/read the certain number of events use the -records option without -time option as follows
 
-<SBK directory>/run/SBK/bin/SBK  -controller tcp://127.0.0.1:9090  -stream streamname5  -segments 5  -producers 1  -size 100   -throughput 10   -events 1000000
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 5 -size 1000  -records 1000000  -throughput 10
 
--events 1000000 indicates that total 1000000 (1 million) of events will be written at the throughput speed of 10MB/sec
+-records 1000000 indicates that total 1000000 (1 million) of events will be written at the throughput speed of 10MB/sec
 ```
 
-### 3 - OPS Mode or  Events Rate / Rate Limiter Mode
-This mode is another form of controlling writers throughput by limiting the number of events per second.
-In this mode, the SBK  pushes the messages to the Pravega client with specified approximate maximum events per sec.
-This mode is used to find the least latency  that can be obtained from the Pravega cluster for events rate.
+### 3 - Rate limiter Mode (Recrods Rate or Events Rate Mode)
+This mode is another form of controlling writers throughput by limiting the number of records per second.
+In this mode, the SBK  pushes the messages to the storage client (device/driver) with specified approximate maximum records per sec.
+This mode is used to find the least latency  that can be obtained from the storage device or storage cluster (server) for events rate.
 This mode is used only for write operation.
 
 ```
-For example:
-<SBK directory>/run/SBK/bin/SBK   -controller tcp://127.0.0.1:9090  -stream streamname1  -segments 1  -producers 5  -size 100  -events 1000   -time 60
+For example:  The Rate limiter Mode for pulsar 5 writers as follows
 
-The -events <event numbers>  (1000 ) specifies the events per second to write.
-Note that the option "-throughput"  SHOULD NOT supplied for this OPS Mode or  Events Rate / Rate limiter Mode.
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broke
+r tcp://localhost:6650 -topic topic-k-225  -partitions 10  -writers 5 -size 100  -time 60  -records 1000
 
-This test will be executed with approximate 1000 events per second by 6 producers.
-This test will executed for 300 seconds (5 minutes) because option -time 60 is used.
+The -records <records numbes>  (1000) specifies the records per second to write.
+Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode (Recrods Rate or Events Rate Mode).
+
+This test will be executed with approximate 1000 events per second by 5 writers.
+The topic "topic-k-225" with 10 partitions are created to run this test.
+This test will executed for 60seconds (1 minutes) because option -time 60 is used.
 Note that in this mode, there is 'NO total number of events' to specify hence user must supply the time to run using -time option.
 ```
 
 ### 4 - End to End Latency Mode
-In this mode, the SBK  writes and read the messages to the Pravega cluster and records the end to end latency.
+In this mode, the SBK  writes and read the messages to the storage client (device/driver) and records the end to end latency.
 End to end latency means the time duration between the beginning of the writing event/record to stream and the time after reading the event/record.
-in this mode user must specify both the number of producers and consumers.
-The -throughput option (Throughput mode) or -events (late limiter) can used to limit the writers throughput or events rate.
+in this mode user must specify both the number of writers and readers.
+The -throughput option (Throughput mode) or -records (late limiter) can used to limit the writers throughput or records rate.
 
 ```
-For example:
-<SBK directory>/run/SBK/bin/SBK  -controller tcp://127.0.0.1:9090  -stream streamname3  -segments 1  -producers 1 -consumers 1  -size 100  -throughput -1   -time 60
+For example: The End to End latency of between single writer and single reader of pulsar is as follows:
 
-The user should specify both producers and consumers count  for write to read or End to End latency mode. it should be set to true.
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-km-1  -partitions 1  -writers 1 -readers 1 -size 1000 -throughput -1 -time 60 
+
+The user should specify both writers and readers count for write to read or End to End latency mode.
 The -throughput -1 specifies the writes tries to write the events at the maximum possible speed.
 ```
 
-### Recording the latencies to CSV files
-User can use the option "-csv <file name>" to record the latencies of writers/readers.
+## Recording the latencies to CSV files
+User can use the option "-csv [file name]" to record the latencies of writers/readers.
     
 ## Add your driver to SBK
 1. Create the gradle sub project preferable with the name driver-<your driver(storage device) name>.
@@ -215,7 +223,7 @@ User can use the option "-csv <file name>" to record the latencies of writers/re
         
       a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L41
         
-      b). flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L47
+      b). Flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L47
         
       c). Close the Writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L53
         
