@@ -13,12 +13,12 @@ package io.sbk.main;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
-import io.sbk.api.SbkPerformance;
-import io.sbk.api.SbkReader;
-import io.sbk.api.SbkWriter;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.ResultLogger;
-import io.sbk.api.SystemResultLogger;
+import io.sbk.api.impl.SbkPerformance;
+import io.sbk.api.impl.SbkReader;
+import io.sbk.api.impl.SbkWriter;
+import io.sbk.api.impl.SystemResultLogger;
 
 import java.io.IOException;
 

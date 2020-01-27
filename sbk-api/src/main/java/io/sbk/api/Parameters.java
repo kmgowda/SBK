@@ -17,7 +17,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
 /**
- * class for Basic parameters.
+ * class for Command Line Parameters.
  */
 final public class Parameters {
     static final int MAXTIME = 60 * 60 * 24;

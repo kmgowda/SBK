@@ -8,7 +8,12 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.api.impl;
+
+import io.sbk.api.Parameters;
+import io.sbk.api.QuadConsumer;
+import io.sbk.api.Reader;
+import io.sbk.api.RunBenchmark;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -23,7 +28,7 @@ public class SbkReader extends Worker implements Callable<Void> {
     final private Reader reader;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId,  Parameters params, QuadConsumer recordTime, Reader reader) {
+    public SbkReader(int readerId, Parameters params, QuadConsumer recordTime, Reader reader) {
         super(readerId, params, recordTime);
         this.reader = reader;
         this.perf = createBenchmark();

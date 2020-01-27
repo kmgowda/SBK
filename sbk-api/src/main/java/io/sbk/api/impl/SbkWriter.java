@@ -8,7 +8,12 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.api.impl;
+
+import io.sbk.api.Parameters;
+import io.sbk.api.QuadConsumer;
+import io.sbk.api.RunBenchmark;
+import io.sbk.api.Writer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
