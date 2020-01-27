@@ -187,7 +187,7 @@ The user should specify both writers and readers count for write to read or End 
 The -throughput -1 specifies the writes tries to write the events at the maximum possible speed.
 ```
 
-### Recording the latencies to CSV files
+## Recording the latencies to CSV files
 User can use the option "-csv <file name>" to record the latencies of writers/readers.
     
 ## Add your driver to SBK
