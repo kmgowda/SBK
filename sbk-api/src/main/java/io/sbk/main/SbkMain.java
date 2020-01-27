@@ -39,8 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Performance benchmark for Pravega.
- * Data format is in comma separated format as following: {TimeStamp, Sensor Id, Location, TempValue }.
+ * Main class of SBK.
  */
 public class SbkMain {
     final static String BENCHMARKNAME = "sbk";
