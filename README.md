@@ -159,13 +159,15 @@ This mode is used only for write operation.
 
 ```
 For example:
-<SBK directory>
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broke
+r tcp://localhost:6650 -topic topic-k-225  -partitions 10  -writers 5 -size 100  -time 60  -records 1000
 
 The -records <records numbes>  (1000) specifies the records per second to write.
 Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode (Recrods Rate or Events Rate Mode).
 
-This test will be executed with approximate 1000 events per second by 5 producers.
-This test will executed for 120 seconds (2 minutes) because option -time 120 is used.
+This test will be executed with approximate 1000 events per second by 5 writers.
+The topic "topic-k-225" with 10 partitions are created to run this test.
+This test will executed for 60seconds (1 minutes) because option -time 60 is used.
 Note that in this mode, there is 'NO total number of events' to specify hence user must supply the time to run using -time option.
 ```
 
@@ -177,7 +179,7 @@ The -throughput option (Throughput mode) or -records (late limiter) can used to 
 
 ```
 For example:
-<SBK directory>/run/SBK/bin/SBK  -controller tcp://127.0.0.1:9090  -stream streamname3  -segments 1  -producers 1 -consumers 1  -size 100  -throughput -1   -time 60
+<SBK directory>
 
 The user should specify both producers and consumers count  for write to read or End to End latency mode. it should be set to true.
 The -throughput -1 specifies the writes tries to write the events at the maximum possible speed.
