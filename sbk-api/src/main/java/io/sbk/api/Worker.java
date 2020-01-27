@@ -18,11 +18,9 @@ public abstract class Worker {
 
     protected final int workerID;
     protected final Parameters params;
-    protected final QuadConsumer recordTime;
 
-    Worker(int workerID, Parameters params, QuadConsumer recordTime) {
+    Worker(int workerID, Parameters params) {
         this.workerID = workerID;
-        this.recordTime = recordTime;
         this.params = params;
     }
 }

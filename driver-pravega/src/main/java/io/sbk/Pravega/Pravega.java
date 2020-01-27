@@ -12,7 +12,6 @@ package io.sbk.Pravega;
 
 import io.sbk.api.Benchmark;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
 
@@ -120,9 +119,9 @@ public class Pravega implements Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime) {
+    public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new PravegaWriter(id, params, recordTime, streamName, factory);
+            return new PravegaWriter(id, params, streamName, factory);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -131,9 +130,9 @@ public class Pravega implements Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime) {
+    public Reader createReader(final int id, final Parameters params) {
         try {
-            return new PravegaReader(id, params, recordTime, streamName, rdGrpName, factory);
+            return new PravegaReader(id, params, streamName, rdGrpName, factory);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

@@ -11,7 +11,6 @@ package io.sbk.Kafka;
 
 import io.sbk.api.Benchmark;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
 
@@ -100,9 +99,9 @@ public class Kafka implements Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime) {
+    public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new KafkaWriter(id, params, recordTime, topicName, producerConfig);
+            return new KafkaWriter(id, params, topicName, producerConfig);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -110,9 +109,9 @@ public class Kafka implements Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime) {
+    public Reader createReader(final int id, final Parameters params) {
         try {
-            return new KafkaReader(id, params, recordTime, topicName, consumerConfig);
+            return new KafkaReader(id, params, topicName, consumerConfig);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

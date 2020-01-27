@@ -25,9 +25,8 @@ import io.pravega.client.EventStreamClientFactory;
 public class PravegaWriter extends Writer {
     final EventStreamWriter<byte[]> producer;
 
-    public PravegaWriter(int writerID, Parameters params, QuadConsumer recordTime,
-                        String streamName, EventStreamClientFactory factory) throws IOException {
-        super(writerID, params, recordTime);
+    public PravegaWriter(int writerID, Parameters params, String streamName, EventStreamClientFactory factory) throws IOException {
+        super(writerID, params);
         this.producer = factory.createEventWriter(streamName,
                 new ByteArraySerializer(),
                 EventWriterConfig.builder().build());

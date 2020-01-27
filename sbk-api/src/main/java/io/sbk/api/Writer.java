@@ -26,8 +26,8 @@ public abstract class Writer extends Worker implements Callable<Void> {
     final private RunBenchmark perf;
     final private byte[] payload;
 
-    public Writer(int writerID, Parameters params, QuadConsumer recordTime) {
-        super(writerID, params, recordTime);
+    public Writer(int writerID, Parameters params) {
+        super(writerID, params);
         this.payload = createPayload(params.recordSize);
         this.perf = createBenchmark();
     }
@@ -132,7 +132,7 @@ public abstract class Writer extends Worker implements Callable<Void> {
 
     final private void RecordsWriter() throws InterruptedException, IOException {
         for (int i = 0; i < params.records; i++) {
-            recordWrite(payload, recordTime);
+            recordWrite(payload, params.recordWrite);
         }
         flush();
     }
@@ -144,7 +144,7 @@ public abstract class Writer extends Worker implements Callable<Void> {
         while (cnt < params.records) {
             int loopMax = Math.min(params.recordsPerFlush, params.records - cnt);
             for (int i = 0; i < loopMax; i++) {
-                eCnt.control(cnt++, recordWrite(payload, recordTime));
+                eCnt.control(cnt++, recordWrite(payload, params.recordWrite));
             }
             flush();
         }
@@ -155,7 +155,7 @@ public abstract class Writer extends Worker implements Callable<Void> {
         final long msToRun = params.secondsToRun * MS_PER_SEC;
         long time = System.currentTimeMillis();
         while ((time - params.startTime) < msToRun) {
-            time = recordWrite(payload, recordTime);
+            time = recordWrite(payload, params.recordWrite);
         }
         flush();
     }
@@ -169,7 +169,7 @@ public abstract class Writer extends Worker implements Callable<Void> {
         int cnt = 0;
         while (msElapsed < msToRun) {
             for (int i = 0; (msElapsed < msToRun) && (i < params.recordsPerFlush); i++) {
-                time = recordWrite(payload, recordTime);
+                time = recordWrite(payload, params.recordWrite);
                 eCnt.control(cnt++, time);
                 msElapsed = time - params.startTime;
             }

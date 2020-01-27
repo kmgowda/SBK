@@ -22,8 +22,8 @@ public abstract class Reader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
     final private RunBenchmark perf;
 
-    public Reader(int readerId,  Parameters params, QuadConsumer recordTime) {
-        super(readerId, params, recordTime);
+    public Reader(int readerId,  Parameters params) {
+        super(readerId, params);
         this.perf = createBenchmark();
     }
 
@@ -72,7 +72,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                 ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    recordTime.accept(startTime, endTime, ret.length, 1);
+                    params.recordRead.accept(startTime, endTime, ret.length, 1);
                     i++;
                 }
             }
@@ -94,7 +94,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                     timeBuffer.clear();
                     timeBuffer.put(ret, 0, TIME_HEADER_SIZE);
                     final long start = timeBuffer.getLong(0);
-                    recordTime.accept(start, endTime, ret.length, 1);
+                    params.recordRead.accept(start, endTime, ret.length, 1);
                     i++;
                 }
             }
@@ -114,7 +114,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                 ret = read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    recordTime.accept(time, endTime, ret.length, 1);
+                    params.recordRead.accept(time, endTime, ret.length, 1);
                 }
             }
         } finally {
@@ -135,7 +135,7 @@ public abstract class Reader extends Worker implements Callable<Void> {
                     timeBuffer.clear();
                     timeBuffer.put(ret, 0, TIME_HEADER_SIZE);
                     final long start = timeBuffer.getLong(0);
-                    recordTime.accept(start, time, ret.length, 1);
+                    params.recordRead.accept(start, time, ret.length, 1);
                 }
             }
         } finally {

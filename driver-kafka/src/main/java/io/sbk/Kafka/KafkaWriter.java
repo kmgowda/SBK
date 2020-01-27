@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
+import lombok.Synchronized;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
@@ -26,9 +27,9 @@ public class KafkaWriter extends Writer {
     final private KafkaProducer<byte[], byte[]> producer;
     final private String topicName;
 
-    public KafkaWriter(int writerID, Parameters params, QuadConsumer recordTime,
+    public KafkaWriter(int writerID, Parameters params,
                              String topicName, Properties producerProps) throws IOException {
-        super(writerID, params, recordTime);
+        super(writerID, params);
         this.topicName = topicName;
         this.producer = new KafkaProducer<>(producerProps);
     }
@@ -68,7 +69,8 @@ public class KafkaWriter extends Writer {
     }
 
     @Override
-    public synchronized void close() {
+    @Synchronized
+    public void close() {
         producer.close();
     }
 }

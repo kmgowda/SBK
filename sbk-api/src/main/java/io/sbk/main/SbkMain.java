@@ -12,7 +12,6 @@ package io.sbk.main;
 
 import io.sbk.api.Benchmark;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Performance;
 import io.sbk.api.SbkPerformance;
 import io.sbk.api.Writer;
@@ -55,8 +54,6 @@ public class SbkMain {
         final ExecutorService executor;
         final Performance writeStats;
         final Performance readStats;
-        final QuadConsumer writeTime;
-        final QuadConsumer readTime;
 
         options.addOption("class", true, "Benchmark class");
         try {
@@ -122,10 +119,10 @@ public class SbkMain {
         if (params.writersCount > 0 && !params.writeAndRead) {
             writeStats = new SbkPerformance("Writing", REPORTINGINTERVAL, params.recordSize,
                                 params.csvFile, logger, executor);
-            writeTime = writeStats::recordTime;
+            params.recordWrite = writeStats::recordTime;
         } else {
             writeStats = null;
-            writeTime = null;
+            params.recordWrite = null;
         }
 
         if (params.readersCount > 0) {
@@ -137,21 +134,21 @@ public class SbkMain {
             }
             readStats = new SbkPerformance(action, REPORTINGINTERVAL, params.recordSize,
                             params.csvFile, logger, executor);
-            readTime = readStats::recordTime;
+            params.recordRead = readStats::recordTime;
         } else {
             readStats = null;
-            readTime = null;
+            params.recordRead = null;
         }
 
         try {
             final List<Writer> writers =  IntStream.range(0, params.writersCount)
                                             .boxed()
-                                            .map(i -> benchmark.createWriter(i, params, writeTime))
+                                            .map(i -> benchmark.createWriter(i, params))
                                             .collect(Collectors.toList());
 
             final List<Reader> readers = IntStream.range(0, params.readersCount)
                                             .boxed()
-                                            .map(i -> benchmark.createReader(i, params, readTime))
+                                            .map(i -> benchmark.createReader(i, params))
                                             .collect(Collectors.toList());
 
             final List<Callable<Void>> workers = Stream.of(readers, writers)

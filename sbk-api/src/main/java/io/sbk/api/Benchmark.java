@@ -47,17 +47,15 @@ public interface  Benchmark {
      * Create the Writer.
      * @param id Writer id
      * @param params configuration parameters.
-     * @param recordTime  record the time
      * @return Writer return the Writer , null in case of failure
      */
-    Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime);
+    Writer createWriter(final int id, final Parameters params);
 
     /**
      * Create the Reader.
      * @param id Writer id
      * @param params configuration parameters.
-     * @param recordTime  record the time
      * @return Reader return the Reader , null in case of failure
      */
-    Reader createReader(final int id, final Parameters params, QuadConsumer recordTime);
+    Reader createReader(final int id, final Parameters params);
 }

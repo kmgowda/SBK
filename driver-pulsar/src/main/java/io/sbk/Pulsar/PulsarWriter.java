@@ -9,7 +9,6 @@
  */
 package io.sbk.Pulsar;
 import io.sbk.api.Writer;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Parameters;
 
 import java.io.IOException;
@@ -24,9 +23,8 @@ import org.apache.pulsar.client.api.PulsarClientException;
 public class PulsarWriter extends Writer {
     final private Producer<byte[]> producer;
 
-    public PulsarWriter(int writerID, Parameters params, QuadConsumer recordTime,
-                              String topicName, PulsarClient client) throws IOException {
-        super(writerID, params, recordTime);
+    public PulsarWriter(int writerID, Parameters params, String topicName, PulsarClient client) throws IOException {
+        super(writerID, params);
         try {
             this.producer = client.newProducer()
                     .enableBatching(true)
