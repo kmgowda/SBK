@@ -179,9 +179,9 @@ The -throughput option (Throughput mode) or -records (late limiter) can used to 
 
 ```
 For example:
-<SBK directory>
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-km-1  -partitions 1  -writers 1 -readers 1 -size 1000 -throughput -1 -time 60 
 
-The user should specify both producers and consumers count  for write to read or End to End latency mode. it should be set to true.
+The user should specify both writers and readers count for write to read or End to End latency mode.
 The -throughput -1 specifies the writes tries to write the events at the maximum possible speed.
 ```
 
