@@ -70,7 +70,7 @@ usage: sbk
 
 ## Running Performance benchmarking
 
-SBK outputs the number of records written/read , throughput in terms of MB/s and the average and maximum latency for every 5 seconds time interval as show in below.
+SBK outputs the number of records written/read, throughput in terms of MB/s and the average and maximum latency for every 5 seconds time interval as show in below.
 
 ```
 Writing     152372 records,   30328.8 records/sec,   28.92 MB/sec,    35.4 ms avg latency,  1238.0 ms max latency
@@ -152,28 +152,28 @@ in the case you want to write/read the certain number of events use the -records
 ```
 
 ### 3 - Rate limiter Mode (Recrods Rate or Events Rate Mode)
-This mode is another form of controlling writers throughput by limiting the number of events per second.
-In this mode, the SBK  pushes the messages to the Pravega client with specified approximate maximum events per sec.
-This mode is used to find the least latency  that can be obtained from the Pravega cluster for events rate.
+This mode is another form of controlling writers throughput by limiting the number of records per second.
+In this mode, the SBK  pushes the messages to the storage client (device/driver) with specified approximate maximum records per sec.
+This mode is used to find the least latency  that can be obtained from the storage device or storage cluster (server) for events rate.
 This mode is used only for write operation.
 
 ```
 For example:
-<SBK directory>/run/SBK/bin/SBK   -controller tcp://127.0.0.1:9090  -stream streamname1  -segments 1  -producers 5  -size 100  -events 1000   -time 60
+<SBK directory>
 
-The -events <event numbers>  (1000 ) specifies the events per second to write.
-Note that the option "-throughput"  SHOULD NOT supplied for this OPS Mode or  Events Rate / Rate limiter Mode.
+The -records <records numbes>  (1000) specifies the records per second to write.
+Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode (Recrods Rate or Events Rate Mode).
 
-This test will be executed with approximate 1000 events per second by 6 producers.
-This test will executed for 300 seconds (5 minutes) because option -time 60 is used.
+This test will be executed with approximate 1000 events per second by 5 producers.
+This test will executed for 120 seconds (2 minutes) because option -time 120 is used.
 Note that in this mode, there is 'NO total number of events' to specify hence user must supply the time to run using -time option.
 ```
 
 ### 4 - End to End Latency Mode
-In this mode, the SBK  writes and read the messages to the Pravega cluster and records the end to end latency.
+In this mode, the SBK  writes and read the messages to the storage client (device/driver) and records the end to end latency.
 End to end latency means the time duration between the beginning of the writing event/record to stream and the time after reading the event/record.
-in this mode user must specify both the number of producers and consumers.
-The -throughput option (Throughput mode) or -events (late limiter) can used to limit the writers throughput or events rate.
+in this mode user must specify both the number of writers and readers.
+The -throughput option (Throughput mode) or -records (late limiter) can used to limit the writers throughput or records rate.
 
 ```
 For example:
