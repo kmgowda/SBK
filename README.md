@@ -150,7 +150,7 @@ in the case you want to write/read the certain number of events use the -records
 -records 1000000 indicates that total 1000000 (1 million) of events will be written at the throughput speed of 10MB/sec
 ```
 
-### 3 - Rate limiter Mode (Recrods Rate or Events Rate Mode)
+### 3 - Rate limiter Mode (Records Rate or Events Rate Mode)
 This mode is another form of controlling writers throughput by limiting the number of records per second.
 In this mode, the SBK  pushes the messages to the storage client (device/driver) with specified approximate maximum records per sec.
 This mode is used to find the least latency  that can be obtained from the storage device or storage cluster (server) for events rate.
@@ -204,7 +204,8 @@ User can use the option "-csv [file name]" to record the latencies of writers/re
         
     * you have to implement the following methods of Benchmark Interface:
         
-      a). Add the Addtional parameters for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
+      a). Add the Addtional parameters (Command line Parameters) for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
+      * The default command line parameters are listed in the help output here : https://github.com/kmgowda/sbk#building
         
       b). Parse your driver specific paramters: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L30
         
@@ -212,34 +213,43 @@ User can use the option "-csv [file name]" to record the latencies of writers/re
         
       d). Close the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L44
         
-      e). Create the writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
+      e). Create a single writer instance: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L52
+        * Create Writer will be called multiple times by SBK incase of Multi writers are specified in the command line.   
         
-      f). Create the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
+      f). Create a single Reader instance: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L60
+        * Create Reader will be called multiple times by SBK incase of Multi readers are specified in the command line. 
     
-4. Extend the class Writer: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
+4. Implement the Writer Interface: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java
     
     * you have to implement the following methods of Writer class:
         
-      a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L41
+      a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L27
         
-      b). Flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L47
+      b). Flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L33
         
-      c). Close the Writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L53
+      c). Close the Writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L39
         
       d). In case , if you want to have your own recordWrite implemenation to write data and record the start and end time, then you can override: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L64
         
-5. Extend the class Reader: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
+5. Implement the Reader Interface: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
 
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java
 
     * you have to implement the following methods of Reader class:
         
-      a). Read Data (synchronous reades): https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L35
+      a). Read Data (synchronous reades): https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L24
         
-      b). Close the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L41 
+      b). Close the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L30 
           
-6. That's all ; Now, Build the SBK included your driver with the command:
+6.  Add the Gradle dependecy [ compile project(":sbk-api")]   to your sub-project (driver)
+    * see the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle
+
+7. Add your sub project to main gradle as dependency.
+    * see the Example: https://github.com/kmgowda/sbk/blob/master/build.gradle#L59
+    * make sure that gradle settings file: https://github.com/kmgowda/sbk/blob/master/settings.gradle has your Storage driver sub project name
+
+8. That's all ; Now, Build the SBK included your driver with the command:
 
 ```
 ./gradlew build
@@ -251,7 +261,7 @@ untar the SBK  to local folder
 tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
-7.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
+9.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
 
 Example: For pulsar driver
 ```
