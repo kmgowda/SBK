@@ -15,6 +15,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.ResultLogger;
+import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SbkPerformance;
 import io.sbk.api.impl.SbkReader;
 import io.sbk.api.impl.SbkWriter;
@@ -68,7 +69,7 @@ public class SbkMain {
         }
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            new Parameters(BENCHMARKNAME, startTime).printHelp();
+            new SbkParameters(BENCHMARKNAME, startTime).printHelp();
             System.exit(0);
         }
 
@@ -84,7 +85,7 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new Parameters(BENCHMARKNAME +" -class "+ className, startTime);
+        params = new SbkParameters(BENCHMARKNAME +" -class "+ className, startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
