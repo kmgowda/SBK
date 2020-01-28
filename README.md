@@ -204,7 +204,8 @@ User can use the option "-csv [file name]" to record the latencies of writers/re
         
     * you have to implement the following methods of Benchmark Interface:
         
-      a). Add the Addtional parameters for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
+      a). Add the Addtional parameters (Command line Parameters) for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
+      * The default command line parameters are listed in the help output here : https://github.com/kmgowda/sbk#building
         
       b). Parse your driver specific paramters: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L30
         
