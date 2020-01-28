@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.api.impl;
 
 import java.io.IOException;
 

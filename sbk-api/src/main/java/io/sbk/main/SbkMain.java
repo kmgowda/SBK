@@ -48,6 +48,7 @@ public class SbkMain {
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
         final Options options = new Options();
+        final boolean fork = true;
         CommandLine commandline = null;
         String className = null;
         Benchmark obj = null;
@@ -112,31 +113,31 @@ public class SbkMain {
 
         final ResultLogger logger = new SystemResultLogger();
 
-        final int threadCount = params.writersCount + params.readersCount + 6;
-        if (params.fork) {
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
+        if (fork) {
             executor = new ForkJoinPool(threadCount);
         } else {
             executor = Executors.newFixedThreadPool(threadCount);
         }
 
-        if (params.writersCount > 0 && !params.writeAndRead) {
-            writeStats = new SbkPerformance("Writing", REPORTINGINTERVAL, params.recordSize,
-                                params.csvFile, logger, executor);
+        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
+            writeStats = new SbkPerformance("Writing", REPORTINGINTERVAL, params.getRecordSize(),
+                                params.getCsvFile(), logger, executor);
             writeTime = writeStats::recordTime;
         } else {
             writeStats = null;
             writeTime = null;
         }
 
-        if (params.readersCount > 0) {
+        if (params.getReadersCount() > 0) {
             String action;
-            if (params.writeAndRead) {
+            if (params.isWriteAndRead()) {
                 action = "Write/Reading";
               } else {
                 action = "Reading";
             }
-            readStats = new SbkPerformance(action, REPORTINGINTERVAL, params.recordSize,
-                            params.csvFile, logger, executor);
+            readStats = new SbkPerformance(action, REPORTINGINTERVAL, params.getRecordSize(),
+                            params.getCsvFile(), logger, executor);
             readTime = readStats::recordTime;
         } else {
             readStats = null;
@@ -144,12 +145,12 @@ public class SbkMain {
         }
 
         try {
-            final List<SbkWriter> writers =  IntStream.range(0, params.writersCount)
+            final List<SbkWriter> writers =  IntStream.range(0, params.getWritersCount())
                                             .boxed()
                                             .map(i -> new SbkWriter(i, params, writeTime, benchmark.createWriter(i, params)))
                                             .collect(Collectors.toList());
 
-            final List<SbkReader> readers = IntStream.range(0, params.readersCount)
+            final List<SbkReader> readers = IntStream.range(0, params.getReadersCount())
                                             .boxed()
                                             .map(i -> new SbkReader(i, params, readTime, benchmark.createReader(i, params)))
                                             .collect(Collectors.toList());
@@ -165,7 +166,7 @@ public class SbkMain {
                         System.out.println();
                         executor.shutdown();
                         executor.awaitTermination(1, TimeUnit.SECONDS);
-                        if (writeStats != null && !params.writeAndRead) {
+                        if (writeStats != null && !params.isWriteAndRead()) {
                             writeStats.shutdown(System.currentTimeMillis());
                         }
                         if (readStats != null) {
@@ -196,7 +197,7 @@ public class SbkMain {
                 }
             });
             startTime = System.currentTimeMillis();
-            if (writeStats != null && !params.writeAndRead) {
+            if (writeStats != null && !params.isWriteAndRead()) {
                 writeStats.start(startTime);
             }
             if (readStats != null) {
@@ -206,7 +207,7 @@ public class SbkMain {
             executor.invokeAll(workers);
             executor.shutdown();
             executor.awaitTermination(1, TimeUnit.SECONDS);
-            if (writeStats != null && !params.writeAndRead) {
+            if (writeStats != null && !params.isWriteAndRead()) {
                 writeStats.shutdown(System.currentTimeMillis());
             }
             if (readStats != null) {

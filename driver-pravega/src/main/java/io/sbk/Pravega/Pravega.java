@@ -60,7 +60,7 @@ public class Pravega implements Benchmark {
         if (params.hasOption("recreate")) {
             recreate = Boolean.parseBoolean(params.getOptionValue("recreate"));
         } else {
-            recreate = params.writersCount > 0 && params.readersCount > 0;
+            recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
         }
         if (controllerUri == null) {
             throw new IllegalArgumentException("Error: Must specify Controller IP address");
@@ -70,7 +70,7 @@ public class Pravega implements Benchmark {
             throw new IllegalArgumentException("Error: Must specify stream Name");
         }
         if (recreate) {
-            rdGrpName = streamName + params.startTime;
+            rdGrpName = streamName + params.getStartTime();
         } else {
             rdGrpName = streamName + "RdGrp";
         }
@@ -88,18 +88,18 @@ public class Pravega implements Benchmark {
                     bgExecutor);
 
             streamHandle = new PravegaStreamHandler(scopeName, streamName, rdGrpName, controllerUri,
-                    segmentCount, params.timeout, controller,
+                    segmentCount, params.getTimeout(), controller,
                     bgExecutor);
 
-            if (params.writersCount > 0 && !streamHandle.create()) {
+            if (params.getWritersCount() > 0 && !streamHandle.create()) {
                 if (recreate) {
                     streamHandle.recreate();
                 } else {
                     streamHandle.scale();
                 }
             }
-            if (params.readersCount > 0) {
-                readerGroup = streamHandle.createReaderGroup(!params.writeAndRead);
+            if (params.getReadersCount() > 0) {
+                readerGroup = streamHandle.createReaderGroup(!params.isWriteAndRead());
             } else {
                 readerGroup = null;
             }

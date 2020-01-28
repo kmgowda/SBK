@@ -53,7 +53,7 @@ public class Kafka implements Benchmark {
     }
 
     private Properties createProducerConfig(Parameters params) {
-        if (params.writersCount < 1) {
+        if (params.getWritersCount() < 1) {
             return null;
         }
         final Properties props = new Properties();
@@ -67,7 +67,7 @@ public class Kafka implements Benchmark {
     }
 
     private Properties createConsumerConfig(Parameters params) {
-        if (params.readersCount < 1) {
+        if (params.getReadersCount() < 1) {
             return null;
         }
         final Properties props = new Properties();
@@ -77,12 +77,12 @@ public class Kafka implements Benchmark {
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);
         // Enabling the consumer to READ_COMMITTED is must to compare between Kafka and Pravega
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
-        if (params.writeAndRead) {
+        if (params.isWriteAndRead()) {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
             props.put(ConsumerConfig.GROUP_ID_CONFIG, topicName);
         } else {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            props.put(ConsumerConfig.GROUP_ID_CONFIG, Long.toString(params.startTime));
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, Long.toString(params.getStartTime()));
         }
         return props;
     }

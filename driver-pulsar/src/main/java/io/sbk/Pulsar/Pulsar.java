@@ -100,7 +100,7 @@ public class Pulsar implements Benchmark {
         if (adminUri != null) {
             topicHandler = new PulsarTopicHandler(adminUri, brokerUri, tenant, cluster, nameSpace,
                     topicName, partitions, ensembleSize, writeQuorum, ackQuorum, deduplication);
-            topicHandler.createTopic(params.writersCount > 0);
+            topicHandler.createTopic(params.getWritersCount() > 0);
         } else {
             topicHandler = null;
         }

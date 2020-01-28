@@ -31,7 +31,7 @@ public class PulsarReader implements Reader {
     public PulsarReader(int readerId, Parameters params, String topicName,
                         String subscriptionName, PulsarClient client) throws  IOException {
         this.params = params;
-        final  SubscriptionInitialPosition position = params.writeAndRead ? SubscriptionInitialPosition.Latest :
+        final  SubscriptionInitialPosition position = params.isWriteAndRead() ? SubscriptionInitialPosition.Latest :
                                                     SubscriptionInitialPosition.Earliest;
 
         try {
@@ -52,7 +52,7 @@ public class PulsarReader implements Reader {
     @Override
     public byte[] read() throws IOException {
         try {
-            return consumer.receive(params.timeout, TimeUnit.SECONDS).getData();
+            return consumer.receive(params.getTimeout(), TimeUnit.SECONDS).getData();
         } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }

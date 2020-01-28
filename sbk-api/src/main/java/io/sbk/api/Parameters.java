@@ -9,6 +9,8 @@
  */
 package io.sbk.api;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.CommandLine;
@@ -19,31 +21,43 @@ import org.apache.commons.cli.ParseException;
 /**
  * class for Command Line Parameters.
  */
+@Slf4j
 final public class Parameters {
     static final int MAXTIME = 60 * 60 * 24;
     static final int TIMEOUT = 1000;
-
-    final public long startTime;
-    final public int timeout;
-
-    public int records;
-    public int recordSize;
-    public int recordsPerSec;
-    public int recordsPerWriter;
-    public int recordsPerReader;
-    public int recordsPerFlush;
-    public int secondsToRun;
-    public int writersCount;
-    public int readersCount;
-    public double throughput;
-    public String csvFile;
-    public boolean writeAndRead;
-    public boolean fork;
-
     final private String benchmarkName;
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
+
+    @Getter
+    final private long startTime;
+    @Getter
+    final private int timeout;
+
+    @Getter
+    private int recordsCount;
+    @Getter
+    private int recordSize;
+    @Getter
+    private int recordsPerSec;
+    @Getter
+    private int recordsPerWriter;
+    @Getter
+    private int recordsPerReader;
+    @Getter
+    private int recordsPerFlush;
+    @Getter
+    private int secondsToRun;
+    @Getter
+    private int writersCount;
+    @Getter
+    private int readersCount;
+    @Getter
+    private String csvFile;
+    @Getter
+    private boolean writeAndRead;
+    private double throughput;
     private CommandLine commandline;
 
     public Parameters(String name, long startTime) {
@@ -54,7 +68,6 @@ final public class Parameters {
         commandline = null;
         this.timeout = TIMEOUT;
         this.startTime = startTime;
-        this.fork = true;
 
         options.addOption("class", true, "Benchmark class (refer to driver-* folder)");
         options.addOption("writers", true, "Number of writers");
@@ -161,7 +174,7 @@ final public class Parameters {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");
         }
 
-        records = Integer.parseInt(commandline.getOptionValue("records", "0"));
+        recordsCount = Integer.parseInt(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
         csvFile = commandline.getOptionValue("csv", null);
         int flushRecords = Integer.parseInt(commandline.getOptionValue("flush", "0"));
@@ -173,7 +186,7 @@ final public class Parameters {
 
         if (commandline.hasOption("time")) {
             secondsToRun = Integer.parseInt(commandline.getOptionValue("time"));
-        } else if (records > 0) {
+        } else if (recordsCount > 0) {
             secondsToRun = 0;
         } else {
             secondsToRun = MAXTIME;
@@ -190,7 +203,7 @@ final public class Parameters {
                 throw new IllegalArgumentException("Error: Must specify the record 'size'");
             }
             writeAndRead = readersCount > 0;
-            recordsPerWriter = (records + writersCount - 1) / writersCount;
+            recordsPerWriter = (recordsCount + writersCount - 1) / writersCount;
             if (throughput < 0 && secondsToRun > 0) {
                 recordsPerSec = readersCount / writersCount;
             } else if (throughput > 0) {
@@ -205,7 +218,7 @@ final public class Parameters {
         }
 
         if (readersCount > 0) {
-            recordsPerReader = records / readersCount;
+            recordsPerReader = recordsCount / readersCount;
         } else {
             recordsPerReader = 0;
         }

@@ -12,7 +12,6 @@ package io.sbk.api.impl;
 
 import io.sbk.api.Parameters;
 import io.sbk.api.QuadConsumer;
-import io.sbk.api.RunBenchmark;
 import io.sbk.api.Writer;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -35,7 +34,7 @@ public class SbkWriter extends Worker implements Callable<Void> {
     public SbkWriter(int writerID, Parameters params, QuadConsumer recordTime, Writer writer) {
         super(writerID, params, recordTime);
         this.writer = writer;
-        this.payload = createPayload(params.recordSize);
+        this.payload = createPayload(params.getRecordSize());
         this.perf = createBenchmark();
     }
 
@@ -78,21 +77,21 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
     final private RunBenchmark createBenchmark() {
         final RunBenchmark perfWriter;
-        if (params.secondsToRun > 0) {
-            if (params.writeAndRead) {
+        if (params.getSecondsToRun() > 0) {
+            if (params.isWriteAndRead()) {
                 perfWriter = this::RecordsWriterTimeRW;
             } else {
-                if (params.recordsPerSec > 0 || params.recordsPerFlush < Integer.MAX_VALUE) {
+                if (params.getRecordsPerSec() > 0 || params.getRecordsPerFlush() < Integer.MAX_VALUE) {
                     perfWriter = this::RecordsWriterTimeSleep;
                 } else {
                     perfWriter = this::RecordsWriterTime;
                 }
             }
         } else {
-            if (params.writeAndRead) {
+            if (params.isWriteAndRead()) {
                 perfWriter = this::RecordsWriterRW;
             } else {
-                if (params.recordsPerSec > 0 || params.recordsPerFlush < Integer.MAX_VALUE) {
+                if (params.getRecordsPerSec() > 0 || params.getRecordsPerFlush() < Integer.MAX_VALUE) {
                     perfWriter = this::RecordsWriterSleep;
                 } else {
                     perfWriter = this::RecordsWriter;
@@ -106,7 +105,7 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
 
     final private void RecordsWriter() throws InterruptedException, IOException {
-        for (int i = 0; i < params.records; i++) {
+        for (int i = 0; i < params.getRecordsCount(); i++) {
             recordWrite(payload, recordTime);
         }
         flush();
@@ -114,10 +113,11 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
 
     final private void RecordsWriterSleep() throws InterruptedException, IOException {
-        final RateController eCnt = new RateController(System.currentTimeMillis(), params.recordsPerSec);
+        final RateController eCnt = new RateController(System.currentTimeMillis(), params.getRecordsPerSec());
+        final int recordsCount = params.getRecordsCount();
         int cnt = 0;
-        while (cnt < params.records) {
-            int loopMax = Math.min(params.recordsPerFlush, params.records - cnt);
+        while (cnt < recordsCount) {
+            int loopMax = Math.min(params.getRecordsPerFlush(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
                 eCnt.control(cnt++, recordWrite(payload, recordTime));
             }
@@ -127,9 +127,10 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
 
     final private void RecordsWriterTime() throws InterruptedException, IOException {
-        final long msToRun = params.secondsToRun * MS_PER_SEC;
+        final long startTime = params.getStartTime();
+        final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         long time = System.currentTimeMillis();
-        while ((time - params.startTime) < msToRun) {
+        while ((time - startTime) < msToRun) {
             time = recordWrite(payload, recordTime);
         }
         flush();
@@ -137,16 +138,17 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
 
     final private void RecordsWriterTimeSleep() throws InterruptedException, IOException {
-        final long msToRun = params.secondsToRun * MS_PER_SEC;
+        final long startTime = params.getStartTime();
+        final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         long time = System.currentTimeMillis();
-        final RateController eCnt = new RateController(time, params.recordsPerSec);
-        long msElapsed = time - params.startTime;
+        final RateController eCnt = new RateController(time, params.getRecordsPerSec());
+        long msElapsed = time - startTime;
         int cnt = 0;
         while (msElapsed < msToRun) {
-            for (int i = 0; (msElapsed < msToRun) && (i < params.recordsPerFlush); i++) {
+            for (int i = 0; (msElapsed < msToRun) && (i < params.getRecordsPerFlush()); i++) {
                 time = recordWrite(payload, recordTime);
                 eCnt.control(cnt++, time);
-                msElapsed = time - params.startTime;
+                msElapsed = time - startTime;
             }
             flush();
         }
@@ -156,8 +158,8 @@ public class SbkWriter extends Worker implements Callable<Void> {
     final private void RecordsWriterRW() throws InterruptedException, IOException {
         final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         final long time = System.currentTimeMillis();
-        final RateController eCnt = new RateController(time, params.recordsPerSec);
-        for (int i = 0; i < params.records; i++) {
+        final RateController eCnt = new RateController(time, params.getRecordsPerSec());
+        for (int i = 0; i < params.getRecordsCount(); i++) {
             byte[] bytes = timeBuffer.putLong(0, System.currentTimeMillis()).array();
             System.arraycopy(bytes, 0, payload, 0, bytes.length);
             writer.writeAsync(payload);
@@ -175,12 +177,13 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
 
     final private void RecordsWriterTimeRW() throws InterruptedException, IOException {
-        final long msToRun = params.secondsToRun * MS_PER_SEC;
+        final long startTime = params.getStartTime();
+        final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         long time = System.currentTimeMillis();
-        final RateController eCnt = new RateController(time, params.recordsPerSec);
+        final RateController eCnt = new RateController(time, params.getRecordsPerSec());
 
-        for (int i = 0; (time - params.startTime) < msToRun; i++) {
+        for (int i = 0; (time -startTime) < msToRun; i++) {
             time = System.currentTimeMillis();
             byte[] bytes = timeBuffer.putLong(0, time).array();
             System.arraycopy(bytes, 0, payload, 0, bytes.length);

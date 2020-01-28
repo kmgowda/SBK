@@ -40,7 +40,7 @@ public class PravegaReader implements Reader {
     @Override
     public byte[] read() throws IOException {
         try {
-            return reader.readNextEvent(params.timeout).getEvent();
+            return reader.readNextEvent(params.getTimeout()).getEvent();
         } catch (ReinitializationRequiredException e) {
             throw new IOException(e);
         }

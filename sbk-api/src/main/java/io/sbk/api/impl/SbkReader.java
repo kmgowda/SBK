@@ -13,7 +13,6 @@ package io.sbk.api.impl;
 import io.sbk.api.Parameters;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.Reader;
-import io.sbk.api.RunBenchmark;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -55,10 +54,10 @@ public class SbkReader extends Worker implements Callable<Void> {
 
     final private RunBenchmark createBenchmark() {
         final RunBenchmark perfReader;
-        if (params.secondsToRun > 0) {
-            perfReader = params.writeAndRead ? this::RecordsTimeReaderRW : this::RecordsTimeReader;
+        if (params.getSecondsToRun() > 0) {
+            perfReader = params.isWriteAndRead() ? this::RecordsTimeReaderRW : this::RecordsTimeReader;
         } else {
-            perfReader = params.writeAndRead ? this::RecordsReaderRW : this::RecordsReader;
+            perfReader = params.isWriteAndRead() ? this::RecordsReaderRW : this::RecordsReader;
         }
         return perfReader;
     }
@@ -68,7 +67,7 @@ public class SbkReader extends Worker implements Callable<Void> {
         byte[] ret = null;
         try {
             int i = 0;
-            while (i < params.records) {
+            while (i < params.getRecordsCount()) {
                 final long startTime = System.currentTimeMillis();
                 ret = read();
                 if (ret != null) {
@@ -88,7 +87,7 @@ public class SbkReader extends Worker implements Callable<Void> {
         byte[] ret = null;
         try {
             int i = 0;
-            while (i < params.records) {
+            while (i < params.getRecordsCount()) {
                 ret = reader.read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
@@ -106,11 +105,12 @@ public class SbkReader extends Worker implements Callable<Void> {
 
 
     final public void RecordsTimeReader() throws IOException {
-        final long msToRun = params.secondsToRun * MS_PER_SEC;
+        final long startTime = params.getStartTime();
+        final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         byte[] ret = null;
         long time = System.currentTimeMillis();
         try {
-            while ((time - params.startTime) < msToRun) {
+            while ((time - startTime) < msToRun) {
                 time = System.currentTimeMillis();
                 ret = reader.read();
                 if (ret != null) {
@@ -124,12 +124,13 @@ public class SbkReader extends Worker implements Callable<Void> {
     }
 
     final public void RecordsTimeReaderRW() throws IOException {
-        final long msToRun = params.secondsToRun * MS_PER_SEC;
+        final long startTime = params.getStartTime();
+        final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         byte[] ret = null;
         long time = System.currentTimeMillis();
         try {
-            while ((time - params.startTime) < msToRun) {
+            while ((time - startTime) < msToRun) {
                 ret = read();
                 time = System.currentTimeMillis();
                 if (ret != null) {
