@@ -212,32 +212,34 @@ User can use the option "-csv [file name]" to record the latencies of writers/re
         
       d). Close the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L44
         
-      e). Create the writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
+      e). Create a single writer instance: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L52
+        * Create Writer will be called multiple times by SBK incase of Multi writers are specified in the command line.   
         
-      f). Create the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L53
+      f). Create a single Reader instance: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L60
+        * Create Reader will be called multiple times by SBK incase of Multi readers are specified in the command line. 
     
-4. Extend the class Writer: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
+4. Implement the Writer Interface: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java
     
     * you have to implement the following methods of Writer class:
         
-      a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L41
+      a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L27
         
-      b). Flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L47
+      b). Flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L33
         
-      c). Close the Writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L53
+      c). Close the Writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L39
         
       d). In case , if you want to have your own recordWrite implemenation to write data and record the start and end time, then you can override: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L64
         
-5. Extend the class Reader: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
+5. Implement the Reader Interface: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
 
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java
 
     * you have to implement the following methods of Reader class:
         
-      a). Read Data (synchronous reades): https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L35
+      a). Read Data (synchronous reades): https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L24
         
-      b). Close the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L41 
+      b). Close the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L30 
           
 6. That's all ; Now, Build the SBK included your driver with the command:
 
