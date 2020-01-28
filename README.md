@@ -220,6 +220,19 @@ in the above, I'm assuming that:
 
 The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
 
+### Lombok
+SBK uses [[Lombok](https://projectlombok.org)] for code optimizations; I suggest the same for all the contributors too.
+If you use an IDE you'll need to install a plugin to make the IDE understand it. Using IntelliJ is recommended.
+
+To import the source into IntelliJ:
+
+1. Import the project directory into IntelliJ IDE. It will automatically detect the gradle project and import things correctly.
+2. Enable `Annotation Processing` by going to `Build, Execution, Deployment` -> `Compiler` > `Annotation Processors` and checking 'Enable annotation processing'.
+3. Install the `Lombok Plugin`. This can be found in `Preferences` -> `Plugins`. Restart your IDE.
+4. Pravega should now compile properly.
+
+For eclipse, you can generate eclipse project files by running `./gradlew eclipse`.
+
 
 ## Add your driver to SBK
 1. Create the gradle sub project preferable with the name driver-<your driver(storage device) name>.
