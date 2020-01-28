@@ -12,9 +12,14 @@ You may obtain a copy of the License at
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  too. It massively writes the data to storage system. This  supports multi writers and readers. This  also supports End to End latency. The percentile is calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
 
-Currently SBK supports benchmarking of Apache Kafka, Pulsar and Pravega distributed streaming storages. In future, many more storage storage systems drivers will be plugged in. Refer to :   [[Add your storage driver](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver/storage device for performance benchmarking.
+Currently SBK supports benchmarking of 
+1. Apache Kafka
+2. Apache Pulsar 
+3. Pravega distributed streaming storages.
 
-we welcome open source developers to contribute to this probject by adding a driver your storage device and any features to SBK. Refer to : 
+In future, many more storage storage systems drivers will be plugged in. 
+
+we welcome open source developers to contribute to this project by adding a driver your storage device and any features to SBK. Refer to :    for the Contributing guidlines and Refer to :   [[Add your storage driver](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver/storage device for performance benchmarking.  
 
 ## Build SBK
 
@@ -88,7 +93,7 @@ Writing Latencies 22 ms 50th, 31 ms 75th, 90 ms 95th, 168 ms 99th, 1064 ms 99.9t
 
 
 The SBK  can be executed to
- - write/read specific amount of events/records to/from the Pravega cluster
+ - write/read specific amount of events/records to/from the storage driver (device/cluster)
  - write/read the events/records for the specified amount of time
 
 The SBK can be executed in the following modes:
