@@ -7,7 +7,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-
 # Storage Benchmark Kit (SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Version](https://img.shields.io/badge/release-0.5-blue)](https://github.com/kmgowda/dsb/releases)
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  too. It massively writes the data to storage system and reads the data from strorage system. The SBK supports multi writers and readers and also the End to End latency benchmarking. The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
@@ -102,7 +101,7 @@ The SBK can be executed in the following modes:
 ```
 1. Burst Mode (Max rate mode)
 2. Throughput Mode
-3. Rate limiter Mode (Recrods Rate or Events Rate Mode)
+3. Rate limiter Mode
 4. End to End Latency Mode
 ```
 
@@ -157,7 +156,7 @@ in the case you want to write/read the certain number of events use the -records
 -records 1000000 indicates that total 1000000 (1 million) of events will be written at the throughput speed of 10MB/sec
 ```
 
-### 3 - Rate limiter Mode (Records Rate or Events Rate Mode)
+### 3 - Rate limiter Mode
 This mode is another form of controlling writers throughput by limiting the number of records per second.
 In this mode, the SBK  pushes the messages to the storage client (device/driver) with specified approximate maximum records per sec.
 This mode is used to find the least latency  that can be obtained from the storage device or storage cluster (server) for events rate.
@@ -170,7 +169,7 @@ For example:  The Rate limiter Mode for pulsar 5 writers as follows
 r tcp://localhost:6650 -topic topic-k-225  -partitions 10  -writers 5 -size 100  -time 60  -records 1000
 
 The -records <records numbes>  (1000) specifies the records per second to write.
-Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode (Recrods Rate or Events Rate Mode).
+Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode.
 
 This test will be executed with approximate 1000 events per second by 5 writers.
 The topic "topic-k-225" with 10 partitions are created to run this test.
