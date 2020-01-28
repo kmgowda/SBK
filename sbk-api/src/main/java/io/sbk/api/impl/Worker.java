@@ -8,7 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.api.impl;
+
+import io.sbk.api.Parameters;
+import io.sbk.api.QuadConsumer;
 
 /**
  * Abstract class for Writers and Readers.
@@ -22,7 +25,7 @@ public abstract class Worker {
 
     Worker(int workerID, Parameters params, QuadConsumer recordTime) {
         this.workerID = workerID;
-        this.recordTime = recordTime;
         this.params = params;
+        this.recordTime = recordTime;
     }
 }

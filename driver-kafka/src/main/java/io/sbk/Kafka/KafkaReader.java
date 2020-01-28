@@ -11,7 +11,6 @@ package io.sbk.Kafka;
 
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.QuadConsumer;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -24,17 +23,14 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 /**
  * Class for Kafka reader/consumer.
  */
-public class KafkaReader extends Reader {
+public class KafkaReader implements Reader {
     final private KafkaConsumer<byte[], byte[]> consumer;
     final private Duration timeoutDuration;
 
-    public KafkaReader(int readerId, Parameters params, QuadConsumer recordTime,
-                       String topicName, Properties consumerProps) throws IOException {
-        super(readerId, params, recordTime);
-
+    public KafkaReader(int id, Parameters params, String topicName, Properties consumerProps) throws IOException {
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
-        this.timeoutDuration = Duration.ofMillis(params.timeout);
+        this.timeoutDuration = Duration.ofMillis(params.getTimeout());
     }
 
     @Override

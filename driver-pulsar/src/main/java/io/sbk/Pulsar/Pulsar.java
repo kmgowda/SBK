@@ -10,7 +10,6 @@
 package io.sbk.Pulsar;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
 
@@ -101,7 +100,7 @@ public class Pulsar implements Benchmark {
         if (adminUri != null) {
             topicHandler = new PulsarTopicHandler(adminUri, brokerUri, tenant, cluster, nameSpace,
                     topicName, partitions, ensembleSize, writeQuorum, ackQuorum, deduplication);
-            topicHandler.createTopic(params.writersCount > 0);
+            topicHandler.createTopic(params.getWritersCount() > 0);
         } else {
             topicHandler = null;
         }
@@ -114,9 +113,9 @@ public class Pulsar implements Benchmark {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params, QuadConsumer recordTime) {
+    public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new PulsarWriter(id, params, recordTime, topicName, client);
+            return new PulsarWriter(id, params, topicName, client);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -124,9 +123,9 @@ public class Pulsar implements Benchmark {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params, QuadConsumer recordTime) {
+    public Reader createReader(final int id, final Parameters params) {
         try {
-            return new PulsarReader(id, params, recordTime, topicName, topicName+"rdGrp", client);
+            return new PulsarReader(id, params, topicName, topicName+"rdGrp", client);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

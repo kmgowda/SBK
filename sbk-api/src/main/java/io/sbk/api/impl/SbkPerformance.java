@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api;
+package io.sbk.api.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +20,8 @@ import java.util.concurrent.locks.LockSupport;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import io.sbk.api.Performance;
+import io.sbk.api.ResultLogger;
 import lombok.Synchronized;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;

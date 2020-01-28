@@ -13,7 +13,6 @@ package io.sbk.Pravega;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 
-import io.sbk.api.QuadConsumer;
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.pravega.client.stream.ReaderConfig;
@@ -22,17 +21,18 @@ import io.pravega.client.EventStreamClientFactory;
 
 import java.io.IOException;
 
+
 /**
  * Class for Pravega reader/consumer.
  */
-public class PravegaReader extends Reader {
+public class PravegaReader implements Reader {
+    private final Parameters params;
     private final EventStreamReader<byte[]> reader;
 
-    public PravegaReader(int readerId, Parameters params, QuadConsumer recordTime,
-                         String streamName, String readergrp, EventStreamClientFactory factory) throws IOException {
-        super(readerId, params, recordTime);
-
-        final String readerSt = Integer.toString(readerId);
+    public PravegaReader(int id, Parameters params, String streamName,
+                         String readergrp, EventStreamClientFactory factory) throws IOException {
+        final String readerSt = Integer.toString(id);
+        this.params = params;
         reader = factory.createReader(readerSt, readergrp,
                         new ByteArraySerializer(), ReaderConfig.builder().build());
     }
@@ -40,7 +40,7 @@ public class PravegaReader extends Reader {
     @Override
     public byte[] read() throws IOException {
         try {
-            return reader.readNextEvent(params.timeout).getEvent();
+            return reader.readNextEvent(params.getTimeout()).getEvent();
         } catch (ReinitializationRequiredException e) {
             throw new IOException(e);
         }

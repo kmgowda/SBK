@@ -8,8 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.api.impl;
 
+import io.sbk.api.ResultLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

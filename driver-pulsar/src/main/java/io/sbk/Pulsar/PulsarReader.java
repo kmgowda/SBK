@@ -10,7 +10,6 @@
 package io.sbk.Pulsar;
 
 import io.sbk.api.Reader;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Parameters;
 
 import java.io.IOException;
@@ -25,14 +24,16 @@ import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 /**
  * Class for Pulsar reader/consumer.
  */
-public class PulsarReader extends Reader {
+public class PulsarReader implements Reader {
     final private Consumer<byte[]> consumer;
+    final private Parameters params;
 
-    public PulsarReader(int readerId, Parameters params, QuadConsumer recordTime,
-                              String topicName, String subscriptionName, PulsarClient client) throws  IOException {
-        super(readerId, params, recordTime);
-        final  SubscriptionInitialPosition position = params.writeAndRead ? SubscriptionInitialPosition.Latest :
+    public PulsarReader(int readerId, Parameters params, String topicName,
+                        String subscriptionName, PulsarClient client) throws  IOException {
+        this.params = params;
+        final  SubscriptionInitialPosition position = params.isWriteAndRead() ? SubscriptionInitialPosition.Latest :
                                                     SubscriptionInitialPosition.Earliest;
+
         try {
             this.consumer = client.newConsumer()
                     .topic(topicName)
@@ -51,7 +52,7 @@ public class PulsarReader extends Reader {
     @Override
     public byte[] read() throws IOException {
         try {
-            return consumer.receive(params.timeout, TimeUnit.SECONDS).getData();
+            return consumer.receive(params.getTimeout(), TimeUnit.SECONDS).getData();
         } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }

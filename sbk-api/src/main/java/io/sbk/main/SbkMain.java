@@ -12,13 +12,14 @@ package io.sbk.main;
 
 import io.sbk.api.Benchmark;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Performance;
-import io.sbk.api.SbkPerformance;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
+import io.sbk.api.QuadConsumer;
 import io.sbk.api.ResultLogger;
-import io.sbk.api.SystemResultLogger;
+import io.sbk.api.impl.SbkParameters;
+import io.sbk.api.impl.SbkPerformance;
+import io.sbk.api.impl.SbkReader;
+import io.sbk.api.impl.SbkWriter;
+import io.sbk.api.impl.SystemResultLogger;
 
 import java.io.IOException;
 
@@ -48,6 +49,7 @@ public class SbkMain {
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
         final Options options = new Options();
+        final boolean fork = true;
         CommandLine commandline = null;
         String className = null;
         Benchmark obj = null;
@@ -67,7 +69,7 @@ public class SbkMain {
         }
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            new Parameters(BENCHMARKNAME, startTime).printHelp();
+            new SbkParameters(BENCHMARKNAME, startTime).printHelp();
             System.exit(0);
         }
 
@@ -83,7 +85,7 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new Parameters(BENCHMARKNAME +" -class "+ className, startTime);
+        params = new SbkParameters(BENCHMARKNAME +" -class "+ className, startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
@@ -112,31 +114,31 @@ public class SbkMain {
 
         final ResultLogger logger = new SystemResultLogger();
 
-        final int threadCount = params.writersCount + params.readersCount + 6;
-        if (params.fork) {
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
+        if (fork) {
             executor = new ForkJoinPool(threadCount);
         } else {
             executor = Executors.newFixedThreadPool(threadCount);
         }
 
-        if (params.writersCount > 0 && !params.writeAndRead) {
-            writeStats = new SbkPerformance("Writing", REPORTINGINTERVAL, params.recordSize,
-                                params.csvFile, logger, executor);
+        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
+            writeStats = new SbkPerformance("Writing", REPORTINGINTERVAL, params.getRecordSize(),
+                                params.getCsvFile(), logger, executor);
             writeTime = writeStats::recordTime;
         } else {
             writeStats = null;
             writeTime = null;
         }
 
-        if (params.readersCount > 0) {
+        if (params.getReadersCount() > 0) {
             String action;
-            if (params.writeAndRead) {
+            if (params.isWriteAndRead()) {
                 action = "Write/Reading";
               } else {
                 action = "Reading";
             }
-            readStats = new SbkPerformance(action, REPORTINGINTERVAL, params.recordSize,
-                            params.csvFile, logger, executor);
+            readStats = new SbkPerformance(action, REPORTINGINTERVAL, params.getRecordSize(),
+                            params.getCsvFile(), logger, executor);
             readTime = readStats::recordTime;
         } else {
             readStats = null;
@@ -144,14 +146,14 @@ public class SbkMain {
         }
 
         try {
-            final List<Writer> writers =  IntStream.range(0, params.writersCount)
+            final List<SbkWriter> writers =  IntStream.range(0, params.getWritersCount())
                                             .boxed()
-                                            .map(i -> benchmark.createWriter(i, params, writeTime))
+                                            .map(i -> new SbkWriter(i, params, writeTime, benchmark.createWriter(i, params)))
                                             .collect(Collectors.toList());
 
-            final List<Reader> readers = IntStream.range(0, params.readersCount)
+            final List<SbkReader> readers = IntStream.range(0, params.getReadersCount())
                                             .boxed()
-                                            .map(i -> benchmark.createReader(i, params, readTime))
+                                            .map(i -> new SbkReader(i, params, readTime, benchmark.createReader(i, params)))
                                             .collect(Collectors.toList());
 
             final List<Callable<Void>> workers = Stream.of(readers, writers)
@@ -165,7 +167,7 @@ public class SbkMain {
                         System.out.println();
                         executor.shutdown();
                         executor.awaitTermination(1, TimeUnit.SECONDS);
-                        if (writeStats != null && !params.writeAndRead) {
+                        if (writeStats != null && !params.isWriteAndRead()) {
                             writeStats.shutdown(System.currentTimeMillis());
                         }
                         if (readStats != null) {
@@ -196,7 +198,7 @@ public class SbkMain {
                 }
             });
             startTime = System.currentTimeMillis();
-            if (writeStats != null && !params.writeAndRead) {
+            if (writeStats != null && !params.isWriteAndRead()) {
                 writeStats.start(startTime);
             }
             if (readStats != null) {
@@ -206,7 +208,7 @@ public class SbkMain {
             executor.invokeAll(workers);
             executor.shutdown();
             executor.awaitTermination(1, TimeUnit.SECONDS);
-            if (writeStats != null && !params.writeAndRead) {
+            if (writeStats != null && !params.isWriteAndRead()) {
                 writeStats.shutdown(System.currentTimeMillis());
             }
             if (readStats != null) {
