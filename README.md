@@ -7,14 +7,20 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-
 # Storage Benchmark Kit (SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Version](https://img.shields.io/badge/release-0.5-blue)](https://github.com/kmgowda/dsb/releases)
 
-The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any generic both persistent or non-persistent storage systems. If you are curious measure the  maximum throughput of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  too. It massively writes the data to storage system. This  supports multi writers and readers. This  also supports End to End latency. The percentile is calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
+The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage systems. If you are curious measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  too. It massively writes the data to storage system and reads the data from strorage system. The SBK supports multi writers and readers and also the End to End latency benchmarking. The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
 
-Currently SBK supports benchmarking of Apache Kafka, Pulsar and Pravega distributed streaming storages. In future, many more storage storage systems drivers will be plugged in. Refer to :   [[Add your storage driver](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver/storage device for performance benchmarking.
+Currently SBK supports benchmarking of 
+1. Apache Kafka
+2. Apache Pulsar 
+3. Pravega distributed streaming storages.
 
-we welcome open source developers to contribute to this probject by adding a driver your storage device and any features to SBK. Refer to : 
+In future, many more storage storage systems drivers will be plugged in. 
+
+we welcome open source developers to contribute to this project by adding a driver your storage device and any features to SBK. Refer to : 
+* [[Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk)] for the Contributing guidlines.
+* [[Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver (storage device driver or client) for performance benchmarking.  
 
 ## Build SBK
 
@@ -88,14 +94,14 @@ Writing Latencies 22 ms 50th, 31 ms 75th, 90 ms 95th, 168 ms 99th, 1064 ms 99.9t
 
 
 The SBK  can be executed to
- - write/read specific amount of events/records to/from the Pravega cluster
+ - write/read specific amount of events/records to/from the storage driver (device/cluster)
  - write/read the events/records for the specified amount of time
 
 The SBK can be executed in the following modes:
 ```
 1. Burst Mode (Max rate mode)
 2. Throughput Mode
-3. Rate limiter Mode (Recrods Rate or Events Rate Mode)
+3. Rate limiter Mode
 4. End to End Latency Mode
 ```
 
@@ -150,7 +156,7 @@ in the case you want to write/read the certain number of events use the -records
 -records 1000000 indicates that total 1000000 (1 million) of events will be written at the throughput speed of 10MB/sec
 ```
 
-### 3 - Rate limiter Mode (Records Rate or Events Rate Mode)
+### 3 - Rate limiter Mode
 This mode is another form of controlling writers throughput by limiting the number of records per second.
 In this mode, the SBK  pushes the messages to the storage client (device/driver) with specified approximate maximum records per sec.
 This mode is used to find the least latency  that can be obtained from the storage device or storage cluster (server) for events rate.
@@ -163,7 +169,7 @@ For example:  The Rate limiter Mode for pulsar 5 writers as follows
 r tcp://localhost:6650 -topic topic-k-225  -partitions 10  -writers 5 -size 100  -time 60  -records 1000
 
 The -records <records numbes>  (1000) specifies the records per second to write.
-Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode (Recrods Rate or Events Rate Mode).
+Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode.
 
 This test will be executed with approximate 1000 events per second by 5 writers.
 The topic "topic-k-225" with 10 partitions are created to run this test.
@@ -188,7 +194,46 @@ The -throughput -1 specifies the writes tries to write the events at the maximum
 
 ## Recording the latencies to CSV files
 User can use the option "-csv [file name]" to record the latencies of writers/readers.
-    
+
+## Contributing to SBK
+All submissions to the master are done through pull requests. If you'd like to make a change:
+
+1. Create a new Git hub issue ([SBK issues](https://github.com/kmgowda/sbk/issues)) describing the problem / feature.
+2. Fork a branch.
+3. Make your changes. 
+    * you can refer ([Oracle Java Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for coding style; however, Running the Gradle build helps you to fix the Coding syte issues too. 
+4. Verify all changes are working and Gradle build checkstyle is good.
+5. Submit a pull request with Issue Numer, Description and your Sign-off.
+
+Make sure that you update the issue with all details of testing you have done; it will helpful for me to review and merge.
+
+Another important point to consider is how to keep up with changes against the base the branch (the one your pull request is comparing against). Let's assume that the base branch is master. To make sure that your changes reflect the recent commits, I recommend that you rebase frequently. The command I suggest you use is:
+
+```
+git pull --rebase upstream master
+git push --force origin <pr-branch-name>
+```
+in the above, I'm assuming that:
+
+* upstream is sbk/sbk.git
+* origin is youraccount/sbk.git
+
+The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
+
+### Lombok
+SBK uses [[Lombok](https://projectlombok.org)] for code optimizations; I suggest the same for all the contributors too.
+If you use an IDE you'll need to install a plugin to make the IDE understand it. Using IntelliJ is recommended.
+
+To import the source into IntelliJ:
+
+1. Import the project directory into IntelliJ IDE. It will automatically detect the gradle project and import things correctly.
+2. Enable `Annotation Processing` by going to `Build, Execution, Deployment` -> `Compiler` > `Annotation Processors` and checking 'Enable annotation processing'.
+3. Install the `Lombok Plugin`. This can be found in `Preferences` -> `Plugins`. Restart your IDE.
+4. Pravega should now compile properly.
+
+For eclipse, you can generate eclipse project files by running `./gradlew eclipse`.
+
+
 ## Add your driver to SBK
 1. Create the gradle sub project preferable with the name driver-<your driver(storage device) name>.
 
