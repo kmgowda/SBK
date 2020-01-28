@@ -150,7 +150,7 @@ in the case you want to write/read the certain number of events use the -records
 -records 1000000 indicates that total 1000000 (1 million) of events will be written at the throughput speed of 10MB/sec
 ```
 
-### 3 - Rate limiter Mode (Recrods Rate or Events Rate Mode)
+### 3 - Rate limiter Mode (Records Rate or Events Rate Mode)
 This mode is another form of controlling writers throughput by limiting the number of records per second.
 In this mode, the SBK  pushes the messages to the storage client (device/driver) with specified approximate maximum records per sec.
 This mode is used to find the least latency  that can be obtained from the storage device or storage cluster (server) for events rate.
