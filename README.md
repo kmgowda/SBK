@@ -20,7 +20,7 @@ In future, many more storage storage systems drivers will be plugged in.
 
 we welcome open source developers to contribute to this project by adding a driver your storage device and any features to SBK. Refer to : 
 * [[Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk)] for the Contributing guidlines.
-* [[Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver/storage device for performance benchmarking.  
+* [[Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver (storage device driver or client) for performance benchmarking.  
 
 ## Build SBK
 
