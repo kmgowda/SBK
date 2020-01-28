@@ -188,7 +188,31 @@ The -throughput -1 specifies the writes tries to write the events at the maximum
 
 ## Recording the latencies to CSV files
 User can use the option "-csv [file name]" to record the latencies of writers/readers.
-    
+
+## Contributing to SBK
+All submissions to the master are done through pull requests. If you'd like to make a change:
+
+1. Create a new Git hub issue ([SBK issues](https://github.com/kmgowda/sbk/issues)) describing the problem / feature.
+2. Fork a branch.
+3. Make your changes. 
+    * you can refer ([Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for coding Style; however , Running Gradle build helps you to fix the Coding syte issues too. 
+4. Verify all changes are working and Gradle build checkstyle is good.
+5. Submit a pull request with Issue Numer, Description and your Sign-off.
+
+Another important point to consider is how to keep up with changes against the base the branch (the one your pull request is comparing against). Let's assume that the base branch is master. To make sure that your changes reflect the recent commits, I recommend that you rebase frequently. The command I suggest you use is:
+
+```
+git pull --rebase upstream master
+git push --force origin <pr-branch-name>
+```
+in the above, I'm assuming that:
+
+* upstream is sbk/sbk.git
+* origin is youraccount/sbk.git
+
+The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
+
+
 ## Add your driver to SBK
 1. Create the gradle sub project preferable with the name driver-<your driver(storage device) name>.
 
