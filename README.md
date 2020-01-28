@@ -35,7 +35,7 @@ Checkout the source code:
 
 ```
 git clone https://github.com/kmgowda/sbk.git
-cd dsb
+cd sbk
 ```
 
 Build the SBK:
