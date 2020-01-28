@@ -242,7 +242,14 @@ User can use the option "-csv [file name]" to record the latencies of writers/re
         
       b). Close the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L30 
           
-6. That's all ; Now, Build the SBK included your driver with the command:
+6.  Add the Gradle dependecy [ compile project(":sbk-api")]   to your sub-project (driver)
+    * see the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle
+
+7. Add your sub project to main gradle as dependency.
+    * see the Example: https://github.com/kmgowda/sbk/blob/master/build.gradle#L59
+    * make sure that gradle settings file: https://github.com/kmgowda/sbk/blob/master/settings.gradle has your Storage driver sub project name
+
+8. That's all ; Now, Build the SBK included your driver with the command:
 
 ```
 ./gradlew build
@@ -254,7 +261,7 @@ untar the SBK  to local folder
 tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
-7.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
+9.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
 
 Example: For pulsar driver
 ```
