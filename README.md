@@ -239,7 +239,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
-2. Create the package io.sbk.< your driver name>
+2. Create the package **io.sbk.< your driver name>** 
 
     * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
     
