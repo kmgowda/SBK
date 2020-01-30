@@ -55,7 +55,8 @@ Running SBK locally:
 ```
 <dir>/sbk$ ./build/distributions/sbk/bin/sbk  -help
 usage: sbk
- -class <arg>        Benchmark class (refer to driver-* folder)
+ -class <arg>        Benchmark Driver Class,
+                     Available Drivers [Kafka, Pravega, Pulsar]
  -csv <arg>          CSV file to record write/read latencies
  -flush <arg>        Each Writer calls flush after writing <arg> number of
                      of events(records); Not applicable, if both writers
@@ -70,6 +71,7 @@ usage: sbk
                      if 0 , writes 'events'
                      if -1, get the maximum throughput
  -time <arg>         Number of seconds this SBK runs (24hrs by default)
+ -version            Version
  -writers <arg>      Number of writers
 ```
 
@@ -311,17 +313,18 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 Example: For pulsar driver
 ```
 <SBK directory>/run/sbk/bin/sbk  -class Pulsar -help
- usage: sbk -class Pulsar
- -ackQuorum <arg>       ackQuorum (default: 1)
+usage: sbk -class Pulsar
+ -ackQuorum <arg>       AckQuorum (default: 1)
  -admin <arg>           Admin URI, required to create the partitioned
                         topic
  -broker <arg>          Broker URI
- -class <arg>           Benchmark class (refer to driver-* folder)
+ -class <arg>           Benchmark Driver Class,
+                        Available Drivers [Kafka, Pravega, Pulsar]
  -cluster <arg>         Cluster name (optional parameter)
  -csv <arg>             CSV file to record write/read latencies
  -deduplication <arg>   Enable or Disable Deduplication; by default
                         disabled
- -ensembleSize <arg>    ensembleSize (default: 1)
+ -ensembleSize <arg>    EnsembleSize (default: 1)
  -flush <arg>           Each Writer calls flush after writing <arg> number
                         of of events(records); Not applicable, if both
                         writers and readers are specified
@@ -337,6 +340,7 @@ Example: For pulsar driver
                         if -1, get the maximum throughput
  -time <arg>            Number of seconds this SBK runs (24hrs by default)
  -topic <arg>           Topic name
- -writeQuorum <arg>     writeQuorum (default: 1)
- -writers <arg>         Number of writers
+ -version               Version
+ -writeQuorum <arg>     WriteQuorum (default: 1)
+ -writers <arg>         Number of writers 
 ```
