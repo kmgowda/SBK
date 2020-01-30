@@ -14,7 +14,7 @@ The SBK (Storage Benchmark Kit) is an open source software frame-work for the pe
 Currently SBK supports benchmarking of 
 1. Apache Kafka
 2. Apache Pulsar 
-3. Pravega distributed streaming storages.
+3. Pravega distributed streaming storage systems.
 
 In future, many more storage storage systems drivers will be plugged in. 
 
