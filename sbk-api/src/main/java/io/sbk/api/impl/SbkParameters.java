@@ -19,6 +19,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
+import java.util.List;
+
 /**
  * class for Command Line Parameters.
  */
@@ -30,6 +32,7 @@ final public class SbkParameters implements Parameters {
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
+    final private List<String> driversList;
 
     @Getter
     final private long startTime;
@@ -60,16 +63,18 @@ final public class SbkParameters implements Parameters {
     private double throughput;
     private CommandLine commandline;
 
-    public SbkParameters(String name, long startTime) {
+    public SbkParameters(String name, List<String> driversList, long startTime) {
         options = new Options();
         formatter = new HelpFormatter();
         parser = new DefaultParser();
         benchmarkName = name;
         commandline = null;
         this.timeout = TIMEOUT;
+        this.driversList = driversList;
         this.startTime = startTime;
 
-        options.addOption("class", true, "Benchmark class (refer to driver-* folder)");
+        options.addOption("class", true, "Benchmark Driver Class,\n Available Drivers "
+                            + this.driversList.toString());
         options.addOption("writers", true, "Number of writers");
         options.addOption("readers", true, "Number of readers");
         options.addOption("records", true,
