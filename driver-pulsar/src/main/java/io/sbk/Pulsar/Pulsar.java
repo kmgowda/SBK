@@ -33,6 +33,7 @@ public class Pulsar implements Benchmark {
     private String tenant;
     private String adminUri;
     private int partitions;
+    private int ioThreads;
     private int ensembleSize;
     private int writeQuorum;
     private int ackQuorum;
@@ -52,6 +53,7 @@ public class Pulsar implements Benchmark {
         params.addOption("writeQuorum", true, "WriteQuorum (default: 1)");
         params.addOption("ackQuorum", true, "AckQuorum (default: 1) ");
         params.addOption("deduplication", true, "Enable or Disable Deduplication; by default disabled");
+        params.addOption("threads", true, "io threads per Topic; by default (writers+readers)");
     }
 
     @Override
@@ -69,10 +71,15 @@ public class Pulsar implements Benchmark {
         adminUri = params.getOptionValue("admin", null);
         cluster =  params.getOptionValue("cluster", DEFAULT_CLUSTER);
         partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
+        ioThreads =  Integer.parseInt(params.getOptionValue("threads", "0"));
         ensembleSize = Integer.parseInt(params.getOptionValue("ensembleSize", "1"));
         writeQuorum = Integer.parseInt(params.getOptionValue("writeQuorum", "1"));
         ackQuorum = Integer.parseInt(params.getOptionValue("ackQuorum", "1"));
         deduplication = Boolean.parseBoolean(params.getOptionValue("recreate", "false"));
+
+        if (ioThreads == 0) {
+            ioThreads = params.getWritersCount() + params.getReadersCount();
+        }
 
         final String[] names = topicName.split("[/]");
         try {
@@ -91,7 +98,7 @@ public class Pulsar implements Benchmark {
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         try {
-            client = PulsarClient.builder().serviceUrl(brokerUri).build();
+            client = PulsarClient.builder().ioThreads(ioThreads).serviceUrl(brokerUri).build();
         } catch (PulsarClientException ex) {
             ex.printStackTrace();
             throw new IOException(ex);
