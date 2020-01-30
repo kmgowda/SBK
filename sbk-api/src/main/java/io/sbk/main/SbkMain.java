@@ -51,7 +51,6 @@ public class SbkMain {
 
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
-        final Options options = new Options();
         final boolean fork = true;
         CommandLine commandline = null;
         String className = null;
@@ -62,19 +61,34 @@ public class SbkMain {
         final Performance readStats;
         final QuadConsumer writeTime;
         final QuadConsumer readTime;
+        final List<String> driversList;
+        final String version = SbkMain.class.getPackage().getImplementationVersion();
 
-        final List<String> driversList =  getClassNames(PKGNAME);
-
-        options.addOption("class", true, "Benchmark class");
         try {
-            commandline = new DefaultParser().parse(options, args, true);
+            commandline = new DefaultParser().parse(new Options()
+                    .addOption("version", false, "Version"),
+                    args, true);
         } catch (ParseException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
+        if (commandline.hasOption("version")) {
+            System.out.println(BENCHMARKNAME+" Version: "+version);
+            System.exit(0);
+        }
+
+        try {
+            commandline = new DefaultParser().parse(new Options()
+                            .addOption("class", true, "Benchmark Class"),
+                    args, true);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            System.exit(0);
+        }
+        driversList =  getClassNames(PKGNAME);
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            new SbkParameters(BENCHMARKNAME, driversList, startTime).printHelp();
+            new SbkParameters(BENCHMARKNAME, version, driversList,  startTime).printHelp();
             System.exit(0);
         }
 
@@ -90,19 +104,21 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new SbkParameters(BENCHMARKNAME +" -class "+ className, driversList, startTime);
+        params = new SbkParameters(BENCHMARKNAME +" -class "+ className, version, driversList, startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
-        }  catch (ParseException ex) {
+        }  catch (ParseException | IllegalArgumentException ex) {
             ex.printStackTrace();
             params.printHelp();
+            System.exit(0);
+        }
+        if (params.hasOption("version")) {
             System.exit(0);
         }
         if (params.hasOption("help")) {
             System.exit(0);
         }
-
         try {
             benchmark.parseArgs(params);
         } catch (IllegalArgumentException ex) {

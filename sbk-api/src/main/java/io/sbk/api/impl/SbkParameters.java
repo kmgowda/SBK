@@ -29,6 +29,7 @@ final public class SbkParameters implements Parameters {
     static final int MAXTIME = 60 * 60 * 24;
     static final int TIMEOUT = 1000;
     final private String benchmarkName;
+    final private String version;
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
@@ -63,16 +64,16 @@ final public class SbkParameters implements Parameters {
     private double throughput;
     private CommandLine commandline;
 
-    public SbkParameters(String name, List<String> driversList, long startTime) {
-        options = new Options();
-        formatter = new HelpFormatter();
-        parser = new DefaultParser();
-        benchmarkName = name;
-        commandline = null;
+    public SbkParameters(String name, String version, List<String> driversList, long startTime) {
+        this.options = new Options();
+        this.formatter = new HelpFormatter();
+        this.parser = new DefaultParser();
+        this.benchmarkName = name;
+        this.version = version;
         this.timeout = TIMEOUT;
         this.driversList = driversList;
         this.startTime = startTime;
-
+        this.commandline = null;
         options.addOption("class", true, "Benchmark Driver Class,\n Available Drivers "
                             + this.driversList.toString());
         options.addOption("writers", true, "Number of writers");
@@ -92,6 +93,7 @@ final public class SbkParameters implements Parameters {
                         "if -1, get the maximum throughput");
         options.addOption("csv", true, "CSV file to record write/read latencies");
         options.addOption("help", false, "Help message");
+        options.addOption("version", false, "Version");
     }
 
      @Override
@@ -108,6 +110,12 @@ final public class SbkParameters implements Parameters {
     public void printHelp() {
         formatter.printHelp(benchmarkName, options);
     }
+
+    @Override
+    public void printVersion() {
+        System.out.println(benchmarkName+" Version: "+version);
+    }
+
 
     @Override
     public boolean hasOption(String name) {
@@ -137,12 +145,17 @@ final public class SbkParameters implements Parameters {
     }
 
     @Override
-    public void parseArgs(String[] args) throws ParseException {
+    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
         commandline = parser.parse(options, args);
         if (commandline.hasOption("help")) {
             printHelp();
             return;
         }
+        if (commandline.hasOption("version")) {
+            printVersion();
+            return;
+        }
+
         writersCount = Integer.parseInt(commandline.getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(commandline.getOptionValue("readers", "0"));
 

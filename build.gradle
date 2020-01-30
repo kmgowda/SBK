@@ -47,6 +47,13 @@ allprojects {
 	apply from: "$rootDir/gradle/maven.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
+	jar {
+		manifest {
+			attributes 	'Implementation-Title': rootProject.name,
+						'Implementation-Version': sbkVersion
+		}
+	}
+
 	mainClassName = "io.sbk.main.SbkMain"
 	startScripts {
 		doLast {
