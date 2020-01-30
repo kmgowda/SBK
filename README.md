@@ -335,6 +335,8 @@ usage: sbk -class Pulsar
                         otherwise, Maximum records per second by writer(s)
                         and/or Number of records per reader
  -size <arg>            Size of each message (event or record)
+ -threads <arg>         io threads per Topic; by default (writers +
+                        readers)
  -throughput <arg>      if > 0 , throughput in MB/s
                         if 0 , writes 'events'
                         if -1, get the maximum throughput
@@ -342,5 +344,5 @@ usage: sbk -class Pulsar
  -topic <arg>           Topic name
  -version               Version
  -writeQuorum <arg>     WriteQuorum (default: 1)
- -writers <arg>         Number of writers 
+ -writers <arg>         Number of writers
 ```
