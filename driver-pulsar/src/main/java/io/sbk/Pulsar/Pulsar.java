@@ -48,10 +48,9 @@ public class Pulsar implements Benchmark {
         params.addOption("broker", true, "Broker URI");
         params.addOption("admin", true, "Admin URI, required to create the partitioned topic");
         params.addOption("partitions", true, "Number of partitions of the topic (default: 1)");
-
-        params.addOption("ensembleSize", true, "ensembleSize (default: 1)");
-        params.addOption("writeQuorum", true, "writeQuorum (default: 1)");
-        params.addOption("ackQuorum", true, "ackQuorum (default: 1) ");
+        params.addOption("ensembleSize", true, "EnsembleSize (default: 1)");
+        params.addOption("writeQuorum", true, "WriteQuorum (default: 1)");
+        params.addOption("ackQuorum", true, "AckQuorum (default: 1) ");
         params.addOption("deduplication", true, "Enable or Disable Deduplication; by default disabled");
     }
 

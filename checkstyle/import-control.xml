@@ -46,5 +46,6 @@
     <allow pkg="com.spotify" />
     <allow pkg="io.jsonwebtoken" />
     <allow pkg="io.kubernetes" />
+    <allow pkg="org.reflections" />
 
 </import-control>

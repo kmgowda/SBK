@@ -27,7 +27,9 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.reflections.Reflections;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.IntStream;
@@ -44,11 +46,11 @@ import java.util.concurrent.ExecutorService;
  */
 public class SbkMain {
     final static String BENCHMARKNAME = "sbk";
+    final static String PKGNAME = "io.sbk";
     final static int REPORTINGINTERVAL = 5000;
 
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
-        final Options options = new Options();
         final boolean fork = true;
         CommandLine commandline = null;
         String className = null;
@@ -59,22 +61,39 @@ public class SbkMain {
         final Performance readStats;
         final QuadConsumer writeTime;
         final QuadConsumer readTime;
+        final List<String> driversList;
+        final String version = SbkMain.class.getPackage().getImplementationVersion();
 
-        options.addOption("class", true, "Benchmark class");
         try {
-            commandline = new DefaultParser().parse(options, args, true);
+            commandline = new DefaultParser().parse(new Options()
+                    .addOption("version", false, "Version"),
+                    args, true);
         } catch (ParseException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
-        className = commandline.getOptionValue("class", null);
-        if (className == null) {
-            new SbkParameters(BENCHMARKNAME, startTime).printHelp();
+        if (commandline.hasOption("version")) {
+            System.out.println(BENCHMARKNAME+" Version: "+version);
             System.exit(0);
         }
 
         try {
-            obj = (Benchmark) Class.forName("io.sbk." + className + "." + className).newInstance();
+            commandline = new DefaultParser().parse(new Options()
+                            .addOption("class", true, "Benchmark Class"),
+                    args, true);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            System.exit(0);
+        }
+        driversList =  getClassNames(PKGNAME);
+        className = commandline.getOptionValue("class", null);
+        if (className == null) {
+            new SbkParameters(BENCHMARKNAME, version, driversList,  startTime).printHelp();
+            System.exit(0);
+        }
+
+        try {
+            obj = (Benchmark) Class.forName(PKGNAME + "." + className + "." + className).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(0);
@@ -85,19 +104,21 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new SbkParameters(BENCHMARKNAME +" -class "+ className, startTime);
+        params = new SbkParameters(BENCHMARKNAME +" -class "+ className, version, driversList, startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
-        }  catch (ParseException ex) {
+        }  catch (ParseException | IllegalArgumentException ex) {
             ex.printStackTrace();
             params.printHelp();
+            System.exit(0);
+        }
+        if (params.hasOption("version")) {
             System.exit(0);
         }
         if (params.hasOption("help")) {
             System.exit(0);
         }
-
         try {
             benchmark.parseArgs(params);
         } catch (IllegalArgumentException ex) {
@@ -237,5 +258,13 @@ public class SbkMain {
             ex.printStackTrace();
         }
         System.exit(0);
+    }
+
+
+    private static List<String> getClassNames(String pkgName) {
+        Reflections reflections = new Reflections(pkgName);
+        Set<Class<? extends Benchmark>> subTypes = reflections.getSubTypesOf(Benchmark.class);
+        return subTypes.stream().map(i -> i.toString().substring(i.toString().lastIndexOf(".") + 1))
+                .sorted().collect(Collectors.toList());
     }
 }

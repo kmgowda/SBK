@@ -42,6 +42,11 @@ public interface Parameters {
     void printHelp();
 
     /**
+     * Print the -version output.
+     */
+    void printVersion();
+
+    /**
      * Returns whether the named Option is a member of this Parameters.
      * @param name name of the parameter option
      * @return  true if the named Option is a member of this Options
@@ -66,9 +71,10 @@ public interface Parameters {
     /**
      * Parse the command line arguments.
      * @param args list of command line arguments.
+     * @throws IllegalArgumentException If an exception occurred.
      * @throws ParseException If an exception occurred.
      */
-    void parseArgs(String[] args) throws ParseException;
+    void parseArgs(String[] args) throws ParseException, IllegalArgumentException;
 
     /**
      * get the execution time in seconds.
