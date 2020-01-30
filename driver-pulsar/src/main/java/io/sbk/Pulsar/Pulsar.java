@@ -53,7 +53,7 @@ public class Pulsar implements Benchmark {
         params.addOption("writeQuorum", true, "WriteQuorum (default: 1)");
         params.addOption("ackQuorum", true, "AckQuorum (default: 1) ");
         params.addOption("deduplication", true, "Enable or Disable Deduplication; by default disabled");
-        params.addOption("threads", true, "io threads per Topic; by default (writers+readers)");
+        params.addOption("threads", true, "io threads per Topic; by default (writers + readers)");
     }
 
     @Override
