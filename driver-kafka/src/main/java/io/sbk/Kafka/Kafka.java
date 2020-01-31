@@ -33,6 +33,7 @@ public class Kafka implements Benchmark {
     private int partitions;
     private short replica;
     private short sync;
+    private boolean create;
     private Properties producerConfig;
     private Properties consumerConfig;
     private KafkaTopicHandler topicHandler;
@@ -44,6 +45,8 @@ public class Kafka implements Benchmark {
         params.addOption("partitions", true, "partitions");
         params.addOption("replica", true, "Replication factor");
         params.addOption("sync", true, "Minimum in-sync Replicas");
+        params.addOption("sync", true, "Minimum in-sync Replicas");
+        params.addOption("create", true, "Create (recreate) the topic, valid only for writers");
     }
 
     @Override
@@ -60,7 +63,7 @@ public class Kafka implements Benchmark {
         partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
         replica = Short.parseShort(params.getOptionValue("replica", "1"));
         sync = Short.parseShort(params.getOptionValue("sync", "1"));
-
+        create = Boolean.parseBoolean(params.getOptionValue("create", "false"));
     }
 
     private Properties createProducerConfig(Parameters params) {
@@ -103,7 +106,7 @@ public class Kafka implements Benchmark {
         producerConfig = createProducerConfig(params);
         consumerConfig = createConsumerConfig(params);
         topicHandler = new KafkaTopicHandler(brokerUri, topicName, partitions, replica, sync);
-        if (params.getWritersCount() > 0) {
+        if (params.getWritersCount() > 0 && create) {
             topicHandler.createTopic(true);
         }
     }
