@@ -29,6 +29,8 @@ final public class SbkParameters implements Parameters {
     static final int MAXTIME = 60 * 60 * 24;
     static final int TIMEOUT = 1000;
     final private String benchmarkName;
+    final private String className;
+    final private String desc;
     final private String version;
     final private Options options;
     final private HelpFormatter formatter;
@@ -64,11 +66,13 @@ final public class SbkParameters implements Parameters {
     private double throughput;
     private CommandLine commandline;
 
-    public SbkParameters(String name, String version, List<String> driversList, long startTime) {
+    public SbkParameters(String name, String desc, String version, String className, List<String> driversList, long startTime) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
+        this.desc = desc;
+        this.className = className;
         this.version = version;
         this.timeout = TIMEOUT;
         this.driversList = driversList;
@@ -96,7 +100,7 @@ final public class SbkParameters implements Parameters {
         options.addOption("version", false, "Version");
     }
 
-     @Override
+    @Override
     public Options addOption(String name, boolean hasArg, String description) {
         return options.addOption(name, hasArg, description);
     }
@@ -108,12 +112,16 @@ final public class SbkParameters implements Parameters {
 
     @Override
     public void printHelp() {
-        formatter.printHelp(benchmarkName, options);
+        if (className.length() > 0) {
+            formatter.printHelp(benchmarkName + " -class " + className, options);
+        } else {
+            formatter.printHelp(benchmarkName, options);
+        }
     }
 
     @Override
     public void printVersion() {
-        System.out.println(benchmarkName+" Version: "+version);
+        System.out.println(desc + ", " + benchmarkName +" version: " + version);
     }
 
 
