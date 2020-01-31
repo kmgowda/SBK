@@ -46,6 +46,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class SbkMain {
     final static String BENCHMARKNAME = "sbk";
+    final static String DESC = "Storage Benchmark Kit";
     final static String PKGNAME = "io.sbk";
     final static int REPORTINGINTERVAL = 5000;
 
@@ -73,7 +74,7 @@ public class SbkMain {
             System.exit(0);
         }
         if (commandline.hasOption("version")) {
-            System.out.println(BENCHMARKNAME+" Version: "+version);
+            System.out.println(DESC + ", " + BENCHMARKNAME + " version: " + version);
             System.exit(0);
         }
 
@@ -88,7 +89,7 @@ public class SbkMain {
         driversList =  getClassNames(PKGNAME);
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            new SbkParameters(BENCHMARKNAME, version, driversList,  startTime).printHelp();
+            new SbkParameters(BENCHMARKNAME, DESC, version, "", driversList,  startTime).printHelp();
             System.exit(0);
         }
 
@@ -104,7 +105,7 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new SbkParameters(BENCHMARKNAME +" -class "+ className, version, driversList, startTime);
+        params = new SbkParameters(BENCHMARKNAME, DESC, version, className, driversList,  startTime);
         benchmark.addArgs(params);
         try {
             params.parseArgs(args);
