@@ -127,5 +127,7 @@ public class PulsarTopicHandler {
         }
     }
 
-
+    public  void close() {
+        pulsarAdmin.clone();
+    }
 }

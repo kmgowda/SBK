@@ -103,10 +103,10 @@ public class Pulsar implements Benchmark {
             ex.printStackTrace();
             throw new IOException(ex);
         }
-        if (adminUri != null) {
+        if (adminUri != null && params.getWritersCount() > 0) {
             topicHandler = new PulsarTopicHandler(adminUri, brokerUri, tenant, cluster, nameSpace,
                     topicName, partitions, ensembleSize, writeQuorum, ackQuorum, deduplication);
-            topicHandler.createTopic(params.getWritersCount() > 0);
+            topicHandler.createTopic(true);
         } else {
             topicHandler = null;
         }
