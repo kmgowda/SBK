@@ -11,10 +11,10 @@ You may obtain a copy of the License at
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage syste. If you are curious to measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  tool/frame work. It massively writes the data to storage system and reads the data from strorage system. The SBK supports multi writers and readers and also the End to End latency benchmarking. The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
 
-Currently SBK supports benchmarking of 
-1. Apache Kafka
-2. Apache Pulsar 
-3. Pravega distributed streaming storage systems.
+Currently SBK supports benchmarking of
+1. [Apache Kafka](https://kafka.apache.org)
+2. [Apache Pulsar](https://pulsar.apache.org)
+3. [Pravega](http://pravega.io) distributed streaming storage systems.
 
 In future, many more storage storage systems drivers will be plugged in. 
 
