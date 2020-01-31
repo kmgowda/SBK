@@ -28,15 +28,25 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
  * Abstract class for Benchmarking.
  */
 public class Kafka implements Benchmark {
-    private String topicName;
     private String brokerUri;
+    private String topicName;
+    private int partitions;
+    private short replica;
+    private short sync;
+    private boolean create;
     private Properties producerConfig;
     private Properties consumerConfig;
+    private KafkaTopicHandler topicHandler;
 
     @Override
     public void addArgs(final Parameters params) {
-        params.addOption("topic", true, "Topic name");
         params.addOption("broker", true, "Broker URI");
+        params.addOption("topic", true, "Topic name");
+        params.addOption("partitions", true, "partitions");
+        params.addOption("replica", true, "Replication factor");
+        params.addOption("sync", true, "Minimum in-sync Replicas");
+        params.addOption("sync", true, "Minimum in-sync Replicas");
+        params.addOption("create", true, "Create (recreate) the topic, valid only for writers");
     }
 
     @Override
@@ -50,6 +60,10 @@ public class Kafka implements Benchmark {
         if (topicName == null) {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
+        partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
+        replica = Short.parseShort(params.getOptionValue("replica", "1"));
+        sync = Short.parseShort(params.getOptionValue("sync", "1"));
+        create = Boolean.parseBoolean(params.getOptionValue("create", "false"));
     }
 
     private Properties createProducerConfig(Parameters params) {
@@ -91,6 +105,10 @@ public class Kafka implements Benchmark {
     public void openStorage(final Parameters params) throws  IOException {
         producerConfig = createProducerConfig(params);
         consumerConfig = createConsumerConfig(params);
+        topicHandler = new KafkaTopicHandler(brokerUri, topicName, partitions, replica, sync);
+        if (params.getWritersCount() > 0 && create) {
+            topicHandler.createTopic(true);
+        }
     }
 
     @Override
