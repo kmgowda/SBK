@@ -34,8 +34,8 @@ we welcome open source developers to contribute to this project by adding a driv
 Checkout the source code:
 
 ```
-git clone https://github.com/kmgowda/sbk.git
-cd sbk
+git clone https://github.com/kmgowda/SBK.git
+cd SBK
 ```
 
 Build the SBK:
