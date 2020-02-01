@@ -12,6 +12,9 @@ package io.sbk.api.impl;
 
 import io.sbk.api.ResultLogger;
 
+/**
+ * Class for recoding/printing results on System.out.
+ */
 public class SystemResultLogger implements ResultLogger {
 
     public SystemResultLogger() {

@@ -19,7 +19,7 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 
 /**
- * Abstract class for Benchmarking.
+ * class for Pulsar Benchmarking.
  */
 public class Pulsar implements Benchmark {
     static final String DEFAULT_NAMESPACE = null;
@@ -115,7 +115,7 @@ public class Pulsar implements Benchmark {
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
-
+            topicHandler.close();
     }
 
     @Override

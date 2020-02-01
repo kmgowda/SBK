@@ -21,11 +21,11 @@ public interface Reader {
      * @return byte[] return the data.
      * @throws IOException If an exception occurred.
      */
-    public abstract byte[] read() throws IOException;
+    byte[] read() throws IOException;
 
     /**
      * close the consumer/reader.
      * @throws IOException If an exception occurred.
      */
-    public abstract void close() throws IOException;
+    void close() throws IOException;
 }

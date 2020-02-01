@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Class for Kafka topic and partitions.
+ */
 public class KafkaTopicHandler {
     final private Properties topicProperties;
     final private Properties adminProperties;

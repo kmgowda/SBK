@@ -25,7 +25,7 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 
 /**
- * Abstract class for Benchmarking.
+ * class for Kafka Benchmarking.
  */
 public class Kafka implements Benchmark {
     private String brokerUri;
@@ -113,7 +113,7 @@ public class Kafka implements Benchmark {
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
-
+        topicHandler.close();
     }
 
     @Override

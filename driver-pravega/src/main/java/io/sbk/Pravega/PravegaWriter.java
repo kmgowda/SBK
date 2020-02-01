@@ -21,7 +21,9 @@ import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.pravega.client.stream.EventWriterConfig;
 import io.pravega.client.EventStreamClientFactory;
 
-
+/**
+ * Class for Pravega writer/producer.
+ */
 public class PravegaWriter implements Writer {
     final EventStreamWriter<byte[]> producer;
 

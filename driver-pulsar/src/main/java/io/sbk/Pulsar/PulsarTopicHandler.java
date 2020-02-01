@@ -26,6 +26,9 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Collections;
 
+/**
+ * Class for Pulsar topic and partitions.
+ */
 public class PulsarTopicHandler {
     final private PulsarAdmin adminClient;
     final private PulsarAdminBuilder pulsarAdmin;
