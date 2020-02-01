@@ -346,3 +346,6 @@ usage: sbk -class Pulsar
  -writeQuorum <arg>     WriteQuorum (default: 1)
  -writers <arg>         Number of writers
 ```
+
+## Design of SBK
+The SBK is the spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of SBK and comparision of Kafka and Pravega in terms of perofrmance benchmarking.
