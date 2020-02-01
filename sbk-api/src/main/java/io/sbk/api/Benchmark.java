@@ -23,38 +23,42 @@ public interface  Benchmark {
     void addArgs(final Parameters params);
 
     /**
-     * Add the driver specific command line arguments.
-     * @param params Parameters object to be parsed.
+     * Parse the driver specific command line arguments.
+     * @param params Parameters object to be parsed for driver specific parameters/arguments.
      * @throws IllegalArgumentException If an exception occurred.
      */
     void parseArgs(final Parameters params) throws IllegalArgumentException;
 
     /**
      * Open the storage device / client to perform the benchmarking.
-     * @param params configuration parameters.
+     * @param params Parameters object enclosing all commandline arguments,
+     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @throws IOException If an exception occurred.
      */
     void openStorage(final Parameters params) throws IOException;
 
     /**
      * Close the Storage device / client.
-     * @param params configuration parameters.
+     * @param params Parameters object enclosing all commandline arguments,
+     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @throws IOException If an exception occurred.
      */
     void closeStorage(final Parameters params) throws IOException;
 
     /**
-     * Create a Single Writer.
+     * Create a Single Writer / Producer.
      * @param id Writer id
-     * @param params configuration parameters.
+     * @param params Parameters object enclosing all commandline arguments,
+     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Writer return the Writer , null in case of failure
      */
     Writer createWriter(final int id, final Parameters params);
 
     /**
-     * Create a Single Reader.
+     * Create a Single Reader / Consumer.
      * @param id Reader id
-     * @param params configuration parameters.
+     * @param params Parameters object enclosing all commandline arguments,
+     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Reader return the Reader , null in case of failure
      */
     Reader createReader(final int id, final Parameters params);

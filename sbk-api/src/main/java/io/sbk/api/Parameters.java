@@ -29,22 +29,12 @@ public interface Parameters {
     Options addOption(String name, boolean hasArg, String description);
 
     /**
-     * Add the driver specific command line arguments.
+     * Parse the driver specific command line arguments.
      * @param name Name of the parameter to add.
      * @param description Self-documenting description.
      * @return Options return the added options
      */
     Options addOption(String name, String description);
-
-    /**
-     * Print the -help output.
-     */
-    void printHelp();
-
-    /**
-     * Print the -version output.
-     */
-    void printVersion();
 
     /**
      * Returns whether the named Option is a member of this Parameters.
@@ -67,14 +57,6 @@ public interface Parameters {
      * @return   parameter value
      */
     String getOptionValue(String name, String defaultValue);
-
-    /**
-     * Parse the command line arguments.
-     * @param args list of command line arguments.
-     * @throws IllegalArgumentException If an exception occurred.
-     * @throws ParseException If an exception occurred.
-     */
-    void parseArgs(String[] args) throws ParseException, IllegalArgumentException;
 
     /**
      * get the execution time in seconds.
@@ -142,4 +124,21 @@ public interface Parameters {
      */
     int getTimeout();
 
+    /**
+     * Print the -help output.
+     */
+    void printHelp();
+
+    /**
+     * Print the -version output.
+     */
+    void printVersion();
+
+    /**
+     * Parse the command line arguments.
+     * @param args list of command line arguments.
+     * @throws IllegalArgumentException If an exception occurred.
+     * @throws ParseException If an exception occurred.
+     */
+    void parseArgs(String[] args) throws ParseException, IllegalArgumentException;
 }

@@ -39,7 +39,10 @@ public interface Writer {
     void close() throws IOException;
 
     /**
-     * Writes the data and benchmark.
+     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(byte[])}
+     * and recording the benchmark statistics.
+     * if you are intend to not use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(byte[])}
+     * then you can override this method. otherwise, use the default implementation and don't override this method.
      *
      * @param data   data to write
      * @param recordTime to call for benchmarking

@@ -22,7 +22,7 @@ import org.apache.commons.cli.ParseException;
 import java.util.List;
 
 /**
- * class for Command Line Parameters.
+ * class for processing command Line arguments/parameters.
  */
 @Slf4j
 final public class SbkParameters implements Parameters {

@@ -13,7 +13,9 @@ package io.sbk.api.impl;
 import io.sbk.api.ResultLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * Class for recoding/printing results on Sl4j.
+ */
 public class Sl4jResultLogger implements ResultLogger {
     final private Logger log;
 
