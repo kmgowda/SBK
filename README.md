@@ -53,7 +53,7 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 Running SBK locally:
 
 ```
-<dir>/sbk$ ./build/distributions/sbk/bin/sbk  -help
+<SBK directory>$ ./build/distributions/sbk/bin/sbk  -help
 usage: sbk
  -class <arg>        Benchmark Driver Class,
                      Available Drivers [Kafka, Pravega, Pulsar]
