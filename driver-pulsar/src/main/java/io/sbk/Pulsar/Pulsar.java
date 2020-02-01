@@ -115,7 +115,9 @@ public class Pulsar implements Benchmark {
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
+        if (topicHandler != null) {
             topicHandler.close();
+        }
     }
 
     @Override

@@ -113,7 +113,9 @@ public class Kafka implements Benchmark {
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
-        topicHandler.close();
+        if (topicHandler != null) {
+            topicHandler.close();
+        }
     }
 
     @Override
