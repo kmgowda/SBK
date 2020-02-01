@@ -245,49 +245,49 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
     * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
     
-3. In your driver package you have to implement the Interface: [[Benchmark](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java)]
+3. In your driver package you have to implement the Interface: [[Benchmark](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html)]
 
     * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
         
     * you have to implement the following methods of Benchmark Interface:
         
-      a). Add the Addtional parameters (Command line Parameters) for your driver : https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L23
+      a). Add the Addtional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#addArgs-io.sbk.api.Parameters-)]
       * The default command line parameters are listed in the help output here : https://github.com/kmgowda/sbk#building
         
-      b). Parse your driver specific paramters: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L30
+      b). Parse your driver specific paramters: [[parseArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#parseArgs-io.sbk.api.Parameters-)]
         
-      c). Open the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L37
+      c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#openStorage-io.sbk.api.Parameters-)]
         
-      d). Close the storage: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L44
+      d). Close the storage:[[openStorage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#closeStorage-io.sbk.api.Parameters-)]
         
-      e). Create a single writer instance: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L52
+      e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#createWriter-int-io.sbk.api.Parameters-)]
         * Create Writer will be called multiple times by SBK incase of Multi writers are specified in the command line.   
         
-      f). Create a single Reader instance: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Benchmark.java#L60
+      f). Create a single Reader instance: :[[createReader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#createReader-int-io.sbk.api.Parameters-)]
         * Create Reader will be called multiple times by SBK incase of Multi readers are specified in the command line. 
     
-4. Implement the Writer Interface: [[Writer](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java)]
+4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html)]
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java
     
     * you have to implement the following methods of Writer class:
         
-      a). Writer Data [Async or Sync]: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L27
+      a). Writer Data [Async or Sync]:  [[writeAsync](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#writeAsync-byte:A-)]
         
-      b). Flush the data: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L33
+      b). Flush the data: [[flush](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#flush--)]
         
-      c). Close the Writer: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L39
+      c). Close the Writer: [[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#close--)]
         
-      d). In case , if you want to have your own recordWrite implemenation to write data and record the start and end time, then you can override: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L64
+      d). In case , if you want to have your own recordWrite implemenation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#recordWrite-byte:A-io.sbk.api.QuadConsumer-)]
         
-5. Implement the Reader Interface: [[Reader](https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java)]
+5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html)]
 
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java
 
     * you have to implement the following methods of Reader class:
         
-      a). Read Data (synchronous reades): https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L24
+      a). Read Data (synchronous reades): [[read](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#read--)]
         
-      b). Close the Reader: https://github.com/kmgowda/sbk/blob/master/sbk-api/src/main/java/io/sbk/api/Reader.java#L30 
+      b). Close the Reader:[[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#close--)] 
           
 6.  Add the Gradle dependecy [ compile project(":sbk-api")]   to your sub-project (driver)
     * see the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle
