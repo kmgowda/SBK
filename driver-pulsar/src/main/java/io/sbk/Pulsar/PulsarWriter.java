@@ -14,13 +14,14 @@ import io.sbk.api.Parameters;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import lombok.Synchronized;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 /**
  * Class for Pulsar writer/producer.
  */
-public class PulsarWriter implements Writer {
+public class PulsarWriter implements Writer<byte[]> {
     final private Producer<byte[]> producer;
 
     public PulsarWriter(int writerID, Parameters params, String topicName, PulsarClient client) throws IOException {
@@ -50,7 +51,8 @@ public class PulsarWriter implements Writer {
     }
 
     @Override
-    public synchronized void close() throws IOException {
+    @Synchronized
+    public void close() throws IOException {
         try {
             producer.close();
         } catch (PulsarClientException ex) {

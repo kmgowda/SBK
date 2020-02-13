@@ -10,31 +10,32 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.Data;
 import io.sbk.api.Parameters;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.Writer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Writer Implementation.
  */
-public class SbkWriter extends Worker implements Callable<Void> {
+public class SbkWriter<T> extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
-    final private Writer writer;
+    final private Data<T> data;
+    final private Writer<T> writer;
     final private RunBenchmark perf;
-    final private byte[] payload;
+    final private T payload;
 
-    public SbkWriter(int writerID, Parameters params, QuadConsumer recordTime, Writer writer) {
+    public SbkWriter(int writerID, Parameters params, QuadConsumer recordTime, Data<T> data, Writer<T> writer) {
         super(writerID, params, recordTime);
+        this.data = data;
         this.writer = writer;
-        this.payload = createPayload(params.getRecordSize());
+        this.payload = data.create(params.getRecordSize());
         this.perf = createBenchmark();
     }
 
@@ -45,22 +46,6 @@ public class SbkWriter extends Worker implements Callable<Void> {
             bytes[i] = (byte) (random.nextInt(26) + 65);
         }
         return bytes;
-    }
-
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
-        return writer.writeAsync(data);
-    }
-
-    public void flush() throws IOException {
-        writer.flush();
-    }
-
-    public void close() throws IOException {
-        writer.close();
-    }
-
-    long recordWrite(byte[] data, QuadConsumer recordTime) throws IOException {
-        return writer.recordWrite(data, recordTime);
     }
 
     @Override
@@ -105,23 +90,25 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
 
     final private void RecordsWriter() throws InterruptedException, IOException {
+        final int size = data.length(payload);
         for (int i = 0; i < params.getRecordsCount(); i++) {
-            recordWrite(payload, recordTime);
+            writer.recordWrite(payload, size, recordTime);
         }
-        flush();
+        writer.flush();
     }
 
 
     final private void RecordsWriterSleep() throws InterruptedException, IOException {
         final RateController eCnt = new RateController(System.currentTimeMillis(), params.getRecordsPerSec());
         final int recordsCount = params.getRecordsCount();
+        final int size = data.length(payload);
         int cnt = 0;
         while (cnt < recordsCount) {
             int loopMax = Math.min(params.getRecordsPerFlush(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
-                eCnt.control(cnt++, recordWrite(payload, recordTime));
+                eCnt.control(cnt++, writer.recordWrite(payload, size, recordTime));
             }
-            flush();
+            writer.flush();
         }
     }
 
@@ -129,40 +116,39 @@ public class SbkWriter extends Worker implements Callable<Void> {
     final private void RecordsWriterTime() throws InterruptedException, IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
+        final int size = data.length(payload);
         long time = System.currentTimeMillis();
         while ((time - startTime) < msToRun) {
-            time = recordWrite(payload, recordTime);
+            time = writer.recordWrite(payload, size, recordTime);
         }
-        flush();
+        writer.flush();
     }
 
 
     final private void RecordsWriterTimeSleep() throws InterruptedException, IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
+        final int size = data.length(payload);
         long time = System.currentTimeMillis();
         final RateController eCnt = new RateController(time, params.getRecordsPerSec());
         long msElapsed = time - startTime;
         int cnt = 0;
         while (msElapsed < msToRun) {
             for (int i = 0; (msElapsed < msToRun) && (i < params.getRecordsPerFlush()); i++) {
-                time = recordWrite(payload, recordTime);
+                time = writer.recordWrite(payload, size, recordTime);
                 eCnt.control(cnt++, time);
                 msElapsed = time - startTime;
             }
-            flush();
+            writer.flush();
         }
     }
 
 
     final private void RecordsWriterRW() throws InterruptedException, IOException {
-        final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         final long time = System.currentTimeMillis();
         final RateController eCnt = new RateController(time, params.getRecordsPerSec());
         for (int i = 0; i < params.getRecordsCount(); i++) {
-            byte[] bytes = timeBuffer.putLong(0, System.currentTimeMillis()).array();
-            System.arraycopy(bytes, 0, payload, 0, bytes.length);
-            writer.writeAsync(payload);
+            writer.writeAsync(data.setTime(payload, System.currentTimeMillis()));
             /*
               flush is required here for following reasons:
               1. The writeData is called for End to End latency mode; hence make sure that data is sent.
@@ -179,15 +165,12 @@ public class SbkWriter extends Worker implements Callable<Void> {
     final private void RecordsWriterTimeRW() throws InterruptedException, IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        final ByteBuffer timeBuffer = ByteBuffer.allocate(TIME_HEADER_SIZE);
         long time = System.currentTimeMillis();
         final RateController eCnt = new RateController(time, params.getRecordsPerSec());
 
         for (int i = 0; (time -startTime) < msToRun; i++) {
             time = System.currentTimeMillis();
-            byte[] bytes = timeBuffer.putLong(0, time).array();
-            System.arraycopy(bytes, 0, payload, 0, bytes.length);
-            writeAsync(payload);
+            writer.writeAsync(data.setTime(payload, time));
             /*
               flush is required here for following reasons:
               1. The writeData is called for End to End latency mode; hence make sure that data is sent.
@@ -195,7 +178,7 @@ public class SbkWriter extends Worker implements Callable<Void> {
                  flushing moderates the kafka producer.
               3. If the flush called after several iterations, then flush may take too much of time.
             */
-            flush();
+            writer.flush();
             eCnt.control(i);
         }
     }

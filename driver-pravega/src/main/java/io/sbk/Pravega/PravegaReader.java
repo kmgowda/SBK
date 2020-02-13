@@ -25,7 +25,7 @@ import java.io.IOException;
 /**
  * Class for Pravega reader/consumer.
  */
-public class PravegaReader implements Reader {
+public class PravegaReader implements Reader<byte[]> {
     private final Parameters params;
     private final EventStreamReader<byte[]> reader;
 

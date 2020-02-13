@@ -23,7 +23,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 /**
  * Class for Kafka writer/producer.
  */
-public class KafkaWriter implements Writer {
+public class KafkaWriter implements Writer<byte[]> {
     final private KafkaProducer<byte[], byte[]> producer;
     final private String topicName;
 
@@ -33,11 +33,11 @@ public class KafkaWriter implements Writer {
     }
 
     @Override
-    public long recordWrite(byte[] data, QuadConsumer record) {
+    public long recordWrite(byte[] data, int size, QuadConsumer record) {
         final long time = System.currentTimeMillis();
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, data.length, 1);
+            record.accept(time, endTime, size, 1);
         });
         return time;
     }

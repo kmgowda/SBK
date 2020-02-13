@@ -15,13 +15,13 @@ import java.io.IOException;
 /**
  * Interface for Readers.
  */
-public interface Reader {
+public interface Reader<T> {
     /**
      * read the data.
-     * @return byte[] return the data.
+     * @return T return the data.
      * @throws IOException If an exception occurred.
      */
-    byte[] read() throws IOException;
+    T read() throws IOException;
 
     /**
      * close the consumer/reader.

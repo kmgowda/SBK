@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Interface for Writers.
  */
-public interface Writer {
+public interface Writer<T>  {
 
     /**
      * Asynchronously Writes the data .
@@ -24,7 +24,7 @@ public interface Writer {
      * @return CompletableFuture completable future. null if the write completed synchronously .
      * @throws IOException If an exception occurred
      */
-    CompletableFuture writeAsync(byte[] data) throws IOException;
+    CompletableFuture writeAsync(T data) throws IOException;
 
     /**
      * Flush the  data.
@@ -39,27 +39,28 @@ public interface Writer {
     void close() throws IOException;
 
     /**
-     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(byte[])}
+     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * and recording the benchmark statistics.
-     * if you are intend to not use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(byte[])}
+     * if you are intend to not use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * then you can override this method. otherwise, use the default implementation and don't override this method.
      *
      * @param data   data to write
+     * @param size  size of the data
      * @param recordTime to call for benchmarking
      * @return time return the data sent time
      * @throws IOException If an exception occurred.
      */
-    default long recordWrite(byte[] data, QuadConsumer recordTime) throws IOException {
+    default long recordWrite(T data, int size, QuadConsumer recordTime) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         if (ret == null) {
             final long endTime = System.currentTimeMillis();
-            recordTime.accept(time, endTime, data.length, 1);
+            recordTime.accept(time, endTime, size, 1);
         } else {
             ret.thenAccept(d -> {
                 final long endTime = System.currentTimeMillis();
-                recordTime.accept(time, endTime, data.length, 1);
+                recordTime.accept(time, endTime, size, 1);
             });
         }
         return time;

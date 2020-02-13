@@ -24,7 +24,7 @@ import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 /**
  * Class for Pulsar reader/consumer.
  */
-public class PulsarReader implements Reader {
+public class PulsarReader implements Reader<byte[]> {
     final private Consumer<byte[]> consumer;
     final private Parameters params;
 
