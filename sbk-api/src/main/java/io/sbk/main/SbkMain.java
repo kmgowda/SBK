@@ -104,7 +104,7 @@ public class SbkMain {
             System.exit(0);
         }
 
-        final Benchmark benchmark = obj;
+        final Benchmark<byte[]> benchmark = obj;
         if (benchmark == null) {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);

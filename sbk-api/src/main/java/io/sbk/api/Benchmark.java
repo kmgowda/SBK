@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * Interface for Benchmarking.
  */
-public interface Benchmark {
+public interface Benchmark<T> {
 
     /**
      * Add the driver specific command line arguments.
@@ -52,7 +52,7 @@ public interface Benchmark {
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Writer return the Writer , null in case of failure
      */
-    Writer<byte[]> createWriter(final int id, final Parameters params);
+    Writer<T> createWriter(final int id, final Parameters params);
 
     /**
      * Create a Single Reader / Consumer.
@@ -61,5 +61,5 @@ public interface Benchmark {
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Reader return the Reader , null in case of failure
      */
-    Reader<byte[]> createReader(final int id, final Parameters params);
+    Reader<T> createReader(final int id, final Parameters params);
 }
