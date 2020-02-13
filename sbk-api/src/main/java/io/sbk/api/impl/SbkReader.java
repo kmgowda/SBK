@@ -10,7 +10,7 @@
 
 package io.sbk.api.impl;
 
-import io.sbk.api.Data;
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.Reader;
@@ -22,13 +22,13 @@ import java.util.concurrent.ExecutionException;
 /**
  * Reader Implementation.
  */
-public class SbkReader<T> extends Worker implements Callable<Void> {
+public class SbkReader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
-    final private Data<T> data;
-    final private Reader<T> reader;
+    final private DataType data;
+    final private Reader reader;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, Parameters params, QuadConsumer recordTime, Data<T> data, Reader<T> reader) {
+    public SbkReader(int readerId, Parameters params, QuadConsumer recordTime, DataType data, Reader reader) {
         super(readerId, params, recordTime);
         this.data = data;
         this.reader = reader;
@@ -58,7 +58,7 @@ public class SbkReader<T> extends Worker implements Callable<Void> {
 
 
     final public void RecordsReader() throws IOException {
-        T ret = null;
+        Object ret = null;
         try {
             int i = 0;
             while (i < params.getRecordsCount()) {
@@ -77,7 +77,7 @@ public class SbkReader<T> extends Worker implements Callable<Void> {
 
 
     final public void RecordsReaderRW() throws IOException {
-        T ret = null;
+        Object ret = null;
         try {
             int i = 0;
             while (i < params.getRecordsCount()) {
@@ -98,7 +98,7 @@ public class SbkReader<T> extends Worker implements Callable<Void> {
     final public void RecordsTimeReader() throws IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        T ret = null;
+        Object ret = null;
         long time = System.currentTimeMillis();
         try {
             while ((time - startTime) < msToRun) {
@@ -117,7 +117,7 @@ public class SbkReader<T> extends Worker implements Callable<Void> {
     final public void RecordsTimeReaderRW() throws IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        T ret = null;
+        Object ret;
         long time = System.currentTimeMillis();
         try {
             while ((time - startTime) < msToRun) {

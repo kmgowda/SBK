@@ -10,42 +10,32 @@
 
 package io.sbk.api.impl;
 
-import io.sbk.api.Data;
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.Writer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 /**
  * Writer Implementation.
  */
-public class SbkWriter<T> extends Worker implements Callable<Void> {
+public class SbkWriter extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
-    final private Data<T> data;
-    final private Writer<T> writer;
+    final private DataType data;
+    final private Writer writer;
     final private RunBenchmark perf;
-    final private T payload;
+    final private Object payload;
 
-    public SbkWriter(int writerID, Parameters params, QuadConsumer recordTime, Data<T> data, Writer<T> writer) {
+    public SbkWriter(int writerID, Parameters params, QuadConsumer recordTime, DataType data, Writer writer) {
         super(writerID, params, recordTime);
         this.data = data;
         this.writer = writer;
         this.payload = data.create(params.getRecordSize());
         this.perf = createBenchmark();
-    }
-
-    private byte[] createPayload(int size) {
-        Random random = new Random();
-        byte[] bytes = new byte[size];
-        for (int i = 0; i < size; ++i) {
-            bytes[i] = (byte) (random.nextInt(26) + 65);
-        }
-        return bytes;
     }
 
     @Override

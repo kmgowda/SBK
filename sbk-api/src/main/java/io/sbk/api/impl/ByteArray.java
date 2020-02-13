@@ -11,16 +11,16 @@
 
 package io.sbk.api.impl;
 
-import io.sbk.api.Data;
+import io.sbk.api.DataType;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-public class ByteData implements Data<byte[]> {
+public class ByteArray implements DataType<byte[]> {
     final static int TIME_HEADER_SIZE = 8;
 
     /**
-     * Create byte the data.
+     * Create byte array data.
      * @param size size (number of bytes) of the data to create.
      * @return T return the data.
      */
@@ -60,7 +60,7 @@ public class ByteData implements Data<byte[]> {
     /**
      * get the time of data.
      * @param  data data
-     * @return long return the time set by last {@link io.sbk.api.impl.ByteData#setTime(byte[], long)}  } )}}.
+     * @return long return the time set by last {@link ByteArray#setTime(byte[], long)}  } )}}.
      */
     @Override
     public long getTime(byte[] data) {

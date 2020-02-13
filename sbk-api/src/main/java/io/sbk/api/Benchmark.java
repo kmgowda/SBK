@@ -9,6 +9,7 @@
  */
 
 package io.sbk.api;
+import io.sbk.api.impl.ByteArray;
 import java.io.IOException;
 
 /**
@@ -62,4 +63,14 @@ public interface Benchmark<T> {
      * @return Reader return the Reader , null in case of failure
      */
     Reader<T> createReader(final int id, final Parameters params);
+
+    /**
+     * Default implementation to create a payload or data to write/read.
+     * default data type is byte[].
+     * if your Benchmark type <T> is other than byte[] then you need to implement your own Data class.
+     * @return Data Data interface, null in case of failure
+     */
+    default DataType dataType() {
+         return new ByteArray();
+    }
 }

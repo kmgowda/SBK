@@ -9,7 +9,7 @@
  */
 package io.sbk.api;
 
-public interface Data<T> {
+public interface DataType<T> {
 
     /**
      * Create the data.
@@ -36,7 +36,7 @@ public interface Data<T> {
     /**
      * get the time of data.
      * @param  data data
-     * @return long return the time set by last {@link io.sbk.api.Data#setTime(Object, long)}}.
+     * @return long return the time set by last {@link DataType#setTime(Object, long)}}.
      */
     long getTime(T data);
 }
