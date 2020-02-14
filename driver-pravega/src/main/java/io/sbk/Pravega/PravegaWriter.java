@@ -24,7 +24,7 @@ import io.pravega.client.EventStreamClientFactory;
 /**
  * Class for Pravega writer/producer.
  */
-public class PravegaWriter implements Writer {
+public class PravegaWriter implements Writer<byte[]> {
     final EventStreamWriter<byte[]> producer;
 
     public PravegaWriter(int id, Parameters params, String streamName, EventStreamClientFactory factory) throws IOException {
@@ -37,17 +37,18 @@ public class PravegaWriter implements Writer {
      * Writes the data and benchmark.
      *
      * @param data   data to write
+     * @param size   size of the data
      * @param record to call for benchmarking
      * @return time return the data sent time
      */
     @Override
-    public long recordWrite(byte[] data, QuadConsumer record) throws IOException {
+    public long recordWrite(byte[] data, int size, QuadConsumer record) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         ret.thenAccept(d -> {
             final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, data.length, 1);
+            record.accept(time, endTime, size, 1);
         });
         return time;
     }

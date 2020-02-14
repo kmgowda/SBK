@@ -23,7 +23,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 /**
  * Class for Kafka reader/consumer.
  */
-public class KafkaReader implements Reader {
+public class KafkaReader implements Reader<byte[]> {
     final private KafkaConsumer<byte[], byte[]> consumer;
     final private Duration timeoutDuration;
 

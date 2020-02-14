@@ -11,10 +11,13 @@
 package io.sbk.main;
 
 import io.sbk.api.Benchmark;
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
 import io.sbk.api.QuadConsumer;
+import io.sbk.api.Reader;
 import io.sbk.api.ResultLogger;
+import io.sbk.api.Writer;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SbkPerformance;
 import io.sbk.api.impl.SbkReader;
@@ -166,19 +169,29 @@ public class SbkMain {
             readStats = null;
             readTime = null;
         }
-
+        final DataType data = benchmark.getDataType();
         try {
-            final List<SbkWriter> writers =  IntStream.range(0, params.getWritersCount())
+            final List<Writer> writers = IntStream.range(0, params.getWritersCount())
+                                                .boxed()
+                                                .map(i -> benchmark.createWriter(i, params))
+                                                .collect(Collectors.toList());
+
+            final List<Reader> readers = IntStream.range(0, params.getReadersCount())
+                                                .boxed()
+                                                .map(i -> benchmark.createReader(i, params))
+                                                .collect(Collectors.toList());
+
+            final List<SbkWriter> sbkWriters =  IntStream.range(0, params.getWritersCount())
                                             .boxed()
-                                            .map(i -> new SbkWriter(i, params, writeTime, benchmark.createWriter(i, params)))
+                                            .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
                                             .collect(Collectors.toList());
 
-            final List<SbkReader> readers = IntStream.range(0, params.getReadersCount())
+            final List<SbkReader> sbkReaders = IntStream.range(0, params.getReadersCount())
                                             .boxed()
-                                            .map(i -> new SbkReader(i, params, readTime, benchmark.createReader(i, params)))
+                                            .map(i -> new SbkReader(i, params, readTime, data, readers.get(i)))
                                             .collect(Collectors.toList());
 
-            final List<Callable<Void>> workers = Stream.of(readers, writers)
+            final List<Callable<Void>> workers = Stream.of(sbkReaders, sbkWriters)
                     .filter(x -> x != null)
                     .flatMap(x -> x.stream())
                     .collect(Collectors.toList());

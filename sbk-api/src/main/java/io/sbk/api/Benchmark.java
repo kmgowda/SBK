@@ -9,12 +9,15 @@
  */
 
 package io.sbk.api;
+import io.sbk.api.impl.ByteArray;
 import java.io.IOException;
+import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 /**
  * Interface for Benchmarking.
  */
-public interface  Benchmark {
+public interface Benchmark<T> {
 
     /**
      * Add the driver specific command line arguments.
@@ -52,7 +55,7 @@ public interface  Benchmark {
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Writer return the Writer , null in case of failure
      */
-    Writer createWriter(final int id, final Parameters params);
+    Writer<T> createWriter(final int id, final Parameters params);
 
     /**
      * Create a Single Reader / Consumer.
@@ -61,5 +64,23 @@ public interface  Benchmark {
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Reader return the Reader , null in case of failure
      */
-    Reader createReader(final int id, final Parameters params);
+    Reader<T> createReader(final int id, final Parameters params);
+
+    /**
+     * Default implementation to create a payload or data to write/read.
+     * default data type is byte[].
+     * if your Benchmark type <T> is other than byte[] then you need to implement your own Data class.
+     * @return Data Data interface, null in case of failure
+     * @throws IllegalArgumentException if data type is other than byte[]
+     */
+    default DataType getDataType() throws IllegalArgumentException {
+        final TypeToken<T> typeToken = new TypeToken<T>(getClass()) { };
+        final Type type = typeToken.getComponentType().getType();
+        if (type.getTypeName().equals("byte")) {
+            return new ByteArray();
+        } else {
+            throw new IllegalArgumentException("The data type is your class which implements Benchmark interface is not byte[]"+
+                    ", Override/Implement the 'dataType' method");
+        }
+    }
 }

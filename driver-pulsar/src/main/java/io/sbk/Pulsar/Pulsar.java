@@ -19,9 +19,9 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 
 /**
- * class for Pulsar Benchmarking.
+ * Class for Pulsar Benchmarking.
  */
-public class Pulsar implements Benchmark {
+public class Pulsar implements Benchmark<byte[]> {
     static final String DEFAULT_NAMESPACE = null;
     static final String DEFAULT_TENANT = null;
     static final String DEFAULT_CLUSTER = null;

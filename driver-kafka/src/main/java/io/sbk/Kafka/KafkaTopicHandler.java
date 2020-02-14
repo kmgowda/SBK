@@ -29,7 +29,6 @@ public class KafkaTopicHandler {
     final private AdminClient admin;
     final private NewTopic topic;
 
-
     public KafkaTopicHandler(String brokerUri, String topicName, int partitions,
                               short replicationFactor, short minSync) throws IOException {
             adminProperties = new Properties();

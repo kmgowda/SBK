@@ -17,8 +17,6 @@ import io.sbk.api.QuadConsumer;
  * Abstract class for Writers and Readers.
  */
 public abstract class Worker {
-    final static int TIME_HEADER_SIZE = 8;
-
     protected final int workerID;
     protected final Parameters params;
     protected final QuadConsumer recordTime;
