@@ -7,15 +7,15 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-
-
 package io.sbk.api.impl;
 
 import io.sbk.api.DataType;
-
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+/**
+ * Class for processing byte[] data.
+ */
 public class ByteArray implements DataType<byte[]> {
     final static int TIME_HEADER_SIZE = 8;
 
@@ -35,7 +35,7 @@ public class ByteArray implements DataType<byte[]> {
     }
 
     /**
-     * get the size of the given data in terms of number of bytes.
+     * Get the size of the given data in terms of number of bytes.
      * @param  data data
      * @return return size of the data.
      */
@@ -45,7 +45,7 @@ public class ByteArray implements DataType<byte[]> {
     }
 
     /**
-     * set the time for data.
+     * Set the time for data.
      * @param  data data
      * @param  time time to set
      * @return byte[] return the data.
@@ -58,7 +58,7 @@ public class ByteArray implements DataType<byte[]> {
     }
 
     /**
-     * get the time of data.
+     * Get the time of data.
      * @param  data data
      * @return long return the time set by last {@link ByteArray#setTime(byte[], long)}  } )}}.
      */

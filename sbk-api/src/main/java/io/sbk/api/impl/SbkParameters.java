@@ -22,12 +22,10 @@ import org.apache.commons.cli.ParseException;
 import java.util.List;
 
 /**
- * class for processing command Line arguments/parameters.
+ * Class for processing command Line arguments/parameters.
  */
 @Slf4j
 final public class SbkParameters implements Parameters {
-    static final int MAXTIME = 60 * 60 * 24;
-    static final int TIMEOUT = 1000;
     final private String benchmarkName;
     final private String className;
     final private String desc;

@@ -27,7 +27,7 @@ import io.pravega.client.stream.impl.ControllerImplConfig;
 import io.pravega.client.EventStreamClientFactory;
 
 /**
- * class for Pravega benchmarking.
+ * Class for Pravega benchmarking.
  */
 public class Pravega implements Benchmark<byte[]> {
     static final String DEFAULT_SCOPE = "Scope";

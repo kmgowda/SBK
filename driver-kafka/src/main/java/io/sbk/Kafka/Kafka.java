@@ -25,7 +25,7 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 
 /**
- * class for Kafka Benchmarking.
+ * Class for Kafka Benchmarking.
  */
 public class Kafka implements Benchmark<byte[]> {
     private String brokerUri;

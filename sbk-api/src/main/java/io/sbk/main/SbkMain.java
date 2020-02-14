@@ -169,7 +169,7 @@ public class SbkMain {
             readStats = null;
             readTime = null;
         }
-        final DataType data = benchmark.dataType();
+        final DataType data = benchmark.getDataType();
         try {
             final List<Writer> writers = IntStream.range(0, params.getWritersCount())
                                                 .boxed()

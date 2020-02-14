@@ -9,6 +9,9 @@
  */
 package io.sbk.api;
 
+/**
+ * Interface for Data Type operations.
+ */
 public interface DataType<T> {
 
     /**
@@ -19,14 +22,14 @@ public interface DataType<T> {
     T create(int size);
 
     /**
-     * get the size of the given data in terms of number of bytes.
+     * Get the size of the given data in terms of number of bytes.
      * @param  data data
      * @return return size of the data.
      */
     int length(T data);
 
     /**
-     * set the time for data.
+     * Set the time for data.
      * @param  data data
      * @param  time time to set
      * @return T return the data.
@@ -34,7 +37,7 @@ public interface DataType<T> {
     T setTime(T data, long time);
 
     /**
-     * get the time of data.
+     * Get the time of data.
      * @param  data data
      * @return long return the time set by last {@link DataType#setTime(Object, long)}}.
      */

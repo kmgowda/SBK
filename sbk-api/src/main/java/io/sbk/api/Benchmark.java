@@ -11,6 +11,8 @@
 package io.sbk.api;
 import io.sbk.api.impl.ByteArray;
 import java.io.IOException;
+import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 /**
  * Interface for Benchmarking.
@@ -69,8 +71,16 @@ public interface Benchmark<T> {
      * default data type is byte[].
      * if your Benchmark type <T> is other than byte[] then you need to implement your own Data class.
      * @return Data Data interface, null in case of failure
+     * @throws IllegalArgumentException if data type is other than byte[]
      */
-    default DataType dataType() {
-         return new ByteArray();
+    default DataType getDataType() throws IllegalArgumentException {
+        final TypeToken<T> typeToken = new TypeToken<T>(getClass()) { };
+        final Type type = typeToken.getComponentType().getType();
+        if (type.getTypeName().equals("byte")) {
+            return new ByteArray();
+        } else {
+            throw new IllegalArgumentException("The data type is your class which implements Benchmark interface is not byte[]"+
+                    ", Override/Implement the 'dataType' method");
+        }
     }
 }
