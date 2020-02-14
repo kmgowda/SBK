@@ -41,7 +41,7 @@ public interface Writer<T>  {
     /**
      * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * and recording the benchmark statistics.
-     * if you are intend to not use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
+     * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * then you can override this method. otherwise, use the default implementation and don't override this method.
      *
      * @param data   data to write

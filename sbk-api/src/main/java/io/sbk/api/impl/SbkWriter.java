@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Writer Implementation.
+ * Writer Benchmarking Implementation.
  */
 public class SbkWriter extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
