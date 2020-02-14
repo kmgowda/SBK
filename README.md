@@ -263,8 +263,13 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#createWriter-int-io.sbk.api.Parameters-)]
         * Create Writer will be called multiple times by SBK incase of Multi writers are specified in the command line.   
         
-      f). Create a single Reader instance: :[[createReader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#createReader-int-io.sbk.api.Parameters-)]
+      f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#createReader-int-io.sbk.api.Parameters-)]
         * Create Reader will be called multiple times by SBK incase of Multi readers are specified in the command line. 
+        
+      g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#getDataType--)]
+        * In case if your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+        * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implemenation.
+        
     
 4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html)]
     * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java
@@ -293,7 +298,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
     * see the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle
 
 7. Add your sub project to main gradle as dependency.
-    * see the Example: https://github.com/kmgowda/sbk/blob/master/build.gradle#L59
+    * see the Example: https://github.com/kmgowda/sbk/blob/master/build.gradle#L66
     * make sure that gradle settings file: https://github.com/kmgowda/sbk/blob/master/settings.gradle has your Storage driver sub project name
 
 8. That's all ; Now, Build the SBK included your driver with the command:
@@ -348,4 +353,4 @@ usage: sbk -class Pulsar
 ```
 
 ## Design of SBK
-The SBK is the spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of SBK and comparision of Kafka and Pravega in terms of perofrmance benchmarking.
+The SBK is a spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of SBK and comparision of Kafka and Pravega in terms of perofrmance benchmarking.
