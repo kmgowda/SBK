@@ -59,25 +59,25 @@ public interface Parameters {
     String getOptionValue(String name, String defaultValue);
 
     /**
-     * get the execution time in seconds.
+     * Get the execution time in seconds.
      * @return   seconds to run
      */
     int getSecondsToRun();
 
     /**
-     * check if the both read and writes are requested.
+     * Check if the both read and writes are requested.
      * @return   True if both Writers and readers are supplied; False otherwise.
      */
     boolean isWriteAndRead();
 
     /**
-     * get the Number of records to read/writer.
+     * Get the Number of records to read/writer.
      * @return   number of records.
      */
     int getRecordsCount();
 
     /**
-     * start time of SBK.
+     * Start time of SBK.
      * @return   starting time of SBK in milliseconds.
      */
     long getStartTime();

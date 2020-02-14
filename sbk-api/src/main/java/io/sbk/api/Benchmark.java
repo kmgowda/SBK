@@ -68,8 +68,10 @@ public interface Benchmark<T> {
 
     /**
      * Default implementation to create a payload or data to write/read.
-     * default data type is byte[].
-     * if your Benchmark type <T> is other than byte[] then you need to implement your own Data class.
+     * Default data type is byte[].
+     * If your Benchmark type <T> is other than byte[] then you need to implement your own Data class.
+     * If the data type of your Benchmark, Reader and Writer classes  is byte[] (Byte Array),
+     * then use this default implementation as it is.
      * @return Data Data interface, null in case of failure
      * @throws IllegalArgumentException if data type is other than byte[]
      */

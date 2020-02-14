@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Reader Implementation.
+ * Reader Benchmarking Implementation.
  */
 public class SbkReader extends Worker implements Callable<Void> {
     final private static int MS_PER_SEC = 1000;
