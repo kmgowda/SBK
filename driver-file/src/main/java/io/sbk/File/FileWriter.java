@@ -21,10 +21,12 @@ import java.util.concurrent.CompletableFuture;
 public class FileWriter implements Writer<byte[]> {
     final private String fileName;
     final private FileOutputStream out;
+    final private boolean sync;
 
     public FileWriter(int id, Parameters params, String fileName, boolean sync) throws IOException {
         this.fileName = fileName;
         this.out = new FileOutputStream(fileName, false);
+        this.sync = sync;
         out.getChannel().force(sync);
     }
 
@@ -33,12 +35,19 @@ public class FileWriter implements Writer<byte[]> {
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
         out.write(data);
+        if (sync) {
+            out.flush();
+            out.getFD().sync();
+        }
         return null;
     }
 
     @Override
     public void flush() throws IOException {
         out.flush();
+        if (sync) {
+            out.getFD().sync();
+        }
     }
 
     @Override
