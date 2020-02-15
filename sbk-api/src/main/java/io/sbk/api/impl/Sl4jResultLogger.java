@@ -24,7 +24,7 @@ public class Sl4jResultLogger implements ResultLogger {
     }
 
     public void print(String action, long records, double recsPerSec, double mbPerSec, double avgLatency, double maxLatency) {
-        log.info(String.format("%s %10d records, %9.1f records/sec, %7.2f MB/sec, %7.1f ms avg latency, %7.1f ms max latency",
+        log.info(String.format("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f ms avg latency, %8.1f ms max latency",
                 action, records, recsPerSec, mbPerSec, avgLatency, maxLatency));
     }
 
