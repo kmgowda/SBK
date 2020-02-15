@@ -27,10 +27,7 @@ public class FileWriter implements Writer<byte[]> {
         this.fileName = fileName;
         this.out = new FileOutputStream(fileName, false);
         this.sync = sync;
-        out.getChannel().force(sync);
     }
-
-
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
