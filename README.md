@@ -237,7 +237,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
 
 ## Add your driver to SBK
-1. Create the gradle sub project preferable with the name driver-<your driver(storage device) name>.
+1. Create the gradle sub project preferable with the name **driver-<your driver(storage device) name>**.
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
@@ -252,7 +252,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
     * you have to implement the following methods of Benchmark Interface:
         
       a). Add the Addtional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#addArgs-io.sbk.api.Parameters-)]
-      * The default command line parameters are listed in the help output here : https://github.com/kmgowda/sbk#building
+      * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
         
       b). Parse your driver specific paramters: [[parseArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#parseArgs-io.sbk.api.Parameters-)]
         
@@ -272,11 +272,11 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
         
     
 4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html)]
-    * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java
+    * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java)]
     
     * you have to implement the following methods of Writer class:
         
-      a). Writer Data [Async or Sync]:  [[writeAsync](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#writeAsync-byte:A-)]
+      a). Writer Data [Async or Sync]: [[writeAsync](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#writeAsync-byte:A-)]
         
       b). Flush the data: [[flush](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#flush--)]
         
@@ -286,7 +286,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
         
 5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html)]
 
-    * See the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java
+    * See the Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
 
     * you have to implement the following methods of Reader class:
         
@@ -295,11 +295,11 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       b). Close the Reader:[[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#close--)] 
           
 6.  Add the Gradle dependecy [ compile project(":sbk-api")]   to your sub-project (driver)
-    * see the Example: https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle
+    * see the Example:[[Pulsar Gradle Build](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle)]
 
 7. Add your sub project to main gradle as dependency.
-    * see the Example: https://github.com/kmgowda/sbk/blob/master/build.gradle#L66
-    * make sure that gradle settings file: https://github.com/kmgowda/sbk/blob/master/settings.gradle has your Storage driver sub project name
+    * see the Example: [[SBK Gradle](https://github.com/kmgowda/sbk/blob/master/build.gradle#L66)]
+    * make sure that gradle settings file: [[SBK Gradle Settings](https://github.com/kmgowda/sbk/blob/master/settings.gradle)] has your Storage driver sub project name
 
 8. That's all ; Now, Build the SBK included your driver with the command:
 
