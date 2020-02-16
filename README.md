@@ -299,7 +299,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
 7. Add your sub project to main gradle as dependency.
     * see the Example: [[SBK Gradle](https://github.com/kmgowda/sbk/blob/master/build.gradle#L66)]
-    * make sure that gradle settings file: [[SBK Gradle Settings](https://github.com/kmgowda/sbk/blob/master/settings.gradle)] has your Storage driver sub project name
+    * make sure that gradle settings file: [[SBK Gradle Settings](https://github.com/kmgowda/sbk/blob/master/settings.gradle#L13)] has your Storage driver sub project name
 
 8. That's all ; Now, Build the SBK included your driver with the command:
 
