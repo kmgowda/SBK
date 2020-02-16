@@ -241,14 +241,16 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
+
 2. Create the package **io.sbk.< your driver name>** 
 
     * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
     
+
 3. In your driver package you have to implement the Interface: [[Benchmark](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html)]
 
     * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
-        
+    
     * you have to implement the following methods of Benchmark Interface:
         
       a). Add the Addtional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#addArgs-io.sbk.api.Parameters-)]
@@ -269,9 +271,10 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#getDataType--)]
         * In case if your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
         * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implemenation.
-        
+       
     
 4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html)]
+
     * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java)]
     
     * you have to implement the following methods of Writer class:
@@ -283,7 +286,8 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       c). Close the Writer: [[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#close--)]
         
       d). In case , if you want to have your own recordWrite implemenation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#recordWrite-byte:A-io.sbk.api.QuadConsumer-)]
-        
+
+
 5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html)]
 
     * See the Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
@@ -293,13 +297,19 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       a). Read Data (synchronous reades): [[read](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#read--)]
         
       b). Close the Reader:[[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#close--)] 
-          
+
+
 6.  Add the Gradle dependecy [ compile project(":sbk-api")]   to your sub-project (driver)
+
     * see the Example:[[Pulsar Gradle Build](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle)]
 
+
 7. Add your sub project to main gradle as dependency.
+
     * see the Example: [[SBK Gradle](https://github.com/kmgowda/sbk/blob/master/build.gradle#L66)]
+    
     * make sure that gradle settings file: [[SBK Gradle Settings](https://github.com/kmgowda/sbk/blob/master/settings.gradle#L13)] has your Storage driver sub project name
+
 
 8. That's all ; Now, Build the SBK included your driver with the command:
 
@@ -312,6 +322,7 @@ untar the SBK  to local folder
 ```
 tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
+
 
 9.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
 
