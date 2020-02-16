@@ -65,6 +65,7 @@ allprojects {
 
 dependencies {
 	compile project(":sbk-api")
+	compile project(":driver-concurrentq")
 	compile project(":driver-file")
 	compile project(":driver-pulsar")
 	compile project(":driver-kafka")
