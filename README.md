@@ -262,7 +262,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
         
       c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#openStorage-io.sbk.api.Parameters-)]
         
-      d). Close the storage:[[openStorage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#closeStorage-io.sbk.api.Parameters-)]
+      d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#closeStorage-io.sbk.api.Parameters-)]
         
       e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#createWriter-int-io.sbk.api.Parameters-)]
         * Create Writer will be called multiple times by SBK incase of Multi writers are specified in the command line.   
@@ -273,7 +273,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Benchmark.html#getDataType--)]
         * In case if your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
         * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implemenation.
-       
+
     
 4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html)]
 
