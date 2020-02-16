@@ -16,7 +16,7 @@ Currently SBK supports benchmarking of
 2. [Apache Pulsar](https://pulsar.apache.org)
 3. [Pravega](http://pravega.io) distributed streaming storage systems
 4. Local mounted File Systems
-5. [Java Concurrent Queue [Message Queues]](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html).
+5. [Java Concurrent Queue [Message Queue]](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html).
 
 In future, many more storage storage systems drivers will be plugged in. 
 
