@@ -15,4 +15,5 @@ include 'driver-pulsar'
 include 'driver-kafka'
 include 'driver-pravega'
 include 'driver-file'
+include 'driver-concurrentq'
 

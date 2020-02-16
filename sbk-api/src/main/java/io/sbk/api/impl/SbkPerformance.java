@@ -318,7 +318,7 @@ final public class SbkPerformance implements Performance {
         }
 
         public void record(int bytes, int events, int latency) {
-            if (latency  < latencies.length) {
+            if (latency  < latencies.length && latency > -1) {
                 totalBytes += bytes;
                 latencies[latency] += events;
             } else {
