@@ -58,7 +58,8 @@ Running SBK locally:
 <SBK directory>$ ./build/distributions/sbk/bin/sbk  -help
 usage: sbk
  -class <arg>        Benchmark Driver Class,
-                     Available Drivers [Kafka, Pravega, Pulsar]
+                     Available Drivers [ConcurrentQ, File, Kafka, Pravega,
+                     Pulsar]
  -csv <arg>          CSV file to record write/read latencies
  -flush <arg>        Each Writer calls flush after writing <arg> number of
                      of events(records); Not applicable, if both writers
