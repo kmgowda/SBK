@@ -95,9 +95,13 @@ public class SbkMain {
             new SbkParameters(BENCHMARKNAME, DESC, version, "", driversList,  startTime).printHelp();
             System.exit(0);
         }
-
+        final String name = searchDriver(driversList, className);
+        if (name == null) {
+            System.out.printf("storage driver : %s not found in the SBK, run with -help to see the supported drivers\n", className);
+            System.exit(0);
+        }
         try {
-            obj = (Benchmark) Class.forName(PKGNAME + "." + className + "." + className).newInstance();
+            obj = (Benchmark) Class.forName(PKGNAME + "." + name + "." + name).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(0);
@@ -281,4 +285,14 @@ public class SbkMain {
         return subTypes.stream().map(i -> i.toString().substring(i.toString().lastIndexOf(".") + 1))
                 .sorted().collect(Collectors.toList());
     }
+
+    private static String searchDriver(List<String> list, String name) {
+        for (String st: list) {
+            if (st.equalsIgnoreCase(name)) {
+                return st;
+            }
+        }
+        return null;
+    }
+
 }
