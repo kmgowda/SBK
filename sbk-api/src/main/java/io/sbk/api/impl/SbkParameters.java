@@ -91,7 +91,7 @@ final public class SbkParameters implements Parameters {
         options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +
-                        "if 0 , writes 'events'\n" +
+                        "if 0 , writes 'records'\n" +
                         "if -1, get the maximum throughput");
         options.addOption("csv", true, "CSV file to record write/read latencies");
         options.addOption("help", false, "Help message");
