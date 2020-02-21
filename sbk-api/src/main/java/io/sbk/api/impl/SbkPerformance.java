@@ -41,19 +41,21 @@ final public class SbkPerformance implements Performance {
     final private int messageSize;
     final private int windowInterval;
     final private ConcurrentLinkedQueue<TimeStamp> queue;
-    final private ResultLogger logger;
+    final private ResultLogger periodicLogger;
+    final private ResultLogger totalLogger;
     final private ExecutorService executor;
 
     @GuardedBy("this")
     private Future<Void> ret;
 
     public SbkPerformance(String action, int reportingInterval, int messageSize,
-               String csvFile, ResultLogger logger, ExecutorService executor) {
+               String csvFile, ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
         this.action = action;
         this.messageSize = messageSize;
         this.windowInterval = reportingInterval;
         this.csvFile = csvFile;
-        this.logger = logger;
+        this.periodicLogger = periodicLogger;
+        this.totalLogger = totalLogger;
         this.executor = executor;
         this.queue = new ConcurrentLinkedQueue<>();
         this.ret = null;
@@ -117,14 +119,14 @@ final public class SbkPerformance implements Performance {
                     }
                     time =  t.endTime;
                     if (window.elapsedTimeMS(time) > windowInterval) {
-                        window.print(time, logger);
+                        window.print(time, periodicLogger);
                         window.reset(time);
                     }
                 } else {
-                        window.busyWaitPrint(logger);
+                        window.busyWaitPrint(periodicLogger);
                 }
             }
-            latencyRecorder.print(time, logger);
+            latencyRecorder.print(time, totalLogger);
             return null;
         }
     }
@@ -282,8 +284,8 @@ final public class SbkPerformance implements Performance {
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
 
-            logger.print(action, records, recsPerSec, mbPerSec, totalLatency / (double) records, maxLatency,
-                    discard, percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
+            logger.print(action, bytes, records, recsPerSec, mbPerSec, totalLatency / (double) records,
+                    maxLatency, discard, percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
         }
     }
 

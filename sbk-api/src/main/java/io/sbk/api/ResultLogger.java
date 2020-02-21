@@ -15,8 +15,9 @@ package io.sbk.api;
 public interface ResultLogger {
 
     /**
-     * Print the performance results.
+     * Print the Periodic performance results.
      * @param action  Name of the action/operation.
+     * @param bytes number of bytes read/write
      * @param records data to write.
      * @param recsPerSec  records per second.
      * @param mbPerSec Throughput value in terms of MB (Mega Bytes) per Second.
@@ -30,7 +31,7 @@ public interface ResultLogger {
      * @param five 99.9th Percentile
      * @param six  99.99th Percentile     *
      */
-    void print(String action, long records, double recsPerSec, double mbPerSec, double avgLatency, double maxLatency,
-               long discard, int one, int two, int three, int four, int five, int six);
+    void print(String action, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+               int maxLatency, long discard, int one, int two, int three, int four, int five, int six);
 
 }
