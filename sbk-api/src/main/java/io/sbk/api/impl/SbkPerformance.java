@@ -100,7 +100,7 @@ final public class SbkPerformance implements Performance {
         public Void call() throws IOException {
             final TimeWindow window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval);
             final LatencyWriter latencyRecorder = csvFile == null ? new LatencyWriter(action+"(Total)", startTime, MS_PER_HR) :
-                    new CSVLatencyWriter(action+"(Total)", startTime, MS_PER_HR, csvFile);
+                    new CSVLatencyWriter(action+"(Total)", startTime, MS_PER_HR, action, csvFile);
             boolean doWork = true;
             long time = startTime;
             TimeStamp t;
@@ -292,8 +292,8 @@ final public class SbkPerformance implements Performance {
         final private ElasticCounter counter;
         final private int windowInterval;
 
-        private TimeWindow(String action, long start, int maxLatency, int interval) {
-            super(action, start, maxLatency);
+        private TimeWindow(String action, long start, int latencyThreshold, int interval) {
+            super(action, start, latencyThreshold);
             this.counter = new ElasticCounter(interval);
             this.windowInterval = interval;
         }
@@ -326,11 +326,11 @@ final public class SbkPerformance implements Performance {
         final private String csvFile;
         final private CSVPrinter csvPrinter;
 
-        CSVLatencyWriter(String action, long start,  int maxLatency,  String csvFile) throws IOException {
-            super(action, start, maxLatency);
+        CSVLatencyWriter(String action, long start,  int latencyThreshold,  String latencyName, String csvFile) throws IOException {
+            super(action, start, latencyThreshold);
             this.csvFile = csvFile;
             csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
-                    .withHeader("Start Time (Milliseconds)", "data size (bytes)", "Records", action + " Latency (Milliseconds)"));
+                    .withHeader("Start Time (Milliseconds)", "data size (bytes)", "Records", latencyName + " Latency (Milliseconds)"));
         }
 
         private void readCSV() {
