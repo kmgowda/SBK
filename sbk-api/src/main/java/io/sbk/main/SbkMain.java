@@ -10,6 +10,12 @@
 
 package io.sbk.main;
 
+import com.sun.net.httpserver.HttpServer;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
@@ -33,6 +39,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -157,8 +165,29 @@ public class SbkMain {
         }
 
         final ResultLogger logger = new SystemResultLogger();
-        final ResultLogger metricsLogger = new MetricsLogger(className+"#"+action, params.getWritersCount(),
-                params.getReadersCount(), logger, new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
+        final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
+        final PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
+        compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
+        compositeLogger.add(prometheusRegistry);
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+            server.createContext("/metrics", httpExchange -> {
+                String response = prometheusRegistry.scrape();
+                httpExchange.sendResponseHeaders(200, response.getBytes().length);
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            });
+
+            new Thread(server::start).start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        final ResultLogger metricsLogger = new MetricsLogger(
+                BENCHMARKNAME.toUpperCase()+"_" +className+"_"+action+"_",
+                params.getWritersCount(),
+                params.getReadersCount(), logger, compositeLogger);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
         if (fork) {

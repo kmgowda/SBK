@@ -12,6 +12,7 @@ package io.sbk.api.impl;
 import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.api.ResultLogger;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,16 +50,16 @@ public class MetricsLogger implements ResultLogger {
     private final ResultLogger defaultLogger;
 
 
-    public MetricsLogger(String prefix, int writers, int readers, ResultLogger defaultLogger, MeterRegistry registry) {
+    public MetricsLogger(String prefix, int writers, int readers, ResultLogger defaultLogger, CompositeMeterRegistry registry) {
         this.registry = registry;
         this.defaultLogger = defaultLogger;
         this.bytesName = prefix + "Bytes";
         this.recordsName = prefix + "Records";
-        this.mbPsecName = prefix + "MB/Sec";
-        this.recsPsecName = prefix + "Records/Sec";
+        this.mbPsecName = prefix + "MBPerSec";
+        this.recsPsecName = prefix + "RecordsPerSec";
         this.avgLatencyName = prefix + "AvgLatency";
         this.maxLatencyName = prefix + "MaxLatency";
-        this.discardedName = prefix + "discardedLatencies";
+        this.discardedName = prefix + "DiscardedLatencies";
         this.percOneName = prefix + "50th";
         this.percTwoName = prefix + "75th";
         this.percThreeName = prefix + "90th";
