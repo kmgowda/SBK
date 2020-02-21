@@ -100,7 +100,7 @@ final public class SbkPerformance implements Performance {
         public Void call() throws IOException {
             final TimeWindow window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval);
             final LatencyWriter latencyRecorder = csvFile == null ? new LatencyWriter(action+"(Total)", startTime, MS_PER_HR) :
-                    new CSVLatencyWriter(action, startTime, MS_PER_HR, csvFile);
+                    new CSVLatencyWriter(action+"(Total)", startTime, MS_PER_HR, csvFile);
             boolean doWork = true;
             long time = startTime;
             TimeStamp t;
@@ -339,7 +339,7 @@ final public class SbkPerformance implements Performance {
                         .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
 
                 for (CSVRecord csvEntry : csvParser) {
-                    super.record(Integer.parseInt(csvEntry.get(0)), Integer.parseInt(csvEntry.get(1)),
+                    super.record(Long.parseLong(csvEntry.get(0)), Integer.parseInt(csvEntry.get(1)),
                             Integer.parseInt(csvEntry.get(2)), Integer.parseInt(csvEntry.get(3)));
                 }
                 csvParser.close();
