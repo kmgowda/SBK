@@ -23,19 +23,11 @@ public class Sl4jResultLogger implements ResultLogger {
         log = LoggerFactory.getLogger("SBK");
     }
 
-    public void print(String action, long records, double recsPerSec, double mbPerSec, double avgLatency, double maxLatency) {
-        log.info(String.format("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f ms avg latency, %8.1f ms max latency",
-                action, records, recsPerSec, mbPerSec, avgLatency, maxLatency));
-    }
-
-    public void printLatencies(String action, int one, int two, int three, int four, int five, int six) {
-        log.info(String.format("%s %d ms 50th, %d ms 75th, %d ms 95th, %d ms 99th, %d ms 99.9th, %d ms 99.99th.",
-                action, one, two, three, four, five, six));
-    }
-
-    public void printDiscardedLatencies(String action, int discard) {
-        if (discard > 0) {
-            log.info(String.format("%s %d\n", action, discard));
-        }
+    public void print(String action, long records, double recsPerSec, double mbPerSec, double avgLatency, double maxLatency,
+                      long discard, int one, int two, int three, int four, int five, int six) {
+        log.info(String.format("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f ms avg latency, %8.1f ms max latency," +
+                        "%8d discarded latencies;" +
+                        "Percentiles: %7d ms 50th, %7d ms 75th, %7d ms 95th, %7d ms 99th, %7d ms 99.9th, %7d ms 99.99th.\n",
+                action, records, recsPerSec, mbPerSec, avgLatency, maxLatency, discard, one, two, three, four, five, six));
     }
 }

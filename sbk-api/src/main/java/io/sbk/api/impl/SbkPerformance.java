@@ -88,6 +88,9 @@ final public class SbkPerformance implements Performance {
      * Private class for start and end time.
      */
     final private class QueueProcessor implements Callable {
+        final static int MS_PER_SEC = 1000;
+        final static int MS_PER_MIN = MS_PER_SEC * 60;
+        final static int MS_PER_HR = MS_PER_MIN * 60;
         final private long startTime;
 
         private QueueProcessor(long startTime) {
@@ -95,9 +98,9 @@ final public class SbkPerformance implements Performance {
         }
 
         public Void call() throws IOException {
-            final TimeWindow window = new TimeWindow(action, startTime, windowInterval);
-            final LatencyWriter latencyRecorder = csvFile == null ? new LatencyWriter(action, messageSize, startTime) :
-                    new CSVLatencyWriter(action, messageSize, startTime, csvFile);
+            final TimeWindow window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval);
+            final LatencyWriter latencyRecorder = csvFile == null ? new LatencyWriter(action+"(Total)", startTime, MS_PER_HR) :
+                    new CSVLatencyWriter(action, startTime, MS_PER_HR, csvFile);
             boolean doWork = true;
             long time = startTime;
             TimeStamp t;
@@ -109,11 +112,11 @@ final public class SbkPerformance implements Performance {
                         doWork = false;
                     } else {
                         final int latency = (int) (t.endTime - t.startTime);
-                        window.record(t.bytes, t.records, latency);
+                        window.record(startTime, t.bytes, t.records, latency);
                         latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
                     }
                     time =  t.endTime;
-                    if (window.windowTimeMS(time) > windowInterval) {
+                    if (window.elapsedTimeMS(time) > windowInterval) {
                         window.print(time, logger);
                         window.reset(time);
                     }
@@ -121,7 +124,7 @@ final public class SbkPerformance implements Performance {
                         window.busyWaitPrint(logger);
                 }
             }
-            latencyRecorder.printTotal(time, logger);
+            latencyRecorder.print(time, logger);
             return null;
         }
     }
@@ -177,58 +180,87 @@ final public class SbkPerformance implements Performance {
      * Private class for Performance statistics within a given time window.
      */
     @NotThreadSafe
-    final static private class TimeWindow {
+    static private class LatencyWriter {
+        final double[] percentiles = {0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
         final private String action;
-        final private ElasticCounter counter;
-        final private int windowInterval;
+        final private int latencyThreshold;
+        private int[] latencies;
         private long startTime;
-        private long lastTime;
-        private long count;
+        private long records;
         private long bytes;
         private int maxLatency;
         private long totalLatency;
+        private long discard;
+        private ArrayList<int[]> latencyRanges;
 
-        private TimeWindow(String action, long start, int interval) {
+        LatencyWriter(String action, long start, int latencyThreshold) {
             this.action = action;
-            this.counter = new ElasticCounter(interval);
-            this.windowInterval = interval;
-            reset(start);
+            this.latencyThreshold = latencyThreshold;
+            resetValues(start);
         }
 
-        private void reset(long start) {
+        private void resetValues(long start) {
             this.startTime = start;
-            this.lastTime = this.startTime;
-            this.count = 0;
+            this.records = 0;
             this.bytes = 0;
             this.maxLatency = 0;
             this.totalLatency = 0;
-            this.counter.reset();
+            this.discard = 0;
+            this.latencyRanges = null;
+            this.latencies = new int[latencyThreshold];
+        }
+
+        public void reset(long start) {
+            resetValues(start);
+        }
+
+        private void countLatencies() {
+            records = 0;
+            latencyRanges = new ArrayList<>();
+            for (int i = 0, cur = 0; i < latencies.length; i++) {
+                if (latencies[i] > 0) {
+                    latencyRanges.add(new int[]{cur, cur + latencies[i], i});
+                    cur += latencies[i] + 1;
+                    totalLatency += i * latencies[i];
+                    records += latencies[i];
+                    maxLatency = i;
+                }
+            }
+        }
+
+        private int[] getPercentiles() {
+            int[] percentileIds = new int[percentiles.length];
+            int[] values = new int[percentileIds.length];
+            int index = 0;
+
+            for (int i = 0; i < percentiles.length; i++) {
+                percentileIds[i] = (int) (records * percentiles[i]);
+            }
+
+            for (int[] lr : latencyRanges) {
+                while ((index < percentileIds.length) &&
+                        (lr[0] <= percentileIds[index]) && (percentileIds[index] <= lr[1])) {
+                    values[index++] = lr[2];
+                }
+            }
+            return values;
         }
 
         /**
-         * Record the latency and bytes
+         * Record the latency
          *
-         * @param bytes   number of bytes.
-         * @param latency latency in ms.
+         * @param startTime start time.
+         * @param bytes number of bytes.
+         * @param events number of events(records).
+         * @param latency latency value in milliseconds.
          */
-        private void record(long bytes, int records, int latency) {
-            this.count += records;
-            this.totalLatency += latency;
-            this.bytes += bytes;
-            this.maxLatency = Math.max(this.maxLatency, latency);
-        }
-
-        /**
-         * Print the window statistics
-         */
-        private void print(long time, ResultLogger logger) {
-            this.lastTime = time;
-            assert this.lastTime > this.startTime : "Invalid Start and EndTime";
-            final double elapsed = (this.lastTime - this.startTime) / 1000.0;
-            final double recsPerSec = count / elapsed;
-            final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
-
-            logger.print(action, count, recsPerSec, mbPerSec, totalLatency / (double) count, maxLatency);
+        public void record(long startTime, int bytes, int events, int latency) {
+            if (latency  < latencies.length && latency > -1) {
+                this.bytes += bytes;
+                latencies[latency] += events;
+            } else {
+                discard++;
+            }
         }
 
         /**
@@ -236,14 +268,46 @@ final public class SbkPerformance implements Performance {
          *
          * @param time current time.
          */
-        private long windowTimeMS(long time) {
+        public long elapsedTimeMS(long time) {
             return time - startTime;
+        }
+
+        /**
+         * Print the window statistics
+         */
+        public void print(long endTime, ResultLogger logger) {
+            countLatencies();
+            final double elapsed = (endTime - startTime) / 1000.0;
+            final double recsPerSec = records / elapsed;
+            final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
+            int[] percs = getPercentiles();
+
+            logger.print(action, records, recsPerSec, mbPerSec, totalLatency / (double) records, maxLatency,
+                    discard, percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
+        }
+    }
+
+    @NotThreadSafe
+    final static private class TimeWindow extends LatencyWriter {
+        final private ElasticCounter counter;
+        final private int windowInterval;
+
+        private TimeWindow(String action, long start, int maxLatency, int interval) {
+            super(action, start, maxLatency);
+            this.counter = new ElasticCounter(interval);
+            this.windowInterval = interval;
+        }
+
+        @Override
+        public void reset(long start) {
+            super.reset(start);
+            this.counter.reset();
         }
 
         private void busyWaitPrint(ResultLogger logger) {
             if (counter.canPrint()) {
                 final long time = System.currentTimeMillis();
-                final long diffTime = windowTimeMS(time);
+                final long diffTime = elapsedTimeMS(time);
                 if (diffTime > windowInterval) {
                     print(time, logger);
                     reset(time);
@@ -256,100 +320,14 @@ final public class SbkPerformance implements Performance {
 
     }
 
-    @NotThreadSafe
-    static private class LatencyWriter {
-        final static int MS_PER_SEC = 1000;
-        final static int MS_PER_MIN = MS_PER_SEC * 60;
-        final static int MS_PER_HR = MS_PER_MIN * 60;
-        final double[] percentiles = {0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
-        final String action;
-        final int messageSize;
-        final long startTime;
-        final int[] latencies;
-        int discard;
-        long count;
-        long totalLatency;
-        long maxLatency;
-        long totalBytes;
-        ArrayList<int[]> latencyRanges;
-
-        LatencyWriter(String action, int messageSize, long startTime) {
-            this.action = action;
-            this.messageSize = messageSize;
-            this.startTime = startTime;
-            this.latencies = new int[MS_PER_HR];
-            this.discard = 0;
-            this.latencyRanges = null;
-            this.totalLatency = 0;
-            this.maxLatency = 0;
-            this.count = 0;
-        }
-
-        private void countLatencies() {
-            count = 0;
-            latencyRanges = new ArrayList<>();
-            for (int i = 0, cur = 0; i < latencies.length; i++) {
-                if (latencies[i] > 0) {
-                    latencyRanges.add(new int[]{cur, cur + latencies[i], i});
-                    cur += latencies[i] + 1;
-                    totalLatency += i * latencies[i];
-                    count += latencies[i];
-                    maxLatency = i;
-                }
-            }
-        }
-
-        private int[] getPercentiles() {
-            int[] percentileIds = new int[percentiles.length];
-            int[] values = new int[percentileIds.length];
-            int index = 0;
-
-            for (int i = 0; i < percentiles.length; i++) {
-                percentileIds[i] = (int) (count * percentiles[i]);
-            }
-
-            for (int[] lr : latencyRanges) {
-                while ((index < percentileIds.length) &&
-                        (lr[0] <= percentileIds[index]) && (percentileIds[index] <= lr[1])) {
-                    values[index++] = lr[2];
-                }
-            }
-            return values;
-        }
-
-        public void record(int bytes, int events, int latency) {
-            if (latency  < latencies.length && latency > -1) {
-                totalBytes += bytes;
-                latencies[latency] += events;
-            } else {
-                discard++;
-            }
-        }
-
-        public void record(long start, int bytes, int events, int latency) {
-            this.record(bytes, events, latency);
-        }
-
-        public void printTotal(long endTime, ResultLogger logger) {
-            countLatencies();
-            final double elapsed = (endTime - startTime) / 1000.0;
-            final double recsPerSec = count / elapsed;
-            final double mbPerSec = (this.totalBytes / (1024.0 * 1024.0)) / elapsed;
-            int[] percs = getPercentiles();
-
-            logger.print(action+" (Total) ", count, recsPerSec, mbPerSec, totalLatency / (double) count, maxLatency);
-            logger.printLatencies(action +" Latencies", percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
-            logger.printDiscardedLatencies(action + "Discarded Latencies:", discard);
-        }
-    }
 
     @NotThreadSafe
     static private class CSVLatencyWriter extends LatencyWriter {
         final private String csvFile;
         final private CSVPrinter csvPrinter;
 
-        CSVLatencyWriter(String action, int messageSize, long start, String csvFile) throws IOException {
-            super(action, messageSize, start);
+        CSVLatencyWriter(String action, long start,  int maxLatency,  String csvFile) throws IOException {
+            super(action, start, maxLatency);
             this.csvFile = csvFile;
             csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
                     .withHeader("Start Time (Milliseconds)", "data size (bytes)", "Records", action + " Latency (Milliseconds)"));
@@ -361,7 +339,8 @@ final public class SbkPerformance implements Performance {
                         .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
 
                 for (CSVRecord csvEntry : csvParser) {
-                    record(Integer.parseInt(csvEntry.get(1)), Integer.parseInt(csvEntry.get(2)), Integer.parseInt(csvEntry.get(3)));
+                    super.record(Integer.parseInt(csvEntry.get(0)), Integer.parseInt(csvEntry.get(1)),
+                            Integer.parseInt(csvEntry.get(2)), Integer.parseInt(csvEntry.get(3)));
                 }
                 csvParser.close();
             } catch (IOException ex) {
@@ -370,23 +349,23 @@ final public class SbkPerformance implements Performance {
         }
 
         @Override
-        public void record(long start, int bytes, int events, int latency) {
+        public void record(long startTime, int bytes, int events, int latency) {
             try {
-                csvPrinter.printRecord(start, bytes, events, latency);
+                csvPrinter.printRecord(startTime, bytes, events, latency);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         }
 
         @Override
-        public void printTotal(long endTime, ResultLogger logger) {
+        public void print(long endTime, ResultLogger logger) {
             try {
                 csvPrinter.close();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
             readCSV();
-            super.printTotal(endTime, logger);
+            super.print(endTime, logger);
         }
     }
 
