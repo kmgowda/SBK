@@ -77,6 +77,12 @@ public interface Parameters {
     boolean isMetricsEnabled();
 
     /**
+     * Get the prefix name for metrics.
+     * @return  Prefix Name.
+     */
+    String getPrefixName();
+
+    /**
      * Get the Number of records to read/writer.
      * @return   number of records.
      */

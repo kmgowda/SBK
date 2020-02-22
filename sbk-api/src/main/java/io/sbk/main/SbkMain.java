@@ -164,7 +164,7 @@ public class SbkMain {
         } else {
             action = "Writing";
         }
-
+        final String defaultPrefix = BENCHMARKNAME.toUpperCase() + "_" + className + "_" + action + "_";
         final ResultLogger logger = new SystemResultLogger();
         if (params.isMetricsEnabled()) {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
@@ -185,9 +185,15 @@ public class SbkMain {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            String prefix = params.getPrefixName();
+            if (prefix != null) {
+                prefix = prefix + "_" + defaultPrefix;
+            } else {
+                prefix = defaultPrefix;
+            }
+
             metricsLogger = new MetricsLogger(
-                    BENCHMARKNAME.toUpperCase()+"_" +className+"_"+action+"_",
-                    params.getWritersCount(), params.getReadersCount(),
+                    prefix, params.getWritersCount(), params.getReadersCount(),
                     REPORTINGINTERVAL, logger, compositeLogger);
         } else {
             metricsLogger = logger;
