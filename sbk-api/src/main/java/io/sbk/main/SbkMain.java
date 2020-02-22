@@ -179,15 +179,14 @@ public class SbkMain {
                     os.write(response.getBytes());
                 }
             });
-
             new Thread(server::start).start();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         final ResultLogger metricsLogger = new MetricsLogger(
                 BENCHMARKNAME.toUpperCase()+"_" +className+"_"+action+"_",
-                params.getWritersCount(),
-                params.getReadersCount(), logger, compositeLogger);
+                params.getWritersCount(), params.getReadersCount(),
+                REPORTINGINTERVAL, logger, compositeLogger);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
         if (fork) {

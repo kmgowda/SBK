@@ -48,11 +48,14 @@ public class MetricsLogger implements ResultLogger {
     private final AtomicInteger percSix;
     private final MeterRegistry registry;
     private final ResultLogger defaultLogger;
+    private final int reportingInterval;
 
 
-    public MetricsLogger(String prefix, int writers, int readers, ResultLogger defaultLogger, CompositeMeterRegistry registry) {
+    public MetricsLogger(String prefix, int writers, int readers, int reportingInterval,
+                         ResultLogger defaultLogger, CompositeMeterRegistry registry) {
         this.registry = registry;
         this.defaultLogger = defaultLogger;
+        this.reportingInterval = reportingInterval;
         this.bytesName = prefix + "Bytes";
         this.recordsName = prefix + "Records";
         this.mbPsecName = prefix + "MBPerSec";
