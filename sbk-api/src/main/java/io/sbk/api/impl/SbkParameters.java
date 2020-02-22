@@ -61,6 +61,9 @@ final public class SbkParameters implements Parameters {
     private String csvFile;
     @Getter
     private boolean writeAndRead;
+    @Getter
+    private boolean metricsEnabled;
+
     private double throughput;
     private CommandLine commandline;
 
@@ -94,6 +97,7 @@ final public class SbkParameters implements Parameters {
                         "if 0 , writes 'records'\n" +
                         "if -1, get the maximum throughput");
         options.addOption("csv", true, "CSV file to record write/read latencies");
+        options.addOption("metrics", true, "Enable JMX and Prometheus metrics; True by default");
         options.addOption("help", false, "Help message");
         options.addOption("version", false, "Version");
     }
@@ -172,6 +176,7 @@ final public class SbkParameters implements Parameters {
         recordsCount = Integer.parseInt(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
         csvFile = commandline.getOptionValue("csv", null);
+        metricsEnabled = Boolean.parseBoolean(commandline.getOptionValue("metrics", "true"));
         int flushRecords = Integer.parseInt(commandline.getOptionValue("flush", "0"));
         if (flushRecords > 0) {
             recordsPerFlush = flushRecords;

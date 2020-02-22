@@ -79,6 +79,7 @@ public class SbkMain {
         final QuadConsumer writeTime;
         final QuadConsumer readTime;
         final List<String> driversList;
+        final ResultLogger metricsLogger;
         final String version = SbkMain.class.getPackage().getImplementationVersion();
 
         try {
@@ -165,28 +166,32 @@ public class SbkMain {
         }
 
         final ResultLogger logger = new SystemResultLogger();
-        final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-        final PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
-        compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
-        compositeLogger.add(prometheusRegistry);
-        try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-            server.createContext("/metrics", httpExchange -> {
-                String response = prometheusRegistry.scrape();
-                httpExchange.sendResponseHeaders(200, response.getBytes().length);
-                try (OutputStream os = httpExchange.getResponseBody()) {
-                    os.write(response.getBytes());
-                }
-            });
-            new Thread(server::start).start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (params.isMetricsEnabled()) {
+            final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
+            final PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+            prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
+            compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
+            compositeLogger.add(prometheusRegistry);
+            try {
+                HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+                server.createContext("/metrics", httpExchange -> {
+                    String response = prometheusRegistry.scrape();
+                    httpExchange.sendResponseHeaders(200, response.getBytes().length);
+                    try (OutputStream os = httpExchange.getResponseBody()) {
+                        os.write(response.getBytes());
+                    }
+                });
+                new Thread(server::start).start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            metricsLogger = new MetricsLogger(
+                    BENCHMARKNAME.toUpperCase()+"_" +className+"_"+action+"_",
+                    params.getWritersCount(), params.getReadersCount(),
+                    REPORTINGINTERVAL, logger, compositeLogger);
+        } else {
+            metricsLogger = logger;
         }
-        final ResultLogger metricsLogger = new MetricsLogger(
-                BENCHMARKNAME.toUpperCase()+"_" +className+"_"+action+"_",
-                params.getWritersCount(), params.getReadersCount(),
-                REPORTINGINTERVAL, logger, compositeLogger);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
         if (fork) {
