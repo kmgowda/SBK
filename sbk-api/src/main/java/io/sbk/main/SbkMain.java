@@ -10,20 +10,19 @@
 
 package io.sbk.main;
 
-import com.sun.net.httpserver.HttpServer;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
+import io.sbk.api.Metric;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.Reader;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.Writer;
+import io.sbk.api.impl.MetricImpl;
 import io.sbk.api.impl.MetricsLogger;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SbkPerformance;
@@ -39,8 +38,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,6 +68,7 @@ public class SbkMain {
         CommandLine commandline = null;
         String className = null;
         Benchmark obj = null;
+        MeterRegistry metricRegistry = null;
         final String action;
         final Parameters params;
         final ExecutorService executor;
@@ -126,8 +124,10 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
+        final Metric metric = new MetricImpl();
         params = new SbkParameters(BENCHMARKNAME, DESC, version, className, driversList,  startTime);
         benchmark.addArgs(params);
+        metric.addArgs(params);
         try {
             params.parseArgs(args);
         }  catch (ParseException | IllegalArgumentException ex) {
@@ -142,15 +142,11 @@ public class SbkMain {
             System.exit(0);
         }
         try {
+            metric.parseArgs(params);
             benchmark.parseArgs(params);
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-            System.exit(0);
-        }
-
-        try {
+            metricRegistry = metric.createMetric(params);
             benchmark.openStorage(params);
-        } catch (IOException ex) {
+        } catch (RuntimeException | IOException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
@@ -164,39 +160,17 @@ public class SbkMain {
         } else {
             action = "Writing";
         }
-        final String defaultPrefix = BENCHMARKNAME.toUpperCase() + "_" + className + "_" + action + "_";
         final ResultLogger logger = new SystemResultLogger();
-        if (params.isMetricsEnabled()) {
+        if (metricRegistry == null) {
+            metricsLogger = logger;
+        } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-            final PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-            prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
+            final String prefix = BENCHMARKNAME.toUpperCase() + "_" + className + "_" + action + "_";
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
-            compositeLogger.add(prometheusRegistry);
-            try {
-                HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-                server.createContext("/metrics", httpExchange -> {
-                    String response = prometheusRegistry.scrape();
-                    httpExchange.sendResponseHeaders(200, response.getBytes().length);
-                    try (OutputStream os = httpExchange.getResponseBody()) {
-                        os.write(response.getBytes());
-                    }
-                });
-                new Thread(server::start).start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            String prefix = params.getPrefixName();
-            if (prefix != null) {
-                prefix = prefix + "_" + defaultPrefix;
-            } else {
-                prefix = defaultPrefix;
-            }
-
+            compositeLogger.add(metricRegistry);
             metricsLogger = new MetricsLogger(
                     prefix, params.getWritersCount(), params.getReadersCount(),
                     REPORTINGINTERVAL, logger, compositeLogger);
-        } else {
-            metricsLogger = logger;
         }
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;

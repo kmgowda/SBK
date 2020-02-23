@@ -71,18 +71,6 @@ public interface Parameters {
     boolean isWriteAndRead();
 
     /**
-     * Check metrics enabled.
-     * @return  True by default; False is user explicitly specified.
-     */
-    boolean isMetricsEnabled();
-
-    /**
-     * Get the prefix name for metrics.
-     * @return  Prefix Name.
-     */
-    String getPrefixName();
-
-    /**
      * Get the Number of records to read/writer.
      * @return   number of records.
      */
