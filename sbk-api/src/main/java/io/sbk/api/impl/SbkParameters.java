@@ -61,6 +61,7 @@ final public class SbkParameters implements Parameters {
     private String csvFile;
     @Getter
     private boolean writeAndRead;
+
     private double throughput;
     private CommandLine commandline;
 
@@ -93,7 +94,6 @@ final public class SbkParameters implements Parameters {
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes 'records'\n" +
                         "if -1, get the maximum throughput");
-        options.addOption("csv", true, "CSV file to record write/read latencies");
         options.addOption("help", false, "Help message");
         options.addOption("version", false, "Version");
     }

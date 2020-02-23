@@ -47,5 +47,7 @@
     <allow pkg="io.jsonwebtoken" />
     <allow pkg="io.kubernetes" />
     <allow pkg="org.reflections" />
+    <allow pkg="io.micrometer" />
+    <allow pkg="com.sun" />
 
 </import-control>

@@ -10,14 +10,20 @@
 
 package io.sbk.main;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
+import io.sbk.api.Metric;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
 import io.sbk.api.QuadConsumer;
 import io.sbk.api.Reader;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.Writer;
+import io.sbk.api.impl.MetricImpl;
+import io.sbk.api.impl.MetricsLogger;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SbkPerformance;
 import io.sbk.api.impl.SbkReader;
@@ -43,6 +49,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import io.micrometer.jmx.JmxMeterRegistry;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.core.instrument.Clock;
 
 /**
  * Main class of SBK.
@@ -59,6 +68,8 @@ public class SbkMain {
         CommandLine commandline = null;
         String className = null;
         Benchmark obj = null;
+        MeterRegistry metricRegistry = null;
+        final String action;
         final Parameters params;
         final ExecutorService executor;
         final Performance writeStats;
@@ -66,6 +77,7 @@ public class SbkMain {
         final QuadConsumer writeTime;
         final QuadConsumer readTime;
         final List<String> driversList;
+        final ResultLogger metricsLogger;
         final String version = SbkMain.class.getPackage().getImplementationVersion();
 
         try {
@@ -112,8 +124,10 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
+        final Metric metric = new MetricImpl();
         params = new SbkParameters(BENCHMARKNAME, DESC, version, className, driversList,  startTime);
         benchmark.addArgs(params);
+        metric.addArgs(params);
         try {
             params.parseArgs(args);
         }  catch (ParseException | IllegalArgumentException ex) {
@@ -128,20 +142,36 @@ public class SbkMain {
             System.exit(0);
         }
         try {
+            metric.parseArgs(params);
             benchmark.parseArgs(params);
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-            System.exit(0);
-        }
-
-        try {
+            metricRegistry = metric.createMetric(params);
             benchmark.openStorage(params);
-        } catch (IOException ex) {
+        } catch (RuntimeException | IOException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
 
+        if (params.getReadersCount() > 0) {
+            if (params.isWriteAndRead()) {
+                action = "Write/Reading";
+            } else {
+                action = "Reading";
+            }
+        } else {
+            action = "Writing";
+        }
         final ResultLogger logger = new SystemResultLogger();
+        if (metricRegistry == null) {
+            metricsLogger = logger;
+        } else {
+            final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
+            final String prefix = BENCHMARKNAME.toUpperCase() + "_" + className + "_" + action + "_";
+            compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
+            compositeLogger.add(metricRegistry);
+            metricsLogger = new MetricsLogger(
+                    prefix, params.getWritersCount(), params.getReadersCount(),
+                    REPORTINGINTERVAL, logger, compositeLogger);
+        }
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
         if (fork) {
@@ -151,8 +181,8 @@ public class SbkMain {
         }
 
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new SbkPerformance("Writing", REPORTINGINTERVAL, params.getRecordSize(),
-                                params.getCsvFile(), logger, executor);
+            writeStats = new SbkPerformance(action, REPORTINGINTERVAL, params.getRecordSize(),
+                                params.getCsvFile(), metricsLogger, logger, executor);
             writeTime = writeStats::recordTime;
         } else {
             writeStats = null;
@@ -160,14 +190,8 @@ public class SbkMain {
         }
 
         if (params.getReadersCount() > 0) {
-            String action;
-            if (params.isWriteAndRead()) {
-                action = "Write/Reading";
-              } else {
-                action = "Reading";
-            }
             readStats = new SbkPerformance(action, REPORTINGINTERVAL, params.getRecordSize(),
-                            params.getCsvFile(), logger, executor);
+                            params.getCsvFile(), metricsLogger, logger, executor);
             readTime = readStats::recordTime;
         } else {
             readStats = null;
