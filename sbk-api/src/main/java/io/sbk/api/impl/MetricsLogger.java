@@ -17,6 +17,9 @@ import io.sbk.api.ResultLogger;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
+ */
 public class MetricsLogger implements ResultLogger {
     private final String bytesName;
     private final String recordsName;

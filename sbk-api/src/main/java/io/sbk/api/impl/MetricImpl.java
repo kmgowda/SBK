@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
+/**
+ * Class for Implementing Prometheus MeterRegistry for metrics.
+ */
 public class MetricImpl implements Metric {
     private final static int DEFAULT_PORT = 8080;
     private final static String DEFAULT_CONTEXT = "/metrics";
