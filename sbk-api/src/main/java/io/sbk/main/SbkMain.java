@@ -101,10 +101,13 @@ public class SbkMain {
             ex.printStackTrace();
             System.exit(0);
         }
+        final Metric metric = new MetricImpl();
         driversList =  getClassNames(PKGNAME);
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            new SbkParameters(BENCHMARKNAME, DESC, version, "", driversList,  startTime).printHelp();
+            Parameters paramsHelp = new SbkParameters(BENCHMARKNAME, DESC, version, "", driversList,  startTime);
+            metric.addArgs(paramsHelp);
+            paramsHelp.printHelp();
             System.exit(0);
         }
         final String name = searchDriver(driversList, className);
@@ -124,7 +127,6 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        final Metric metric = new MetricImpl();
         params = new SbkParameters(BENCHMARKNAME, DESC, version, className, driversList,  startTime);
         benchmark.addArgs(params);
         metric.addArgs(params);

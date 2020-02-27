@@ -35,7 +35,7 @@ public class MetricImpl implements Metric {
     @Override
     public void addArgs(final Parameters params) {
         params.addOption("context", true, "Prometheus Metric context;" +
-                "default context :" + DEFAULT_FULL_CONTEXT + "; 'no' disables the  metrics");
+                "default context: " + DEFAULT_FULL_CONTEXT + "; 'no' disables the  metrics");
     }
 
     @Override
