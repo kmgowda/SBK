@@ -81,21 +81,27 @@ usage: sbk
 
 ## Running Performance benchmarking
 
-SBK outputs the number of records written/read, throughput in terms of MB/s and the average and maximum latency for every 5 seconds time interval as show in below.
+SBK outputs the total data written/read , average throughput and latency , maximum latency  and the latency percentiles 50th, 75th, 95th, 99th , 99.9th and 99.99th for every 5 seconds time interval as show below.
 
 ```
-Writing     152372 records,   30328.8 records/sec,   28.92 MB/sec,    35.4 ms avg latency,  1238.0 ms max latency
-Writing     178680 records,   35382.2 records/sec,   33.74 MB/sec,    26.2 ms avg latency,   189.0 ms max latency
-Writing     176365 records,   35160.5 records/sec,   33.53 MB/sec,    27.2 ms avg latency,   197.0 ms max latency
-Writing      73151 records,   14621.4 records/sec,   13.94 MB/sec,    62.8 ms avg latency,   399.0 ms max latency
+Writing     234059 records,   46774.4 records/sec,    44.61 MB/sec,     19.8 ms avg latency,     151 ms max latency,       0 discarded latencies; Percentiles:      15 ms 50th,      19 ms 75th,      71 ms 95th,      87 ms 99th,     120 ms 99.9th,     121 ms 99.99th.
+Writing     241211 records,   48203.6 records/sec,    45.97 MB/sec,     19.9 ms avg latency,     326 ms max latency,       0 discarded latencies; Percentiles:      14 ms 50th,      18 ms 75th,      69 ms 95th,     129 ms 99th,     324 ms 99.9th,     325 ms 99.99th.
+Writing     181333 records,   36259.3 records/sec,    34.58 MB/sec,     26.6 ms avg latency,     472 ms max latency,       0 discarded latencies; Percentiles:      15 ms 50th,      20 ms 75th,      75 ms 95th,     292 ms 99th,     470 ms 99.9th,     471 ms 99.99th.
+Writing     207749 records,   41541.5 records/sec,    39.62 MB/sec,     23.3 ms avg latency,     474 ms max latency,       0 discarded latencies; Percentiles:      14 ms 50th,      17 ms 75th,      74 ms 95th,     259 ms 99th,     467 ms 99.9th,     468 ms 99.99th.
+Writing     278237 records,   54933.3 records/sec,    52.39 MB/sec,     17.1 ms avg latency,     127 ms max latency,       0 discarded latencies; Percentiles:      13 ms 50th,      16 ms 75th,      67 ms 95th,      94 ms 99th,     108 ms 99.9th,     113 ms 99.99th.
+Writing     188978 records,   37421.4 records/sec,    35.69 MB/sec,     26.0 ms avg latency,     540 ms max latency,       0 discarded latencies; Percentiles:      14 ms 50th,      17 ms 75th,      70 ms 95th,     279 ms 99th,     539 ms 99.9th,     539 ms 99.99th.
+Writing     241126 records,   48186.7 records/sec,    45.95 MB/sec,     20.3 ms avg latency,     155 ms max latency,       0 discarded latencies; Percentiles:      13 ms 50th,      17 ms 75th,      73 ms 95th,     116 ms 99th,     153 ms 99.9th,     154 ms 99.99th.
+Writing     217897 records,   43345.3 records/sec,    41.34 MB/sec,     22.1 ms avg latency,     224 ms max latency,       0 discarded latencies; Percentiles:      14 ms 50th,      16 ms 75th,      77 ms 95th,     184 ms 99th,     220 ms 99.9th,     221 ms 99.99th.
+Writing      76501 records,   14748.6 records/sec,    14.07 MB/sec,     63.7 ms avg latency,     720 ms max latency,       0 discarded latencies; Percentiles:      17 ms 50th,      74 ms 75th,     260 ms 95th,     620 ms 99th,     715 ms 99.9th,     716 ms 99.99th.
+Writing     158371 records,   31642.6 records/sec,    30.18 MB/sec,     32.6 ms avg latency,     957 ms max latency,       0 discarded latencies; Percentiles:      14 ms 50th,      18 ms 75th,      92 ms 95th,     370 ms 99th,     955 ms 99.9th,     955 ms 99.99th.
+Writing     111786 records,   20980.9 records/sec,    20.01 MB/sec,     37.3 ms avg latency,    1018 ms max latency,       0 discarded latencies; Percentiles:      16 ms 50th,      25 ms 75th,     116 ms 95th,     162 ms 99th,    1018 ms 99.9th,    1018 ms 99.99th.
 ```
 
-At the end of the benchmarking session, SBK outputs the total data written/read , average throughput and latency , maximum latency  and the percentiles 50th, 75th, 95th, 99th , 99.9th and 99.99th for the complete data records written/read.
+At the end of the benchmarking session, SBK outputs the total data written/read , average throughput and latency , maximum latency  and the latency percentiles 50th, 75th, 95th, 99th , 99.9th and 99.99th for the complete data records written/read.
 An example  final output is show as below:
 
 ```
-Writing (Total)      641805 records,   20696.0 records/sec,   19.74 MB/sec,    32.7 ms avg latency,  1238.0 ms max latency
-Writing Latencies 22 ms 50th, 31 ms 75th, 90 ms 95th, 168 ms 99th, 1064 ms 99.9th, 1099 ms 99.99th.
+Writing(Total)    2137248 records,   38387.2 records/sec,    36.61 MB/sec,     24.6 ms avg latency,    1018 ms max latency,       0 discarded latencies; Percentiles:      14 ms 50th,      18 ms 75th,      78 ms 95th,     231 ms 99th,     623 ms 99.9th,     955 ms 99.99th.
 ```
 
 
