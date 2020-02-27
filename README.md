@@ -60,7 +60,8 @@ usage: sbk
  -class <arg>        Benchmark Driver Class,
                      Available Drivers [ConcurrentQ, File, Kafka, Pravega,
                      Pulsar]
- -csv <arg>          CSV file to record write/read latencies
+ -context <arg>      Prometheus Metric context;default context:
+                     8080/metrics; 'no' disables the  metrics
  -flush <arg>        Each Writer calls flush after writing <arg> number of
                      of events(records); Not applicable, if both writers
                      and readers are specified
@@ -71,7 +72,7 @@ usage: sbk
                      and/or Number of records per reader
  -size <arg>         Size of each message (event or record)
  -throughput <arg>   if > 0 , throughput in MB/s
-                     if 0 , writes 'events'
+                     if 0 , writes 'records'
                      if -1, get the maximum throughput
  -time <arg>         Number of seconds this SBK runs (24hrs by default)
  -version            Version
@@ -196,9 +197,6 @@ For example: The End to End latency of between single writer and single reader o
 The user should specify both writers and readers count for write to read or End to End latency mode.
 The -throughput -1 specifies the writes tries to write the events at the maximum possible speed.
 ```
-
-## Recording the latencies to CSV files
-User can use the option "-csv [file name]" to record the latencies of writers/readers.
 
 ## Contributing to SBK
 All submissions to the master are done through pull requests. If you'd like to make a change:
@@ -338,9 +336,11 @@ usage: sbk -class Pulsar
                         topic
  -broker <arg>          Broker URI
  -class <arg>           Benchmark Driver Class,
-                        Available Drivers [Kafka, Pravega, Pulsar]
+                        Available Drivers [ConcurrentQ, File, Kafka,
+                        Pravega, Pulsar]
  -cluster <arg>         Cluster name (optional parameter)
- -csv <arg>             CSV file to record write/read latencies
+ -context <arg>         Prometheus Metric context;default context:
+                        8080/metrics; 'no' disables the  metrics
  -deduplication <arg>   Enable or Disable Deduplication; by default
                         disabled
  -ensembleSize <arg>    EnsembleSize (default: 1)
@@ -357,7 +357,7 @@ usage: sbk -class Pulsar
  -threads <arg>         io threads per Topic; by default (writers +
                         readers)
  -throughput <arg>      if > 0 , throughput in MB/s
-                        if 0 , writes 'events'
+                        if 0 , writes 'records'
                         if -1, get the maximum throughput
  -time <arg>            Number of seconds this SBK runs (24hrs by default)
  -topic <arg>           Topic name
