@@ -118,7 +118,7 @@ When you run the SBK, by default it starts the http server and all the output be
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
-![Pulsar Standalone benchmark on grafana](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pulsar-grafana.jpg)
+![Pulsar Standalone benchmark on grafana](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/pulsar-grafana.jpg)
 
 
 
