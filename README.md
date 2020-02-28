@@ -388,4 +388,7 @@ usage: sbk -class Pulsar
 ```
 
 ## Design of SBK
-The SBK is a spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of SBK and comparision of Kafka and Pravega in terms of performance benchmarking.
+
+![SBK System Diagram](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/SBK-system-diagram.png)
+
+The internal components are detailed in the above system diagram of SBK. The key differentiator of SBK to get the max throughput of the storage driver is **SBK performance Processor**. The SBK is a spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of **SBK performance Processor**. This paper also compares the performance of Kafka and Pravega streaming storage Systems.
