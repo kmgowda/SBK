@@ -127,7 +127,7 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new SbkParameters(BENCHMARKNAME, DESC, version, className, driversList,  startTime);
+        params = new SbkParameters(BENCHMARKNAME, DESC, version, name, driversList,  startTime);
         benchmark.addArgs(params);
         metric.addArgs(params);
         try {
@@ -167,7 +167,7 @@ public class SbkMain {
             metricsLogger = logger;
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-            final String prefix = BENCHMARKNAME.toUpperCase() + "_" + className + "_" + action + "_";
+            final String prefix = BENCHMARKNAME.toUpperCase() + "_" + name + "_" + action + "_";
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
             metricsLogger = new MetricsLogger(
