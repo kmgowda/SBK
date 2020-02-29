@@ -391,4 +391,24 @@ usage: sbk -class Pulsar
 
 ![SBK System Diagram](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/SBK-system-diagram.png)
 
-The internal components are detailed in the above system diagram of SBK. The key differentiator component of SBK to get the max throughput of the storage driver is **SBK performance Processor**. The SBK is a spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of **SBK performance Processor**. This paper also compares the performance of Kafka and Pravega streaming storage Systems.
+The internal components are detailed in the above system diagram of SBK. 
+
+1. SBK Kick Starter
+    This the Main method of the SBK, which processes the command line arguments , initiates the input number of writers/readers and SBK performance processor.
+    
+2. Writer and Readers
+    Performs the data write/read operations and implements the [Execution modes](https://github.com/kmgowda/SBK#sbk-execution-modes)
+
+3. Data Type handler , Byte Array Handler and Custom Data type Handler
+    Generic interface to defined for data type oeprations such as creating a payload, writing and reading the timestamp of the payload. By default, the Byte Array Handler is implemented if your storage driver is uses the byte[] as data type; for any other custom data type, then storage driver has to implement the data type specfic operations.
+
+4. Storage Driver
+     As expalined in [Adding your Storage driver] https://github.com/kmgowda/SBK#add-your-driver-to-sbk
+
+
+5. SBK preformance Processor
+6. Result logger, SL4J, System Logger and Prometheus Logger
+
+
+
+The key differentiator component of SBK to get the max throughput of the storage driver is **SBK performance Processor**. The SBK is a spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of **SBK performance Processor**. This paper also compares the performance of Kafka and Pravega streaming storage Systems.
