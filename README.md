@@ -393,7 +393,7 @@ usage: sbk -class Pulsar
 
 The internal components are detailed in the above system diagram of SBK. 
 
-### SBK Kick Starter
+#### SBK Kick Starter
 This is the Main method of the SBK, which processes the command line arguments, initiates the input number of writers/readers and SBK performance processor.
     
 #### Writers and Readers
