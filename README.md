@@ -118,7 +118,7 @@ When you run the SBK, by default it starts the http server and all the output be
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
-[![Pulsar Grafana Dashboard](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/pulsar-grafana.jpg)](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/pulsar-grafana.jpg)
+[![Pulsar Grafana Dashboard](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)
 
 #### Port conflicts between strage servers and grafana/prometheus
 * If you have running Pulsar server in standalone/local mode or if you are running SBK in the same system in which Pulsar broker is also running, then using the local port 8080 conflicts with the Pulsar Admin which runs at same port. So, either you change the Pulsar admin port or change the SBK's http port usig **-metrics** option.
@@ -391,7 +391,7 @@ usage: sbk -class Pulsar
 
 ## Design of SBK
 
-[![SBK System Diagram](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/SBK-system-diagram.png)](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/SBK-system-diagram.png)
+[![SBK System Diagram](https://github.com/kmgowda/SBK/blob/gh-pages/images/SBK-system-diagram.png)](https://github.com/kmgowda/SBK/blob/gh-pages/images/SBK-system-diagram.png)
 
 The internal components are detailed in the above system diagram of SBK. 
 
