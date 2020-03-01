@@ -416,4 +416,4 @@ The key differentiator component of SBK to get the max throughput of the storage
     
 
 #### Result logger, SL4J, System Logger and Prometheus Logger
-This component logs the benchmark results to local system output device and to Prometheus monitoring system as described in [SBK Grafana dashboards](https://github.com/kmgowda/SBK#grafana-dashboards-of-sbk). The SBK logs the benchmark results to JMX also. Logging to SL4J is also avilable, but currently its disabled.
+This component logs the benchmark results to local system output device and to Prometheus monitoring system as described in [SBK Grafana dashboards](https://github.com/kmgowda/SBK#grafana-dashboards-of-sbk) using [micrometer metrics instrumentation library](https://micrometer.io). The SBK logs the benchmark results to JMX also. Logging to SL4J is also avilable, but currently its disabled.
