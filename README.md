@@ -120,7 +120,9 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 
 ![Pulsar Standalone benchmark on grafana](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/pulsar-grafana.jpg)
 
-
+#### Port conflicts between strage servers and grafana/prometheus
+* If you have running Pulsar server in standalone/local mode or if you are running SBK in the same system in which Pulsar broker is also running, then using the local port 8080 conflicts with the Pulsar Admin which runs at same port. So, either you change the Pulsar admin port or change the SBK's http port usig **-metrics** option.
+* If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [prometheus configuraiton file](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) before deploying the prometheus. 
 
 ## SBK Execution Modes
 
@@ -414,4 +416,4 @@ The key differentiator component of SBK to get the max throughput of the storage
     
 
 #### Result logger, SL4J, System Logger and Prometheus Logger
-This component logs the benchmark results to local system output device and to Prometheus monitoring system as described in [SBK Grafana dashboards](https://github.com/kmgowda/SBK#grafana-dashboards-of-sbk). logging to SL4J is also avilable, but currently its disabled.
+This component logs the benchmark results to local system output device and to Prometheus monitoring system as described in [SBK Grafana dashboards](https://github.com/kmgowda/SBK#grafana-dashboards-of-sbk). The SBK logs the benchmark results to JMX also. Logging to SL4J is also avilable, but currently its disabled.
