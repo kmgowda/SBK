@@ -118,7 +118,7 @@ When you run the SBK, by default it starts the http server and all the output be
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
-![Pulsar Standalone benchmark on grafana](https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/pulsar-grafana.jpg)
+<img src="https://github.com/kmgowda/SBK/blob/gh-pages/examples/pictures/pulsar-grafana.jpg" />
 
 #### Port conflicts between strage servers and grafana/prometheus
 * If you have running Pulsar server in standalone/local mode or if you are running SBK in the same system in which Pulsar broker is also running, then using the local port 8080 conflicts with the Pulsar Admin which runs at same port. So, either you change the Pulsar admin port or change the SBK's http port usig **-metrics** option.
