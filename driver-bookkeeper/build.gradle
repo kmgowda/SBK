@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+}
+
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(":sbk-api")
+    compile 'org.apache.distributedlog:distributedlog-core-shaded:4.9.2'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
