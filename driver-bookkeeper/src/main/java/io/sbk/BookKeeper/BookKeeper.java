@@ -54,8 +54,8 @@ public class BookKeeper implements Benchmark<byte[]> {
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         recreate = false;
-        logName =  params.getOptionValue("topic", null);
-        uriName = params.getOptionValue("broker", null);
+        logName =  params.getOptionValue("log", null);
+        uriName = params.getOptionValue("uri", null);
         if (uriName == null) {
             throw new IllegalArgumentException("Error: Must specify Bookkeeper/Distributed log IP address");
         }
