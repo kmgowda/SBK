@@ -200,7 +200,7 @@ final public class SbkParameters implements Parameters {
             writeAndRead = readersCount > 0;
             recordsPerWriter = (recordsCount + writersCount - 1) / writersCount;
             if (throughput < 0 && secondsToRun > 0) {
-                recordsPerSec = readersCount / writersCount;
+                recordsPerSec = recordsCount / writersCount;
             } else if (throughput > 0) {
                 recordsPerSec = (int) (((throughput * 1024 * 1024) / recordSize) / writersCount);
             } else {
