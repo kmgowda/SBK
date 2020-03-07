@@ -33,6 +33,7 @@ public interface Metric {
      * Create the Metric.
      * @param params Parameters object enclosing all commandline arguments,
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
+     * @return return the Metric Registry.
      * @throws IllegalArgumentException If an exception occurred.
      */
     MeterRegistry createMetric(final Parameters params) throws IllegalArgumentException;
