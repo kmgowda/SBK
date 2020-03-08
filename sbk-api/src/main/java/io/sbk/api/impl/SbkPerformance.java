@@ -183,7 +183,7 @@ final public class SbkPerformance implements Performance {
      */
     @NotThreadSafe
     static private class LatencyWriter {
-        final double[] percentiles = {0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
+        final double[] percentiles = {0.1, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
         final private String action;
         final private int latencyThreshold;
         private int[] latencies;
@@ -285,7 +285,8 @@ final public class SbkPerformance implements Performance {
             int[] percs = getPercentiles();
 
             logger.print(action, bytes, records, recsPerSec, mbPerSec, totalLatency / (double) records,
-                    maxLatency, discard, percs[0], percs[1], percs[2], percs[3], percs[4], percs[5]);
+                    maxLatency, discard, percs[0], percs[1], percs[2], percs[3],
+                    percs[4], percs[5], percs[6], percs[7]);
         }
     }
 
