@@ -13,7 +13,7 @@ package io.sbk.main;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.sbk.api.Benchmark;
+import io.sbk.api.Storage;
 import io.sbk.api.DataType;
 import io.sbk.api.Metric;
 import io.sbk.api.Parameters;
@@ -67,7 +67,7 @@ public class SbkMain {
         final boolean fork = true;
         CommandLine commandline = null;
         String className = null;
-        Benchmark obj = null;
+        Storage obj = null;
         MeterRegistry metricRegistry = null;
         final String action;
         final Parameters params;
@@ -116,19 +116,19 @@ public class SbkMain {
             System.exit(0);
         }
         try {
-            obj = (Benchmark) Class.forName(PKGNAME + "." + name + "." + name).newInstance();
+            obj = (Storage) Class.forName(PKGNAME + "." + name + "." + name).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
 
-        final Benchmark benchmark = obj;
-        if (benchmark == null) {
+        final Storage storage = obj;
+        if (storage == null) {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
         params = new SbkParameters(BENCHMARKNAME, DESC, version, name, driversList,  startTime);
-        benchmark.addArgs(params);
+        storage.addArgs(params);
         metric.addArgs(params);
         try {
             params.parseArgs(args);
@@ -145,9 +145,9 @@ public class SbkMain {
         }
         try {
             metric.parseArgs(params);
-            benchmark.parseArgs(params);
+            storage.parseArgs(params);
             metricRegistry = metric.createMetric(params);
-            benchmark.openStorage(params);
+            storage.openStorage(params);
         } catch (RuntimeException | IOException ex) {
             ex.printStackTrace();
             System.exit(0);
@@ -199,16 +199,16 @@ public class SbkMain {
             readStats = null;
             readTime = null;
         }
-        final DataType data = benchmark.getDataType();
+        final DataType data = storage.getDataType();
         try {
             final List<Writer> writers = IntStream.range(0, params.getWritersCount())
                                                 .boxed()
-                                                .map(i -> benchmark.createWriter(i, params))
+                                                .map(i -> storage.createWriter(i, params))
                                                 .collect(Collectors.toList());
 
             final List<Reader> readers = IntStream.range(0, params.getReadersCount())
                                                 .boxed()
-                                                .map(i -> benchmark.createReader(i, params))
+                                                .map(i -> storage.createReader(i, params))
                                                 .collect(Collectors.toList());
 
             final List<SbkWriter> sbkWriters =  IntStream.range(0, params.getWritersCount())
@@ -256,7 +256,7 @@ public class SbkMain {
                                 }
                             });
                         }
-                        benchmark.closeStorage(params);
+                        storage.closeStorage(params);
                     } catch (ExecutionException | InterruptedException | IOException ex) {
                         ex.printStackTrace();
                     }
@@ -297,7 +297,7 @@ public class SbkMain {
                     }
                 });
             }
-            benchmark.closeStorage(params);
+            storage.closeStorage(params);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -307,7 +307,7 @@ public class SbkMain {
 
     private static List<String> getClassNames(String pkgName) {
         Reflections reflections = new Reflections(pkgName);
-        Set<Class<? extends Benchmark>> subTypes = reflections.getSubTypesOf(Benchmark.class);
+        Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
         return subTypes.stream().map(i -> i.toString().substring(i.toString().lastIndexOf(".") + 1))
                 .sorted().collect(Collectors.toList());
     }

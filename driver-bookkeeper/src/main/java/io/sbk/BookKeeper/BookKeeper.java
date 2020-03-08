@@ -9,7 +9,7 @@
  */
 package io.sbk.BookKeeper;
 
-import io.sbk.api.Benchmark;
+import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
@@ -27,7 +27,7 @@ import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 /**
  * Class for Bookkeeper Benchmarking.
  */
-public class BookKeeper implements Benchmark<byte[]> {
+public class BookKeeper implements Storage<byte[]> {
     private final static String CONFIGFILE = "BookKeeper.properties";
     private Namespace namespace;
     private URI dlogUri;

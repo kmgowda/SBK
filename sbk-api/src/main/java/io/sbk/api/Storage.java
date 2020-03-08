@@ -17,7 +17,7 @@ import java.lang.reflect.Type;
 /**
  * Interface for Benchmarking.
  */
-public interface Benchmark<T> {
+public interface Storage<T> {
 
     /**
      * Add the driver specific command line arguments.

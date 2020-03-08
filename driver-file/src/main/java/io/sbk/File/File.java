@@ -9,7 +9,7 @@
  */
 package io.sbk.File;
 
-import io.sbk.api.Benchmark;
+import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * Class for File System Benchmarking.
  */
-public class File implements Benchmark<byte[]> {
+public class File implements Storage<byte[]> {
     private String fileName;
     private boolean sync;
 
