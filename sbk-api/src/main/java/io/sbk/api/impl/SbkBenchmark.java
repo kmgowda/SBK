@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -34,8 +35,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class SbkBenchmark implements Benchmark {
-    final private String action;
-    final private int reportingInterval;
+    final static private boolean USEFORK = true;
     final private Storage storage;
     final private ExecutorService executor;
     final private Parameters params;
@@ -43,27 +43,25 @@ public class SbkBenchmark implements Benchmark {
     final private Performance readStats;
     final private QuadConsumer writeTime;
     final private QuadConsumer readTime;
-    final private ResultLogger metricsLogger;
-    final private ResultLogger logger;
     final private ScheduledExecutorService timeoutExecutor;
-    final private CompletableFuture<Void> ret;
+    private CompletableFuture<Void> ret;
     private List<Writer> writers;
     private List<Reader> readers;
     private List<SbkWriter> sbkWriters;
     private List<SbkReader> sbkReaders;
     private List<Callable<Void>> workers;
-    private boolean state;
 
     public SbkBenchmark(String  action, Parameters params, Storage storage, ResultLogger logger,
-                        ResultLogger metricsLogger, int reportingInterval, ExecutorService executor) {
-        this.action = action;
+                        ResultLogger metricsLogger, int reportingInterval) {
         this.params = params;
         this.storage = storage;
-        this.logger = logger;
-        this.metricsLogger = logger;
-        this.reportingInterval = reportingInterval;
-        this.executor = executor;
-         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
+        if (USEFORK) {
+            executor = new ForkJoinPool(threadCount);
+        } else {
+            executor = Executors.newFixedThreadPool(threadCount);
+        }
+        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(action, reportingInterval, params.getRecordSize(),
                     params.getCsvFile(), metricsLogger, logger, executor);
             writeTime = writeStats::recordTime;
@@ -80,15 +78,14 @@ public class SbkBenchmark implements Benchmark {
             readStats = null;
             readTime = null;
         }
-        ret = new CompletableFuture<>();
         timeoutExecutor = Executors.newScheduledThreadPool(1);
-        state = false;
+        ret = null;
     }
 
     @Override
     @Synchronized
     public CompletableFuture<Void> start() throws IOException, IllegalStateException {
-        if (state) {
+        if (ret != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
         storage.openStorage(params);
@@ -124,18 +121,24 @@ public class SbkBenchmark implements Benchmark {
         if (readStats != null) {
             readStats.start(startTime);
         }
-        workers.forEach(executor::submit);
+        ret = CompletableFuture.runAsync(() -> {
+            try {
+                executor.invokeAll(workers);
+                stop();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }, executor);
         if (params.getSecondsToRun() > 0) {
-            timeoutExecutor.schedule(this::stop, params.getSecondsToRun(), TimeUnit.SECONDS);
+            timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
-        state = true;
         return ret;
     }
 
     @Override
     @Synchronized
     public void stop() {
-        if (ret.isDone()) {
+        if (ret == null) {
             return;
         }
         try {
@@ -171,6 +174,13 @@ public class SbkBenchmark implements Benchmark {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        executor.shutdown();
+        try {
+            executor.awaitTermination(1, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
         ret.complete(null);
+        ret = null;
     }
 }

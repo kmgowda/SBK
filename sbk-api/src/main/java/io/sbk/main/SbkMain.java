@@ -36,11 +36,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
 import io.micrometer.jmx.JmxMeterRegistry;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.core.instrument.Clock;
@@ -56,14 +52,12 @@ public class SbkMain {
 
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
-        final boolean fork = true;
         CommandLine commandline = null;
         String className = null;
         Storage obj = null;
         MeterRegistry metricRegistry = null;
         final String action;
         final Parameters params;
-        final ExecutorService executor;
         final List<String> driversList;
         final ResultLogger metricsLogger;
         final String version = SbkMain.class.getPackage().getImplementationVersion();
@@ -163,40 +157,22 @@ public class SbkMain {
                     REPORTINGINTERVAL, logger, compositeLogger);
         }
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
-        if (fork) {
-            executor = new ForkJoinPool(threadCount);
-        } else {
-            executor = Executors.newFixedThreadPool(threadCount);
-        }
-
         final Benchmark benchmark = new SbkBenchmark(action, params, storage, logger,
-                metricsLogger, REPORTINGINTERVAL, executor);
+                metricsLogger, REPORTINGINTERVAL);
         try {
             ret = benchmark.start();
         } catch (IOException ex) {
             ex.printStackTrace();
             System.exit(1);
         }
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                try {
-                    System.out.println();
-                    benchmark.stop();
-                    executor.shutdown();
-                    executor.awaitTermination(1, TimeUnit.SECONDS);
-                 } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println();
+                benchmark.stop();
+        }));
         try {
             if (ret != null) {
                 ret.get();
             }
-            benchmark.stop();
-            executor.shutdown();
-            executor.awaitTermination(1, TimeUnit.SECONDS);
         } catch (ExecutionException | InterruptedException ex ) {
             ex.printStackTrace();
         }

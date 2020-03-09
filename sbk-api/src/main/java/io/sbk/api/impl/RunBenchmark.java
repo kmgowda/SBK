@@ -19,6 +19,7 @@ public interface RunBenchmark {
 
      /**
       * Run writers/readers benchmarks.
+      *
       * @throws IOException If an exception occurred.
       * @throws InterruptedException If an exception occurred.
       */
