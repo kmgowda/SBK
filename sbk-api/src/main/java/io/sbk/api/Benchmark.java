@@ -15,7 +15,16 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Benchmark {
 
+    /**
+     * Start the Benchmark.
+     * @return CompletableFuture.
+     * @throws IllegalStateException If an exception occurred.
+     * @throws IOException If an exception occurred.
+     */
     CompletableFuture<Void> start() throws IOException, IllegalStateException;
 
+    /**
+     * stop/shutdown the Benchmark.
+     */
     void stop();
 }

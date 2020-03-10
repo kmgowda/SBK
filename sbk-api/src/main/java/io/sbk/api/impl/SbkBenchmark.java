@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * Class for performing the benchmark.
+ */
 public class SbkBenchmark implements Benchmark {
     final static private boolean USEFORK = true;
     final private Storage storage;
@@ -51,6 +54,16 @@ public class SbkBenchmark implements Benchmark {
     private List<SbkReader> sbkReaders;
     private List<Callable<Void>> workers;
 
+    /**
+     * Create SBK Benchmark.
+     *
+     * @param  action   Action String
+     * @param  params   Parameters
+     * @param  storage  Storage device/client/driver for benchmarking
+     * @param  logger   Result Logger
+     * @param  metricsLogger    Log the results to metrics logger
+     * @param  reportingInterval Results reporting interval
+     */
     public SbkBenchmark(String  action, Parameters params, Storage storage, ResultLogger logger,
                         ResultLogger metricsLogger, int reportingInterval) {
         this.params = params;
@@ -82,6 +95,17 @@ public class SbkBenchmark implements Benchmark {
         ret = null;
     }
 
+    /**
+     * Start SBK Benchmark.
+     *
+     * opens the storage device/client , creates the writers/readers.
+     * conducts the performance benchmarking for given time in seconds
+     * or exits if the input the number of records are written/read.
+     * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
+     *
+     * @throws IOException If an exception occurred.
+     * @throws IllegalStateException If an exception occurred.
+     */
     @Override
     @Synchronized
     public CompletableFuture<Void> start() throws IOException, IllegalStateException {
@@ -135,6 +159,13 @@ public class SbkBenchmark implements Benchmark {
         return ret;
     }
 
+    /**
+     * Stop/shutdown SBK Benchmark.
+     *
+     * closes all writers/readers.
+     * closes the storage device/client.
+     *
+     */
     @Override
     @Synchronized
     public void stop() {
