@@ -15,6 +15,7 @@ import io.sbk.api.Parameters;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -31,7 +32,7 @@ import com.rabbitmq.client.Envelope;
  */
 public class RabbitMQReader extends DefaultConsumer implements Reader<byte[]> {
     final private Channel channel;
-    private BlockingQueue<byte[]> queue;
+    final private BlockingQueue<byte[]> queue;
     final private Parameters params;
 
     public RabbitMQReader(int readerId, Parameters params, Connection connection, String topicName,
@@ -43,6 +44,7 @@ public class RabbitMQReader extends DefaultConsumer implements Reader<byte[]> {
         channel.queueDeclare(queueName, true, false, false, Collections.emptyMap());
         channel.queueBind(queueName, topicName, "");
         channel.basicConsume(queueName, true, this);
+        queue = new LinkedBlockingQueue();
     }
 
     @Override
