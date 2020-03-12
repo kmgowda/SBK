@@ -9,7 +9,7 @@
  */
 package io.sbk.Kafka;
 
-import io.sbk.api.Benchmark;
+import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
@@ -27,7 +27,7 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 /**
  * Class for Kafka Benchmarking.
  */
-public class Kafka implements Benchmark<byte[]> {
+public class Kafka implements Storage<byte[]> {
     private String brokerUri;
     private String topicName;
     private int partitions;

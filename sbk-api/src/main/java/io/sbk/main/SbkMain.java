@@ -14,20 +14,14 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.api.Benchmark;
-import io.sbk.api.DataType;
+import io.sbk.api.Storage;
 import io.sbk.api.Metric;
 import io.sbk.api.Parameters;
-import io.sbk.api.Performance;
-import io.sbk.api.QuadConsumer;
-import io.sbk.api.Reader;
 import io.sbk.api.ResultLogger;
-import io.sbk.api.Writer;
 import io.sbk.api.impl.MetricImpl;
 import io.sbk.api.impl.MetricsLogger;
+import io.sbk.api.impl.SbkBenchmark;
 import io.sbk.api.impl.SbkParameters;
-import io.sbk.api.impl.SbkPerformance;
-import io.sbk.api.impl.SbkReader;
-import io.sbk.api.impl.SbkWriter;
 import io.sbk.api.impl.SystemResultLogger;
 
 import java.io.IOException;
@@ -39,16 +33,10 @@ import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.IntStream;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
 import io.micrometer.jmx.JmxMeterRegistry;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.core.instrument.Clock;
@@ -64,21 +52,16 @@ public class SbkMain {
 
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
-        final boolean fork = true;
         CommandLine commandline = null;
         String className = null;
-        Benchmark obj = null;
+        Storage obj = null;
         MeterRegistry metricRegistry = null;
         final String action;
         final Parameters params;
-        final ExecutorService executor;
-        final Performance writeStats;
-        final Performance readStats;
-        final QuadConsumer writeTime;
-        final QuadConsumer readTime;
         final List<String> driversList;
         final ResultLogger metricsLogger;
         final String version = SbkMain.class.getPackage().getImplementationVersion();
+        CompletableFuture ret = null;
 
         try {
             commandline = new DefaultParser().parse(new Options()
@@ -116,19 +99,19 @@ public class SbkMain {
             System.exit(0);
         }
         try {
-            obj = (Benchmark) Class.forName(PKGNAME + "." + name + "." + name).newInstance();
+            obj = (Storage) Class.forName(PKGNAME + "." + name + "." + name).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
 
-        final Benchmark benchmark = obj;
-        if (benchmark == null) {
+        final Storage storage = obj;
+        if (storage == null) {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
         params = new SbkParameters(BENCHMARKNAME, DESC, version, name, driversList,  startTime);
-        benchmark.addArgs(params);
+        storage.addArgs(params);
         metric.addArgs(params);
         try {
             params.parseArgs(args);
@@ -145,10 +128,9 @@ public class SbkMain {
         }
         try {
             metric.parseArgs(params);
-            benchmark.parseArgs(params);
+            storage.parseArgs(params);
             metricRegistry = metric.createMetric(params);
-            benchmark.openStorage(params);
-        } catch (RuntimeException | IOException ex) {
+        } catch (RuntimeException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
@@ -175,139 +157,31 @@ public class SbkMain {
                     REPORTINGINTERVAL, logger, compositeLogger);
         }
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
-        if (fork) {
-            executor = new ForkJoinPool(threadCount);
-        } else {
-            executor = Executors.newFixedThreadPool(threadCount);
-        }
-
-        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new SbkPerformance(action, REPORTINGINTERVAL, params.getRecordSize(),
-                                params.getCsvFile(), metricsLogger, logger, executor);
-            writeTime = writeStats::recordTime;
-        } else {
-            writeStats = null;
-            writeTime = null;
-        }
-
-        if (params.getReadersCount() > 0) {
-            readStats = new SbkPerformance(action, REPORTINGINTERVAL, params.getRecordSize(),
-                            params.getCsvFile(), metricsLogger, logger, executor);
-            readTime = readStats::recordTime;
-        } else {
-            readStats = null;
-            readTime = null;
-        }
-        final DataType data = benchmark.getDataType();
+        final Benchmark benchmark = new SbkBenchmark(action, params, storage, logger,
+                metricsLogger, REPORTINGINTERVAL);
         try {
-            final List<Writer> writers = IntStream.range(0, params.getWritersCount())
-                                                .boxed()
-                                                .map(i -> benchmark.createWriter(i, params))
-                                                .collect(Collectors.toList());
-
-            final List<Reader> readers = IntStream.range(0, params.getReadersCount())
-                                                .boxed()
-                                                .map(i -> benchmark.createReader(i, params))
-                                                .collect(Collectors.toList());
-
-            final List<SbkWriter> sbkWriters =  IntStream.range(0, params.getWritersCount())
-                                            .boxed()
-                                            .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
-                                            .collect(Collectors.toList());
-
-            final List<SbkReader> sbkReaders = IntStream.range(0, params.getReadersCount())
-                                            .boxed()
-                                            .map(i -> new SbkReader(i, params, readTime, data, readers.get(i)))
-                                            .collect(Collectors.toList());
-
-            final List<Callable<Void>> workers = Stream.of(sbkReaders, sbkWriters)
-                    .filter(x -> x != null)
-                    .flatMap(x -> x.stream())
-                    .collect(Collectors.toList());
-
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    try {
-                        System.out.println();
-                        executor.shutdown();
-                        executor.awaitTermination(1, TimeUnit.SECONDS);
-                        if (writeStats != null && !params.isWriteAndRead()) {
-                            writeStats.shutdown(System.currentTimeMillis());
-                        }
-                        if (readStats != null) {
-                            readStats.shutdown(System.currentTimeMillis());
-                        }
-                        if (readers != null) {
-                            readers.forEach(c -> {
-                                try {
-                                    c.close();
-                                } catch (IOException ex) {
-                                    ex.printStackTrace();
-                                }
-                            });
-                        }
-                        if (writers != null) {
-                            writers.forEach(c -> {
-                                try {
-                                    c.close();
-                                } catch (IOException ex) {
-                                    ex.printStackTrace();
-                                }
-                            });
-                        }
-                        benchmark.closeStorage(params);
-                    } catch (ExecutionException | InterruptedException | IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            });
-            startTime = System.currentTimeMillis();
-            if (writeStats != null && !params.isWriteAndRead()) {
-                writeStats.start(startTime);
+            ret = benchmark.start();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println();
+                benchmark.stop();
+        }));
+        try {
+            if (ret != null) {
+                ret.get();
             }
-            if (readStats != null) {
-                readStats.start(startTime);
-            }
-
-            executor.invokeAll(workers);
-            executor.shutdown();
-            executor.awaitTermination(1, TimeUnit.SECONDS);
-            if (writeStats != null && !params.isWriteAndRead()) {
-                writeStats.shutdown(System.currentTimeMillis());
-            }
-            if (readStats != null) {
-                readStats.shutdown(System.currentTimeMillis());
-            }
-            if (readers != null) {
-                readers.forEach(c -> {
-                    try {
-                       c.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                });
-            }
-            if (writers != null) {
-                writers.forEach(c -> {
-                    try {
-                        c.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                });
-            }
-            benchmark.closeStorage(params);
-        } catch (Exception ex) {
+        } catch (ExecutionException | InterruptedException ex ) {
             ex.printStackTrace();
         }
         System.exit(0);
     }
 
-
     private static List<String> getClassNames(String pkgName) {
         Reflections reflections = new Reflections(pkgName);
-        Set<Class<? extends Benchmark>> subTypes = reflections.getSubTypesOf(Benchmark.class);
+        Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
         return subTypes.stream().map(i -> i.toString().substring(i.toString().lastIndexOf(".") + 1))
                 .sorted().collect(Collectors.toList());
     }

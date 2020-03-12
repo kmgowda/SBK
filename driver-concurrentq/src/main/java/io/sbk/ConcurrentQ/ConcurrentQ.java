@@ -9,7 +9,7 @@
  */
 package io.sbk.ConcurrentQ;
 
-import io.sbk.api.Benchmark;
+import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Class for Concurrent Queue Benchmarking.
  */
-public class ConcurrentQ implements Benchmark<byte[]> {
+public class ConcurrentQ implements Storage<byte[]> {
     private ConcurrentLinkedQueue<byte[]> queue;
 
     @Override

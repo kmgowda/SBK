@@ -24,14 +24,17 @@ public interface ResultLogger {
      * @param avgLatency Average Latency.
      * @param maxLatency Maximum Latency.
      * @param discard number of discarded latencies.
-     * @param one 50th Percentile.
-     * @param two  75th Percentile.
-     * @param three 95th Percentile.
-     * @param four 99th Percentile
-     * @param five 99.9th Percentile
-     * @param six  99.99th Percentile     *
+     * @param one 10th Percentile.
+     * @param two  25th Percentile.
+     * @param three 50th Percentile.
+     * @param four 75th Percentile
+     * @param five 95th Percentile
+     * @param six  99th Percentile
+     * @param seven  99.9th Percentile
+     * @param eight  99.99th Percentile
      */
     void print(String action, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-               int maxLatency, long discard, int one, int two, int three, int four, int five, int six);
+               int maxLatency, long discard, int one, int two, int three, int four, int five, int six,
+               int seven, int eight);
 
 }

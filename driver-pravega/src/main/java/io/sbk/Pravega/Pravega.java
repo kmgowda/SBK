@@ -10,7 +10,7 @@
 
 package io.sbk.Pravega;
 
-import io.sbk.api.Benchmark;
+import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
@@ -29,7 +29,7 @@ import io.pravega.client.EventStreamClientFactory;
 /**
  * Class for Pravega benchmarking.
  */
-public class Pravega implements Benchmark<byte[]> {
+public class Pravega implements Storage<byte[]> {
     static final String DEFAULT_SCOPE = "Scope";
     private String scopeName;
     private String streamName;

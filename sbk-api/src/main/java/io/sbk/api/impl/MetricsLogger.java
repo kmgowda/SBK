@@ -34,6 +34,8 @@ public class MetricsLogger implements ResultLogger {
     private final String percFourName;
     private final String percFiveName;
     private final String percSixName;
+    private final String percSevenName;
+    private final String percEightName;
     private final String writersName;
     private final String readersName;
     private final Counter bytes;
@@ -49,6 +51,8 @@ public class MetricsLogger implements ResultLogger {
     private final AtomicInteger percFour;
     private final AtomicInteger percFive;
     private final AtomicInteger percSix;
+    private final AtomicInteger percSeven;
+    private final AtomicInteger percEight;
     private final MeterRegistry registry;
     private final ResultLogger defaultLogger;
     private final int reportingInterval;
@@ -66,12 +70,14 @@ public class MetricsLogger implements ResultLogger {
         this.avgLatencyName = prefix + "AvgLatency";
         this.maxLatencyName = prefix + "MaxLatency";
         this.discardedName = prefix + "DiscardedLatencies";
-        this.percOneName = prefix + "50th";
-        this.percTwoName = prefix + "75th";
-        this.percThreeName = prefix + "90th";
-        this.percFourName = prefix + "99th";
-        this.percFiveName = prefix + "99.9th";
-        this.percSixName = prefix + "99.99th";
+        this.percOneName = prefix + "10th";
+        this.percTwoName = prefix + "25th";
+        this.percThreeName = prefix + "50th";
+        this.percFourName = prefix + "75th";
+        this.percFiveName = prefix + "90th";
+        this.percSixName = prefix + "99th";
+        this.percSevenName = prefix + "99.9th";
+        this.percEightName = prefix + "99.99th";
         this.writersName = prefix + "Writers";
         this.readersName = prefix + "Readers";
         this.registry.gauge(this.writersName, writers);
@@ -89,12 +95,15 @@ public class MetricsLogger implements ResultLogger {
         this.percFour = registry.gauge(percFourName, new AtomicInteger());
         this.percFive = registry.gauge(percFiveName, new AtomicInteger());
         this.percSix = registry.gauge(percSixName, new AtomicInteger());
+        this.percSeven = registry.gauge(percSevenName, new AtomicInteger());
+        this.percEight = registry.gauge(percEightName, new AtomicInteger());
     }
 
     @Override
     public void print(String action, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-               long discard, int one, int two, int three, int four, int five, int six) {
-        defaultLogger.print(action, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, discard, one, two, three, four, five, six);
+               long discard, int one, int two, int three, int four, int five, int six, int seven, int eight) {
+        defaultLogger.print(action, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                discard, one, two, three, four, five, six, seven, eight);
         this.bytes.increment(bytes);
         this.records.increment(records);
         this.discarded.increment(discard);
@@ -108,5 +117,7 @@ public class MetricsLogger implements ResultLogger {
         this.percFour.set(four);
         this.percFive.set(five);
         this.percSix.set(six);
+        this.percSeven.set(seven);
+        this.percEight.set(eight);
     }
 }

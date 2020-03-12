@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Pulsar;
-import io.sbk.api.Benchmark;
+import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
@@ -21,7 +21,7 @@ import org.apache.pulsar.client.api.PulsarClientException;
 /**
  * Class for Pulsar Benchmarking.
  */
-public class Pulsar implements Benchmark<byte[]> {
+public class Pulsar implements Storage<byte[]> {
     static final String DEFAULT_NAMESPACE = null;
     static final String DEFAULT_TENANT = null;
     static final String DEFAULT_CLUSTER = null;
