@@ -18,4 +18,5 @@ include 'driver-pravega'
 include 'driver-file'
 include 'driver-concurrentq'
 include 'driver-bookkeeper'
+include 'driver-template'
 
