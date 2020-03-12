@@ -19,4 +19,5 @@ include 'driver-file'
 include 'driver-concurrentq'
 include 'driver-bookkeeper'
 include 'driver-template'
+include 'driver-rabbitmq'
 

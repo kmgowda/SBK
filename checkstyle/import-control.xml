@@ -49,5 +49,6 @@
     <allow pkg="org.reflections" />
     <allow pkg="io.micrometer" />
     <allow pkg="com.sun" />
+    <allow pkg="com.rabbitmq" />
 
 </import-control>
