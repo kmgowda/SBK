@@ -27,12 +27,16 @@ public class RabbitMQ implements Storage<byte[]> {
     private String topicName;
     private String brokerUri;
     private Boolean isPersist;
+    private String user;
+    private String password;
 
     @Override
     public void addArgs(final Parameters params) {
         params.addOption("topic", true, "Topic name");
         params.addOption("broker", true, "Broker URI");
         params.addOption("persist", true, "keep messages persistent");
+        params.addOption("user", true, "user name, default: " + USER);
+        params.addOption("password", true, "user password, default: " + PASSWORD);
     }
 
     @Override
@@ -47,7 +51,8 @@ public class RabbitMQ implements Storage<byte[]> {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
         isPersist = Boolean.parseBoolean(params.getOptionValue("persist", "false"));
-
+        user = params.getOptionValue("user", USER);
+        password = params.getOptionValue("password", PASSWORD);
     }
 
     @Override
@@ -55,8 +60,8 @@ public class RabbitMQ implements Storage<byte[]> {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setAutomaticRecoveryEnabled(true);
         connectionFactory.setHost(brokerUri);
-        connectionFactory.setUsername(USER);
-        connectionFactory.setPassword(PASSWORD);
+        connectionFactory.setUsername(user);
+        connectionFactory.setPassword(password);
 
         try {
             connection = connectionFactory.newConnection();
