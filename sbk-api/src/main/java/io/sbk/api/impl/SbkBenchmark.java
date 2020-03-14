@@ -146,22 +146,10 @@ public class SbkBenchmark implements Benchmark {
             readStats.start(startTime);
         }
         writeFutures = sbkWriters.stream()
-                .map(x -> CompletableFuture.runAsync(() -> {
-                    try {
-                        x.call();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }, executor)).collect(Collectors.toList());
+                .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
 
         readFutures = sbkReaders.stream()
-                .map(x -> CompletableFuture.runAsync(() -> {
-                    try {
-                        x.call();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }, executor)).collect(Collectors.toList());
+                .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
 
         ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
                 collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));

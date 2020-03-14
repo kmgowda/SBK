@@ -17,13 +17,11 @@ import io.sbk.api.Writer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Writer Benchmarking Implementation.
  */
-public class SbkWriter extends Worker implements Callable<Void> {
+public class SbkWriter extends Worker implements Runnable {
     final private static int MS_PER_SEC = 1000;
     final private DataType data;
     final private Writer writer;
@@ -39,14 +37,12 @@ public class SbkWriter extends Worker implements Callable<Void> {
     }
 
     @Override
-    public Void call() throws InterruptedException, ExecutionException, IOException {
+    public void run()  {
         try {
             perf.run();
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         }
-        return null;
     }
 
 
@@ -75,8 +71,6 @@ public class SbkWriter extends Worker implements Callable<Void> {
         }
         return perfWriter;
     }
-
-
 
 
     final private void RecordsWriter() throws InterruptedException, IOException {
