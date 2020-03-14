@@ -22,7 +22,6 @@ import lombok.Synchronized;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -52,8 +51,8 @@ public class SbkBenchmark implements Benchmark {
     private List<Reader> readers;
     private List<SbkWriter> sbkWriters;
     private List<SbkReader> sbkReaders;
-    private List<Callable<Void>> workers;
-    private List<CompletableFuture<Void>> retFutures;
+    private List<CompletableFuture<Void>> writeFutures;
+    private List<CompletableFuture<Void>> readFutures;
 
     /**
      * Create SBK Benchmark.
@@ -118,27 +117,27 @@ public class SbkBenchmark implements Benchmark {
         writers = IntStream.range(0, params.getWritersCount())
                 .boxed()
                 .map(i -> storage.createWriter(i, params))
+                .filter(x -> x != null)
                 .collect(Collectors.toList());
 
         readers = IntStream.range(0, params.getReadersCount())
                 .boxed()
                 .map(i -> storage.createReader(i, params))
+                .filter(x -> x != null)
                 .collect(Collectors.toList());
 
         sbkWriters =  IntStream.range(0, params.getWritersCount())
                 .boxed()
                 .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
+                .filter(x -> x != null)
                 .collect(Collectors.toList());
 
         sbkReaders = IntStream.range(0, params.getReadersCount())
                 .boxed()
                 .map(i -> new SbkReader(i, params, readTime, data, readers.get(i)))
+                .filter(x -> x != null)
                 .collect(Collectors.toList());
 
-        workers = Stream.of(sbkReaders, sbkWriters)
-                .filter(x -> x != null)
-                .flatMap(x -> x.stream())
-                .collect(Collectors.toList());
         final long startTime = System.currentTimeMillis();
         if (writeStats != null && !params.isWriteAndRead()) {
             writeStats.start(startTime);
@@ -146,7 +145,7 @@ public class SbkBenchmark implements Benchmark {
         if (readStats != null) {
             readStats.start(startTime);
         }
-        retFutures = workers.stream()
+        writeFutures = sbkWriters.stream()
                 .map(x -> CompletableFuture.runAsync(() -> {
                     try {
                         x.call();
@@ -155,7 +154,18 @@ public class SbkBenchmark implements Benchmark {
                     }
                 }, executor)).collect(Collectors.toList());
 
-        ret = CompletableFuture.allOf(retFutures.toArray(new CompletableFuture[retFutures.size()]));
+        readFutures = sbkReaders.stream()
+                .map(x -> CompletableFuture.runAsync(() -> {
+                    try {
+                        x.call();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }, executor)).collect(Collectors.toList());
+
+        ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
+                collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
+
         if (params.getSecondsToRun() > 0) {
             timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
