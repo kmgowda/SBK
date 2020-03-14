@@ -52,7 +52,40 @@ public class RocketMQWriter implements Writer<byte[]> {
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, QuadConsumer record) {
+    public CompletableFuture writeAsync(byte[] data) throws IOException {
+        Message message = new Message(topicName, data);
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        try {
+            this.rmqProducer.send(message, new SendCallback() {
+                @Override
+                public void onSuccess(final SendResult sendResult) {
+                    future.complete(null);
+                }
+
+                @Override
+                public void onException(final Throwable e) {
+                    future.completeExceptionally(e);
+                }
+            });
+        } catch (Exception e) {
+            future.completeExceptionally(e);
+        }
+        return future;
+    }
+
+    @Override
+    public void flush() throws IOException {
+
+    }
+
+    @Override
+    public void close() throws IOException {
+        rmqProducer.shutdown();
+    }
+
+    // recordWrite override implementation , instead of completable future.
+    private long recordWriteImpl(byte[] data, int size, QuadConsumer record) {
         final long time = System.currentTimeMillis();
         Message message = new Message(topicName, data);
 
@@ -76,9 +109,8 @@ public class RocketMQWriter implements Writer<byte[]> {
         return time;
     }
 
-
-    @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    //  writeAsync implementation for recordWriteImpl.
+    private CompletableFuture writeAsyncImpl(byte[] data) throws IOException {
         Message message = new Message(topicName, data);
         try {
             this.rmqProducer.send(message);
@@ -87,16 +119,5 @@ public class RocketMQWriter implements Writer<byte[]> {
             throw  new IOException(ex);
         }
         return null;
-    }
-
-
-    @Override
-    public void flush() throws IOException {
-
-    }
-
-    @Override
-    public void close() throws IOException {
-        rmqProducer.shutdown();
     }
 }
