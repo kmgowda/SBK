@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.AsyncReader;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
@@ -46,13 +47,9 @@ public class SbkBenchmark implements Benchmark {
     final private QuadConsumer writeTime;
     final private QuadConsumer readTime;
     final private ScheduledExecutorService timeoutExecutor;
-    private CompletableFuture<Void> ret;
     private List<Writer> writers;
     private List<Reader> readers;
-    private List<SbkWriter> sbkWriters;
-    private List<SbkReader> sbkReaders;
-    private List<CompletableFuture<Void>> writeFutures;
-    private List<CompletableFuture<Void>> readFutures;
+    private CompletableFuture<Void> ret;
 
     /**
      * Create SBK Benchmark.
@@ -114,6 +111,13 @@ public class SbkBenchmark implements Benchmark {
         }
         storage.openStorage(params);
         final DataType data = storage.getDataType();
+        final List<AsyncReader> asyncReaders;
+        final List<SbkWriter> sbkWriters;
+        final List<SbkReader> sbkReaders;
+        final List<SbkAsyncReader> sbkAsyncReaders;
+        final List<CompletableFuture<Void>> writeFutures;
+        final List<CompletableFuture<Void>> readFutures;
+
         writers = IntStream.range(0, params.getWritersCount())
                 .boxed()
                 .map(i -> storage.createWriter(i, params))
@@ -132,11 +136,30 @@ public class SbkBenchmark implements Benchmark {
                 .filter(x -> x != null)
                 .collect(Collectors.toList());
 
-        sbkReaders = IntStream.range(0, params.getReadersCount())
+        asyncReaders = IntStream.range(0, params.getReadersCount())
                 .boxed()
-                .map(i -> new SbkReader(i, params, readTime, data, readers.get(i)))
+                .map(i -> storage.createAsyncReader(i, params))
                 .filter(x -> x != null)
                 .collect(Collectors.toList());
+
+        if (readers.size() > 0) {
+            sbkReaders = IntStream.range(0, params.getReadersCount())
+                    .boxed()
+                    .map(i -> new SbkReader(i, params, readTime, data, readers.get(i)))
+                    .filter(x -> x != null)
+                    .collect(Collectors.toList());
+            sbkAsyncReaders = null;
+        } else {
+            sbkAsyncReaders = IntStream.range(0, params.getReadersCount())
+                    .boxed()
+                    .map(i -> new SbkAsyncReader(i, params, readTime, data))
+                    .filter(x -> x != null)
+                    .collect(Collectors.toList());
+            for (int i = 0; i < params.getReadersCount(); i++) {
+                asyncReaders.get(i).setCallback(sbkAsyncReaders.get(i));
+            }
+            sbkReaders = null;
+        }
 
         final long startTime = System.currentTimeMillis();
         if (writeStats != null && !params.isWriteAndRead()) {
@@ -147,9 +170,14 @@ public class SbkBenchmark implements Benchmark {
         }
         writeFutures = sbkWriters.stream()
                 .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
-
-        readFutures = sbkReaders.stream()
-                .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
+        if (sbkReaders != null) {
+            readFutures = sbkReaders.stream()
+                    .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
+        } else {
+            readFutures = sbkAsyncReaders.stream()
+                    .map(x -> x.start(startTime)).collect(Collectors.toList());
+            asyncReaders.forEach(x -> x.start(startTime));
+        }
 
         ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
                 collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
