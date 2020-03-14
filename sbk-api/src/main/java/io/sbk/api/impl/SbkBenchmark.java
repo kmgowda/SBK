@@ -53,6 +53,7 @@ public class SbkBenchmark implements Benchmark {
     private List<SbkWriter> sbkWriters;
     private List<SbkReader> sbkReaders;
     private List<Callable<Void>> workers;
+    private List<CompletableFuture<Void>> retFutures;
 
     /**
      * Create SBK Benchmark.
@@ -145,14 +146,16 @@ public class SbkBenchmark implements Benchmark {
         if (readStats != null) {
             readStats.start(startTime);
         }
-        ret = CompletableFuture.runAsync(() -> {
-            try {
-                executor.invokeAll(workers);
-                stop();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }, executor);
+        retFutures = workers.stream()
+                .map(x -> CompletableFuture.runAsync(() -> {
+                    try {
+                        x.call();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }, executor)).collect(Collectors.toList());
+
+        ret = CompletableFuture.allOf(retFutures.toArray(new CompletableFuture[retFutures.size()]));
         if (params.getSecondsToRun() > 0) {
             timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
