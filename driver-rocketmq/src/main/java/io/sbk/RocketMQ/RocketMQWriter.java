@@ -8,6 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RocketMQ;
+import io.sbk.api.QuadConsumer;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -50,28 +51,42 @@ public class RocketMQWriter implements Writer<byte[]> {
         }
     }
 
-
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public long recordWrite(byte[] data, int size, QuadConsumer record) {
+        final long time = System.currentTimeMillis();
         Message message = new Message(topicName, data);
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
         try {
             this.rmqProducer.send(message, new SendCallback() {
                 @Override
                 public void onSuccess(final SendResult sendResult) {
-                    future.complete(null);
+                    final long endTime = System.currentTimeMillis();
+                    record.accept(time, endTime, size, 1);
                 }
 
                 @Override
                 public void onException(final Throwable e) {
-                    future.completeExceptionally(e);
+                  e.printStackTrace();
                 }
             });
-        } catch (Exception e) {
-            future.completeExceptionally(e);
+        } catch (Exception ex) {
+          ex.printStackTrace();
         }
-        return future;
+
+        return time;
+    }
+
+
+    @Override
+    public CompletableFuture writeAsync(byte[] data) throws IOException {
+        Message message = new Message(topicName, data);
+        try {
+            this.rmqProducer.send(message);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw  new IOException(ex);
+        }
+        return null;
     }
 
 
