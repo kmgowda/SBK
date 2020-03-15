@@ -49,7 +49,7 @@ public class RocketMQAsyncReader implements AsyncReader<byte[]> {
         try {
             rmqConsumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
                 for (MessageExt message : msgs) {
-                   callback.consume(message);
+                   callback.consume(message.getBody());
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             });
