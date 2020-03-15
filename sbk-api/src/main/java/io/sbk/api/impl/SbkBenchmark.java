@@ -49,6 +49,7 @@ public class SbkBenchmark implements Benchmark {
     final private ScheduledExecutorService timeoutExecutor;
     private List<Writer> writers;
     private List<Reader> readers;
+    private List<AsyncReader> asyncReaders;
     private CompletableFuture<Void> ret;
 
     /**
@@ -111,7 +112,6 @@ public class SbkBenchmark implements Benchmark {
         }
         storage.openStorage(params);
         final DataType data = storage.getDataType();
-        final List<AsyncReader> asyncReaders;
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
         final List<SbkAsyncReader> sbkAsyncReaders;
@@ -130,15 +130,15 @@ public class SbkBenchmark implements Benchmark {
                 .filter(x -> x != null)
                 .collect(Collectors.toList());
 
-        sbkWriters =  IntStream.range(0, params.getWritersCount())
-                .boxed()
-                .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
-                .filter(x -> x != null)
-                .collect(Collectors.toList());
-
         asyncReaders = IntStream.range(0, params.getReadersCount())
                 .boxed()
                 .map(i -> storage.createAsyncReader(i, params))
+                .filter(x -> x != null)
+                .collect(Collectors.toList());
+
+        sbkWriters =  IntStream.range(0, params.getWritersCount())
+                .boxed()
+                .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
                 .filter(x -> x != null)
                 .collect(Collectors.toList());
 
@@ -212,6 +212,15 @@ public class SbkBenchmark implements Benchmark {
         }
         if (readers != null) {
             readers.forEach(c -> {
+                try {
+                    c.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            });
+        }
+        if (asyncReaders != null) {
+            asyncReaders.forEach(c -> {
                 try {
                     c.close();
                 } catch (IOException ex) {
