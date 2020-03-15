@@ -20,31 +20,54 @@ import java.util.concurrent.CompletableFuture;
 public class SbkAsyncReader extends Worker implements ReaderCallback {
     final private DataType dataType;
     final private CompletableFuture<Void> ret;
+    final private ReaderCallback callback;
     private long readCnt;
-    private long startTime;
+    private long beginTime;
 
     public SbkAsyncReader(int readerId, Parameters params, QuadConsumer recordTime, DataType dataType) {
         super(readerId, params, recordTime);
         this.dataType = dataType;
         this.ret = new CompletableFuture();
         this.readCnt = 0;
-        this.startTime = 0;
+        this.beginTime = 0;
+        if (params.isWriteAndRead()) {
+            callback = this::consumeRW;
+        } else {
+            callback = this::consumeRead;
+        }
     }
 
     public CompletableFuture<Void> start(long statTime) {
-        this.startTime = statTime;
+        this.beginTime = statTime;
         return ret;
     }
 
     @Override
     public void consume(Object data) {
-        final long time = System.currentTimeMillis();
-        recordTime.accept(time, time, dataType.length(data), 1);
+            callback.consume(data);
+    }
+
+    final private void consumeRead(Object data) {
+        final long endTime = System.currentTimeMillis();
+        recordTime.accept(endTime, endTime, dataType.length(data), 1);
         readCnt += 1;
-        if (params.getSecondsToRun() > 0 && (((time - startTime) / 1000) > params.getSecondsToRun())) {
+        if (params.getSecondsToRun() > 0 && (((endTime - beginTime) / 1000) >= params.getSecondsToRun())) {
             ret.complete(null);
         } else if (params.getRecordsPerReader() > readCnt) {
             ret.complete(null);
         }
     }
+
+    final private void consumeRW(Object data) {
+        final long endTime = System.currentTimeMillis();
+        final long startTime = dataType.getTime(data);
+        recordTime.accept(startTime, endTime, dataType.length(data), 1);
+        readCnt += 1;
+        if (params.getSecondsToRun() > 0 && (((endTime - beginTime) / 1000) >= params.getSecondsToRun())) {
+            ret.complete(null);
+        } else if (params.getRecordsPerReader() > readCnt) {
+            ret.complete(null);
+        }
+    }
+
 }

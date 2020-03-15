@@ -155,9 +155,6 @@ public class SbkBenchmark implements Benchmark {
                     .map(i -> new SbkAsyncReader(i, params, readTime, data))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
-            for (int i = 0; i < params.getReadersCount(); i++) {
-                asyncReaders.get(i).setCallback(sbkAsyncReaders.get(i));
-            }
             sbkReaders = null;
         }
 
@@ -176,7 +173,9 @@ public class SbkBenchmark implements Benchmark {
         } else {
             readFutures = sbkAsyncReaders.stream()
                     .map(x -> x.start(startTime)).collect(Collectors.toList());
-            asyncReaders.forEach(x -> x.start(startTime));
+            for (int i = 0; i < params.getReadersCount(); i++) {
+                asyncReaders.get(i).start(sbkAsyncReaders.get(i));
+            }
         }
 
         ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).

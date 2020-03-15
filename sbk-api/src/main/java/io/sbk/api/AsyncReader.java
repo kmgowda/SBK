@@ -10,17 +10,20 @@
 
 package io.sbk.api;
 
+import java.io.IOException;
+
 public interface AsyncReader<T> {
 
     /**
-     * set the callback for AsyncReader.
-     * @param callback reader callback .
+     * set the callback and start the AsyncReader.
+     * @param callback Reader callback.
+     * @throws IOException If an exception occurred.
      */
-    void setCallback(ReaderCallback callback);
+    void start(ReaderCallback callback) throws IOException;
 
     /**
-     * start the AsyncReader.
-     * @param startTime startTime.
+     * Close the AsyncReader.
+     * @throws IOException If an exception occurred.
      */
-    void start(long startTime);
+    void close() throws IOException;
 }

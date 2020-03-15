@@ -8,6 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RabbitMQ;
+import io.sbk.api.AsyncReader;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
@@ -17,8 +18,10 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+
+
 /**
- * Class for Storage driver.
+ * Class for RabbitMQ.
  */
 public class RabbitMQ implements Storage<byte[]> {
     final private static String USER = "guest";
@@ -67,7 +70,7 @@ public class RabbitMQ implements Storage<byte[]> {
             connection = connectionFactory.newConnection();
         } catch (TimeoutException ex) {
             ex.printStackTrace();
-            throw  new IOException("Timeout Exeception occured at openStorage of RabbitMQ");
+            throw  new IOException("Timeout Exception occurred at openStorage of RabbitMQ");
         }
 
     }
@@ -89,8 +92,13 @@ public class RabbitMQ implements Storage<byte[]> {
 
     @Override
     public Reader createReader(final int id, final Parameters params) {
+        return null;
+    }
+
+    @Override
+    public AsyncReader createAsyncReader(final int id, final Parameters params) {
         try {
-            return new RabbitMQReader(id, params, connection, topicName, topicName + "-" + id);
+            return new RabbitMQAsyncReader(id, params, connection, topicName, topicName + "-" + id);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
