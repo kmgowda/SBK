@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(":sbk-api")
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: '2.10.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
+    compile group: 'org.apache.rocketmq', name: 'rocketmq-common', version: '4.6.1'
+    compile group: 'org.apache.rocketmq', name: 'rocketmq-tools', version: '4.6.1'
+    compile group: 'org.apache.rocketmq', name: 'rocketmq-client', version: '4.6.1'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

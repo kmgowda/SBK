@@ -69,6 +69,8 @@ dependencies {
 	compile project(":driver-concurrentq")
 	compile project(":driver-file")
 	compile project(":driver-bookkeeper")
+	compile project(":driver-rabbitmq")
+	compile project(":driver-rocketmq")
 	compile project(":driver-pulsar")
 	compile project(":driver-kafka")
 	compile project(":driver-pravega")

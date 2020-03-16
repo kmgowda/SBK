@@ -16,13 +16,11 @@ import io.sbk.api.QuadConsumer;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Reader Benchmarking Implementation.
  */
-public class SbkReader extends Worker implements Callable<Void> {
+public class SbkReader extends Worker implements Runnable {
     final private static int MS_PER_SEC = 1000;
     final private DataType data;
     final private Reader reader;
@@ -36,14 +34,12 @@ public class SbkReader extends Worker implements Callable<Void> {
     }
 
     @Override
-    public Void call() throws InterruptedException, ExecutionException, IOException {
+    public void run() {
         try {
             perf.run();
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         }
-        return null;
     }
 
     final private RunBenchmark createBenchmark() {

@@ -71,7 +71,7 @@ public interface Parameters {
     boolean isWriteAndRead();
 
     /**
-     * Get the Number of records to read/writer.
+     * Get the Total Number of records to read/writer.
      * @return   number of records.
      */
     int getRecordsCount();
@@ -111,6 +111,18 @@ public interface Parameters {
      * @return   Number of Readers.
      */
     int getReadersCount();
+
+    /**
+     * Get the Number of records per Reader.
+     * @return   number of records.
+     */
+    int getRecordsPerReader();
+
+    /**
+     * Get the Number of records per Writer.
+     * @return   number of records.
+     */
+    int getRecordsPerWriter();
 
     /**
      * CSV file to store the write and read benchmarking data.

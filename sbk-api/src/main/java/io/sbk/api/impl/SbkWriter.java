@@ -17,13 +17,11 @@ import io.sbk.api.Writer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Writer Benchmarking Implementation.
  */
-public class SbkWriter extends Worker implements Callable<Void> {
+public class SbkWriter extends Worker implements Runnable {
     final private static int MS_PER_SEC = 1000;
     final private DataType data;
     final private Writer writer;
@@ -39,14 +37,12 @@ public class SbkWriter extends Worker implements Callable<Void> {
     }
 
     @Override
-    public Void call() throws InterruptedException, ExecutionException, IOException {
+    public void run()  {
         try {
             perf.run();
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         }
-        return null;
     }
 
 
@@ -77,11 +73,9 @@ public class SbkWriter extends Worker implements Callable<Void> {
     }
 
 
-
-
     final private void RecordsWriter() throws InterruptedException, IOException {
         final int size = data.length(payload);
-        for (int i = 0; i < params.getRecordsCount(); i++) {
+        for (int i = 0; i < params.getRecordsPerWriter(); i++) {
             writer.recordWrite(payload, size, recordTime);
         }
         writer.flush();
@@ -90,7 +84,7 @@ public class SbkWriter extends Worker implements Callable<Void> {
 
     final private void RecordsWriterSleep() throws InterruptedException, IOException {
         final RateController eCnt = new RateController(System.currentTimeMillis(), params.getRecordsPerSec());
-        final int recordsCount = params.getRecordsCount();
+        final int recordsCount = params.getRecordsPerWriter();
         final int size = data.length(payload);
         int cnt = 0;
         while (cnt < recordsCount) {
