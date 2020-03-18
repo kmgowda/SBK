@@ -172,6 +172,8 @@ public class SbkMain {
         try {
             if (ret != null) {
                 ret.get();
+            } else {
+                benchmark.stop();
             }
         } catch (ExecutionException | InterruptedException ex ) {
             ex.printStackTrace();

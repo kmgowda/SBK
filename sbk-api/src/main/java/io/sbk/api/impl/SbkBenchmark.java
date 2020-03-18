@@ -22,6 +22,7 @@ import io.sbk.api.Writer;
 import lombok.Synchronized;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -136,50 +137,72 @@ public class SbkBenchmark implements Benchmark {
                 .filter(x -> x != null)
                 .collect(Collectors.toList());
 
-        sbkWriters =  IntStream.range(0, params.getWritersCount())
-                .boxed()
-                .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
-                .filter(x -> x != null)
-                .collect(Collectors.toList());
+        if (writers != null && writers.size() > 0) {
+            sbkWriters = IntStream.range(0, params.getWritersCount())
+                    .boxed()
+                    .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
+                    .filter(x -> x != null)
+                    .collect(Collectors.toList());
+        } else {
+            sbkWriters = null;
+        }
 
-        if (readers.size() > 0) {
+        if (readers != null && readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, params, readTime, data, readers.get(i)))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
             sbkAsyncReaders = null;
-        } else {
+        } else if (asyncReaders != null && asyncReaders.size() > 0) {
             sbkAsyncReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkAsyncReader(i, params, readTime, data))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
             sbkReaders = null;
+        } else {
+            sbkReaders = null;
+            sbkAsyncReaders = null;
         }
 
         final long startTime = System.currentTimeMillis();
-        if (writeStats != null && !params.isWriteAndRead()) {
+        if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
             writeStats.start(startTime);
         }
-        if (readStats != null) {
+        if (readStats != null && (sbkReaders != null || sbkAsyncReaders != null)) {
             readStats.start(startTime);
         }
-        writeFutures = sbkWriters.stream()
-                .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
+        if (sbkWriters != null) {
+            writeFutures = sbkWriters.stream()
+                    .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
+        } else {
+            writeFutures = null;
+        }
+
         if (sbkReaders != null) {
             readFutures = sbkReaders.stream()
                     .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
-        } else {
+        } else if (sbkAsyncReaders != null) {
             readFutures = sbkAsyncReaders.stream()
                     .map(x -> x.start(startTime)).collect(Collectors.toList());
             for (int i = 0; i < params.getReadersCount(); i++) {
                 asyncReaders.get(i).start(sbkAsyncReaders.get(i));
             }
+        } else {
+            readFutures = null;
         }
 
-        ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
-                collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
+        if (writeFutures != null && readFutures != null) {
+            ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
+                    collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
+        } else if (readFutures != null) {
+            ret = CompletableFuture.allOf(new ArrayList<>(readFutures).toArray(new CompletableFuture[readFutures.size()]));
+        } else if (writeFutures != null) {
+            ret = CompletableFuture.allOf(new ArrayList<>(writeFutures).toArray(new CompletableFuture[writeFutures.size()]));
+        } else {
+            ret = null;
+        }
 
         if (params.getSecondsToRun() > 0) {
             timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
@@ -197,9 +220,6 @@ public class SbkBenchmark implements Benchmark {
     @Override
     @Synchronized
     public void stop() {
-        if (ret == null) {
-            return;
-        }
         try {
             if (writeStats != null && !params.isWriteAndRead()) {
                 writeStats.shutdown(System.currentTimeMillis());
@@ -248,7 +268,9 @@ public class SbkBenchmark implements Benchmark {
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-        ret.complete(null);
+        if (ret != null) {
+            ret.complete(null);
+        }
         ret = null;
     }
 }
