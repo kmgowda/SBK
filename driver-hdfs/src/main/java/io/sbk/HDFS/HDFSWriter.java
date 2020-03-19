@@ -9,6 +9,7 @@
  */
 package io.sbk.HDFS;
 import io.sbk.api.Parameters;
+import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
@@ -29,6 +30,18 @@ public class HDFSWriter implements Writer<byte[]> {
         out = fileSystem.create(filePath, true);
         this.sync = sync;
     }
+
+    @Override
+    public long recordWrite(byte[] data, int size, RecordTime record) throws IOException {
+        final long time = System.currentTimeMillis();
+        out.write(data);
+        if (sync) {
+            out.hsync();
+        }
+        record.accept(time, System.currentTimeMillis(), size, 1);
+        return time;
+    }
+
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
