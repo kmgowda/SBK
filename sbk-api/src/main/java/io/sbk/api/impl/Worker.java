@@ -11,7 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
+import io.sbk.api.RecordTime;
 
 /**
  * Abstract class for Writers and Readers.
@@ -19,9 +19,9 @@ import io.sbk.api.QuadConsumer;
 public abstract class Worker {
     protected final int workerID;
     protected final Parameters params;
-    protected final QuadConsumer recordTime;
+    protected final RecordTime recordTime;
 
-    Worker(int workerID, Parameters params, QuadConsumer recordTime) {
+    Worker(int workerID, Parameters params, RecordTime recordTime) {
         this.workerID = workerID;
         this.params = params;
         this.recordTime = recordTime;

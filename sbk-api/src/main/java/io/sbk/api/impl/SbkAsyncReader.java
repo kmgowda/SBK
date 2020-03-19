@@ -11,7 +11,7 @@ package io.sbk.api.impl;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
+import io.sbk.api.RecordTime;
 import io.sbk.api.ReaderCallback;
 
 import java.util.concurrent.CompletableFuture;
@@ -24,7 +24,7 @@ public class SbkAsyncReader extends Worker implements ReaderCallback {
     private long readCnt;
     private long beginTime;
 
-    public SbkAsyncReader(int readerId, Parameters params, QuadConsumer recordTime, DataType dataType) {
+    public SbkAsyncReader(int readerId, Parameters params, RecordTime recordTime, DataType dataType) {
         super(readerId, params, recordTime);
         this.dataType = dataType;
         this.ret = new CompletableFuture();

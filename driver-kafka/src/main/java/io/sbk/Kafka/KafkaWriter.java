@@ -10,7 +10,7 @@
 package io.sbk.Kafka;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
-import io.sbk.api.QuadConsumer;
+import io.sbk.api.RecordTime;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -33,7 +33,7 @@ public class KafkaWriter implements Writer<byte[]> {
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, QuadConsumer record) {
+    public long recordWrite(byte[] data, int size, RecordTime record) {
         final long time = System.currentTimeMillis();
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = System.currentTimeMillis();

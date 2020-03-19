@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Interface for performance Statistics.
  */
-public interface Performance {
+public interface Performance extends RecordTime {
     /**
      * Start the performance statistics.
      *
@@ -30,14 +30,4 @@ public interface Performance {
      * @throws InterruptedException If an exception occurred.
      */
     void shutdown(long endTime) throws ExecutionException, InterruptedException;
-
-    /**
-     * Record the data write/read time of data.
-     *
-     * @param startTime starting time
-     * @param endTime   End time
-     * @param bytes     number of bytes written or read
-     * @param records   number of records written or read
-     **/
-    void recordTime(long startTime, long endTime, int bytes, int records);
 }

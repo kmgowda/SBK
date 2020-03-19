@@ -14,7 +14,6 @@ import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
-import io.sbk.api.QuadConsumer;
 import io.sbk.api.Reader;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.Storage;
@@ -45,8 +44,6 @@ public class SbkBenchmark implements Benchmark {
     final private Parameters params;
     final private Performance writeStats;
     final private Performance readStats;
-    final private QuadConsumer writeTime;
-    final private QuadConsumer readTime;
     final private ScheduledExecutorService timeoutExecutor;
     private List<Writer> writers;
     private List<Reader> readers;
@@ -76,19 +73,15 @@ public class SbkBenchmark implements Benchmark {
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(action, reportingInterval, params.getRecordSize(),
                     params.getCsvFile(), metricsLogger, logger, executor);
-            writeTime = writeStats::recordTime;
         } else {
             writeStats = null;
-            writeTime = null;
         }
 
         if (params.getReadersCount() > 0) {
             readStats = new SbkPerformance(action, reportingInterval, params.getRecordSize(),
                     params.getCsvFile(), metricsLogger, logger, executor);
-            readTime = readStats::recordTime;
         } else {
             readStats = null;
-            readTime = null;
         }
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         ret = null;
@@ -140,7 +133,7 @@ public class SbkBenchmark implements Benchmark {
         if (writers != null && writers.size() > 0) {
             sbkWriters = IntStream.range(0, params.getWritersCount())
                     .boxed()
-                    .map(i -> new SbkWriter(i, params, writeTime, data, writers.get(i)))
+                    .map(i -> new SbkWriter(i, params, writeStats, data, writers.get(i)))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
         } else {
@@ -150,14 +143,14 @@ public class SbkBenchmark implements Benchmark {
         if (readers != null && readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i, params, readTime, data, readers.get(i)))
+                    .map(i -> new SbkReader(i, params, readStats, data, readers.get(i)))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
             sbkAsyncReaders = null;
         } else if (asyncReaders != null && asyncReaders.size() > 0) {
             sbkAsyncReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkAsyncReader(i, params, readTime, data))
+                    .map(i -> new SbkAsyncReader(i, params, readStats, data))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
             sbkReaders = null;

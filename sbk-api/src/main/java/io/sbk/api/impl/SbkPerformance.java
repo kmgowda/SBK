@@ -392,7 +392,7 @@ final public class SbkPerformance implements Performance {
     }
 
     @Override
-    public void recordTime(long startTime, long endTime, int bytes, int records) {
+    public void accept(long startTime, long endTime, int bytes, int records) {
         queue.add(new TimeStamp(startTime, endTime, bytes, records));
     }
 }

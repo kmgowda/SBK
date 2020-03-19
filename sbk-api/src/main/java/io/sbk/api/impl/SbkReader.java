@@ -12,7 +12,7 @@ package io.sbk.api.impl;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
+import io.sbk.api.RecordTime;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class SbkReader extends Worker implements Runnable {
     final private Reader reader;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, Parameters params, QuadConsumer recordTime, DataType data, Reader reader) {
+    public SbkReader(int readerId, Parameters params, RecordTime recordTime, DataType data, Reader reader) {
         super(readerId, params, recordTime);
         this.data = data;
         this.reader = reader;

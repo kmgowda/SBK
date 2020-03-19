@@ -10,7 +10,7 @@
 package io.sbk.Pravega;
 
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
+import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class PravegaWriter implements Writer<byte[]> {
      * @return time return the data sent time
      */
     @Override
-    public long recordWrite(byte[] data, int size, QuadConsumer record) throws IOException {
+    public long recordWrite(byte[] data, int size, RecordTime record) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
