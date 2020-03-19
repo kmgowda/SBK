@@ -23,20 +23,28 @@ import org.apache.hadoop.fs.FSDataOutputStream;
  */
 public class HDFSWriter implements Writer<byte[]> {
     final private FSDataOutputStream out;
+    final private boolean sync;
 
-    public HDFSWriter(int id, Parameters params, FileSystem fileSystem, Path filePath) throws IOException {
+    public HDFSWriter(int id, Parameters params, FileSystem fileSystem, Path filePath,  boolean sync) throws IOException {
         out = fileSystem.create(filePath, true);
+        this.sync = sync;
     }
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
         out.write(data);
+        if (sync) {
+            out.hsync();
+        }
         return null;
     }
 
     @Override
     public void flush() throws IOException {
-        out.flush();
+        out.hflush();
+        if (sync) {
+            out.hsync();
+        }
      }
 
     @Override

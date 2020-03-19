@@ -25,23 +25,26 @@ import org.apache.hadoop.fs.Path;
 public class HDFS implements Storage<byte[]> {
     private static final String FSTYPE = "fs.defaultFS";
     private String fileName;
-    private String nameNode;
+    private String uri;
     private FileSystem fileSystem;
     private Path filePath;
+    private boolean sync;
 
     @Override
     public void addArgs(final Parameters params) {
         params.addOption("file", true, "File name");
-        params.addOption("namenode", true, "NameNode URI");
+        params.addOption("uri", true, "URI");
+        params.addOption("sync", true, "hsync to storage client; only for writer");
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         fileName =  params.getOptionValue("file", null);
-        nameNode =  params.getOptionValue("namenode", null);
+        uri =  params.getOptionValue("uri", null);
+        sync = Boolean.parseBoolean(params.getOptionValue("sync", "false"));
 
-        if (nameNode == null) {
-            throw new IllegalArgumentException("Error: Must specify Name Node IP");
+        if (uri == null) {
+            throw new IllegalArgumentException("Error: Must specify URI IP");
         }
 
         if (fileName == null) {
@@ -55,7 +58,7 @@ public class HDFS implements Storage<byte[]> {
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         Configuration configuration = new Configuration();
-        configuration.set(FSTYPE, nameNode);
+        configuration.set(FSTYPE, uri);
         fileSystem = FileSystem.get(configuration);
         filePath = new Path(fileName);
     }
@@ -68,7 +71,7 @@ public class HDFS implements Storage<byte[]> {
     @Override
     public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new HDFSWriter(id, params, fileSystem, filePath);
+            return new HDFSWriter(id, params, fileSystem, filePath, sync);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
