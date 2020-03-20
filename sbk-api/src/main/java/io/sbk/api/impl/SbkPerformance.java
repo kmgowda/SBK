@@ -11,10 +11,9 @@ package io.sbk.api.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 import java.nio.file.Files;
@@ -46,7 +45,7 @@ final public class SbkPerformance implements Performance {
     final private ExecutorService executor;
 
     @GuardedBy("this")
-    private Future<Void> ret;
+    private CompletableFuture<Void> ret;
 
     public SbkPerformance(String action, int reportingInterval, int messageSize,
                String csvFile, ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
@@ -89,7 +88,7 @@ final public class SbkPerformance implements Performance {
     /**
      * Private class for start and end time.
      */
-    final private class QueueProcessor implements Callable {
+    final private class QueueProcessor implements Runnable {
         final static int MS_PER_SEC = 1000;
         final static int MS_PER_MIN = MS_PER_SEC * 60;
         final static int MS_PER_HR = MS_PER_MIN * 60;
@@ -99,14 +98,24 @@ final public class SbkPerformance implements Performance {
             this.startTime = startTime;
         }
 
-        public Void call() throws IOException {
-            final TimeWindow window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval);
-            final LatencyWriter latencyRecorder = csvFile == null ? new LatencyWriter(action+"(Total)", startTime, MS_PER_HR) :
-                    new CSVLatencyWriter(action+"(Total)", startTime, MS_PER_HR, action, csvFile);
+        public void run() {
+            final TimeWindow window;
+            final LatencyWriter latencyRecorder;
             boolean doWork = true;
             long time = startTime;
             TimeStamp t;
 
+            if (csvFile != null) {
+                try {
+                    latencyRecorder = new CSVLatencyWriter(action + "(Total)", startTime, MS_PER_HR, action, csvFile);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    return;
+                }
+            } else {
+                latencyRecorder = new LatencyWriter(action+"(Total)", startTime, MS_PER_HR);
+            }
+            window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval);
             while (doWork) {
                 t = queue.poll();
                 if (t != null) {
@@ -127,7 +136,6 @@ final public class SbkPerformance implements Performance {
                 }
             }
             latencyRecorder.print(time, totalLogger);
-            return null;
         }
     }
 
@@ -374,18 +382,23 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public void start(long startTime) {
+    public CompletableFuture<Void> start(long startTime) {
         if (this.ret == null) {
-            this.ret = executor.submit(new QueueProcessor(startTime));
+            this.ret = CompletableFuture.runAsync(new QueueProcessor(startTime), executor);
         }
+        return this.ret;
     }
 
     @Override
     @Synchronized
-    public void shutdown(long endTime) throws ExecutionException, InterruptedException {
+    public void stop(long endTime)  {
         if (this.ret != null) {
             queue.add(new TimeStamp(endTime));
-            ret.get();
+            try {
+                ret.get();
+            } catch (ExecutionException | InterruptedException ex) {
+                ex.printStackTrace();
+            }
             queue.clear();
             this.ret = null;
         }

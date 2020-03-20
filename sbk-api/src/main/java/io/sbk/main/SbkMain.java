@@ -10,36 +10,34 @@
 
 package io.sbk.main;
 
+import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.jmx.JmxMeterRegistry;
 import io.sbk.api.Benchmark;
-import io.sbk.api.Storage;
 import io.sbk.api.Metric;
 import io.sbk.api.Parameters;
 import io.sbk.api.ResultLogger;
+import io.sbk.api.Storage;
 import io.sbk.api.impl.MetricImpl;
 import io.sbk.api.impl.MetricsLogger;
 import io.sbk.api.impl.SbkBenchmark;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SystemResultLogger;
-
-import java.io.IOException;
-
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
-import io.micrometer.jmx.JmxMeterRegistry;
-import io.micrometer.jmx.JmxConfig;
-import io.micrometer.core.instrument.Clock;
+import java.util.stream.Collectors;
 
 /**
  * Main class of SBK.
@@ -160,20 +158,20 @@ public class SbkMain {
         final Benchmark benchmark = new SbkBenchmark(action, params, storage, logger,
                 metricsLogger, REPORTINGINTERVAL);
         try {
-            ret = benchmark.start();
+            ret = benchmark.start(System.currentTimeMillis());
         } catch (IOException ex) {
             ex.printStackTrace();
             System.exit(1);
         }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println();
-                benchmark.stop();
+                benchmark.stop(System.currentTimeMillis());
         }));
         try {
             if (ret != null) {
                 ret.get();
             } else {
-                benchmark.stop();
+                benchmark.stop(System.currentTimeMillis());
             }
         } catch (ExecutionException | InterruptedException ex ) {
             ex.printStackTrace();

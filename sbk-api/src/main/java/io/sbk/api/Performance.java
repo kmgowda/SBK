@@ -9,25 +9,9 @@
  */
 package io.sbk.api;
 
-import java.util.concurrent.ExecutionException;
-
 /**
  * Interface for performance Statistics.
  */
-public interface Performance extends RecordTime {
-    /**
-     * Start the performance statistics.
-     *
-     * @param startTime start time time
-     */
-    void start(long startTime);
+public interface Performance extends RecordTime, Benchmark {
 
-    /**
-     * End the final performance statistics.
-     *
-     * @param endTime End time
-     * @throws ExecutionException   If an exception occurred.
-     * @throws InterruptedException If an exception occurred.
-     */
-    void shutdown(long endTime) throws ExecutionException, InterruptedException;
 }

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -95,12 +94,13 @@ public class SbkBenchmark implements Benchmark {
      * or exits if the input the number of records are written/read.
      * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
      *
+     * @param beginTime StartTime
      * @throws IOException If an exception occurred.
      * @throws IllegalStateException If an exception occurred.
      */
     @Override
     @Synchronized
-    public CompletableFuture<Void> start() throws IOException, IllegalStateException {
+    public CompletableFuture<Void> start(long beginTime) throws IOException, IllegalStateException {
         if (ret != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
@@ -198,7 +198,8 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (params.getSecondsToRun() > 0) {
-            timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
+            timeoutExecutor.schedule(() -> stop(System.currentTimeMillis()),
+                    params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
         return ret;
     }
@@ -209,19 +210,16 @@ public class SbkBenchmark implements Benchmark {
      * closes all writers/readers.
      * closes the storage device/client.
      *
+     * @param  endTime End Time.
      */
     @Override
     @Synchronized
-    public void stop() {
-        try {
-            if (writeStats != null && !params.isWriteAndRead()) {
-                writeStats.shutdown(System.currentTimeMillis());
-            }
-            if (readStats != null) {
-                readStats.shutdown(System.currentTimeMillis());
-            }
-        } catch (InterruptedException | ExecutionException ex) {
-            ex.printStackTrace();
+    public void stop(long endTime) {
+        if (writeStats != null && !params.isWriteAndRead()) {
+            writeStats.stop(endTime);
+        }
+        if (readStats != null) {
+            readStats.stop(endTime);
         }
         if (readers != null) {
             readers.forEach(c -> {
