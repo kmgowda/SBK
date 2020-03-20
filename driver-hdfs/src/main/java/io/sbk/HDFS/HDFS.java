@@ -37,7 +37,7 @@ public class HDFS implements Storage<byte[]> {
         params.addOption("uri", true, "URI");
         params.addOption("sync", true, "hsync to storage client; only for writer");
         params.addOption("recreate", true,
-                "If the file is already existing, delete and recreate the same");
+                "If the file is already existing, delete and recreate the same; only for writer");
     }
 
     @Override
@@ -65,7 +65,7 @@ public class HDFS implements Storage<byte[]> {
         configuration.set(FSTYPE, uri);
         fileSystem = FileSystem.get(configuration);
         filePath = new Path(fileName);
-        if (recreate) {
+        if (recreate && params.getWritersCount() > 0) {
             try {
                 fileSystem.delete(filePath, true);
             } catch (IOException ex) {
