@@ -57,7 +57,7 @@ public class SbkReader extends Worker implements Runnable {
         Object ret = null;
         try {
             int i = 0;
-            while (i < params.getRecordsCount()) {
+            while (i < params.getRecordsPerReader()) {
                 final long startTime = System.currentTimeMillis();
                 ret = reader.read();
                 if (ret != null) {
@@ -76,7 +76,7 @@ public class SbkReader extends Worker implements Runnable {
         Object ret = null;
         try {
             int i = 0;
-            while (i < params.getRecordsCount()) {
+            while (i < params.getRecordsPerReader()) {
                 ret = reader.read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
