@@ -61,6 +61,11 @@ public class HDFS implements Storage<byte[]> {
         configuration.set(FSTYPE, uri);
         fileSystem = FileSystem.get(configuration);
         filePath = new Path(fileName);
+        try {
+            fileSystem.delete(filePath, true);
+        } catch (IOException ex) {
+            // Ignore the error
+        }
     }
 
     @Override
