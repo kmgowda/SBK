@@ -29,12 +29,15 @@ public class HDFS implements Storage<byte[]> {
     private FileSystem fileSystem;
     private Path filePath;
     private boolean sync;
+    private boolean recreate;
 
     @Override
     public void addArgs(final Parameters params) {
         params.addOption("file", true, "File name");
         params.addOption("uri", true, "URI");
         params.addOption("sync", true, "hsync to storage client; only for writer");
+        params.addOption("recreate", true,
+                "If the file is already existing, delete and recreate the same");
     }
 
     @Override
@@ -42,6 +45,7 @@ public class HDFS implements Storage<byte[]> {
         fileName =  params.getOptionValue("file", null);
         uri =  params.getOptionValue("uri", null);
         sync = Boolean.parseBoolean(params.getOptionValue("sync", "false"));
+        recreate = Boolean.parseBoolean(params.getOptionValue("recreate", "false"));
 
         if (uri == null) {
             throw new IllegalArgumentException("Error: Must specify URI IP");
@@ -61,10 +65,12 @@ public class HDFS implements Storage<byte[]> {
         configuration.set(FSTYPE, uri);
         fileSystem = FileSystem.get(configuration);
         filePath = new Path(fileName);
-        try {
-            fileSystem.delete(filePath, true);
-        } catch (IOException ex) {
-            // Ignore the error
+        if (recreate) {
+            try {
+                fileSystem.delete(filePath, true);
+            } catch (IOException ex) {
+                // Ignore the error
+            }
         }
     }
 

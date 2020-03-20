@@ -27,7 +27,7 @@ public class HDFSWriter implements Writer<byte[]> {
     final private boolean sync;
 
     public HDFSWriter(int id, Parameters params, FileSystem fileSystem, Path filePath,  boolean sync) throws IOException {
-        out = fileSystem.create(filePath, true);
+        out = fileSystem.create(filePath, false);
         this.sync = sync;
     }
 
