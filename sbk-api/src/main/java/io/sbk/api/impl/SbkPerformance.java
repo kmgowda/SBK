@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import io.sbk.api.Performance;
+import io.sbk.api.RecordTime;
 import io.sbk.api.ResultLogger;
 import lombok.Synchronized;
 import org.apache.commons.csv.CSVFormat;
@@ -39,15 +40,18 @@ final public class SbkPerformance implements Performance {
     final private String csvFile;
     final private int messageSize;
     final private int windowInterval;
-    final private ConcurrentLinkedQueue<TimeStamp> queue;
     final private ResultLogger periodicLogger;
     final private ResultLogger totalLogger;
     final private ExecutorService executor;
+    private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
+
+    @GuardedBy("this")
+    private int size;
 
     @GuardedBy("this")
     private CompletableFuture<Void> ret;
 
-    public SbkPerformance(String action, int reportingInterval, int messageSize,
+    public SbkPerformance(String action, int reportingInterval, int messageSize, int workers,
                String csvFile, ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
         this.action = action;
         this.messageSize = messageSize;
@@ -56,7 +60,8 @@ final public class SbkPerformance implements Performance {
         this.periodicLogger = periodicLogger;
         this.totalLogger = totalLogger;
         this.executor = executor;
-        this.queue = new ConcurrentLinkedQueue<>();
+        this.cQueues = new ConcurrentLinkedQueue[workers];
+        this.size = 0;
         this.ret = null;
     }
 
@@ -102,6 +107,7 @@ final public class SbkPerformance implements Performance {
             final TimeWindow window;
             final LatencyWriter latencyRecorder;
             boolean doWork = true;
+            boolean notFound = true;
             long time = startTime;
             TimeStamp t;
 
@@ -117,22 +123,27 @@ final public class SbkPerformance implements Performance {
             }
             window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval);
             while (doWork) {
-                t = queue.poll();
-                if (t != null) {
-                    if (t.isEnd()) {
-                        doWork = false;
-                    } else {
-                        final int latency = (int) (t.endTime - t.startTime);
-                        window.record(startTime, t.bytes, t.records, latency);
-                        latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
+                notFound = true;
+                for (ConcurrentLinkedQueue<TimeStamp> queue : cQueues) {
+                    t = queue.poll();
+                    if (t != null) {
+                        notFound = false;
+                        if (t.isEnd()) {
+                            doWork = false;
+                        } else {
+                            final int latency = (int) (t.endTime - t.startTime);
+                            window.record(startTime, t.bytes, t.records, latency);
+                            latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
+                        }
+                        time =  t.endTime;
+                        if (window.elapsedTimeMS(time) > windowInterval) {
+                            window.print(time, periodicLogger);
+                            window.reset(time);
+                        }
                     }
-                    time =  t.endTime;
-                    if (window.elapsedTimeMS(time) > windowInterval) {
-                        window.print(time, periodicLogger);
-                        window.reset(time);
-                    }
-                } else {
-                        window.busyWaitPrint(periodicLogger);
+                }
+                if (notFound) {
+                    window.busyWaitPrint(periodicLogger);
                 }
             }
             latencyRecorder.print(time, totalLogger);
@@ -380,6 +391,31 @@ final public class SbkPerformance implements Performance {
         }
     }
 
+    static final class TimeRecorder implements RecordTime {
+        final private ConcurrentLinkedQueue<TimeStamp> queue;
+
+        TimeRecorder(ConcurrentLinkedQueue queue) {
+            this.queue = queue;
+        }
+
+        @Override
+        public void accept(long startTime, long endTime, int bytes, int records) {
+            queue.add(new TimeStamp(startTime, endTime, bytes, records));
+        }
+    }
+
+    @Override
+    @Synchronized
+    public RecordTime get() {
+        if (size >= cQueues.length) {
+            return null;
+        }
+        cQueues[size] = new ConcurrentLinkedQueue<>();
+        size += 1;
+        return new TimeRecorder(cQueues[size-1]);
+    }
+
+
     @Override
     @Synchronized
     public CompletableFuture<Void> start(long startTime) {
@@ -393,19 +429,18 @@ final public class SbkPerformance implements Performance {
     @Synchronized
     public void stop(long endTime)  {
         if (this.ret != null) {
-            queue.add(new TimeStamp(endTime));
-            try {
-                ret.get();
-            } catch (ExecutionException | InterruptedException ex) {
-                ex.printStackTrace();
+            if (cQueues.length > 0) {
+                cQueues[0].add(new TimeStamp(endTime));
+                try {
+                    ret.get();
+                } catch (ExecutionException | InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                for (ConcurrentLinkedQueue queue : cQueues) {
+                    queue.clear();
+                }
             }
-            queue.clear();
             this.ret = null;
         }
-    }
-
-    @Override
-    public void accept(long startTime, long endTime, int bytes, int records) {
-        queue.add(new TimeStamp(startTime, endTime, bytes, records));
     }
 }

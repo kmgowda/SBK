@@ -12,6 +12,12 @@ package io.sbk.api;
 /**
  * Interface for performance Statistics.
  */
-public interface Performance extends RecordTime, Benchmark {
+public interface Performance extends Benchmark {
 
+     /**
+     * Get the Time recorder for benchmarking.
+     *
+     * @return RecordTime Interface if its avilable ; returns null in case of failure.
+     */
+     RecordTime get();
 }
