@@ -26,8 +26,14 @@ public class HDFSWriter implements Writer<byte[]> {
     final private FSDataOutputStream out;
     final private boolean sync;
 
-    public HDFSWriter(int id, Parameters params, FileSystem fileSystem, Path filePath,  boolean sync) throws IOException {
-        out = fileSystem.create(filePath, false);
+    public HDFSWriter(int id, Parameters params, FileSystem fileSystem, Path filePath,
+                      boolean recreate, boolean sync) throws IOException {
+        if (recreate) {
+            out = fileSystem.create(filePath, true, params.getRecordSize());
+        } else {
+            fileSystem.createNewFile(filePath);
+            out = fileSystem.append(filePath, params.getRecordSize());
+        }
         this.sync = sync;
     }
 
@@ -41,7 +47,6 @@ public class HDFSWriter implements Writer<byte[]> {
         record.accept(time, System.currentTimeMillis(), size, 1);
         return time;
     }
-
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
@@ -58,7 +63,7 @@ public class HDFSWriter implements Writer<byte[]> {
         if (sync) {
             out.hsync();
         }
-     }
+    }
 
     @Override
     public void close() throws  IOException {

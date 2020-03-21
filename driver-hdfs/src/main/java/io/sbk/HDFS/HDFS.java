@@ -82,7 +82,7 @@ public class HDFS implements Storage<byte[]> {
     @Override
     public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new HDFSWriter(id, params, fileSystem, filePath, sync);
+            return new HDFSWriter(id, params, fileSystem, filePath, recreate, sync);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
