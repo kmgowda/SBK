@@ -32,7 +32,14 @@ public class HDFSWriter implements Writer<byte[]> {
             out = fileSystem.create(filePath, true, params.getRecordSize());
         } else {
             fileSystem.createNewFile(filePath);
-            out = fileSystem.append(filePath, params.getRecordSize());
+            FSDataOutputStream outStream;
+            try {
+                outStream = fileSystem.append(filePath, params.getRecordSize());
+            } catch (UnsupportedOperationException ex) {
+                ex.printStackTrace();
+                outStream = fileSystem.create(filePath, true, params.getRecordSize());
+            }
+            out = outStream;
         }
         this.sync = sync;
     }
