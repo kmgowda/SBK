@@ -13,7 +13,7 @@ package io.sbk.api;
 /**
  * Interface for recording benchmarking data.
  */
-public interface QuadConsumer {
+public interface RecordTime {
     /**
      * accept the benchmarking data.
      * @param startTime Start time

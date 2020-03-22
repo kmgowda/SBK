@@ -12,7 +12,7 @@ package io.sbk.api.impl;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
+import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -28,7 +28,7 @@ public class SbkWriter extends Worker implements Runnable {
     final private RunBenchmark perf;
     final private Object payload;
 
-    public SbkWriter(int writerID, Parameters params, QuadConsumer recordTime, DataType data, Writer writer) {
+    public SbkWriter(int writerID, Parameters params, RecordTime recordTime, DataType data, Writer writer) {
         super(writerID, params, recordTime);
         this.data = data;
         this.writer = writer;

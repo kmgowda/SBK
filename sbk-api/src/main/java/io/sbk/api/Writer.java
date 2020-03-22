@@ -50,7 +50,7 @@ public interface Writer<T>  {
      * @return time return the data sent time
      * @throws IOException If an exception occurred.
      */
-    default long recordWrite(T data, int size, QuadConsumer recordTime) throws IOException {
+    default long recordWrite(T data, int size, RecordTime recordTime) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);

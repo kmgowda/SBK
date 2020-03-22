@@ -9,22 +9,23 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.QuadConsumer;
+import io.sbk.api.RecordTime;
 import io.sbk.api.ReaderCallback;
 
 import java.util.concurrent.CompletableFuture;
 
 
-public class SbkAsyncReader extends Worker implements ReaderCallback {
+public class SbkAsyncReader extends Worker implements ReaderCallback, Benchmark {
     final private DataType dataType;
     final private CompletableFuture<Void> ret;
     final private ReaderCallback callback;
     private long readCnt;
     private long beginTime;
 
-    public SbkAsyncReader(int readerId, Parameters params, QuadConsumer recordTime, DataType dataType) {
+    public SbkAsyncReader(int readerId, Parameters params, RecordTime recordTime, DataType dataType) {
         super(readerId, params, recordTime);
         this.dataType = dataType;
         this.ret = new CompletableFuture();
@@ -37,9 +38,15 @@ public class SbkAsyncReader extends Worker implements ReaderCallback {
         }
     }
 
+    @Override
     public CompletableFuture<Void> start(long statTime) {
         this.beginTime = statTime;
         return ret;
+    }
+
+    @Override
+    public void stop(long endTime) {
+        ret.complete(null);
     }
 
     @Override
