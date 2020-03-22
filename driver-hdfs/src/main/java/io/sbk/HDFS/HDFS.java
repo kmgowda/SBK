@@ -24,6 +24,7 @@ import org.apache.hadoop.fs.Path;
  */
 public class HDFS implements Storage<byte[]> {
     private static final String FSTYPE = "fs.defaultFS";
+    private String fsType;
     private String fileName;
     private String uri;
     private FileSystem fileSystem;
@@ -33,6 +34,7 @@ public class HDFS implements Storage<byte[]> {
 
     @Override
     public void addArgs(final Parameters params) {
+        params.addOption("fs", true, "File System Type, default: "+ FSTYPE);
         params.addOption("file", true, "File name");
         params.addOption("uri", true, "URI");
         params.addOption("sync", true, "hsync to storage client; only for writer");
@@ -42,6 +44,7 @@ public class HDFS implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
+        fsType =  params.getOptionValue("fs", FSTYPE);
         fileName =  params.getOptionValue("file", null);
         uri =  params.getOptionValue("uri", null);
         sync = Boolean.parseBoolean(params.getOptionValue("sync", "false"));
@@ -62,7 +65,7 @@ public class HDFS implements Storage<byte[]> {
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         Configuration configuration = new Configuration();
-        configuration.set(FSTYPE, uri);
+        configuration.set(fsType, uri);
         fileSystem = FileSystem.get(configuration);
         filePath = new Path(fileName);
         if (recreate && params.getWritersCount() > 0) {
@@ -99,6 +102,3 @@ public class HDFS implements Storage<byte[]> {
         }
     }
 }
-
-
-
