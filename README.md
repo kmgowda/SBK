@@ -412,7 +412,7 @@ As expalined in [Adding your Storage driver](https://github.com/kmgowda/SBK#add-
 
 
 #### SBK preformance Processor
-The key differentiator component of SBK to get the max throughput of the storage driver is **SBK performance Processor**. The SBK is a spin-off from pravega benchmark tool, refer to the paper : [[Distributed Streaming Storage Performance Benchmarking: Kafka and Pravega](https://www.researchgate.net/publication/338171860_Distributed_Streaming_Storage_Performance_Benchmarking_Kafka_and_Pravega)] to know the internal design details of **SBK performance Processor** , data type handlers and about writer/readers too. This paper also compares the performance of Kafka and Pravega streaming storage Systems.
+The key differentiator component of SBK to get the max throughput of the storage driver is **SBK performance Processor**. The SBK is a spin-off from pravega benchmark tool, This component uses the concurrent queue to aggregate the benchmark results.
     
 
 #### Result logger, SL4J, System Logger and Prometheus Logger
