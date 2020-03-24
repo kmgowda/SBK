@@ -412,7 +412,7 @@ As expalined in [Adding your Storage driver](https://github.com/kmgowda/SBK#add-
 
 
 #### SBK preformance Processor
-The key differentiator component of SBK to get the max throughput of the storage driver is **SBK performance Processor**. The SBK is a spin-off from pravega benchmark tool, This component uses the multiple concurrent queues to aggregate the benchmark results.
+The key differentiator component of SBK to get the max throughput of the storage driver is **SBK performance Processor**. This component uses the multiple concurrent queues to aggregate the benchmark results to reduce the sync issues between the response threads from writers/readers.
     
 
 #### Result logger, SL4J, System Logger and Prometheus Logger
