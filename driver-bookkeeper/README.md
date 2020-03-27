@@ -1,4 +1,4 @@
-# SBK Apache Bookkeeper Performance benchmarking
+# Apache Bookkeeper Benchmarking
 
 Make sure that you do the binding of distributedlog to Ledgers of Bookkeeper
 
