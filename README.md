@@ -13,10 +13,10 @@ The SBK (Storage Benchmark Kit) is an open source software frame-work for the pe
 
 Currently SBK supports benchmarking of
 1. Local mounted File Systems
-2. [Apache Kafka](https://kafka.apache.org)
-2. [Apache Pulsar](https://pulsar.apache.org)
-3. [Pravega](http://pravega.io)
-4. [Java Concurrent Queue [Message Queue]](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html)
+2. [Java Concurrent Queue [Message Queue]](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html)
+3. [Apache Kafka](https://kafka.apache.org)
+4. [Apache Pulsar](https://pulsar.apache.org)
+5. [Pravega](http://pravega.io)
 6. [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html)
 7. [Apache Bookkeeper](https://bookkeeper.apache.org)
 8. [RabbitMQ](https://www.rabbitmq.com)
