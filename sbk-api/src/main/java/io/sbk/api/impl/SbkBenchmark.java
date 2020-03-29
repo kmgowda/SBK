@@ -72,14 +72,14 @@ public class SbkBenchmark implements Benchmark {
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(action, reportingInterval, params.getRecordSize(), params.getWritersCount(),
-                    params.getCsvFile(), metricsLogger, logger, executor);
+                    MAXIDS, params.getCsvFile(), metricsLogger, logger, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
             readStats = new SbkPerformance(action, reportingInterval, params.getRecordSize(), params.getReadersCount(),
-                    params.getCsvFile(), metricsLogger, logger, executor);
+                    MAXIDS, params.getCsvFile(), metricsLogger, logger, executor);
         } else {
             readStats = null;
         }
