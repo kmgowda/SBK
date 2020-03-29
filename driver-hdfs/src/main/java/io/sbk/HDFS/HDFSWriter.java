@@ -45,13 +45,13 @@ public class HDFSWriter implements Writer<byte[]> {
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record) throws IOException {
+    public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
         final long time = System.currentTimeMillis();
         out.write(data);
         if (sync) {
             out.hsync();
         }
-        record.accept(time, System.currentTimeMillis(), size, 1);
+        record.accept(id, time, System.currentTimeMillis(), size, 1);
         return time;
     }
 

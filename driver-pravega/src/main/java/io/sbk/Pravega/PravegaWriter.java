@@ -39,16 +39,17 @@ public class PravegaWriter implements Writer<byte[]> {
      * @param data   data to write
      * @param size   size of the data
      * @param record to call for benchmarking
+     * @param id     for record benchmarking
      * @return time return the data sent time
      */
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record) throws IOException {
+    public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         ret.thenAccept(d -> {
             final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, size, 1);
+            record.accept(id, time, endTime, size, 1);
         });
         return time;
     }

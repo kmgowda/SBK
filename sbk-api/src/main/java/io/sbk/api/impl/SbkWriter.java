@@ -28,8 +28,8 @@ public class SbkWriter extends Worker implements Runnable {
     final private RunBenchmark perf;
     final private Object payload;
 
-    public SbkWriter(int writerID, Parameters params, RecordTime recordTime, DataType data, Writer writer) {
-        super(writerID, params, recordTime);
+    public SbkWriter(int writerID, int idMax, Parameters params, RecordTime recordTime, DataType data, Writer writer) {
+        super(writerID, idMax, params, recordTime);
         this.data = data;
         this.writer = writer;
         this.payload = data.create(params.getRecordSize());
@@ -76,7 +76,7 @@ public class SbkWriter extends Worker implements Runnable {
     final private void RecordsWriter() throws InterruptedException, IOException {
         final int size = data.length(payload);
         for (int i = 0; i < params.getRecordsPerWriter(); i++) {
-            writer.recordWrite(payload, size, recordTime);
+            writer.recordWrite(payload, size, recordTime, i % idMax);
         }
         writer.flush();
     }
@@ -90,7 +90,7 @@ public class SbkWriter extends Worker implements Runnable {
         while (cnt < recordsCount) {
             int loopMax = Math.min(params.getRecordsPerFlush(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
-                eCnt.control(cnt++, writer.recordWrite(payload, size, recordTime));
+                eCnt.control(cnt++, writer.recordWrite(payload, size, recordTime, i % idMax));
             }
             writer.flush();
         }
@@ -102,8 +102,13 @@ public class SbkWriter extends Worker implements Runnable {
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         final int size = data.length(payload);
         long time = System.currentTimeMillis();
+        int i = 0;
         while ((time - startTime) < msToRun) {
-            time = writer.recordWrite(payload, size, recordTime);
+            time = writer.recordWrite(payload, size, recordTime, i);
+            i += 1;
+            if (i >= idMax) {
+                i = 0;
+            }
         }
         writer.flush();
     }
@@ -119,7 +124,7 @@ public class SbkWriter extends Worker implements Runnable {
         int cnt = 0;
         while (msElapsed < msToRun) {
             for (int i = 0; (msElapsed < msToRun) && (i < params.getRecordsPerFlush()); i++) {
-                time = writer.recordWrite(payload, size, recordTime);
+                time = writer.recordWrite(payload, size, recordTime, i % idMax);
                 eCnt.control(cnt++, time);
                 msElapsed = time - startTime;
             }

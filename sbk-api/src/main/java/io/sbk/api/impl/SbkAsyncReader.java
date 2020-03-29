@@ -16,20 +16,21 @@ import io.sbk.api.RecordTime;
 import io.sbk.api.ReaderCallback;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class SbkAsyncReader extends Worker implements ReaderCallback, Benchmark {
     final private DataType dataType;
     final private CompletableFuture<Void> ret;
     final private ReaderCallback callback;
-    private long readCnt;
+    final private AtomicLong readCnt;
     private long beginTime;
 
-    public SbkAsyncReader(int readerId, Parameters params, RecordTime recordTime, DataType dataType) {
-        super(readerId, params, recordTime);
+    public SbkAsyncReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
+        super(readerId, idMax, params, recordTime);
         this.dataType = dataType;
         this.ret = new CompletableFuture();
-        this.readCnt = 0;
+        this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
         if (params.isWriteAndRead()) {
             callback = this::consumeRW;
@@ -56,11 +57,12 @@ public class SbkAsyncReader extends Worker implements ReaderCallback, Benchmark 
 
     final private void consumeRead(Object data) {
         final long endTime = System.currentTimeMillis();
-        recordTime.accept(endTime, endTime, dataType.length(data), 1);
-        readCnt += 1;
+        final long cnt = readCnt.incrementAndGet();
+        final int id = (int) (cnt % idMax);
+        recordTime.accept(id, endTime, endTime, dataType.length(data), 1);
         if (params.getSecondsToRun() > 0 && (((endTime - beginTime) / 1000) >= params.getSecondsToRun())) {
             ret.complete(null);
-        } else if (params.getRecordsPerReader() > readCnt) {
+        } else if (params.getRecordsPerReader() > cnt) {
             ret.complete(null);
         }
     }
@@ -68,11 +70,12 @@ public class SbkAsyncReader extends Worker implements ReaderCallback, Benchmark 
     final private void consumeRW(Object data) {
         final long endTime = System.currentTimeMillis();
         final long startTime = dataType.getTime(data);
-        recordTime.accept(startTime, endTime, dataType.length(data), 1);
-        readCnt += 1;
+        final long cnt = readCnt.incrementAndGet();
+        final int id = (int) (cnt % idMax);
+        recordTime.accept(id, startTime, endTime, dataType.length(data), 1);
         if (params.getSecondsToRun() > 0 && (((endTime - beginTime) / 1000) >= params.getSecondsToRun())) {
             ret.complete(null);
-        } else if (params.getRecordsPerReader() > readCnt) {
+        } else if (params.getRecordsPerReader() > cnt) {
             ret.complete(null);
         }
     }

@@ -18,11 +18,13 @@ import io.sbk.api.RecordTime;
  */
 public abstract class Worker {
     protected final int workerID;
+    protected final int idMax;
     protected final Parameters params;
     protected final RecordTime recordTime;
 
-    Worker(int workerID, Parameters params, RecordTime recordTime) {
+    Worker(int workerID, int idMax, Parameters params, RecordTime recordTime) {
         this.workerID = workerID;
+        this.idMax = idMax;
         this.params = params;
         this.recordTime = recordTime;
     }

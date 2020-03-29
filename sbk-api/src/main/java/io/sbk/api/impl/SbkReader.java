@@ -26,8 +26,8 @@ public class SbkReader extends Worker implements Runnable {
     final private Reader reader;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, Parameters params, RecordTime recordTime, DataType data, Reader reader) {
-        super(readerId, params, recordTime);
+    public SbkReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType data, Reader reader) {
+        super(readerId, idMax, params, recordTime);
         this.data = data;
         this.reader = reader;
         this.perf = createBenchmark();
@@ -62,7 +62,7 @@ public class SbkReader extends Worker implements Runnable {
                 ret = reader.read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    recordTime.accept(startTime, endTime, data.length(ret), 1);
+                    recordTime.accept(i % idMax, startTime, endTime, data.length(ret), 1);
                     i++;
                 }
             }
@@ -81,7 +81,7 @@ public class SbkReader extends Worker implements Runnable {
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
                     final long start = data.getTime(ret);
-                    recordTime.accept(start, endTime, data.length(ret), 1);
+                    recordTime.accept(i % idMax, start, endTime, data.length(ret), 1);
                     i++;
                 }
             }
@@ -96,13 +96,18 @@ public class SbkReader extends Worker implements Runnable {
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         Object ret = null;
         long time = System.currentTimeMillis();
+        int i = 0;
         try {
             while ((time - startTime) < msToRun) {
                 time = System.currentTimeMillis();
                 ret = reader.read();
                 if (ret != null) {
                     final long endTime = System.currentTimeMillis();
-                    recordTime.accept(time, endTime, data.length(ret), 1);
+                    recordTime.accept(i, time, endTime, data.length(ret), 1);
+                    i += 1;
+                    if (i >= idMax) {
+                        i = 0;
+                    }
                 }
             }
         } finally {
@@ -115,13 +120,18 @@ public class SbkReader extends Worker implements Runnable {
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         Object ret;
         long time = System.currentTimeMillis();
+        int i = 0;
         try {
             while ((time - startTime) < msToRun) {
                 ret = reader.read();
                 time = System.currentTimeMillis();
                 if (ret != null) {
                     final long start = data.getTime(ret);
-                    recordTime.accept(start, time, data.length(ret), 1);
+                    recordTime.accept(i, start, time, data.length(ret), 1);
+                    i += 1;
+                    if (i >= idMax) {
+                        i = 0;
+                    }
                 }
             }
         } finally {
