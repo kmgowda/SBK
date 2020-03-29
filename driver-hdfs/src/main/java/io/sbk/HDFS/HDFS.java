@@ -29,7 +29,6 @@ public class HDFS implements Storage<byte[]> {
     private String uri;
     private FileSystem fileSystem;
     private Path filePath;
-    private boolean sync;
     private boolean recreate;
 
     @Override
@@ -37,7 +36,6 @@ public class HDFS implements Storage<byte[]> {
         params.addOption("fs", true, "File System Type, default: "+ FSTYPE);
         params.addOption("file", true, "File name");
         params.addOption("uri", true, "URI");
-        params.addOption("sync", true, "hsync to storage client; only for writer");
         params.addOption("recreate", true,
                 "If the file is already existing, delete and recreate the same; only for writer");
     }
@@ -47,7 +45,6 @@ public class HDFS implements Storage<byte[]> {
         fsType =  params.getOptionValue("fs", FSTYPE);
         fileName =  params.getOptionValue("file", null);
         uri =  params.getOptionValue("uri", null);
-        sync = Boolean.parseBoolean(params.getOptionValue("sync", "false"));
         recreate = Boolean.parseBoolean(params.getOptionValue("recreate", "false"));
 
         if (uri == null) {
@@ -85,7 +82,7 @@ public class HDFS implements Storage<byte[]> {
     @Override
     public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new HDFSWriter(id, params, fileSystem, filePath, recreate, sync);
+            return new HDFSWriter(id, params, fileSystem, filePath, recreate);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

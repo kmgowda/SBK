@@ -77,7 +77,7 @@ final public class SbkParameters implements Parameters {
         this.driversList = driversList;
         this.startTime = startTime;
         this.commandline = null;
-        options.addOption("class", true, "Benchmark Driver Class,\n Available Drivers "
+        options.addOption("class", true, "Storage Driver Class,\n Available Drivers "
                             + this.driversList.toString());
         options.addOption("writers", true, "Number of writers");
         options.addOption("readers", true, "Number of readers");
@@ -86,8 +86,7 @@ final public class SbkParameters implements Parameters {
                         "otherwise, Maximum records per second by writer(s) " +
                         "and/or Number of records per reader");
         options.addOption("flush", true,
-                "Each Writer calls flush after writing <arg> number of of events(records); " +
-                        "Not applicable, if both writers and readers are specified");
+                "Each Writer calls flush after writing <arg> number of of events(records)");
         options.addOption("time", true, "Number of seconds this SBK runs (24hrs by default)");
         options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("throughput", true,

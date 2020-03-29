@@ -9,6 +9,7 @@
  */
 package io.sbk.File;
 import io.sbk.api.Parameters;
+import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
 
 import java.io.FileOutputStream;
@@ -21,30 +22,30 @@ import java.util.concurrent.CompletableFuture;
 public class FileWriter implements Writer<byte[]> {
     final private String fileName;
     final private FileOutputStream out;
-    final private boolean sync;
 
-    public FileWriter(int id, Parameters params, String fileName, boolean sync) throws IOException {
+    public FileWriter(int id, Parameters params, String fileName) throws IOException {
         this.fileName = fileName;
         this.out = new FileOutputStream(fileName, false);
-        this.sync = sync;
+    }
+
+    @Override
+    public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
+        final long time = System.currentTimeMillis();
+        out.write(data);
+        record.accept(id, time, System.currentTimeMillis(), size, 1);
+        return time;
     }
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
         out.write(data);
-        if (sync) {
-            out.flush();
-            out.getFD().sync();
-        }
         return null;
     }
 
     @Override
     public void flush() throws IOException {
         out.flush();
-        if (sync) {
-            out.getFD().sync();
-        }
+        out.getFD().sync();
     }
 
     @Override

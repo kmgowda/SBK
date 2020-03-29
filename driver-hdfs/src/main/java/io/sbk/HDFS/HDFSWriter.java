@@ -24,10 +24,9 @@ import org.apache.hadoop.fs.FSDataOutputStream;
  */
 public class HDFSWriter implements Writer<byte[]> {
     final private FSDataOutputStream out;
-    final private boolean sync;
 
     public HDFSWriter(int id, Parameters params, FileSystem fileSystem, Path filePath,
-                      boolean recreate, boolean sync) throws IOException {
+                      boolean recreate) throws IOException {
         if (recreate) {
             out = fileSystem.create(filePath, true, params.getRecordSize());
         } else {
@@ -41,16 +40,12 @@ public class HDFSWriter implements Writer<byte[]> {
             }
             out = outStream;
         }
-        this.sync = sync;
     }
 
     @Override
     public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
         final long time = System.currentTimeMillis();
         out.write(data);
-        if (sync) {
-            out.hsync();
-        }
         record.accept(id, time, System.currentTimeMillis(), size, 1);
         return time;
     }
@@ -58,18 +53,13 @@ public class HDFSWriter implements Writer<byte[]> {
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
         out.write(data);
-        if (sync) {
-            out.hsync();
-        }
         return null;
     }
 
     @Override
     public void flush() throws IOException {
         out.hflush();
-        if (sync) {
-            out.hsync();
-        }
+        out.hsync();
     }
 
     @Override
