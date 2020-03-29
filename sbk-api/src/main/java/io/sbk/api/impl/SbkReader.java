@@ -14,6 +14,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Reader;
+import io.sbk.api.TimeStamp;
 
 import java.io.IOException;
 
@@ -52,19 +53,13 @@ public class SbkReader extends Worker implements Runnable {
         return perfReader;
     }
 
-
     final public void RecordsReader() throws IOException {
-        Object ret = null;
+       final TimeStamp status = new TimeStamp();
         try {
             int i = 0;
             while (i < params.getRecordsPerReader()) {
-                final long startTime = System.currentTimeMillis();
-                ret = reader.read();
-                if (ret != null) {
-                    final long endTime = System.currentTimeMillis();
-                    recordTime.accept(i % idMax, startTime, endTime, data.length(ret), 1);
-                    i++;
-                }
+                reader.recordRead(data, status, recordTime, i % idMax);
+                i += status.records;
             }
         } finally {
             reader.close();
@@ -73,17 +68,12 @@ public class SbkReader extends Worker implements Runnable {
 
 
     final public void RecordsReaderRW() throws IOException {
-        Object ret = null;
+        final TimeStamp status = new TimeStamp();
         try {
             int i = 0;
             while (i < params.getRecordsPerReader()) {
-                ret = reader.read();
-                if (ret != null) {
-                    final long endTime = System.currentTimeMillis();
-                    final long start = data.getTime(ret);
-                    recordTime.accept(i % idMax, start, endTime, data.length(ret), 1);
-                    i++;
-                }
+                reader.recordReadTime(data, status, recordTime, i % idMax);
+                i += status.records;
             }
         } finally {
             reader.close();
@@ -92,22 +82,16 @@ public class SbkReader extends Worker implements Runnable {
 
 
     final public void RecordsTimeReader() throws IOException {
+        final TimeStamp status = new TimeStamp();
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        Object ret = null;
-        long time = System.currentTimeMillis();
         int i = 0;
         try {
-            while ((time - startTime) < msToRun) {
-                time = System.currentTimeMillis();
-                ret = reader.read();
-                if (ret != null) {
-                    final long endTime = System.currentTimeMillis();
-                    recordTime.accept(i, time, endTime, data.length(ret), 1);
-                    i += 1;
-                    if (i >= idMax) {
-                        i = 0;
-                    }
+            while ((status.endTime - startTime) < msToRun) {
+                reader.recordRead(data, status, recordTime, i);
+                i += status.records;
+                if (i >= idMax) {
+                    i = 0;
                 }
             }
         } finally {
@@ -116,22 +100,16 @@ public class SbkReader extends Worker implements Runnable {
     }
 
     final public void RecordsTimeReaderRW() throws IOException {
+        final TimeStamp status = new TimeStamp();
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        Object ret;
-        long time = System.currentTimeMillis();
         int i = 0;
         try {
-            while ((time - startTime) < msToRun) {
-                ret = reader.read();
-                time = System.currentTimeMillis();
-                if (ret != null) {
-                    final long start = data.getTime(ret);
-                    recordTime.accept(i, start, time, data.length(ret), 1);
-                    i += 1;
-                    if (i >= idMax) {
-                        i = 0;
-                    }
+            while ((status.endTime - startTime) < msToRun) {
+                reader.recordReadTime(data, status, recordTime, i);
+                i += status.records;
+                if (i >= idMax) {
+                    i = 0;
                 }
             }
         } finally {

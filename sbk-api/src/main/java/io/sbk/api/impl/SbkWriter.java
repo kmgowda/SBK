@@ -53,7 +53,7 @@ public class SbkWriter extends Worker implements Runnable {
                 perfWriter = this::RecordsWriterTimeRW;
             } else {
                 if (params.getRecordsPerSec() > 0 || params.getRecordsPerFlush() < Integer.MAX_VALUE) {
-                    perfWriter = this::RecordsWriterTimeSleep;
+                    perfWriter = this::RecordsWriterTimeFlush;
                 } else {
                     perfWriter = this::RecordsWriterTime;
                 }
@@ -63,7 +63,7 @@ public class SbkWriter extends Worker implements Runnable {
                 perfWriter = this::RecordsWriterRW;
             } else {
                 if (params.getRecordsPerSec() > 0 || params.getRecordsPerFlush() < Integer.MAX_VALUE) {
-                    perfWriter = this::RecordsWriterSleep;
+                    perfWriter = this::RecordsWriterFlush;
                 } else {
                     perfWriter = this::RecordsWriter;
                 }
@@ -82,7 +82,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriterSleep() throws InterruptedException, IOException {
+    final private void RecordsWriterFlush() throws InterruptedException, IOException {
         final RateController eCnt = new RateController(System.currentTimeMillis(), params.getRecordsPerSec());
         final int recordsCount = params.getRecordsPerWriter();
         final int size = data.length(payload);
@@ -114,7 +114,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriterTimeSleep() throws InterruptedException, IOException {
+    final private void RecordsWriterTimeFlush() throws InterruptedException, IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         final int size = data.length(payload);

@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import io.sbk.api.Performance;
 import io.sbk.api.RecordTime;
 import io.sbk.api.ResultLogger;
+import io.sbk.api.TimeStamp;
 import lombok.Synchronized;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -63,31 +64,6 @@ final public class SbkPerformance implements Performance {
         this.cQueues = new ConcurrentLinkedQueue[workers][maxIDs];
         this.size = 0;
         this.ret = null;
-    }
-
-    /**
-     * Private class for start and end time.
-     */
-    final static private class TimeStamp {
-        final private long startTime;
-        final private long endTime;
-        final private int bytes;
-        final private int records;
-
-        private TimeStamp(long startTime, long endTime, int bytes, int records) {
-            this.startTime = startTime;
-            this.endTime = endTime;
-            this.bytes = bytes;
-            this.records = records;
-        }
-
-        private TimeStamp(long endTime) {
-            this(-1, endTime, 0, 0);
-        }
-
-        private boolean isEnd() {
-            return this.records == 0 && this.startTime == -1;
-        }
     }
 
     /**
