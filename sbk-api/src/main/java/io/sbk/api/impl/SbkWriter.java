@@ -134,19 +134,18 @@ public class SbkWriter extends Worker implements Runnable {
 
 
     final private void RecordsWriterRW() throws InterruptedException, IOException {
-        final long time = System.currentTimeMillis();
-        final RateController eCnt = new RateController(time, params.getRecordsPerSec());
-        for (int i = 0; i < params.getRecordsCount(); i++) {
-            writer.writeAsync(data.setTime(payload, System.currentTimeMillis()));
-            /*
-              flush is required here for following reasons:
-              1. The writeData is called for End to End latency mode; hence make sure that data is sent.
-              2. In case of kafka benchmarking, the buffering makes too many writes;
-                 flushing moderates the kafka producer.
-              3. If the flush called after several iterations, then flush may take too much of time.
-            */
+        final RateController eCnt = new RateController(System.currentTimeMillis(), params.getRecordsPerSec());
+        final int recordsCount = params.getRecordsPerWriter();
+        int cnt = 0;
+        long time;
+        while (cnt < recordsCount) {
+            int loopMax = Math.min(params.getRecordsPerFlush(), recordsCount - cnt);
+            for (int i = 0; i < loopMax; i++) {
+                time = System.currentTimeMillis();
+                writer.writeAsync(data.setTime(payload, time));
+                eCnt.control(cnt++, time);
+            }
             writer.flush();
-            eCnt.control(i);
         }
     }
 
@@ -156,19 +155,16 @@ public class SbkWriter extends Worker implements Runnable {
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         long time = System.currentTimeMillis();
         final RateController eCnt = new RateController(time, params.getRecordsPerSec());
-
-        for (int i = 0; (time -startTime) < msToRun; i++) {
-            time = System.currentTimeMillis();
-            writer.writeAsync(data.setTime(payload, time));
-            /*
-              flush is required here for following reasons:
-              1. The writeData is called for End to End latency mode; hence make sure that data is sent.
-              2. In case of kafka benchmarking, the buffering makes too many writes;
-                 flushing moderates the kafka producer.
-              3. If the flush called after several iterations, then flush may take too much of time.
-            */
+        long msElapsed = time - startTime;
+        int cnt = 0;
+        while (msElapsed < msToRun) {
+            for (int i = 0; (msElapsed < msToRun) && (i < params.getRecordsPerFlush()); i++) {
+                time = System.currentTimeMillis();
+                writer.writeAsync(data.setTime(payload, time));
+                eCnt.control(cnt++, time);
+                msElapsed = time - startTime;
+            }
             writer.flush();
-            eCnt.control(i);
         }
     }
 
@@ -191,18 +187,6 @@ public class SbkWriter extends Worker implements Runnable {
             this.recordsPerSec = recordsPerSec;
             this.sleepTimeNs = this.recordsPerSec > 0 ?
                     NS_PER_SEC / this.recordsPerSec : 0;
-        }
-
-        /**
-         * Blocks for small amounts of time to achieve targetThroughput/events per sec
-         *
-         * @param events current events
-         */
-        void control(long events) {
-            if (this.recordsPerSec <= 0) {
-                return;
-            }
-            needSleep(events, System.currentTimeMillis());
         }
 
         /**
