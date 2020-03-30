@@ -255,11 +255,11 @@ final public class SbkPerformance implements Performance {
          */
         public void record(long startTime, int bytes, int events, int latency) {
             if (latency  < latencies.length && latency > -1) {
-                this.bytes += bytes;
                 latencies[latency] += events;
             } else {
                 discard++;
             }
+            this.bytes += bytes;
         }
 
         /**
