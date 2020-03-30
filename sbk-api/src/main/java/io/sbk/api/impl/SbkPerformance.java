@@ -259,7 +259,7 @@ final public class SbkPerformance implements Performance {
             if (latency  < latencies.length && latency > -1) {
                 latencies[latency] += events;
             } else {
-                discard++;
+                discard += events;
             }
             this.records += events;
             this.bytes += bytes;
