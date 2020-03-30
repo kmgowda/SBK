@@ -284,7 +284,7 @@ final public class SbkPerformance implements Performance {
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
 
-            logger.print(action, bytes, latencyRecords, recsPerSec, mbPerSec, totalLatency / (double) latencyRecords,
+            logger.print(action, bytes, records, recsPerSec, mbPerSec, totalLatency / (double) latencyRecords,
                     maxLatency, discard, percs[0], percs[1], percs[2], percs[3],
                     percs[4], percs[5], percs[6], percs[7]);
         }
