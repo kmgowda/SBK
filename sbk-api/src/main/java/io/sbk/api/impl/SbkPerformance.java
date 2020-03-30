@@ -186,6 +186,7 @@ final public class SbkPerformance implements Performance {
         private int[] latencies;
         private long startTime;
         private long records;
+        private long latencyRecords;
         private long bytes;
         private int maxLatency;
         private long totalLatency;
@@ -201,6 +202,7 @@ final public class SbkPerformance implements Performance {
         private void resetValues(long start) {
             this.startTime = start;
             this.records = 0;
+            this.latencyRecords = 0;
             this.bytes = 0;
             this.maxLatency = 0;
             this.totalLatency = 0;
@@ -214,14 +216,14 @@ final public class SbkPerformance implements Performance {
         }
 
         private void countLatencies() {
-            records = 0;
+            latencyRecords = 0;
             latencyRanges = new ArrayList<>();
             for (int i = 0, cur = 0; i < latencies.length; i++) {
                 if (latencies[i] > 0) {
                     latencyRanges.add(new int[]{cur, cur + latencies[i], i});
                     cur += latencies[i] + 1;
                     totalLatency += i * latencies[i];
-                    records += latencies[i];
+                    latencyRecords += latencies[i];
                     maxLatency = i;
                 }
             }
@@ -233,7 +235,7 @@ final public class SbkPerformance implements Performance {
             int index = 0;
 
             for (int i = 0; i < percentiles.length; i++) {
-                percentileIds[i] = (int) (records * percentiles[i]);
+                percentileIds[i] = (int) (latencyRecords * percentiles[i]);
             }
 
             for (int[] lr : latencyRanges) {
@@ -259,6 +261,7 @@ final public class SbkPerformance implements Performance {
             } else {
                 discard++;
             }
+            this.records += events;
             this.bytes += bytes;
         }
 
@@ -281,7 +284,7 @@ final public class SbkPerformance implements Performance {
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
 
-            logger.print(action, bytes, records, recsPerSec, mbPerSec, totalLatency / (double) records,
+            logger.print(action, bytes, latencyRecords, recsPerSec, mbPerSec, totalLatency / (double) latencyRecords,
                     maxLatency, discard, percs[0], percs[1], percs[2], percs[3],
                     percs[4], percs[5], percs[6], percs[7]);
         }
