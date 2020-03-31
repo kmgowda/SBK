@@ -38,6 +38,7 @@ import java.util.stream.Stream;
  */
 public class SbkBenchmark implements Benchmark {
     final static private boolean USEFORK = true;
+    final static private int MAXIDS = 10;
     final private Storage storage;
     final private ExecutorService executor;
     final private Parameters params;
@@ -71,14 +72,14 @@ public class SbkBenchmark implements Benchmark {
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(action, reportingInterval, params.getRecordSize(), params.getWritersCount(),
-                    params.getCsvFile(), metricsLogger, logger, executor);
+                    MAXIDS, params.getCsvFile(), metricsLogger, logger, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
             readStats = new SbkPerformance(action, reportingInterval, params.getRecordSize(), params.getReadersCount(),
-                    params.getCsvFile(), metricsLogger, logger, executor);
+                    MAXIDS, params.getCsvFile(), metricsLogger, logger, executor);
         } else {
             readStats = null;
         }
@@ -134,13 +135,13 @@ public class SbkBenchmark implements Benchmark {
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, params, writeStats.get(), data, writers.get(i)))
+                        .map(i -> new SbkWriter(i, MAXIDS, params, writeStats.get(), data, writers.get(i)))
                         .filter(x -> x != null)
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, params, null, data, writers.get(i)))
+                        .map(i -> new SbkWriter(i, MAXIDS, params, null, data, writers.get(i)))
                         .filter(x -> x != null)
                         .collect(Collectors.toList());
             }
@@ -151,14 +152,14 @@ public class SbkBenchmark implements Benchmark {
         if (readers != null && readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i, params, readStats.get(), data, readers.get(i)))
+                    .map(i -> new SbkReader(i, MAXIDS, params, readStats.get(), data, readers.get(i)))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
             sbkAsyncReaders = null;
         } else if (asyncReaders != null && asyncReaders.size() > 0) {
             sbkAsyncReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkAsyncReader(i, params, readStats.get(), data))
+                    .map(i -> new SbkAsyncReader(i, MAXIDS, params, readStats.get(), data))
                     .filter(x -> x != null)
                     .collect(Collectors.toList());
             sbkReaders = null;

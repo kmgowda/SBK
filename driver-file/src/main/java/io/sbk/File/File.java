@@ -21,18 +21,15 @@ import java.io.IOException;
  */
 public class File implements Storage<byte[]> {
     private String fileName;
-    private boolean sync;
 
     @Override
     public void addArgs(final Parameters params) {
         params.addOption("file", true, "File name");
-        params.addOption("sync", true, "sync to storage device; only for writer");
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         fileName =  params.getOptionValue("file", null);
-        sync = Boolean.parseBoolean(params.getOptionValue("sync", "false"));
 
         if (fileName == null) {
             throw new IllegalArgumentException("Error: Must specify file Name");
@@ -58,7 +55,7 @@ public class File implements Storage<byte[]> {
     @Override
     public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new FileWriter(id, params, fileName, sync);
+            return new FileWriter(id, params, fileName);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

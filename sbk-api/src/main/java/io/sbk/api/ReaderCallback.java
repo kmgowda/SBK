@@ -13,8 +13,22 @@ package io.sbk.api;
 public interface ReaderCallback {
 
     /**
-     * consume the data.
+     * Consume the data.
      * @param data data read from storage client/device.
      */
     void consume(final Object data);
+
+    /**
+     * Accept the benchmarking data.
+     * if your storage driver is not interested in passing the data read;
+     * then below method can be overridden.
+     *
+     * @param startTime Start time
+     * @param endTime End Time.
+     * @param dataSize  size of the data in bytes.
+     * @param records  number of records/events/messages.
+     */
+    default void record(long startTime, long endTime, int dataSize, int records) {
+
+    }
 }

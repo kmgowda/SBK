@@ -33,11 +33,11 @@ public class KafkaWriter implements Writer<byte[]> {
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record) {
+    public long recordWrite(byte[] data, int size, RecordTime record, int id) {
         final long time = System.currentTimeMillis();
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = System.currentTimeMillis();
-            record.accept(time, endTime, size, 1);
+            record.accept(id, time, endTime, size, 1);
         });
         return time;
     }

@@ -88,7 +88,8 @@ public class Kafka implements Storage<byte[]> {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUri);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Integer.MAX_VALUE);
+        // props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, params.getTimeout());
         // Enabling the consumer to READ_COMMITTED is must to compare between Kafka and Pravega
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
         if (params.isWriteAndRead()) {

@@ -9,6 +9,7 @@
  */
 package io.sbk.Kafka;
 
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 
@@ -17,6 +18,9 @@ import java.time.Duration;
 import java.util.Properties;
 import java.util.Arrays;
 
+import io.sbk.api.RecordTime;
+import io.sbk.api.TimeStamp;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
@@ -31,6 +35,45 @@ public class KafkaReader implements Reader<byte[]> {
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
         this.timeoutDuration = Duration.ofMillis(params.getTimeout());
+    }
+
+    @Override
+    public void recordRead(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+        status.startTime = System.currentTimeMillis();
+        final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
+        status.endTime = System.currentTimeMillis();
+        if (records.isEmpty()) {
+            status.records = 0;
+        } else {
+            status.bytes = 0;
+            status.records = 0;
+            for (ConsumerRecord<byte[], byte[]> record : records) {
+                status.bytes += record.value().length;
+                status.records += 1;
+            }
+            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        }
+    }
+
+    @Override
+    public void recordReadTime(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+        final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
+        status.endTime = System.currentTimeMillis();
+        if (records.isEmpty()) {
+            status.records = 0;
+        } else {
+            status.bytes = 0;
+            status.records = 0;
+            status.startTime = 0;
+            for (ConsumerRecord<byte[], byte[]> record : records) {
+                status.bytes += record.value().length;
+                status.records += 1;
+                if (status.startTime == 0) {
+                    status.startTime = dType.getTime(record.value());
+                }
+            }
+            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        }
     }
 
     @Override

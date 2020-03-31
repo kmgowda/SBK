@@ -47,20 +47,21 @@ public interface Writer<T>  {
      * @param data   data to write
      * @param size  size of the data
      * @param recordTime to call for benchmarking
+     * @param  id   Identifier for recordTime
      * @return time return the data sent time
      * @throws IOException If an exception occurred.
      */
-    default long recordWrite(T data, int size, RecordTime recordTime) throws IOException {
+    default long recordWrite(T data, int size, RecordTime recordTime, int id) throws IOException {
         CompletableFuture ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         if (ret == null) {
             final long endTime = System.currentTimeMillis();
-            recordTime.accept(time, endTime, size, 1);
+            recordTime.accept(id, time, endTime, size, 1);
         } else {
             ret.thenAccept(d -> {
                 final long endTime = System.currentTimeMillis();
-                recordTime.accept(time, endTime, size, 1);
+                recordTime.accept(id, time, endTime, size, 1);
             });
         }
         return time;

@@ -85,7 +85,7 @@ public class RocketMQWriter implements Writer<byte[]> {
     }
 
     // recordWrite override implementation , instead of completable future.
-    private long recordWriteImpl(byte[] data, int size, RecordTime record) {
+    private long recordWriteImpl(byte[] data, int size, RecordTime record, int id) {
         final long time = System.currentTimeMillis();
         Message message = new Message(topicName, data);
 
@@ -94,7 +94,7 @@ public class RocketMQWriter implements Writer<byte[]> {
                 @Override
                 public void onSuccess(final SendResult sendResult) {
                     final long endTime = System.currentTimeMillis();
-                    record.accept(time, endTime, size, 1);
+                    record.accept(id, time, endTime, size, 1);
                 }
 
                 @Override

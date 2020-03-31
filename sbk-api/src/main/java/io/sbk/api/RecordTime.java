@@ -16,10 +16,11 @@ package io.sbk.api;
 public interface RecordTime {
     /**
      * accept the benchmarking data.
+     * @param  id  identifier
      * @param startTime Start time
      * @param endTime End Time.
      * @param dataSize  size of the data in bytes.
      * @param records  number of records/events/messages.
      */
-    void accept(long startTime, long endTime, int dataSize, int records);
+    void accept(int id, long startTime, long endTime, int dataSize, int records);
 }
