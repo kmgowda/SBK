@@ -41,9 +41,9 @@ public class KafkaReader implements Reader<byte[]> {
     public void recordRead(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
         status.startTime = System.currentTimeMillis();
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
+        status.endTime = System.currentTimeMillis();
         if (records.isEmpty()) {
             status.records = 0;
-            status.endTime = status.startTime;
         } else {
             status.bytes = 0;
             status.records = 0;
@@ -51,7 +51,6 @@ public class KafkaReader implements Reader<byte[]> {
                 status.bytes += record.value().length;
                 status.records += 1;
             }
-            status.endTime = System.currentTimeMillis();
             recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
@@ -59,9 +58,9 @@ public class KafkaReader implements Reader<byte[]> {
     @Override
     public void recordReadTime(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
+        status.endTime = System.currentTimeMillis();
         if (records.isEmpty()) {
             status.records = 0;
-            status.endTime = status.startTime;
         } else {
             status.bytes = 0;
             status.records = 0;
@@ -73,7 +72,6 @@ public class KafkaReader implements Reader<byte[]> {
                     status.startTime = dType.getTime(record.value());
                 }
             }
-            status.endTime = System.currentTimeMillis();
             recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
