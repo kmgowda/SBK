@@ -44,7 +44,7 @@ final public class SbkPerformance implements Performance {
     final private ResultLogger periodicLogger;
     final private ResultLogger totalLogger;
     final private ExecutorService executor;
-    private ConcurrentLinkedQueue<TimeStamp>[][] cQueues;
+    final private ConcurrentLinkedQueue<TimeStamp>[][] cQueues;
 
     @GuardedBy("this")
     private int size;
@@ -83,8 +83,8 @@ final public class SbkPerformance implements Performance {
             final TimeWindow window;
             final LatencyWriter latencyRecorder;
             boolean doWork = true;
-            boolean notFound = true;
             long time = startTime;
+            boolean notFound;
             TimeStamp t;
 
             if (csvFile != null) {
@@ -375,7 +375,7 @@ final public class SbkPerformance implements Performance {
     static final class TimeRecorder implements RecordTime {
         final private ConcurrentLinkedQueue<TimeStamp>[] queue;
 
-        TimeRecorder(ConcurrentLinkedQueue[] queue) {
+        TimeRecorder(ConcurrentLinkedQueue<TimeStamp>[] queue) {
             this.queue = queue;
         }
 
@@ -413,7 +413,7 @@ final public class SbkPerformance implements Performance {
     public void stop(long endTime)  {
         if (this.ret != null) {
             if (cQueues.length > 0) {
-                for (ConcurrentLinkedQueue[] queues : cQueues) {
+                for (ConcurrentLinkedQueue<TimeStamp>[] queues : cQueues) {
                     queues[0].add(new TimeStamp(endTime));
                 }
                 try {
@@ -421,8 +421,8 @@ final public class SbkPerformance implements Performance {
                 } catch (ExecutionException | InterruptedException ex) {
                     ex.printStackTrace();
                 }
-                for (ConcurrentLinkedQueue[] queues : cQueues) {
-                    for (ConcurrentLinkedQueue queue: queues) {
+                for (ConcurrentLinkedQueue<TimeStamp>[] queues : cQueues) {
+                    for (ConcurrentLinkedQueue<TimeStamp> queue: queues) {
                         queue.clear();
                     }
                 }
