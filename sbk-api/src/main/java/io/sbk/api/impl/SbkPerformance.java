@@ -83,8 +83,8 @@ final public class SbkPerformance implements Performance {
             final TimeWindow window;
             final LatencyWriter latencyRecorder;
             boolean doWork = true;
-            boolean notFound = true;
             long time = startTime;
+            boolean notFound;
             TimeStamp t;
 
             if (csvFile != null) {
