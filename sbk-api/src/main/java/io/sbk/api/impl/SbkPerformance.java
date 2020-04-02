@@ -133,7 +133,7 @@ final public class SbkPerformance implements Performance {
                         }
                     }
                     if (notFound && idleWorker) {
-                       window.minIdleWaitPrint(periodicLogger);
+                       window.minWait();
                     }
                 }
                 if (notFound) {
@@ -309,13 +309,13 @@ final public class SbkPerformance implements Performance {
     @NotThreadSafe
     final static private class TimeWindow extends LatencyWriter {
         final private ElasticCounter idleCounter;
-        final private ElasticCounter minIdleCounter;
         final private int windowInterval;
+        final private int minIdleNS;
 
         private TimeWindow(String action, long start, int latencyThreshold, int interval, int minIdleNS, int idleNS) {
             super(action, start, latencyThreshold);
             this.idleCounter = new ElasticCounter(interval, idleNS);
-            this.minIdleCounter = new ElasticCounter(interval, minIdleNS);
+            this.minIdleNS = minIdleNS;
             this.windowInterval = interval;
         }
 
@@ -323,12 +323,11 @@ final public class SbkPerformance implements Performance {
         public void reset(long start) {
             super.reset(start);
             this.idleCounter.reset();
-            this.minIdleCounter.reset();
         }
 
         private void waitCheckPrint(ElasticCounter counter, ResultLogger logger) {
             if (counter.waitCheck()) {
-                final long time = System.nanoTime() / NS_PER_MS;
+                final long time = System.currentTimeMillis();
                 final long diffTime = elapsedTimeMS(time);
                 if (diffTime > windowInterval) {
                     print(time, logger);
@@ -344,8 +343,8 @@ final public class SbkPerformance implements Performance {
                 waitCheckPrint(idleCounter, logger);
         }
 
-        private void minIdleWaitPrint(ResultLogger logger) {
-            waitCheckPrint(minIdleCounter, logger);
+        private void minWait() {
+            LockSupport.parkNanos(minIdleNS);
         }
     }
 
