@@ -37,10 +37,21 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance statistics.
  */
 final public class SbkPerformance implements Performance {
+    final private static int NS_PER_MICRO = 1000;
+    final private static int MICROS_PER_MS = 1000;
+    final private static int MS_PER_SEC = 1000;
+    final private static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
+    final private static int MS_PER_MIN = MS_PER_SEC * 60;
+    final private static int MS_PER_HR = MS_PER_MIN * 60;
+    final private static int MIN_REPORTING_INTERVAL_MS = 5000;
+    final private static int MIN_Q_PER_WORKER = 1;
+
     final private String action;
     final private String csvFile;
     final private int messageSize;
     final private int windowInterval;
+    final private int workerIdleNS;
+    final private int idleNS;
     final private ResultLogger periodicLogger;
     final private ResultLogger totalLogger;
     final private ExecutorService executor;
@@ -52,16 +63,20 @@ final public class SbkPerformance implements Performance {
     @GuardedBy("this")
     private CompletableFuture<Void> ret;
 
-    public SbkPerformance(String action, int reportingInterval, int messageSize, int workers, int maxIDs,
-               String csvFile, ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
+    public SbkPerformance(String action, int messageSize, int workers, int reportingInterval, int qPerWorker,
+               int workerIdleNS, int idleNS, String csvFile, ResultLogger periodicLogger,
+               ResultLogger totalLogger, ExecutorService executor) {
+        final int numQ = Math.max(MIN_Q_PER_WORKER, qPerWorker);
         this.action = action;
         this.messageSize = messageSize;
-        this.windowInterval = reportingInterval;
+        this.windowInterval = Math.max(MIN_REPORTING_INTERVAL_MS, reportingInterval);
+        this.idleNS = idleNS;
+        this.workerIdleNS = Math.min(this.idleNS, workerIdleNS);
         this.csvFile = csvFile;
         this.periodicLogger = periodicLogger;
         this.totalLogger = totalLogger;
         this.executor = executor;
-        this.cQueues = new ConcurrentLinkedQueue[workers][maxIDs];
+        this.cQueues = new ConcurrentLinkedQueue[workers][numQ];
         this.size = 0;
         this.ret = null;
     }
@@ -70,9 +85,6 @@ final public class SbkPerformance implements Performance {
      * Private class for start and end time.
      */
     final private class QueueProcessor implements Runnable {
-        final static int MS_PER_SEC = 1000;
-        final static int MS_PER_MIN = MS_PER_SEC * 60;
-        final static int MS_PER_HR = MS_PER_MIN * 60;
         final private long startTime;
 
         private QueueProcessor(long startTime) {
@@ -82,6 +94,7 @@ final public class SbkPerformance implements Performance {
         public void run() {
             final TimeWindow window;
             final LatencyWriter latencyRecorder;
+            final boolean idleWorker = cQueues.length > 1 && workerIdleNS > 0;
             boolean doWork = true;
             long time = startTime;
             boolean notFound;
@@ -97,10 +110,10 @@ final public class SbkPerformance implements Performance {
             } else {
                 latencyRecorder = new LatencyWriter(action+"(Total)", startTime, MS_PER_HR);
             }
-            window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval);
+            window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval, workerIdleNS, idleNS);
             while (doWork) {
                 notFound = true;
-                for (ConcurrentLinkedQueue<TimeStamp>[] queues:cQueues) {
+                for (ConcurrentLinkedQueue<TimeStamp>[] queues : cQueues) {
                     for (ConcurrentLinkedQueue<TimeStamp> queue : queues) {
                         t = queue.poll();
                         if (t != null) {
@@ -119,9 +132,12 @@ final public class SbkPerformance implements Performance {
                             }
                         }
                     }
+                    if (notFound && idleWorker) {
+                       window.minWait();
+                    }
                 }
                 if (notFound) {
-                    window.busyWaitPrint(periodicLogger);
+                    window.idleWaitPrint(periodicLogger);
                 }
             }
             latencyRecorder.print(time, totalLogger);
@@ -133,28 +149,28 @@ final public class SbkPerformance implements Performance {
      */
     @NotThreadSafe
     final static private class ElasticCounter {
-        final private static int NS_PER_MICRO = 1000;
-        final private static int MICROS_PER_MS = 1000;
-        final private static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
-        final private static int PARK_NS = NS_PER_MS;
-        final private int minWindowInterval;
-        final private int minWaitTimeMS;
+        final private int windowInterval;
+        final private int idleNS;
+        final private double minWaitTimeMS;
+        final private double countRatio;
         final private long minIdleCount;
         private long elasticCount;
         private long idleCount;
         private long totalCount;
 
-        private ElasticCounter(int interval) {
-            minWindowInterval = interval;
-            minWaitTimeMS = interval / 50;
-            minIdleCount = (NS_PER_MS / PARK_NS) * minWaitTimeMS;
+        private ElasticCounter(int windowInterval, int idleNS) {
+            this.windowInterval = windowInterval;
+            this.idleNS = idleNS;
+            minWaitTimeMS = windowInterval / 50.0;
+            countRatio = (NS_PER_MS * 1.0) / idleNS;
+            minIdleCount = (long) (countRatio * minWaitTimeMS);
             elasticCount = minIdleCount;
             idleCount = 0;
             totalCount = 0;
         }
 
-        private boolean canPrint() {
-            LockSupport.parkNanos(PARK_NS);
+        private boolean waitCheck() {
+            LockSupport.parkNanos(idleNS);
             idleCount++;
             totalCount++;
             return idleCount > elasticCount;
@@ -165,11 +181,11 @@ final public class SbkPerformance implements Performance {
         }
 
         private void updateElastic(long diffTime) {
-            elasticCount = Math.max((NS_PER_MS / PARK_NS) * (minWindowInterval - diffTime), minWaitTimeMS);
+            elasticCount = Math.max((long) (countRatio * (windowInterval - diffTime)), minIdleCount);
         }
 
         private void setElastic(long diffTime) {
-            elasticCount =  (totalCount * minWindowInterval) / diffTime;
+            elasticCount =  (totalCount * windowInterval) / diffTime;
             totalCount = 0;
         }
     }
@@ -292,23 +308,25 @@ final public class SbkPerformance implements Performance {
 
     @NotThreadSafe
     final static private class TimeWindow extends LatencyWriter {
-        final private ElasticCounter counter;
+        final private ElasticCounter idleCounter;
         final private int windowInterval;
+        final private int minIdleNS;
 
-        private TimeWindow(String action, long start, int latencyThreshold, int interval) {
+        private TimeWindow(String action, long start, int latencyThreshold, int interval, int minIdleNS, int idleNS) {
             super(action, start, latencyThreshold);
-            this.counter = new ElasticCounter(interval);
+            this.idleCounter = new ElasticCounter(interval, idleNS);
+            this.minIdleNS = minIdleNS;
             this.windowInterval = interval;
         }
 
         @Override
         public void reset(long start) {
             super.reset(start);
-            this.counter.reset();
+            this.idleCounter.reset();
         }
 
-        private void busyWaitPrint(ResultLogger logger) {
-            if (counter.canPrint()) {
+        private void waitCheckPrint(ElasticCounter counter, ResultLogger logger) {
+            if (counter.waitCheck()) {
                 final long time = System.currentTimeMillis();
                 final long diffTime = elapsedTimeMS(time);
                 if (diffTime > windowInterval) {
@@ -321,6 +339,13 @@ final public class SbkPerformance implements Performance {
             }
         }
 
+        private void idleWaitPrint(ResultLogger logger) {
+                waitCheckPrint(idleCounter, logger);
+        }
+
+        private void minWait() {
+            LockSupport.parkNanos(minIdleNS);
+        }
     }
 
 
@@ -422,7 +447,7 @@ final public class SbkPerformance implements Performance {
                     ex.printStackTrace();
                 }
                 for (ConcurrentLinkedQueue<TimeStamp>[] queues : cQueues) {
-                    for (ConcurrentLinkedQueue<TimeStamp> queue: queues) {
+                    for (ConcurrentLinkedQueue<TimeStamp> queue : queues) {
                         queue.clear();
                     }
                 }
