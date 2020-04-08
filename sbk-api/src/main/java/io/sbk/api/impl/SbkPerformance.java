@@ -11,6 +11,7 @@ package io.sbk.api.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -198,8 +199,7 @@ final public class SbkPerformance implements Performance {
     static private class LatencyWriter {
         final double[] percentiles = {0.1, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
         final private String action;
-        final private int latencyThreshold;
-        private int[] latencies;
+        final private int[] latencies;
         private long startTime;
         private long records;
         private long latencyRecords;
@@ -211,7 +211,7 @@ final public class SbkPerformance implements Performance {
 
         LatencyWriter(String action, long start, int latencyThreshold) {
             this.action = action;
-            this.latencyThreshold = latencyThreshold;
+            this.latencies = new int[latencyThreshold];
             resetValues(start);
         }
 
@@ -224,7 +224,7 @@ final public class SbkPerformance implements Performance {
             this.totalLatency = 0;
             this.discard = 0;
             this.latencyRanges = null;
-            this.latencies = new int[latencyThreshold];
+            Arrays.fill(this.latencies, 0);
         }
 
         public void reset(long start) {
