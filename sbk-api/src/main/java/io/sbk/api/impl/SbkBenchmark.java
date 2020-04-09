@@ -16,7 +16,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
 import io.sbk.api.Reader;
 import io.sbk.api.ResultLogger;
-import io.sbk.api.SbkConfig;
+import io.sbk.api.Config;
 import io.sbk.api.Storage;
 import io.sbk.api.Writer;
 import lombok.Synchronized;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * Class for performing the benchmark.
  */
 public class SbkBenchmark implements Benchmark {
-    final private SbkConfig config;
+    final private Config config;
     final private Storage storage;
     final private ExecutorService executor;
     final private Parameters params;
@@ -60,7 +60,7 @@ public class SbkBenchmark implements Benchmark {
      * @param  logger   Result Logger
      * @param  metricsLogger    Log the results to metrics logger
      */
-    public SbkBenchmark(String  action, SbkConfig config, Parameters params,
+    public SbkBenchmark(String  action, Config config, Parameters params,
                         Storage storage, ResultLogger logger, ResultLogger metricsLogger) {
         this.config = config;
         this.params = params;

@@ -10,8 +10,8 @@
 
 package io.sbk.api;
 
-public class SbkConfig {
-    public String sbkName;
+public class Config {
+    public String name;
     public String description;
     public String packageName;
     public boolean fork;

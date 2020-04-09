@@ -23,7 +23,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.api.Metric;
 import io.sbk.api.Parameters;
 import io.sbk.api.ResultLogger;
-import io.sbk.api.SbkConfig;
+import io.sbk.api.Config;
 import io.sbk.api.Storage;
 import io.sbk.api.impl.MetricImpl;
 import io.sbk.api.impl.MetricsLogger;
@@ -60,20 +60,20 @@ public class SbkMain {
         final List<String> driversList;
         final ResultLogger metricsLogger;
         final String version = SbkMain.class.getPackage().getImplementationVersion();
-        SbkConfig config = null;
-        CompletableFuture ret = null;
+        Config config = null;
+        CompletableFuture<Void> ret = null;
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
             config = mapper.readValue(SbkMain.class.getClassLoader().getResourceAsStream(CONFIGFILE),
-                    SbkConfig.class);
+                    Config.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             System.exit(0);
         }
-        System.out.printf("Package name : %s", config.packageName);
+
         try {
             commandline = new DefaultParser().parse(new Options()
                     .addOption("version", false, "Version"),
@@ -83,7 +83,7 @@ public class SbkMain {
             System.exit(0);
         }
         if (commandline.hasOption("version")) {
-            System.out.println(config.description + ", " + config.sbkName + " version: " + version);
+            System.out.println(config.description + ", " + config.name + " version: " + version);
             System.exit(0);
         }
 
@@ -99,7 +99,7 @@ public class SbkMain {
         driversList =  getClassNames(config.packageName);
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            Parameters paramsHelp = new SbkParameters(config.sbkName, config.description, version, "", driversList,  startTime);
+            Parameters paramsHelp = new SbkParameters(config.name, config.description, version, "", driversList,  startTime);
             metric.addArgs(paramsHelp);
             paramsHelp.printHelp();
             System.exit(0);
@@ -121,7 +121,7 @@ public class SbkMain {
             System.out.println("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new SbkParameters(config.sbkName, config.description, version, name, driversList,  startTime);
+        params = new SbkParameters(config.name, config.description, version, name, driversList,  startTime);
         storage.addArgs(params);
         metric.addArgs(params);
         try {
@@ -160,7 +160,7 @@ public class SbkMain {
             metricsLogger = logger;
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-            final String prefix = config.sbkName.toUpperCase() + "_" + name + "_" + action + "_";
+            final String prefix = config.name.toUpperCase() + "_" + name + "_" + action + "_";
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
             metricsLogger = new MetricsLogger(
