@@ -102,12 +102,12 @@ public class SbkWriter extends Worker implements Runnable {
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         final int size = data.length(payload);
         long time = System.currentTimeMillis();
-        int i = 0;
+        int id = workerID % idMax;
         while ((time - startTime) < msToRun) {
-            time = writer.recordWrite(payload, size, recordTime, i);
-            i += 1;
-            if (i >= idMax) {
-                i = 0;
+            time = writer.recordWrite(payload, size, recordTime, id);
+            id += 1;
+            if (id >= idMax) {
+                id = 0;
             }
         }
         writer.flush();
