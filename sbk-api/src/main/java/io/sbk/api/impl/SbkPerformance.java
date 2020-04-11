@@ -236,14 +236,14 @@ final public class SbkPerformance implements Performance {
             for (int i = 0; i < Math.min(latencies.length, Integer.MAX_VALUE); i++) {
                 if (latencies[i] > 0) {
                      while (index < values.length) {
-                        if (percentileIds[index] < cur || percentileIds[index] > (cur + latencies[i])) {
-                            break;
-                        } else {
-                            values[index] = i;
-                            index += 1;
-                        }
+                         if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
+                             values[index] = i;
+                             index += 1;
+                         } else {
+                             break;
+                         }
                     }
-                    cur += latencies[i] + 1;
+                    cur += latencies[i];
                     totalLatency += i * latencies[i];
                     maxLatency = i;
                 }
