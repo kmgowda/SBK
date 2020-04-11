@@ -62,9 +62,9 @@ final public class SbkPerformance implements Performance {
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
         this.windowInterval = Math.max(Config.MIN_REPORTING_INTERVAL_MS, config.reportingMS);
         this.maxWindowLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(config.maxWindowLatency * Config.MS_PER_SEC, Config.MS_PER_MIN));
+                                    Math.max(config.maxWindowLatency * Config.MS_PER_SEC, Config.DEFAULT_WINDOW_LATENCY));
         this.maxLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(config.maxLatency * Config.MS_PER_SEC, Config.MS_PER_HR));
+                                    Math.max(config.maxLatency * Config.MS_PER_SEC, Config.DEFAULT_MAX_LATENCY));
         this.csvFile = csvFile;
         this.periodicLogger = periodicLogger;
         this.totalLogger = totalLogger;

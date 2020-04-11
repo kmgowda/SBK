@@ -20,6 +20,8 @@ public class Config {
     final public static int MIN_REPORTING_INTERVAL_MS = 5000;
     final public static int MIN_IDLE_NS = MICROS_PER_MS;
     final public static int MIN_Q_PER_WORKER = 1;
+    final public static int DEFAULT_WINDOW_LATENCY = MS_PER_MIN;
+    final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 15;
 
     public String name;
     public String description;
