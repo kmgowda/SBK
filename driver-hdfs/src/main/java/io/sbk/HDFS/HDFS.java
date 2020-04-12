@@ -80,7 +80,7 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new HDFSWriter(id, params, fileSystem, filePath, recreate);
         } catch (IOException ex) {
@@ -90,7 +90,7 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new HDFSReader(id, params, fileSystem, filePath);
         } catch (IOException ex) {

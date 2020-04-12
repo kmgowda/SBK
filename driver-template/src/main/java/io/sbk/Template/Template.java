@@ -38,12 +38,12 @@ public class Template implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         return new TemplateWriter(id, params);
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         return new TemplateReader(id, params);
     }
 }
