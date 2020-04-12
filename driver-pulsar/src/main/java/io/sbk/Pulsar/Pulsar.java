@@ -121,7 +121,7 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new PulsarWriter(id, params, topicName, client);
         } catch (IOException ex) {
@@ -131,7 +131,7 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new PulsarReader(id, params, topicName, topicName+"rdGrp", client);
         } catch (IOException ex) {

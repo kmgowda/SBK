@@ -120,7 +120,7 @@ public class Kafka implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new KafkaWriter(id, params, topicName, producerConfig);
         } catch (IOException ex) {
@@ -130,7 +130,7 @@ public class Kafka implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new KafkaReader(id, params, topicName, consumerConfig);
         } catch (IOException ex) {
