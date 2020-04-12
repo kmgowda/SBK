@@ -17,7 +17,7 @@ public interface Performance extends Benchmark {
      /**
      * Get the Time recorder for benchmarking.
      *
-     * @return RecordTime Interface if its avilable ; returns null in case of failure.
+     * @return RecordTime Interface if its available ; returns null in case of failure.
      */
      RecordTime get();
 }

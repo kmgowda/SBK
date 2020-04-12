@@ -56,7 +56,7 @@ public class SbkReader extends Worker implements Runnable {
     final public void RecordsReader() throws IOException {
        final TimeStamp status = new TimeStamp();
         try {
-            int i = 0, id = 0;
+            int i = 0, id = workerID % idMax;
             while (i < params.getRecordsPerReader()) {
                 reader.recordRead(data, status, recordTime, id++);
                 i += status.records;
@@ -73,7 +73,7 @@ public class SbkReader extends Worker implements Runnable {
     final public void RecordsReaderRW() throws IOException {
         final TimeStamp status = new TimeStamp();
         try {
-            int i = 0, id = 0;
+            int i = 0, id = workerID % idMax;
             while (i < params.getRecordsPerReader()) {
                 reader.recordReadTime(data, status, recordTime, id++);
                 i += status.records;
@@ -91,7 +91,7 @@ public class SbkReader extends Worker implements Runnable {
         final TimeStamp status = new TimeStamp();
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        int id = 0;
+        int id = workerID % idMax;
         try {
             while ((status.endTime - startTime) < msToRun) {
                 reader.recordRead(data, status, recordTime, id++);
@@ -108,7 +108,7 @@ public class SbkReader extends Worker implements Runnable {
         final TimeStamp status = new TimeStamp();
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        int id = 0;
+        int id = workerID % idMax;
         try {
             while ((status.endTime - startTime) < msToRun) {
                 reader.recordReadTime(data, status, recordTime, id++);

@@ -10,7 +10,6 @@
 package io.sbk.api.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,6 +19,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import io.sbk.api.Config;
 import io.sbk.api.Performance;
 import io.sbk.api.RecordTime;
 import io.sbk.api.ResultLogger;
@@ -38,48 +38,50 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance statistics.
  */
 final public class SbkPerformance implements Performance {
-    final private static int NS_PER_MICRO = 1000;
-    final private static int MICROS_PER_MS = 1000;
-    final private static int MS_PER_SEC = 1000;
-    final private static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
-    final private static int MS_PER_MIN = MS_PER_SEC * 60;
-    final private static int MS_PER_HR = MS_PER_MIN * 60;
-    final private static int MIN_REPORTING_INTERVAL_MS = 5000;
-    final private static int MIN_Q_PER_WORKER = 1;
-
     final private String action;
     final private String csvFile;
-    final private int messageSize;
     final private int windowInterval;
-    final private int workerIdleNS;
     final private int idleNS;
+    final private int maxWindowLatency;
+    final private int maxLatency;
+    final private int maxQs;
     final private ResultLogger periodicLogger;
     final private ResultLogger totalLogger;
     final private ExecutorService executor;
-    final private ConcurrentLinkedQueue<TimeStamp>[][] cQueues;
+    final private TimeRecorder[]  timeRecorders;
 
     @GuardedBy("this")
-    private int size;
+    private int index;
 
     @GuardedBy("this")
     private CompletableFuture<Void> ret;
 
-    public SbkPerformance(String action, int messageSize, int workers, int reportingInterval, int qPerWorker,
-               int workerIdleNS, int idleNS, String csvFile, ResultLogger periodicLogger,
-               ResultLogger totalLogger, ExecutorService executor) {
-        final int numQ = Math.max(MIN_Q_PER_WORKER, qPerWorker);
+    public SbkPerformance(String action, Config config, int workers, String csvFile,
+                          ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
         this.action = action;
-        this.messageSize = messageSize;
-        this.windowInterval = Math.max(MIN_REPORTING_INTERVAL_MS, reportingInterval);
-        this.idleNS = idleNS;
-        this.workerIdleNS = Math.min(this.idleNS, workerIdleNS);
+        this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
+        this.windowInterval = Math.max(Config.MIN_REPORTING_INTERVAL_MS, config.reportingMS);
+        this.maxWindowLatency = Math.min(Integer.MAX_VALUE,
+                                    Math.max(config.maxWindowLatency * Config.MS_PER_SEC, Config.DEFAULT_WINDOW_LATENCY));
+        this.maxLatency = Math.min(Integer.MAX_VALUE,
+                                    Math.max(config.maxLatency * Config.MS_PER_SEC, Config.DEFAULT_MAX_LATENCY));
         this.csvFile = csvFile;
         this.periodicLogger = periodicLogger;
         this.totalLogger = totalLogger;
         this.executor = executor;
-        this.cQueues = new ConcurrentLinkedQueue[workers][numQ];
-        this.size = 0;
         this.ret = null;
+        if (config.maxQs > 0) {
+            maxQs = config.maxQs;
+            this.timeRecorders = new TimeRecorder[1];
+            this.index = 1;
+        } else {
+            maxQs =  Math.max(Config.MIN_Q_PER_WORKER, config.qPerWorker);
+            this.timeRecorders = new TimeRecorder[workers];
+            this.index = workers;
+        }
+        for (int i = 0; i < timeRecorders.length; i++) {
+            timeRecorders[i] = new TimeRecorder(maxQs);
+        }
     }
 
     /**
@@ -95,7 +97,6 @@ final public class SbkPerformance implements Performance {
         public void run() {
             final TimeWindow window;
             final LatencyWriter latencyRecorder;
-            final boolean idleWorker = cQueues.length > 1 && workerIdleNS > 0;
             boolean doWork = true;
             long time = startTime;
             boolean notFound;
@@ -103,38 +104,33 @@ final public class SbkPerformance implements Performance {
 
             if (csvFile != null) {
                 try {
-                    latencyRecorder = new CSVLatencyWriter(action + "(Total)", startTime, MS_PER_HR, action, csvFile);
+                    latencyRecorder = new CSVLatencyWriter(action + "(Total)", startTime, maxLatency, action, csvFile);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     return;
                 }
             } else {
-                latencyRecorder = new LatencyWriter(action+"(Total)", startTime, MS_PER_HR);
+                latencyRecorder = new LatencyWriter(action+"(Total)", startTime, maxLatency);
             }
-            window = new TimeWindow(action, startTime, MS_PER_MIN, windowInterval, workerIdleNS, idleNS);
+            window = new TimeWindow(action, startTime, maxWindowLatency, windowInterval, idleNS);
             while (doWork) {
                 notFound = true;
-                for (ConcurrentLinkedQueue<TimeStamp>[] queues : cQueues) {
-                    for (ConcurrentLinkedQueue<TimeStamp> queue : queues) {
-                        t = queue.poll();
-                        if (t != null) {
-                            notFound = false;
-                            if (t.isEnd()) {
-                                doWork = false;
-                            } else {
-                                final int latency = (int) (t.endTime - t.startTime);
-                                window.record(startTime, t.bytes, t.records, latency);
-                                latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
-                            }
-                            time = t.endTime;
-                            if (window.elapsedTimeMS(time) > windowInterval) {
-                                window.print(time, periodicLogger);
-                                window.reset(time);
-                            }
+                for (TimeRecorder recorder : timeRecorders) {
+                    t = recorder.poll();
+                    if (t != null) {
+                        notFound = false;
+                        if (t.isEnd()) {
+                            doWork = false;
+                        } else {
+                            final int latency = (int) (t.endTime - t.startTime);
+                            window.record(startTime, t.bytes, t.records, latency);
+                            latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
                         }
-                    }
-                    if (notFound && idleWorker) {
-                       window.minWait();
+                        time = t.endTime;
+                        if (window.elapsedTimeMS(time) > windowInterval) {
+                            window.print(time, periodicLogger);
+                            window.reset(time);
+                        }
                     }
                 }
                 if (notFound) {
@@ -163,7 +159,7 @@ final public class SbkPerformance implements Performance {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
             minWaitTimeMS = windowInterval / 50.0;
-            countRatio = (NS_PER_MS * 1.0) / idleNS;
+            countRatio = (Config.NS_PER_MS * 1.0) / idleNS;
             minIdleCount = (long) (countRatio * minWaitTimeMS);
             elasticCount = minIdleCount;
             idleCount = 0;
@@ -197,33 +193,29 @@ final public class SbkPerformance implements Performance {
      */
     @NotThreadSafe
     static private class LatencyWriter {
-        final double[] percentiles = {0.1, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
+        final private double[] percentiles = {0.1, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
         final private String action;
-        final private int[] latencies;
+        final private long[] latencies;
         private long startTime;
-        private long records;
         private long latencyRecords;
+        private long discardRecords;
         private long bytes;
-        private int maxLatency;
         private long totalLatency;
-        private long discard;
-        private ArrayList<int[]> latencyRanges;
+        private int maxLatency;
 
         LatencyWriter(String action, long start, int latencyThreshold) {
             this.action = action;
-            this.latencies = new int[latencyThreshold];
+            this.latencies = new long[latencyThreshold];
             resetValues(start);
         }
 
         private void resetValues(long start) {
             this.startTime = start;
-            this.records = 0;
             this.latencyRecords = 0;
+            this.discardRecords = 0;
             this.bytes = 0;
             this.maxLatency = 0;
             this.totalLatency = 0;
-            this.discard = 0;
-            this.latencyRanges = null;
             Arrays.fill(this.latencies, 0);
         }
 
@@ -231,33 +223,29 @@ final public class SbkPerformance implements Performance {
             resetValues(start);
         }
 
-        private void countLatencies() {
-            latencyRecords = 0;
-            latencyRanges = new ArrayList<>();
-            for (int i = 0, cur = 0; i < latencies.length; i++) {
-                if (latencies[i] > 0) {
-                    latencyRanges.add(new int[]{cur, cur + latencies[i], i});
-                    cur += latencies[i] + 1;
-                    totalLatency += i * latencies[i];
-                    latencyRecords += latencies[i];
-                    maxLatency = i;
-                }
-            }
-        }
-
         private int[] getPercentiles() {
-            int[] percentileIds = new int[percentiles.length];
-            int[] values = new int[percentileIds.length];
+            final int[] values = new int[percentiles.length];
+            final long[] percentileIds = new long[percentiles.length];
+            long cur = 0;
             int index = 0;
 
-            for (int i = 0; i < percentiles.length; i++) {
-                percentileIds[i] = (int) (latencyRecords * percentiles[i]);
+            for (int i = 0; i < percentileIds.length; i++) {
+                percentileIds[i] = (long) (latencyRecords * percentiles[i]);
             }
 
-            for (int[] lr : latencyRanges) {
-                while ((index < percentileIds.length) &&
-                        (lr[0] <= percentileIds[index]) && (percentileIds[index] <= lr[1])) {
-                    values[index++] = lr[2];
+            for (int i = 0; i < Math.min(latencies.length, Integer.MAX_VALUE); i++) {
+                if (latencies[i] > 0) {
+                     while (index < values.length) {
+                         if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
+                             values[index] = i;
+                             index += 1;
+                         } else {
+                             break;
+                         }
+                    }
+                    cur += latencies[i];
+                    totalLatency += i * latencies[i];
+                    maxLatency = i;
                 }
             }
             return values;
@@ -272,12 +260,12 @@ final public class SbkPerformance implements Performance {
          * @param latency latency value in milliseconds.
          */
         public void record(long startTime, int bytes, int events, int latency) {
-            if (latency  < latencies.length && latency > -1) {
-                latencies[latency] += events;
+            if (latency  < this.latencies.length && latency > -1) {
+                this.latencies[latency] += events;
+                this.latencyRecords += events;
             } else {
-                discard += events;
+                this.discardRecords += events;
             }
-            this.records += events;
             this.bytes += bytes;
         }
 
@@ -294,15 +282,15 @@ final public class SbkPerformance implements Performance {
          * Print the window statistics
          */
         public void print(long endTime, ResultLogger logger) {
-            countLatencies();
+            final long totalRecords  = latencyRecords + discardRecords;
             final double elapsed = (endTime - startTime) / 1000.0;
-            final double recsPerSec = records / elapsed;
+            final double recsPerSec = totalRecords / elapsed;
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
 
-            logger.print(action, bytes, records, recsPerSec, mbPerSec, totalLatency / (double) latencyRecords,
-                    maxLatency, discard, percs[0], percs[1], percs[2], percs[3],
-                    percs[4], percs[5], percs[6], percs[7]);
+            logger.print(action, bytes, totalRecords, recsPerSec, mbPerSec,
+                    totalLatency / (double) latencyRecords, maxLatency, discardRecords,
+                    percs[0], percs[1], percs[2], percs[3], percs[4], percs[5], percs[6], percs[7]);
         }
     }
 
@@ -310,12 +298,10 @@ final public class SbkPerformance implements Performance {
     final static private class TimeWindow extends LatencyWriter {
         final private ElasticCounter idleCounter;
         final private int windowInterval;
-        final private int minIdleNS;
 
-        private TimeWindow(String action, long start, int latencyThreshold, int interval, int minIdleNS, int idleNS) {
+        private TimeWindow(String action, long start, int latencyThreshold, int interval, int idleNS) {
             super(action, start, latencyThreshold);
             this.idleCounter = new ElasticCounter(interval, idleNS);
-            this.minIdleNS = minIdleNS;
             this.windowInterval = interval;
         }
 
@@ -341,10 +327,6 @@ final public class SbkPerformance implements Performance {
 
         private void idleWaitPrint(ResultLogger logger) {
                 waitCheckPrint(idleCounter, logger);
-        }
-
-        private void minWait() {
-            LockSupport.parkNanos(minIdleNS);
         }
     }
 
@@ -397,30 +379,55 @@ final public class SbkPerformance implements Performance {
         }
     }
 
+    @NotThreadSafe
     static final class TimeRecorder implements RecordTime {
-        final private ConcurrentLinkedQueue<TimeStamp>[] queue;
+        final private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
+        private int index;
 
-        TimeRecorder(ConcurrentLinkedQueue<TimeStamp>[] queue) {
-            this.queue = queue;
+        public TimeRecorder(int qSize) {
+            this.index = qSize;
+            this.cQueues = new ConcurrentLinkedQueue[qSize];
+            for (int i = 0; i < cQueues.length; i++) {
+                cQueues[i] = new ConcurrentLinkedQueue<>();
+            }
         }
 
+        public TimeStamp poll() {
+            index += 1;
+            if (index >= cQueues.length) {
+                index = 0;
+            }
+            return cQueues[index].poll();
+        }
+
+        public void enqEndTime(long endTime) {
+            cQueues[0].add(new TimeStamp(endTime));
+        }
+
+        public void clear() {
+            for (ConcurrentLinkedQueue<TimeStamp> q: cQueues) {
+                q.clear();
+            }
+        }
+
+        /* This Method is Thread Safe */
         @Override
         public void accept(int id, long startTime, long endTime, int bytes, int records) {
-            queue[id].add(new TimeStamp(startTime, endTime, bytes, records));
+            cQueues[id].add(new TimeStamp(startTime, endTime, bytes, records));
         }
     }
 
     @Override
     @Synchronized
     public RecordTime get() {
-        if (size >= cQueues.length) {
-            return null;
+        if (timeRecorders.length == 1) {
+                return timeRecorders[0];
         }
-        for (int i = 0; i < cQueues[size].length; i++) {
-            cQueues[size][i] = new ConcurrentLinkedQueue<>();
+        index += 1;
+        if (index >= timeRecorders.length) {
+            index = 0;
         }
-        size += 1;
-        return new TimeRecorder(cQueues[size-1]);
+        return  timeRecorders[index];
     }
 
 
@@ -437,20 +444,16 @@ final public class SbkPerformance implements Performance {
     @Synchronized
     public void stop(long endTime)  {
         if (this.ret != null) {
-            if (cQueues.length > 0) {
-                for (ConcurrentLinkedQueue<TimeStamp>[] queues : cQueues) {
-                    queues[0].add(new TimeStamp(endTime));
-                }
-                try {
-                    ret.get();
-                } catch (ExecutionException | InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                for (ConcurrentLinkedQueue<TimeStamp>[] queues : cQueues) {
-                    for (ConcurrentLinkedQueue<TimeStamp> queue : queues) {
-                        queue.clear();
-                    }
-                }
+            for (TimeRecorder recorder : timeRecorders) {
+                recorder.enqEndTime(endTime);
+            }
+            try {
+                ret.get();
+            } catch (ExecutionException | InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            for (TimeRecorder recorder: timeRecorders) {
+                recorder.clear();
             }
             this.ret = null;
         }
