@@ -244,8 +244,6 @@ final public class SbkPerformance implements Performance {
                          }
                     }
                     cur += latencies[i];
-                    totalLatency += i * latencies[i];
-                    maxLatency = i;
                 }
             }
             return values;
@@ -267,6 +265,8 @@ final public class SbkPerformance implements Performance {
                 this.discardRecords += events;
             }
             this.bytes += bytes;
+            this.totalLatency += latency * events;
+            this.maxLatency = Math.max(this.maxLatency, latency);
         }
 
         /**
@@ -282,14 +282,14 @@ final public class SbkPerformance implements Performance {
          * Print the window statistics
          */
         public void print(long endTime, ResultLogger logger) {
-            final long totalRecords  = latencyRecords + discardRecords;
+            final long totalRecords  = this.latencyRecords + this.discardRecords;
             final double elapsed = (endTime - startTime) / 1000.0;
             final double recsPerSec = totalRecords / elapsed;
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
 
-            logger.print(action, bytes, totalRecords, recsPerSec, mbPerSec,
-                    totalLatency / (double) latencyRecords, maxLatency, discardRecords,
+            logger.print(action, this.bytes, totalRecords, recsPerSec, mbPerSec,
+                    this.totalLatency / (double) totalRecords, this.maxLatency, this.discardRecords,
                     percs[0], percs[1], percs[2], percs[3], percs[4], percs[5], percs[6], percs[7]);
         }
     }
