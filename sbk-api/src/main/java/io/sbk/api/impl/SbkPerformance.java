@@ -10,7 +10,6 @@
 package io.sbk.api.impl;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -216,7 +215,6 @@ final public class SbkPerformance implements Performance {
             this.bytes = 0;
             this.maxLatency = 0;
             this.totalLatency = 0;
-            Arrays.fill(this.latencies, 0);
         }
 
         public void reset(long start) {
@@ -233,7 +231,7 @@ final public class SbkPerformance implements Performance {
                 percentileIds[i] = (long) (latencyRecords * percentiles[i]);
             }
 
-            for (int i = 0; i < Math.min(latencies.length, Integer.MAX_VALUE); i++) {
+            for (int i = 0; i < Math.min(latencies.length, this.maxLatency+1); i++) {
                 if (latencies[i] > 0) {
                      while (index < values.length) {
                          if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
@@ -244,6 +242,7 @@ final public class SbkPerformance implements Performance {
                          }
                     }
                     cur += latencies[i];
+                    latencies[i] = 0;
                 }
             }
             return values;
