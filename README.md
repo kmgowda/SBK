@@ -109,7 +109,6 @@ An example  final output is show as below:
 
 ```
 Writing(Total)    2004511 records,   35187.2 records/sec,    33.56 MB/sec,     27.8 ms avg latency,    2928 ms max latency;Discarded Latencies:       0 lower ,        0 higher; Latency Percentiles:      10 ms 10th,      12 ms 25th,      15 ms 50th,      20 ms 75th,      80 ms 95th,     213 ms 99th,     792 ms 99.9th,    2926 ms 99.99th.
-2020-04-18 08:42:44 INFO [kmg-topic-12] [standalone-4-12] Closed Producer
 ```
 
 ### Grafana Dashboards of SBK
