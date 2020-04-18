@@ -27,7 +27,8 @@ public class MetricsLogger implements ResultLogger {
     private final String recsPsecName;
     private final String avgLatencyName;
     private final String maxLatencyName;
-    private final String discardedName;
+    private final String lowerDiscardName;
+    private final String higherDiscardName;
     private final String percOneName;
     private final String percTwoName;
     private final String percThreeName;
@@ -40,7 +41,8 @@ public class MetricsLogger implements ResultLogger {
     private final String readersName;
     private final Counter bytes;
     private final Counter records;
-    private final Counter discarded;
+    private final Counter lowerDiscard;
+    private final Counter higherDiscard;
     private final AtomicDouble mbPsec;
     private final AtomicDouble recsPsec;
     private final AtomicDouble avgLatency;
@@ -69,7 +71,8 @@ public class MetricsLogger implements ResultLogger {
         this.recsPsecName = prefix + "RecordsPerSec";
         this.avgLatencyName = prefix + "AvgLatency";
         this.maxLatencyName = prefix + "MaxLatency";
-        this.discardedName = prefix + "DiscardedLatencies";
+        this.lowerDiscardName = prefix + "LowerDiscardedLatencyRecords";
+        this.higherDiscardName = prefix + "HigherDiscardLatencyRecords";
         this.percOneName = prefix + "10th";
         this.percTwoName = prefix + "25th";
         this.percThreeName = prefix + "50th";
@@ -84,7 +87,8 @@ public class MetricsLogger implements ResultLogger {
         this.registry.gauge(this.readersName, readers);
         this.bytes = registry.counter(bytesName);
         this.records = registry.counter(recordsName);
-        this.discarded = registry.counter(discardedName);
+        this.lowerDiscard = registry.counter(lowerDiscardName);
+        this.higherDiscard = registry.counter(higherDiscardName);
         this.mbPsec = registry.gauge(mbPsecName, new AtomicDouble());
         this.recsPsec = registry.gauge(recsPsecName, new AtomicDouble());
         this.avgLatency = registry.gauge(avgLatencyName, new AtomicDouble());
@@ -101,12 +105,13 @@ public class MetricsLogger implements ResultLogger {
 
     @Override
     public void print(String action, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-               long discard, int one, int two, int three, int four, int five, int six, int seven, int eight) {
+               long lowerDiscard, long higherDiscard, int one, int two, int three, int four, int five, int six, int seven, int eight) {
         defaultLogger.print(action, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                discard, one, two, three, four, five, six, seven, eight);
+                lowerDiscard, higherDiscard, one, two, three, four, five, six, seven, eight);
         this.bytes.increment(bytes);
         this.records.increment(records);
-        this.discarded.increment(discard);
+        this.lowerDiscard.increment(lowerDiscard);
+        this.higherDiscard.increment(higherDiscard);
         this.recsPsec.set(recsPerSec);
         this.mbPsec.set(mbPerSec);
         this.avgLatency.set(avgLatency);

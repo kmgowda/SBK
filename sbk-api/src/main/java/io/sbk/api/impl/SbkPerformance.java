@@ -41,6 +41,7 @@ final public class SbkPerformance implements Performance {
     final private String csvFile;
     final private int windowInterval;
     final private int idleNS;
+    final private int baseLatency;
     final private int maxWindowLatency;
     final private int maxLatency;
     final private int maxQs;
@@ -59,11 +60,12 @@ final public class SbkPerformance implements Performance {
                           ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
         this.action = action;
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
+        this.baseLatency = Math.max(Config.DEFAULT_MIN_LATENCY, config.minLatency);
         this.windowInterval = Math.max(Config.MIN_REPORTING_INTERVAL_MS, config.reportingMS);
         this.maxWindowLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(config.maxWindowLatency * Config.MS_PER_SEC, Config.DEFAULT_WINDOW_LATENCY));
+                                    Math.max(config.maxWindowLatency, Config.DEFAULT_WINDOW_LATENCY));
         this.maxLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(config.maxLatency * Config.MS_PER_SEC, Config.DEFAULT_MAX_LATENCY));
+                                    Math.max(config.maxLatency, Config.DEFAULT_MAX_LATENCY));
         this.csvFile = csvFile;
         this.periodicLogger = periodicLogger;
         this.totalLogger = totalLogger;
@@ -103,15 +105,16 @@ final public class SbkPerformance implements Performance {
 
             if (csvFile != null) {
                 try {
-                    latencyRecorder = new CSVLatencyWriter(action + "(Total)", startTime, maxLatency, action, csvFile);
+                    latencyRecorder = new CSVLatencyWriter(action + "(Total)", startTime, baseLatency,
+                            maxLatency, action, csvFile);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     return;
                 }
             } else {
-                latencyRecorder = new LatencyWriter(action+"(Total)", startTime, maxLatency);
+                latencyRecorder = new LatencyWriter(action+"(Total)", startTime, baseLatency, maxLatency);
             }
-            window = new TimeWindow(action, startTime, maxWindowLatency, windowInterval, idleNS);
+            window = new TimeWindow(action, startTime, baseLatency, maxWindowLatency, windowInterval, idleNS);
             while (doWork) {
                 notFound = true;
                 for (TimeRecorder recorder : timeRecorders) {
@@ -194,24 +197,28 @@ final public class SbkPerformance implements Performance {
     static private class LatencyWriter {
         final private double[] percentiles = {0.1, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
         final private String action;
+        final private int baseLatency;
         final private long[] latencies;
         private long startTime;
-        private long latencyRecords;
-        private long discardRecords;
+        private long validLatencyRecords;
+        private long lowerLatencyDiscardRecords;
+        private long higherLatencyDiscardRecords;
         private long bytes;
         private long totalLatency;
         private int maxLatency;
 
-        LatencyWriter(String action, long start, int latencyThreshold) {
+        LatencyWriter(String action, long start, int baseLatency, int latencyThreshold) {
             this.action = action;
-            this.latencies = new long[latencyThreshold];
+            this.baseLatency = baseLatency;
+            this.latencies = new long[latencyThreshold-baseLatency];
             resetValues(start);
         }
 
         private void resetValues(long start) {
             this.startTime = start;
-            this.latencyRecords = 0;
-            this.discardRecords = 0;
+            this.validLatencyRecords = 0;
+            this.lowerLatencyDiscardRecords = 0;
+            this.higherLatencyDiscardRecords = 0;
             this.bytes = 0;
             this.maxLatency = 0;
             this.totalLatency = 0;
@@ -228,14 +235,14 @@ final public class SbkPerformance implements Performance {
             int index = 0;
 
             for (int i = 0; i < percentileIds.length; i++) {
-                percentileIds[i] = (long) (latencyRecords * percentiles[i]);
+                percentileIds[i] = (long) (validLatencyRecords * percentiles[i]);
             }
 
             for (int i = 0; i < Math.min(latencies.length, this.maxLatency+1); i++) {
                 if (latencies[i] > 0) {
                      while (index < values.length) {
                          if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
-                             values[index] = i;
+                             values[index] = i + baseLatency;
                              index += 1;
                          } else {
                              break;
@@ -257,11 +264,16 @@ final public class SbkPerformance implements Performance {
          * @param latency latency value in milliseconds.
          */
         public void record(long startTime, int bytes, int events, int latency) {
-            if (latency  < this.latencies.length && latency > -1) {
-                this.latencies[latency] += events;
-                this.latencyRecords += events;
+            if (latency < this.baseLatency) {
+                this.lowerLatencyDiscardRecords += events;
             } else {
-                this.discardRecords += events;
+                final int index = latency - this.baseLatency;
+                if (index < this.latencies.length) {
+                    this.latencies[index] += events;
+                    this.validLatencyRecords += events;
+                } else {
+                    this.higherLatencyDiscardRecords += events;
+                }
             }
             this.bytes += bytes;
             this.totalLatency += latency * events;
@@ -281,14 +293,16 @@ final public class SbkPerformance implements Performance {
          * Print the window statistics
          */
         public void print(long endTime, ResultLogger logger) {
-            final long totalRecords  = this.latencyRecords + this.discardRecords;
+            final long totalRecords  = this.validLatencyRecords +
+                    this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
             final double elapsed = (endTime - startTime) / 1000.0;
             final double recsPerSec = totalRecords / elapsed;
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsed;
             int[] percs = getPercentiles();
 
             logger.print(action, this.bytes, totalRecords, recsPerSec, mbPerSec,
-                    this.totalLatency / (double) totalRecords, this.maxLatency, this.discardRecords,
+                    this.totalLatency / (double) totalRecords, this.maxLatency,
+                    this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                     percs[0], percs[1], percs[2], percs[3], percs[4], percs[5], percs[6], percs[7]);
         }
     }
@@ -298,8 +312,8 @@ final public class SbkPerformance implements Performance {
         final private ElasticCounter idleCounter;
         final private int windowInterval;
 
-        private TimeWindow(String action, long start, int latencyThreshold, int interval, int idleNS) {
-            super(action, start, latencyThreshold);
+        private TimeWindow(String action, long start, int baseLatency, int latencyThreshold, int interval, int idleNS) {
+            super(action, start, baseLatency, latencyThreshold);
             this.idleCounter = new ElasticCounter(interval, idleNS);
             this.windowInterval = interval;
         }
@@ -335,8 +349,9 @@ final public class SbkPerformance implements Performance {
         final private String csvFile;
         final private CSVPrinter csvPrinter;
 
-        CSVLatencyWriter(String action, long start,  int latencyThreshold,  String latencyName, String csvFile) throws IOException {
-            super(action, start, latencyThreshold);
+        CSVLatencyWriter(String action, long start,  int baseLatency, int latencyThreshold,
+                         String latencyName, String csvFile) throws IOException {
+            super(action, start, baseLatency, latencyThreshold);
             this.csvFile = csvFile;
             csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
                     .withHeader("Start Time (Milliseconds)", "data size (bytes)", "Records", latencyName + " Latency (Milliseconds)"));
