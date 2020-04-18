@@ -28,7 +28,7 @@ public class Sl4jResultLogger implements ResultLogger {
                       int maxLatency, long lowerDiscard, long higherDiscard, int one, int two, int three, int four, int five, int six,
                       int seven, int eight) {
         log.info(String.format("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f ms avg latency, %7d ms max latency;" +
-                        " Discarded Latencies:%8d lower , %8d higher;" +
+                        " Discarded Latencies:%8d lower, %8d higher;" +
                         " Latency Percentiles: %7d ms 10th, %7d ms 25th, %7d ms 50th, %7d ms 75th, %7d ms 95th, %7d ms 99th, %7d ms 99.9th, %7d ms 99.99th.\n",
                 action, records, recsPerSec, mbPerSec, avgLatency, maxLatency, lowerDiscard, higherDiscard, one, two, three,
                 four, five, six, seven, eight));
