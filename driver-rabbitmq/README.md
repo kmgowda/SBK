@@ -38,6 +38,8 @@ rabbitmqctl set_permissions -p / guest ".*" ".*" ".*"
 
 To allow remote users to access your server,  add the following content to in the file /etc/rabbitmq/rabbitmq.config
 
+In case , if you have installed the Rabbit MQ in windows system, then to allow remote users to access your server,  add the following content to in the file c:\Users\[your user name]\AppData\Roaming\RabbitMQ\rabbitmq.config or :\Users\[your user name]\AppData\Roaming\RabbitMQ\advanced.config (%APPDATA%\RabbitMQ\rabbit.config or advanced.conifg).
+
 ```
 [{rabbit, [{loopback_users, []}]}].
 
