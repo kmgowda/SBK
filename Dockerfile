@@ -19,11 +19,11 @@ USER 0
 COPY ca-certificates/* /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
-COPY --chown=root:root   build/install/sbk   /home/sbk
+COPY --chown=root:root   build/install/sbk   /opt/sbk
 
-WORKDIR /home/sbk
+WORKDIR /opt/sbk
 
 ENV APP_NAME=sbk
 
-ENTRYPOINT ["/home/sbk/bin/sbk"]
+ENTRYPOINT ["/opt/sbk/bin/sbk"]
 
