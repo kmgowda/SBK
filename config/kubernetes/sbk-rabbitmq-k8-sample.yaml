@@ -1,0 +1,32 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: sbk-rabbitmq-k8
+spec:
+  parallelism: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: sbk-rabbitmq
+          # SBK Image.
+          image: kmgowda/sbk:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: "2"
+              memory: "1Gi"
+            requests:
+              cpu: "1"
+              memory: "1Gi"
+          args: [
+            "-class","rabbitmq",
+            "-broker","192.168.0.192",    # IP address of the Rabbit MQ broker
+            "-topic","kmg-topic-1",
+            "-writers","1",
+            "-readers","1",
+            "-size","10"
+          ]
+          env:
+            - name: JAVA_OPTS
+              value: "-Xmx1g -Xms1g"
