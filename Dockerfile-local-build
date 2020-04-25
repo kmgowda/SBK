@@ -1,0 +1,27 @@
+##
+# Copyright (c) KMG. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+##
+
+# Running Container
+
+FROM openjdk:8-jre
+
+USER root
+
+COPY ca-certificates/* /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
+ENV APP_NAME=sbk
+
+# Copy the image to container
+COPY --chown=root:root   build/install/${APP_NAME}   /opt/${APP_NAME}
+
+WORKDIR /opt/${APP_NAME}
+
+ENTRYPOINT ["/opt/sbk/bin/sbk"]
