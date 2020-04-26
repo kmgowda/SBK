@@ -143,7 +143,7 @@ docker run  -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk:latest -class  rabbitmq  -br
 * Note that the option **-p 127.0.0.1:8080:8080/tcp** redirects the 8080 port to local port for fetch the performance metric data for Prometheus.  
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
-#### [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/kmg-kubernetes-2/config/kubernetes) 
+#### [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/config/kubernetes) 
 
 
 ## SBK Execution Modes
