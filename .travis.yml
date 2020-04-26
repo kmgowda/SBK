@@ -24,12 +24,6 @@ sudo: required
 services:
   - docker
 
-cache:
-  directories:
-    - ".gradle"
-    - "$HOME/.gradle"
-    - "$HOME/.m2"
-
 notifications:
   email:
     - keshava.gowda@gmail.com
