@@ -58,8 +58,10 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
                     @Override
                     public void failed(Throwable exc, ByteBuffer attachment) {
+                        /*
                         System.out.println("AsyncFileReader read failed");
                         exc.printStackTrace();
+                         */
                     }
                 });
         pos += dType.length(buffer);
@@ -80,8 +82,10 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
                     @Override
                     public void failed(Throwable exc, ByteBuffer attachment) {
+                        /*
                         System.out.println("AsyncFileReader read failed");
                         exc.printStackTrace();
+                        */
                     }
                 });
         pos += dType.length(buffer);
