@@ -32,6 +32,7 @@ COPY --chown=root:root driver-hdfs ${APP_HOME}/driver-hdfs
 COPY --chown=root:root driver-bookkeeper ${APP_HOME}/driver-bookkeeper
 COPY --chown=root:root driver-concurrentq ${APP_HOME}/driver-concurrentq
 COPY --chown=root:root driver-file ${APP_HOME}/driver-file
+COPY --chown=root:root driver-asyncfile ${APP_HOME}/driver-asyncfile
 COPY --chown=root:root driver-kafka ${APP_HOME}/driver-kafka
 COPY --chown=root:root driver-pravega ${APP_HOME}/driver-pravega
 COPY --chown=root:root driver-rabbitmq ${APP_HOME}/driver-rabbitmq
