@@ -58,7 +58,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
                     @Override
                     public void failed(Throwable exc, ByteBuffer attachment) {
-                        System.out.println("AsyncFileWriter Write failed");
+                        System.out.println("AsyncFileReader read failed");
                         exc.printStackTrace();
                     }
                 });
