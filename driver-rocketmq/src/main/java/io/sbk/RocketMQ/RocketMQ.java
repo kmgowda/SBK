@@ -12,7 +12,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
-import io.sbk.api.AsyncReader;
+import io.sbk.api.CallbackReader;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
@@ -136,9 +136,9 @@ public class RocketMQ implements Storage<byte[]> {
     }
 
     @Override
-    public AsyncReader createAsyncReader(final int id, final Parameters params) {
+    public CallbackReader createCallbackReader(final int id, final Parameters params) {
         try {
-            return new RocketMQAsyncReader(id, params, namesAdr, topicName, rmqClientConfig, subscriptionName);
+            return new RocketMQCallbackReader(id, params, namesAdr, topicName, rmqClientConfig, subscriptionName);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
