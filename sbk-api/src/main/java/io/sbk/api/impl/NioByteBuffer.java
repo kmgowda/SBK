@@ -41,6 +41,7 @@ public class NioByteBuffer implements DataType<ByteBuffer> {
         for (int i = 0; i < size; ++i) {
             buffer.put((byte) (random.nextInt(26) + 65));
         }
+        buffer.flip();
         return buffer;
     }
 

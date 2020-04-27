@@ -22,4 +22,5 @@ include 'driver-template'
 include 'driver-rabbitmq'
 include 'driver-rocketmq'
 include 'driver-hdfs'
+include 'driver-asyncfile'
 
