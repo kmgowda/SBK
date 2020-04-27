@@ -52,10 +52,6 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
 
             @Override
             public void failed(Throwable exc, ByteBuffer attachment) {
-                /*
-                System.out.println("AsyncFileWriter Write failed");
-                exc.printStackTrace();
-                */
             }
         });
         pos += data.capacity();
