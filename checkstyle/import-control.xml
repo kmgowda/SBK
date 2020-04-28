@@ -50,5 +50,6 @@
     <allow pkg="io.micrometer" />
     <allow pkg="com.sun" />
     <allow pkg="com.rabbitmq" />
+    <allow pkg="io.nats" />
 
 </import-control>

@@ -45,7 +45,7 @@ public class NatsCallbackReader  implements CallbackReader<byte[]> {
 
     @Override
     public void start(Callback callback) throws IOException {
-        consumer = cn.createDispatcher((msg) -> {
+        consumer = cn.createDispatcher(msg -> {
              callback.consume(msg.getData());
         });
         consumer.subscribe(topic, subscriptionName);
