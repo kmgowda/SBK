@@ -9,9 +9,9 @@
  */
 package io.sbk.RabbitMQ;
 
-import io.sbk.api.AsyncReader;
+import io.sbk.api.CallbackReader;
 import io.sbk.api.Parameters;
-import io.sbk.api.ReaderCallback;
+import io.sbk.api.Callback;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -29,14 +29,14 @@ import com.rabbitmq.client.Envelope;
 /**
  * Class for RabbitMQ Async Reader.
  */
-public class RabbitMQAsyncReader extends DefaultConsumer implements AsyncReader<byte[]> {
+public class RabbitMQCallbackReader extends DefaultConsumer implements CallbackReader<byte[]> {
     final private Channel channel;
     final private Parameters params;
     final private String queueName;
-    private ReaderCallback callback;
+    private Callback callback;
 
-    public RabbitMQAsyncReader(int readerId, Parameters params, Connection connection, String topicName,
-                          String queueName) throws IOException {
+    public RabbitMQCallbackReader(int readerId, Parameters params, Connection connection, String topicName,
+                                  String queueName) throws IOException {
         super(connection.createChannel());
         this.params = params;
         this.queueName = queueName;
@@ -55,7 +55,7 @@ public class RabbitMQAsyncReader extends DefaultConsumer implements AsyncReader<
     }
 
     @Override
-    public void start(ReaderCallback callback) throws IOException {
+    public void start(Callback callback) throws IOException {
         this.callback = callback;
         channel.basicConsume(queueName, true, this);
     }

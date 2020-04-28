@@ -15,7 +15,14 @@ package io.sbk.api;
 public interface DataType<T> {
 
     /**
-     * Create the data.
+     * allocate the data.
+     * @param size size (number of bytes) of the data to create.
+     * @return T return the data.
+     */
+    T allocate(int size);
+
+    /**
+     * Create the data with payload content.
      * @param size size (number of bytes) of the data to create.
      * @return T return the data.
      */

@@ -9,9 +9,9 @@
  */
 package io.sbk.RocketMQ;
 
-import io.sbk.api.AsyncReader;
+import io.sbk.api.CallbackReader;
 import io.sbk.api.Parameters;
-import io.sbk.api.ReaderCallback;
+import io.sbk.api.Callback;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
@@ -23,12 +23,12 @@ import java.io.IOException;
 /**
  * Class for Asynchronous RocketMQ Reader.
  */
-public class RocketMQAsyncReader implements AsyncReader<byte[]> {
+public class RocketMQCallbackReader implements CallbackReader<byte[]> {
     final private DefaultMQPushConsumer rmqConsumer;
     final private Parameters params;
 
-    public RocketMQAsyncReader(int readerId, Parameters params, String namesAdr, String topicName,
-                          RocketMQClientConfig config, String subscriptionName ) throws IOException {
+    public RocketMQCallbackReader(int readerId, Parameters params, String namesAdr, String topicName,
+                                  RocketMQClientConfig config, String subscriptionName ) throws IOException {
         this.params = params;
         rmqConsumer = new DefaultMQPushConsumer(subscriptionName);
         rmqConsumer.setNamesrvAddr(namesAdr);
@@ -45,7 +45,7 @@ public class RocketMQAsyncReader implements AsyncReader<byte[]> {
       }
 
     @Override
-    public void start(ReaderCallback callback) throws IOException {
+    public void start(Callback callback) throws IOException {
         try {
             rmqConsumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
                 for (MessageExt message : msgs) {

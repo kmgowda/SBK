@@ -13,20 +13,20 @@ import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
-import io.sbk.api.ReaderCallback;
+import io.sbk.api.Callback;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class SbkAsyncReader extends Worker implements ReaderCallback, Benchmark {
+public class SbkCallback extends Worker implements Callback, Benchmark {
     final private DataType dataType;
     final private CompletableFuture<Void> ret;
-    final private ReaderCallback callback;
+    final private Callback callback;
     final private AtomicLong readCnt;
     private long beginTime;
 
-    public SbkAsyncReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
+    public SbkCallback(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
         super(readerId, idMax, params, recordTime);
         this.dataType = dataType;
         this.ret = new CompletableFuture();

@@ -12,14 +12,14 @@ package io.sbk.api;
 
 import java.io.IOException;
 
-public interface AsyncReader<T> {
+public interface CallbackReader<T> {
 
     /**
      * set the callback and start the AsyncReader.
      * @param callback Reader callback.
      * @throws IOException If an exception occurred.
      */
-    void start(ReaderCallback callback) throws IOException;
+    void start(Callback callback) throws IOException;
 
     /**
      * Close the AsyncReader.

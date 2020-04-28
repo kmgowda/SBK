@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-public interface ReaderCallback {
+public interface Callback {
 
     /**
      * Consume the data.

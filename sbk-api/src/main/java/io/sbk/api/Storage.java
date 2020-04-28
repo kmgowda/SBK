@@ -77,7 +77,7 @@ public interface Storage<T> {
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Reader return the Async Reader , null in case of failure
      */
-    default AsyncReader<T> createAsyncReader(final int id, final Parameters params)  {
+    default CallbackReader<T> createCallbackReader(final int id, final Parameters params)  {
         return null;
     }
 
