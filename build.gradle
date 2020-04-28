@@ -76,6 +76,7 @@ dependencies {
 	compile project(":driver-pulsar")
 	compile project(":driver-kafka")
 	compile project(":driver-pravega")
+	compile project(":driver-nats")
 }
 
 buildscript {
