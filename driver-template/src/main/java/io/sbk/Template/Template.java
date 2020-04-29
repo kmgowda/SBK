@@ -21,7 +21,7 @@ import java.io.IOException;
 public class Template implements Storage<byte[]> {
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
 
     }
 

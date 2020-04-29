@@ -22,8 +22,9 @@ public interface Storage<T> {
     /**
      * Add the driver specific command line arguments.
      * @param params Parameters object to be extended.
+     * @throws IllegalArgumentException If an exception occurred.
      */
-    void addArgs(final Parameters params);
+    void addArgs(final Parameters params) throws IllegalArgumentException;
 
     /**
      * Parse the driver specific command line arguments.

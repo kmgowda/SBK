@@ -43,7 +43,7 @@ public class Pulsar implements Storage<byte[]> {
 
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("cluster", true, "Cluster name (optional parameter)");
         params.addOption("topic", true, "Topic name");
         params.addOption("broker", true, "Broker URI");

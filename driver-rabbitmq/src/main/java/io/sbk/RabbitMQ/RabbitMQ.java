@@ -34,7 +34,7 @@ public class RabbitMQ implements Storage<byte[]> {
     private String password;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("topic", true, "Topic name");
         params.addOption("broker", true, "Broker URI");
         params.addOption("persist", true, "keep messages persistent");

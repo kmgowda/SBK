@@ -24,7 +24,7 @@ public class ConcurrentQ implements Storage<byte[]> {
     private ConcurrentLinkedQueue<byte[]> queue;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
     }
 
     @Override

@@ -41,7 +41,7 @@ public class BookKeeper implements Storage<byte[]> {
     private int ackQuorum;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
         params.addOption("ensembleSize", true, "EnsembleSize (default value is in "+CONFIGFILE+" )");

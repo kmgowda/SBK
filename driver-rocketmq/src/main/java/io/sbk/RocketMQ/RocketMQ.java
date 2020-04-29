@@ -50,7 +50,7 @@ public class RocketMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("cluster", true, "Cluster name default: "+DEFAULT_CLUSTER);
         params.addOption("topic", true, "Topic name");
         params.addOption("nameserver", true, "Name Server URI");

@@ -7,7 +7,10 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.Nats;
+package io.sbk.NatsStream;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.CallbackReader;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
@@ -15,42 +18,51 @@ import io.sbk.api.Writer;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
-import io.nats.client.Options;
+import io.nats.streaming.Options.Builder;
 
 
 /**
- * Class for Nats.
+ * Class for Nats Streaming.
  */
-public class Nats implements Storage<byte[]> {
+public class NatsStream implements Storage<byte[]> {
+    private final static String CONFIGFILE = "natsstream.properties";
     private String topicName;
-    private String uri;
-    private Options options;
+    private NatsStreamClientConfig config;
+    private Builder optsBuilder;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        try {
+            config = mapper.readValue(NatsStream.class.getClassLoader().getResourceAsStream(CONFIGFILE),
+                    NatsStreamClientConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+
         params.addOption("topic", true, "Topic name");
-        params.addOption("uri", true, "Server URI");
+        params.addOption("uri", true, "Server URI, default uri: "+config.uri);
+        params.addOption("cluster", true, "Cluster ID, default id: " + config.clusterName);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         topicName =  params.getOptionValue("topic", null);
-        uri = params.getOptionValue("uri", null);
-        if (uri == null) {
-            throw new IllegalArgumentException("Error: Must specify Nats server IP address");
-        }
-
         if (topicName == null) {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
-        if (params.getReadersCount() < 1 || params.getWritersCount() < 1) {
-            throw new IllegalArgumentException("Specify both Writer or readers for NATS Server");
-        }
+        config.uri = params.getOptionValue("uri", config.uri);
+        config.clusterName = params.getOptionValue("cluster", config.clusterName);
     }
 
     @Override
     public void openStorage(final Parameters params) throws  IOException {
-        options = new Options.Builder().server(uri).maxReconnects(5).build();
+        optsBuilder =  new Builder();
+        optsBuilder.natsUrl(config.uri);
+        optsBuilder.maxPubAcksInFlight(config.maxPubAcksInFlight);
     }
 
     @Override
@@ -60,7 +72,7 @@ public class Nats implements Storage<byte[]> {
     @Override
     public Writer createWriter(final int id, final Parameters params) {
         try {
-            return new NatsWriter(id, params, topicName, options);
+            return new NatsStreamWriter(id, params, topicName, config, optsBuilder);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -75,7 +87,8 @@ public class Nats implements Storage<byte[]> {
     @Override
     public CallbackReader createCallbackReader(final int id, final Parameters params) {
         try {
-            return new NatsCallbackReader(id, params, topicName, topicName + "-" + id, options);
+            return new NatsStreamCallbackReader(id, params, topicName, topicName + "-" + id,
+                    config, optsBuilder);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
