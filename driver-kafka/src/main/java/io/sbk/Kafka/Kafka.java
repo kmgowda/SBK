@@ -39,7 +39,7 @@ public class Kafka implements Storage<byte[]> {
     private KafkaTopicHandler topicHandler;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("broker", true, "Broker URI");
         params.addOption("topic", true, "Topic name");
         params.addOption("partitions", true, "partitions");

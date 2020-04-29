@@ -32,7 +32,7 @@ public class HDFS implements Storage<byte[]> {
     private boolean recreate;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("fs", true, "File System Type, default: "+ FSTYPE);
         params.addOption("file", true, "File name");
         params.addOption("uri", true, "URI");

@@ -26,7 +26,7 @@ public class AsyncFile implements Storage<ByteBuffer> {
     private String fileName;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("file", true, "File name");
     }
 

@@ -23,7 +23,7 @@ public class File implements Storage<byte[]> {
     private String fileName;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("file", true, "File name");
     }
 

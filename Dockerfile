@@ -39,6 +39,7 @@ COPY --chown=root:root driver-rabbitmq ${APP_HOME}/driver-rabbitmq
 COPY --chown=root:root driver-rocketmq ${APP_HOME}/driver-rocketmq
 COPY --chown=root:root driver-pulsar ${APP_HOME}/driver-pulsar
 COPY --chown=root:root driver-nats ${APP_HOME}/driver-nats
+COPY --chown=root:root driver-natsStream ${APP_HOME}/driver-natsStream
 
 ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  build --no-daemon --info --stacktrace

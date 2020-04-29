@@ -42,7 +42,7 @@ public class Pravega implements Storage<byte[]> {
     private ReaderGroup readerGroup;
 
     @Override
-    public void addArgs(final Parameters params) {
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
         params.addOption("scope", true, "Scope name");
         params.addOption("stream", true, "Stream name");
         params.addOption("controller", true, "Controller URI");
