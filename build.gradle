@@ -79,6 +79,7 @@ dependencies {
 	compile project(":driver-nats")
 	compile project(':driver-natsStream')
 	compile project(':driver-artemis')
+	compile project(':driver-nsq')
 }
 
 buildscript {
