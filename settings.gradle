@@ -25,4 +25,5 @@ include 'driver-hdfs'
 include 'driver-asyncfile'
 include 'driver-nats'
 include 'driver-natsStream'
+include 'driver-artemis'
 
