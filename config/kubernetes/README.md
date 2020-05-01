@@ -47,4 +47,4 @@ kubectl run nginx  --image=kmgowda/sbk:latest -- -class  rabbitmq  -broker 192.1
 
 eventhough -time 60 is specified, the kubectl system always reruns the sbk image.
 
-to pass the command line arguments to SBK image , **--** prefix is used before **-class** argument.
+to pass the command line arguments to SBK image , **"--"** prefix is used before **-class** argument.
