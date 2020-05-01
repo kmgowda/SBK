@@ -37,3 +37,14 @@ kubectl proxy
 kubectl -n kube-system describe secret default
 ```
 This command displays the token which is generally a larger size string, copy it and use it for authenction of step 6. link: http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
+
+
+## SBK docker image with Kuberenetes and command line arguments
+you can directly run the SBK image with command line arguments , below is an example
+```
+kubectl run nginx  --image=kmgowda/sbk:latest -- -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -time 60
+```
+
+eventhough -time 60 is specified, the kubectl system always reruns the sbk image.
+
+to pass the command line arguments to SBK image , **--** prefix is used before **-class** argument.
