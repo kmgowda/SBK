@@ -17,6 +17,7 @@ import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.util.IOUtils;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
 import io.sbk.api.Benchmark;
@@ -49,6 +50,7 @@ import java.util.stream.Collectors;
  */
 public class SbkMain {
     final static String CONFIGFILE = "sbk.properties";
+    final static String BANNERFILE = "banner.txt";
 
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
@@ -64,6 +66,9 @@ public class SbkMain {
         Config config = null;
         CompletableFuture<Void> ret = null;
 
+        SbkLogger.log.info(IOUtils.toString(SbkMain.class.getClassLoader().getResourceAsStream(BANNERFILE)));
+        SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
+
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -75,7 +80,6 @@ public class SbkMain {
             System.exit(0);
         }
 
-        SbkLogger.log.info(config.NAME.toUpperCase() +" version: "+version);
         try {
             commandline = new DefaultParser().parse(new Options()
                             .addOption("class", true, "Benchmark Class"),
