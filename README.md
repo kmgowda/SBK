@@ -83,7 +83,6 @@ usage: sbk
                      if 0 , writes 'records'
                      if -1, get the maximum throughput
  -time <arg>         Number of seconds this SBK runs (24hrs by default)
- -version            Version
  -writers <arg>      Number of writers
 ```
 
@@ -410,7 +409,6 @@ usage: sbk -class Pulsar
                         if -1, get the maximum throughput
  -time <arg>            Number of seconds this SBK runs (24hrs by default)
  -topic <arg>           Topic name
- -version               Version
  -writeQuorum <arg>     WriteQuorum (default: 1)
  -writers <arg>         Number of writers
 ```
