@@ -142,11 +142,6 @@ public interface Parameters {
     void printHelp();
 
     /**
-     * Print the -version output.
-     */
-    void printVersion();
-
-    /**
      * Parse the command line arguments.
      * @param args list of command line arguments.
      * @throws IllegalArgumentException If an exception occurred.

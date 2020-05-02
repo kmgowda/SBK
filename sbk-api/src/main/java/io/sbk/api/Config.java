@@ -11,6 +11,9 @@
 package io.sbk.api;
 
 public class Config {
+    final public static String NAME = "sbk";
+    final public static String DESC = "Storage Benchmark Kit";
+
     final public static int NS_PER_MICRO = 1000;
     final public static int MICROS_PER_MS = 1000;
     final public static int MS_PER_SEC = 1000;
@@ -23,8 +26,6 @@ public class Config {
     final public static int DEFAULT_WINDOW_LATENCY = MS_PER_MIN;
     final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 15;
 
-    public String name;
-    public String description;
     public String packageName;
     public boolean fork;
     public int reportingMS;
