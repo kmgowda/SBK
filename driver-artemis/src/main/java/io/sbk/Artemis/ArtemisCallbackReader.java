@@ -12,6 +12,7 @@ package io.sbk.Artemis;
 import io.sbk.api.CallbackReader;
 import io.sbk.api.Parameters;
 import io.sbk.api.Callback;
+import io.sbk.api.impl.SbkLogger;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
 import org.apache.activemq.artemis.api.core.ActiveMQQueueExistsException;
 import org.apache.activemq.artemis.api.core.RoutingType;
@@ -56,7 +57,7 @@ public class ArtemisCallbackReader  implements CallbackReader<byte[]> {
                 try {
                     message.acknowledge();
                 } catch (ActiveMQException e) {
-                    System.out.println("ArtemisCallbackReader : Message acknowledge failed");
+                    SbkLogger.log.error("ArtemisCallbackReader : Message acknowledge failed");
                 }
             });
         } catch (ActiveMQException ex) {

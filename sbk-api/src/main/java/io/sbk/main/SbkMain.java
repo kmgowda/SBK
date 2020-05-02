@@ -28,6 +28,7 @@ import io.sbk.api.Storage;
 import io.sbk.api.impl.MetricImpl;
 import io.sbk.api.impl.MetricsLogger;
 import io.sbk.api.impl.SbkBenchmark;
+import io.sbk.api.impl.SbkLogger;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SystemResultLogger;
 import org.apache.commons.cli.CommandLine;
@@ -106,7 +107,7 @@ public class SbkMain {
         }
         final String name = searchDriver(driversList, className);
         if (name == null) {
-            System.out.printf("storage driver : %s not found in the SBK, run with -help to see the supported drivers\n", className);
+            SbkLogger.log.error("storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers");
             System.exit(0);
         }
         try {
@@ -118,7 +119,7 @@ public class SbkMain {
 
         final Storage storage = obj;
         if (storage == null) {
-            System.out.println("Failure to create Benchmark object");
+            SbkLogger.log.error("Failure to create Benchmark object");
             System.exit(0);
         }
         params = new SbkParameters(config.name, config.description, version, name, driversList,  startTime);

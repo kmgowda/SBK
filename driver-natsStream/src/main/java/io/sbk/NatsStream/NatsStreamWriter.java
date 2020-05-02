@@ -19,6 +19,7 @@ import io.nats.streaming.Options.Builder;
 import io.nats.streaming.AckHandler;
 import io.nats.streaming.NatsStreaming;
 import io.nats.streaming.StreamingConnection;
+import io.sbk.api.impl.SbkLogger;
 
 /**
  * Class for NATS Stream Writer.
@@ -44,7 +45,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
         final String[] guid = new String[1];
         final AckHandler acb = (s, e) -> {
             if ((e != null) || !guid[0].equals(s)) {
-                System.out.println("NAT Streaming Writer failed !");
+                SbkLogger.log.error("NAT Streaming Writer failed !");
             } else {
                 final long endTime = System.currentTimeMillis();
                 record.accept(id, time, endTime, size, 1);
