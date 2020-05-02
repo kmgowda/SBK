@@ -17,6 +17,7 @@ import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.util.IOUtils;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
 import io.sbk.api.Benchmark;
@@ -28,6 +29,7 @@ import io.sbk.api.Storage;
 import io.sbk.api.impl.MetricImpl;
 import io.sbk.api.impl.MetricsLogger;
 import io.sbk.api.impl.SbkBenchmark;
+import io.sbk.api.impl.SbkLogger;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SystemResultLogger;
 import org.apache.commons.cli.CommandLine;
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
  */
 public class SbkMain {
     final static String CONFIGFILE = "sbk.properties";
+    final static String BANNERFILE = "banner.txt";
 
     public static void main(final String[] args) {
         long startTime = System.currentTimeMillis();
@@ -63,6 +66,9 @@ public class SbkMain {
         Config config = null;
         CompletableFuture<Void> ret = null;
 
+        SbkLogger.log.info(IOUtils.toString(SbkMain.class.getClassLoader().getResourceAsStream(BANNERFILE)));
+        SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
+
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -71,19 +77,6 @@ public class SbkMain {
                     Config.class);
         } catch (Exception ex) {
             ex.printStackTrace();
-            System.exit(0);
-        }
-
-        try {
-            commandline = new DefaultParser().parse(new Options()
-                    .addOption("version", false, "Version"),
-                    args, true);
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-            System.exit(0);
-        }
-        if (commandline.hasOption("version")) {
-            System.out.println(config.description + ", " + config.name + " version: " + version);
             System.exit(0);
         }
 
@@ -99,14 +92,14 @@ public class SbkMain {
         driversList =  getClassNames(config.packageName);
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            Parameters paramsHelp = new SbkParameters(config.name, config.description, version, "", driversList,  startTime);
+            Parameters paramsHelp = new SbkParameters(config.NAME, config.DESC, "", driversList,  startTime);
             metric.addArgs(paramsHelp);
             paramsHelp.printHelp();
             System.exit(0);
         }
         final String name = searchDriver(driversList, className);
         if (name == null) {
-            System.out.printf("storage driver : %s not found in the SBK, run with -help to see the supported drivers\n", className);
+            SbkLogger.log.error("storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers");
             System.exit(0);
         }
         try {
@@ -118,10 +111,10 @@ public class SbkMain {
 
         final Storage storage = obj;
         if (storage == null) {
-            System.out.println("Failure to create Benchmark object");
+            SbkLogger.log.error("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new SbkParameters(config.name, config.description, version, name, driversList,  startTime);
+        params = new SbkParameters(config.NAME, config.DESC, name, driversList,  startTime);
         storage.addArgs(params);
         metric.addArgs(params);
         try {
@@ -129,9 +122,6 @@ public class SbkMain {
         }  catch (ParseException | IllegalArgumentException ex) {
             ex.printStackTrace();
             params.printHelp();
-            System.exit(0);
-        }
-        if (params.hasOption("version")) {
             System.exit(0);
         }
         if (params.hasOption("help")) {
@@ -160,7 +150,7 @@ public class SbkMain {
             metricsLogger = logger;
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-            final String prefix = config.name.toUpperCase() + "_" + name + "_" + action + "_";
+            final String prefix = config.NAME.toUpperCase() + "_" + name + "_" + action + "_";
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
             metricsLogger = new MetricsLogger(

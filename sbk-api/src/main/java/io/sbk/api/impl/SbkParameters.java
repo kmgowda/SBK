@@ -29,7 +29,6 @@ final public class SbkParameters implements Parameters {
     final private String benchmarkName;
     final private String className;
     final private String desc;
-    final private String version;
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
@@ -65,14 +64,13 @@ final public class SbkParameters implements Parameters {
     private double throughput;
     private CommandLine commandline;
 
-    public SbkParameters(String name, String desc, String version, String className, List<String> driversList, long startTime) {
+    public SbkParameters(String name, String desc, String className, List<String> driversList, long startTime) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
         this.desc = desc;
         this.className = className;
-        this.version = version;
         this.timeout = TIMEOUT;
         this.driversList = driversList;
         this.startTime = startTime;
@@ -94,7 +92,6 @@ final public class SbkParameters implements Parameters {
                         "if 0 , writes 'records'\n" +
                         "if -1, get the maximum throughput");
         options.addOption("help", false, "Help message");
-        options.addOption("version", false, "Version");
     }
 
     @Override
@@ -115,12 +112,6 @@ final public class SbkParameters implements Parameters {
             formatter.printHelp(benchmarkName, options);
         }
     }
-
-    @Override
-    public void printVersion() {
-        System.out.println(desc + ", " + benchmarkName +" version: " + version);
-    }
-
 
     @Override
     public boolean hasOption(String name) {
@@ -156,11 +147,6 @@ final public class SbkParameters implements Parameters {
             printHelp();
             return;
         }
-        if (commandline.hasOption("version")) {
-            printVersion();
-            return;
-        }
-
         writersCount = Integer.parseInt(commandline.getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(commandline.getOptionValue("readers", "0"));
 
