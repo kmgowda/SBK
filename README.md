@@ -63,7 +63,7 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 Running SBK locally:
 
 ```
-./build/distributions/sbk/bin/sbk -help
+<SBK directory>/./build/distributions/sbk/bin/sbk -help
 usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
