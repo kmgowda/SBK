@@ -25,6 +25,7 @@ Currently SBK supports benchmarking of
 10. [ActiveMQ Artemis](https://activemq.apache.org/components/artemis)
 11. [NATS Distributed Messaging](https://nats.io)
 12. [NATS Streaming Storage](https://nats.io/blog/introducing-nats-streaming)
+13. [NSQ](https://nsq.io)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
