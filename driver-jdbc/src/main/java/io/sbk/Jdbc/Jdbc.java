@@ -19,7 +19,6 @@ import io.sbk.api.impl.StringHandler;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -104,17 +103,21 @@ public class Jdbc implements Storage<String> {
             Statement st = conn.createStatement();
             if (params.getWritersCount() > 0) {
                 if (config.reCreate) {
+                    SbkLogger.log.info("Deleting the Table: "+tableName);
                     final String query = "DROP TABLE " + tableName;
                     st.execute(query);
                     conn.commit();
                 }
                 if (!tableExist(conn, tableName)) {
+                    SbkLogger.log.info("Creating the Table: "+tableName);
                     final String query = "CREATE TABLE " + tableName +
                             "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
                             ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
                     SbkLogger.log.info("query :" + query);
                     st.execute(query);
                     conn.commit();
+                } else {
+                    SbkLogger.log.info("The Table: "+ tableName +"already exists");
                 }
                 conn.close();
             }
