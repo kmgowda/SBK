@@ -27,4 +27,5 @@ include 'driver-nats'
 include 'driver-natsStream'
 include 'driver-artemis'
 include 'driver-nsq'
+include 'driver-jdbc'
 

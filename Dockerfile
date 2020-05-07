@@ -42,6 +42,8 @@ COPY --chown=root:root driver-nats ${APP_HOME}/driver-nats
 COPY --chown=root:root driver-natsStream ${APP_HOME}/driver-natsStream
 COPY --chown=root:root driver-artemis ${APP_HOME}/driver-artemis
 COPY --chown=root:root driver-nsq ${APP_HOME}/driver-nsq
+COPY --chown=root:root driver-jdbc ${APP_HOME}/driver-jdbc
+
 
 ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  build --no-daemon --info --stacktrace
