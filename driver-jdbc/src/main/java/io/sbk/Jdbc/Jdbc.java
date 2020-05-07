@@ -117,7 +117,7 @@ public class Jdbc implements Storage<String> {
                     st.execute(query);
                     conn.commit();
                 } else {
-                    SbkLogger.log.info("The Table: "+ tableName +"already exists");
+                    SbkLogger.log.info("The Table: "+ tableName +" already exists");
                 }
                 conn.close();
             }
