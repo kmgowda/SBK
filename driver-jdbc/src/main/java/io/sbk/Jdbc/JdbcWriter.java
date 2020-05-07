@@ -60,6 +60,7 @@ public class JdbcWriter implements Writer<String> {
         final long time = System.currentTimeMillis();
         final String query = "INSERT INTO " + tableName + " (DATA) VALUES ('" + data + "')";
         try {
+            SbkLogger.log.info("JDBC Write data: "+data);
             st.executeUpdate(query);
         } catch (SQLException ex) {
             SbkLogger.log.error("JDBC: recordWrite failed !");
@@ -74,7 +75,9 @@ public class JdbcWriter implements Writer<String> {
     public CompletableFuture writeAsync(String data) throws IOException {
         final String query = "INSERT INTO " + tableName + " (DATA) VALUES ('" + data + "')";
         try {
+            SbkLogger.log.info("JDBC Write data: "+data);
             st.executeUpdate(query);
+            flush();
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
