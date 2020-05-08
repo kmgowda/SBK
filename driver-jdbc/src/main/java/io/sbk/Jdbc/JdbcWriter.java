@@ -56,14 +56,14 @@ public class JdbcWriter implements Writer<String> {
     }
 
     @Override
-    public long recordWrite(String data, int size, RecordTime record, int id) {
+    public long recordWrite(String data, int size, RecordTime record, int id) throws IOException {
         final long time = System.currentTimeMillis();
         final String query = "INSERT INTO " + tableName + " (DATA) VALUES ('" + data + "')";
         try {
             st.executeUpdate(query);
         } catch (SQLException ex) {
             SbkLogger.log.error("JDBC: recordWrite failed !");
-            ex.printStackTrace();
+            throw  new IOException(ex);
         }
         record.accept(id, time, System.currentTimeMillis(), size, 1);
         return time;

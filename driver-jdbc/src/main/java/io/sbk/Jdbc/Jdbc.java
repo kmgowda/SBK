@@ -62,6 +62,9 @@ public class Jdbc implements Storage<String> {
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
+        if (params.getWritersCount() > 0 && params.getReadersCount() > 0) {
+            throw new IllegalArgumentException("Error: JDBC: Specify either writers or readers, both are not allowed");
+        }
         tableName =  params.getOptionValue("table", null);
         if (tableName == null) {
             throw new IllegalArgumentException("Error: Must specify Table Name");
@@ -102,22 +105,25 @@ public class Jdbc implements Storage<String> {
             }
             Statement st = conn.createStatement();
             if (params.getWritersCount() > 0) {
-                if (config.reCreate) {
-                    SbkLogger.log.info("Deleting the Table: "+tableName);
-                    final String query = "DROP TABLE " + tableName;
-                    st.execute(query);
-                    conn.commit();
+                boolean isTableExists = tableExist(conn, tableName);
+                if (isTableExists) {
+                    SbkLogger.log.info("The Table: " + tableName + " already exists");
+                    if (config.reCreate) {
+                        SbkLogger.log.info("Deleting the Table: "+tableName);
+                        final String query = "DROP TABLE " + tableName;
+                        st.execute(query);
+                        conn.commit();
+                        isTableExists = false;
+                    }
                 }
-                if (!tableExist(conn, tableName)) {
-                    SbkLogger.log.info("Creating the Table: "+tableName);
+                if (!isTableExists) {
+                    SbkLogger.log.info("Creating the Table: " + tableName);
                     final String query = "CREATE TABLE " + tableName +
                             "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
                             ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
                     SbkLogger.log.info("query :" + query);
                     st.execute(query);
                     conn.commit();
-                } else {
-                    SbkLogger.log.info("The Table: "+ tableName +" already exists");
                 }
                 conn.close();
             }
