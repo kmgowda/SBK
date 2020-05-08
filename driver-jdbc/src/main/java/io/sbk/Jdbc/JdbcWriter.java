@@ -48,6 +48,7 @@ public class JdbcWriter implements Writer<String> {
             } else {
                 conn = DriverManager.getConnection(config.url, props);
             }
+            conn.setAutoCommit(config.autoCommit);
             st = conn.createStatement();
 
         } catch (SQLException ex) {
@@ -84,7 +85,9 @@ public class JdbcWriter implements Writer<String> {
     @Override
     public void flush() throws IOException {
         try {
-            conn.commit();
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }

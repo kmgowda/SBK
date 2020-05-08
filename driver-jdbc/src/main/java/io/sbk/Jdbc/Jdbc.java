@@ -19,6 +19,7 @@ import io.sbk.api.impl.StringHandler;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
  * Class for Jdbc.
  */
 public class Jdbc implements Storage<String> {
+    private final static String DERBY_NAME = "derby";
     private final static String CONFIGFILE = "jdbc.properties";
     private String tableName;
     private JdbcConfig config;
@@ -50,7 +52,7 @@ public class Jdbc implements Storage<String> {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("table", true, "table name");
+        params.addOption("table", true, "table name ");
         params.addOption("driver", true, "Database driver, default Driver: "+config.driver);
         params.addOption("url", true, "Database url, default url: "+config.url);
         params.addOption("user", true, "User Name, default User name: "+config.user);
@@ -69,7 +71,6 @@ public class Jdbc implements Storage<String> {
         if (tableName == null) {
             throw new IllegalArgumentException("Error: Must specify Table Name");
         }
-        tableName = tableName.toUpperCase();
         config.driver = params.getOptionValue("driver", config.driver);
         config.url = params.getOptionValue("url", config.url);
         config.user = params.getOptionValue("user", config.user);
@@ -83,8 +84,11 @@ public class Jdbc implements Storage<String> {
             Class.forName(config.driver);
         } catch (ClassNotFoundException ex) {
             SbkLogger.log.error("The JDBC Driver: "+ config.driver+" not found");
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
+        final Connection conn;
+        final Statement st;
+        final String driverType;
         final Properties props = new Properties();
         if (params.getWritersCount() > 0) {
             props.put("create", "true");
@@ -97,50 +101,91 @@ public class Jdbc implements Storage<String> {
             props.put("password", config.password);
         }
         try {
-            final Connection conn;
             if (props.isEmpty()) {
                 conn = DriverManager.getConnection(config.url);
             } else {
                 conn = DriverManager.getConnection(config.url, props);
             }
-            Statement st = conn.createStatement();
-            if (params.getWritersCount() > 0) {
-                boolean isTableExists = tableExist(conn, tableName);
-                if (isTableExists) {
-                    SbkLogger.log.info("The Table: " + tableName + " already exists");
-                    if (config.reCreate) {
-                        SbkLogger.log.info("Deleting the Table: "+tableName);
-                        final String query = "DROP TABLE " + tableName;
-                        st.execute(query);
-                        conn.commit();
-                        isTableExists = false;
-                    }
-                }
-                if (!isTableExists) {
-                    SbkLogger.log.info("Creating the Table: " + tableName);
-                    final String query = "CREATE TABLE " + tableName +
-                            "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
-                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-                    SbkLogger.log.info("query :" + query);
-                    st.execute(query);
-                    conn.commit();
-                }
-                conn.close();
-            }
+            conn.setAutoCommit(config.autoCommit);
+            driverType = getDriverType(config.url);
+            final DatabaseMetaData dbmd = conn.getMetaData();
+
+            SbkLogger.log.info("JDBC Driver Type: " + driverType);
+            SbkLogger.log.info("JDBC Driver Name: " + dbmd.getDriverName());
+            SbkLogger.log.info("JDBC Driver Version: " + dbmd.getDriverVersion());
+            st = conn.createStatement();
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
+        if (params.getWritersCount() > 0) {
+
+            try {
+                if (tableExist(conn, tableName)) {
+                    SbkLogger.log.info("The Table: " + tableName + " already exists");
+                }
+            } catch (SQLException ex) {
+                SbkLogger.log.error(ex.getMessage());
+            }
+
+            if (config.reCreate) {
+                SbkLogger.log.info("Deleting the Table: "+tableName);
+                final String query = "DROP TABLE " + tableName;
+                try {
+                    st.execute(query);
+                    if (!conn.getAutoCommit()) {
+                        conn.commit();
+                    }
+                } catch (SQLException ex) {
+                    SbkLogger.log.info(ex.getMessage());
+                }
+            }
+
+            try {
+                SbkLogger.log.info("Creating the Table: " + tableName);
+                final String query;
+                if (driverType.equalsIgnoreCase(DERBY_NAME)) {
+                    query = "CREATE TABLE " + tableName +
+                            "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
+                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+                } else {
+                    query = "CREATE TABLE " + tableName +
+                            "(ID BIGINT PRIMARY KEY AUTO_INCREMENT" +
+                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+                }
+                st.execute(query);
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            } catch ( SQLException ex) {
+                SbkLogger.log.info(ex.getMessage());
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    SbkLogger.log.error(e.getMessage());
+                }
+            }
+            try {
+                conn.close();
+            } catch ( SQLException ex) {
+                throw  new IOException(ex);
+            }
+        }
     }
 
-    private boolean tableExist(Connection conn, String tableName) throws SQLException {
+
+    public String getDriverType(String url) {
+        String[] st = url.split(":");
+        return st[1];
+    }
+
+    public boolean tableExist(Connection conn, String tableName) throws SQLException {
         boolean tExists = false;
-        try (ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null)) {
-            while (rs.next()) {
-                String tName = rs.getString("TABLE_NAME");
-                if (tName != null && tName.equals(tableName)) {
-                    tExists = true;
-                    break;
-                }
+        ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
+        while (rs.next()) {
+            String tName = rs.getString("TABLE_NAME");
+            if (tName != null && tName.equalsIgnoreCase(tableName)) {
+                tExists = true;
+                break;
             }
         }
         return tExists;
@@ -149,7 +194,6 @@ public class Jdbc implements Storage<String> {
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
-
     }
 
     @Override
