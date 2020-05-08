@@ -68,7 +68,6 @@ public class JdbcReader implements Reader<String> {
         } else {
             try {
                 if (res.next()) {
-                    SbkLogger.log.info("JDBC Read: "+res.getLong(1)+" :"+res.getString(2));
                     return res.getString(2);
                 }
             } catch ( SQLException ex) {
