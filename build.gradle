@@ -80,6 +80,7 @@ dependencies {
 	compile project(':driver-natsStream')
 	compile project(':driver-artemis')
 	compile project(':driver-nsq')
+	compile project(':driver-jdbc')
 }
 
 buildscript {
