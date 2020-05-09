@@ -54,6 +54,9 @@ An Example data base read command is as follows:
  ./build/install/sbk/bin/sbk -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://localhost:3306/social -user root -password root  -table kmg_2 -size 100 -readers 1 -time 60
 ``` 
 
-
+The MySQL database write benchmarking example using SBK docker images is
+```
+docker run  -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk:latest -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://192.168.0.192:3306/social -user root -password root  -table kmg_2 -size 100 -writers 1 -time 60
+```
 
  
