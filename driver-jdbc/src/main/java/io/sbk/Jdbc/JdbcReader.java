@@ -28,6 +28,7 @@ public class JdbcReader implements Reader<String> {
     final private String tableName;
     final private Connection conn;
     final private Statement st;
+    final private String readQuery;
     private ResultSet res;
 
     public JdbcReader(int id, Parameters params, String tableName, JdbcConfig config) throws IOException {
@@ -51,17 +52,17 @@ public class JdbcReader implements Reader<String> {
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
+        readQuery = "SELECT * from "+ this.tableName;
         res = null;
     }
 
     @Override
     public String read() {
         if (res == null) {
-            final String query = "SELECT * from "+ tableName;
             try {
-                res = st.executeQuery(query);
+                res = st.executeQuery(readQuery);
             } catch (SQLException ex) {
-                SbkLogger.log.error("JDBC:JdbcReader "+query+" failed");
+                SbkLogger.log.error("JDBC:JdbcReader "+readQuery+" failed");
                 ex.printStackTrace();
                 res = null;
             }
