@@ -113,7 +113,7 @@ public class SbkBenchmark implements Benchmark {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
         storage.openStorage(params);
-        final DataType data = storage.getDataType();
+        final DataType dType = storage.getDataType();
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
         final List<SbkCallback> sbkCallbackReaders;
@@ -142,12 +142,12 @@ public class SbkBenchmark implements Benchmark {
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.get(), data, writers.get(i)))
+                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.get(), dType, writers.get(i)))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, null, data, writers.get(i)))
+                        .map(i -> new SbkWriter(i, maxQs, params, null, dType, writers.get(i)))
                         .collect(Collectors.toList());
             }
         } else {
@@ -157,13 +157,13 @@ public class SbkBenchmark implements Benchmark {
         if (readers != null && readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i, maxQs, params, readStats.get(), data, readers.get(i)))
+                    .map(i -> new SbkReader(i, maxQs, params, readStats.get(), dType, readers.get(i)))
                     .collect(Collectors.toList());
             sbkCallbackReaders = null;
         } else if (callbackReaders != null && callbackReaders.size() > 0) {
             sbkCallbackReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkCallback(i, maxQs, params, readStats.get(), data))
+                    .map(i -> new SbkCallback(i, maxQs, params, readStats.get(), dType))
                     .collect(Collectors.toList());
             sbkReaders = null;
         } else {

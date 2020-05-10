@@ -23,13 +23,13 @@ import java.io.IOException;
  */
 public class SbkReader extends Worker implements Runnable {
     final private static int MS_PER_SEC = 1000;
-    final private DataType data;
+    final private DataType dType;
     final private Reader reader;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType data, Reader reader) {
+    public SbkReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dType, Reader reader) {
         super(readerId, idMax, params, recordTime);
-        this.data = data;
+        this.dType = dType;
         this.reader = reader;
         this.perf = createBenchmark();
     }
@@ -58,7 +58,7 @@ public class SbkReader extends Worker implements Runnable {
         try {
             int i = 0, id = workerID % idMax;
             while (i < params.getRecordsPerReader()) {
-                reader.recordRead(data, status, recordTime, id++);
+                reader.recordRead(dType, status, recordTime, id++);
                 i += status.records;
                 if (id >= idMax) {
                     id = 0;
@@ -75,7 +75,7 @@ public class SbkReader extends Worker implements Runnable {
         try {
             int i = 0, id = workerID % idMax;
             while (i < params.getRecordsPerReader()) {
-                reader.recordReadTime(data, status, recordTime, id++);
+                reader.recordReadTime(dType, status, recordTime, id++);
                 i += status.records;
                 if (id >= idMax) {
                     id = 0;
@@ -94,7 +94,7 @@ public class SbkReader extends Worker implements Runnable {
         int id = workerID % idMax;
         try {
             while ((status.endTime - startTime) < msToRun) {
-                reader.recordRead(data, status, recordTime, id++);
+                reader.recordRead(dType, status, recordTime, id++);
                 if (id >= idMax) {
                     id = 0;
                 }
@@ -111,7 +111,7 @@ public class SbkReader extends Worker implements Runnable {
         int id = workerID % idMax;
         try {
             while ((status.endTime - startTime) < msToRun) {
-                reader.recordReadTime(data, status, recordTime, id++);
+                reader.recordReadTime(dType, status, recordTime, id++);
                 if (id >= idMax) {
                     id = 0;
                 }
