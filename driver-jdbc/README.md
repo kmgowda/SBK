@@ -59,4 +59,16 @@ The MySQL database write benchmarking example using SBK docker images is
 docker run  -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk:latest -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://192.168.0.192:3306/social -user root -password root  -table kmg_2 -size 100 -writers 1 -time 60
 ```
 
- 
+## JDBC with PostgreSQL
+The SBK with JDBC is tested with PostgreSQL server. Visit this page : https://www.postgresql.org to download and know about the Postgress.
+you can run the PostgreSQL docker image as follows.
+```
+docker run  -p 127.0.0.1:5432:5432/tcp  --name kmg-postgres -e POSTGRES_USER=root -e POSTGRES_PASSWORD=root -d postgres
+```
+An example command to run the SBK benchmarking is
+```
+./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:5432/postgres -user root -password root  -table kmg_1 -size 100 -writers 1 -time 60
+```
+Make sure that user name and passwords are same while running the postgreSQL server and SBK benchmarking.
+generally **'postgres'** is the name of the database available by default.
+

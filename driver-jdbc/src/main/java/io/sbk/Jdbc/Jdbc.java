@@ -35,6 +35,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
  */
 public class Jdbc implements Storage<String> {
     private final static String DERBY_NAME = "derby";
+    private final static String POSTGRESQL_NAME = "postgresql";
     private final static String CONFIGFILE = "jdbc.properties";
     private String tableName;
     private JdbcConfig config;
@@ -137,13 +138,18 @@ public class Jdbc implements Storage<String> {
                     }
                 } catch (SQLException ex) {
                     SbkLogger.log.info(ex.getMessage());
+                    try {
+                        conn.rollback();
+                    } catch (SQLException e) {
+                        SbkLogger.log.error(e.getMessage());
+                    }
                 }
             }
 
             try {
                 SbkLogger.log.info("Creating the Table: " + tableName);
                 final String query;
-                if (driverType.equalsIgnoreCase(DERBY_NAME)) {
+                if (driverType.equalsIgnoreCase(DERBY_NAME) || driverType.equalsIgnoreCase(POSTGRESQL_NAME)) {
                     query = "CREATE TABLE " + tableName +
                             "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
                             ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
