@@ -41,9 +41,9 @@ public interface Reader<T> {
      * @param  id   Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
-    default void recordRead(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    default void recordRead(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
         status.startTime = System.currentTimeMillis();
-        final Object ret = read();
+        final T ret = read();
         if (ret == null) {
             status.records = 0;
             status.endTime = status.startTime;
@@ -67,8 +67,8 @@ public interface Reader<T> {
      * @param  id   Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
-    default void recordReadTime(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
-        final Object ret = read();
+    default void recordReadTime(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+        final T ret = read();
         if (ret == null) {
             status.endTime = System.currentTimeMillis();
             status.records = 0;

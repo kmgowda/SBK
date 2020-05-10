@@ -24,7 +24,7 @@ public interface Writer<T>  {
      * @return CompletableFuture completable future. null if the write completed synchronously .
      * @throws IOException If an exception occurred.
      */
-    CompletableFuture<Void> writeAsync(T data) throws IOException;
+    CompletableFuture<Object> writeAsync(T data) throws IOException;
 
     /**
      * Flush the  data.
@@ -53,7 +53,7 @@ public interface Writer<T>  {
      * @throws IOException If an exception occurred.
      */
     default long recordWrite(T data, int size, RecordTime recordTime, int id) throws IOException {
-        CompletableFuture<Void> ret;
+        CompletableFuture<Object> ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         if (ret == null) {
@@ -79,9 +79,9 @@ public interface Writer<T>  {
      * @return time return the data sent time
      * @throws IOException If an exception occurred.
      */
-    default  long writeAsyncTime(DataType dType, T data) throws IOException {
+    default  long writeAsyncTime(DataType<T> dType, T data) throws IOException {
         final long time = System.currentTimeMillis();
-        writeAsync((T) dType.setTime(data, time));
+        writeAsync(dType.setTime(data, time));
         return time;
     }
 }
