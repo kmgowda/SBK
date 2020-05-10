@@ -141,8 +141,7 @@ public class SbkWriter extends Worker implements Runnable {
         while (cnt < recordsCount) {
             int loopMax = Math.min(params.getRecordsPerFlush(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
-                time = System.currentTimeMillis();
-                writer.writeAsync(data.setTime(payload, time));
+                time = writer.writeAsyncTime(data, payload);
                 eCnt.control(cnt++, time);
             }
             writer.flush();
@@ -159,8 +158,7 @@ public class SbkWriter extends Worker implements Runnable {
         int cnt = 0;
         while (msElapsed < msToRun) {
             for (int i = 0; (msElapsed < msToRun) && (i < params.getRecordsPerFlush()); i++) {
-                time = System.currentTimeMillis();
-                writer.writeAsync(data.setTime(payload, time));
+                time = writer.writeAsyncTime(data, payload);
                 eCnt.control(cnt++, time);
                 msElapsed = time - startTime;
             }

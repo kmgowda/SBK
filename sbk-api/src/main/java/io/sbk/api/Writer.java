@@ -22,9 +22,9 @@ public interface Writer<T>  {
      * Asynchronously Writes the data .
      * @param data data to write
      * @return CompletableFuture completable future. null if the write completed synchronously .
-     * @throws IOException If an exception occurred
+     * @throws IOException If an exception occurred.
      */
-    CompletableFuture writeAsync(T data) throws IOException;
+    CompletableFuture<Void> writeAsync(T data) throws IOException;
 
     /**
      * Flush the  data.
@@ -43,6 +43,7 @@ public interface Writer<T>  {
      * and recording the benchmark statistics.
      * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * then you can override this method. otherwise, use the default implementation and don't override this method.
+     * If you are intend to use your own payload, then also you can use override this method.
      *
      * @param data   data to write
      * @param size  size of the data
@@ -52,7 +53,7 @@ public interface Writer<T>  {
      * @throws IOException If an exception occurred.
      */
     default long recordWrite(T data, int size, RecordTime recordTime, int id) throws IOException {
-        CompletableFuture ret;
+        CompletableFuture<Void> ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         if (ret == null) {
@@ -64,6 +65,23 @@ public interface Writer<T>  {
                 recordTime.accept(id, time, endTime, size, 1);
             });
         }
+        return time;
+    }
+
+    /**
+     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)})} with time
+     * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
+     * then you can override this method. otherwise, use the default implementation and don't override this method.
+     * If you are intend to use your own payload, then also you can use override this method.
+     *
+     * @param dType   Data Type interface
+     * @param data  data to writer
+     * @return time return the data sent time
+     * @throws IOException If an exception occurred.
+     */
+    default  long writeAsyncTime(DataType dType, T data) throws IOException {
+        final long time = System.currentTimeMillis();
+        writeAsync((T) dType.setTime(data, time));
         return time;
     }
 }
