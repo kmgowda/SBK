@@ -67,7 +67,7 @@ public class Nsq implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new NsqWriter(id, params, topicName, config);
         } catch (IOException ex) {
@@ -77,12 +77,12 @@ public class Nsq implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         return null;
     }
 
     @Override
-    public CallbackReader createCallbackReader(final int id, final Parameters params) {
+    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
             return new NsqCallbackReader(id, params, topicName,
                     topicName + "-" + id, config);

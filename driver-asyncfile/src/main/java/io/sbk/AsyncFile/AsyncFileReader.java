@@ -45,9 +45,9 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordRead(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    public void recordRead(DataType<ByteBuffer> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
         final long time = System.currentTimeMillis();
-        final ByteBuffer buffer = (ByteBuffer) dType.allocate(params.getRecordSize());
+        final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
                     @Override
@@ -65,8 +65,8 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordReadTime(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
-        final ByteBuffer buffer = (ByteBuffer) dType.allocate(params.getRecordSize());
+    public void recordReadTime(DataType<ByteBuffer> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+        final ByteBuffer buffer =  dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
 

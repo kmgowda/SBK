@@ -203,7 +203,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<String> createWriter(final int id, final Parameters params) {
         try {
            return new JdbcWriter(id, params, tableName, config);
         } catch (IOException ex) {
@@ -213,7 +213,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<String> createReader(final int id, final Parameters params) {
         try {
             return  new JdbcReader(id, params, tableName, config);
         } catch (IOException ex) {

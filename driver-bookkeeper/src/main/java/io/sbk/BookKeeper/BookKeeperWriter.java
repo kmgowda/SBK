@@ -9,6 +9,7 @@
  */
 package io.sbk.BookKeeper;
 import io.sbk.api.Writer;
+import org.apache.distributedlog.DLSN;
 import org.apache.distributedlog.LogRecord;
 import org.apache.distributedlog.api.AsyncLogWriter;
 import org.apache.distributedlog.api.DistributedLogManager;
@@ -24,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 public class BookKeeperWriter implements Writer<byte[]> {
     private final AsyncLogWriter writer;
     private final TimeSequencer sequencer;
-    private CompletableFuture ret;
+    private CompletableFuture<DLSN> ret;
 
     public BookKeeperWriter(DistributedLogManager dlm) throws IOException {
         try {
@@ -37,7 +38,7 @@ public class BookKeeperWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<DLSN> writeAsync(byte[] data) throws IOException {
         LogRecord record = new LogRecord(
                 sequencer.nextId(), data);
         ret =  writer.write(record);

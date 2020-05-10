@@ -44,7 +44,7 @@ public class PravegaWriter implements Writer<byte[]> {
      */
     @Override
     public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
-        CompletableFuture ret;
+        CompletableFuture<Void> ret;
         final long time = System.currentTimeMillis();
         ret = writeAsync(data);
         ret.thenAccept(d -> {
@@ -56,7 +56,7 @@ public class PravegaWriter implements Writer<byte[]> {
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<Void> writeAsync(byte[] data) throws IOException {
         return producer.writeEvent(data);
     }
 

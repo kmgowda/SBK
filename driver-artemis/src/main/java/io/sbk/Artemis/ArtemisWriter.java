@@ -55,7 +55,7 @@ public class ArtemisWriter implements Writer<byte[]> {
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<Void> writeAsync(byte[] data) throws IOException {
         ClientMessage msg = session.createMessage(true /* durable */ );
         msg.getBodyBuffer().writeBytes(data);
         try {
