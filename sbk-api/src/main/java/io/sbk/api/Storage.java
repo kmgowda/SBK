@@ -91,7 +91,7 @@ public interface Storage<T> {
      * @return Data Data interface, null in case of failure
      * @throws IllegalArgumentException if data type is other than byte[]
      */
-    default DataType getDataType() throws IllegalArgumentException {
+    default DataType<?> getDataType() throws IllegalArgumentException {
         final TypeToken<T> typeToken = new TypeToken<T>(getClass()) { };
         final Type type = typeToken.getComponentType().getType();
         if (type.getTypeName().equals("byte")) {

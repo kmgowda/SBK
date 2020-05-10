@@ -76,7 +76,7 @@ public class AsyncFile implements Storage<ByteBuffer> {
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType<ByteBuffer> getDataType() {
         return new NioByteBuffer();
     }
 }

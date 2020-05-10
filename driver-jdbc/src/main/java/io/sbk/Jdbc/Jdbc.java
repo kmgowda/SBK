@@ -223,7 +223,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType<String> getDataType() {
         return new StringHandler();
     }
 }
