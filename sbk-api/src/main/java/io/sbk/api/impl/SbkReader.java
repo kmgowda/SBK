@@ -43,7 +43,7 @@ public class SbkReader extends Worker implements Runnable {
         }
     }
 
-    final private RunBenchmark createBenchmark() {
+    private RunBenchmark createBenchmark() {
         final RunBenchmark perfReader;
         if (params.getSecondsToRun() > 0) {
             perfReader = params.isWriteAndRead() ? this::RecordsTimeReaderRW : this::RecordsTimeReader;
@@ -53,7 +53,7 @@ public class SbkReader extends Worker implements Runnable {
         return perfReader;
     }
 
-    final public void RecordsReader() throws IOException {
+    private void RecordsReader() throws IOException {
        final TimeStamp status = new TimeStamp();
         try {
             int i = 0, id = workerID % idMax;
@@ -70,7 +70,7 @@ public class SbkReader extends Worker implements Runnable {
     }
 
 
-    final public void RecordsReaderRW() throws IOException {
+    private void RecordsReaderRW() throws IOException {
         final TimeStamp status = new TimeStamp();
         try {
             int i = 0, id = workerID % idMax;
@@ -87,7 +87,7 @@ public class SbkReader extends Worker implements Runnable {
     }
 
 
-    final public void RecordsTimeReader() throws IOException {
+    private void RecordsTimeReader() throws IOException {
         final TimeStamp status = new TimeStamp();
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
@@ -104,7 +104,7 @@ public class SbkReader extends Worker implements Runnable {
         }
     }
 
-    final public void RecordsTimeReaderRW() throws IOException {
+    private void RecordsTimeReaderRW() throws IOException {
         final TimeStamp status = new TimeStamp();
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;

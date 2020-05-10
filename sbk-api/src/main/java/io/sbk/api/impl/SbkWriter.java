@@ -46,7 +46,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private RunBenchmark createBenchmark() {
+    private RunBenchmark createBenchmark() {
         final RunBenchmark perfWriter;
         if (params.getSecondsToRun() > 0) {
             if (params.isWriteAndRead()) {
@@ -73,7 +73,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriter() throws InterruptedException, IOException {
+    private void RecordsWriter() throws InterruptedException, IOException {
         final int size = data.length(payload);
         for (int i = 0; i < params.getRecordsPerWriter(); i++) {
             writer.recordWrite(payload, size, recordTime, i % idMax);
@@ -82,7 +82,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriterFlush() throws InterruptedException, IOException {
+    private void RecordsWriterFlush() throws InterruptedException, IOException {
         final RateController eCnt = new RateController(System.currentTimeMillis(), params.getRecordsPerSec());
         final int recordsCount = params.getRecordsPerWriter();
         final int size = data.length(payload);
@@ -97,7 +97,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriterTime() throws InterruptedException, IOException {
+    private void RecordsWriterTime() throws InterruptedException, IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         final int size = data.length(payload);
@@ -114,7 +114,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriterTimeFlush() throws InterruptedException, IOException {
+    private void RecordsWriterTimeFlush() throws InterruptedException, IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         final int size = data.length(payload);
@@ -133,7 +133,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriterRW() throws InterruptedException, IOException {
+    private void RecordsWriterRW() throws InterruptedException, IOException {
         final RateController eCnt = new RateController(System.currentTimeMillis(), params.getRecordsPerSec());
         final int recordsCount = params.getRecordsPerWriter();
         int cnt = 0;
@@ -149,7 +149,7 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    final private void RecordsWriterTimeRW() throws InterruptedException, IOException {
+    private void RecordsWriterTimeRW() throws InterruptedException, IOException {
         final long startTime = params.getStartTime();
         final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
         long time = System.currentTimeMillis();
