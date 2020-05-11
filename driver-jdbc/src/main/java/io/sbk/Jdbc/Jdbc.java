@@ -149,9 +149,13 @@ public class Jdbc implements Storage<String> {
             try {
                 SbkLogger.log.info("Creating the Table: " + tableName);
                 final String query;
-                if (driverType.equalsIgnoreCase(DERBY_NAME) || driverType.equalsIgnoreCase(POSTGRESQL_NAME)) {
+                if (driverType.equalsIgnoreCase(DERBY_NAME)) {
                     query = "CREATE TABLE " + tableName +
                             "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
+                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+                } else if (driverType.equalsIgnoreCase(POSTGRESQL_NAME)) {
+                    query = "CREATE TABLE " + tableName +
+                            "(ID BIGSERIAL PRIMARY KEY" +
                             ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
                 } else {
                     query = "CREATE TABLE " + tableName +
