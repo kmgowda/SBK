@@ -101,3 +101,83 @@ An example,
 fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --sync=1 --thread --nrfiles=1
 ```
 
+The SBK can be used with buffered writes and reads. An example command of buffered write without -flush option is as follows.
+```
+./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 100000
+```
+
+output for 100GB buffered file write is as follows
+```
+[root@mdw SBK]# ./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 100000
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
+2020-05-12 06:51:13 INFO
+       _____   ____    _   __
+      / ____| |  _ \  | | / /
+     | (___   | |_) | | |/ /
+      \___ \  |  _ <  |   <
+      ____) | | |_) | | |\ \
+     |_____/  |____/  |_| \_\
+
+2020-05-12 06:51:13 INFO SBK version: 0.75
+2020-05-12 06:51:13 INFO Reflections took 63 ms to scan 16 urls, producing 22 keys and 79 values
+Writing       7150 records,    1429.4 records/sec,  1429.43 MB/sec,      0.7 ms avg latency,       4 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       4 ms 99.99th.
+Writing       7434 records,    1486.2 records/sec,  1486.21 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       2 ms 99.99th.
+Writing       7392 records,    1478.1 records/sec,  1478.10 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       2 ms 99.99th.
+Writing       7272 records,    1454.1 records/sec,  1454.11 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6688 records,    1337.3 records/sec,  1337.33 MB/sec,      0.7 ms avg latency,       3 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       3 ms 99.99th.
+Writing       6730 records,    1344.9 records/sec,  1344.92 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6764 records,    1352.5 records/sec,  1352.53 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6812 records,    1362.1 records/sec,  1362.13 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       7285 records,    1456.7 records/sec,  1456.71 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6703 records,    1340.3 records/sec,  1340.33 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6635 records,    1326.7 records/sec,  1326.73 MB/sec,      0.8 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6717 records,    1343.1 records/sec,  1343.13 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6702 records,    1340.1 records/sec,  1340.13 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing       6754 records,    1350.5 records/sec,  1350.53 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Writing(Total)     100000 records,    1384.9 records/sec,  1384.87 MB/sec,      0.7 ms avg latency,       4 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+```
+
+the fio buffered write with pthreads is as follows
+```
+fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --thread --nrfiles=1
+```
+The output for buffered write without `sync` option for 100GB file as follows
+
+```
+[root@mdw SBK]# fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --thread --nrfiles=1
+write: (g=0): rw=write, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=psync, iodepth=1
+fio-3.1
+Starting 1 thread
+Jobs: 1 (f=1)
+write: (groupid=0, jobs=1): err= 0: pid=239842: Tue May 12 07:11:47 2020
+  write: IOPS=1782, BW=1782MiB/s (1869MB/s)(5120MiB/2873msec)
+    clat (usec): min=430, max=732, avg=450.14, stdev=22.01
+     lat (usec): min=442, max=1548, avg=463.54, stdev=27.37
+    clat percentiles (usec):
+     |  1.00th=[  437],  5.00th=[  441], 10.00th=[  441], 20.00th=[  441],
+     | 30.00th=[  445], 40.00th=[  445], 50.00th=[  445], 60.00th=[  449],
+     | 70.00th=[  449], 80.00th=[  449], 90.00th=[  457], 95.00th=[  465],
+     | 99.00th=[  578], 99.50th=[  586], 99.90th=[  586], 99.95th=[  611],
+     | 99.99th=[  734]
+   bw (  MiB/s): min=   16, max= 2188, per=97.57%, avg=1738.80, stdev=963.26, samples=5
+   iops        : min=   16, max= 2188, avg=1738.80, stdev=963.26, samples=5
+  lat (usec)   : 500=97.13%, 750=2.87%
+  cpu          : usr=2.92%, sys=97.01%, ctx=3, majf=0, minf=803
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwt: total=0,5120,0, short=0,0,0, dropped=0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=1
+
+Run status group 0 (all jobs):
+  WRITE: bw=1782MiB/s (1869MB/s), 1782MiB/s-1782MiB/s (1869MB/s-1869MB/s), io=5120MiB (5369MB), run=2873-2873msec
+
+Disk stats (read/write):
+  sde: ios=0/0, merge=0/0, ticks=0/0, in_queue=0, util=0.00%
+
+```
