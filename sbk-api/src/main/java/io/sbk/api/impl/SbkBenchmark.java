@@ -30,7 +30,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -45,7 +44,6 @@ public class SbkBenchmark implements Benchmark {
     final private Parameters params;
     final private Performance writeStats;
     final private Performance readStats;
-    final private ScheduledExecutorService timeoutExecutor;
     final private int maxQs;
     private List<Writer> writers;
     private List<Reader> readers;
@@ -93,7 +91,6 @@ public class SbkBenchmark implements Benchmark {
         } else {
             readStats = null;
         }
-        timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = null;
     }
 
@@ -195,7 +192,7 @@ public class SbkBenchmark implements Benchmark {
                     .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
         } else if (sbkCallbackReaders != null) {
             readFutures = sbkCallbackReaders.stream()
-                    .map(x -> x.start(startTime, params.getSecondsToRun(), params.getRecordsPerReader())).collect(Collectors.toList());
+                    .map(x -> x.start(startTime, secondsToRun, records)).collect(Collectors.toList());
             for (int i = 0; i < params.getReadersCount(); i++) {
                 callbackReaders.get(i).start(sbkCallbackReaders.get(i));
             }
@@ -212,11 +209,6 @@ public class SbkBenchmark implements Benchmark {
             retFuture = CompletableFuture.allOf(new ArrayList<>(writeFutures).toArray(new CompletableFuture[writeFutures.size()]));
         } else {
             throw new IllegalStateException("No Writers and/or Readers\n");
-        }
-
-        if (params.getSecondsToRun() > 0) {
-            timeoutExecutor.schedule(() -> stop(System.currentTimeMillis()),
-                    params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
         retFuture.thenRun(() -> stop(System.currentTimeMillis()));
         return retFuture;

@@ -149,7 +149,7 @@ final public class SbkPerformance implements Performance {
                 if (notFound) {
                     time = window.idleWaitPrint(time, periodicLogger);
                 }
-                if ((time - startTime) >= msToRun) {
+                if ( msToRun > 0 && (time - startTime) >= msToRun) {
                     doWork = false;
                 }
             }
