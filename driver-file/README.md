@@ -56,42 +56,44 @@ Writing(Total)       5000 records,     502.3 records/sec,   502.26 MB/sec,      
 
 An equivalent command in FIO to sequentially write 5GB of data with 1MB block size to a single file with sync enabled is as follows.
 ```
-fio --name=write --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --nrfiles=1 --sync=1
+fio --name=write --iodepth=1 --rw=write --bs=1048576 --size=10G --numjobs=1  --group_reporting  --nrfiles=1 --sync=1
 ```
 The output is as follows:
 ```
-fio --name=write --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --nrfiles=1 --sync=1
+fio --name=write --iodepth=1 --rw=write --bs=1048576 --size=10G --numjobs=1  --group_reporting  --nrfiles=1 --sync=1
+
 write: (g=0): rw=write, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=psync, iodepth=1
 fio-3.1
 Starting 1 process
-Jobs: 1 (f=1): [W(1)][90.9%][r=0KiB/s,w=542MiB/s][r=0,w=542 IOPS][eta 00m:01s]
-write: (groupid=0, jobs=1): err= 0: pid=157689: Tue May 12 01:53:43 2020
-  write: IOPS=481, BW=482MiB/s (505MB/s)(5120MiB/10624msec)
-    clat (usec): min=789, max=618716, avg=1934.94, stdev=13410.20
-     lat (usec): min=800, max=618738, avg=1960.91, stdev=13410.15
+Jobs: 1 (f=1): [W(1)][100.0%][r=0KiB/s,w=468MiB/s][r=0,w=468 IOPS][eta 00m:00s]
+write: (groupid=0, jobs=1): err= 0: pid=242719: Tue May 12 08:00:26 2020
+  write: IOPS=465, BW=465MiB/s (488MB/s)(10.0GiB/22014msec)
+    clat (usec): min=790, max=654069, avg=2009.05, stdev=13176.78
+     lat (usec): min=805, max=654089, avg=2036.18, stdev=13176.90
     clat percentiles (usec):
-     |  1.00th=[   807],  5.00th=[   832], 10.00th=[   848], 20.00th=[   881],
-     | 30.00th=[   971], 40.00th=[  1254], 50.00th=[  1565], 60.00th=[  1680],
-     | 70.00th=[  1811], 80.00th=[  1991], 90.00th=[  2868], 95.00th=[  3032],
-     | 99.00th=[  3359], 99.50th=[  3458], 99.90th=[  9634], 99.95th=[434111],
-     | 99.99th=[616563]
-   bw (  KiB/s): min=151552, max=921600, per=100.00%, avg=517734.40, stdev=184686.84, samples=20
-   iops        : min=  148, max=  900, avg=505.60, stdev=180.36, samples=20
-  lat (usec)   : 1000=31.91%
-  lat (msec)   : 2=48.46%, 4=19.28%, 10=0.27%, 100=0.02%, 500=0.02%
-  lat (msec)   : 750=0.04%
-  cpu          : usr=1.56%, sys=41.59%, ctx=15443, majf=0, minf=560
+     |  1.00th=[   807],  5.00th=[   824], 10.00th=[   840], 20.00th=[   889],
+     | 30.00th=[  1106], 40.00th=[  1565], 50.00th=[  1647], 60.00th=[  1795],
+     | 70.00th=[  1893], 80.00th=[  2089], 90.00th=[  2933], 95.00th=[  3097],
+     | 99.00th=[  3392], 99.50th=[  3458], 99.90th=[  9110], 99.95th=[ 71828],
+     | 99.99th=[608175]
+   bw (  KiB/s): min=30720, max=1036288, per=100.00%, avg=511229.49, stdev=204741.38, samples=41
+   iops        : min=   30, max= 1012, avg=499.24, stdev=199.94, samples=41
+  lat (usec)   : 1000=26.24%
+  lat (msec)   : 2=49.95%, 4=23.49%, 10=0.23%, 20=0.03%, 100=0.01%
+  lat (msec)   : 750=0.05%
+  cpu          : usr=1.58%, sys=40.66%, ctx=30721, majf=0, minf=887
   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
-     issued rwt: total=0,5120,0, short=0,0,0, dropped=0,0,0
+     issued rwt: total=0,10240,0, short=0,0,0, dropped=0,0,0
      latency   : target=0, window=0, percentile=100.00%, depth=1
 
 Run status group 0 (all jobs):
-  WRITE: bw=482MiB/s (505MB/s), 482MiB/s-482MiB/s (505MB/s-505MB/s), io=5120MiB (5369MB), run=10624-10624msec
+  WRITE: bw=465MiB/s (488MB/s), 465MiB/s-465MiB/s (488MB/s-488MB/s), io=10.0GiB (10.7GB), run=22014-22014msec
 
 Disk stats (read/write):
-  sde: ios=0/25038, merge=0/1, ticks=0/10498, in_queue=10478, util=60.98%
+  sde: ios=0/50910, merge=0/0, ticks=0/24191, in_queue=24167, util=66.78%
+
 ```
 
 With FIO, you can change the io engines too. Typically, io engine `psync` with `thread` option is equivalent with SBK.
