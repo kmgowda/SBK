@@ -45,6 +45,7 @@ final public class SbkPerformance implements Performance {
     final private int maxWindowLatency;
     final private int maxLatency;
     final private int maxQs;
+    final private long totalRecords;
     final private ResultLogger periodicLogger;
     final private ResultLogger totalLogger;
     final private ExecutorService executor;
@@ -56,7 +57,7 @@ final public class SbkPerformance implements Performance {
     @GuardedBy("this")
     private CompletableFuture<Void> retFuture;
 
-    public SbkPerformance(String action, Config config, int workers, String csvFile,
+    public SbkPerformance(String action, Config config, int workers, int totalRecords, String csvFile,
                           ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
         this.action = action;
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
@@ -71,6 +72,7 @@ final public class SbkPerformance implements Performance {
         this.totalLogger = totalLogger;
         this.executor = executor;
         this.retFuture = null;
+        this.totalRecords = totalRecords;
         if (config.maxQs > 0) {
             maxQs = config.maxQs;
             this.timeRecorders = new TimeRecorder[1];
@@ -100,6 +102,7 @@ final public class SbkPerformance implements Performance {
             final LatencyWriter latencyRecorder;
             boolean doWork = true;
             long time = startTime;
+            long recordsCnt = 0;
             boolean notFound;
             TimeStamp t;
 
@@ -126,9 +129,14 @@ final public class SbkPerformance implements Performance {
                             doWork = false;
                             break;
                         } else {
+                            recordsCnt += t.records;
                             final int latency = (int) (time - t.startTime);
                             window.record(startTime, t.bytes, t.records, latency);
                             latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
+                            if (totalRecords > 0  && recordsCnt >= totalRecords) {
+                                doWork = false;
+                                break;
+                            }
                         }
                         if (window.elapsedTimeMS(time) > windowInterval) {
                             window.print(time, periodicLogger);

@@ -81,14 +81,14 @@ public class SbkBenchmark implements Benchmark {
             executor = Executors.newFixedThreadPool(threadCount);
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new SbkPerformance(action, config, params.getWritersCount(),
+            writeStats = new SbkPerformance(action, config, params.getWritersCount(), params.getRecordsCount(),
                                        params.getCsvFile(), metricsLogger, logger, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
-            readStats = new SbkPerformance(action, config, params.getReadersCount(),
+            readStats = new SbkPerformance(action, config, params.getReadersCount(), params.getRecordsCount(),
                                     params.getCsvFile(), metricsLogger, logger, executor);
         } else {
             readStats = null;
