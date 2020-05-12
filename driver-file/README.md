@@ -12,8 +12,8 @@ The File system driver for SBK supports single Writer , single reader and multip
 The End to End Latency Performance benchmarking is not supported.
 
 ## File write Benchmarking with SBK and FIO
-The FIO (Flexible I/O tester) supports multiple files writing at a time. where as SBK uses single file for write/read operation.
-Both FIO And SBK can be used with Write operations with buffering and  writes can be with in sync (Sync to file system).
+The FIO (Flexible I/O tester) supports multiple files writing at a time. whereas SBK uses single file for write/read operation.
+Both FIO And SBK can be used with Write operations with buffering and writes can be with in sync (Sync to file system).
 
 An Example SBK command for file write with sync (flush) enabled is as follows
 
@@ -108,7 +108,7 @@ The SBK can be used with buffered writes and reads. An example command of buffer
 
 output for 100GB buffered file write is as follows
 ```
-[root@mdw SBK]# ./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 100000
+./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 100000
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -144,40 +144,42 @@ Writing(Total)     100000 records,    1384.9 records/sec,  1384.87 MB/sec,      
 
 the fio buffered write with pthreads is as follows
 ```
-fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --thread --nrfiles=1
+fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=100G --numjobs=1  --group_reporting  --thread --nrfiles=1
 ```
 The output for buffered write without `sync` option for 100GB file as follows
 
 ```
-[root@mdw SBK]# fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --thread --nrfiles=1
+fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=100G --numjobs=1  --group_reporting  --thread --nrfiles=1
+
 write: (g=0): rw=write, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=psync, iodepth=1
 fio-3.1
 Starting 1 thread
-Jobs: 1 (f=1)
-write: (groupid=0, jobs=1): err= 0: pid=239842: Tue May 12 07:11:47 2020
-  write: IOPS=1782, BW=1782MiB/s (1869MB/s)(5120MiB/2873msec)
-    clat (usec): min=430, max=732, avg=450.14, stdev=22.01
-     lat (usec): min=442, max=1548, avg=463.54, stdev=27.37
+Jobs: 1 (f=1): [W(1)][100.0%][r=0KiB/s,w=1883MiB/s][r=0,w=1882 IOPS][eta 00m:00s]
+write: (groupid=0, jobs=1): err= 0: pid=240475: Tue May 12 07:21:22 2020
+  write: IOPS=1829, BW=1830MiB/s (1919MB/s)(100GiB/55957msec)
+    clat (usec): min=376, max=1279, avg=441.51, stdev=55.54
+     lat (usec): min=389, max=1293, avg=454.53, stdev=55.59
     clat percentiles (usec):
-     |  1.00th=[  437],  5.00th=[  441], 10.00th=[  441], 20.00th=[  441],
-     | 30.00th=[  445], 40.00th=[  445], 50.00th=[  445], 60.00th=[  449],
-     | 70.00th=[  449], 80.00th=[  449], 90.00th=[  457], 95.00th=[  465],
-     | 99.00th=[  578], 99.50th=[  586], 99.90th=[  586], 99.95th=[  611],
-     | 99.99th=[  734]
-   bw (  MiB/s): min=   16, max= 2188, per=97.57%, avg=1738.80, stdev=963.26, samples=5
-   iops        : min=   16, max= 2188, avg=1738.80, stdev=963.26, samples=5
-  lat (usec)   : 500=97.13%, 750=2.87%
-  cpu          : usr=2.92%, sys=97.01%, ctx=3, majf=0, minf=803
+     |  1.00th=[  396],  5.00th=[  400], 10.00th=[  400], 20.00th=[  404],
+     | 30.00th=[  408], 40.00th=[  408], 50.00th=[  412], 60.00th=[  416],
+     | 70.00th=[  486], 80.00th=[  498], 90.00th=[  506], 95.00th=[  515],
+     | 99.00th=[  635], 99.50th=[  660], 99.90th=[  750], 99.95th=[  799],
+     | 99.99th=[  824]
+   bw (  MiB/s): min=  666, max= 2404, per=100.00%, avg=2183.97, stdev=260.34, samples=93
+   iops        : min=  666, max= 2404, avg=2183.94, stdev=260.34, samples=93
+  lat (usec)   : 500=81.15%, 750=18.75%, 1000=0.09%
+  lat (msec)   : 2=0.01%
+  cpu          : usr=2.59%, sys=97.41%, ctx=85, majf=0, minf=1927
   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
-     issued rwt: total=0,5120,0, short=0,0,0, dropped=0,0,0
+     issued rwt: total=0,102400,0, short=0,0,0, dropped=0,0,0
      latency   : target=0, window=0, percentile=100.00%, depth=1
 
 Run status group 0 (all jobs):
-  WRITE: bw=1782MiB/s (1869MB/s), 1782MiB/s-1782MiB/s (1869MB/s-1869MB/s), io=5120MiB (5369MB), run=2873-2873msec
+  WRITE: bw=1830MiB/s (1919MB/s), 1830MiB/s-1830MiB/s (1919MB/s-1919MB/s), io=100GiB (107GB), run=55957-55957msec
 
 Disk stats (read/write):
-  sde: ios=0/0, merge=0/0, ticks=0/0, in_queue=0, util=0.00%
+  sde: ios=0/89881, merge=0/3, ticks=0/5184325, in_queue=5188927, util=65.26%
 
 ```
