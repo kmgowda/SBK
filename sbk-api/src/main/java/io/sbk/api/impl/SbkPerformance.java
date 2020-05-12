@@ -121,14 +121,15 @@ final public class SbkPerformance implements Performance {
                     t = recorder.poll();
                     if (t != null) {
                         notFound = false;
+                        time = t.endTime;
                         if (t.isEnd()) {
                             doWork = false;
+                            break;
                         } else {
-                            final int latency = (int) (t.endTime - t.startTime);
+                            final int latency = (int) (time - t.startTime);
                             window.record(startTime, t.bytes, t.records, latency);
                             latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
                         }
-                        time = t.endTime;
                         if (window.elapsedTimeMS(time) > windowInterval) {
                             window.print(time, periodicLogger);
                             window.reset(time);
