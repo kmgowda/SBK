@@ -10,6 +10,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
+import io.sbk.api.Config;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
@@ -25,6 +26,8 @@ public class SbkCallback extends Worker implements Callback, Benchmark {
     final private Callback callback;
     final private AtomicLong readCnt;
     private long beginTime;
+    private long msToRun;
+    private int totalRecords;
 
     public SbkCallback(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
         super(readerId, idMax, params, recordTime);
@@ -40,8 +43,10 @@ public class SbkCallback extends Worker implements Callback, Benchmark {
     }
 
     @Override
-    public CompletableFuture<Void> start(long statTime, int records) {
+    public CompletableFuture<Void> start(long statTime, int secondsToRun, int records) {
         this.beginTime = statTime;
+        this.msToRun = secondsToRun * Config.MS_PER_SEC;
+        this.totalRecords = records;
         return ret;
     }
 
@@ -56,9 +61,9 @@ public class SbkCallback extends Worker implements Callback, Benchmark {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % idMax);
         recordTime.accept(id, startTime, endTime, dataSize, events);
-        if (params.getSecondsToRun() > 0 && (((endTime - beginTime) / 1000) >= params.getSecondsToRun())) {
+        if (this.msToRun > 0 && ((endTime - beginTime)  >= this.msToRun)) {
             ret.complete(null);
-        } else if (params.getRecordsPerReader() > cnt) {
+        } else if (this.totalRecords > cnt) {
             ret.complete(null);
         }
     }

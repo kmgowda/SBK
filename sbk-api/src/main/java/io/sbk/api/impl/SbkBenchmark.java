@@ -106,13 +106,14 @@ public class SbkBenchmark implements Benchmark {
      * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
      *
      * @param beginTime StartTime
+     * @param secondsToRun Seconds to Run.
      * @param records   Maximum number of records to benchmark.
      * @throws IOException If an exception occurred.
      * @throws IllegalStateException If an exception occurred.
      */
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long beginTime, int records) throws IOException, IllegalStateException {
+    public CompletableFuture<Void> start(long beginTime, int secondsToRun, int records) throws IOException, IllegalStateException {
         if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
@@ -177,10 +178,10 @@ public class SbkBenchmark implements Benchmark {
 
         final long startTime = System.currentTimeMillis();
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
-            writeStats.start(startTime, records);
+            writeStats.start(startTime, secondsToRun, records);
         }
         if (readStats != null && (sbkReaders != null || sbkCallbackReaders != null)) {
-            readStats.start(startTime, records);
+            readStats.start(startTime, secondsToRun, records);
         }
         if (sbkWriters != null) {
             writeFutures = sbkWriters.stream()
@@ -194,7 +195,7 @@ public class SbkBenchmark implements Benchmark {
                     .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
         } else if (sbkCallbackReaders != null) {
             readFutures = sbkCallbackReaders.stream()
-                    .map(x -> x.start(startTime, params.getRecordsPerReader())).collect(Collectors.toList());
+                    .map(x -> x.start(startTime, params.getSecondsToRun(), params.getRecordsPerReader())).collect(Collectors.toList());
             for (int i = 0; i < params.getReadersCount(); i++) {
                 callbackReaders.get(i).start(sbkCallbackReaders.get(i));
             }

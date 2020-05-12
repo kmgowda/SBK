@@ -19,14 +19,13 @@ public interface Benchmark {
      * Start the Benchmark.
      *
      * @param startTime start time.
-     * @param records Maximum number of records to count.
-     *                If this value 0 or less than 0,
-     *                then {@link io.sbk.api.Benchmark#stop(long)} should be called to shutdown the benchmark.
+     * @param  secondsToRun number of seconds to Run
+     * @param records Maximum number of records to count.If this value 0 or less than 0,then runs till secondsToRun.
      * @return CompletableFuture.
      * @throws IllegalStateException If an exception occurred.
      * @throws IOException If an exception occurred.
      */
-    CompletableFuture<Void> start(long startTime, int records) throws IOException, IllegalStateException;
+    CompletableFuture<Void> start(long startTime, int secondsToRun, int records) throws IOException, IllegalStateException;
 
     /**
      * stop/shutdown the Benchmark.

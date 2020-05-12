@@ -90,10 +90,12 @@ final public class SbkPerformance implements Performance {
      */
     final private class QueueProcessor implements Runnable {
         final private long startTime;
+        final private long msToRun;
         final private long totalRecords;
 
-        private QueueProcessor(long startTime, int records) {
+        private QueueProcessor(long startTime, int secondsToRun, int records) {
             this.startTime = startTime;
+            this.msToRun = secondsToRun * Config.MS_PER_SEC;
             this.totalRecords = records;
         }
 
@@ -145,7 +147,10 @@ final public class SbkPerformance implements Performance {
                     }
                 }
                 if (notFound) {
-                    window.idleWaitPrint(periodicLogger);
+                    time = window.idleWaitPrint(time, periodicLogger);
+                }
+                if ((time - startTime) >= msToRun) {
+                    doWork = false;
                 }
             }
             latencyRecorder.print(time, totalLogger);
@@ -336,9 +341,9 @@ final public class SbkPerformance implements Performance {
             this.idleCounter.reset();
         }
 
-        private void waitCheckPrint(ElasticCounter counter, ResultLogger logger) {
+        private long waitCheckPrint(ElasticCounter counter, long time, ResultLogger logger) {
             if (counter.waitCheck()) {
-                final long time = System.currentTimeMillis();
+                time = System.currentTimeMillis();
                 final long diffTime = elapsedTimeMS(time);
                 if (diffTime > windowInterval) {
                     print(time, logger);
@@ -348,10 +353,11 @@ final public class SbkPerformance implements Performance {
                     counter.updateElastic(diffTime);
                 }
             }
+            return time;
         }
 
-        private void idleWaitPrint(ResultLogger logger) {
-                waitCheckPrint(idleCounter, logger);
+        private long  idleWaitPrint(long currentTime, ResultLogger logger) {
+                return waitCheckPrint(idleCounter, currentTime, logger);
         }
     }
 
@@ -459,9 +465,9 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long startTime, int records) {
+    public CompletableFuture<Void> start(long startTime, int secondsToRun, int records) {
         if (this.retFuture == null) {
-            this.retFuture = CompletableFuture.runAsync(new QueueProcessor(startTime, records), executor);
+            this.retFuture = CompletableFuture.runAsync(new QueueProcessor(startTime, secondsToRun, records), executor);
         }
         return this.retFuture;
     }
