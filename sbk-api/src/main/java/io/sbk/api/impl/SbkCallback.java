@@ -40,7 +40,7 @@ public class SbkCallback extends Worker implements Callback, Benchmark {
     }
 
     @Override
-    public CompletableFuture<Void> start(long statTime) {
+    public CompletableFuture<Void> start(long statTime, int records) {
         this.beginTime = statTime;
         return ret;
     }

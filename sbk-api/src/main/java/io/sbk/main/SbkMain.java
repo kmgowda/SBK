@@ -161,7 +161,7 @@ public class SbkMain {
         final Benchmark benchmark = new SbkBenchmark(action, config, params,
                 storage, logger, metricsLogger);
         try {
-            ret = benchmark.start(System.currentTimeMillis());
+            ret = benchmark.start(System.currentTimeMillis(), params.getRecordsCount());
         } catch (IOException ex) {
             ex.printStackTrace();
             System.exit(1);
