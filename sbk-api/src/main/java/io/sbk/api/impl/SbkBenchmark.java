@@ -21,6 +21,7 @@ import io.sbk.api.Storage;
 import io.sbk.api.Writer;
 import lombok.Synchronized;
 
+import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -44,12 +44,13 @@ public class SbkBenchmark implements Benchmark {
     final private Parameters params;
     final private Performance writeStats;
     final private Performance readStats;
-    final private ScheduledExecutorService timeoutExecutor;
     final private int maxQs;
     private List<Writer> writers;
     private List<Reader> readers;
     private List<CallbackReader> callbackReaders;
-    private CompletableFuture<Void> ret;
+
+    @GuardedBy("this")
+    private CompletableFuture<Void> retFuture;
 
     /**
      * Create SBK Benchmark.
@@ -90,8 +91,7 @@ public class SbkBenchmark implements Benchmark {
         } else {
             readStats = null;
         }
-        timeoutExecutor = Executors.newScheduledThreadPool(1);
-        ret = null;
+        retFuture = null;
     }
 
     /**
@@ -103,13 +103,15 @@ public class SbkBenchmark implements Benchmark {
      * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
      *
      * @param beginTime StartTime
+     * @param secondsToRun Seconds to Run.
+     * @param records   Maximum number of records to benchmark.
      * @throws IOException If an exception occurred.
      * @throws IllegalStateException If an exception occurred.
      */
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long beginTime) throws IOException, IllegalStateException {
-        if (ret != null) {
+    public CompletableFuture<Void> start(long beginTime, int secondsToRun, int records) throws IOException, IllegalStateException {
+        if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
         storage.openStorage(params);
@@ -173,10 +175,10 @@ public class SbkBenchmark implements Benchmark {
 
         final long startTime = System.currentTimeMillis();
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
-            writeStats.start(startTime);
+            writeStats.start(startTime, secondsToRun, records);
         }
         if (readStats != null && (sbkReaders != null || sbkCallbackReaders != null)) {
-            readStats.start(startTime);
+            readStats.start(startTime, secondsToRun, records);
         }
         if (sbkWriters != null) {
             writeFutures = sbkWriters.stream()
@@ -190,7 +192,7 @@ public class SbkBenchmark implements Benchmark {
                     .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
         } else if (sbkCallbackReaders != null) {
             readFutures = sbkCallbackReaders.stream()
-                    .map(x -> x.start(startTime)).collect(Collectors.toList());
+                    .map(x -> x.start(startTime, secondsToRun, records)).collect(Collectors.toList());
             for (int i = 0; i < params.getReadersCount(); i++) {
                 callbackReaders.get(i).start(sbkCallbackReaders.get(i));
             }
@@ -199,21 +201,17 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (writeFutures != null && readFutures != null) {
-            ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
+            retFuture = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
                     collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
         } else if (readFutures != null) {
-            ret = CompletableFuture.allOf(new ArrayList<>(readFutures).toArray(new CompletableFuture[readFutures.size()]));
+            retFuture = CompletableFuture.allOf(new ArrayList<>(readFutures).toArray(new CompletableFuture[readFutures.size()]));
         } else if (writeFutures != null) {
-            ret = CompletableFuture.allOf(new ArrayList<>(writeFutures).toArray(new CompletableFuture[writeFutures.size()]));
+            retFuture = CompletableFuture.allOf(new ArrayList<>(writeFutures).toArray(new CompletableFuture[writeFutures.size()]));
         } else {
-            ret = null;
+            throw new IllegalStateException("No Writers and/or Readers\n");
         }
-
-        if (params.getSecondsToRun() > 0) {
-            timeoutExecutor.schedule(() -> stop(System.currentTimeMillis()),
-                    params.getSecondsToRun() + 1, TimeUnit.SECONDS);
-        }
-        return ret;
+        retFuture.thenRun(() -> stop(System.currentTimeMillis()));
+        return retFuture;
     }
 
     /**
@@ -227,6 +225,9 @@ public class SbkBenchmark implements Benchmark {
     @Override
     @Synchronized
     public void stop(long endTime) {
+        if (retFuture == null) {
+            return;
+        }
         if (writeStats != null && !params.isWriteAndRead()) {
             writeStats.stop(endTime);
         }
@@ -271,9 +272,7 @@ public class SbkBenchmark implements Benchmark {
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-        if (ret != null) {
-            ret.complete(null);
-        }
-        ret = null;
+        retFuture.complete(null);
+        retFuture = null;
     }
 }

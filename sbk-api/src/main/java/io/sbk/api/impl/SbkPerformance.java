@@ -54,7 +54,7 @@ final public class SbkPerformance implements Performance {
     private int index;
 
     @GuardedBy("this")
-    private CompletableFuture<Void> ret;
+    private CompletableFuture<Void> retFuture;
 
     public SbkPerformance(String action, Config config, int workers, String csvFile,
                           ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
@@ -70,7 +70,7 @@ final public class SbkPerformance implements Performance {
         this.periodicLogger = periodicLogger;
         this.totalLogger = totalLogger;
         this.executor = executor;
-        this.ret = null;
+        this.retFuture = null;
         if (config.maxQs > 0) {
             maxQs = config.maxQs;
             this.timeRecorders = new TimeRecorder[1];
@@ -90,9 +90,13 @@ final public class SbkPerformance implements Performance {
      */
     final private class QueueProcessor implements Runnable {
         final private long startTime;
+        final private long msToRun;
+        final private long totalRecords;
 
-        private QueueProcessor(long startTime) {
+        private QueueProcessor(long startTime, int secondsToRun, int records) {
             this.startTime = startTime;
+            this.msToRun = secondsToRun * Config.MS_PER_SEC;
+            this.totalRecords = records;
         }
 
         public void run() {
@@ -100,6 +104,7 @@ final public class SbkPerformance implements Performance {
             final LatencyWriter latencyRecorder;
             boolean doWork = true;
             long time = startTime;
+            long recordsCnt = 0;
             boolean notFound;
             TimeStamp t;
 
@@ -121,14 +126,20 @@ final public class SbkPerformance implements Performance {
                     t = recorder.poll();
                     if (t != null) {
                         notFound = false;
+                        time = t.endTime;
                         if (t.isEnd()) {
                             doWork = false;
+                            break;
                         } else {
-                            final int latency = (int) (t.endTime - t.startTime);
+                            recordsCnt += t.records;
+                            final int latency = (int) (time - t.startTime);
                             window.record(startTime, t.bytes, t.records, latency);
                             latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
+                            if (totalRecords > 0  && recordsCnt >= totalRecords) {
+                                doWork = false;
+                                break;
+                            }
                         }
-                        time = t.endTime;
                         if (window.elapsedTimeMS(time) > windowInterval) {
                             window.print(time, periodicLogger);
                             window.reset(time);
@@ -136,10 +147,16 @@ final public class SbkPerformance implements Performance {
                     }
                 }
                 if (notFound) {
-                    window.idleWaitPrint(periodicLogger);
+                    time = window.idleWaitPrint(time, periodicLogger);
+                }
+                if ( msToRun > 0 && (time - startTime) >= msToRun) {
+                    doWork = false;
                 }
             }
             latencyRecorder.print(time, totalLogger);
+            for (TimeRecorder recorder : timeRecorders) {
+                recorder.clear();
+            }
         }
     }
 
@@ -324,9 +341,9 @@ final public class SbkPerformance implements Performance {
             this.idleCounter.reset();
         }
 
-        private void waitCheckPrint(ElasticCounter counter, ResultLogger logger) {
+        private long waitCheckPrint(ElasticCounter counter, long time, ResultLogger logger) {
             if (counter.waitCheck()) {
-                final long time = System.currentTimeMillis();
+                time = System.currentTimeMillis();
                 final long diffTime = elapsedTimeMS(time);
                 if (diffTime > windowInterval) {
                     print(time, logger);
@@ -336,10 +353,11 @@ final public class SbkPerformance implements Performance {
                     counter.updateElastic(diffTime);
                 }
             }
+            return time;
         }
 
-        private void idleWaitPrint(ResultLogger logger) {
-                waitCheckPrint(idleCounter, logger);
+        private long  idleWaitPrint(long currentTime, ResultLogger logger) {
+                return waitCheckPrint(idleCounter, currentTime, logger);
         }
     }
 
@@ -447,29 +465,26 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long startTime) {
-        if (this.ret == null) {
-            this.ret = CompletableFuture.runAsync(new QueueProcessor(startTime), executor);
+    public CompletableFuture<Void> start(long startTime, int secondsToRun, int records) {
+        if (this.retFuture == null) {
+            this.retFuture = CompletableFuture.runAsync(new QueueProcessor(startTime, secondsToRun, records), executor);
         }
-        return this.ret;
+        return this.retFuture;
     }
 
     @Override
     @Synchronized
     public void stop(long endTime)  {
-        if (this.ret != null) {
-            for (TimeRecorder recorder : timeRecorders) {
-                recorder.enqEndTime(endTime);
+        if (this.retFuture != null) {
+            if (!this.retFuture.isDone()) {
+                timeRecorders[0].enqEndTime(endTime);
+                try {
+                    retFuture.get();
+                } catch (ExecutionException | InterruptedException ex) {
+                    ex.printStackTrace();
+                }
             }
-            try {
-                ret.get();
-            } catch (ExecutionException | InterruptedException ex) {
-                ex.printStackTrace();
-            }
-            for (TimeRecorder recorder: timeRecorders) {
-                recorder.clear();
-            }
-            this.ret = null;
+            this.retFuture = null;
         }
     }
 }
