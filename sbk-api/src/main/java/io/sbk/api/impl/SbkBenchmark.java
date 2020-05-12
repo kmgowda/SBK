@@ -21,6 +21,7 @@ import io.sbk.api.Storage;
 import io.sbk.api.Writer;
 import lombok.Synchronized;
 
+import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,9 @@ public class SbkBenchmark implements Benchmark {
     private List<Writer> writers;
     private List<Reader> readers;
     private List<CallbackReader> callbackReaders;
-    private CompletableFuture<Void> ret;
+
+    @GuardedBy("this")
+    private CompletableFuture<Void> retFuture;
 
     /**
      * Create SBK Benchmark.
@@ -91,7 +94,7 @@ public class SbkBenchmark implements Benchmark {
             readStats = null;
         }
         timeoutExecutor = Executors.newScheduledThreadPool(1);
-        ret = null;
+        retFuture = null;
     }
 
     /**
@@ -109,7 +112,7 @@ public class SbkBenchmark implements Benchmark {
     @Override
     @Synchronized
     public CompletableFuture<Void> start(long beginTime) throws IOException, IllegalStateException {
-        if (ret != null) {
+        if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
         storage.openStorage(params);
@@ -199,21 +202,22 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (writeFutures != null && readFutures != null) {
-            ret = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
+            retFuture = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
                     collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
         } else if (readFutures != null) {
-            ret = CompletableFuture.allOf(new ArrayList<>(readFutures).toArray(new CompletableFuture[readFutures.size()]));
+            retFuture = CompletableFuture.allOf(new ArrayList<>(readFutures).toArray(new CompletableFuture[readFutures.size()]));
         } else if (writeFutures != null) {
-            ret = CompletableFuture.allOf(new ArrayList<>(writeFutures).toArray(new CompletableFuture[writeFutures.size()]));
+            retFuture = CompletableFuture.allOf(new ArrayList<>(writeFutures).toArray(new CompletableFuture[writeFutures.size()]));
         } else {
-            ret = null;
+            throw new IllegalStateException("No Writers and/or Readers\n");
         }
 
         if (params.getSecondsToRun() > 0) {
             timeoutExecutor.schedule(() -> stop(System.currentTimeMillis()),
                     params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
-        return ret;
+        retFuture.thenRun(() -> stop(System.currentTimeMillis()));
+        return retFuture;
     }
 
     /**
@@ -227,6 +231,9 @@ public class SbkBenchmark implements Benchmark {
     @Override
     @Synchronized
     public void stop(long endTime) {
+        if (retFuture == null) {
+            return;
+        }
         if (writeStats != null && !params.isWriteAndRead()) {
             writeStats.stop(endTime);
         }
@@ -271,9 +278,7 @@ public class SbkBenchmark implements Benchmark {
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-        if (ret != null) {
-            ret.complete(null);
-        }
-        ret = null;
+        retFuture.complete(null);
+        retFuture = null;
     }
 }

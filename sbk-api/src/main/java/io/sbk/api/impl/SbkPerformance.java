@@ -54,7 +54,7 @@ final public class SbkPerformance implements Performance {
     private int index;
 
     @GuardedBy("this")
-    private CompletableFuture<Void> ret;
+    private CompletableFuture<Void> retFuture;
 
     public SbkPerformance(String action, Config config, int workers, String csvFile,
                           ResultLogger periodicLogger, ResultLogger totalLogger, ExecutorService executor) {
@@ -70,7 +70,7 @@ final public class SbkPerformance implements Performance {
         this.periodicLogger = periodicLogger;
         this.totalLogger = totalLogger;
         this.executor = executor;
-        this.ret = null;
+        this.retFuture = null;
         if (config.maxQs > 0) {
             maxQs = config.maxQs;
             this.timeRecorders = new TimeRecorder[1];
@@ -448,28 +448,28 @@ final public class SbkPerformance implements Performance {
     @Override
     @Synchronized
     public CompletableFuture<Void> start(long startTime) {
-        if (this.ret == null) {
-            this.ret = CompletableFuture.runAsync(new QueueProcessor(startTime), executor);
+        if (this.retFuture == null) {
+            this.retFuture = CompletableFuture.runAsync(new QueueProcessor(startTime), executor);
         }
-        return this.ret;
+        return this.retFuture;
     }
 
     @Override
     @Synchronized
     public void stop(long endTime)  {
-        if (this.ret != null) {
+        if (this.retFuture != null) {
             for (TimeRecorder recorder : timeRecorders) {
                 recorder.enqEndTime(endTime);
             }
             try {
-                ret.get();
+                retFuture.get();
             } catch (ExecutionException | InterruptedException ex) {
                 ex.printStackTrace();
             }
             for (TimeRecorder recorder: timeRecorders) {
                 recorder.clear();
             }
-            this.ret = null;
+            this.retFuture = null;
         }
     }
 }

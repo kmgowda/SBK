@@ -171,11 +171,7 @@ public class SbkMain {
                 benchmark.stop(System.currentTimeMillis());
         }));
         try {
-            if (ret != null) {
-                ret.get();
-            } else {
-                benchmark.stop(System.currentTimeMillis());
-            }
+            ret.get();
         } catch (ExecutionException | InterruptedException ex ) {
             ex.printStackTrace();
         }
