@@ -88,10 +88,10 @@ public interface Storage<T> {
      * If your Benchmark data type is other than byte[] then you need to implement your own Data class.
      * If the data type of your Benchmark, Reader and Writer classes  is byte[] (Byte Array),
      * then use this default implementation as it is.
-     * @return Data Data interface, null in case of failure
+     * @return Data Data interface.
      * @throws IllegalArgumentException if data type is other than byte[]
      */
-    default DataType getDataType() throws IllegalArgumentException {
+    default DataType<?> getDataType() throws IllegalArgumentException {
         final TypeToken<T> typeToken = new TypeToken<T>(getClass()) { };
         final Type type = typeToken.getComponentType().getType();
         if (type.getTypeName().equals("byte")) {

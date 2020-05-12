@@ -95,7 +95,7 @@ public class Artemis implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new ArtemisWriter(id, params, topicName, config, session);
         } catch (IOException ex) {
@@ -105,12 +105,12 @@ public class Artemis implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         return null;
     }
 
     @Override
-    public CallbackReader createCallbackReader(final int id, final Parameters params) {
+    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
             return new ArtemisCallbackReader(id, params, topicName, topicName + "-" + id,
                     config, session);

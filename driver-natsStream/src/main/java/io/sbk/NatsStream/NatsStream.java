@@ -70,7 +70,7 @@ public class NatsStream implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new NatsStreamWriter(id, params, topicName, config, optsBuilder);
         } catch (IOException ex) {
@@ -80,12 +80,12 @@ public class NatsStream implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         return null;
     }
 
     @Override
-    public CallbackReader createCallbackReader(final int id, final Parameters params) {
+    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
             return new NatsStreamCallbackReader(id, params, topicName, topicName + "-" + id,
                     config, optsBuilder);

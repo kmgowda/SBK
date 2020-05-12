@@ -35,6 +35,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
  */
 public class Jdbc implements Storage<String> {
     private final static String DERBY_NAME = "derby";
+    private final static String POSTGRESQL_NAME = "postgresql";
     private final static String CONFIGFILE = "jdbc.properties";
     private String tableName;
     private JdbcConfig config;
@@ -137,6 +138,11 @@ public class Jdbc implements Storage<String> {
                     }
                 } catch (SQLException ex) {
                     SbkLogger.log.info(ex.getMessage());
+                    try {
+                        conn.rollback();
+                    } catch (SQLException e) {
+                        SbkLogger.log.error(e.getMessage());
+                    }
                 }
             }
 
@@ -146,6 +152,10 @@ public class Jdbc implements Storage<String> {
                 if (driverType.equalsIgnoreCase(DERBY_NAME)) {
                     query = "CREATE TABLE " + tableName +
                             "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
+                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+                } else if (driverType.equalsIgnoreCase(POSTGRESQL_NAME)) {
+                    query = "CREATE TABLE " + tableName +
+                            "(ID BIGSERIAL PRIMARY KEY" +
                             ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
                 } else {
                     query = "CREATE TABLE " + tableName +
@@ -197,7 +207,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<String> createWriter(final int id, final Parameters params) {
         try {
            return new JdbcWriter(id, params, tableName, config);
         } catch (IOException ex) {
@@ -207,7 +217,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<String> createReader(final int id, final Parameters params) {
         try {
             return  new JdbcReader(id, params, tableName, config);
         } catch (IOException ex) {
@@ -217,7 +227,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType<String> getDataType() {
         return new StringHandler();
     }
 }

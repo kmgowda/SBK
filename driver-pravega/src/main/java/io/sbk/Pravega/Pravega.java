@@ -119,7 +119,7 @@ public class Pravega implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new PravegaWriter(id, params, streamName, factory);
         } catch (IOException ex) {
@@ -130,7 +130,7 @@ public class Pravega implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new PravegaReader(id, params, streamName, rdGrpName, factory);
         } catch (IOException ex) {
