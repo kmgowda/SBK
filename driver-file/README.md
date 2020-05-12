@@ -18,20 +18,19 @@ Both FIO And SBK can be used with Write operations with buffering and writes can
 An Example SBK command for file write with sync (flush) enabled is as follows
 
 ```
- ./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 5000 -flush 1
+./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
 ```
-In the above example, the file size of 5GB (Giga Bytes) are written with 1048576 (1MB) block/record size.
+In the above example, the file size of 10 GB (Giga Bytes) are written with 1048576 (1MB) block/record size.
 The data is flushed for every block/record (1MB in this example) write.  The output is as follows 
-
 ```
-./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 5000 -flush 1
+./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
 SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
-2020-05-12 01:52:28 INFO
+2020-05-12 08:03:02 INFO
        _____   ____    _   __
       / ____| |  _ \  | | / /
      | (___   | |_) | | |/ /
@@ -39,22 +38,31 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
       ____) | | |_) | | |\ \
      |_____/  |____/  |_| \_\
 
-2020-05-12 01:52:28 INFO SBK version: 0.75
-2020-05-12 01:52:28 INFO Reflections took 61 ms to scan 16 urls, producing 22 keys and 79 values
-Writing        543 records,     104.7 records/sec,   104.73 MB/sec,      0.8 ms avg latency,       4 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       4 ms 99.9th,       4 ms 99.99th.
+2020-05-12 08:03:02 INFO SBK version: 0.75
+2020-05-12 08:03:02 INFO Reflections took 61 ms to scan 16 urls, producing 22 keys and 79 values
+Writing        543 records,     105.3 records/sec,   105.27 MB/sec,      0.7 ms avg latency,       3 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       3 ms 99.9th,       3 ms 99.99th.
+Writing        526 records,     105.1 records/sec,   105.07 MB/sec,      0.5 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.58 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.38 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.38 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.38 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.58 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.56 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.38 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.58 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.36 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.58 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.38 MB/sec,      0.7 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.58 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.38 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.58 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        528 records,     105.6 records/sec,   105.56 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing        527 records,     105.4 records/sec,   105.38 MB/sec,      0.6 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
+Writing(Total)      10000 records,     493.0 records/sec,   492.98 MB/sec,      0.6 ms avg latency,       3 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       3 ms 99.99th.
 
-Writing        524 records,     104.8 records/sec,   104.78 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
-Writing        525 records,     105.0 records/sec,   104.98 MB/sec,      0.7 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
-Writing        525 records,     105.0 records/sec,   104.98 MB/sec,      0.7 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
-Writing        525 records,     105.0 records/sec,   104.96 MB/sec,      0.7 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
-Writing        525 records,     105.0 records/sec,   104.98 MB/sec,      0.7 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
-Writing        525 records,     105.0 records/sec,   104.98 MB/sec,      0.7 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
-Writing        525 records,     105.0 records/sec,   104.96 MB/sec,      0.7 ms avg latency,       2 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
-Writing        525 records,     105.0 records/sec,   104.98 MB/sec,      0.7 ms avg latency,       1 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       1 ms 99.99th.
-Writing(Total)       5000 records,     502.3 records/sec,   502.26 MB/sec,      0.7 ms avg latency,       4 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       0 ms 10th,       0 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 95th,       1 ms 99th,       1 ms 99.9th,       4 ms 99.99th.
 ```
 
-An equivalent command in FIO to sequentially write 5GB of data with 1MB block size to a single file with sync enabled is as follows.
+An equivalent command in FIO to sequentially write 10 GB of data with 1MB block size to a single file with sync enabled is as follows.
 ```
 fio --name=write --iodepth=1 --rw=write --bs=1048576 --size=10G --numjobs=1  --group_reporting  --nrfiles=1 --sync=1
 ```
