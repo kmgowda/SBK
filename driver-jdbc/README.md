@@ -69,6 +69,20 @@ An example command to run the SBK benchmarking is
 ```
 ./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:5432/postgres -user root -password root  -table kmg_1 -size 100 -writers 1 -time 60
 ```
-Make sure that user name and passwords are same while running the postgreSQL server and SBK benchmarking.
+Make sure the user name and passwords are same while running the postgreSQL server and SBK benchmarking.
 generally **'postgres'** is the name of the database available by default.
 
+##JDBC with Microsoft SQL Server
+The SBK with JDBC is tested with Microsoft SQL server. Visit this page : https://www.postgresql.org  to download developer or expression editions of MS SQL.
+you can run the MS SQL docker image as follows.
+
+```
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Kmg@1234' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
+```
+In the above example, the password `Kmg@1234` used for default user name `sa`
+
+An example command to run the SBK benchmarking is
+```
+./build/install/sbk/bin/sbk -class jdbc  -driver com.microsoft.sqlserver.jdbc.SQLServerDriver -url jdbc:sqlserver://localhost:1433 -user sa -password Kmg@1234  -table kmg_1 -size 1000 -writers 1 -time 60
+```
+Make sure the user name is `sa` and passwords are same while running the MS SQL server and SBK benchmarking.
