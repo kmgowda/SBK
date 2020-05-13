@@ -9,6 +9,7 @@
  */
 package io.sbk.Jdbc;
 
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
@@ -29,12 +30,16 @@ public class JdbcWriter implements Writer<String> {
     final private String tableName;
     final private Connection conn;
     final private Statement st;
+    final private DataType<String> dType;
+    final private String  data;
+    final private String  insertQuery;
 
 
     public JdbcWriter(int writerID, Parameters params,
-                         String tableName, JdbcConfig config) throws IOException {
-        this.tableName = tableName;
+                      String tableName, JdbcConfig config, DataType<String> dType) throws IOException {
         final Properties props = new Properties();
+        this.tableName = tableName;
+        this.dType = dType;
         if (config.user != null) {
             props.put("user", config.user);
 
@@ -54,20 +59,22 @@ public class JdbcWriter implements Writer<String> {
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
+        this.data = dType.create(params.getRecordSize());
+        this.insertQuery = "INSERT INTO " + tableName + " (DATA) VALUES ('" + this.data + "')";
     }
 
     @Override
     public long recordWrite(String data, int size, RecordTime record, int id) throws IOException {
-        final long time = System.currentTimeMillis();
-        final String query = "INSERT INTO " + tableName + " (DATA) VALUES ('" + data + "')";
+        final long beginTime = System.currentTimeMillis();
         try {
-            st.executeUpdate(query);
+            st.executeUpdate(this.insertQuery);
         } catch (SQLException ex) {
             SbkLogger.log.error("JDBC: recordWrite failed !");
             throw  new IOException(ex);
         }
-        record.accept(id, time, System.currentTimeMillis(), size, 1);
-        return time;
+        final long endTime =  System.currentTimeMillis();
+        record.accept(id, beginTime, endTime, size, 1);
+        return endTime;
     }
 
 

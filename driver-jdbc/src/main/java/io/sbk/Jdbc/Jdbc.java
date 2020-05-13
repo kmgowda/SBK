@@ -39,6 +39,7 @@ public class Jdbc implements Storage<String> {
     private final static String CONFIGFILE = "jdbc.properties";
     private String tableName;
     private JdbcConfig config;
+    private DataType<String> dType;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
@@ -87,6 +88,7 @@ public class Jdbc implements Storage<String> {
             SbkLogger.log.error("The JDBC Driver: "+ config.driver+" not found");
             throw new IOException(ex);
         }
+        dType = new StringHandler();
         final Connection conn;
         final Statement st;
         final String driverType;
@@ -209,7 +211,7 @@ public class Jdbc implements Storage<String> {
     @Override
     public Writer<String> createWriter(final int id, final Parameters params) {
         try {
-           return new JdbcWriter(id, params, tableName, config);
+           return new JdbcWriter(id, params, tableName, config, dType);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -228,6 +230,6 @@ public class Jdbc implements Storage<String> {
 
     @Override
     public DataType<String> getDataType() {
-        return new StringHandler();
+        return this.dType;
     }
 }
