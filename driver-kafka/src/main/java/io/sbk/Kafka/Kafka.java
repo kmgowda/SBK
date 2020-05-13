@@ -45,7 +45,6 @@ public class Kafka implements Storage<byte[]> {
         params.addOption("partitions", true, "partitions");
         params.addOption("replica", true, "Replication factor");
         params.addOption("sync", true, "Minimum in-sync Replicas");
-        params.addOption("sync", true, "Minimum in-sync Replicas");
         params.addOption("create", true, "Create (recreate) the topic, valid only for writers");
     }
 
@@ -90,7 +89,7 @@ public class Kafka implements Storage<byte[]> {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Integer.MAX_VALUE);
         // props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, params.getTimeout());
-        // Enabling the consumer to READ_COMMITTED is must to compare between Kafka and Pravega
+        // Enabling the consumer to READ_COMMITTED is must, to compare between Kafka and Pravega.
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
         if (params.isWriteAndRead()) {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
