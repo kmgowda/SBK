@@ -154,9 +154,6 @@ final public class SbkPerformance implements Performance {
                 }
             }
             latencyRecorder.print(time, totalLogger);
-            for (TimeRecorder recorder : timeRecorders) {
-                recorder.clear();
-            }
         }
     }
 
@@ -477,11 +474,16 @@ final public class SbkPerformance implements Performance {
     public void stop(long endTime)  {
         if (this.retFuture != null) {
             if (!this.retFuture.isDone()) {
-                timeRecorders[0].enqEndTime(endTime);
+                for (TimeRecorder recorder : timeRecorders) {
+                    recorder.enqEndTime(endTime);
+                }
                 try {
                     retFuture.get();
                 } catch (ExecutionException | InterruptedException ex) {
                     ex.printStackTrace();
+                }
+                for (TimeRecorder recorder : timeRecorders) {
+                    recorder.clear();
                 }
             }
             this.retFuture = null;

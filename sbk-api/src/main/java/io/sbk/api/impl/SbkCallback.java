@@ -32,7 +32,7 @@ public class SbkCallback extends Worker implements Callback, Benchmark {
     public SbkCallback(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
         super(readerId, idMax, params, recordTime);
         this.dataType = dataType;
-        this.ret = new CompletableFuture();
+        this.ret = new CompletableFuture<>();
         this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
         if (params.isWriteAndRead()) {

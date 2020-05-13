@@ -30,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -45,9 +46,11 @@ public class SbkBenchmark implements Benchmark {
     final private Performance writeStats;
     final private Performance readStats;
     final private int maxQs;
+    final private ScheduledExecutorService timeoutExecutor;
     private List<Writer> writers;
     private List<Reader> readers;
     private List<CallbackReader> callbackReaders;
+
 
     @GuardedBy("this")
     private CompletableFuture<Void> retFuture;
@@ -91,6 +94,7 @@ public class SbkBenchmark implements Benchmark {
         } else {
             readStats = null;
         }
+        timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = null;
     }
 
@@ -210,7 +214,12 @@ public class SbkBenchmark implements Benchmark {
         } else {
             throw new IllegalStateException("No Writers and/or Readers\n");
         }
-        retFuture.thenRun(() -> stop(System.currentTimeMillis()));
+
+        if (secondsToRun > 0) {
+            timeoutExecutor.schedule(() -> stop(System.currentTimeMillis()),
+                    secondsToRun + 1, TimeUnit.SECONDS);
+        }
+        retFuture.thenRunAsync(() -> stop(System.currentTimeMillis()), timeoutExecutor);
         return retFuture;
     }
 
