@@ -175,6 +175,7 @@ public class SbkMain {
         } catch (ExecutionException | InterruptedException ex ) {
             ex.printStackTrace();
         }
+        benchmark.stop(System.currentTimeMillis());
         System.exit(0);
     }
 

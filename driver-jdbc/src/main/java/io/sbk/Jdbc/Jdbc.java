@@ -24,6 +24,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Objects;
 import java.util.Properties;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -40,9 +41,11 @@ public class Jdbc implements Storage<String> {
     private final static String SQLITE_NAME = "sqlite";
 
     private final static String CONFIGFILE = "jdbc.properties";
+    private String driverType;
     private String tableName;
     private JdbcConfig config;
     private DataType<String> dType;
+
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
@@ -50,7 +53,7 @@ public class Jdbc implements Storage<String> {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
-            config = mapper.readValue(Jdbc.class.getClassLoader().getResourceAsStream(CONFIGFILE),
+            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     JdbcConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -94,7 +97,6 @@ public class Jdbc implements Storage<String> {
         dType = new StringHandler();
         final Connection conn;
         final Statement st;
-        final String driverType;
         final Properties props = new Properties();
         if (params.getWritersCount() > 0) {
             props.put("create", "true");
@@ -217,6 +219,13 @@ public class Jdbc implements Storage<String> {
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
+        final Properties props = new Properties();
+        props.put("shutdown", "true");
+        try {
+            DriverManager.getConnection(config.url, props);
+        } catch (SQLException ex) {
+           // throw new IOException(ex);
+        }
     }
 
     @Override
