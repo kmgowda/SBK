@@ -86,3 +86,12 @@ An example command to run the SBK benchmarking is
 ./build/install/sbk/bin/sbk -class jdbc  -driver com.microsoft.sqlserver.jdbc.SQLServerDriver -url jdbc:sqlserver://localhost:1433 -user sa -password Kmg@1234  -table kmg_1 -size 1000 -writers 1 -time 60
 ```
 Make sure the user name is `sa` and passwords are same while running the MS SQL server and SBK benchmarking.
+
+##JDBC with SQLite
+The SBK with JDBC is tested with embedded SQL data base SQLite. Visit this page : https://www.sqlite.org/index.html to know more.
+
+An example command to run the SBK benchmarking is
+```
+./build/install/sbk/bin/sbk -class jdbc  -driver org.sqlite.JDBC -url jdbc:sqlite:test.db   -table kmg_2 -size 100 -writers 1 -time 60
+```
+Note that, SQLite is a local on disk database, it does not supports multiple wrtiers and it supports mulitple readers benchmarking. 
