@@ -221,6 +221,13 @@ public class Jdbc implements Storage<String> {
     public void closeStorage(final Parameters params) throws IOException {
         final Properties props = new Properties();
         props.put("shutdown", "true");
+        if (config.user != null) {
+            props.put("user", config.user);
+
+        }
+        if (config.password != null) {
+            props.put("password", config.password);
+        }
         try {
             DriverManager.getConnection(config.url, props);
         } catch (SQLException ex) {

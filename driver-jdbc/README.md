@@ -26,6 +26,15 @@ you can specify the derby driver explicitly as follows
 ```
 you can also specify the username and password in the above commands with -user and -password options. The default user name/password are admin/admin.
 
+Below is the exmaple SBK command for the Apache Derby Embedded Driver benchmarking.
+```
+./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.EmbeddedDriver -url jdbc:derby:test.db   -table kmg_1 -size 100 -writers 1 -time 60
+```
+The example command for read benchmarking is as follows.
+```
+./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.EmbeddedDriver -url jdbc:derby:test.db   -table kmg_1 -size 100 -readers 1 -time 60
+```
+
 
 ## JDBC with MySQL
 The SBK is tested with MySQL benchmarking too. you can find the community edition of Mysql to download here : https://dev.mysql.com/downloads/mysql
