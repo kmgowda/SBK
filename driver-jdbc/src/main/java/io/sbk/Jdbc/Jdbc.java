@@ -37,6 +37,8 @@ public class Jdbc implements Storage<String> {
     private final static String DERBY_NAME = "derby";
     private final static String POSTGRESQL_NAME = "postgresql";
     private final static String MSSQL_NAME = "sqlserver";
+    private final static String SQLITE_NAME = "sqlite";
+
     private final static String CONFIGFILE = "jdbc.properties";
     private String tableName;
     private JdbcConfig config;
@@ -163,6 +165,10 @@ public class Jdbc implements Storage<String> {
                 } else if (driverType.equalsIgnoreCase(MSSQL_NAME)) {
                     query = "CREATE TABLE " + tableName +
                             "(ID BIGINT IDENTITY(1,1) PRIMARY KEY" +
+                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+                } else if (driverType.equalsIgnoreCase(SQLITE_NAME)) {
+                    query = "CREATE TABLE " + tableName +
+                            "(ID INTEGER PRIMARY KEY AUTOINCREMENT" +
                             ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
                 } else {
                     query = "CREATE TABLE " + tableName +
