@@ -40,8 +40,8 @@ public class SbkWriter extends Worker implements Runnable {
     public void run()  {
         try {
             perf.run();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException | IOException ex) {
+            ex.printStackTrace();
         }
     }
 
