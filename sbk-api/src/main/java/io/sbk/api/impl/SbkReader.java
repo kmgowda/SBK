@@ -16,6 +16,7 @@ import io.sbk.api.RecordTime;
 import io.sbk.api.Reader;
 import io.sbk.api.TimeStamp;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -38,8 +39,8 @@ public class SbkReader extends Worker implements Runnable {
     public void run() {
         try {
             perf.run();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException | IOException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -64,8 +65,8 @@ public class SbkReader extends Worker implements Runnable {
                     id = 0;
                 }
             }
-        } finally {
-            reader.close();
+        } catch (EOFException ex) {
+            //
         }
     }
 
@@ -81,8 +82,8 @@ public class SbkReader extends Worker implements Runnable {
                     id = 0;
                 }
             }
-        } finally {
-            reader.close();
+        } catch (EOFException ex) {
+            //
         }
     }
 
@@ -99,8 +100,8 @@ public class SbkReader extends Worker implements Runnable {
                     id = 0;
                 }
             }
-        } finally {
-            reader.close();
+        } catch (EOFException ex) {
+            //
         }
     }
 
@@ -116,8 +117,8 @@ public class SbkReader extends Worker implements Runnable {
                     id = 0;
                 }
             }
-        } finally {
-            reader.close();
+        } catch (EOFException ex) {
+            //
         }
     }
 }

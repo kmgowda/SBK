@@ -10,6 +10,7 @@
 
 package io.sbk.api;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -19,9 +20,10 @@ public interface Reader<T> {
     /**
      * read the data.
      * @return T return the data.
+     * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    T read() throws IOException;
+    T read() throws EOFException, IOException;
 
     /**
      * close the consumer/reader.
@@ -39,9 +41,11 @@ public interface Reader<T> {
      * @param status     Timestamp
      * @param recordTime to call for benchmarking
      * @param  id   Identifier for recordTime
+     * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordRead(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    default void recordRead(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id)
+            throws EOFException, IOException {
         status.startTime = System.currentTimeMillis();
         final T ret = read();
         if (ret == null) {
@@ -65,9 +69,11 @@ public interface Reader<T> {
      * @param status     Timestamp
      * @param recordTime to call for benchmarking
      * @param  id   Identifier for recordTime
+     * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordReadTime(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    default void recordReadTime(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id)
+            throws EOFException, IOException {
         final T ret = read();
         if (ret == null) {
             status.endTime = System.currentTimeMillis();
@@ -81,3 +87,4 @@ public interface Reader<T> {
         }
     }
 }
+
