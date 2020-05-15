@@ -12,6 +12,7 @@ package io.sbk.File;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 
+import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -31,10 +32,10 @@ public class FileReader implements Reader<byte[]> {
     }
 
     @Override
-    public byte[] read() throws IOException {
+    public byte[] read() throws EOFException, IOException {
         final int ret = in.read(readBuffer);
         if (ret < 0) {
-            return null;
+            throw new EOFException("File Red: EOF");
         } else if (ret < readBuffer.length) {
             return Arrays.copyOf(readBuffer, ret);
         }

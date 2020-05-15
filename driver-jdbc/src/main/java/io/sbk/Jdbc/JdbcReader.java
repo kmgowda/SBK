@@ -13,6 +13,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.impl.SbkLogger;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -57,7 +58,7 @@ public class JdbcReader implements Reader<String> {
     }
 
     @Override
-    public String read() {
+    public String read() throws EOFException {
         if (res == null) {
             try {
                 res = st.executeQuery(readQuery);
@@ -70,6 +71,8 @@ public class JdbcReader implements Reader<String> {
             try {
                 if (res.next()) {
                     return res.getString(2);
+                } else {
+                    throw  new EOFException("JDBC : file red EOF");
                 }
             } catch ( SQLException ex) {
                 SbkLogger.log.error("JDBC:JdbcReader result next failed");
