@@ -81,7 +81,7 @@ An example command to run the SBK benchmarking is
 Make sure the user name and passwords are same while running the postgreSQL server and SBK benchmarking.
 generally **'postgres'** is the name of the database available by default.
 
-##JDBC with Microsoft SQL Server
+## JDBC with Microsoft SQL Server
 The SBK with JDBC is tested with Microsoft SQL server. Visit this page : https://www.postgresql.org  to download developer or expression editions of MS SQL.
 you can run the MS SQL docker image as follows.
 
@@ -96,7 +96,7 @@ An example command to run the SBK benchmarking is
 ```
 Make sure the user name is `sa` and passwords are same while running the MS SQL server and SBK benchmarking.
 
-##JDBC with SQLite
+## JDBC with SQLite
 The SBK with JDBC is tested with embedded SQL data base SQLite. Visit this page : https://www.sqlite.org/index.html to know more.
 
 An example command to run the SBK benchmarking is
