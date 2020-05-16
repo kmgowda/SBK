@@ -73,8 +73,8 @@ Running SBK locally:
 usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     ConcurrentQ, File, HDFS, Kafka, Nats, NatsStream,
-                     Nsq, Pravega, Pulsar, RabbitMQ, RocketMQ]
+                     ConcurrentQ, File, HDFS, Jdbc, Kafka, Nats,
+                     NatsStream, Nsq, Pravega, Pulsar, RabbitMQ, RocketMQ]
  -context <arg>      Prometheus Metric context;default context:
                      8080/metrics; 'no' disables the  metrics
  -flush <arg>        Each Writer calls flush after writing <arg> number of
