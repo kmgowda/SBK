@@ -391,8 +391,9 @@ usage: sbk -class Pulsar
  -broker <arg>          Broker URI
  -class <arg>           Storage Driver Class,
                         Available Drivers [Artemis, AsyncFile, BookKeeper,
-                        ConcurrentQ, File, HDFS, Kafka, Nats, NatsStream,
-                        Nsq, Pravega, Pulsar, RabbitMQ, RocketMQ]
+                        ConcurrentQ, File, HDFS, Jdbc, Kafka, Nats,
+                        NatsStream, Nsq, Pravega, Pulsar, RabbitMQ,
+                        RocketMQ]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
                         8080/metrics; 'no' disables the  metrics
