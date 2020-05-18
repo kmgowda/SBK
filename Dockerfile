@@ -9,7 +9,7 @@
 ##
 
 # Building Container
-FROM gradle:4.10-jdk8 as GradleBuilder
+FROM gradle:6.0.1-jdk8 as GradleBuilder
 USER root
 
 COPY ca-certificates/* /usr/local/share/ca-certificates/
