@@ -20,6 +20,8 @@ buildscript {
 	println "Build JVM Version is : " + Jvm.current()
 }
 
+def SbkMainClass = "io.sbk.main.SbkMain"
+
 allprojects {
 	apply plugin: 'java'
 	apply plugin: 'application'
@@ -48,14 +50,7 @@ allprojects {
 	apply from: "$rootDir/gradle/maven.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
-	jar {
-		manifest {
-			attributes 	'Implementation-Title': rootProject.name,
-						'Implementation-Version': sbkVersion
-		}
-	}
-
-	mainClassName = "io.sbk.main.SbkMain"
+	mainClassName = SbkMainClass
 	startScripts {
 		doLast {
 			unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')
@@ -82,4 +77,20 @@ dependencies {
 	compile project(':driver-artemis')
 	compile project(':driver-nsq')
 	compile project(':driver-jdbc')
+}
+
+//create a single Jar with all dependencies
+task buildJar(type: Jar) {
+	manifest {
+		attributes	'Implementation-Title': rootProject.name,
+					'Implementation-Version': sbkVersion,
+					'Main-Class': SbkMainClass
+	}
+	zip64 true
+	baseName = rootProject.name
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	exclude 'META-INF/*.RSA'
+	exclude 'META-INF/*.SF'
+	exclude 'META-INF/*.DSA'
+	with jar
 }
