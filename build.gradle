@@ -51,6 +51,14 @@ allprojects {
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
 	mainClassName = SbkMainClass
+
+	jar {
+		manifest {
+			attributes	'Implementation-Title': rootProject.name,
+						'Implementation-Version': sbkVersion
+		}
+	}
+
 	startScripts {
 		doLast {
 			unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')
