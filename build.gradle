@@ -12,7 +12,17 @@
 import org.gradle.internal.jvm.Jvm
 
 buildscript {
+	repositories {
+		mavenLocal()
+		jcenter()
+		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+
 	println "Build JVM Version is : " + Jvm.current()
+
 }
 
 apply plugin: 'java'
