@@ -11,21 +11,18 @@
 
 import org.gradle.internal.jvm.Jvm
 
+buildscript {
+	println "Build JVM Version is : " + Jvm.current()
+}
+
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'checkstyle'
 
-buildscript {
-	println "Build JVM Version is : " + Jvm.current()
-}
-
 def SbkMainClass = "io.sbk.main.SbkMain"
 
 allprojects {
-	apply plugin: 'java'
-	apply plugin: 'application'
-
 	repositories {
 		mavenLocal()
 		jcenter()
@@ -34,6 +31,9 @@ allprojects {
 			url "https://plugins.gradle.org/m2/"
 		}
 	}
+
+	apply plugin: 'java'
+	apply plugin: 'application'
 
 	dependencies {
 		compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
