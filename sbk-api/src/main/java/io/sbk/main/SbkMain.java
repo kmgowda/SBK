@@ -39,6 +39,7 @@ import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -103,8 +104,9 @@ public class SbkMain {
             System.exit(0);
         }
         try {
-            obj = (Storage) Class.forName(config.packageName + "." + name + "." + name).newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            obj = (Storage) Class.forName(config.packageName + "." + name + "." + name).getConstructor().newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                NoSuchMethodException | InvocationTargetException ex) {
             ex.printStackTrace();
             System.exit(0);
         }
