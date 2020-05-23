@@ -95,6 +95,7 @@ dependencies {
 	compile project(':driver-artemis')
 	compile project(':driver-nsq')
 	compile project(':driver-jdbc')
+	compile project(':driver-minio')
 }
 
 //create a single Jar with all dependencies

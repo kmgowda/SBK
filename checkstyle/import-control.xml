@@ -52,5 +52,7 @@
     <allow pkg="com.rabbitmq" />
     <allow pkg="io.nats" />
     <allow pkg="com.github.brainlag.nsq" />
+    <allow pkg="io.minio" />
+    <allow pkg="org.xmlpull" />
 
 </import-control>
