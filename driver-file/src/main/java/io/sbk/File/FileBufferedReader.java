@@ -12,20 +12,21 @@ package io.sbk.File;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 
+import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Class for File Reader.
+ * Class for File buffered Reader.
  */
-public class FileReader implements Reader<byte[]> {
-    private final FileInputStream in;
+public class FileBufferedReader implements Reader<byte[]> {
+    private final BufferedInputStream in;
     private final byte[] readBuffer;
 
-    public FileReader(int id, Parameters params, FileConfig config) throws IOException {
-        this.in = new FileInputStream(config.fileName);
+    public FileBufferedReader(int id, Parameters params, FileConfig config) throws IOException {
+        this.in = new BufferedInputStream(new FileInputStream(config.fileName));
         this.readBuffer = new byte[params.getRecordSize()];
     }
 
