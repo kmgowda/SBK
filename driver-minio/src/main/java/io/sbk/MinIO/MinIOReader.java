@@ -26,6 +26,7 @@ import io.sbk.api.TimeStamp;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -48,14 +49,17 @@ public class MinIOReader implements Reader<byte[]> {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
+        InputStream inStream;
         try {
             for (Result<Item> result : results) {
                 status.startTime = System.currentTimeMillis();
                 item = result.get();
-                client.getObject(config.bucketName, item.objectName());
+                status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
+                inStream = client.getObject(config.bucketName, item.objectName());
                 status.endTime = System.currentTimeMillis();
                 recordTime.accept(id, status.startTime, status.endTime, status.bytes, 1);
-            }
+                inStream.close();
+              }
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
                 InvalidKeyException | NoResponseException | XmlPullParserException | ErrorResponseException |
                 InternalException | InvalidArgumentException ex) {
@@ -67,18 +71,22 @@ public class MinIOReader implements Reader<byte[]> {
     public void recordReadTime(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
-        byte[] data = new byte[params.getRecordSize()];
         Item item;
         int ret;
+        InputStream inStream;
         try {
             for (Result<Item> result : results) {
                 status.startTime = System.currentTimeMillis();
                 item = result.get();
-                ret = client.getObject(config.bucketName, item.objectName()).read(data);
+                status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
+                byte[] inData = new byte[status.bytes];
+                inStream = client.getObject(config.bucketName, item.objectName());
+                ret = inStream.read(inData);
                 if (ret > 0) {
-                    status.endTime = dType.getTime(data);
+                    status.endTime = dType.getTime(inData);
                     recordTime.accept(id, status.startTime, status.endTime, status.bytes, 1);
                 }
+                inStream.close();
             }
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
                 InvalidKeyException | NoResponseException | XmlPullParserException | ErrorResponseException |
