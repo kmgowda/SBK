@@ -63,7 +63,7 @@ public class MinIO implements Storage<byte[]> {
         }
 
         params.addOption("bucket", true, "Bucket name, default bucket name: "+config.bucketName);
-        params.addOption("url", true, "Database url, default url: "+config.url);
+        params.addOption("url", true, "Minio url, default url: "+config.url);
         params.addOption("key", true, "Access Key, default User name: "+config.accessKey);
         params.addOption("secret", true, "secret key, default password: "+config.secretKey);
         params.addOption("recreate", true,
