@@ -11,7 +11,7 @@
         <property name="header" value="/\*\*\n * Copyright \(c\) KMG\. All Rights Reserved\."/>
     </module>
     <module name="SuppressionFilter">
-        <property name="file" value="checkstyle/suppressions.xml"/>
+	    <property name="file" value="${config_loc}/suppressions.xml"/>
     </module>
     <module name="SuppressWarningsFilter"/>
     <module name="FileTabCharacter"/>
@@ -83,7 +83,7 @@
 
         <!-- dependencies -->
         <module name="ImportControl">
-            <property name="file" value="checkstyle/import-control.xml"/>
+		<property name="file" value="${config_loc}/import-control.xml"/>
         </module>
 
         <!-- whitespace -->
