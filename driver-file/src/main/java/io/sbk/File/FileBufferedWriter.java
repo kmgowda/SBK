@@ -24,7 +24,7 @@ public class FileBufferedWriter implements Writer<byte[]> {
     final private BufferedOutputStream out;
 
     public FileBufferedWriter(int id, Parameters params, FileConfig config) throws IOException {
-        this.out = new BufferedOutputStream(new FileOutputStream(config.fileName, config.isAppend));
+        this.out = new BufferedOutputStream(new FileOutputStream(config.fileName, config.isAppend), config.bufferSize);
     }
 
     @Override

@@ -15,4 +15,5 @@ public class FileConfig {
     public boolean isAppend;
     public boolean reCreate;
     public boolean isBuffered;
+    public int bufferSize;
 }
