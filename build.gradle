@@ -83,6 +83,7 @@ dependencies {
 	compile project(":driver-concurrentq")
 	compile project(":driver-file")
 	compile project(":driver-asyncfile")
+	compile project(":driver-filechannel")
 	compile project(":driver-hdfs")
 	compile project(":driver-bookkeeper")
 	compile project(":driver-rabbitmq")
