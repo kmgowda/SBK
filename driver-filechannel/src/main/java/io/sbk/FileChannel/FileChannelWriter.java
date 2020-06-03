@@ -25,8 +25,10 @@ import java.util.concurrent.CompletableFuture;
  */
 public class FileChannelWriter implements Writer<ByteBuffer> {
     final private FileChannel out;
+    final private FileChannelConfig config;
 
     public FileChannelWriter(int id, Parameters params, FileChannelConfig config) throws IOException {
+        this.config = config;
         if (config.isAppend) {
             this.out = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.WRITE,
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -34,7 +36,6 @@ public class FileChannelWriter implements Writer<ByteBuffer> {
             this.out = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.WRITE,
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         }
-        this.out.force(false);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class FileChannelWriter implements Writer<ByteBuffer> {
 
     @Override
     public void flush() throws IOException {
-        out.force(true);
+        out.force(config.metaUpdate);
     }
 
     @Override

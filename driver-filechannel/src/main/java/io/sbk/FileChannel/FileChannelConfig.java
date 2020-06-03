@@ -13,4 +13,5 @@ public class FileChannelConfig {
     public String fileName;
     public boolean isAppend;
     public boolean reCreate;
+    public boolean metaUpdate;
 }
