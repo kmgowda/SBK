@@ -31,6 +31,7 @@ Currently SBK supports benchmarking of
 16. [PostgreSQL](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-with-postgresql)
 17. [Microsoft SQL](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-with-microsoft-sql-server)
 18. [SQLite](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-with-sqlite)
+19. [MinIO](https://min.io)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
@@ -43,7 +44,7 @@ we welcome open source developers to contribute to this project by adding a driv
 ### Prerequisites
 
 - Java 8+
-- Gradle 4+
+- Gradle 6+
 
 ### Building
 
@@ -73,8 +74,9 @@ Running SBK locally:
 usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     ConcurrentQ, File, HDFS, Jdbc, Kafka, Nats,
-                     NatsStream, Nsq, Pravega, Pulsar, RabbitMQ, RocketMQ]
+                     ConcurrentQ, File, FileChannel, HDFS, Jdbc, Kafka,
+                     MinIO, Nats, NatsStream, Nsq, Pravega, Pulsar,
+                     RabbitMQ, RocketMQ]
  -context <arg>      Prometheus Metric context;default context:
                      8080/metrics; 'no' disables the  metrics
  -flush <arg>        Each Writer calls flush after writing <arg> number of
@@ -260,7 +262,7 @@ All submissions to the master are done through pull requests. If you'd like to m
 3. Make your changes. 
     * you can refer ([Oracle Java Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for coding style; however, Running the Gradle build helps you to fix the Coding syte issues too. 
 4. Verify all changes are working and Gradle build checkstyle is good.
-5. Submit a pull request with Issue Numer, Description and your Sign-off.
+5. Submit a pull request with Issue numer, Description and your Sign-off.
 
 Make sure that you update the issue with all details of testing you have done; it will helpful for me to review and merge.
 
@@ -272,8 +274,8 @@ git push --force origin <pr-branch-name>
 ```
 in the above, I'm assuming that:
 
-* upstream is sbk/sbk.git
-* origin is youraccount/sbk.git
+* upstream is kmgowda/SBK.git
+* origin is youraccount/SBK.git
 
 The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
 
@@ -286,7 +288,7 @@ To import the source into IntelliJ:
 1. Import the project directory into IntelliJ IDE. It will automatically detect the gradle project and import things correctly.
 2. Enable `Annotation Processing` by going to `Build, Execution, Deployment` -> `Compiler` > `Annotation Processors` and checking 'Enable annotation processing'.
 3. Install the `Lombok Plugin`. This can be found in `Preferences` -> `Plugins`. Restart your IDE.
-4. Pravega should now compile properly.
+4. SBK should now compile properly.
 
 For eclipse, you can generate eclipse project files by running `./gradlew eclipse`.
 
@@ -385,15 +387,16 @@ Example: For pulsar driver
 ```
 <SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
 usage: sbk -class Pulsar
+usage: sbk -class Pulsar
  -ackQuorum <arg>       AckQuorum (default: 1)
  -admin <arg>           Admin URI, required to create the partitioned
                         topic
  -broker <arg>          Broker URI
  -class <arg>           Storage Driver Class,
                         Available Drivers [Artemis, AsyncFile, BookKeeper,
-                        ConcurrentQ, File, HDFS, Jdbc, Kafka, Nats,
-                        NatsStream, Nsq, Pravega, Pulsar, RabbitMQ,
-                        RocketMQ]
+                        ConcurrentQ, File, FileChannel, HDFS, Jdbc, Kafka,
+                        MinIO, Nats, NatsStream, Nsq, Pravega, Pulsar,
+                        RabbitMQ, RocketMQ]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
                         8080/metrics; 'no' disables the  metrics
