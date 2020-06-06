@@ -27,6 +27,17 @@ For read performance benchmarking, you run the below command.
 ./build/install/sbk/bin/sbk -class minio -writers 1 -size 100 -time 60
 ```
 
+The SBK Docker command writer benchmarking uploading the objects into https://play.min.io
+
+```
+docker run kmgowda/sbk -class minio -writers 1 -size 10 -time 60
+```
+
+The SBK docker command to read the objects from https://play.min.io
+```
+docker run kmgowda/sbk -class minio -readers 1 -size 10 -time 60
+```
+
 you can override the default access key and secret key by using the options `-key` and `-secret`
 
 ## MinIO docker performance benchmarking
