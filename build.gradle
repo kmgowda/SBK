@@ -81,7 +81,7 @@ allprojects {
 dependencies {
 	compile project(":sbk-api")
 	compile project(":driver-concurrentq")
-	compile project(":driver-file")
+	compile project(":driver-filestream")
 	compile project(":driver-asyncfile")
 	compile project(":driver-filechannel")
 	compile project(":driver-hdfs")

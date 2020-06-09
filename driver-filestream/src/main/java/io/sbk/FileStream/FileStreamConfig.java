@@ -8,9 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.File;
+package io.sbk.FileStream;
 
-public class FileConfig {
+public class FileStreamConfig {
     public String fileName;
     public boolean isAppend;
     public boolean reCreate;

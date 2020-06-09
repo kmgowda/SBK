@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.File;
+package io.sbk.FileStream;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,17 +23,17 @@ import java.util.Objects;
 /**
  * Class for File System Benchmarking.
  */
-public class File implements Storage<byte[]> {
-    private final static String CONFIGFILE = "file.properties";
-    private FileConfig config;
+public class FileStream implements Storage<byte[]> {
+    private final static String CONFIGFILE = "filestream.properties";
+    private FileStreamConfig config;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            config = mapper.readValue(Objects.requireNonNull(File.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
-                    FileConfig.class);
+            config = mapper.readValue(Objects.requireNonNull(FileStream.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+                    FileStreamConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
@@ -80,7 +80,7 @@ public class File implements Storage<byte[]> {
             if (config.isBuffered) {
                 return new FileBufferedWriter(id, params, config);
             } else {
-                return new FileWriter(id, params, config);
+                return new FileStreamWriter(id, params, config);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -92,9 +92,9 @@ public class File implements Storage<byte[]> {
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
             if (config.isBuffered) {
-             return new FileBufferedReader(id, params, config);
+                return new FileBufferedReader(id, params, config);
             } else {
-                return new FileReader(id, params, config);
+                return new FileStreamReader(id, params, config);
             }
         } catch (IOException ex) {
             ex.printStackTrace();

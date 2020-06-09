@@ -7,24 +7,23 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.File;
+package io.sbk.FileStream;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
 
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Class for File Buffered Writer.
+ * Class for File Writer.
  */
-public class FileBufferedWriter implements Writer<byte[]> {
-    final private BufferedOutputStream out;
+public class FileStreamWriter implements Writer<byte[]> {
+    final private FileOutputStream out;
 
-    public FileBufferedWriter(int id, Parameters params, FileConfig config) throws IOException {
-        this.out = new BufferedOutputStream(new FileOutputStream(config.fileName, config.isAppend), config.bufferSize);
+    public FileStreamWriter(int id, Parameters params, FileStreamConfig config) throws IOException {
+        this.out = new FileOutputStream(config.fileName, config.isAppend);
     }
 
     @Override
@@ -44,6 +43,7 @@ public class FileBufferedWriter implements Writer<byte[]> {
     @Override
     public void flush() throws IOException {
         out.flush();
+        out.getFD().sync();
     }
 
     @Override

@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.File;
+package io.sbk.FileStream;
 
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
@@ -20,11 +20,11 @@ import java.util.Arrays;
 /**
  * Class for File Reader.
  */
-public class FileReader implements Reader<byte[]> {
+public class FileStreamReader implements Reader<byte[]> {
     private final FileInputStream in;
     private final byte[] readBuffer;
 
-    public FileReader(int id, Parameters params, FileConfig config) throws IOException {
+    public FileStreamReader(int id, Parameters params, FileStreamConfig config) throws IOException {
         this.in = new FileInputStream(config.fileName);
         this.readBuffer = new byte[params.getRecordSize()];
     }
