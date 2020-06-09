@@ -7,9 +7,9 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.FileChannel;
+package io.sbk.File;
 
-public class FileChannelConfig {
+public class FileConfig {
     public String fileName;
     public boolean isAppend;
     public boolean reCreate;

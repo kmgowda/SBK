@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.FileChannel;
+package io.sbk.File;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
@@ -24,11 +24,11 @@ import java.nio.file.StandardOpenOption;
 /**
  * Class for File Reader.
  */
-public class FileChannelReader implements Reader<ByteBuffer> {
+public class FileReader implements Reader<ByteBuffer> {
     final private FileChannel in;
     final private ByteBuffer readBuffer;
 
-    public FileChannelReader(int id, Parameters params, DataType<ByteBuffer> dType, FileChannelConfig config) throws IOException {
+    public FileReader(int id, Parameters params, DataType<ByteBuffer> dType, FileConfig config) throws IOException {
         this.in = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.READ);
         this.readBuffer = dType.create(params.getRecordSize());
     }

@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.FileChannel;
+package io.sbk.File;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
@@ -23,11 +23,11 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Class for File Channel Writer.
  */
-public class FileChannelWriter implements Writer<ByteBuffer> {
+public class FileWriter implements Writer<ByteBuffer> {
     final private FileChannel out;
-    final private FileChannelConfig config;
+    final private FileConfig config;
 
-    public FileChannelWriter(int id, Parameters params, FileChannelConfig config) throws IOException {
+    public FileWriter(int id, Parameters params, FileConfig config) throws IOException {
         this.config = config;
         if (config.isAppend) {
             this.out = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.WRITE,

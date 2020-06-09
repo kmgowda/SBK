@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.FileChannel;
+package io.sbk.File;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,6 @@ import io.sbk.api.Writer;
 import io.sbk.api.Reader;
 import io.sbk.api.impl.NioByteBuffer;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -27,9 +26,9 @@ import java.util.Objects;
 /**
  * Class for File System Benchmarking using File Channel.
  */
-public class FileChannel implements Storage<ByteBuffer> {
-    private final static String CONFIGFILE = "filechannel.properties";
-    private FileChannelConfig config;
+public class File implements Storage<ByteBuffer> {
+    private final static String CONFIGFILE = "file.properties";
+    private FileConfig config;
     private DataType<ByteBuffer> dType;
 
     @Override
@@ -38,8 +37,8 @@ public class FileChannel implements Storage<ByteBuffer> {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             config = mapper.readValue(
-                    Objects.requireNonNull(FileChannel.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
-                    FileChannelConfig.class);
+                    Objects.requireNonNull(File.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+                    FileConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
@@ -61,7 +60,7 @@ public class FileChannel implements Storage<ByteBuffer> {
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         if (config.reCreate && params.getWritersCount() > 0) {
-            File file = new File(config.fileName);
+            java.io.File file = new java.io.File(config.fileName);
             file.delete();
         }
     }
@@ -74,7 +73,7 @@ public class FileChannel implements Storage<ByteBuffer> {
     @Override
     public Writer<ByteBuffer> createWriter(final int id, final Parameters params) {
         try {
-            return new FileChannelWriter(id, params, config);
+            return new FileWriter(id, params, config);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -84,7 +83,7 @@ public class FileChannel implements Storage<ByteBuffer> {
     @Override
     public Reader<ByteBuffer> createReader(final int id, final Parameters params) {
         try {
-            return new FileChannelReader(id, params, dType, config);
+            return new FileReader(id, params, dType, config);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
