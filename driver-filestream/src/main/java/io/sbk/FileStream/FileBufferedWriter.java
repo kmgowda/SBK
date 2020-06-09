@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.File;
+package io.sbk.FileStream;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 public class FileBufferedWriter implements Writer<byte[]> {
     final private BufferedOutputStream out;
 
-    public FileBufferedWriter(int id, Parameters params, FileConfig config) throws IOException {
+    public FileBufferedWriter(int id, Parameters params, FileStreamConfig config) throws IOException {
         this.out = new BufferedOutputStream(new FileOutputStream(config.fileName, config.isAppend), config.bufferSize);
     }
 

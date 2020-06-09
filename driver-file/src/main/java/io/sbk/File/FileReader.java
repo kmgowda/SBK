@@ -9,35 +9,38 @@
  */
 package io.sbk.File;
 
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 
+
 import java.io.EOFException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 /**
  * Class for File Reader.
  */
-public class FileReader implements Reader<byte[]> {
-    private final FileInputStream in;
-    private final byte[] readBuffer;
+public class FileReader implements Reader<ByteBuffer> {
+    final private FileChannel in;
+    final private ByteBuffer readBuffer;
 
-    public FileReader(int id, Parameters params, FileConfig config) throws IOException {
-        this.in = new FileInputStream(config.fileName);
-        this.readBuffer = new byte[params.getRecordSize()];
+    public FileReader(int id, Parameters params, DataType<ByteBuffer> dType, FileConfig config) throws IOException {
+        this.in = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.READ);
+        this.readBuffer = dType.create(params.getRecordSize());
     }
 
     @Override
-    public byte[] read() throws EOFException, IOException {
-        final int ret = in.read(readBuffer);
-        if (ret < 0) {
+    public ByteBuffer read() throws IOException {
+        ByteBuffer retBuffer = readBuffer.slice();
+        final int ret = in.read(retBuffer);
+        if (ret <= 0) {
             throw new EOFException("File Red: EOF");
-        } else if (ret < readBuffer.length) {
-            return Arrays.copyOf(readBuffer, ret);
         }
-        return  readBuffer;
+        return retBuffer;
     }
 
     @Override

@@ -7,13 +7,11 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-
 package io.sbk.File;
 
 public class FileConfig {
     public String fileName;
     public boolean isAppend;
     public boolean reCreate;
-    public boolean isBuffered;
-    public int bufferSize;
+    public boolean metaUpdate;
 }

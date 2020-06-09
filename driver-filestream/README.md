@@ -7,9 +7,9 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# File System Benchmarking with SBK
-The File system driver for SBK supports single Writer , single reader and multiple readers performance benchmarking.
-The End to End Latency Performance benchmarking is not supported.
+# File System Benchmarking with SBK using File stream and Buffered write/Read APIs
+The File system stream driver for SBK supports single Writer , single reader and multiple readers performance benchmarking.
+SBK does not support the End to End latency for file system stream benchmarking.
 
 ## File write Benchmarking with SBK and FIO
 The FIO (Flexible I/O tester) supports multiple files writing at a time. whereas SBK uses single file for write/read operation.
@@ -18,12 +18,12 @@ Both FIO And SBK can be used with Write operations with buffering and writes can
 An Example SBK command for file write with sync (flush) enabled is as follows
 
 ```
-./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
+./build/install/sbk/bin/sbk -class filestream -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
 ```
 In the above example, the file size of 10 GB (Giga Bytes) are written with 1048576 (1MB) block/record size.
 The data is flushed for every block/record (1MB in this example) write.  The output is as follows 
 ```
-./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
+./build/install/sbk/bin/sbk -class filestream -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -113,12 +113,12 @@ fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=5G 
 
 The SBK can be used with buffered writes and reads. An example command of buffered write without -flush option is as follows.
 ```
-./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 100000
+./build/install/sbk/bin/sbk -class filestream -file tmp.txt -size 1048576  -writers 1 -records 100000
 ```
 
 output for 100GB buffered file write is as follows
 ```
-./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 100000
+./build/install/sbk/bin/sbk -class filestream -file tmp.txt -size 1048576  -writers 1 -records 100000
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]

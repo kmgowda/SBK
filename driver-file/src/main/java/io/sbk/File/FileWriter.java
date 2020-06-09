@@ -12,38 +12,52 @@ import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Writer;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 
+
 /**
- * Class for File Writer.
+ * Class for File Channel Writer.
  */
-public class FileWriter implements Writer<byte[]> {
-    final private FileOutputStream out;
+public class FileWriter implements Writer<ByteBuffer> {
+    final private FileChannel out;
+    final private FileConfig config;
 
     public FileWriter(int id, Parameters params, FileConfig config) throws IOException {
-        this.out = new FileOutputStream(config.fileName, config.isAppend);
+        this.config = config;
+        if (config.isAppend) {
+            this.out = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.WRITE,
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } else {
+            this.out = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.WRITE,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        }
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
+    public long recordWrite(ByteBuffer data, int size, RecordTime record, int id) throws IOException {
         final long time = System.currentTimeMillis();
-        out.write(data);
+        final ByteBuffer buffer = data.asReadOnlyBuffer();
+        out.write(buffer);
         record.accept(id, time, System.currentTimeMillis(), size, 1);
         return time;
     }
 
+
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
-        out.write(data);
+    public CompletableFuture writeAsync(ByteBuffer data) throws IOException {
+        final ByteBuffer buffer = data.asReadOnlyBuffer();
+        out.write(buffer);
         return null;
     }
 
     @Override
     public void flush() throws IOException {
-        out.flush();
-        out.getFD().sync();
+        out.force(config.metaUpdate);
     }
 
     @Override

@@ -7,11 +7,13 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.FileChannel;
 
-public class FileChannelConfig {
+package io.sbk.FileStream;
+
+public class FileStreamConfig {
     public String fileName;
     public boolean isAppend;
     public boolean reCreate;
-    public boolean metaUpdate;
+    public boolean isBuffered;
+    public int bufferSize;
 }
