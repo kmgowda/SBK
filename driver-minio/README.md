@@ -30,12 +30,12 @@ For read performance benchmarking, you run the below command.
 The SBK Docker command writer benchmarking uploading the objects into https://play.min.io
 
 ```
-docker run kmgowda/sbk -class minio -writers 1 -size 10 -time 60
+docker run -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk -class minio -writers 1 -size 10 -time 60
 ```
 
 The SBK docker command to read the objects from https://play.min.io
 ```
-docker run kmgowda/sbk -class minio -readers 1 -size 10 -time 60
+docker run -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk -class minio -readers 1 -size 10 -time 60
 ```
 
 you can override the default access key and secret key by using the options `-key` and `-secret`
