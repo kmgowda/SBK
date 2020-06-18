@@ -54,5 +54,6 @@
     <allow pkg="com.github.brainlag.nsq" />
     <allow pkg="io.minio" />
     <allow pkg="org.xmlpull" />
+    <allow pkg="com.apple" />
 
 </import-control>
