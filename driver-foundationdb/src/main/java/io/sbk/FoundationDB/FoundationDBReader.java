@@ -11,31 +11,40 @@
 package io.sbk.FoundationDB;
 
 import com.apple.foundationdb.Database;
+import com.apple.foundationdb.Transaction;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Class for File Reader.
  */
 public class FoundationDBReader implements Reader<byte[]> {
     final private Database db;
+    final private Transaction tx;
     private long key;
 
     public FoundationDBReader(int id, Parameters params, Database db) throws IOException {
-        this.key = (id * Integer.MAX_VALUE) - 1;
+        this.key = (id * Integer.MAX_VALUE) + 1;
         this.db = db;
+        this.tx = db.createTransaction();
     }
 
     @Override
     public byte[] read() throws EOFException, IOException {
+        CompletableFuture<byte[]> cf = tx.get(FoundationDB.longToBytes(key));
         key++;
-        return db.run(tx -> tx.get(FoundationDB.longToBytes(key)).join());
+        if (cf == null) {
+            return null;
+        }
+        return cf.join();
     }
 
     @Override
     public void close() throws  IOException {
+        tx.close();
     }
 }
