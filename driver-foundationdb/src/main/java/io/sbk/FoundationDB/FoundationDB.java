@@ -56,9 +56,6 @@ public class FoundationDB implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        if (params.getReadersCount() > 0 && params.getWritersCount() > 0) {
-            throw new IllegalArgumentException("Specify either Writer or readers ; both are not allowed");
-        }
         cFile =  params.getOptionValue("cfile", cFile);
     }
 

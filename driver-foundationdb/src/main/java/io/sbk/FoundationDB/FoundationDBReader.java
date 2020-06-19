@@ -22,21 +22,26 @@ import java.util.concurrent.CompletableFuture;
  * Class for File Reader.
  */
 public class FoundationDBReader implements Reader<byte[]> {
+    final private Parameters params;
     final private Transaction tx;
     private long key;
 
     public FoundationDBReader(int id, Parameters params, Transaction tx) throws IOException {
         this.key = (id * Integer.MAX_VALUE) + 1;
+        this.params = params;
         this.tx = tx;
     }
 
     @Override
     public byte[] read() throws EOFException, IOException {
         CompletableFuture<byte[]> cf = tx.get(FoundationDB.longToBytes(key));
-        key++;
         if (cf == null) {
+            if (!params.isWriteAndRead()) {
+               throw new EOFException();
+            }
             return null;
         }
+        key++;
         return cf.join();
     }
 
