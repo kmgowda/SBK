@@ -14,6 +14,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Class for File Writer.
@@ -37,7 +38,11 @@ public class FoundationDBWriter implements Writer<byte[]> {
 
     @Override
     public void flush() throws IOException {
-        tx.commit();
+        try {
+            tx.commit().get();
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new IOException(ex);
+        }
     }
 
     @Override
