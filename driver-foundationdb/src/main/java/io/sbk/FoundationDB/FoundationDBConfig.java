@@ -11,4 +11,5 @@ package io.sbk.FoundationDB;
 
 public class FoundationDBConfig {
     public int version;
+    public String cFile;
 }

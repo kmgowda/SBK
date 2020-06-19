@@ -30,8 +30,6 @@ import java.util.Objects;
  */
 public class FoundationDB implements Storage<byte[]> {
     private final static String CONFIGFILE = "foundationdb.properties";
-    private final static String CLUSTERFILE = "fdb.cluster";
-    private String cFile;
     private FoundationDBConfig config;
     private FDB fdb;
     private Database db;
@@ -44,25 +42,23 @@ public class FoundationDB implements Storage<byte[]> {
         try {
             config = mapper.readValue(Objects.requireNonNull(FoundationDB.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     FoundationDBConfig.class);
-            cFile  = FoundationDB.class.getClassLoader().getResource(CLUSTERFILE).getPath();
-
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("cfile", true, "cluster file, default : "+ cFile);
+        params.addOption("cfile", true, "cluster file, default : "+ config.cFile);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        cFile =  params.getOptionValue("cfile", cFile);
+        config.cFile =  params.getOptionValue("cfile", config.cFile);
     }
 
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         fdb = FDB.selectAPIVersion(config.version);
-        db = fdb.open(cFile);
+        db = fdb.open(config.cFile);
         tx = db.createTransaction();
     }
 
