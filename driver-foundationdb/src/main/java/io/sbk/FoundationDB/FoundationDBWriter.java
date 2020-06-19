@@ -9,7 +9,6 @@
  */
 package io.sbk.FoundationDB;
 
-import com.apple.foundationdb.Database;
 import com.apple.foundationdb.Transaction;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
@@ -20,14 +19,12 @@ import java.util.concurrent.CompletableFuture;
  * Class for File Writer.
  */
 public class FoundationDBWriter implements Writer<byte[]> {
-    final private Database db;
     final private Transaction tx;
     private long key;
 
-    public FoundationDBWriter(int id, Parameters params, Database db) throws IOException {
+    public FoundationDBWriter(int id, Parameters params, Transaction tx) throws IOException {
         this.key = (id * Integer.MAX_VALUE) + 1;
-        this.db = db;
-        this.tx = db.createTransaction();
+        this.tx = tx;
         this.tx.clear(FoundationDB.longToBytes(this.key), FoundationDB.longToBytes(key + Integer.MAX_VALUE));
     }
 
@@ -45,6 +42,5 @@ public class FoundationDBWriter implements Writer<byte[]> {
 
     @Override
     public void close() throws  IOException {
-        tx.close();
     }
 }

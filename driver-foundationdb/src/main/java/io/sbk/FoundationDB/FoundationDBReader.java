@@ -10,7 +10,6 @@
 
 package io.sbk.FoundationDB;
 
-import com.apple.foundationdb.Database;
 import com.apple.foundationdb.Transaction;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
@@ -23,14 +22,12 @@ import java.util.concurrent.CompletableFuture;
  * Class for File Reader.
  */
 public class FoundationDBReader implements Reader<byte[]> {
-    final private Database db;
     final private Transaction tx;
     private long key;
 
-    public FoundationDBReader(int id, Parameters params, Database db) throws IOException {
+    public FoundationDBReader(int id, Parameters params, Transaction tx) throws IOException {
         this.key = (id * Integer.MAX_VALUE) + 1;
-        this.db = db;
-        this.tx = db.createTransaction();
+        this.tx = tx;
     }
 
     @Override
@@ -45,6 +42,5 @@ public class FoundationDBReader implements Reader<byte[]> {
 
     @Override
     public void close() throws  IOException {
-        tx.close();
     }
 }
