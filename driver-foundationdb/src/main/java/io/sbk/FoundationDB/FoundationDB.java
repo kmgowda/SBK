@@ -12,7 +12,6 @@ package io.sbk.FoundationDB;
 
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
-import com.apple.foundationdb.Transaction;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
@@ -33,7 +32,6 @@ public class FoundationDB implements Storage<byte[]> {
     private FoundationDBConfig config;
     private FDB fdb;
     private Database db;
-    private Transaction tx;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
@@ -59,19 +57,17 @@ public class FoundationDB implements Storage<byte[]> {
     public void openStorage(final Parameters params) throws  IOException {
         fdb = FDB.selectAPIVersion(config.version);
         db = fdb.open(config.cFile);
-        tx = db.createTransaction();
     }
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
-        tx.close();
         db.close();
     }
 
     @Override
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
-            return new FoundationDBWriter(id, params, tx);
+            return new FoundationDBWriter(id, params, db);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -81,7 +77,7 @@ public class FoundationDB implements Storage<byte[]> {
     @Override
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
-            return new FoundationDBReader(id, params, tx);
+            return new FoundationDBReader(id, params, db);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
