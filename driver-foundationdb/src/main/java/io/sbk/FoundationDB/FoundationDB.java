@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- * Class for File System Benchmarking.
+ * Class for FoundationDB Benchmarking.
  */
 public class FoundationDB implements Storage<byte[]> {
     private final static String CONFIGFILE = "foundationdb.properties";

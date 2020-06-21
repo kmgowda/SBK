@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Class for File Writer.
+ * Class for Writer.
  */
 public class FoundationDBWriter implements Writer<byte[]> {
     final private Database db;

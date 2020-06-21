@@ -19,7 +19,7 @@ import java.io.EOFException;
 import java.io.IOException;
 
 /**
- * Class for File Reader.
+ * Class for Reader.
  */
 public class FoundationDBReader implements Reader<byte[]> {
     final private Database db;
