@@ -22,13 +22,11 @@ import java.io.IOException;
  * Class for File Reader.
  */
 public class FoundationDBReader implements Reader<byte[]> {
-    final private Parameters params;
     final private Database db;
     private long key;
 
     public FoundationDBReader(int id, Parameters params, Database db) throws IOException {
         this.key = (id * Integer.MAX_VALUE) + 1;
-        this.params = params;
         this.db = db;
     }
 
@@ -39,7 +37,7 @@ public class FoundationDBReader implements Reader<byte[]> {
             byte[] result = tr.get(Tuple.from(key).pack()).join();
             return result;
         });
-        if (ret != null || !params.isWriteAndRead()) {
+        if (ret != null) {
             key++;
         }
         return ret;
