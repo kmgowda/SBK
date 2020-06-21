@@ -24,22 +24,21 @@ public class FoundationDBWriter implements Writer<byte[]> {
     private long key;
 
     public FoundationDBWriter(int id, Parameters params, Database db) throws IOException {
-        this.key = (id * Integer.MAX_VALUE) + 1;
+        this.key = id * Integer.MAX_VALUE;
         this.db = db;
         this.db.run(tr -> {
-            tr.clear(Tuple.from(key).pack(), Tuple.from(key + Integer.MAX_VALUE).pack());
+            tr.clear(Tuple.from(key + 1).pack(), Tuple.from(key + 1 + Integer.MAX_VALUE).pack());
             return null;
         });
     }
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
-        db.run(tr -> {
+        key++;
+        return db.run(tr -> {
             tr.set(Tuple.from(key).pack(), data);
             return null;
         });
-        key++;
-        return null;
     }
 
     @Override
