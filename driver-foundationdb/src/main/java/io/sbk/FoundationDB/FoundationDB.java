@@ -21,7 +21,6 @@ import io.sbk.api.Writer;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -82,11 +81,5 @@ public class FoundationDB implements Storage<byte[]> {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    public static byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
     }
 }

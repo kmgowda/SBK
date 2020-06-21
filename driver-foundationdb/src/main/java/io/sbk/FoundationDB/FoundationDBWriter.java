@@ -11,11 +11,11 @@ package io.sbk.FoundationDB;
 
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.Transaction;
+import com.apple.foundationdb.tuple.Tuple;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Class for File Writer.
@@ -29,23 +29,22 @@ public class FoundationDBWriter implements Writer<byte[]> {
         this.key = (id * Integer.MAX_VALUE) + 1;
         this.db = db;
         this.tx = db.createTransaction();
-        this.tx.clear(FoundationDB.longToBytes(this.key), FoundationDB.longToBytes(key + Integer.MAX_VALUE));
+        this.tx.clear(Tuple.from(key).pack(), Tuple.from(key + Integer.MAX_VALUE).pack());
+        this.tx.close();
     }
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
-        tx.set(FoundationDB.longToBytes(key), data);
+        db.run(tr -> {
+            tr.set(Tuple.from(key).pack(), data);
+            return null;
+        });
         key++;
         return null;
     }
 
     @Override
     public void flush() throws IOException {
-        try {
-            tx.commit().get();
-        } catch (ExecutionException | InterruptedException ex) {
-            throw new IOException(ex);
-        }
     }
 
     @Override
