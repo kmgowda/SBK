@@ -10,7 +10,6 @@
 package io.sbk.FoundationDB;
 
 import com.apple.foundationdb.Database;
-import com.apple.foundationdb.Transaction;
 import com.apple.foundationdb.tuple.Tuple;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
@@ -22,15 +21,15 @@ import java.util.concurrent.CompletableFuture;
  */
 public class FoundationDBWriter implements Writer<byte[]> {
     final private Database db;
-    final private Transaction tx;
     private long key;
 
     public FoundationDBWriter(int id, Parameters params, Database db) throws IOException {
         this.key = (id * Integer.MAX_VALUE) + 1;
         this.db = db;
-        this.tx = db.createTransaction();
-        this.tx.clear(Tuple.from(key).pack(), Tuple.from(key + Integer.MAX_VALUE).pack());
-        this.tx.close();
+        this.db.run(tr -> {
+            tr.clear(Tuple.from(key).pack(), Tuple.from(key + Integer.MAX_VALUE).pack());
+            return null;
+        });
     }
 
     @Override
