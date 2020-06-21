@@ -30,5 +30,5 @@ include 'driver-artemis'
 include 'driver-nsq'
 include 'driver-jdbc'
 include 'driver-minio'
-
+include 'driver-foundationdb'
 
