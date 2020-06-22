@@ -33,7 +33,7 @@ public class FoundationDBReader implements Reader<byte[]> {
     @Override
     public byte[] read() throws EOFException, IOException {
         byte[] ret;
-        ret = db.run(tr -> {
+        ret = db.read(tr -> {
             byte[] result = tr.get(Tuple.from(key).pack()).join();
             return result;
         });
