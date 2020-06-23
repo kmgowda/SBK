@@ -86,7 +86,16 @@ public interface Writer<T>  {
     }
 
 
-    default void RecordsWriter(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+    /**
+     * Default implementation for writer benchmarking by writing given number of records.
+     * flush is invoked after writing all the records.
+     *
+     * @param writer Writer Descriptor
+     * @param dType  Data Type interface
+     * @param data  data to write
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriter(Worker writer, DataType<T> dType, T data) throws IOException {
         final int size = dType.length(data);
         for (int i = 0; i < writer.params.getRecordsCount(); i++) {
             recordWrite(data, size, writer.recordTime, i % writer.recordIDMax);
@@ -94,21 +103,40 @@ public interface Writer<T>  {
         flush();
     }
 
-    default void RecordsWriterFlush(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
-        final RateController eCnt = new RateController(System.currentTimeMillis(), writer.params.getRecordsPerSec());
+    /**
+     * Default implementation for writer benchmarking by writing given number of records.
+     * flush is invoked after writing given set of records.
+     *
+     * @param writer Writer Descriptor
+     * @param dType  Data Type interface
+     * @param data  data to write
+     * @param rController Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriterFlush(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
         final int recordsCount = writer.params.getRecordsPerWriter();
         final int size = dType.length(data);
         int cnt = 0;
+        rController.start(writer.params.getRecordsPerSec(), System.currentTimeMillis());
         while (cnt < recordsCount) {
             int loopMax = Math.min(writer.params.getRecordsPerFlush(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
-                eCnt.control(cnt++, recordWrite(data, size, writer.recordTime, i % writer.recordIDMax));
+                rController.control(cnt++, recordWrite(data, size, writer.recordTime, i % writer.recordIDMax));
             }
             flush();
         }
     }
 
-    default void RecordsWriterTime(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+    /**
+     * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
+     * flush is invoked after writing records for given time.
+     *
+     * @param writer Writer Descriptor
+     * @param dType  Data Type interface
+     * @param data  data to write
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriterTime(Worker writer, DataType<T> dType, T data) throws IOException {
         final long startTime = writer.params.getStartTime();
         final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
         final int size = dType.length(data);
@@ -124,52 +152,82 @@ public interface Writer<T>  {
         flush();
     }
 
-
-    default void RecordsWriterTimeFlush(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+    /**
+     * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
+     * flush is invoked after writing given set of records.
+     *
+     * @param writer Writer Descriptor
+     * @param dType  Data Type interface
+     * @param data  data to write
+     * @param rController Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriterTimeFlush(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
         final long startTime = writer.params.getStartTime();
         final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
         final int size = dType.length(data);
         long time = System.currentTimeMillis();
-        final RateController eCnt = new RateController(time, writer.params.getRecordsPerSec());
         long msElapsed = time - startTime;
         int cnt = 0;
+        rController.start(writer.params.getRecordsPerSec(), time);
         while (msElapsed < msToRun) {
             for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerFlush()); i++) {
                 time = recordWrite(data, size, writer.recordTime, i % writer.recordIDMax);
-                eCnt.control(cnt++, time);
+                rController.control(cnt++, time);
                 msElapsed = time - startTime;
             }
             flush();
         }
     }
 
-
-    default void RecordsWriterRW(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
-        final RateController eCnt = new RateController(System.currentTimeMillis(), writer.params.getRecordsPerSec());
+    /**
+     * Default implementation for writing given number of records. No Writer Benchmarking is performed.
+     * Write is performed using {@link io.sbk.api.Writer#writeAsync(Object)}  )}.
+     * flush is invoked after writing given set of records.
+     *
+     * @param writer Writer Descriptor
+     * @param dType  Data Type interface
+     * @param data  data to write
+     * @param rController Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriterRW(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
         final int recordsCount = writer.params.getRecordsPerWriter();
         int cnt = 0;
         long time;
+        rController.start(writer.params.getRecordsPerSec(), System.currentTimeMillis());
         while (cnt < recordsCount) {
             int loopMax = Math.min(writer.params.getRecordsPerFlush(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
                 time = writeAsyncTime(dType, data);
-                eCnt.control(cnt++, time);
+                rController.control(cnt++, time);
             }
             flush();
         }
     }
 
-    default void RecordsWriterTimeRW(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+    /**
+     * Default implementation for writing data records for specific time duration. No Writer Benchmarking is performed.
+     * Write is performed using {@link io.sbk.api.Writer#writeAsync(Object)}  )}.
+     * flush is invoked after writing given set of records.
+     *
+     * @param writer Writer Descriptor
+     * @param dType  Data Type interface
+     * @param data  data to write
+     * @param rController Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriterTimeRW(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
         final long startTime = writer.params.getStartTime();
         final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
         long time = System.currentTimeMillis();
-        final RateController eCnt = new RateController(time, writer.params.getRecordsPerSec());
         long msElapsed = time - startTime;
         int cnt = 0;
+        rController.start(writer.params.getRecordsPerSec(), time);
         while (msElapsed < msToRun) {
             for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerFlush()); i++) {
                 time = writeAsyncTime(dType, data);
-                eCnt.control(cnt++, time);
+                rController.control(cnt++, time);
                 msElapsed = time - startTime;
             }
             flush();

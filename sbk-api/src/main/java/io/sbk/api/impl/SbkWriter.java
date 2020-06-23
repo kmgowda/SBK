@@ -12,6 +12,7 @@ package io.sbk.api.impl;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
+import io.sbk.api.RateController;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Worker;
 import io.sbk.api.Writer;
@@ -22,11 +23,11 @@ import java.io.IOException;
  * Writer Benchmarking Implementation.
  */
 public class SbkWriter extends Worker implements Runnable {
-    final private static int MS_PER_SEC = 1000;
     final private DataType dType;
     final private Writer writer;
     final private RunBenchmark perf;
     final private Object payload;
+    final private RateController rCnt;
 
     public SbkWriter(int writerID, int idMax, Parameters params, RecordTime recordTime, DataType dType, Writer writer) {
         super(writerID, idMax, params, recordTime);
@@ -34,6 +35,7 @@ public class SbkWriter extends Worker implements Runnable {
         this.writer = writer;
         this.payload = dType.create(params.getRecordSize());
         this.perf = createBenchmark();
+        this.rCnt = new SbkRateController();
     }
 
     @Override
@@ -78,7 +80,7 @@ public class SbkWriter extends Worker implements Runnable {
 
 
     private void RecordsWriterFlush() throws InterruptedException, IOException {
-        writer.RecordsWriterFlush(this, dType, payload);
+        writer.RecordsWriterFlush(this, dType, payload, rCnt);
     }
 
 
@@ -88,17 +90,17 @@ public class SbkWriter extends Worker implements Runnable {
 
 
     private void RecordsWriterTimeFlush() throws InterruptedException, IOException {
-        writer.RecordsWriterTimeFlush(this, dType, payload);
+        writer.RecordsWriterTimeFlush(this, dType, payload, rCnt);
     }
 
 
     private void RecordsWriterRW() throws InterruptedException, IOException {
-        writer.RecordsWriterRW(this, dType, payload);
+        writer.RecordsWriterRW(this, dType, payload, rCnt);
     }
 
 
     private void RecordsWriterTimeRW() throws InterruptedException, IOException {
-        writer.RecordsWriterTimeRW(this, dType, payload);
+        writer.RecordsWriterTimeRW(this, dType, payload, rCnt);
     }
 
 }

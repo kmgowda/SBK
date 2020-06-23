@@ -21,7 +21,6 @@ import java.io.IOException;
  * Reader Benchmarking Implementation.
  */
 public class SbkReader extends Worker implements Runnable {
-    final private static int MS_PER_SEC = 1000;
     final private DataType dType;
     final private Reader reader;
     final private RunBenchmark perf;
@@ -58,7 +57,7 @@ public class SbkReader extends Worker implements Runnable {
 
 
     private void RecordsReaderRW() throws IOException {
-           reader.RecordsReaderRW(this, dType);
+        reader.RecordsReaderRW(this, dType);
     }
 
     private void RecordsTimeReader() throws IOException {
