@@ -14,9 +14,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Reader;
-import io.sbk.api.TimeStamp;
-
-import java.io.EOFException;
+import io.sbk.api.Worker;
 import java.io.IOException;
 
 /**
@@ -55,70 +53,19 @@ public class SbkReader extends Worker implements Runnable {
     }
 
     private void RecordsReader() throws IOException {
-       final TimeStamp status = new TimeStamp();
-        try {
-            int i = 0, id = workerID % idMax;
-            while (i < params.getRecordsPerReader()) {
-                reader.recordRead(dType, status, recordTime, id++);
-                i += status.records;
-                if (id >= idMax) {
-                    id = 0;
-                }
-            }
-        } catch (EOFException ex) {
-            //
-        }
+        reader.RecordsReader(this, dType);
     }
 
 
     private void RecordsReaderRW() throws IOException {
-        final TimeStamp status = new TimeStamp();
-        try {
-            int i = 0, id = workerID % idMax;
-            while (i < params.getRecordsPerReader()) {
-                reader.recordReadTime(dType, status, recordTime, id++);
-                i += status.records;
-                if (id >= idMax) {
-                    id = 0;
-                }
-            }
-        } catch (EOFException ex) {
-            //
-        }
+           reader.RecordsReaderRW(this, dType);
     }
 
-
     private void RecordsTimeReader() throws IOException {
-        final TimeStamp status = new TimeStamp();
-        final long startTime = params.getStartTime();
-        final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        int id = workerID % idMax;
-        try {
-            while ((status.endTime - startTime) < msToRun) {
-                reader.recordRead(dType, status, recordTime, id++);
-                if (id >= idMax) {
-                    id = 0;
-                }
-            }
-        } catch (EOFException ex) {
-            //
-        }
+        reader.RecordsTimeReader(this, dType);
     }
 
     private void RecordsTimeReaderRW() throws IOException {
-        final TimeStamp status = new TimeStamp();
-        final long startTime = params.getStartTime();
-        final long msToRun = params.getSecondsToRun() * MS_PER_SEC;
-        int id = workerID % idMax;
-        try {
-            while ((status.endTime - startTime) < msToRun) {
-                reader.recordReadTime(dType, status, recordTime, id++);
-                if (id >= idMax) {
-                    id = 0;
-                }
-            }
-        } catch (EOFException ex) {
-            //
-        }
+        reader.RecordsTimeReaderRW(this, dType);
     }
 }

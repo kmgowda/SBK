@@ -8,23 +8,20 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
-
-import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+package io.sbk.api;
 
 /**
  * Abstract class for Writers and Readers.
  */
 public abstract class Worker {
-    protected final int workerID;
-    protected final int idMax;
-    protected final Parameters params;
-    protected final RecordTime recordTime;
+    public final int id;
+    public final int recordIDMax;
+    public final Parameters params;
+    public final RecordTime recordTime;
 
-    Worker(int workerID, int idMax, Parameters params, RecordTime recordTime) {
-        this.workerID = workerID;
-        this.idMax = idMax;
+    public Worker(int workerID, int idMax, Parameters params, RecordTime recordTime) {
+        this.id = workerID;
+        this.recordIDMax = idMax;
         this.params = params;
         this.recordTime = recordTime;
     }

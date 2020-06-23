@@ -84,4 +84,95 @@ public interface Writer<T>  {
         writeAsync(dType.setTime(data, time));
         return time;
     }
+
+
+    default void RecordsWriter(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+        final int size = dType.length(data);
+        for (int i = 0; i < writer.params.getRecordsCount(); i++) {
+            recordWrite(data, size, writer.recordTime, i % writer.recordIDMax);
+        }
+        flush();
+    }
+
+    default void RecordsWriterFlush(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+        final RateController eCnt = new RateController(System.currentTimeMillis(), writer.params.getRecordsPerSec());
+        final int recordsCount = writer.params.getRecordsPerWriter();
+        final int size = dType.length(data);
+        int cnt = 0;
+        while (cnt < recordsCount) {
+            int loopMax = Math.min(writer.params.getRecordsPerFlush(), recordsCount - cnt);
+            for (int i = 0; i < loopMax; i++) {
+                eCnt.control(cnt++, recordWrite(data, size, writer.recordTime, i % writer.recordIDMax));
+            }
+            flush();
+        }
+    }
+
+    default void RecordsWriterTime(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+        final long startTime = writer.params.getStartTime();
+        final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
+        final int size = dType.length(data);
+        long time = System.currentTimeMillis();
+        int id = writer.id % writer.recordIDMax;
+        while ((time - startTime) < msToRun) {
+            time = recordWrite(data, size, writer.recordTime, id);
+            id += 1;
+            if (id >= writer.recordIDMax) {
+                id = 0;
+            }
+        }
+        flush();
+    }
+
+
+    default void RecordsWriterTimeFlush(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+        final long startTime = writer.params.getStartTime();
+        final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
+        final int size = dType.length(data);
+        long time = System.currentTimeMillis();
+        final RateController eCnt = new RateController(time, writer.params.getRecordsPerSec());
+        long msElapsed = time - startTime;
+        int cnt = 0;
+        while (msElapsed < msToRun) {
+            for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerFlush()); i++) {
+                time = recordWrite(data, size, writer.recordTime, i % writer.recordIDMax);
+                eCnt.control(cnt++, time);
+                msElapsed = time - startTime;
+            }
+            flush();
+        }
+    }
+
+
+    default void RecordsWriterRW(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+        final RateController eCnt = new RateController(System.currentTimeMillis(), writer.params.getRecordsPerSec());
+        final int recordsCount = writer.params.getRecordsPerWriter();
+        int cnt = 0;
+        long time;
+        while (cnt < recordsCount) {
+            int loopMax = Math.min(writer.params.getRecordsPerFlush(), recordsCount - cnt);
+            for (int i = 0; i < loopMax; i++) {
+                time = writeAsyncTime(dType, data);
+                eCnt.control(cnt++, time);
+            }
+            flush();
+        }
+    }
+
+    default void RecordsWriterTimeRW(Worker writer, DataType<T> dType, T data) throws InterruptedException, IOException {
+        final long startTime = writer.params.getStartTime();
+        final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
+        long time = System.currentTimeMillis();
+        final RateController eCnt = new RateController(time, writer.params.getRecordsPerSec());
+        long msElapsed = time - startTime;
+        int cnt = 0;
+        while (msElapsed < msToRun) {
+            for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerFlush()); i++) {
+                time = writeAsyncTime(dType, data);
+                eCnt.control(cnt++, time);
+                msElapsed = time - startTime;
+            }
+            flush();
+        }
+    }
 }

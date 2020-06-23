@@ -86,5 +86,73 @@ public interface Reader<T> {
             recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
+
+    default void RecordsReader(Worker reader, DataType<T> dType) throws IOException {
+        final TimeStamp status = new TimeStamp();
+        try {
+            int i = 0, id = reader.id % reader.recordIDMax;
+            while (i < reader.params.getRecordsPerReader()) {
+                recordRead(dType, status, reader.recordTime, id++);
+                i += status.records;
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
+        }
+    }
+
+
+    default void RecordsReaderRW(Worker reader, DataType<T> dType) throws IOException {
+        final TimeStamp status = new TimeStamp();
+        try {
+            int i = 0, id = reader.id % reader.recordIDMax;
+            while (i < reader.params.getRecordsPerReader()) {
+                recordReadTime(dType, status, reader.recordTime, id++);
+                i += status.records;
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
+        }
+    }
+
+
+    default void RecordsTimeReader(Worker reader, DataType<T> dType) throws IOException {
+        final TimeStamp status = new TimeStamp();
+        final long startTime = reader.params.getStartTime();
+        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
+        int id = reader.id % reader.recordIDMax;
+        try {
+            while ((status.endTime - startTime) < msToRun) {
+                recordRead(dType, status, reader.recordTime, id++);
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
+        }
+    }
+
+    default void RecordsTimeReaderRW(Worker reader, DataType<T> dType) throws IOException {
+        final TimeStamp status = new TimeStamp();
+        final long startTime = reader.params.getStartTime();
+        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
+        int id = reader.id % reader.recordIDMax;
+        try {
+            while ((status.endTime - startTime) < msToRun) {
+                recordReadTime(dType, status, reader.recordTime, id++);
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
+        }
+    }
 }
 
