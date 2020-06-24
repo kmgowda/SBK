@@ -8,7 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Artemis;
+import io.sbk.api.DataType;
 import io.sbk.api.RecordTime;
+import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
@@ -37,8 +39,11 @@ public class ArtemisWriter implements Writer<byte[]> {
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record, int id) {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) {
         final long time = System.currentTimeMillis();
+        status.startTime = time;
+        status.bytes = size;
+        status.records = 1;
         ClientMessage msg = session.createMessage(true /* durable */ );
         msg.setTimestamp(time);
         msg.getBodyBuffer().writeBytes(data);
@@ -50,7 +55,6 @@ public class ArtemisWriter implements Writer<byte[]> {
         } catch ( ActiveMQException ex) {
             ex.printStackTrace();
         }
-        return time;
     }
 
 

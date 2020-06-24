@@ -26,16 +26,18 @@ public class SbkWriter extends Worker implements Runnable {
     final private DataType dType;
     final private Writer writer;
     final private RunBenchmark perf;
-    final private Object payload;
     final private RateController rCnt;
+    final private Object payload;
+    final private int dataSize;
 
     public SbkWriter(int writerID, int idMax, Parameters params, RecordTime recordTime, DataType dType, Writer writer) {
         super(writerID, idMax, params, recordTime);
         this.dType = dType;
         this.writer = writer;
-        this.payload = dType.create(params.getRecordSize());
         this.perf = createBenchmark();
         this.rCnt = new SbkRateController();
+        this.payload = dType.create(params.getRecordSize());
+        this.dataSize = dType.length(this.payload);
     }
 
     @Override
@@ -75,32 +77,32 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
     private void RecordsWriter() throws InterruptedException, IOException {
-        writer.RecordsWriter(this, dType, payload);
+        writer.RecordsWriter(this, dType, payload, dataSize);
     }
 
 
     private void RecordsWriterSync() throws InterruptedException, IOException {
-        writer.RecordsWriterSync(this, dType, payload, rCnt);
+        writer.RecordsWriterSync(this, dType, payload, dataSize, rCnt);
     }
 
 
     private void RecordsWriterTime() throws InterruptedException, IOException {
-        writer.RecordsWriterTime(this, dType, payload);
+        writer.RecordsWriterTime(this, dType, payload, dataSize);
     }
 
 
     private void RecordsWriterTimeSync() throws InterruptedException, IOException {
-        writer.RecordsWriterTimeSync(this, dType, payload, rCnt);
+        writer.RecordsWriterTimeSync(this, dType, payload, dataSize, rCnt);
     }
 
 
     private void RecordsWriterRW() throws InterruptedException, IOException {
-        writer.RecordsWriterRW(this, dType, payload, rCnt);
+        writer.RecordsWriterRW(this, dType, payload, dataSize, rCnt);
     }
 
 
     private void RecordsWriterTimeRW() throws InterruptedException, IOException {
-        writer.RecordsWriterTimeRW(this, dType, payload, rCnt);
+        writer.RecordsWriterTimeRW(this, dType, payload, dataSize, rCnt);
     }
 
 }

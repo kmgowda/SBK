@@ -8,7 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.NatsStream;
+import io.sbk.api.DataType;
 import io.sbk.api.RecordTime;
+import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
 
@@ -40,8 +42,11 @@ public class NatsStreamWriter implements Writer<byte[]> {
      }
 
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record, int id) {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) {
         final long time = System.currentTimeMillis();
+        status.startTime = time;
+        status.bytes = size;
+        status.records = 1;
         final String[] guid = new String[1];
         final AckHandler acb = (s, e) -> {
             if ((e != null) || !guid[0].equals(s)) {
@@ -56,7 +61,6 @@ public class NatsStreamWriter implements Writer<byte[]> {
         } catch (InterruptedException | TimeoutException | IOException ex) {
             ex.printStackTrace();
         }
-        return time;
     }
 
 
