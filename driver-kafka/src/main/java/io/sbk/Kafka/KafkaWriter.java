@@ -62,7 +62,7 @@ public class KafkaWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void flush() {
+    public void sync() {
         producer.flush();
     }
 

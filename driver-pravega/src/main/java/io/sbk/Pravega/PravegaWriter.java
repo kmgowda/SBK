@@ -60,9 +60,8 @@ public class PravegaWriter implements Writer<byte[]> {
         return producer.writeEvent(data);
     }
 
-
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
             producer.flush();
     }
 

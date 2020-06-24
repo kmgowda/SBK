@@ -89,10 +89,10 @@ public interface Parameters {
     int getRecordSize();
 
     /**
-     * Number of records/events to write per single flush.
-     * @return   number of records per flush.
+     * Number of records/events to write/read per single flush/sync.
+     * @return   number of records per sync.
      */
-    int getRecordsPerFlush();
+    int getRecordsPerSync();
 
     /**
      * Number of records/events to write per Second.

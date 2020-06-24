@@ -71,7 +71,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
     }
 
     @Override

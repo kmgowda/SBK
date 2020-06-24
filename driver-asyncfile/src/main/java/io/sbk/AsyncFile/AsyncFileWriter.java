@@ -71,7 +71,7 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         out.force(true);
     }
 

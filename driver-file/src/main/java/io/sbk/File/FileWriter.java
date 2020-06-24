@@ -56,7 +56,7 @@ public class FileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         out.force(config.metaUpdate);
     }
 

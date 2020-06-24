@@ -42,7 +42,7 @@ public class PulsarWriter implements Writer<byte[]> {
 
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         try {
             producer.flush();
         } catch (PulsarClientException ex) {

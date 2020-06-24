@@ -42,7 +42,7 @@ public class FileBufferedWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         out.flush();
     }
 

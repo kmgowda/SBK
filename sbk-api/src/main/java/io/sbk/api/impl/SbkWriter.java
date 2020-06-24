@@ -54,8 +54,8 @@ public class SbkWriter extends Worker implements Runnable {
             if (params.isWriteAndRead()) {
                 perfWriter = this::RecordsWriterTimeRW;
             } else {
-                if (params.getRecordsPerSec() > 0 || params.getRecordsPerFlush() < Integer.MAX_VALUE) {
-                    perfWriter = this::RecordsWriterTimeFlush;
+                if (params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE) {
+                    perfWriter = this::RecordsWriterTimeSync;
                 } else {
                     perfWriter = this::RecordsWriterTime;
                 }
@@ -64,8 +64,8 @@ public class SbkWriter extends Worker implements Runnable {
             if (params.isWriteAndRead()) {
                 perfWriter = this::RecordsWriterRW;
             } else {
-                if (params.getRecordsPerSec() > 0 || params.getRecordsPerFlush() < Integer.MAX_VALUE) {
-                    perfWriter = this::RecordsWriterFlush;
+                if (params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE) {
+                    perfWriter = this::RecordsWriterSync;
                 } else {
                     perfWriter = this::RecordsWriter;
                 }
@@ -79,8 +79,8 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    private void RecordsWriterFlush() throws InterruptedException, IOException {
-        writer.RecordsWriterFlush(this, dType, payload, rCnt);
+    private void RecordsWriterSync() throws InterruptedException, IOException {
+        writer.RecordsWriterSync(this, dType, payload, rCnt);
     }
 
 
@@ -89,8 +89,8 @@ public class SbkWriter extends Worker implements Runnable {
     }
 
 
-    private void RecordsWriterTimeFlush() throws InterruptedException, IOException {
-        writer.RecordsWriterTimeFlush(this, dType, payload, rCnt);
+    private void RecordsWriterTimeSync() throws InterruptedException, IOException {
+        writer.RecordsWriterTimeSync(this, dType, payload, rCnt);
     }
 
 

@@ -90,7 +90,7 @@ public class JdbcWriter implements Writer<String> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         try {
             if (!conn.getAutoCommit()) {
                 conn.commit();

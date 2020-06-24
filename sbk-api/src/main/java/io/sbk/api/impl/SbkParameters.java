@@ -49,7 +49,7 @@ final public class SbkParameters implements Parameters {
     @Getter
     private int recordsPerReader;
     @Getter
-    private int recordsPerFlush;
+    private int recordsPerSync;
     @Getter
     private int secondsToRun;
     @Getter
@@ -83,8 +83,9 @@ final public class SbkParameters implements Parameters {
                 "Number of records(events) if 'time' not specified;\n" +
                         "otherwise, Maximum records per second by writer(s) " +
                         "and/or Number of records per reader");
-        options.addOption("flush", true,
-                "Each Writer calls flush after writing <arg> number of of events(records)");
+        options.addOption("sync", true,
+                "Each Writer calls flush/sync after writing <arg> number of of events(records)" +
+                        " ; <arg> number of events(records) per Write or Read Transaction");
         options.addOption("time", true, "Number of seconds this SBK runs (24hrs by default)");
         options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("throughput", true,
@@ -157,11 +158,11 @@ final public class SbkParameters implements Parameters {
         recordsCount = Integer.parseInt(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
         csvFile = commandline.getOptionValue("csv", null);
-        int flushRecords = Integer.parseInt(commandline.getOptionValue("flush", "0"));
-        if (flushRecords > 0) {
-            recordsPerFlush = flushRecords;
+        int syncRecords = Integer.parseInt(commandline.getOptionValue("sync", "0"));
+        if (syncRecords > 0) {
+            recordsPerSync = syncRecords;
         } else {
-            recordsPerFlush = Integer.MAX_VALUE;
+            recordsPerSync = Integer.MAX_VALUE;
         }
 
         if (commandline.hasOption("time")) {

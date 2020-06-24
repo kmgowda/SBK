@@ -27,10 +27,10 @@ public interface Writer<T>  {
     CompletableFuture<?> writeAsync(T data) throws IOException;
 
     /**
-     * Flush the  data.
+     * Flush / Sync the  data.
      * @throws IOException If an exception occurred.
      */
-    void flush() throws IOException;
+    void sync() throws IOException;
 
     /**
      * Close the  Writer.
@@ -88,7 +88,7 @@ public interface Writer<T>  {
 
     /**
      * Default implementation for writer benchmarking by writing given number of records.
-     * flush is invoked after writing all the records.
+     * sync is invoked after writing all the records.
      *
      * @param writer Writer Descriptor
      * @param dType  Data Type interface
@@ -100,12 +100,12 @@ public interface Writer<T>  {
         for (int i = 0; i < writer.params.getRecordsCount(); i++) {
             recordWrite(data, size, writer.recordTime, i % writer.recordIDMax);
         }
-        flush();
+        sync();
     }
 
     /**
      * Default implementation for writer benchmarking by writing given number of records.
-     * flush is invoked after writing given set of records.
+     * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
      * @param dType  Data Type interface
@@ -113,23 +113,23 @@ public interface Writer<T>  {
      * @param rController Rate Controller
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriterFlush(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
+    default void RecordsWriterSync(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
         final int recordsCount = writer.params.getRecordsPerWriter();
         final int size = dType.length(data);
         int cnt = 0;
         rController.start(writer.params.getRecordsPerSec(), System.currentTimeMillis());
         while (cnt < recordsCount) {
-            int loopMax = Math.min(writer.params.getRecordsPerFlush(), recordsCount - cnt);
+            int loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
                 rController.control(cnt++, recordWrite(data, size, writer.recordTime, i % writer.recordIDMax));
             }
-            flush();
+            sync();
         }
     }
 
     /**
      * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
-     * flush is invoked after writing records for given time.
+     * sync is invoked after writing records for given time.
      *
      * @param writer Writer Descriptor
      * @param dType  Data Type interface
@@ -149,12 +149,12 @@ public interface Writer<T>  {
                 id = 0;
             }
         }
-        flush();
+        sync();
     }
 
     /**
      * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
-     * flush is invoked after writing given set of records.
+     * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
      * @param dType  Data Type interface
@@ -162,7 +162,7 @@ public interface Writer<T>  {
      * @param rController Rate Controller
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriterTimeFlush(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
+    default void RecordsWriterTimeSync(Worker writer, DataType<T> dType, T data, RateController rController) throws IOException {
         final long startTime = writer.params.getStartTime();
         final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
         final int size = dType.length(data);
@@ -171,19 +171,19 @@ public interface Writer<T>  {
         int cnt = 0;
         rController.start(writer.params.getRecordsPerSec(), time);
         while (msElapsed < msToRun) {
-            for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerFlush()); i++) {
+            for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerSync()); i++) {
                 time = recordWrite(data, size, writer.recordTime, i % writer.recordIDMax);
                 rController.control(cnt++, time);
                 msElapsed = time - startTime;
             }
-            flush();
+            sync();
         }
     }
 
     /**
      * Default implementation for writing given number of records. No Writer Benchmarking is performed.
      * Write is performed using {@link io.sbk.api.Writer#writeAsync(Object)}  )}.
-     * flush is invoked after writing given set of records.
+     * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
      * @param dType  Data Type interface
@@ -197,19 +197,19 @@ public interface Writer<T>  {
         long time;
         rController.start(writer.params.getRecordsPerSec(), System.currentTimeMillis());
         while (cnt < recordsCount) {
-            int loopMax = Math.min(writer.params.getRecordsPerFlush(), recordsCount - cnt);
+            int loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             for (int i = 0; i < loopMax; i++) {
                 time = writeAsyncTime(dType, data);
                 rController.control(cnt++, time);
             }
-            flush();
+            sync();
         }
     }
 
     /**
      * Default implementation for writing data records for specific time duration. No Writer Benchmarking is performed.
      * Write is performed using {@link io.sbk.api.Writer#writeAsync(Object)}  )}.
-     * flush is invoked after writing given set of records.
+     * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
      * @param dType  Data Type interface
@@ -225,12 +225,12 @@ public interface Writer<T>  {
         int cnt = 0;
         rController.start(writer.params.getRecordsPerSec(), time);
         while (msElapsed < msToRun) {
-            for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerFlush()); i++) {
+            for (int i = 0; (msElapsed < msToRun) && (i < writer.params.getRecordsPerSync()); i++) {
                 time = writeAsyncTime(dType, data);
                 rController.control(cnt++, time);
                 msElapsed = time - startTime;
             }
-            flush();
+            sync();
         }
     }
 }
