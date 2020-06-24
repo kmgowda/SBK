@@ -43,6 +43,7 @@ public interface Writer<T>  {
      * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * then you can override this method. otherwise, use the default implementation and don't override this method.
      * If you are intend to use your own payload, then also you can use override this method.
+     * you can write multiple records with this method.
      *
      * @param dType   Data Type interface
      * @param data  data to writer
@@ -64,6 +65,7 @@ public interface Writer<T>  {
      * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * then you can override this method. otherwise, use the default implementation and don't override this method.
      * If you are intend to use your own payload, then also you can use override this method.
+     * you can write multiple records with this method.
      *
      * @param dType   Data Type interface
      * @param data   data to write

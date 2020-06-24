@@ -87,6 +87,14 @@ public interface Reader<T> {
         }
     }
 
+    /**
+     * Default implementation for benchmarking reader by reading given number of records.
+     * This method uses the method {@link Reader#recordRead(DataType, Status, RecordTime, int)}
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @throws IOException If an exception occurred.
+     */
     default void RecordsReader(Worker reader, DataType<T> dType) throws IOException {
         final Status status = new Status();
         try {
@@ -103,7 +111,14 @@ public interface Reader<T> {
         }
     }
 
-
+    /**
+     * Default implementation for benchmarking reader by reading given number of records.
+     * This method uses the method {@link Reader#recordReadTime(DataType, Status, RecordTime, int)}}
+     *
+     * @param reader      Reader Descriptor
+     * @param dType     dataType
+     * @throws IOException If an exception occurred.
+     */
     default void RecordsReaderRW(Worker reader, DataType<T> dType) throws IOException {
         final Status status = new Status();
         try {
@@ -120,7 +135,14 @@ public interface Reader<T> {
         }
     }
 
-
+    /**
+     * Default implementation for benchmarking reader by reading events/records for specific time duration.
+     * This method uses the method {@link Reader#recordRead(DataType, Status, RecordTime, int)}
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @throws IOException If an exception occurred.
+     */
     default void RecordsTimeReader(Worker reader, DataType<T> dType) throws IOException {
         final Status status = new Status();
         final long startTime = reader.params.getStartTime();
@@ -138,6 +160,14 @@ public interface Reader<T> {
         }
     }
 
+    /**
+     * Default implementation for benchmarking reader by reading events/records for specific time duration.
+     * This method uses the method {@link Reader#recordReadTime(DataType, Status, RecordTime, int)}}
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @throws IOException If an exception occurred.
+     */
     default void RecordsTimeReaderRW(Worker reader, DataType<T> dType) throws IOException {
         final Status status = new Status();
         final long startTime = reader.params.getStartTime();
