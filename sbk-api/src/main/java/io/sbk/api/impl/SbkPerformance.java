@@ -22,7 +22,6 @@ import io.sbk.api.Config;
 import io.sbk.api.Performance;
 import io.sbk.api.RecordTime;
 import io.sbk.api.ResultLogger;
-import io.sbk.api.TimeStamp;
 import lombok.Synchronized;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -82,6 +81,35 @@ final public class SbkPerformance implements Performance {
         }
         for (int i = 0; i < timeRecorders.length; i++) {
             timeRecorders[i] = new TimeRecorder(maxQs);
+        }
+    }
+
+    /**
+     * Private class for start and end time.
+     */
+    final static private class TimeStamp {
+        final public long startTime;
+        final public long endTime;
+        final public int bytes;
+        final public int records;
+
+        public TimeStamp(long startTime, long endTime, int bytes, int records) {
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.bytes = bytes;
+            this.records = records;
+        }
+
+        public TimeStamp() {
+            this(0, 0, 0, 0);
+        }
+
+        public TimeStamp(long endTime) {
+            this(-1, endTime, 0, 0);
+        }
+
+        public boolean isEnd() {
+            return this.startTime == -1;
         }
     }
 

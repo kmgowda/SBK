@@ -44,7 +44,7 @@ public interface Reader<T> {
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordRead(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id)
+    default void recordRead(DataType<T> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         status.startTime = System.currentTimeMillis();
         final T ret = read();
@@ -72,7 +72,7 @@ public interface Reader<T> {
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordReadTime(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id)
+    default void recordReadTime(DataType<T> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final T ret = read();
         if (ret == null) {
@@ -84,6 +84,104 @@ public interface Reader<T> {
             status.bytes = dType.length(ret);
             status.records = 1;
             recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        }
+    }
+
+    /**
+     * Default implementation for benchmarking reader by reading given number of records.
+     * This method uses the method {@link Reader#recordRead(DataType, Status, RecordTime, int)}
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsReader(Worker reader, DataType<T> dType) throws IOException {
+        final Status status = new Status();
+        try {
+            int i = 0, id = reader.id % reader.recordIDMax;
+            while (i < reader.params.getRecordsPerReader()) {
+                recordRead(dType, status, reader.recordTime, id++);
+                i += status.records;
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
+        }
+    }
+
+    /**
+     * Default implementation for benchmarking reader by reading given number of records.
+     * This method uses the method {@link Reader#recordReadTime(DataType, Status, RecordTime, int)}}
+     *
+     * @param reader      Reader Descriptor
+     * @param dType     dataType
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsReaderRW(Worker reader, DataType<T> dType) throws IOException {
+        final Status status = new Status();
+        try {
+            int i = 0, id = reader.id % reader.recordIDMax;
+            while (i < reader.params.getRecordsPerReader()) {
+                recordReadTime(dType, status, reader.recordTime, id++);
+                i += status.records;
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
+        }
+    }
+
+    /**
+     * Default implementation for benchmarking reader by reading events/records for specific time duration.
+     * This method uses the method {@link Reader#recordRead(DataType, Status, RecordTime, int)}
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsTimeReader(Worker reader, DataType<T> dType) throws IOException {
+        final Status status = new Status();
+        final long startTime = reader.params.getStartTime();
+        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
+        int id = reader.id % reader.recordIDMax;
+        try {
+            while ((status.endTime - startTime) < msToRun) {
+                recordRead(dType, status, reader.recordTime, id++);
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
+        }
+    }
+
+    /**
+     * Default implementation for benchmarking reader by reading events/records for specific time duration.
+     * This method uses the method {@link Reader#recordReadTime(DataType, Status, RecordTime, int)}}
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsTimeReaderRW(Worker reader, DataType<T> dType) throws IOException {
+        final Status status = new Status();
+        final long startTime = reader.params.getStartTime();
+        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
+        int id = reader.id % reader.recordIDMax;
+        try {
+            while ((status.endTime - startTime) < msToRun) {
+                recordReadTime(dType, status, reader.recordTime, id++);
+                if (id >= reader.recordIDMax) {
+                    id = 0;
+                }
+            }
+        } catch (EOFException ex) {
+            //
         }
     }
 }

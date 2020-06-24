@@ -8,7 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Kafka;
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
+import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.api.RecordTime;
 
@@ -33,13 +35,15 @@ public class KafkaWriter implements Writer<byte[]> {
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record, int id) {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) {
         final long time = System.currentTimeMillis();
+        status.startTime = time;
+        status.bytes = size;
+        status.records = 1;
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = System.currentTimeMillis();
             record.accept(id, time, endTime, size, 1);
         });
-        return time;
     }
 
     private CompletableFuture writeAsyncFuture(byte[] data) {
@@ -62,7 +66,7 @@ public class KafkaWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void flush() {
+    public void sync() {
         producer.flush();
     }
 

@@ -46,7 +46,7 @@ public class BookKeeperWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         try {
             ret.get();
         } catch (InterruptedException | ExecutionException ex) {

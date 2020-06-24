@@ -15,15 +15,15 @@ SBK does not support the End to End latency for file system stream benchmarking.
 The FIO (Flexible I/O tester) supports multiple files writing at a time. whereas SBK uses single file for write/read operation.
 Both FIO And SBK can be used with Write operations with buffering and writes can be with in sync (Sync to file system).
 
-An Example SBK command for file write with sync (flush) enabled is as follows
+An Example SBK command for file write with sync (sync) enabled is as follows
 
 ```
-./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
+./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -sync 1
 ```
 In the above example, the file size of 10 GB (Giga Bytes) are written with 1048576 (1MB) block/record size.
 The data is flushed for every block/record (1MB in this example) write.  The output is as follows 
 ```
-./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -flush 1
+./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 10000 -sync 1
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -110,7 +110,7 @@ An example,
 fio --name=write --ioengine=psync --iodepth=1 --rw=write --bs=1048576 --size=5G --numjobs=1  --group_reporting  --sync=1 --thread --nrfiles=1
 ```
 
-The SBK can be used with  writes and reads. An example command of write without -flush option is as follows.
+The SBK can be used with  writes and reads. An example command of write without -sync option is as follows.
 ```
 ./build/install/sbk/bin/sbk -class file -file tmp.txt -size 1048576  -writers 1 -records 100000
 ```

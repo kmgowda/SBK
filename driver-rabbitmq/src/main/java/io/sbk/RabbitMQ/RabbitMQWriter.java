@@ -129,7 +129,7 @@ public class RabbitMQWriter implements Writer<byte[]> {
 
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         return;
     }
 

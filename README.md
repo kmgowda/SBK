@@ -80,7 +80,7 @@ usage: sbk
                      RabbitMQ, RocketMQ]
  -context <arg>      Prometheus Metric context;default context:
                      8080/metrics; 'no' disables the  metrics
- -flush <arg>        Each Writer calls flush after writing <arg> number of
+ -sync <arg>        Each Writer calls sync after writing <arg> number of
                      of events(records)
  -help               Help message
  -readers <arg>      Number of readers
@@ -339,7 +339,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
         
       a). Writer Data [Async or Sync]: [[writeAsync](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#writeAsync-byte:A-)]
         
-      b). Flush the data: [[flush](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#flush--)]
+      b). Flush the data: [[sync](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#sync--)]
         
       c). Close the Writer: [[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#close--)]
         
@@ -403,7 +403,7 @@ usage: sbk -class Pulsar
  -deduplication <arg>   Enable or Disable Deduplication; by default
                         disabled
  -ensembleSize <arg>    EnsembleSize (default: 1)
- -flush <arg>           Each Writer calls flush after writing <arg> number
+ -sync <arg>           Each Writer calls sync after writing <arg> number
                         of of events(records)
  -help                  Help message
  -partitions <arg>      Number of partitions of the topic (default: 1)

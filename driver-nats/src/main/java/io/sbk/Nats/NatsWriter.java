@@ -44,7 +44,7 @@ public class NatsWriter implements Writer<byte[]> {
 
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         try {
             producer.flush(Duration.ZERO);
         } catch (InterruptedException | TimeoutException ex) {

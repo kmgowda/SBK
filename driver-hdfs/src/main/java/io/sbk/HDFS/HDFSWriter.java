@@ -8,8 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.HDFS;
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
+import io.sbk.api.Status;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
@@ -43,11 +45,13 @@ public class HDFSWriter implements Writer<byte[]> {
     }
 
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
-        final long time = System.currentTimeMillis();
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) throws IOException {
+        status.startTime = System.currentTimeMillis();
         out.write(data);
-        record.accept(id, time, System.currentTimeMillis(), size, 1);
-        return time;
+        status.endTime = System.currentTimeMillis();
+        status.records = 1;
+        status.bytes = size;
+        record.accept(id, status.startTime, status.endTime, size, 1);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class HDFSWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         out.hflush();
         out.hsync();
     }

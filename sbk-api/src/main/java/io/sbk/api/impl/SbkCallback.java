@@ -15,6 +15,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Callback;
+import io.sbk.api.Worker;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
@@ -59,7 +60,7 @@ public class SbkCallback extends Worker implements Callback, Benchmark {
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
-        final int id = (int) (cnt % idMax);
+        final int id = (int) (cnt % recordIDMax);
         recordTime.accept(id, startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && ((endTime - beginTime)  >= this.msToRun)) {
             ret.complete(null);

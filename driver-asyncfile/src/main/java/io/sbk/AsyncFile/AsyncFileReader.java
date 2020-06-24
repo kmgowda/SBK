@@ -13,7 +13,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.RecordTime;
-import io.sbk.api.TimeStamp;
+import io.sbk.api.Status;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -45,7 +45,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordRead(DataType<ByteBuffer> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    public void recordRead(DataType<ByteBuffer> dType, Status status, RecordTime recordTime, int id) throws IOException {
         final long time = System.currentTimeMillis();
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
@@ -65,7 +65,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordReadTime(DataType<ByteBuffer> dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    public void recordReadTime(DataType<ByteBuffer> dType, Status status, RecordTime recordTime, int id) throws IOException {
         final ByteBuffer buffer =  dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {

@@ -8,8 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.File;
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
+import io.sbk.api.Status;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
@@ -39,12 +41,14 @@ public class FileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public long recordWrite(ByteBuffer data, int size, RecordTime record, int id) throws IOException {
-        final long time = System.currentTimeMillis();
+    public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Status status, RecordTime record, int id) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
+        status.startTime = System.currentTimeMillis();
         out.write(buffer);
-        record.accept(id, time, System.currentTimeMillis(), size, 1);
-        return time;
+        status.endTime = System.currentTimeMillis();
+        status.bytes = size;
+        status.records = 1;
+        record.accept(id, status.startTime, status.endTime, size, 1);
     }
 
 
@@ -56,7 +60,7 @@ public class FileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         out.force(config.metaUpdate);
     }
 

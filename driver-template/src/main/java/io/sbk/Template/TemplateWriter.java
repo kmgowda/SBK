@@ -30,7 +30,7 @@ public class TemplateWriter implements Writer<byte[]> {
 
 
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
         throw new IOException("Its Template Writer Driver");
     }
 

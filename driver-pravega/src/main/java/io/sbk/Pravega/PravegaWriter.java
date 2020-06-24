@@ -9,8 +9,10 @@
  */
 package io.sbk.Pravega;
 
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
+import io.sbk.api.Status;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
@@ -36,22 +38,25 @@ public class PravegaWriter implements Writer<byte[]> {
     /**
      * Writes the data and benchmark.
      *
+     * @param dType   Data Type interface
      * @param data   data to write
      * @param size   size of the data
+     * @param status Write status to return
      * @param record to call for benchmarking
      * @param id     for record benchmarking
-     * @return time return the data sent time
      */
     @Override
-    public long recordWrite(byte[] data, int size, RecordTime record, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) throws IOException {
         CompletableFuture<Void> ret;
         final long time = System.currentTimeMillis();
+        status.startTime = time;
+        status.records = 1;
+        status.bytes = size;
         ret = writeAsync(data);
         ret.thenAccept(d -> {
             final long endTime = System.currentTimeMillis();
             record.accept(id, time, endTime, size, 1);
         });
-        return time;
     }
 
 
@@ -60,9 +65,8 @@ public class PravegaWriter implements Writer<byte[]> {
         return producer.writeEvent(data);
     }
 
-
     @Override
-    public void flush() throws IOException {
+    public void sync() throws IOException {
             producer.flush();
     }
 
