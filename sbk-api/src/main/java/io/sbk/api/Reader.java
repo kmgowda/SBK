@@ -44,7 +44,7 @@ public interface Reader<T> {
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordRead(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id)
+    default void recordRead(DataType<T> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         status.startTime = System.currentTimeMillis();
         final T ret = read();
@@ -72,7 +72,7 @@ public interface Reader<T> {
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordReadTime(DataType<T> dType, TimeStamp status, RecordTime recordTime, int id)
+    default void recordReadTime(DataType<T> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final T ret = read();
         if (ret == null) {
@@ -88,7 +88,7 @@ public interface Reader<T> {
     }
 
     default void RecordsReader(Worker reader, DataType<T> dType) throws IOException {
-        final TimeStamp status = new TimeStamp();
+        final Status status = new Status();
         try {
             int i = 0, id = reader.id % reader.recordIDMax;
             while (i < reader.params.getRecordsPerReader()) {
@@ -105,7 +105,7 @@ public interface Reader<T> {
 
 
     default void RecordsReaderRW(Worker reader, DataType<T> dType) throws IOException {
-        final TimeStamp status = new TimeStamp();
+        final Status status = new Status();
         try {
             int i = 0, id = reader.id % reader.recordIDMax;
             while (i < reader.params.getRecordsPerReader()) {
@@ -122,7 +122,7 @@ public interface Reader<T> {
 
 
     default void RecordsTimeReader(Worker reader, DataType<T> dType) throws IOException {
-        final TimeStamp status = new TimeStamp();
+        final Status status = new Status();
         final long startTime = reader.params.getStartTime();
         final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
@@ -139,7 +139,7 @@ public interface Reader<T> {
     }
 
     default void RecordsTimeReaderRW(Worker reader, DataType<T> dType) throws IOException {
-        final TimeStamp status = new TimeStamp();
+        final Status status = new Status();
         final long startTime = reader.params.getStartTime();
         final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;

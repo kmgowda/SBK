@@ -22,7 +22,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.RecordTime;
-import io.sbk.api.TimeStamp;
+import io.sbk.api.Status;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    public void recordRead(DataType dType, Status status, RecordTime recordTime, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -68,7 +68,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, TimeStamp status, RecordTime recordTime, int id) throws IOException {
+    public void recordReadTime(DataType dType, Status status, RecordTime recordTime, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
