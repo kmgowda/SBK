@@ -69,12 +69,15 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
             for (int i = 0; i < recs; i++) {
                 byte[] result = tr.get(Tuple.from(startKey++).pack()).join();
                 if (result != null) {
-                    stat.bytes = result.length;
+                    stat.bytes += result.length;
                     stat.records += 1;
                 }
             }
             return stat;
         });
+        if (ret.records == 0) {
+            throw new EOFException();
+        }
         status.records = ret.records;
         status.bytes = ret.bytes;
         status.endTime = System.currentTimeMillis();
@@ -100,7 +103,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
             for (int i = 0; i < recs; i++) {
                 byte[] result = tr.get(Tuple.from(startKey++).pack()).join();
                 if (result != null) {
-                    stat.bytes = result.length;
+                    stat.bytes += result.length;
                     stat.records += 1;
                 } else {
                     break;
