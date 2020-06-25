@@ -35,7 +35,7 @@ public class FoundationDBWriter implements Writer<byte[]> {
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
         key++;
-        return db.runAsync(tr -> {
+        return db.run(tr -> {
             tr.set(Tuple.from(key).pack(), data);
             return null;
         });

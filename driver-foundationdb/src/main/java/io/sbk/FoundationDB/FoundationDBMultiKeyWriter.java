@@ -39,7 +39,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
-        return db.runAsync(tr -> {
+        return db.run(tr -> {
             tr.set(Tuple.from(key).pack(), data);
             return null;
         });
@@ -65,7 +65,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
         status.bytes = size * recs;
         status.records =  recs;
         status.startTime = time;
-        db.runAsync(tr -> {
+        db.run(tr -> {
             long keyCnt = key;
             for (int i = 0; i < recs; i++) {
                 tr.set(Tuple.from(keyCnt++).pack(), dType.setTime(data, time));
@@ -77,33 +77,24 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime recordTime, int id) throws IOException {
-        CompletableFuture<?> ret;
         final int recs;
         if (params.getRecordsPerReader() > key) {
             recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
-        final long time = System.currentTimeMillis();
         status.bytes = size * recs;
         status.records =  recs;
-        status.startTime = time;
-        ret = db.runAsync(tr -> {
+        status.startTime = System.currentTimeMillis();
+        db.run(tr -> {
             long keyCnt = key;
             for (int i = 0; i < recs; i++) {
                 tr.set(Tuple.from(keyCnt++).pack(), data);
             }
             return null;
         });
-        if (ret == null) {
-            status.endTime = System.currentTimeMillis();
-            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
-        } else {
-            ret.thenAccept(d -> {
-                final long endTime = System.currentTimeMillis();
-                recordTime.accept(id, time, endTime, size * recs, recs);
-            });
-        }
+        status.endTime = System.currentTimeMillis();
+        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
     }
 
