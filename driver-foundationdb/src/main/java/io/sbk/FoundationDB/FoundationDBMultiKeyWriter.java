@@ -1,0 +1,110 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.sbk.FoundationDB;
+
+import com.apple.foundationdb.Database;
+import com.apple.foundationdb.tuple.Tuple;
+import io.sbk.api.DataType;
+import io.sbk.api.Parameters;
+import io.sbk.api.RecordTime;
+import io.sbk.api.Status;
+import io.sbk.api.Writer;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * Class for Multi Key Writer.
+ */
+public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
+    final private Parameters params;
+    final private Database db;
+    private long key;
+
+    public FoundationDBMultiKeyWriter(int id, Parameters params, Database db) throws IOException {
+        this.params = params;
+        this.key = id * Integer.MAX_VALUE;
+        this.db = db;
+        this.db.run(tr -> {
+            tr.clear(Tuple.from(key + 1).pack(), Tuple.from(key + 1 + Integer.MAX_VALUE).pack());
+            return null;
+        });
+    }
+
+    @Override
+    public CompletableFuture writeAsync(byte[] data) throws IOException {
+        return db.runAsync(tr -> {
+            tr.set(Tuple.from(key).pack(), data);
+            return null;
+        });
+    }
+
+    @Override
+    public void sync() throws IOException {
+    }
+
+    @Override
+    public void close() throws  IOException {
+    }
+
+    @Override
+    public void writeAsyncTime(DataType<byte[]> dType, byte[] data, int size, Status status) throws IOException {
+        final int recs;
+        if (params.getRecordsPerReader() > key) {
+            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        } else {
+            recs = params.getRecordsPerSync();
+        }
+        final long time = System.currentTimeMillis();
+        status.bytes = size * recs;
+        status.records =  recs;
+        status.startTime = time;
+        db.runAsync(tr -> {
+            long keyCnt = key;
+            for (int i = 0; i < recs; i++) {
+                tr.set(Tuple.from(keyCnt++).pack(), dType.setTime(data, time));
+            }
+            return null;
+        });
+        key += recs;
+    }
+
+    @Override
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime recordTime, int id) throws IOException {
+        CompletableFuture<?> ret;
+        final int recs;
+        if (params.getRecordsPerReader() > key) {
+            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        } else {
+            recs =  params.getRecordsPerSync();
+        }
+        final long time = System.currentTimeMillis();
+        status.bytes = size * recs;
+        status.records =  recs;
+        status.startTime = time;
+        ret = db.runAsync(tr -> {
+            long keyCnt = key;
+            for (int i = 0; i < recs; i++) {
+                tr.set(Tuple.from(keyCnt++).pack(), data);
+            }
+            return null;
+        });
+        if (ret == null) {
+            status.endTime = System.currentTimeMillis();
+            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        } else {
+            ret.thenAccept(d -> {
+                final long endTime = System.currentTimeMillis();
+                recordTime.accept(id, time, endTime, size * recs, recs);
+            });
+        }
+        key += recs;
+    }
+
+}
