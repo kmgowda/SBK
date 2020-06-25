@@ -105,6 +105,9 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
                 if (result != null) {
                     stat.bytes += result.length;
                     stat.records += 1;
+                    if (stat.startTime == 0) {
+                        stat.startTime = dType.getTime(result);
+                    }
                 } else {
                     break;
                 }
