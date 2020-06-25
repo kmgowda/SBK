@@ -66,7 +66,11 @@ public class FoundationDB implements Storage<byte[]> {
     @Override
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
-            return new FoundationDBWriter(id, params, db);
+            if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                return new FoundationDBMultiKeyWriter(id, params, db);
+            } else {
+                return new FoundationDBWriter(id, params, db);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -76,7 +80,11 @@ public class FoundationDB implements Storage<byte[]> {
     @Override
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
-            return new FoundationDBReader(id, params, db);
+            if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                return new FoundationDBMultiKeyReader(id, params, db);
+            } else {
+                return new FoundationDBReader(id, params, db);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
