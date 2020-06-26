@@ -75,19 +75,20 @@ Running SBK locally:
 usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     ConcurrentQ, File, FileStream, HDFS, Jdbc, Kafka,
-                     MinIO, Nats, NatsStream, Nsq, Pravega, Pulsar,
-                     RabbitMQ, RocketMQ]
+                     ConcurrentQ, File, FileStream, FoundationDB, HDFS,
+                     Jdbc, Kafka, MinIO, Nats, NatsStream, Nsq, Pravega,
+                     Pulsar, RabbitMQ, RocketMQ]
  -context <arg>      Prometheus Metric context;default context:
                      8080/metrics; 'no' disables the  metrics
- -sync <arg>        Each Writer calls sync after writing <arg> number of
-                     of events(records)
  -help               Help message
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'time' not specified;
                      otherwise, Maximum records per second by writer(s)
                      and/or Number of records per reader
  -size <arg>         Size of each message (event or record)
+ -sync <arg>         Each Writer calls flush/sync after writing <arg>
+                     number of of events(records) ; <arg> number of
+                     events(records) per Write or Read Transaction
  -throughput <arg>   if > 0 , throughput in MB/s
                      if 0 , writes 'records'
                      if -1, get the maximum throughput
@@ -394,17 +395,15 @@ usage: sbk -class Pulsar
  -broker <arg>          Broker URI
  -class <arg>           Storage Driver Class,
                         Available Drivers [Artemis, AsyncFile, BookKeeper,
-                        ConcurrentQ, File, FileStream, HDFS, Jdbc, Kafka,
-                        MinIO, Nats, NatsStream, Nsq, Pravega, Pulsar,
-                        RabbitMQ, RocketMQ]
+                        ConcurrentQ, File, FileStream, FoundationDB, HDFS,
+                        Jdbc, Kafka, MinIO, Nats, NatsStream, Nsq,
+                        Pravega, Pulsar, RabbitMQ, RocketMQ]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
                         8080/metrics; 'no' disables the  metrics
  -deduplication <arg>   Enable or Disable Deduplication; by default
                         disabled
  -ensembleSize <arg>    EnsembleSize (default: 1)
- -sync <arg>           Each Writer calls sync after writing <arg> number
-                        of of events(records)
  -help                  Help message
  -partitions <arg>      Number of partitions of the topic (default: 1)
  -readers <arg>         Number of readers
@@ -412,6 +411,9 @@ usage: sbk -class Pulsar
                         otherwise, Maximum records per second by writer(s)
                         and/or Number of records per reader
  -size <arg>            Size of each message (event or record)
+ -sync <arg>            Each Writer calls flush/sync after writing <arg>
+                        number of of events(records) ; <arg> number of
+                        events(records) per Write or Read Transaction
  -threads <arg>         io threads per Topic; by default (writers +
                         readers)
  -throughput <arg>      if > 0 , throughput in MB/s
