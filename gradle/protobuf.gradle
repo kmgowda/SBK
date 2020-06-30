@@ -18,7 +18,7 @@ plugins.withId('com.google.protobuf') {
                 artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
             }
         }
-        generatedFilesBaseDir = "$projectDir/src/generated/grpc-java"
+        generatedFilesBaseDir = "$projectDir/src/generated"
         generateProtoTasks {
             all()*.plugins {
                 grpc {}
