@@ -35,6 +35,7 @@
             <Class name="io.pravega.common.util.ByteArraySegment" />
             <Class name="io.pravega.controller.store.stream.tables.Data" />
             <Class name="io.pravega.segmentstore.server.logs.operations.StreamSegmentAppendOperation" />
+            <Class name="io.sbk.FdbRecord.FdbRecordLayerProto" />
         </Or>
         <Or>
             <Bug pattern="EI_EXPOSE_REP" />

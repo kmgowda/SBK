@@ -21,7 +21,7 @@ plugins.withId('checkstyle') {
     plugins.withId('java') {
         checkstyle {
             // Exclude generated code from Checkstyle checks
-            checkstyleMain.exclude '**/rest/generated/**'
+            checkstyleMain.exclude '**/generated/**'
         }
     }
 }

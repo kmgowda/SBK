@@ -43,6 +43,8 @@ allprojects {
 	}
 
 	apply plugin: 'java'
+	apply plugin: 'idea'
+	apply plugin: 'eclipse'
 	apply plugin: 'application'
 
 	dependencies {
@@ -98,6 +100,7 @@ dependencies {
 	compile project(':driver-jdbc')
 	compile project(':driver-minio')
 	compile project('driver-foundationdb')
+	compile project('driver-fdbrecord')
 }
 
 //create a single Jar with all dependencies

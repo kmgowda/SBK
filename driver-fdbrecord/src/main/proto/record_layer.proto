@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+option java_package = "io.sbk.FdbRecord";
+option java_outer_classname = "FdbRecordLayerProto";
+
+import "record_metadata_options.proto";
+
+message Record {
+  optional int64 recordID = 1;
+  optional bytes data = 2;
+}
+
+message UnionDescriptor {
+  option (com.apple.foundationdb.record.record).usage = UNION;
+  optional Record _Record = 1;
+}
