@@ -1,0 +1,119 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.sbk.FdbRecord;
+
+import com.apple.foundationdb.record.provider.foundationdb.FDBDatabase;
+import com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext;
+import com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore;
+import com.google.protobuf.ByteString;
+import io.sbk.api.DataType;
+import io.sbk.api.Parameters;
+import io.sbk.api.RecordTime;
+import io.sbk.api.Status;
+import io.sbk.api.Writer;
+
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+
+/**
+ * Class for Writer.
+ */
+public class FdbRecordMultiWriter implements Writer<ByteString> {
+    final private Parameters params;
+    final private FDBDatabase db;
+    final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
+    private long key;
+
+    public FdbRecordMultiWriter(int id, Parameters params, FDBDatabase db,
+                           Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
+        this.params = params;
+        this.key = id * Integer.MAX_VALUE;
+        this.db = db;
+        this.recordStoreProvider = recordStoreProvider;
+    }
+
+    @Override
+    public CompletableFuture writeAsync(ByteString data) throws IOException {
+        key++;
+        return db.run(context -> {
+            FDBRecordStore recordStore = recordStoreProvider.apply(context);
+            recordStore.saveRecord(FdbRecordLayerProto.Record.newBuilder()
+                    .setRecordID(key)
+                    .setData(data)
+                    .build());
+            return null;
+        });
+    }
+
+    @Override
+    public void sync() throws IOException {
+    }
+
+    @Override
+    public void close() throws  IOException {
+    }
+
+    @Override
+    public void writeAsyncTime(DataType<ByteString> dType, ByteString data, int size, Status status) throws IOException {
+        final int recs;
+        if (params.getRecordsPerReader() > key) {
+            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        } else {
+            recs = params.getRecordsPerSync();
+        }
+        final long time = System.currentTimeMillis();
+        status.bytes = size * recs;
+        status.records =  recs;
+        status.startTime = time;
+        db.run(context -> {
+            long keyCnt = key;
+            FDBRecordStore recordStore = recordStoreProvider.apply(context);
+            for (int i = 0; i < recs; i++) {
+                recordStore.saveRecord(FdbRecordLayerProto.Record.newBuilder()
+                        .setRecordID(keyCnt++)
+                        .setData(data)
+                        .build());
+
+            }
+            return null;
+        });
+        key += recs;
+    }
+
+    @Override
+    public void recordWrite(DataType<ByteString> dType, ByteString data, int size, Status status, RecordTime recordTime, int id) throws IOException {
+        final int recs;
+        if (params.getRecordsPerReader() > key) {
+            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        } else {
+            recs =  params.getRecordsPerSync();
+        }
+        status.bytes = size * recs;
+        status.records =  recs;
+        status.startTime = System.currentTimeMillis();
+        db.run(context -> {
+            long keyCnt = key;
+            FDBRecordStore recordStore = recordStoreProvider.apply(context);
+            for (int i = 0; i < recs; i++) {
+                recordStore.saveRecord(FdbRecordLayerProto.Record.newBuilder()
+                        .setRecordID(keyCnt++)
+                        .setData(data)
+                        .build());
+            }
+            return null;
+        });
+        status.endTime = System.currentTimeMillis();
+        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        key += recs;
+    }
+
+
+}

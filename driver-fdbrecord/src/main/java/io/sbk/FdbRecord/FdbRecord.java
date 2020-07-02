@@ -105,7 +105,11 @@ public class FdbRecord implements Storage<ByteString> {
     @Override
     public Writer<ByteString> createWriter(final int id, final Parameters params) {
         try {
-            return new FdbRecordWriter(id, params, db, recordStoreProvider);
+            if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                return new FdbRecordMultiWriter(id, params, db, recordStoreProvider);
+            } else {
+                return new FdbRecordWriter(id, params, db, recordStoreProvider);
+            }
          } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -115,7 +119,12 @@ public class FdbRecord implements Storage<ByteString> {
     @Override
     public Reader<ByteString> createReader(final int id, final Parameters params) {
         try {
-            return new FdbRecordReader(id, params, db, recordStoreProvider);
+            if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                return new FdbRecordMultiReader(id, params, db, recordStoreProvider);
+            } else {
+                return new FdbRecordReader(id, params, db, recordStoreProvider);
+            }
+
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
