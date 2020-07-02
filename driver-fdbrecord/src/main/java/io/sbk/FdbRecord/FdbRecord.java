@@ -61,9 +61,6 @@ public class FdbRecord implements Storage<ByteString> {
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        if (params.getWritersCount() > 1) {
-            throw new IllegalArgumentException("Writers should be only 1 for File writing");
-        }
         if (params.getReadersCount() > 0 && params.getWritersCount() > 0) {
             throw new IllegalArgumentException("Specify either Writer or readers ; both are not allowed");
         }
