@@ -33,6 +33,7 @@ Currently SBK supports benchmarking of
 18. [SQLite](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-with-sqlite)
 19. [MinIO](https://min.io)
 20. [FoundationDB](https://www.foundationdb.org)
+21. [FoundationDB Record Layer](https://foundationdb.github.io/fdb-record-layer)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
