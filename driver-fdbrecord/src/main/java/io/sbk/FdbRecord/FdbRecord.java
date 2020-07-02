@@ -85,7 +85,7 @@ public class FdbRecord implements Storage<ByteString> {
         RecordMetaDataBuilder metaDataBuilder = RecordMetaData.newBuilder()
                 .setRecords(FdbRecordLayerProto.getDescriptor());
         metaDataBuilder.getRecordType("Record")
-                .setPrimaryKey(Key.Expressions.field("RecordID"));
+                .setPrimaryKey(Key.Expressions.field("recordID"));
         recordStoreProvider = context -> FDBRecordStore.newBuilder()
                 .setMetaDataProvider(metaDataBuilder)
                 .setContext(context)

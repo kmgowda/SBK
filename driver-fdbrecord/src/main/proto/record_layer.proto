@@ -6,7 +6,7 @@ option java_outer_classname = "FdbRecordLayerProto";
 import "record_metadata_options.proto";
 
 message Record {
-  optional int64 record_ID = 1;
+  optional int64 recordID = 1;
   optional bytes data = 2;
 }
 
