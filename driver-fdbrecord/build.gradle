@@ -16,6 +16,7 @@ repositories {
 }
 
 dependencies {
+    compile project(":sbk-api")
     testCompile group: 'junit', name: 'junit', version: '4.12'
     // https://mvnrepository.com/artifact/org.foundationdb/fdb-record-layer-core-pb3
     compile group: 'org.foundationdb', name: 'fdb-record-layer-core-pb3', version: '2.8.110.0'
