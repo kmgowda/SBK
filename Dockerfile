@@ -46,6 +46,7 @@ COPY --chown=root:root driver-nsq ${APP_HOME}/driver-nsq
 COPY --chown=root:root driver-jdbc ${APP_HOME}/driver-jdbc
 COPY --chown=root:root driver-minio ${APP_HOME}/driver-minio
 COPY --chown=root:root driver-foundationdb ${APP_HOME}/driver-foundationdb
+COPY --chown=root:root driver-fdbrecord ${APP_HOME}/driver-fdbrecord
 
 ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  build --no-daemon --info --stacktrace
