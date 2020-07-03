@@ -11,6 +11,7 @@
 package io.sbk.FoundationDB;
 
 import com.apple.foundationdb.Database;
+import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
@@ -22,12 +23,18 @@ import java.io.IOException;
  * Class for Reader.
  */
 public class FoundationDBReader implements Reader<byte[]> {
+    final private FoundationDBConfig config;
     final private Database db;
     private long key;
 
-    public FoundationDBReader(int id, Parameters params, Database db) throws IOException {
+    public FoundationDBReader(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.key = (id * Integer.MAX_VALUE) + 1;
-        this.db = db;
+        this.config = config;
+        if (config.multiClient) {
+            this.db = fdb.open(config.cFile);
+        } else {
+            this.db = db;
+        }
     }
 
     @Override
@@ -45,5 +52,8 @@ public class FoundationDBReader implements Reader<byte[]> {
 
     @Override
     public void close() throws  IOException {
+        if (config.multiClient && this.db != null) {
+            this.db.close();
+        }
     }
 }

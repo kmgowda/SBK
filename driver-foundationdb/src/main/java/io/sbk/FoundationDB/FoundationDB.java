@@ -45,31 +45,39 @@ public class FoundationDB implements Storage<byte[]> {
         }
 
         params.addOption("cfile", true, "cluster file, default : "+ config.cFile);
+        params.addOption("multiclient", true, "client connection per Writer/Reader, default : "+ config.multiClient);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         config.cFile =  params.getOptionValue("cfile", config.cFile);
+        config.multiClient = Boolean.parseBoolean(params.getOptionValue("multiclient", Boolean.toString(config.multiClient)));
     }
 
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         fdb = FDB.selectAPIVersion(config.version);
-        db = fdb.open(config.cFile);
+        if (config.multiClient) {
+            db = null;
+        } else {
+            db = fdb.open(config.cFile);
+        }
     }
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
-        db.close();
+        if (db != null) {
+            db.close();
+        }
     }
 
     @Override
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
-                return new FoundationDBMultiKeyWriter(id, params, db);
+                return new FoundationDBMultiKeyWriter(id, params, config, fdb, db);
             } else {
-                return new FoundationDBWriter(id, params, db);
+                return new FoundationDBWriter(id, params, config, fdb, db);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -81,9 +89,9 @@ public class FoundationDB implements Storage<byte[]> {
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
             if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
-                return new FoundationDBMultiKeyReader(id, params, db);
+                return new FoundationDBMultiKeyReader(id, params, config, fdb, db);
             } else {
-                return new FoundationDBReader(id, params, db);
+                return new FoundationDBReader(id, params, config, fdb, db);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
