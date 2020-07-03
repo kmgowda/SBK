@@ -58,9 +58,9 @@ public class FoundationDB implements Storage<byte[]> {
     public void openStorage(final Parameters params) throws  IOException {
         fdb = FDB.selectAPIVersion(config.version);
         if (config.multiClient) {
-            db = fdb.open(config.cFile);
-        } else {
             db = null;
+        } else {
+            db = fdb.open(config.cFile);
         }
     }
 
