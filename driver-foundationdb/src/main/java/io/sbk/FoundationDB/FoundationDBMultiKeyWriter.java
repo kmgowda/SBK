@@ -10,6 +10,7 @@
 package io.sbk.FoundationDB;
 
 import com.apple.foundationdb.Database;
+import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
@@ -27,10 +28,14 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     final private Database db;
     private long key;
 
-    public FoundationDBMultiKeyWriter(int id, Parameters params, Database db) throws IOException {
+    public FoundationDBMultiKeyWriter(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.params = params;
         this.key = id * Integer.MAX_VALUE;
-        this.db = db;
+        if (config.multiClient) {
+            this.db = fdb.open(config.cFile);
+        } else {
+            this.db = db;
+        }
         this.db.run(tr -> {
             tr.clear(Tuple.from(key + 1).pack(), Tuple.from(key + 1 + Integer.MAX_VALUE).pack());
             return null;
