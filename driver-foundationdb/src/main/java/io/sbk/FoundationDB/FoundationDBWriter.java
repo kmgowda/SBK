@@ -21,11 +21,13 @@ import java.util.concurrent.CompletableFuture;
  * Class for Writer.
  */
 public class FoundationDBWriter implements Writer<byte[]> {
+    final private FoundationDBConfig config;
     final private Database db;
     private long key;
 
     public FoundationDBWriter(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.key = id * Integer.MAX_VALUE;
+        this.config = config;
         if (config.multiClient) {
             this.db = fdb.open(config.cFile);
         } else {
@@ -52,5 +54,8 @@ public class FoundationDBWriter implements Writer<byte[]> {
 
     @Override
     public void close() throws  IOException {
+        if (config.multiClient && this.db != null) {
+            this.db.close();
+        }
     }
 }

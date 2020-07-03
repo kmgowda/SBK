@@ -66,7 +66,9 @@ public class FoundationDB implements Storage<byte[]> {
 
     @Override
     public void closeStorage(final Parameters params) throws IOException {
-        db.close();
+        if (db != null) {
+            db.close();
+        }
     }
 
     @Override
