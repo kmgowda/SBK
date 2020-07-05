@@ -28,11 +28,13 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     final private FoundationDBConfig config;
     final private Database db;
     private long key;
+    private int cnt;
 
     public FoundationDBMultiKeyWriter(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.params = params;
         this.config = config;
         this.key = id * Integer.MAX_VALUE;
+        this.cnt = 0;
         if (config.multiClient) {
             this.db = fdb.open(config.cFile);
         } else {
@@ -66,8 +68,8 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     @Override
     public void writeAsyncTime(DataType<byte[]> dType, byte[] data, int size, Status status) throws IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerWriter() > cnt) {
+            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
         }
@@ -83,15 +85,16 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
             return null;
         });
         key += recs;
+        cnt += recs;
     }
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime recordTime, int id) throws IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerWriter() > cnt) {
+            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
-            recs =  params.getRecordsPerSync();
+            recs = params.getRecordsPerSync();
         }
         status.bytes = size * recs;
         status.records =  recs;
@@ -106,6 +109,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
         status.endTime = System.currentTimeMillis();
         recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
+        cnt += recs;
     }
 
 }

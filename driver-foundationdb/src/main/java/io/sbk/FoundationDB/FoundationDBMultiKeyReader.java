@@ -30,11 +30,13 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     final private FoundationDBConfig config;
     final private Database db;
     private long key;
+    private int cnt;
 
     public FoundationDBMultiKeyReader(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.params = params;
         this.config = config;
         this.key = (id * Integer.MAX_VALUE) + 1;
+        this.cnt = 0;
         if (config.multiClient) {
             this.db = fdb.open(config.cFile);
         } else {
@@ -66,8 +68,8 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     public void recordRead(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerReader() > cnt) {
+            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -92,6 +94,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         status.bytes = ret.bytes;
         status.endTime = System.currentTimeMillis();
         key += recs;
+        cnt += recs;
         recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
@@ -100,8 +103,8 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     public void recordReadTime(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerReader() > cnt) {
+            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -128,6 +131,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         status.bytes = ret.bytes;
         status.endTime = System.currentTimeMillis();
         key += status.records;
+        cnt += status.records;
         recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
