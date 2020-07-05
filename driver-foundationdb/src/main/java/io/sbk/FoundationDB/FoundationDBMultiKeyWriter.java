@@ -68,7 +68,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     @Override
     public void writeAsyncTime(DataType<byte[]> dType, byte[] data, int size, Status status) throws IOException {
         final int recs;
-        if (params.getRecordsPerWriter() > cnt) {
+        if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
             recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
@@ -91,7 +91,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime recordTime, int id) throws IOException {
         final int recs;
-        if (params.getRecordsPerWriter() > cnt) {
+        if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
             recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();

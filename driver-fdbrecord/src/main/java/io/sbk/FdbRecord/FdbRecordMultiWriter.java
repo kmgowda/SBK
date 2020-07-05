@@ -31,6 +31,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     final private FDBDatabase db;
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
+    private int cnt;
 
     public FdbRecordMultiWriter(int id, Parameters params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
@@ -64,8 +65,8 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     @Override
     public void writeAsyncTime(DataType<ByteString> dType, ByteString data, int size, Status status) throws IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
+            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
         }
@@ -86,15 +87,16 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
             return null;
         });
         key += recs;
+        cnt += recs;
     }
 
     @Override
     public void recordWrite(DataType<ByteString> dType, ByteString data, int size, Status status, RecordTime recordTime, int id) throws IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
+            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
-            recs =  params.getRecordsPerSync();
+            recs = params.getRecordsPerSync();
         }
         status.bytes = size * recs;
         status.records =  recs;
@@ -113,6 +115,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
         status.endTime = System.currentTimeMillis();
         recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
+        cnt += recs;
     }
 
 

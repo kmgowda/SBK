@@ -34,11 +34,13 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     final private FDBDatabase db;
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
+    private int cnt;
 
     public FdbRecordMultiReader(int id, Parameters params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
         this.params = params;
         this.key = (id * Integer.MAX_VALUE) + 1;
+        this.cnt = 0;
         this.db = db;
         this.recordStoreProvider = recordStoreProvider;
     }
@@ -69,8 +71,8 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     public void recordRead(DataType<ByteString> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
+            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -99,6 +101,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         status.bytes = ret.bytes;
         status.endTime = System.currentTimeMillis();
         key += recs;
+        cnt += recs;
         recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
@@ -107,8 +110,8 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     public void recordReadTime(DataType<ByteString> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final int recs;
-        if (params.getRecordsPerReader() > key) {
-            recs = Math.min(params.getRecordsPerReader(), params.getRecordsPerSync());
+        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
+            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -141,6 +144,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         status.bytes = ret.bytes;
         status.endTime = System.currentTimeMillis();
         key += status.records;
+        cnt += status.records;
         recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 }
