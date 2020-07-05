@@ -55,5 +55,6 @@
     <allow pkg="io.minio" />
     <allow pkg="org.xmlpull" />
     <allow pkg="com.apple" />
-
+    <allow pkg="com.mongodb" />
+    <allow pkg="org.bson" />
 </import-control>
