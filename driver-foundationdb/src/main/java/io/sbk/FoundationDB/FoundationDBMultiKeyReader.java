@@ -68,7 +68,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     public void recordRead(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final int recs;
-        if (params.getRecordsPerReader() > cnt) {
+        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
             recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
@@ -103,7 +103,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     public void recordReadTime(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
             throws EOFException, IOException {
         final int recs;
-        if (params.getRecordsPerReader() > cnt) {
+        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
             recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
