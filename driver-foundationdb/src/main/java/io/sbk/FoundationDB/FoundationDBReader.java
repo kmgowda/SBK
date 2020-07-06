@@ -28,7 +28,7 @@ public class FoundationDBReader implements Reader<byte[]> {
     private long key;
 
     public FoundationDBReader(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
-        this.key = (id * Integer.MAX_VALUE) + 1;
+        this.key = FoundationDB.generateStartKey(id);
         this.config = config;
         if (config.multiClient) {
             this.db = fdb.open(config.cFile);

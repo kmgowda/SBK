@@ -98,4 +98,8 @@ public class FoundationDB implements Storage<byte[]> {
             return null;
         }
     }
+
+    public static long generateStartKey(int id) {
+        return (long) id * (long) Integer.MAX_VALUE;
+    }
 }

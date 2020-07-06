@@ -35,7 +35,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     public FoundationDBMultiKeyReader(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.params = params;
         this.config = config;
-        this.key = (id * Integer.MAX_VALUE) + 1;
+        this.key = FoundationDB.generateStartKey(id);
         this.cnt = 0;
         if (config.multiClient) {
             this.db = fdb.open(config.cFile);
