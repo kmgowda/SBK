@@ -184,7 +184,7 @@ final public class SbkParameters implements Parameters {
                 throw new IllegalArgumentException("Error: Must specify the record 'size'");
             }
             writeAndRead = readersCount > 0;
-            recordsPerWriter = (recordsCount + writersCount - 1) / writersCount;
+            recordsPerWriter = recordsCount / writersCount;
             if (throughput < 0 && secondsToRun > 0) {
                 recordsPerSec = recordsCount / writersCount;
             } else if (throughput > 0) {
