@@ -76,7 +76,7 @@ public class SbkBenchmark implements Benchmark {
             this.maxQs = Math.max(Config.MIN_Q_PER_WORKER, config.qPerWorker);
         }
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 6;
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 10;
         if (config.fork) {
             executor = new ForkJoinPool(threadCount);
         } else {
