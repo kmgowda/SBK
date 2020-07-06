@@ -135,4 +135,10 @@ public class FdbRecord implements Storage<ByteString> {
     public DataType<ByteString> getDataType() {
         return new ProtoBufByteString();
     }
+
+
+    public static long generateStartKey(int id) {
+        return (long) id * (long) Integer.MAX_VALUE;
+    }
+
 }

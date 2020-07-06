@@ -39,7 +39,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     public FdbRecordMultiReader(int id, Parameters params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
         this.params = params;
-        this.key = (id * Integer.MAX_VALUE) + 1;
+        this.key = FdbRecord.generateStartKey(id);
         this.cnt = 0;
         this.db = db;
         this.recordStoreProvider = recordStoreProvider;

@@ -33,7 +33,7 @@ public class FdbRecordReader implements Reader<ByteString> {
 
     public FdbRecordReader(int id, Parameters params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
-        this.key = (id * Integer.MAX_VALUE) + 1;
+        this.key = FdbRecord.generateStartKey(id);
         this.db = db;
         this.recordStoreProvider = recordStoreProvider;
     }
