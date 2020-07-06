@@ -26,7 +26,7 @@ public class FoundationDBWriter implements Writer<byte[]> {
     private long key;
 
     public FoundationDBWriter(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
-        this.key = id * Integer.MAX_VALUE;
+        this.key = FoundationDB.generateStartKey(id);
         this.config = config;
         if (config.multiClient) {
             this.db = fdb.open(config.cFile);
@@ -41,9 +41,9 @@ public class FoundationDBWriter implements Writer<byte[]> {
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
-        key++;
+        final long startKey = key++;
         return db.run(tr -> {
-            tr.set(Tuple.from(key).pack(), data);
+            tr.set(Tuple.from(startKey).pack(), data);
             return null;
         });
     }

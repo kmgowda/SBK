@@ -33,7 +33,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     public FoundationDBMultiKeyWriter(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.params = params;
         this.config = config;
-        this.key = id * Integer.MAX_VALUE;
+        this.key = FoundationDB.generateStartKey(id);
         this.cnt = 0;
         if (config.multiClient) {
             this.db = fdb.open(config.cFile);
@@ -48,8 +48,9 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
+        final long startKey = key++;
         return db.run(tr -> {
-            tr.set(Tuple.from(key).pack(), data);
+            tr.set(Tuple.from(startKey).pack(), data);
             return null;
         });
     }
