@@ -101,6 +101,7 @@ dependencies {
 	compile project(':driver-minio')
 	compile project('driver-foundationdb')
 	compile project('driver-fdbrecord')
+	compile project('driver-mongodb')
 }
 
 //create a single Jar with all dependencies
