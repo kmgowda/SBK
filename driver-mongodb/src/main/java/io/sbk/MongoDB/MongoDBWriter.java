@@ -26,7 +26,7 @@ public class MongoDBWriter implements Writer<byte[]> {
     private long key;
 
     public MongoDBWriter(int id, Parameters params, MongoDBConfig config, MongoCollection<Document> databaseCollection) throws IOException {
-        this.key = (id * Integer.MAX_VALUE) + 1;
+        this.key = MongoDB.generateStartKey(id);
         this.params = params;
         this.databaseCollection = databaseCollection;
     }

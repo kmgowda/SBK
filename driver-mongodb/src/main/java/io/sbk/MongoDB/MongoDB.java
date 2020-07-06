@@ -72,8 +72,10 @@ public class MongoDB implements Storage<byte[]> {
         client = MongoClients.create(config.url);
         database = client.getDatabase(config.dbName);
         mCollection = database.getCollection(config.collection);
-        mCollection.drop();
-        database.createCollection(config.collection);
+        if (params.getWritersCount() > 0) {
+            mCollection.drop();
+            database.createCollection(config.collection);
+        }
     }
 
     @Override
@@ -101,5 +103,10 @@ public class MongoDB implements Storage<byte[]> {
             ex.printStackTrace();
             return null;
         }
+    }
+
+
+    public static long generateStartKey(int id) {
+        return (long) id * (long) Integer.MAX_VALUE;
     }
 }

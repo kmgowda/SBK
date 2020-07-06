@@ -12,9 +12,11 @@ package io.sbk.MongoDB;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import org.bson.Document;
+import org.bson.types.Binary;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -29,7 +31,7 @@ public class MongoDBReader implements Reader<byte[]> {
     private int cnt;
 
     public MongoDBReader(int id, Parameters params, MongoDBConfig config,  MongoCollection<Document> databaseCollection) throws IOException {
-        this.key = (id * Integer.MAX_VALUE) + 1;
+        this.key = MongoDB.generateStartKey(id);
         this.cnt = 0;
         this.params = params;
         this.databaseCollection = databaseCollection;
@@ -37,14 +39,11 @@ public class MongoDBReader implements Reader<byte[]> {
 
     @Override
     public byte[] read() throws EOFException, IOException {
-        Document query = new Document();
-        query.put("index",  Long.toString(key));
-        MongoCursor<Document> cursor = databaseCollection.find(query).iterator();
-
-        while (cursor.hasNext()) {
+        MongoCursor<Document> cursor = databaseCollection.find(Filters.eq("index", Long.toString(key))).iterator();
+        if (cursor.hasNext()) {
             key++;
-            System.out.println(cursor.next());
-            return (byte[]) cursor.next().get("data");
+            Binary bin = cursor.next().get("data", org.bson.types.Binary.class);
+            return bin.getData();
         }
         return null;
     }
