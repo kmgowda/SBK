@@ -21,21 +21,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class SbkCallback extends Worker implements Callback, Benchmark {
+public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private DataType dataType;
     final private CompletableFuture<Void> ret;
     final private Callback callback;
     final private AtomicLong readCnt;
+    final private long msToRun;
+    final private int totalRecords;
     private long beginTime;
-    private long msToRun;
-    private int totalRecords;
 
-    public SbkCallback(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
+    public SbkCallbackReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
         super(readerId, idMax, params, recordTime);
         this.dataType = dataType;
         this.ret = new CompletableFuture<>();
         this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
+        this.msToRun = params.getSecondsToRun() * Config.MS_PER_SEC;
+        this.totalRecords = params.getRecordsPerReader() * params.getReadersCount();
+
         if (params.isWriteAndRead()) {
             callback = this::consumeRW;
         } else {
@@ -44,10 +47,8 @@ public class SbkCallback extends Worker implements Callback, Benchmark {
     }
 
     @Override
-    public CompletableFuture<Void> start(long statTime, int secondsToRun, int records) {
+    public CompletableFuture<Void> start(long statTime) {
         this.beginTime = statTime;
-        this.msToRun = secondsToRun * Config.MS_PER_SEC;
-        this.totalRecords = records;
         return ret;
     }
 
