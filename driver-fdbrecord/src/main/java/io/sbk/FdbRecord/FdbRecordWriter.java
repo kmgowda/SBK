@@ -30,18 +30,18 @@ public class FdbRecordWriter implements Writer<ByteString> {
 
     public FdbRecordWriter(int id, Parameters params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
-        this.key = id * Integer.MAX_VALUE;
+        this.key = FdbRecord.generateStartKey(id);
         this.db = db;
         this.recordStoreProvider = recordStoreProvider;
     }
 
     @Override
     public CompletableFuture writeAsync(ByteString data) throws IOException {
-        key++;
+        final long startKey = key++;
         return db.run(context -> {
             FDBRecordStore recordStore = recordStoreProvider.apply(context);
             recordStore.saveRecord(FdbRecordLayerProto.Record.newBuilder()
-                    .setRecordID(key)
+                    .setRecordID(startKey)
                     .setData(data)
                     .build());
             return null;

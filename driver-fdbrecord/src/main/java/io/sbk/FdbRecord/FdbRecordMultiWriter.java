@@ -36,7 +36,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     public FdbRecordMultiWriter(int id, Parameters params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
         this.params = params;
-        this.key = id * Integer.MAX_VALUE;
+        this.key = FdbRecord.generateStartKey(id);
         this.db = db;
         this.recordStoreProvider = recordStoreProvider;
     }
