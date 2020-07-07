@@ -108,7 +108,6 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         } else {
             recs =  params.getRecordsPerSync();
         }
-        status.startTime = System.currentTimeMillis();
         final Status ret = db.read(tr -> {
             long startKey = key;
             Status stat = new Status();
@@ -129,6 +128,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         });
         status.records = ret.records;
         status.bytes = ret.bytes;
+        status.startTime = ret.startTime;
         status.endTime = System.currentTimeMillis();
         key += status.records;
         cnt += status.records;

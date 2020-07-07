@@ -115,7 +115,6 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         } else {
             recs =  params.getRecordsPerSync();
         }
-        status.startTime = System.currentTimeMillis();
         final Status ret = db.run(context -> {
             long startKey = key;
             Status stat = new Status();
@@ -140,6 +139,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
             }
             return stat;
         });
+        status.startTime = ret.startTime;
         status.records = ret.records;
         status.bytes = ret.bytes;
         status.endTime = System.currentTimeMillis();
