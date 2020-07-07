@@ -88,7 +88,11 @@ public class MongoDB implements Storage<byte[]> {
     @Override
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
-            return new MongoDBWriter(id, params, config, mCollection);
+            if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                return new MongoDBMultiWriter(id, params, config, mCollection);
+            } else {
+                return new MongoDBWriter(id, params, config, mCollection);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -98,7 +102,11 @@ public class MongoDB implements Storage<byte[]> {
     @Override
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
-            return new MongoDBReader(id, params, config, mCollection);
+            if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                return new MongoDBMultiReader(id, params, config, mCollection);
+            } else {
+                return new MongoDBReader(id, params, config, mCollection);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
