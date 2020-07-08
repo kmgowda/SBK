@@ -23,11 +23,11 @@ import java.io.IOException;
  * Reader Benchmarking Implementation.
  */
 public class SbkReader extends Worker {
-    final private DataType dType;
-    final private Reader reader;
+    final private DataType<Object> dType;
+    final private Reader<Object> reader;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dType, Reader reader) {
+    public SbkReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType<Object> dType, Reader<Object> reader) {
         super(readerId, idMax, params, recordTime);
         this.dType = dType;
         this.reader = reader;
