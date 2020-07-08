@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -21,7 +22,7 @@ public interface RunBenchmark {
       * Run writers/readers benchmarks.
       *
       * @throws IOException If an exception occurred.
-      * @throws InterruptedException If an exception occurred.
+      * @throws EOFException If the End of the file occurred.
       */
-     void run() throws InterruptedException, IOException;
+     void run() throws EOFException, IOException;
 }

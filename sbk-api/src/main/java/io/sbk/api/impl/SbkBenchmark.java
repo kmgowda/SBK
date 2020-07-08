@@ -22,6 +22,7 @@ import io.sbk.api.Writer;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -119,6 +121,8 @@ public class SbkBenchmark implements Benchmark {
         }
         storage.openStorage(params);
         final DataType dType = storage.getDataType();
+        final AtomicInteger readersErrCnt = new AtomicInteger(0);
+        final AtomicInteger writersErrCnt = new AtomicInteger(0);
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
         final List<SbkCallbackReader> sbkCallbackReaders;
@@ -127,6 +131,8 @@ public class SbkBenchmark implements Benchmark {
         final CompletableFuture<Void> wStatFuture;
         final CompletableFuture<Void> rStatFuture;
         final CompletableFuture<Void> chainFuture;
+        final int readFuturesCnt;
+        final int writeFuturesCnt;
 
         writers = IntStream.range(0, params.getWritersCount())
                 .boxed()
@@ -192,22 +198,44 @@ public class SbkBenchmark implements Benchmark {
         }
         if (sbkWriters != null) {
             writeFutures = sbkWriters.stream()
-                    .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
+                    .map(x -> CompletableFuture.runAsync(() -> {
+                        try {
+                            x.run();
+                        }  catch (IOException ex) {
+                            ex.printStackTrace();
+                            writersErrCnt.incrementAndGet();
+                        }
+                    }, executor)).collect(Collectors.toList());
+            writeFuturesCnt = writeFutures.size();
         } else {
             writeFutures = null;
+            writeFuturesCnt = 0;
         }
 
         if (sbkReaders != null) {
             readFutures = sbkReaders.stream()
-                    .map(x -> CompletableFuture.runAsync(x, executor)).collect(Collectors.toList());
+                    .map(x -> CompletableFuture.runAsync(() -> {
+                        try {
+                            x.run();
+                        } catch (EOFException ex) {
+                            SbkLogger.log.info("Reader " + x.id +" exited with EOF");
+                            readersErrCnt.incrementAndGet();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                            readersErrCnt.incrementAndGet();
+                        }
+                    }, executor)).collect(Collectors.toList());
+            readFuturesCnt = readFutures.size();
         } else if (sbkCallbackReaders != null) {
             readFutures = sbkCallbackReaders.stream()
                     .map(x -> x.start(startTime)).collect(Collectors.toList());
             for (int i = 0; i < params.getReadersCount(); i++) {
                 callbackReaders.get(i).start(sbkCallbackReaders.get(i));
             }
+            readFuturesCnt = readFutures.size();
         } else {
             readFutures = null;
+            readFuturesCnt = 0;
         }
 
         if (writeFutures != null && readFutures != null) {
@@ -227,10 +255,10 @@ public class SbkBenchmark implements Benchmark {
         }
         retFuture = chainFuture.thenRunAsync(() -> {
             try {
-                if (wStatFuture != null) {
+                if ((wStatFuture != null) && (writeFuturesCnt != writersErrCnt.get())) {
                     wStatFuture.get();
                 }
-                if (rStatFuture != null) {
+                if ((rStatFuture != null) && (readFuturesCnt != readersErrCnt.get()) ) {
                     rStatFuture.get();
                 }
             } catch (InterruptedException | ExecutionException ex) {

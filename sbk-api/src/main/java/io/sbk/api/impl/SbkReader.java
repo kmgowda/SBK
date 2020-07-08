@@ -15,12 +15,14 @@ import io.sbk.api.Parameters;
 import io.sbk.api.RecordTime;
 import io.sbk.api.Reader;
 import io.sbk.api.Worker;
+
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
  * Reader Benchmarking Implementation.
  */
-public class SbkReader extends Worker implements Runnable {
+public class SbkReader extends Worker {
     final private DataType dType;
     final private Reader reader;
     final private RunBenchmark perf;
@@ -32,14 +34,9 @@ public class SbkReader extends Worker implements Runnable {
         this.perf = createBenchmark();
     }
 
-    @Override
-    public void run() {
-        try {
-            perf.run();
-        } catch (InterruptedException | IOException ex) {
-            ex.printStackTrace();
-        }
-    }
+    public void run() throws EOFException, IOException {
+        perf.run();
+     }
 
     private RunBenchmark createBenchmark() {
         final RunBenchmark perfReader;
@@ -51,20 +48,20 @@ public class SbkReader extends Worker implements Runnable {
         return perfReader;
     }
 
-    private void RecordsReader() throws IOException {
+    private void RecordsReader() throws EOFException, IOException {
         reader.RecordsReader(this, dType);
     }
 
 
-    private void RecordsReaderRW() throws IOException {
+    private void RecordsReaderRW() throws EOFException, IOException {
         reader.RecordsReaderRW(this, dType);
     }
 
-    private void RecordsTimeReader() throws IOException {
+    private void RecordsTimeReader() throws EOFException, IOException {
         reader.RecordsTimeReader(this, dType);
     }
 
-    private void RecordsTimeReaderRW() throws IOException {
+    private void RecordsTimeReaderRW() throws EOFException, IOException {
         reader.RecordsTimeReaderRW(this, dType);
     }
 }

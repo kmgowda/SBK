@@ -22,7 +22,7 @@ import java.io.IOException;
 /**
  * Writer Benchmarking Implementation.
  */
-public class SbkWriter extends Worker implements Runnable {
+public class SbkWriter extends Worker  {
     final private DataType dType;
     final private Writer writer;
     final private RunBenchmark perf;
@@ -40,13 +40,8 @@ public class SbkWriter extends Worker implements Runnable {
         this.dataSize = dType.length(this.payload);
     }
 
-    @Override
-    public void run()  {
-        try {
-            perf.run();
-        } catch (InterruptedException | IOException ex) {
-            ex.printStackTrace();
-        }
+    public void run() throws IOException {
+        perf.run();
     }
 
 
@@ -76,32 +71,32 @@ public class SbkWriter extends Worker implements Runnable {
         return perfWriter;
     }
 
-    private void RecordsWriter() throws InterruptedException, IOException {
+    private void RecordsWriter() throws  IOException {
         writer.RecordsWriter(this, dType, payload, dataSize);
     }
 
 
-    private void RecordsWriterSync() throws InterruptedException, IOException {
+    private void RecordsWriterSync() throws  IOException {
         writer.RecordsWriterSync(this, dType, payload, dataSize, rCnt);
     }
 
 
-    private void RecordsWriterTime() throws InterruptedException, IOException {
+    private void RecordsWriterTime() throws  IOException {
         writer.RecordsWriterTime(this, dType, payload, dataSize);
     }
 
 
-    private void RecordsWriterTimeSync() throws InterruptedException, IOException {
+    private void RecordsWriterTimeSync() throws IOException {
         writer.RecordsWriterTimeSync(this, dType, payload, dataSize, rCnt);
     }
 
 
-    private void RecordsWriterRW() throws InterruptedException, IOException {
+    private void RecordsWriterRW() throws IOException {
         writer.RecordsWriterRW(this, dType, payload, dataSize, rCnt);
     }
 
 
-    private void RecordsWriterTimeRW() throws InterruptedException, IOException {
+    private void RecordsWriterTimeRW() throws IOException {
         writer.RecordsWriterTimeRW(this, dType, payload, dataSize, rCnt);
     }
 
