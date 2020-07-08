@@ -9,7 +9,6 @@ You may obtain a copy of the License at
 -->
 # MongoDB performance benchmarking with SBK
 The MongoDB driver for SBK supports single/multiple Writer , single/multiple reader performance benchmarking.
-SBK does not support the End to End latency for file system stream benchmarking.
 
 ## setting up  MongoDB local Docker server
 To make simple demo/test, you can run the local MongoDB server docker image as follows:
@@ -58,3 +57,8 @@ Writing       3969 records,     793.6 records/sec,     0.08 MB/sec,      1.3 ms 
 Writing(Total)      44954 records,     773.0 records/sec,     0.07 MB/sec,      1.3 ms avg latency,      22 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       1 ms 10th,       1 ms 25th,       1 ms 50th,       2 ms 75th,       2 ms 95th,       2 ms 99th,       4 ms 99.9th,       8 ms 99.99th.
 2020-07-06 09:57:53 INFO Closed connection [connectionId{localValue:2, serverValue:6}] to localhost:27017 because the pool has been closed.
 ```
+
+## FoundationDB Document layer performance benchmarking
+The SBK MongoDB driver can be used conduct the performance benchmarking of FoundationDB Document layer.
+Note that default port for Foundation DB document layer is 27016 (not 27017).
+Refer to this document: https://foundationdb.github.io/fdb-document-layer/getting-started-linux.html for setting for FoundationDB document layer cluster
