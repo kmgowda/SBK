@@ -34,6 +34,7 @@ Currently SBK supports benchmarking of
 19. [MinIO](https://min.io)
 20. [FoundationDB](https://www.foundationdb.org)
 21. [FoundationDB Record Layer](https://foundationdb.github.io/fdb-record-layer)
+22. [MongoDB](https://www.mongodb.com)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
