@@ -34,7 +34,8 @@ Currently SBK supports benchmarking of
 19. [MinIO](https://min.io)
 20. [FoundationDB](https://www.foundationdb.org)
 21. [FoundationDB Record Layer](https://foundationdb.github.io/fdb-record-layer)
-22. [MongoDB](https://www.mongodb.com)
+22. [FoundationDB Document Layer](https://github.com/kmgowda/SBK/tree/master/driver-mongodb#foundationdb-document-layer-performance-benchmarking)
+23. [MongoDB](https://www.mongodb.com)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
@@ -74,12 +75,14 @@ Running SBK locally:
 
 ```
 <SBK directory>/./build/distributions/sbk/bin/sbk -help
+...
 usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     ConcurrentQ, File, FileStream, FoundationDB, HDFS,
-                     Jdbc, Kafka, MinIO, Nats, NatsStream, Nsq, Pravega,
-                     Pulsar, RabbitMQ, RocketMQ]
+                     ConcurrentQ, FdbRecord, File, FileStream,
+                     FoundationDB, HDFS, Jdbc, Kafka, MinIO, MongoDB,
+                     Nats, NatsStream, Nsq, Pravega, Pulsar, RabbitMQ,
+                     RocketMQ]
  -context <arg>      Prometheus Metric context;default context:
                      8080/metrics; 'no' disables the  metrics
  -help               Help message
@@ -390,6 +393,8 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 Example: For pulsar driver
 ```
 <SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
+
+...
 usage: sbk -class Pulsar
  -ackQuorum <arg>       AckQuorum (default: 1)
  -admin <arg>           Admin URI, required to create the partitioned
@@ -397,9 +402,10 @@ usage: sbk -class Pulsar
  -broker <arg>          Broker URI
  -class <arg>           Storage Driver Class,
                         Available Drivers [Artemis, AsyncFile, BookKeeper,
-                        ConcurrentQ, File, FileStream, FoundationDB, HDFS,
-                        Jdbc, Kafka, MinIO, Nats, NatsStream, Nsq,
-                        Pravega, Pulsar, RabbitMQ, RocketMQ]
+                        ConcurrentQ, FdbRecord, File, FileStream,
+                        FoundationDB, HDFS, Jdbc, Kafka, MinIO, MongoDB,
+                        Nats, NatsStream, Nsq, Pravega, Pulsar, RabbitMQ,
+                        RocketMQ]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
                         8080/metrics; 'no' disables the  metrics
@@ -425,4 +431,5 @@ usage: sbk -class Pulsar
  -topic <arg>           Topic name
  -writeQuorum <arg>     WriteQuorum (default: 1)
  -writers <arg>         Number of writers
+
 ```
