@@ -23,14 +23,14 @@ import java.io.IOException;
  * Writer Benchmarking Implementation.
  */
 public class SbkWriter extends Worker  {
-    final private DataType dType;
-    final private Writer writer;
+    final private DataType<Object> dType;
+    final private Writer<Object> writer;
     final private RunBenchmark perf;
     final private RateController rCnt;
     final private Object payload;
     final private int dataSize;
 
-    public SbkWriter(int writerID, int idMax, Parameters params, RecordTime recordTime, DataType dType, Writer writer) {
+    public SbkWriter(int writerID, int idMax, Parameters params, RecordTime recordTime, DataType<Object> dType, Writer<Object> writer) {
         super(writerID, idMax, params, recordTime);
         this.dType = dType;
         this.writer = writer;

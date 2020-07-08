@@ -43,7 +43,6 @@ final public class SbkPerformance implements Performance {
     final private int baseLatency;
     final private int maxWindowLatency;
     final private int maxLatency;
-    final private int maxQs;
     final private ResultLogger periodicLogger;
     final private ResultLogger totalLogger;
     final private ExecutorService executor;
@@ -70,6 +69,7 @@ final public class SbkPerformance implements Performance {
         this.totalLogger = totalLogger;
         this.executor = executor;
         this.retFuture = null;
+        int maxQs;
         if (config.maxQs > 0) {
             maxQs = config.maxQs;
             this.timeRecorders = new TimeRecorder[1];
@@ -192,7 +192,6 @@ final public class SbkPerformance implements Performance {
     final static private class ElasticCounter {
         final private int windowInterval;
         final private int idleNS;
-        final private double minWaitTimeMS;
         final private double countRatio;
         final private long minIdleCount;
         private long elasticCount;
@@ -202,7 +201,7 @@ final public class SbkPerformance implements Performance {
         private ElasticCounter(int windowInterval, int idleNS) {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
-            minWaitTimeMS = windowInterval / 50.0;
+            double minWaitTimeMS = windowInterval / 50.0;
             countRatio = (Config.NS_PER_MS * 1.0) / idleNS;
             minIdleCount = (long) (countRatio * minWaitTimeMS);
             elasticCount = minIdleCount;

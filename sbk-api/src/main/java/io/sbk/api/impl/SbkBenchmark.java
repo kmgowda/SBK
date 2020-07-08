@@ -43,16 +43,16 @@ import java.util.stream.Stream;
  * Class for performing the benchmark.
  */
 public class SbkBenchmark implements Benchmark {
-    final private Storage storage;
+    final private Storage<Object> storage;
     final private ExecutorService executor;
     final private Parameters params;
     final private Performance writeStats;
     final private Performance readStats;
     final private int maxQs;
     final private ScheduledExecutorService timeoutExecutor;
-    private List<Writer> writers;
-    private List<Reader> readers;
-    private List<CallbackReader> callbackReaders;
+    private List<Writer<Object>> writers;
+    private List<Reader<Object>> readers;
+    private List<CallbackReader<Object>> callbackReaders;
 
 
     @GuardedBy("this")
@@ -69,7 +69,7 @@ public class SbkBenchmark implements Benchmark {
      * @param  metricsLogger    Log the results to metrics logger
      */
     public SbkBenchmark(String  action, Config config, Parameters params,
-                        Storage storage, ResultLogger logger, ResultLogger metricsLogger) {
+                        Storage<Object> storage, ResultLogger logger, ResultLogger metricsLogger) {
         this.params = params;
         this.storage = storage;
         if (config.maxQs > 0) {
@@ -120,7 +120,7 @@ public class SbkBenchmark implements Benchmark {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
         storage.openStorage(params);
-        final DataType dType = storage.getDataType();
+        final DataType<Object> dType = storage.getDataType();
         final AtomicInteger readersErrCnt = new AtomicInteger(0);
         final AtomicInteger writersErrCnt = new AtomicInteger(0);
         final List<SbkWriter> sbkWriters;
