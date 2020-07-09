@@ -81,6 +81,17 @@ An example command to run the SBK benchmarking is
 Make sure the user name and passwords are same while running the postgreSQL server and SBK benchmarking.
 generally **'postgres'** is the name of the database available by default.
 
+## JDBC PostgreSQL for CockroachDB Performance Benchmarking
+The SBK with JDBC using PostgreSQL Jdbc driver can be used to conduct the performance benchmarking of CockroachDB.
+you refer this page : https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html to build simple local cluster.
+The default database name to access is **'defaultdb'** and the default port is 26257.
+
+An example command to run the SBK benchmarking is
+```
+./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:26257/defaultdb  -user root -password root  -table test -size 100 -writers 5 -time 60
+```
+Make sure that you use root/root as username/password while running above benchmarking command.
+ 
 ## JDBC with Microsoft SQL Server
 The SBK with JDBC is tested with Microsoft SQL server. Visit this page : https://www.postgresql.org  to download developer or expression editions of MS SQL.
 you can run the MS SQL docker image as follows.

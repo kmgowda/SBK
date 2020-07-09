@@ -22,7 +22,7 @@ import java.io.IOException;
 /**
  * Reader Benchmarking Implementation.
  */
-public class SbkReader extends Worker {
+public class SbkReader extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private Reader<Object> reader;
     final private RunBenchmark perf;
@@ -34,6 +34,7 @@ public class SbkReader extends Worker {
         this.perf = createBenchmark();
     }
 
+    @Override
     public void run() throws EOFException, IOException {
         perf.run();
      }

@@ -22,7 +22,7 @@ import java.io.IOException;
 /**
  * Writer Benchmarking Implementation.
  */
-public class SbkWriter extends Worker  {
+public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private Writer<Object> writer;
     final private RunBenchmark perf;
@@ -40,6 +40,7 @@ public class SbkWriter extends Worker  {
         this.dataSize = dType.length(this.payload);
     }
 
+    @Override
     public void run() throws IOException {
         perf.run();
     }
