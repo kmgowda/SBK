@@ -36,7 +36,7 @@ Currently SBK supports benchmarking of
 21. [FoundationDB Record Layer](https://foundationdb.github.io/fdb-record-layer)
 22. [FoundationDB Document Layer](https://github.com/kmgowda/SBK/tree/master/driver-mongodb#foundationdb-document-layer-performance-benchmarking)
 23. [MongoDB](https://www.mongodb.com)
-24. [cockroachDB](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-postgresql-for-cockroachdb-performance-benchmarking)
+24. [CockroachDB](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-postgresql-for-cockroachdb-performance-benchmarking)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
