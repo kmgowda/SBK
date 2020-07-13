@@ -33,4 +33,5 @@ include 'driver-minio'
 include 'driver-foundationdb'
 include 'driver-fdbrecord'
 include 'driver-mongodb'
+include 'driver-rocksdb'
 
