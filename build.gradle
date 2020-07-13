@@ -102,6 +102,7 @@ dependencies {
 	compile project('driver-foundationdb')
 	compile project('driver-fdbrecord')
 	compile project('driver-mongodb')
+	compile project('driver-rocksdb')
 }
 
 //create a single Jar with all dependencies
