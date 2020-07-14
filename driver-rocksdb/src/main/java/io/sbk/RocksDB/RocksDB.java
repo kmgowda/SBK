@@ -53,15 +53,13 @@ public class RocksDB implements Storage<byte[]> {
 
     @Override
     public void openStorage(final Parameters params) throws  IOException {
-        if (params.getWritersCount() > 0) {
-            java.io.File file = new java.io.File(config.rFile);
-            file.delete();
-        }
-        final Options options = new Options().setCreateIfMissing(true);
         try {
             // a static method that loads the RocksDB C++ library.
             org.rocksdb.RocksDB.loadLibrary();
-            db = org.rocksdb.RocksDB.open(options, config.rFile);
+            if (params.getWritersCount() > 0) {
+                org.rocksdb.RocksDB.destroyDB(config.rFile, new Options());
+            }
+            db = org.rocksdb.RocksDB.open(new Options().setCreateIfMissing(true), config.rFile);
         } catch (RocksDBException ex) {
             throw new IOException(ex);
         }
