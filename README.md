@@ -37,6 +37,7 @@ Currently SBK supports benchmarking of
 22. [FoundationDB Document Layer](https://github.com/kmgowda/SBK/tree/master/driver-mongodb#foundationdb-document-layer-performance-benchmarking)
 23. [MongoDB](https://www.mongodb.com)
 24. [CockroachDB](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-postgresql-for-cockroachdb-performance-benchmarking)
+25. [RocksDB](https://rocksdb.org)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
@@ -83,7 +84,7 @@ usage: sbk
                      ConcurrentQ, FdbRecord, File, FileStream,
                      FoundationDB, HDFS, Jdbc, Kafka, MinIO, MongoDB,
                      Nats, NatsStream, Nsq, Pravega, Pulsar, RabbitMQ,
-                     RocketMQ]
+                     RocketMQ, RocksDB]
  -context <arg>      Prometheus Metric context;default context:
                      8080/metrics; 'no' disables the  metrics
  -help               Help message
@@ -406,7 +407,7 @@ usage: sbk -class Pulsar
                         ConcurrentQ, FdbRecord, File, FileStream,
                         FoundationDB, HDFS, Jdbc, Kafka, MinIO, MongoDB,
                         Nats, NatsStream, Nsq, Pravega, Pulsar, RabbitMQ,
-                        RocketMQ]
+                        RocketMQ, RocksDB]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
                         8080/metrics; 'no' disables the  metrics
