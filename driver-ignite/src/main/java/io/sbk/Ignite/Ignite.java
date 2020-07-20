@@ -34,6 +34,8 @@ public class Ignite implements Storage<byte[]> {
     private IgniteConfig config;
     private IgniteCache<Long, byte[]> cache;
     private ClientCache<Long, byte[]> clientCache;
+    private IgniteClient igniteClient;
+    private org.apache.ignite.Ignite ignite;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
@@ -67,12 +69,14 @@ public class Ignite implements Storage<byte[]> {
     public void openStorage(final Parameters params) throws  IOException {
         if (config.cFile == null) {
             ClientConfiguration cfg = new ClientConfiguration().setAddresses(config.url);
-            IgniteClient igniteClient = Ignition.startClient(cfg);
+            igniteClient = Ignition.startClient(cfg);
             clientCache = igniteClient.getOrCreateCache(config.cacheName);
+            ignite = null;
             cache = null;
         }  else {
-            org.apache.ignite.Ignite ignite = Ignition.start(config.cFile);
+            ignite = Ignition.start(config.cFile);
             cache = ignite.getOrCreateCache(config.cacheName);
+            igniteClient = null;
             clientCache = null;
         }
     }
@@ -82,6 +86,16 @@ public class Ignite implements Storage<byte[]> {
         if (cache != null) {
             cache.close();
         }
+        if (ignite != null) {
+            ignite.close();
+        }
+        if (igniteClient != null) {
+            try {
+                igniteClient.close();
+            } catch (Exception ex) {
+                throw  new IOException(ex);
+            }
+        }
     }
 
     @Override
@@ -90,7 +104,11 @@ public class Ignite implements Storage<byte[]> {
             if (cache != null) {
                 return new IgniteWriter(id, params, cache);
             } else {
-                return new IgniteClientWriter(id, params, clientCache);
+                if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                    return new IgniteClientTransactionWriter(id, params, clientCache, igniteClient);
+                } else {
+                    return new IgniteClientWriter(id, params, clientCache);
+                }
             }
 
         } catch (IOException ex) {
@@ -105,7 +123,11 @@ public class Ignite implements Storage<byte[]> {
             if (cache != null) {
                 return new IgniteReader(id, params, cache);
             } else {
-                return new IgniteClientReader(id, params, clientCache);
+                if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                    return new IgniteClientTransactionReader(id, params, clientCache, igniteClient);
+                } else {
+                    return new IgniteClientReader(id, params, clientCache);
+                }
             }
         } catch (IOException ex) {
             ex.printStackTrace();
