@@ -102,7 +102,11 @@ public class Ignite implements Storage<byte[]> {
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
             if (cache != null) {
-                return new IgniteWriter(id, params, cache);
+                if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                    return new IgniteTransactionWriter(id, params, cache, ignite);
+                } else {
+                    return new IgniteWriter(id, params, cache);
+                }
             } else {
                 if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
                     return new IgniteClientTransactionWriter(id, params, clientCache, igniteClient);
@@ -121,7 +125,11 @@ public class Ignite implements Storage<byte[]> {
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
             if (cache != null) {
-                return new IgniteReader(id, params, cache);
+                if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
+                    return new IgniteTransactionReader(id, params, cache, ignite);
+                } else {
+                    return new IgniteReader(id, params, cache);
+                }
             } else {
                 if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
                     return new IgniteClientTransactionReader(id, params, clientCache, igniteClient);
