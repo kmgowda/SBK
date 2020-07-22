@@ -248,7 +248,7 @@ public class FileTest {
         SbkLogger.log.info("Write Data: " + data);
         SbkLogger.log.info("Reader Data: " + readData);
         assertEquals(0, data.compareTo(readData));
-        writeBuffer = writeBuffer.flip();
+        writeBuffer.flip();
         SbkLogger.log.info("WriteBuffer : " + writeBuffer.toString());
         SbkLogger.log.info("ReaderBuffer: " + readBuffer.toString());
         assertEquals(0, writeBuffer.compareTo(readBuffer));
