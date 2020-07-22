@@ -103,6 +103,7 @@ dependencies {
 	compile project('driver-fdbrecord')
 	compile project('driver-mongodb')
 	compile project('driver-rocksdb')
+	compile project('driver-ignite')
 }
 
 //create a single Jar with all dependencies
