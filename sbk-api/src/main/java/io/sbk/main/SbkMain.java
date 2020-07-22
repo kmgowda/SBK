@@ -40,6 +40,7 @@ import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -69,6 +70,7 @@ public class SbkMain {
 
         SbkLogger.log.info(IOUtils.toString(SbkMain.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
+        SbkLogger.log.info("Argument List: "+Arrays.toString(args));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

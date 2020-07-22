@@ -40,7 +40,7 @@ public class FileReader implements Reader<ByteBuffer> {
         if (ret <= 0) {
             throw new EOFException("File Red: EOF");
         }
-        return retBuffer;
+        return retBuffer.flip();
     }
 
     @Override
