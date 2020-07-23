@@ -30,36 +30,15 @@ import java.util.Collections;
  * Class for Pulsar topic and partitions.
  */
 public class PulsarTopicHandler {
+    final private PulsarConfig config;
     final private PulsarAdmin adminClient;
     final private PulsarAdminBuilder pulsarAdmin;
-    final private String nameSpace;
-    final private String cluster;
-    final private String tenant;
-    final private String adminUri;
-    final private String brokerUri;
-    final private String topicName;
-    final private int partitions;
-    final private int ensembleSize;
-    final private int writeQuorum;
-    final private int ackQuorum;
-    final private boolean deduplicationEnabled;
 
-    public PulsarTopicHandler(String adminUri, String brokerUri, String tenant, String cluster,
-                              String nameSpace, String topicName, int partitions,
-                              int ensembleSize, int writeQuorum, int ackQuorum, boolean deduplicationEnabled) throws IOException {
-        this.adminUri = adminUri;
-        this.brokerUri = brokerUri;
-        this.tenant = tenant;
-        this.cluster = cluster;
-        this.nameSpace = nameSpace;
-        this.topicName = topicName;
-        this.partitions = partitions;
-        this.ensembleSize = ensembleSize;
-        this.writeQuorum = writeQuorum;
-        this.ackQuorum = ackQuorum;
-        this.deduplicationEnabled = deduplicationEnabled;
+
+    public PulsarTopicHandler(PulsarConfig config) throws IOException {
+        this.config = config;
         try {
-            pulsarAdmin = PulsarAdmin.builder().serviceHttpUrl(adminUri);
+            pulsarAdmin = PulsarAdmin.builder().serviceHttpUrl(config.adminUri);
             adminClient = pulsarAdmin.build();
         } catch (PulsarClientException ex) {
             ex.printStackTrace();
@@ -69,21 +48,21 @@ public class PulsarTopicHandler {
 
 
     public void createTopic(boolean recreate) throws  IOException {
-        if (tenant != null && nameSpace != null) {
-            final String fullNameSpace = tenant + "/" + nameSpace;
-            if (cluster != null) {
+        if (config.tenant != null && config.nameSpace != null) {
+            final String fullNameSpace = config.tenant + "/" + config.nameSpace;
+            if (config.cluster != null) {
                 try {
                     ClusterData clusterData = new ClusterData(
-                            adminUri,
+                            config.adminUri,
                             null,
-                            brokerUri,
+                            config.brokerUri,
                             null
                     );
-                    adminClient.clusters().createCluster(cluster, clusterData);
+                    adminClient.clusters().createCluster(config.cluster, clusterData);
 
-                    if (!adminClient.tenants().getTenants().contains(tenant)) {
-                        adminClient.tenants().createTenant(tenant,
-                                new TenantInfo(Collections.emptySet(), Sets.newHashSet(cluster)));
+                    if (!adminClient.tenants().getTenants().contains(config.tenant)) {
+                        adminClient.tenants().createTenant(config.tenant,
+                                new TenantInfo(Collections.emptySet(), Sets.newHashSet(config.cluster)));
                     }
                 } catch (ConflictException ex) {
                     ex.printStackTrace();
@@ -101,11 +80,11 @@ public class PulsarTopicHandler {
 
             try {
                 adminClient.namespaces().setPersistence(fullNameSpace,
-                        new PersistencePolicies(ensembleSize, writeQuorum, ackQuorum, 1.0));
-
+                        new PersistencePolicies(config.ensembleSize, config.writeQuorum,
+                                config.ackQuorum, 1.0));
                 adminClient.namespaces().setBacklogQuota(fullNameSpace,
                         new BacklogQuota(Long.MAX_VALUE, RetentionPolicy.producer_exception));
-                adminClient.namespaces().setDeduplicationStatus(fullNameSpace, deduplicationEnabled);
+                adminClient.namespaces().setDeduplicationStatus(fullNameSpace, config.deduplicationEnabled);
 
             } catch (PulsarAdminException ex) {
                 throw new IOException(ex);
@@ -113,7 +92,7 @@ public class PulsarTopicHandler {
         }
         if (recreate) {
             try {
-                adminClient.topics().deletePartitionedTopic(topicName);
+                adminClient.topics().deletePartitionedTopic(config.topicName);
             } catch (NotFoundException  ex) {
                 /* already deleted or not existing */
             } catch (PulsarAdminException ex) {
@@ -122,7 +101,7 @@ public class PulsarTopicHandler {
         }
 
         try {
-            adminClient.topics().createPartitionedTopic(topicName, partitions);
+            adminClient.topics().createPartitionedTopic(config.topicName, config.partitions);
         } catch (ConflictException ex) {
             /* ex.printStackTrace(); */
         } catch (PulsarAdminException ex) {

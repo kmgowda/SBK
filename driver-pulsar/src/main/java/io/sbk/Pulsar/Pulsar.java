@@ -8,12 +8,16 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Pulsar;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
@@ -22,75 +26,68 @@ import org.apache.pulsar.client.api.PulsarClientException;
  * Class for Pulsar Benchmarking.
  */
 public class Pulsar implements Storage<byte[]> {
-    static final String DEFAULT_NAMESPACE = null;
-    static final String DEFAULT_TENANT = null;
-    static final String DEFAULT_CLUSTER = null;
+    private static final String CONFIGFILE = "pulsar.properties";
+    private static final String DEFAULT_NAMESPACE = null;
+    private static final String DEFAULT_TENANT = null;
+    private static final String DEFAULT_CLUSTER = null;
+    private PulsarConfig config;
 
-    private String topicName;
-    private String brokerUri;
-    private String nameSpace;
-    private String cluster;
-    private String tenant;
-    private String adminUri;
-    private int partitions;
-    private int ioThreads;
-    private int ensembleSize;
-    private int writeQuorum;
-    private int ackQuorum;
-    private boolean deduplication;
     private PulsarClient client;
     private PulsarTopicHandler topicHandler;
 
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        try {
+            config = mapper.readValue(
+                    Objects.requireNonNull(Pulsar.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+                    PulsarConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
         params.addOption("cluster", true, "Cluster name (optional parameter)");
-        params.addOption("topic", true, "Topic name");
-        params.addOption("broker", true, "Broker URI");
-        params.addOption("admin", true, "Admin URI, required to create the partitioned topic");
-        params.addOption("partitions", true, "Number of partitions of the topic (default: 1)");
-        params.addOption("ensembleSize", true, "EnsembleSize (default: 1)");
-        params.addOption("writeQuorum", true, "WriteQuorum (default: 1)");
-        params.addOption("ackQuorum", true, "AckQuorum (default: 1) ");
-        params.addOption("deduplication", true, "Enable or Disable Deduplication; by default disabled");
-        params.addOption("threads", true, "io threads per Topic; by default (writers + readers)");
+        params.addOption("topic", true, "Topic name, default : " + config.topicName);
+        params.addOption("broker", true, "Broker URI, default: " + config.brokerUri);
+        params.addOption("admin", true,
+                "Admin URI, required to create the partitioned topic, default: " + config.adminUri);
+        params.addOption("partitions", true,
+                "Number of partitions of the topic, default: "+ config.partitions);
+        params.addOption("ensembleSize", true, "EnsembleSize default: " + config.ensembleSize );
+        params.addOption("writeQuorum", true, "WriteQuorum default: " + config.writeQuorum);
+        params.addOption("ackQuorum", true, "AckQuorum default: " + config.ackQuorum);
+        params.addOption("deduplication", true,
+                "Enable or Disable Deduplication; default: " + config.deduplicationEnabled);
+        params.addOption("threads", true, "io threads per Topic, default: " + config.ioThreads);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        topicName =  params.getOptionValue("topic", null);
-        brokerUri = params.getOptionValue("broker", null);
-        if (brokerUri == null) {
-            throw new IllegalArgumentException("Error: Must specify Broker IP address");
-        }
+        config.topicName =  params.getOptionValue("topic", config.topicName);
+        config.brokerUri = params.getOptionValue("broker", config.brokerUri);
 
-        if (topicName == null) {
-            throw new IllegalArgumentException("Error: Must specify Topic Name");
-        }
+        config.adminUri = params.getOptionValue("admin", config.adminUri);
+        config.cluster =  params.getOptionValue("cluster", DEFAULT_CLUSTER);
+        config.partitions = Integer.parseInt(params.getOptionValue("partitions", String.valueOf(config.partitions)));
+        config.ioThreads =  Integer.parseInt(params.getOptionValue("threads", String.valueOf(config.ioThreads)));
+        config.ensembleSize = Integer.parseInt(params.getOptionValue("ensembleSize", String.valueOf(config.ensembleSize)));
+        config.writeQuorum = Integer.parseInt(params.getOptionValue("writeQuorum", String.valueOf(config.writeQuorum)));
+        config.ackQuorum = Integer.parseInt(params.getOptionValue("ackQuorum", String.valueOf(config.ackQuorum)));
+        config.deduplicationEnabled = Boolean.parseBoolean(params.getOptionValue("recreate",
+                                        String.valueOf(config.deduplicationEnabled)));
 
-        adminUri = params.getOptionValue("admin", null);
-        cluster =  params.getOptionValue("cluster", DEFAULT_CLUSTER);
-        partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
-        ioThreads =  Integer.parseInt(params.getOptionValue("threads", "0"));
-        ensembleSize = Integer.parseInt(params.getOptionValue("ensembleSize", "1"));
-        writeQuorum = Integer.parseInt(params.getOptionValue("writeQuorum", "1"));
-        ackQuorum = Integer.parseInt(params.getOptionValue("ackQuorum", "1"));
-        deduplication = Boolean.parseBoolean(params.getOptionValue("recreate", "false"));
-
-        if (ioThreads == 0) {
-            ioThreads = params.getWritersCount() + params.getReadersCount();
-        }
-
-        final String[] names = topicName.split("[/]");
+        final String[] names = config.topicName.split("[/]");
         try {
-            nameSpace = names[names.length-2];
+            config.nameSpace = names[names.length-2];
         } catch (ArrayIndexOutOfBoundsException ex) {
-            nameSpace = DEFAULT_NAMESPACE;
+            config.nameSpace = DEFAULT_NAMESPACE;
         }
         try {
-            tenant = names[names.length-3];
+            config.tenant = names[names.length-3];
         } catch ( ArrayIndexOutOfBoundsException ex) {
-            tenant = DEFAULT_TENANT;
+            config.tenant = DEFAULT_TENANT;
         }
 
     }
@@ -98,14 +95,13 @@ public class Pulsar implements Storage<byte[]> {
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         try {
-            client = PulsarClient.builder().ioThreads(ioThreads).serviceUrl(brokerUri).build();
+            client = PulsarClient.builder().ioThreads(config.ioThreads).serviceUrl(config.brokerUri).build();
         } catch (PulsarClientException ex) {
             ex.printStackTrace();
             throw new IOException(ex);
         }
-        if (adminUri != null && params.getWritersCount() > 0) {
-            topicHandler = new PulsarTopicHandler(adminUri, brokerUri, tenant, cluster, nameSpace,
-                    topicName, partitions, ensembleSize, writeQuorum, ackQuorum, deduplication);
+        if (config.adminUri != null && params.getWritersCount() > 0) {
+            topicHandler = new PulsarTopicHandler(config);
             topicHandler.createTopic(true);
         } else {
             topicHandler = null;
@@ -123,7 +119,7 @@ public class Pulsar implements Storage<byte[]> {
     @Override
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
-            return new PulsarWriter(id, params, topicName, client);
+            return new PulsarWriter(id, params, config.topicName, client);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -133,7 +129,7 @@ public class Pulsar implements Storage<byte[]> {
     @Override
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
-            return new PulsarReader(id, params, topicName, topicName+"rdGrp", client);
+            return new PulsarReader(id, params, config.topicName, config.topicName+"rdGrp", client);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
