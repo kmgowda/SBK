@@ -11,5 +11,4 @@ dependencies {
     compile project(":sbk-api")
     // https://mvnrepository.com/artifact/org.rocksdb/rocksdbjni
     compile group: 'org.rocksdb', name: 'rocksdbjni', version: '6.10.2'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }

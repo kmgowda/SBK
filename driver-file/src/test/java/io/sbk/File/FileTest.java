@@ -18,6 +18,7 @@ import org.apache.commons.cli.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +27,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
 
 /**
  * Class for File System Interface.
@@ -48,6 +48,7 @@ public class FileTest {
             params.parseArgs(args);
         } catch (ParseException ex) {
             ex.printStackTrace();
+            Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
     }
@@ -63,6 +64,7 @@ public class FileTest {
             params.parseArgs(args);
         } catch (ParseException ex) {
             ex.printStackTrace();
+            Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
     }
@@ -78,7 +80,7 @@ public class FileTest {
             params.parseArgs(args);
         } catch (ParseException ex) {
             ex.printStackTrace();
-            Assert.fail();
+            Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
     }
@@ -94,6 +96,7 @@ public class FileTest {
             params.parseArgs(args);
         } catch (ParseException ex) {
             ex.printStackTrace();
+            Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         try {
@@ -101,7 +104,7 @@ public class FileTest {
             file.closeStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail();
+            Assert.fail("Open/Close Storage Failed!");
         }
     }
 
@@ -109,7 +112,7 @@ public class FileTest {
     public void testGetDataType() {
         file = new File();
         file.getDataType();
-     }
+    }
 
 
     @Test
@@ -123,7 +126,7 @@ public class FileTest {
             params.parseArgs(args);
         } catch (ParseException ex) {
             ex.printStackTrace();
-            Assert.fail();
+            Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         file.createWriter(0, params);
@@ -152,7 +155,7 @@ public class FileTest {
             params.parseArgs(readArgs);
         } catch (ParseException ex) {
             ex.printStackTrace();
-            Assert.fail();
+            Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         file.createReader(0, params);
@@ -170,24 +173,24 @@ public class FileTest {
             params.parseArgs(args);
         } catch (ParseException ex) {
             ex.printStackTrace();
-            Assert.fail();
+            Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         assertNull(file.createReader(0, params));
     }
 
+    // This test case works only if the append mode is disabled
     @Test
     public void testWriterReaderData() {
         final String data = "KMG-SBK";
-        final String[] writeArgs = {"-class", "file", "-file", "unit.test", "-size", Integer.toString(data.length()), "-writers", "1", "records", "1"};
-        final String[] readArgs = {"-class", "file", "-file", "unit.test", "-size", Integer.toString(data.length()), "-readers", "1", "records", "1"};
+        final String[] writeArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-writers", "1", "records", "1"};
+        final String[] readArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-readers", "1", "records", "1"};
         final Writer<ByteBuffer> writer;
         final Reader<ByteBuffer> reader;
         ByteBuffer writeBuffer = null;
         ByteBuffer readBuffer = null;
         String readData = null;
 
-        writeBuffer = ByteBuffer.wrap(data.getBytes(StandardCharsets.UTF_8));
         params = new SbkParameters("SBK", "File System Benchmarking",
                 "File", driversList, System.currentTimeMillis());
         file = new File();
@@ -206,8 +209,14 @@ public class FileTest {
             Assert.fail("open storage Failed");
         }
         writer = file.createWriter(0, params);
+        byte[] byteData = data.getBytes();
+        writeBuffer = file.getDataType().allocate(byteData.length);
+        for (int i = 0; i < byteData.length; i++) {
+            writeBuffer.put(byteData[i]);
+        }
+        writeBuffer.flip();
         try {
-            writer.writeAsync(writeBuffer.slice());
+            writer.writeAsync(writeBuffer);
             writer.close();
             file.closeStorage(params);
         } catch (IOException ex) {
@@ -254,5 +263,94 @@ public class FileTest {
         assertEquals(0, writeBuffer.compareTo(readBuffer));
     }
 
+    // This test case works only if the append mode is disabled
+    @Test
+    public void testReaderEOF() {
+        final String data = "KMG-SBK";
+        final String[] writeArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-writers", "1", "records", "1"};
+        final String[] readArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-readers", "1", "records", "1"};
+        final Writer<ByteBuffer> writer;
+        final Reader<ByteBuffer> reader;
+        ByteBuffer writeBuffer = null;
+        ByteBuffer readBuffer = null;
+        String readData = null;
 
+        params = new SbkParameters("SBK", "File System Benchmarking",
+                "File", driversList, System.currentTimeMillis());
+        file = new File();
+        file.addArgs(params);
+        try {
+            params.parseArgs(writeArgs);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            Assert.fail("Parse Arg failed");
+        }
+        file.parseArgs(params);
+        try {
+            file.openStorage(params);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Assert.fail("open storage Failed");
+        }
+        writer = file.createWriter(0, params);
+        byte[] byteData = data.getBytes();
+        writeBuffer = file.getDataType().allocate(byteData.length);
+        for (int i = 0; i < byteData.length; i++) {
+            writeBuffer.put(byteData[i]);
+        }
+        writeBuffer.flip();
+        try {
+            writer.writeAsync(writeBuffer);
+            writer.close();
+            file.closeStorage(params);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Assert.fail("Writer Failed");
+        }
+        file = new File();
+        file.getDataType();
+        file.addArgs(params);
+        try {
+            params.parseArgs(readArgs);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            Assert.fail("Parse Args Failed");
+        }
+        file.parseArgs(params);
+        try {
+            file.openStorage(params);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Assert.fail("open storage Failed");
+        }
+        reader = file.createReader(0, params);
+        try {
+            readBuffer = reader.read();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Assert.fail("Reader Failed");
+        }
+
+        byte[] arr = new byte[readBuffer.limit()];
+        for (int i = 0; i < readBuffer.limit(); i++) {
+            arr[i] = readBuffer.get();
+        }
+        readData = new String(arr, StandardCharsets.UTF_8);
+        SbkLogger.log.info("Write Data: " + data);
+        SbkLogger.log.info("Reader Data: " + readData);
+        assertEquals(0, data.compareTo(readData));
+        writeBuffer.flip();
+        SbkLogger.log.info("WriteBuffer : " + writeBuffer.toString());
+        SbkLogger.log.info("ReaderBuffer: " + readBuffer.toString());
+        assertEquals(0, writeBuffer.compareTo(readBuffer));
+        // read again
+        try {
+            reader.read();
+        } catch (EOFException ex) {
+            SbkLogger.log.info("Got EOF Expected");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Assert.fail("Reader Failed");
+        }
+    }
 }
