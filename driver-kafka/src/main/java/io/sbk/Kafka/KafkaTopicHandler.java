@@ -29,14 +29,13 @@ public class KafkaTopicHandler {
     final private AdminClient admin;
     final private NewTopic topic;
 
-    public KafkaTopicHandler(String brokerUri, String topicName, int partitions,
-                              short replicationFactor, short minSync) throws IOException {
+    public KafkaTopicHandler(KafkaConfig config) throws IOException {
             adminProperties = new Properties();
             topicProperties = new Properties();
-            adminProperties.put("bootstrap.servers", brokerUri);
-            topicProperties.put("min.insync.replicas", Short.toString(minSync));
+            adminProperties.put("bootstrap.servers", config.brokerUri);
+            topicProperties.put("min.insync.replicas", Short.toString(config.sync));
             admin = AdminClient.create(adminProperties);
-            topic = new NewTopic(topicName, partitions, replicationFactor);
+            topic = new NewTopic(config.topicName, config.partitions, config.replica);
             topic.configs(new HashMap<>((Map) topicProperties));
 
     }
