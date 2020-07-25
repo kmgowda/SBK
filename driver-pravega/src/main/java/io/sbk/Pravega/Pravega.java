@@ -10,6 +10,9 @@
 
 package io.sbk.Pravega;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
@@ -17,6 +20,7 @@ import io.sbk.api.Reader;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -30,49 +34,50 @@ import io.pravega.client.EventStreamClientFactory;
  * Class for Pravega benchmarking.
  */
 public class Pravega implements Storage<byte[]> {
-    static final String DEFAULT_SCOPE = "Scope";
-    private String scopeName;
-    private String streamName;
-    private String rdGrpName;
-    private String controllerUri;
-    private int segmentCount;
-    private boolean recreate;
+    private final static String CONFIGFILE = "pravega.properties";
+    private PravegaConfig config;
     private PravegaStreamHandler streamHandle;
     private EventStreamClientFactory factory;
     private ReaderGroup readerGroup;
+    private String rdGrpName;
+
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
-        params.addOption("scope", true, "Scope name");
-        params.addOption("stream", true, "Stream name");
-        params.addOption("controller", true, "Controller URI");
-        params.addOption("segments", true, "Number of segments");
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        try {
+            config = mapper.readValue(Objects.requireNonNull(Pravega.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+                    PravegaConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+
+        params.addOption("scope", true, "Scope name, default :" + config.scopeName);
+        params.addOption("stream", true, "Stream name, default :" + config.streamName);
+        params.addOption("controller", true, "Controller URI, default :" + config.controllerUri);
+        params.addOption("segments", true, "Number of segments, default :" + config.segmentCount);
         params.addOption("recreate", true,
-                "If the stream is already existing, delete and recreate the same");
+                "If the stream is already existing, delete and recreate the same, default :" + config.recreate);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        scopeName = params.getOptionValue("scope", DEFAULT_SCOPE);
-        streamName =  params.getOptionValue("stream", null);
-        controllerUri = params.getOptionValue("controller", null);
-        segmentCount = Integer.parseInt(params.getOptionValue("segments", "1"));
+        config.scopeName = params.getOptionValue("scope", config.scopeName);
+        config.streamName =  params.getOptionValue("stream", config.streamName);
+        config.controllerUri = params.getOptionValue("controller", config.controllerUri);
+        config.segmentCount = Integer.parseInt(params.getOptionValue("segments", Integer.toString(config.segmentCount)));
         if (params.hasOption("recreate")) {
-            recreate = Boolean.parseBoolean(params.getOptionValue("recreate"));
+            config.recreate = Boolean.parseBoolean(params.getOptionValue("recreate"));
         } else {
-            recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
-        }
-        if (controllerUri == null) {
-            throw new IllegalArgumentException("Error: Must specify Controller IP address");
+            config.recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
         }
 
-        if (streamName == null) {
-            throw new IllegalArgumentException("Error: Must specify stream Name");
-        }
-        if (recreate) {
-            rdGrpName = streamName + params.getStartTime();
+        if (config.recreate) {
+            rdGrpName = config.streamName + params.getStartTime();
         } else {
-            rdGrpName = streamName + "RdGrp";
+            rdGrpName = config.streamName + "RdGrp";
         }
 
     }
@@ -83,16 +88,16 @@ public class Pravega implements Storage<byte[]> {
             final ScheduledExecutorService bgExecutor = Executors.newScheduledThreadPool(10);
             final ControllerImpl controller = new ControllerImpl(ControllerImplConfig.builder()
                     .clientConfig(ClientConfig.builder()
-                            .controllerURI(new URI(controllerUri)).build())
+                            .controllerURI(new URI(config.controllerUri)).build())
                     .maxBackoffMillis(5000).build(),
                     bgExecutor);
 
-            streamHandle = new PravegaStreamHandler(scopeName, streamName, rdGrpName, controllerUri,
-                    segmentCount, params.getTimeout(), controller,
+            streamHandle = new PravegaStreamHandler(config.scopeName, config.streamName, rdGrpName,
+                    config.controllerUri, config.segmentCount, params.getTimeout(), controller,
                     bgExecutor);
 
             if (params.getWritersCount() > 0 && !streamHandle.create()) {
-                if (recreate) {
+                if (config.recreate) {
                     streamHandle.recreate();
                 } else {
                     streamHandle.scale();
@@ -104,8 +109,8 @@ public class Pravega implements Storage<byte[]> {
                 readerGroup = null;
             }
 
-            factory = EventStreamClientFactory.withScope(scopeName, ClientConfig.builder()
-                                        .controllerURI(new URI(controllerUri)).build());
+            factory = EventStreamClientFactory.withScope(config.scopeName, ClientConfig.builder()
+                                        .controllerURI(new URI(config.controllerUri)).build());
         } catch (Exception ex) {
              throw new IOException(ex);
         }
@@ -121,7 +126,7 @@ public class Pravega implements Storage<byte[]> {
     @Override
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
-            return new PravegaWriter(id, params, streamName, factory);
+            return new PravegaWriter(id, params, config.streamName, factory);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -132,7 +137,7 @@ public class Pravega implements Storage<byte[]> {
     @Override
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
-            return new PravegaReader(id, params, streamName, rdGrpName, factory);
+            return new PravegaReader(id, params, config.streamName, rdGrpName, factory);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
