@@ -9,6 +9,9 @@
  */
 package io.sbk.Kafka;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.Writer;
@@ -16,6 +19,7 @@ import io.sbk.api.Reader;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -28,41 +32,40 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
  * Class for Kafka Benchmarking.
  */
 public class Kafka implements Storage<byte[]> {
-    private String brokerUri;
-    private String topicName;
-    private int partitions;
-    private short replica;
-    private short sync;
-    private boolean create;
+    private final static String CONFIGFILE = "kafka.properties";
+    private KafkaConfig config;
     private Properties producerConfig;
     private Properties consumerConfig;
     private KafkaTopicHandler topicHandler;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
-        params.addOption("broker", true, "Broker URI");
-        params.addOption("topic", true, "Topic name");
-        params.addOption("partitions", true, "partitions");
-        params.addOption("replica", true, "Replication factor");
-        params.addOption("sync", true, "Minimum in-sync Replicas");
-        params.addOption("create", true, "Create (recreate) the topic, valid only for writers");
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        try {
+            config = mapper.readValue(Objects.requireNonNull(Kafka.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+                    KafkaConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+        params.addOption("broker", true, "Broker URI, default: " + config.brokerUri );
+        params.addOption("topic", true, "Topic name, default: " + config.topicName);
+        params.addOption("partitions", true, "partitions, default: "+ config.partitions);
+        params.addOption("replica", true, "Replication factor, default: "+ config.replica);
+        params.addOption("sync", true, "Minimum in-sync Replicas, default: "+ config.sync);
+        params.addOption("create", true,
+                "Create (recreate) the topic, valid only for writers, default: " + config.create);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        topicName =  params.getOptionValue("topic", null);
-        brokerUri = params.getOptionValue("broker", null);
-        if (brokerUri == null) {
-            throw new IllegalArgumentException("Error: Must specify Broker IP address");
-        }
-
-        if (topicName == null) {
-            throw new IllegalArgumentException("Error: Must specify Topic Name");
-        }
-        partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
-        replica = Short.parseShort(params.getOptionValue("replica", "1"));
-        sync = Short.parseShort(params.getOptionValue("sync", "1"));
-        create = Boolean.parseBoolean(params.getOptionValue("create", "false"));
+        config.topicName =  params.getOptionValue("topic", config.topicName);
+        config.brokerUri = params.getOptionValue("broker", config.brokerUri);
+        config.partitions = Integer.parseInt(params.getOptionValue("partitions", Integer.toString(config.partitions)));
+        config.replica = Short.parseShort(params.getOptionValue("replica", Integer.toString(config.replica)));
+        config.sync = Short.parseShort(params.getOptionValue("sync", Integer.toString(config.sync)));
+        config.create = Boolean.parseBoolean(params.getOptionValue("create", Boolean.toString(config.create)));
     }
 
     private Properties createProducerConfig(Parameters params) {
@@ -70,7 +73,7 @@ public class Kafka implements Storage<byte[]> {
             return null;
         }
         final Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUri);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.brokerUri);
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
@@ -84,7 +87,7 @@ public class Kafka implements Storage<byte[]> {
             return null;
         }
         final Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUri);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.brokerUri);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Integer.MAX_VALUE);
@@ -93,7 +96,7 @@ public class Kafka implements Storage<byte[]> {
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
         if (params.isWriteAndRead()) {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-            props.put(ConsumerConfig.GROUP_ID_CONFIG, topicName);
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, config.topicName);
         } else {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
             props.put(ConsumerConfig.GROUP_ID_CONFIG, Long.toString(params.getStartTime()));
@@ -105,9 +108,11 @@ public class Kafka implements Storage<byte[]> {
     public void openStorage(final Parameters params) throws  IOException {
         producerConfig = createProducerConfig(params);
         consumerConfig = createConsumerConfig(params);
-        topicHandler = new KafkaTopicHandler(brokerUri, topicName, partitions, replica, sync);
-        if (params.getWritersCount() > 0 && create) {
+        if (params.getWritersCount() > 0 && config.create) {
+            topicHandler = new KafkaTopicHandler(config);
             topicHandler.createTopic(true);
+        } else {
+            topicHandler = null;
         }
     }
 
@@ -121,7 +126,7 @@ public class Kafka implements Storage<byte[]> {
     @Override
     public Writer<byte[]> createWriter(final int id, final Parameters params) {
         try {
-            return new KafkaWriter(id, params, topicName, producerConfig);
+            return new KafkaWriter(id, params, config.topicName, producerConfig);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -131,7 +136,7 @@ public class Kafka implements Storage<byte[]> {
     @Override
     public Reader<byte[]> createReader(final int id, final Parameters params) {
         try {
-            return new KafkaReader(id, params, topicName, consumerConfig);
+            return new KafkaReader(id, params, config.topicName, consumerConfig);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
