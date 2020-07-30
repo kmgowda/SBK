@@ -12,7 +12,6 @@ package io.sbk.CouchDB;
 
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.impl.SbkLogger;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 
