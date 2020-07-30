@@ -17,7 +17,6 @@ import java.util.Random;
  * Class for processing byte[] data.
  */
 public class ByteArray implements DataType<byte[]> {
-    final static int TIME_HEADER_SIZE = 8;
 
     /**
      * Create byte array data.
@@ -62,8 +61,8 @@ public class ByteArray implements DataType<byte[]> {
      */
     @Override
     public byte[] setTime(byte[] data, long time) {
-        byte[] bytes = ByteBuffer.allocate(TIME_HEADER_SIZE).putLong(0, time).array();
-        System.arraycopy(bytes, 0, data, 0, TIME_HEADER_SIZE);
+        byte[] bytes = ByteBuffer.allocate(TIME_HEADER_BYTES).putLong(0, time).array();
+        System.arraycopy(bytes, 0, data, 0, TIME_HEADER_BYTES);
         return data;
     }
 
@@ -74,6 +73,6 @@ public class ByteArray implements DataType<byte[]> {
      */
     @Override
     public long getTime(byte[] data) {
-        return ByteBuffer.allocate(TIME_HEADER_SIZE).put(data, 0, TIME_HEADER_SIZE).getLong(0);
+        return ByteBuffer.allocate(TIME_HEADER_BYTES).put(data, 0, TIME_HEADER_BYTES).getLong(0);
     }
 }

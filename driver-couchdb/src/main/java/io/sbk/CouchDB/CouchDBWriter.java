@@ -15,7 +15,6 @@ import io.sbk.api.Writer;
 import org.ektorp.CouchDbConnector;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Class for Writer.
  */
-public class CouchDBWriter implements Writer<byte[]> {
+public class CouchDBWriter implements Writer<String> {
     final private CouchDbConnector db;
     final private Parameters params;
     private long key;
@@ -35,10 +34,10 @@ public class CouchDBWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture writeAsync(String data) throws IOException {
         // fill the map
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("data", Arrays.toString(data));
+        map.put("data", data);
         db.create(Long.toString(key++), map);
         return null;
     }

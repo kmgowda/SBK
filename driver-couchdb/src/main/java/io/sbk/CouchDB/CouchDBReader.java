@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Class for Reader.
  */
-public class CouchDBReader implements Reader<byte[]> {
+public class CouchDBReader implements Reader<String> {
     final private CouchDbConnector db;
     final private Parameters params;
     private long key;
@@ -37,14 +37,13 @@ public class CouchDBReader implements Reader<byte[]> {
     }
 
     @Override
-    public byte[] read() throws EOFException, IOException {
+    public String read() throws EOFException, IOException {
         String k = Long.toString(key);
         try {
             Map<String, Object> map = db.get(Map.class, k);
             if (map != null) {
                 key++;
-                String data = (String) map.get("data");
-                return data.getBytes();
+                return (String) map.get("data");
             }
         } catch (DocumentNotFoundException ex) {
             throw new EOFException("Key : "+ k + "not found");

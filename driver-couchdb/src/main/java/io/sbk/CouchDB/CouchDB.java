@@ -13,10 +13,12 @@ package io.sbk.CouchDB;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.Storage;
 import io.sbk.api.Writer;
+import io.sbk.api.impl.JavaString;
 import io.sbk.api.impl.SbkLogger;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -31,7 +33,7 @@ import java.util.Objects;
 /**
  * Class for CouchDB Benchmarking.
  */
-public class CouchDB implements Storage<byte[]> {
+public class CouchDB implements Storage<String> {
     private final static String CONFIGFILE = "couchdb.properties";
     private CouchDBConfig config;
     private CouchDbConnector db;
@@ -76,7 +78,7 @@ public class CouchDB implements Storage<byte[]> {
                 dbInstance.deleteDatabase(config.dbName);
             }
         } catch (DocumentNotFoundException ex) {
-            SbkLogger.log.info("The data base :" + config.dbName + " not found");
+            SbkLogger.log.info("The data base : " + config.dbName + " not found");
         }
         // if the second parameter is true, the database will be created if it
         // doesn't exists
@@ -91,7 +93,7 @@ public class CouchDB implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public Writer<String> createWriter(final int id, final Parameters params) {
         try {
             return new CouchDBWriter(id, params, config, db);
         } catch (IOException ex) {
@@ -101,13 +103,18 @@ public class CouchDB implements Storage<byte[]> {
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public Reader<String> createReader(final int id, final Parameters params) {
         try {
             return new CouchDBReader(id, params, config, db);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public DataType<String> getDataType() {
+        return new JavaString();
     }
 
     public static long generateStartKey(int id) {
