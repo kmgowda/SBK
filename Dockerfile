@@ -49,6 +49,8 @@ COPY --chown=root:root driver-foundationdb ${APP_HOME}/driver-foundationdb
 COPY --chown=root:root driver-fdbrecord ${APP_HOME}/driver-fdbrecord
 COPY --chown=root:root driver-mongodb ${APP_HOME}/driver-mongodb
 COPY --chown=root:root driver-rocksdb ${APP_HOME}/driver-rocksdb
+COPY --chown=root:root driver-ignite ${APP_HOME}/driver-ignite
+
 
 ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  build --no-daemon --info --stacktrace
