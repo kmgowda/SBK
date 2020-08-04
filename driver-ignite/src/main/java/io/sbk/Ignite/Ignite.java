@@ -78,6 +78,10 @@ public class Ignite implements Storage<byte[]> {
             cache = ignite.getOrCreateCache(config.cacheName);
             igniteClient = null;
             clientCache = null;
+
+            if (params.getWritersCount() > 0) {
+                cache.destroy();
+            }
         }
     }
 
