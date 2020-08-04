@@ -28,7 +28,9 @@ public class IgniteWriter implements Writer<byte[]> {
         this.key = Ignite.generateStartKey(id);
         this.cache = cache;
         for (long i = this.key; i < this.key + Integer.MAX_VALUE + 1; i++) {
-            cache.clear(i);
+            if (cache.containsKey(i)) {
+                cache.clear(i);
+            }
         }
     }
 
