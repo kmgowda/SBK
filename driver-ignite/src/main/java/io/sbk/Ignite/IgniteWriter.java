@@ -27,9 +27,13 @@ public class IgniteWriter implements Writer<byte[]> {
     public IgniteWriter(int id, Parameters params, IgniteCache<Long, byte[]> cache) throws IOException {
         this.key = Ignite.generateStartKey(id);
         this.cache = cache;
+        /*
         for (long i = this.key; i < this.key + Integer.MAX_VALUE + 1; i++) {
-            cache.clear(i);
+            if (cache.containsKey(i)) {
+                cache.clear(i);
+            }
         }
+        */
     }
 
     @Override

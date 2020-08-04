@@ -14,4 +14,5 @@ public class IgniteConfig {
     public String cacheName;
     public String url;
     public String cFile;
+    public boolean isClient;
 }
