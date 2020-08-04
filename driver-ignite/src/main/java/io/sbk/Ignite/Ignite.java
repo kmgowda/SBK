@@ -75,6 +75,9 @@ public class Ignite implements Storage<byte[]> {
             clientCache = igniteClient.getOrCreateCache(config.cacheName);
             ignite = null;
             cache = null;
+            if (params.getWritersCount() > 0) {
+                clientCache.clear();
+            }
         }  else {
             if (config.cFile != null) {
                 ignite = Ignition.start(config.cFile);
