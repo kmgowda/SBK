@@ -79,7 +79,7 @@ public class Ignite implements Storage<byte[]> {
             if (config.cFile != null) {
                 ignite = Ignition.start(config.cFile);
             } else {
-                ignite = Ignition.ignite();
+                ignite = Ignition.start();
             }
             cache = ignite.getOrCreateCache(config.cacheName);
             igniteClient = null;
