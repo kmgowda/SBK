@@ -49,9 +49,10 @@ public class Ignite implements Storage<byte[]> {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("url", true, "server address, default : "+ config.url);
+        params.addOption("url", true, "server address, default : " + config.url);
         params.addOption("cfile", true, "cluster file");
-        params.addOption("cache", true, "cache name,  default : "+ config.cacheName);
+        params.addOption("cache", true, "cache name,  default : " + config.cacheName);
+        params.addOption("client", true, "client mode, default: " + config.isClient);
     }
 
     @Override
@@ -63,18 +64,23 @@ public class Ignite implements Storage<byte[]> {
         } else {
             config.cFile = null;
         }
+        config.isClient = Boolean.parseBoolean(params.getOptionValue("client", Boolean.toString(config.isClient)));
     }
 
     @Override
     public void openStorage(final Parameters params) throws  IOException {
-        if (config.cFile == null) {
+        if (config.isClient) {
             ClientConfiguration cfg = new ClientConfiguration().setAddresses(config.url);
             igniteClient = Ignition.startClient(cfg);
             clientCache = igniteClient.getOrCreateCache(config.cacheName);
             ignite = null;
             cache = null;
         }  else {
-            ignite = Ignition.start(config.cFile);
+            if (config.cFile != null) {
+                ignite = Ignition.start(config.cFile);
+            } else {
+                ignite = Ignition.ignite();
+            }
             cache = ignite.getOrCreateCache(config.cacheName);
             igniteClient = null;
             clientCache = null;
