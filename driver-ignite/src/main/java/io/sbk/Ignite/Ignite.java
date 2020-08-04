@@ -30,7 +30,7 @@ import java.util.Objects;
  * Class for Ignite Benchmarking.
  */
 public class Ignite implements Storage<byte[]> {
-    private final static String CONFIGFILE = "ignite.properties";
+    private final static String CONFIGFILE = "sbk-ignite.properties";
     private IgniteConfig config;
     private IgniteCache<Long, byte[]> cache;
     private ClientCache<Long, byte[]> clientCache;
