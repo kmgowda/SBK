@@ -24,9 +24,9 @@ public class IgniteReader implements Reader<byte[]> {
     private long key;
     private IgniteCache<Long, byte[]> cache;
 
-    public IgniteReader(int id, Parameters params, IgniteCache<Long, byte[]> cache) throws IOException {
+    public IgniteReader(int id, Parameters params, org.apache.ignite.Ignite ignite, IgniteConfig config) throws IOException {
         this.key = Ignite.generateStartKey(id);
-        this.cache = cache;
+        this.cache = ignite.getOrCreateCache(config.cacheName);
     }
 
     @Override
@@ -41,5 +41,6 @@ public class IgniteReader implements Reader<byte[]> {
 
     @Override
     public void close() throws  IOException {
+        cache.close();
     }
 }
