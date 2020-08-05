@@ -24,9 +24,10 @@ public class IgniteWriter implements Writer<byte[]> {
     private long key;
     private IgniteCache<Long, byte[]> cache;
 
-    public IgniteWriter(int id, Parameters params, IgniteCache<Long, byte[]> cache) throws IOException {
+    public IgniteWriter(int id, Parameters params, org.apache.ignite.Ignite ignite, IgniteConfig config) throws IOException {
         this.key = Ignite.generateStartKey(id);
-        this.cache = cache;
+        this.cache = ignite.getOrCreateCache(config.cacheName);
+
         /*
         for (long i = this.key; i < this.key + Integer.MAX_VALUE + 1; i++) {
             if (cache.containsKey(i)) {
@@ -48,5 +49,6 @@ public class IgniteWriter implements Writer<byte[]> {
 
     @Override
     public void close() throws  IOException {
+        cache.close();
     }
 }
