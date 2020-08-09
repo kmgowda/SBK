@@ -397,7 +397,6 @@ Example: For pulsar driver
 ```
 <SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
 
-```
 usage: sbk -class Pulsar
  -ackQuorum <arg>       AckQuorum default: 1
  -admin <arg>           Admin URI, required to create the partitioned
