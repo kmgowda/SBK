@@ -99,11 +99,12 @@ dependencies {
 	compile project(':driver-nsq')
 	compile project(':driver-jdbc')
 	compile project(':driver-minio')
-	compile project('driver-foundationdb')
-	compile project('driver-fdbrecord')
-	compile project('driver-mongodb')
-	compile project('driver-rocksdb')
-	compile project('driver-ignite')
+	compile project(':driver-foundationdb')
+	compile project(':driver-fdbrecord')
+	compile project(':driver-mongodb')
+	compile project(':driver-rocksdb')
+	compile project(':driver-ignite')
+	compile project(':driver-couchdb')
 }
 
 //create a single Jar with all dependencies

@@ -13,6 +13,7 @@ package io.sbk.api;
  * Interface for Data Type operations.
  */
 public interface DataType<T> {
+    final static int TIME_HEADER_BYTES = 8;
 
     /**
      * allocate the data.
