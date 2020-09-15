@@ -39,6 +39,7 @@ Currently SBK supports benchmarking of
 24. [CockroachDB](https://github.com/kmgowda/SBK/tree/master/driver-jdbc#jdbc-postgresql-for-cockroachdb-performance-benchmarking)
 25. [RocksDB](https://rocksdb.org)
 26. [Apache Ignite](https://ignite.apache.org)
+27. [Apache CouchDB](https://couchdb.apache.org)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
