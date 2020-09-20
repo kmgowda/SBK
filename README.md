@@ -127,7 +127,7 @@ Build only the SBK install binary
 ```
 ./gradlew installDist
 ```
-executable binayr will be avialable at : <SBK directory>/./build/install/sbk/bin/sbk
+executable binary will be avialable at :  [SBK directory]/./build/install/sbk/bin/sbk
 
 
 ## Running Performance benchmarking
