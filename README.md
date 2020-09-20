@@ -13,11 +13,13 @@ You may obtain a copy of the License at
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system. If you are curious to measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  tool/frame work. It massively writes the data to storage system and reads the data from strorage system. The SBK supports multi writers and readers and also the End to End latency benchmarking. The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
 
 ___
+
 <p align="center">
 Supported By
 </p>
 
-[<p align="center"> <img src="https://github.com/kmgowda/SBK/blob/gh-pages/images/jetbrains.png" alt="Supported by" width="100" height="100" /></p>](https://www.jetbrains.com/?from=SBK)
+[<p align="center"> <img src="https://github.com/kmgowda/SBK/blob/gh-pages/images/jetbrains.png" alt="Jet Brains" width="100" height="100" /></p>](https://www.jetbrains.com/?from=SBK)
+
 ___
 
 Currently SBK supports benchmarking of
