@@ -91,7 +91,7 @@ Running SBK locally:
 usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     ConcurrentQ, FdbRecord, File, FileStream,
+                     ConcurrentQ, CouchDB, FdbRecord, File, FileStream,
                      FoundationDB, HDFS, Ignite, Jdbc, Kafka, MinIO,
                      MongoDB, Nats, NatsStream, Nsq, Pravega, Pulsar,
                      RabbitMQ, RocketMQ, RocksDB]
@@ -112,6 +112,21 @@ usage: sbk
  -time <arg>         Number of seconds this SBK runs (24hrs by default)
  -writers <arg>      Number of writers
 ```
+
+
+Just to check the SBK build issue the command
+
+```
+./gradlew check
+```
+
+Build only the SBK install binary
+
+```
+./gradlew installDist
+```
+executable binayr will be avialable at : <SBK directory>/./build/install/sbk/bin/sbk
+
 
 ## Running Performance benchmarking
 The SBK  can be executed to
@@ -413,7 +428,7 @@ usage: sbk -class Pulsar
  -broker <arg>          Broker URI, default: tcp://localhost:6650
  -class <arg>           Storage Driver Class,
                         Available Drivers [Artemis, AsyncFile, BookKeeper,
-                        ConcurrentQ, FdbRecord, File, FileStream,
+                        ConcurrentQ, CouchDB, FdbRecord, File, FileStream,
                         FoundationDB, HDFS, Ignite, Jdbc, Kafka, MinIO,
                         MongoDB, Nats, NatsStream, Nsq, Pravega, Pulsar,
                         RabbitMQ, RocketMQ, RocksDB]
