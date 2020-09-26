@@ -23,6 +23,7 @@ import io.sbk.api.Performance;
 import io.sbk.api.RecordTime;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.TimeStamp;
+import io.sbk.api.Channel;
 import lombok.Synchronized;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -47,7 +48,7 @@ final public class SbkPerformance implements Performance {
     final private ResultLogger periodicLogger;
     final private ResultLogger totalLogger;
     final private ExecutorService executor;
-    final private TimeRecorder[]  timeRecorders;
+    final private Channel[] channels;
 
     @GuardedBy("this")
     private int index;
@@ -73,15 +74,15 @@ final public class SbkPerformance implements Performance {
         int maxQs;
         if (config.maxQs > 0) {
             maxQs = config.maxQs;
-            this.timeRecorders = new TimeRecorder[1];
+            this.channels = new CQueueChannel[1];
             this.index = 1;
         } else {
             maxQs =  Math.max(Config.MIN_Q_PER_WORKER, config.qPerWorker);
-            this.timeRecorders = new TimeRecorder[workers];
+            this.channels = new CQueueChannel[workers];
             this.index = workers;
         }
-        for (int i = 0; i < timeRecorders.length; i++) {
-            timeRecorders[i] = new TimeRecorder(maxQs);
+        for (int i = 0; i < channels.length; i++) {
+            channels[i] = new CQueueChannel(maxQs);
         }
     }
 
@@ -122,8 +123,8 @@ final public class SbkPerformance implements Performance {
             window = new TimeWindow(action, startTime, baseLatency, maxWindowLatency, windowInterval, idleNS);
             while (doWork) {
                 notFound = true;
-                for (TimeRecorder recorder : timeRecorders) {
-                    t = recorder.poll();
+                for (Channel ch : channels) {
+                    t = ch.receive();
                     if (t != null) {
                         notFound = false;
                         time = t.endTime;
@@ -408,11 +409,11 @@ final public class SbkPerformance implements Performance {
     }
 
     @NotThreadSafe
-    static final class TimeRecorder implements RecordTime {
+    static final class CQueueChannel implements Channel {
         final private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
         private int index;
 
-        public TimeRecorder(int qSize) {
+        public CQueueChannel(int qSize) {
             this.index = qSize;
             this.cQueues = new ConcurrentLinkedQueue[qSize];
             for (int i = 0; i < cQueues.length; i++) {
@@ -420,7 +421,7 @@ final public class SbkPerformance implements Performance {
             }
         }
 
-        public TimeStamp poll() {
+        public TimeStamp receive() {
             index += 1;
             if (index >= cQueues.length) {
                 index = 0;
@@ -428,7 +429,7 @@ final public class SbkPerformance implements Performance {
             return cQueues[index].poll();
         }
 
-        public void enqEndTime(long endTime) {
+        public void sendEndTime(long endTime) {
             cQueues[0].add(new TimeStamp(endTime));
         }
 
@@ -448,14 +449,14 @@ final public class SbkPerformance implements Performance {
     @Override
     @Synchronized
     public RecordTime get() {
-        if (timeRecorders.length == 1) {
-                return timeRecorders[0];
+        if (channels.length == 1) {
+                return channels[0];
         }
         index += 1;
-        if (index >= timeRecorders.length) {
+        if (index >= channels.length) {
             index = 0;
         }
-        return  timeRecorders[index];
+        return  channels[index];
     }
 
 
@@ -473,16 +474,16 @@ final public class SbkPerformance implements Performance {
     public void stop(long endTime)  {
         if (this.retFuture != null) {
             if (!this.retFuture.isDone()) {
-                for (TimeRecorder recorder : timeRecorders) {
-                    recorder.enqEndTime(endTime);
+                for (Channel ch : channels) {
+                    ch.sendEndTime(endTime);
                 }
                 try {
                     retFuture.get();
                 } catch (ExecutionException | InterruptedException ex) {
                     ex.printStackTrace();
                 }
-                for (TimeRecorder recorder : timeRecorders) {
-                    recorder.clear();
+                for (Channel ch : channels) {
+                    ch.clear();
                 }
             }
             this.retFuture = null;
