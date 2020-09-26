@@ -53,7 +53,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = System.currentTimeMillis();
-                        recordTime.accept(id, time, endTime, result, 1);
+                        recordTime.send(id, time, endTime, result, 1);
                     }
 
                     @Override
@@ -73,7 +73,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = System.currentTimeMillis();
-                        recordTime.accept(id, dType.getTime(attachment), endTime, result, 1);
+                        recordTime.send(id, dType.getTime(attachment), endTime, result, 1);
                     }
 
                     @Override

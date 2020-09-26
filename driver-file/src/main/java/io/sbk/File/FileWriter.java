@@ -48,7 +48,7 @@ public class FileWriter implements Writer<ByteBuffer> {
         status.endTime = System.currentTimeMillis();
         status.bytes = size;
         status.records = 1;
-        record.accept(id, status.startTime, status.endTime, size, 1);
+        record.send(id, status.startTime, status.endTime, size, 1);
     }
 
 

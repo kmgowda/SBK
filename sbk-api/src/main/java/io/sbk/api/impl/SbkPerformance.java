@@ -440,7 +440,7 @@ final public class SbkPerformance implements Performance {
 
         /* This Method is Thread Safe */
         @Override
-        public void accept(int id, long startTime, long endTime, int bytes, int records) {
+        public void send(int id, long startTime, long endTime, int bytes, int records) {
             cQueues[id].add(new TimeStamp(startTime, endTime, bytes, records));
         }
     }

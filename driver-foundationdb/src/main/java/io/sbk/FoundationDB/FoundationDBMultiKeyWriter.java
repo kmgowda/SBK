@@ -108,7 +108,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
             return null;
         });
         status.endTime = System.currentTimeMillis();
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
         cnt += recs;
     }

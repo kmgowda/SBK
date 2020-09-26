@@ -53,7 +53,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
                 SbkLogger.log.error("NAT Streaming Writer failed !");
             } else {
                 final long endTime = System.currentTimeMillis();
-                record.accept(id, time, endTime, size, 1);
+                record.send(id, time, endTime, size, 1);
             }
         };
         try {

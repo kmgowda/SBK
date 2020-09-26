@@ -57,7 +57,7 @@ public class MinIOReader implements Reader<byte[]> {
                 status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
                 inStream = client.getObject(config.bucketName, item.objectName());
                 status.endTime = System.currentTimeMillis();
-                recordTime.accept(id, status.startTime, status.endTime, status.bytes, 1);
+                recordTime.send(id, status.startTime, status.endTime, status.bytes, 1);
                 inStream.close();
               }
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
@@ -84,7 +84,7 @@ public class MinIOReader implements Reader<byte[]> {
                 ret = inStream.read(inData);
                 if (ret > 0) {
                     status.endTime = dType.getTime(inData);
-                    recordTime.accept(id, status.startTime, status.endTime, status.bytes, 1);
+                    recordTime.send(id, status.startTime, status.endTime, status.bytes, 1);
                 }
                 inStream.close();
             }

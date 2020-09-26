@@ -83,12 +83,12 @@ public interface Writer<T>  {
         ret = writeAsync(data);
         if (ret == null) {
             status.endTime = System.currentTimeMillis();
-            recordTime.accept(id, status.startTime, status.endTime, size, 1);
+            recordTime.send(id, status.startTime, status.endTime, size, 1);
         } else {
             final long time =  status.startTime;
             ret.thenAccept(d -> {
                 final long endTime = System.currentTimeMillis();
-                recordTime.accept(id, time, endTime, size, 1);
+                recordTime.send(id, time, endTime, size, 1);
             });
         }
     }

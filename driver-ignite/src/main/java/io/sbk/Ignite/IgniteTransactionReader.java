@@ -83,7 +83,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
         status.endTime = System.currentTimeMillis();
         key += recs;
         cnt += recs;
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
@@ -118,6 +118,6 @@ public class IgniteTransactionReader implements Reader<byte[]> {
         status.endTime = System.currentTimeMillis();
         key += status.records;
         cnt += status.records;
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 }

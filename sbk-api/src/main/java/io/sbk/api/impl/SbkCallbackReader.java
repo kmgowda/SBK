@@ -62,7 +62,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % recordIDMax);
-        recordTime.accept(id, startTime, endTime, dataSize, events);
+        recordTime.send(id, startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && ((endTime - beginTime)  >= this.msToRun)) {
             ret.complete(null);
         } else if (this.totalRecords > cnt) {

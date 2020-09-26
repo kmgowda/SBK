@@ -95,7 +95,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
         }
         tx.commit();
         status.endTime = System.currentTimeMillis();
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
         cnt += recs;
     }

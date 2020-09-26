@@ -55,7 +55,7 @@ public interface Reader<T> {
             status.endTime = System.currentTimeMillis();
             status.bytes = dType.length(ret);
             status.records = 1;
-            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+            recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 
@@ -83,7 +83,7 @@ public interface Reader<T> {
             status.endTime = System.currentTimeMillis();
             status.bytes = dType.length(ret);
             status.records = 1;
-            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+            recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 

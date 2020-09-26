@@ -97,7 +97,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
         }
         databaseCollection.insertMany(lt);
         status.endTime = System.currentTimeMillis();
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
         cnt += recs;
     }
 }

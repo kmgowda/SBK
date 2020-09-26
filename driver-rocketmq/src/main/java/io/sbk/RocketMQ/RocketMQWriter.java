@@ -94,7 +94,7 @@ public class RocketMQWriter implements Writer<byte[]> {
                 @Override
                 public void onSuccess(final SendResult sendResult) {
                     final long endTime = System.currentTimeMillis();
-                    record.accept(id, time, endTime, size, 1);
+                    record.send(id, time, endTime, size, 1);
                 }
 
                 @Override

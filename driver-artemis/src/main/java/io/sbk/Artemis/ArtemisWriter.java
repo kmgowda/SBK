@@ -50,7 +50,7 @@ public class ArtemisWriter implements Writer<byte[]> {
         try {
             producer.send(msg, handler -> {
                 final long endTime = System.currentTimeMillis();
-                record.accept(id, time, endTime, size, 1);
+                record.send(id, time, endTime, size, 1);
             });
         } catch ( ActiveMQException ex) {
             ex.printStackTrace();

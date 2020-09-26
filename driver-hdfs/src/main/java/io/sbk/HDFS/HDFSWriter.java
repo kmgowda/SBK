@@ -51,7 +51,7 @@ public class HDFSWriter implements Writer<byte[]> {
         status.endTime = System.currentTimeMillis();
         status.records = 1;
         status.bytes = size;
-        record.accept(id, status.startTime, status.endTime, size, 1);
+        record.send(id, status.startTime, status.endTime, size, 1);
     }
 
     @Override

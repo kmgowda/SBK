@@ -51,7 +51,7 @@ public class KafkaReader implements Reader<byte[]> {
                 status.bytes += record.value().length;
                 status.records += 1;
             }
-            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+            recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 
@@ -72,7 +72,7 @@ public class KafkaReader implements Reader<byte[]> {
                     status.startTime = dType.getTime(record.value());
                 }
             }
-            recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+            recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 
