@@ -12,7 +12,7 @@ package io.sbk.MongoDB;
 import com.mongodb.client.MongoCollection;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import org.bson.Document;
@@ -78,7 +78,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime recordTime, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel sendChannel, int id) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
             recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
@@ -97,7 +97,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
         }
         databaseCollection.insertMany(lt);
         status.endTime = System.currentTimeMillis();
-        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
         cnt += recs;
     }
 }

@@ -9,7 +9,7 @@
  */
 package io.sbk.api;
 
-public interface Channel extends RecordTime {
+public interface Channel extends SendChannel {
 
     /**
      * Receive the benchmarking timestamp.

@@ -13,7 +13,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Callback;
 import io.sbk.api.Worker;
 
@@ -30,8 +30,8 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private int totalRecords;
     private long beginTime;
 
-    public SbkCallbackReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType dataType) {
-        super(readerId, idMax, params, recordTime);
+    public SbkCallbackReader(int readerId, int idMax, Parameters params, SendChannel sendChannel, DataType dataType) {
+        super(readerId, idMax, params, sendChannel);
         this.dataType = dataType;
         this.ret = new CompletableFuture<>();
         this.readCnt = new AtomicLong(0);
@@ -62,7 +62,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % recordIDMax);
-        recordTime.send(id, startTime, endTime, dataSize, events);
+        sendChannel.send(id, startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && ((endTime - beginTime)  >= this.msToRun)) {
             ret.complete(null);
         } else if (this.totalRecords > cnt) {

@@ -19,7 +19,7 @@ import com.google.protobuf.Message;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 
 import java.io.EOFException;
@@ -68,7 +68,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     }
 
     @Override
-    public void recordRead(DataType<ByteString> dType, Status status, RecordTime recordTime, int id)
+    public void recordRead(DataType<ByteString> dType, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
@@ -102,12 +102,12 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         status.endTime = System.currentTimeMillis();
         key += recs;
         cnt += recs;
-        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
     @Override
-    public void recordReadTime(DataType<ByteString> dType, Status status, RecordTime recordTime, int id)
+    public void recordReadTime(DataType<ByteString> dType, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
@@ -145,6 +145,6 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         status.endTime = System.currentTimeMillis();
         key += status.records;
         cnt += status.records;
-        recordTime.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 }

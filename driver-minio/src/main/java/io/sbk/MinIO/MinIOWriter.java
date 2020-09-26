@@ -18,7 +18,7 @@ import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.api.DataType;
@@ -47,7 +47,7 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel record, int id) throws IOException {
         status.startTime = System.currentTimeMillis();
         dataStream.reset();
         try {

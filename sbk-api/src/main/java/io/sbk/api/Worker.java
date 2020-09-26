@@ -17,12 +17,12 @@ public abstract class Worker {
     public final int id;
     public final int recordIDMax;
     public final Parameters params;
-    public final RecordTime recordTime;
+    public final SendChannel sendChannel;
 
-    public Worker(int workerID, int idMax, Parameters params, RecordTime recordTime) {
+    public Worker(int workerID, int idMax, Parameters params, SendChannel sendChannel) {
         this.id = workerID;
         this.recordIDMax = idMax;
         this.params = params;
-        this.recordTime = recordTime;
+        this.sendChannel = sendChannel;
     }
 }

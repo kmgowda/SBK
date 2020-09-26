@@ -13,7 +13,7 @@ package io.sbk.api;
 /**
  * Interface for recording benchmarking data.
  */
-public interface RecordTime {
+public interface SendChannel {
     /**
      * send the benchmarking data.
      * @param  id  identifier

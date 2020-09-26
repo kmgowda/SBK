@@ -13,7 +13,7 @@ package io.sbk.api.impl;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RateController;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Worker;
 import io.sbk.api.Writer;
 
@@ -30,8 +30,8 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private Object payload;
     final private int dataSize;
 
-    public SbkWriter(int writerID, int idMax, Parameters params, RecordTime recordTime, DataType<Object> dType, Writer<Object> writer) {
-        super(writerID, idMax, params, recordTime);
+    public SbkWriter(int writerID, int idMax, Parameters params, SendChannel sendChannel, DataType<Object> dType, Writer<Object> writer) {
+        super(writerID, idMax, params, sendChannel);
         this.dType = dType;
         this.writer = writer;
         this.perf = createBenchmark();

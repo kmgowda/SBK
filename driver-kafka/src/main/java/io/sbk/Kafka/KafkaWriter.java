@@ -10,9 +10,9 @@
 package io.sbk.Kafka;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
-import io.sbk.api.RecordTime;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -35,7 +35,7 @@ public class KafkaWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel record, int id) {
         final long time = System.currentTimeMillis();
         status.startTime = time;
         status.bytes = size;

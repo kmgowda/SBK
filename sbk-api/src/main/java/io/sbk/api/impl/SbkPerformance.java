@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 
 import io.sbk.api.Config;
 import io.sbk.api.Performance;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.TimeStamp;
 import io.sbk.api.Channel;
@@ -448,7 +448,7 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public RecordTime get() {
+    public SendChannel get() {
         if (channels.length == 1) {
                 return channels[0];
         }

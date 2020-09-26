@@ -10,7 +10,7 @@
 package io.sbk.FileStream;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 
@@ -29,7 +29,7 @@ public class FileStreamWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel record, int id) throws IOException {
         status.startTime = System.currentTimeMillis();
         out.write(data);
         status.endTime = System.currentTimeMillis();

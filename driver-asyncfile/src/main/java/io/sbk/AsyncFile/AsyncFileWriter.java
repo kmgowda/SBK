@@ -10,7 +10,7 @@
 package io.sbk.AsyncFile;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 
@@ -40,7 +40,7 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Status status, RecordTime record, int id) throws IOException {
+    public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Status status, SendChannel record, int id) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
         final long time = System.currentTimeMillis();
 
