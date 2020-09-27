@@ -133,8 +133,8 @@ final public class SbkPerformance implements Performance {
                             break;
                         } else {
                             recordsCnt += t.records;
-                            final int latency = (int) (time - t.startTime);
-                            window.record(startTime, t.bytes, t.records, latency);
+                            final int latency = (int) (t.endTime - t.startTime);
+                            window.record(t.startTime, t.bytes, t.records, latency);
                             latencyRecorder.record(t.startTime, t.bytes, t.records, latency);
                             if (totalRecords > 0  && recordsCnt >= totalRecords) {
                                 doWork = false;
