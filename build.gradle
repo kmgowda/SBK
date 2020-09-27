@@ -63,6 +63,7 @@ allprojects {
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
 	mainClassName = SbkMainClass
+	version = sbkVersion
 
 	jar {
 		manifest {
