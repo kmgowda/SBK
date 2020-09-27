@@ -11,7 +11,7 @@ package io.sbk.Pravega;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 
@@ -46,7 +46,7 @@ public class PravegaWriter implements Writer<byte[]> {
      * @param id     for record benchmarking
      */
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel record, int id) throws IOException {
         CompletableFuture<Void> ret;
         final long time = System.currentTimeMillis();
         status.startTime = time;
@@ -55,7 +55,7 @@ public class PravegaWriter implements Writer<byte[]> {
         ret = writeAsync(data);
         ret.thenAccept(d -> {
             final long endTime = System.currentTimeMillis();
-            record.accept(id, time, endTime, size, 1);
+            record.send(id, time, endTime, size, 1);
         });
     }
 

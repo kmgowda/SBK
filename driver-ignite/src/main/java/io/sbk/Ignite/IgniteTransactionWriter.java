@@ -12,7 +12,7 @@ package io.sbk.Ignite;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import org.apache.ignite.IgniteCache;
@@ -77,7 +77,7 @@ public class IgniteTransactionWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime recordTime, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel sendChannel, int id) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
             recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
@@ -94,7 +94,7 @@ public class IgniteTransactionWriter implements Writer<byte[]> {
         }
         tx.commit();
         status.endTime = System.currentTimeMillis();
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
         cnt += recs;
     }

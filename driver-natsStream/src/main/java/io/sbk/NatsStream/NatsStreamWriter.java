@@ -9,7 +9,7 @@
  */
 package io.sbk.NatsStream;
 import io.sbk.api.DataType;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
@@ -42,7 +42,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
      }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, RecordTime record, int id) {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel record, int id) {
         final long time = System.currentTimeMillis();
         status.startTime = time;
         status.bytes = size;
@@ -53,7 +53,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
                 SbkLogger.log.error("NAT Streaming Writer failed !");
             } else {
                 final long endTime = System.currentTimeMillis();
-                record.accept(id, time, endTime, size, 1);
+                record.send(id, time, endTime, size, 1);
             }
         };
         try {

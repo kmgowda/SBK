@@ -12,7 +12,7 @@ package io.sbk.AsyncFile;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordRead(DataType<ByteBuffer> dType, Status status, RecordTime recordTime, int id) throws IOException {
+    public void recordRead(DataType<ByteBuffer> dType, Status status, SendChannel sendChannel, int id) throws IOException {
         final long time = System.currentTimeMillis();
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
@@ -53,7 +53,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = System.currentTimeMillis();
-                        recordTime.accept(id, time, endTime, result, 1);
+                        sendChannel.send(id, time, endTime, result, 1);
                     }
 
                     @Override
@@ -65,7 +65,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordReadTime(DataType<ByteBuffer> dType, Status status, RecordTime recordTime, int id) throws IOException {
+    public void recordReadTime(DataType<ByteBuffer> dType, Status status, SendChannel sendChannel, int id) throws IOException {
         final ByteBuffer buffer =  dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
@@ -73,7 +73,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = System.currentTimeMillis();
-                        recordTime.accept(id, dType.getTime(attachment), endTime, result, 1);
+                        sendChannel.send(id, dType.getTime(attachment), endTime, result, 1);
                     }
 
                     @Override

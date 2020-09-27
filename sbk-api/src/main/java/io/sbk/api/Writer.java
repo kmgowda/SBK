@@ -71,11 +71,11 @@ public interface Writer<T>  {
      * @param data   data to write
      * @param size  size of the data
      * @param status Write status to return
-     * @param recordTime to call for benchmarking
+     * @param sendChannel to call for benchmarking
      * @param  id   Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
-    default void recordWrite(DataType<T> dType, T data, int size, Status status, RecordTime recordTime, int id) throws IOException {
+    default void recordWrite(DataType<T> dType, T data, int size, Status status, SendChannel sendChannel, int id) throws IOException {
         CompletableFuture<?> ret;
         status.bytes = size;
         status.records =  1;
@@ -83,12 +83,12 @@ public interface Writer<T>  {
         ret = writeAsync(data);
         if (ret == null) {
             status.endTime = System.currentTimeMillis();
-            recordTime.accept(id, status.startTime, status.endTime, size, 1);
+            sendChannel.send(id, status.startTime, status.endTime, size, 1);
         } else {
             final long time =  status.startTime;
             ret.thenAccept(d -> {
                 final long endTime = System.currentTimeMillis();
-                recordTime.accept(id, time, endTime, size, 1);
+                sendChannel.send(id, time, endTime, size, 1);
             });
         }
     }
@@ -108,7 +108,7 @@ public interface Writer<T>  {
         int id = writer.id % writer.recordIDMax;
         int i = 0;
         while (i < writer.params.getRecordsCount()) {
-            recordWrite(dType, data, size, status, writer.recordTime, id);
+            recordWrite(dType, data, size, status, writer.sendChannel, id);
             id += 1;
             if (id >= writer.recordIDMax) {
                 id = 0;
@@ -139,7 +139,7 @@ public interface Writer<T>  {
             int loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             int i = 0;
             while (i < loopMax) {
-                recordWrite(dType, data, size, status, writer.recordTime, id);
+                recordWrite(dType, data, size, status, writer.sendChannel, id);
                 id += 1;
                 if (id >= writer.recordIDMax) {
                     id = 0;
@@ -169,7 +169,7 @@ public interface Writer<T>  {
         int id = writer.id % writer.recordIDMax;
         status.startTime = System.currentTimeMillis();
         while ((status.startTime - startTime) < msToRun) {
-            recordWrite(dType, data, size, status, writer.recordTime, id);
+            recordWrite(dType, data, size, status, writer.sendChannel, id);
             id += 1;
             if (id >= writer.recordIDMax) {
                 id = 0;
@@ -201,7 +201,7 @@ public interface Writer<T>  {
         while (msElapsed < msToRun) {
             int i = 0;
             while ((msElapsed < msToRun) && (i < writer.params.getRecordsPerSync())) {
-                recordWrite(dType, data, size, status, writer.recordTime, id);
+                recordWrite(dType, data, size, status, writer.sendChannel, id);
                 id += 1;
                 if (id >= writer.recordIDMax) {
                     id = 0;

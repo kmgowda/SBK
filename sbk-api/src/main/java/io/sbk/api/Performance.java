@@ -41,5 +41,5 @@ public interface Performance {
      *
      * @return RecordTime Interface if its available ; returns null in case of failure.
      */
-     RecordTime get();
+     SendChannel get();
 }

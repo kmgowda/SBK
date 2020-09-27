@@ -21,7 +21,7 @@ import io.minio.messages.Item;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -45,7 +45,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, Status status, RecordTime recordTime, int id) throws IOException {
+    public void recordRead(DataType dType, Status status, SendChannel sendChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -57,7 +57,7 @@ public class MinIOReader implements Reader<byte[]> {
                 status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
                 inStream = client.getObject(config.bucketName, item.objectName());
                 status.endTime = System.currentTimeMillis();
-                recordTime.accept(id, status.startTime, status.endTime, status.bytes, 1);
+                sendChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
                 inStream.close();
               }
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
@@ -68,7 +68,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, Status status, RecordTime recordTime, int id) throws IOException {
+    public void recordReadTime(DataType dType, Status status, SendChannel sendChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -84,7 +84,7 @@ public class MinIOReader implements Reader<byte[]> {
                 ret = inStream.read(inData);
                 if (ret > 0) {
                     status.endTime = dType.getTime(inData);
-                    recordTime.accept(id, status.startTime, status.endTime, status.bytes, 1);
+                    sendChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
                 }
                 inStream.close();
             }

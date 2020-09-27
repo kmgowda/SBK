@@ -12,7 +12,7 @@ package io.sbk.api.impl;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Reader;
 import io.sbk.api.Worker;
 
@@ -27,8 +27,8 @@ public class SbkReader extends Worker implements RunBenchmark {
     final private Reader<Object> reader;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, int idMax, Parameters params, RecordTime recordTime, DataType<Object> dType, Reader<Object> reader) {
-        super(readerId, idMax, params, recordTime);
+    public SbkReader(int readerId, int idMax, Parameters params, SendChannel sendChannel, DataType<Object> dType, Reader<Object> reader) {
+        super(readerId, idMax, params, sendChannel);
         this.dType = dType;
         this.reader = reader;
         this.perf = createBenchmark();

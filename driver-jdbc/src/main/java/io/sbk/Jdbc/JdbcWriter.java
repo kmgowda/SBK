@@ -11,7 +11,7 @@ package io.sbk.Jdbc;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.api.impl.SbkLogger;
@@ -64,7 +64,7 @@ public class JdbcWriter implements Writer<String> {
     }
 
     @Override
-    public void recordWrite(DataType<String> dType, String data, int size, Status status, RecordTime record, int id) throws IOException {
+    public void recordWrite(DataType<String> dType, String data, int size, Status status, SendChannel record, int id) throws IOException {
         status.startTime = System.currentTimeMillis();
         try {
             st.executeUpdate(this.insertQuery);
@@ -73,7 +73,7 @@ public class JdbcWriter implements Writer<String> {
             throw  new IOException(ex);
         }
         status.endTime =  System.currentTimeMillis();
-        record.accept(id, status.startTime, status.endTime, size, 1);
+        record.send(id, status.startTime, status.endTime, size, 1);
     }
 
 

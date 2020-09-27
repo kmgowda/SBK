@@ -13,7 +13,7 @@ package io.sbk.Ignite;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientTransaction;
@@ -56,7 +56,7 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
+    public void recordRead(DataType<byte[]> dType, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
@@ -84,12 +84,12 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
         status.endTime = System.currentTimeMillis();
         key += recs;
         cnt += recs;
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
     @Override
-    public void recordReadTime(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
+    public void recordReadTime(DataType<byte[]> dType, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
@@ -119,7 +119,7 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
         status.endTime = System.currentTimeMillis();
         key += status.records;
         cnt += status.records;
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 

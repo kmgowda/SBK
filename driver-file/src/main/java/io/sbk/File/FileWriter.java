@@ -10,7 +10,7 @@
 package io.sbk.File;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 
@@ -41,14 +41,14 @@ public class FileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Status status, RecordTime record, int id) throws IOException {
+    public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Status status, SendChannel record, int id) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
         status.startTime = System.currentTimeMillis();
         out.write(buffer);
         status.endTime = System.currentTimeMillis();
         status.bytes = size;
         status.records = 1;
-        record.accept(id, status.startTime, status.endTime, size, 1);
+        record.send(id, status.startTime, status.endTime, size, 1);
     }
 
 

@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RocketMQ;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -85,7 +85,7 @@ public class RocketMQWriter implements Writer<byte[]> {
     }
 
     // recordWrite override implementation , instead of completable future.
-    private long recordWriteImpl(byte[] data, int size, RecordTime record, int id) {
+    private long recordWriteImpl(byte[] data, int size, SendChannel record, int id) {
         final long time = System.currentTimeMillis();
         Message message = new Message(topicName, data);
 
@@ -94,7 +94,7 @@ public class RocketMQWriter implements Writer<byte[]> {
                 @Override
                 public void onSuccess(final SendResult sendResult) {
                     final long endTime = System.currentTimeMillis();
-                    record.accept(id, time, endTime, size, 1);
+                    record.send(id, time, endTime, size, 1);
                 }
 
                 @Override

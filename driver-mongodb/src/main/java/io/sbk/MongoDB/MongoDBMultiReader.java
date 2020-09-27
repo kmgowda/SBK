@@ -15,7 +15,7 @@ import com.mongodb.client.MongoCursor;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.RecordTime;
+import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import org.bson.Document;
 import org.bson.types.Binary;
@@ -58,7 +58,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
+    public void recordRead(DataType<byte[]> dType, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         byte[] result;
@@ -91,12 +91,12 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         status.endTime = System.currentTimeMillis();
         key += recs;
         cnt += recs;
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
     @Override
-    public void recordReadTime(DataType<byte[]> dType, Status status, RecordTime recordTime, int id)
+    public void recordReadTime(DataType<byte[]> dType, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         byte[] result;
@@ -131,7 +131,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         status.endTime = System.currentTimeMillis();
         key += status.records;
         cnt += status.records;
-        recordTime.accept(id, status.startTime, status.endTime, status.bytes, status.records);
+        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 }
