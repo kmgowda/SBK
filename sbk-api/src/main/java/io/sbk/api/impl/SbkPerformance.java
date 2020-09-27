@@ -124,7 +124,7 @@ final public class SbkPerformance implements Performance {
             while (doWork) {
                 notFound = true;
                 for (Channel ch : channels) {
-                    t = ch.receive();
+                    t = ch.receive(windowInterval);
                     if (t != null) {
                         notFound = false;
                         time = t.endTime;
@@ -421,7 +421,7 @@ final public class SbkPerformance implements Performance {
             }
         }
 
-        public TimeStamp receive() {
+        public TimeStamp receive(int timeout) {
             index += 1;
             if (index >= cQueues.length) {
                 index = 0;
