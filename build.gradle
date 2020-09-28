@@ -52,7 +52,6 @@ allprojects {
 		testCompile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
 	}
 
-	apply from: "$rootDir/gradle/application.gradle"
 	apply from: "$rootDir/gradle/checkstyle.gradle"
 	apply from: "$rootDir/gradle/eclipse.gradle"
 	apply from: "$rootDir/gradle/spotbugs.gradle"
