@@ -72,7 +72,7 @@ allprojects {
 	}
 	archivesBaseName = sbkProjectName
 	version = sbkVersion
-
+	applicationName = archivesBaseName
 	jar {
 		manifest {
 			attributes	'Implementation-Title': sbkProjectName,
