@@ -50,6 +50,7 @@ COPY --chown=root:root driver-fdbrecord ${APP_HOME}/driver-fdbrecord
 COPY --chown=root:root driver-mongodb ${APP_HOME}/driver-mongodb
 COPY --chown=root:root driver-rocksdb ${APP_HOME}/driver-rocksdb
 COPY --chown=root:root driver-ignite ${APP_HOME}/driver-ignite
+COPY --chown=root:root driver-couchdb ${APP_HOME}/driver-couchdb
 
 
 ENV GRADLE_USER_HOME=/opt/SBK
@@ -60,8 +61,8 @@ FROM openjdk:8-jre
 ENV APP_NAME=sbk
 ENV APP_HOME=/opt/${APP_NAME}
 
-COPY --from=GradleBuilder ${APP_HOME}/build/distributions/${APP_NAME}*.tar /opt/${APP_NAME}.tar
+COPY --from=GradleBuilder ${APP_HOME}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 
-ENTRYPOINT ["/opt/sbk*/bin/sbk"]
+ENTRYPOINT ["/opt/sbk-*/bin/sbk"]
