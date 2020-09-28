@@ -60,8 +60,8 @@ FROM openjdk:8-jre
 ENV APP_NAME=sbk
 ENV APP_HOME=/opt/${APP_NAME}
 
-COPY --from=GradleBuilder ${APP_HOME}/build/distributions/${APP_NAME}.tar /opt/${APP_NAME}.tar
+COPY --from=GradleBuilder ${APP_HOME}/build/distributions/${APP_NAME}*.tar /opt/${APP_NAME}.tar
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 
-ENTRYPOINT ["/opt/sbk/bin/sbk"]
+ENTRYPOINT ["/opt/sbk*/bin/sbk"]

@@ -39,7 +39,7 @@ plugins.withId('maven') {
                     }
                 }
 
-                pom.artifactId = "sbk" + project.path.replace(':', '-')
+               // pom.artifactId = "sbk" + project.path.replace(':', '-')
                 pom.project {
                     name "sbk"
                     url "https://github.com/kmgowda/sbk"
@@ -73,6 +73,7 @@ plugins.withId('maven') {
         }
     }
 
+    /*
     install {
         repositories {
             mavenInstaller {
@@ -80,6 +81,7 @@ plugins.withId('maven') {
             }
         }
     }
+    */
 
     task publish(dependsOn:'uploadArchives') {
     }
