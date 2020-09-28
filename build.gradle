@@ -63,16 +63,24 @@ allprojects {
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
 	mainClassName = SbkMainClass
-	/* dont use the version , let it be main
-	version = sbkVersion
-	*/
+
+	def sbkProjectName = rootProject.name + project.path.replace(":", "-")
+	sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-" , rootProject.name+"-")
+	sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
+	def manifestName = sbkProjectName.replace("--", "-")
+	sbkProjectName = sbkProjectName + "-" + sbkVersion
+	archivesBaseName = sbkProjectName.replace("--", "-")
 
 	jar {
 		manifest {
-			attributes	'Implementation-Title': rootProject.name,
-						'Implementation-Version': sbkVersion
+			attributes	'Implementation-Title': manifestName,
+					'Implementation-Version': sbkVersion
 		}
 	}
+
+	/* dont use the version , let it be mainline
+	version = sbkVersion
+	*/
 
 /*
  * Use the build startup script which is available in gradle/application.gradle
