@@ -72,12 +72,16 @@ allprojects {
 		}
 	}
 
+/*
+ * Use the build startup script which is available in gradle/application.gradle
 	startScripts {
 		doLast {
 			unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')
 			windowsScript.text = windowsScript.text.replace('SERVER_APP_HOME', '%~dp0..')
 		}
 	}
+
+ */
 }
 
 /* Include your driver below */
