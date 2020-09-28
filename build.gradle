@@ -79,8 +79,11 @@ allprojects {
 					'Implementation-Version': sbkVersion
 		}
 	}
-
-
+	distributions {
+		main {
+			distributionBaseName.set(archivesBaseName)
+		}
+	}
 /*
  * Use the build startup script which is available in gradle/application.gradle
 	startScripts {
