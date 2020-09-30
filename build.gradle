@@ -75,7 +75,7 @@ allprojects {
 	applicationName = archivesBaseName
 	jar {
 		manifest {
-			attributes	'Implementation-Title': sbkProjectName,
+			attributes	'Implementation-Title': archivesBaseName,
 					'Implementation-Version': sbkVersion
 		}
 	}
@@ -83,6 +83,14 @@ allprojects {
 		main {
 			distributionBaseName.set(archivesBaseName)
 		}
+	}
+
+	application {
+		def sbkClass = ""
+		if (project.path.startsWith(":driver-")) {
+			sbkClass = project.path.replace(":driver-","")
+		}
+		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, "-Dsbk.className="+sbkClass]
 	}
 /*
  * Use the build startup script which is available in gradle/application.gradle

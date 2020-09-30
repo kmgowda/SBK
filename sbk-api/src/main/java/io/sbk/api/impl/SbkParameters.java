@@ -27,7 +27,6 @@ import java.util.List;
 @Slf4j
 final public class SbkParameters implements Parameters {
     final private String benchmarkName;
-    final private String className;
     final private String desc;
     final private Options options;
     final private HelpFormatter formatter;
@@ -64,13 +63,12 @@ final public class SbkParameters implements Parameters {
     private double throughput;
     private CommandLine commandline;
 
-    public SbkParameters(String name, String desc, String className, List<String> driversList, long startTime) {
+    public SbkParameters(String name, String desc, List<String> driversList, long startTime) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
         this.desc = desc;
-        this.className = className;
         this.timeout = TIMEOUT;
         this.driversList = driversList;
         this.startTime = startTime;
@@ -107,11 +105,7 @@ final public class SbkParameters implements Parameters {
 
     @Override
     public void printHelp() {
-        if (className.length() > 0) {
-            formatter.printHelp(benchmarkName + " -class " + className, options);
-        } else {
-            formatter.printHelp(benchmarkName, options);
-        }
+        formatter.printHelp(benchmarkName, options);
     }
 
     @Override

@@ -59,18 +59,23 @@ public class SbkMain {
         CommandLine commandline = null;
         String className = null;
         Storage obj = null;
+        String usageLine = null;
         MeterRegistry metricRegistry = null;
         final String action;
         final Parameters params;
         final List<String> driversList;
         final ResultLogger metricsLogger;
         final String version = SbkMain.class.getPackage().getImplementationVersion();
+        final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
+        final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         Config config = null;
         CompletableFuture<Void> ret = null;
 
         SbkLogger.log.info(IOUtils.toString(SbkMain.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
         SbkLogger.log.info("Argument List: "+Arrays.toString(args));
+        SbkLogger.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
+        SbkLogger.log.info(Config.SBK_CLASS_NAME + ": "+ sbkClassName);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -91,14 +96,25 @@ public class SbkMain {
             ex.printStackTrace();
             System.exit(0);
         }
+
+        if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
+            usageLine = sbkApplicationName;
+        } else {
+            usageLine = Config.NAME;
+        }
+
         final Metric metric = new MetricImpl();
         driversList =  getClassNames(config.packageName);
         className = commandline.getOptionValue("class", null);
         if (className == null) {
-            Parameters paramsHelp = new SbkParameters(config.NAME, config.DESC, "", driversList,  startTime);
-            metric.addArgs(paramsHelp);
-            paramsHelp.printHelp();
-            System.exit(0);
+            if (sbkClassName != null && sbkClassName.length() > 0) {
+                className = sbkClassName;
+            } else {
+                Parameters paramsHelp = new SbkParameters(usageLine, config.DESC,  driversList, startTime);
+                metric.addArgs(paramsHelp);
+                paramsHelp.printHelp();
+                System.exit(0);
+            }
         }
         final String name = searchDriver(driversList, className);
         if (name == null) {
@@ -118,7 +134,12 @@ public class SbkMain {
             SbkLogger.log.error("Failure to create Benchmark object");
             System.exit(0);
         }
-        params = new SbkParameters(config.NAME, config.DESC, name, driversList,  startTime);
+
+        if (usageLine.equals(Config.NAME)) {
+            usageLine = usageLine + "-class "+ name;
+        }
+
+        params = new SbkParameters(usageLine, config.DESC, driversList,  startTime);
         storage.addArgs(params);
         metric.addArgs(params);
         try {

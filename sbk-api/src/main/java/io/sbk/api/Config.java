@@ -13,6 +13,8 @@ package io.sbk.api;
 public class Config {
     final public static String NAME = "sbk";
     final public static String DESC = "Storage Benchmark Kit";
+    final public static String SBK_APP_NAME = "sbk.applicationName";
+    final public static String SBK_CLASS_NAME = "sbk.className";
 
     final public static int NS_PER_MICRO = 1000;
     final public static int MICROS_PER_MS = 1000;
