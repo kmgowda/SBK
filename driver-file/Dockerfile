@@ -16,7 +16,9 @@ COPY ca-certificates/* /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 ENV APP_NAME=sbk
+ENV SBK_DRIVER=driver-file
 ENV APP_HOME=/opt/${APP_NAME}
+
 WORKDIR /opt/sbk
 
 COPY --chown=root:root gradle ${APP_HOME}/gradle
@@ -28,18 +30,20 @@ COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
 
 # Copy the SBK storage drivers
-COPY --chown=root:root driver-file ${APP_HOME}/driver-file
+COPY --chown=root:root  ${SBK_DRIVER}   ${APP_HOME}/${SBK_DRIVER}
 
 ENV GRADLE_USER_HOME=/opt/SBK
-RUN gradle  build --no-daemon --info --stacktrace
+RUN gradle  :${SBK_DRIVER}:build --no-daemon --info --stacktrace
 
 # Runtime Container
 FROM openjdk:8-jre
 ENV APP_NAME=sbk
+ENV SBK_DRIVER=driver-file
 ENV APP_HOME=/opt/${APP_NAME}
 
-COPY --from=GradleBuilder ${APP_HOME}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
+COPY --from=GradleBuilder ${APP_HOME}/${SBK_DRIVER}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
+RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}
 
-ENTRYPOINT ["/opt/sbk-*/bin/sbk"]
+ENTRYPOINT ["/opt/sbk/bin/sbk-file"]

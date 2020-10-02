@@ -65,4 +65,6 @@ COPY --from=GradleBuilder ${APP_HOME}/build/distributions/${APP_NAME}-*.tar /opt
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 
-ENTRYPOINT ["/opt/sbk-*/bin/sbk"]
+RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}
+
+ENTRYPOINT ["/opt/sbk/bin/sbk"]
