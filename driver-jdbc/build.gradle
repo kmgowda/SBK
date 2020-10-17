@@ -21,6 +21,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.postgresql/postgresql
     compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
 
+    // https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc
+    compile group: 'org.apache.hive', name: 'hive-jdbc', version: '1.1.0'
+
     // https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc
     compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.2.jre8'
 
