@@ -60,8 +60,13 @@ public class JdbcWriter implements Writer<String> {
             throw  new IOException(ex);
         }
         this.data = dType.create(params.getRecordSize());
-        this.insertQuery = "INSERT INTO " + tableName + " (DATA) VALUES ('" + this.data + "')";
+        this.insertQuery = insertTable();
     }
+
+    public String insertTable() {
+        return "INSERT INTO " + tableName + " (DATA) VALUES ('" + this.data + "')";
+    }
+
 
     @Override
     public void recordWrite(DataType<String> dType, String data, int size, Status status, SendChannel record, int id) throws IOException {
@@ -79,7 +84,7 @@ public class JdbcWriter implements Writer<String> {
 
     @Override
     public CompletableFuture writeAsync(String data) throws IOException {
-        final String query = "INSERT INTO " + tableName + " (DATA) VALUES ('" + data + "')";
+        final String query = insertTable();
         try {
             st.executeUpdate(query);
         } catch (SQLException ex) {
