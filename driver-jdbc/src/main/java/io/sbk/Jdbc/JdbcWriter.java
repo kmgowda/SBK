@@ -34,6 +34,7 @@ public class JdbcWriter implements Writer<String> {
     final private DataType<String> dType;
     final private String  data;
     final private String  insertQuery;
+    private long id;
 
     public JdbcWriter(int writerID, Parameters params,
                       String tableName, JdbcConfig config, DataType<String> dType) throws IOException {
@@ -60,7 +61,7 @@ public class JdbcWriter implements Writer<String> {
             throw  new IOException(ex);
         }
         this.data = dType.create(params.getRecordSize());
-        this.insertQuery = "INSERT INTO " + tableName + " (DATA) VALUES ('" + this.data + "')";
+        this.insertQuery = "INSERT INTO " + tableName + " VALUES ("+  this.id +",'" + this.data + "')";
     }
 
     @Override
@@ -68,6 +69,7 @@ public class JdbcWriter implements Writer<String> {
         status.startTime = System.currentTimeMillis();
         try {
             st.executeUpdate(this.insertQuery);
+            this.id++;
         } catch (SQLException ex) {
             SbkLogger.log.error("JDBC: recordWrite failed !");
             throw  new IOException(ex);
