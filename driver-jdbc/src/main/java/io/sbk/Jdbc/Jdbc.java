@@ -41,19 +41,23 @@ public class Jdbc implements Storage<String> {
     private final static String SQLITE_NAME = "sqlite";
 
     private final static String CONFIGFILE = "jdbc.properties";
-    private String driverType;
-    private String tableName;
-    private JdbcConfig config;
-    private DataType<String> dType;
+    public String driverType;
+    public String tableName;
+    public JdbcConfig config;
+    public DataType<String> dType;
 
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
+        addArgs(params, CONFIGFILE);
+    }
+
+    public void addArgs(final Parameters params, String configFile) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
-            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
                     JdbcConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -130,6 +130,7 @@ dependencies {
 	compile project(':driver-rocksdb')
 	compile project(':driver-ignite')
 	compile project(':driver-couchdb')
+	compile project(':driver-hive')
 }
 
 //create a single Jar with all dependencies

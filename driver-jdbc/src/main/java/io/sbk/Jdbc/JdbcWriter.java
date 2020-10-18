@@ -28,12 +28,12 @@ import java.util.concurrent.CompletableFuture;
  * Class for JDBC  Writer.
  */
 public class JdbcWriter implements Writer<String> {
-    final private String tableName;
+    final public String tableName;
+    final public String  data;
     final private Connection conn;
     final private Statement st;
     final private DataType<String> dType;
-    final private String  data;
-    final private String  insertQuery;
+    final private String  defaultInsertQuery;
 
     public JdbcWriter(int writerID, Parameters params,
                       String tableName, JdbcConfig config, DataType<String> dType) throws IOException {
@@ -60,11 +60,11 @@ public class JdbcWriter implements Writer<String> {
             throw  new IOException(ex);
         }
         this.data = dType.create(params.getRecordSize());
-        this.insertQuery = insertTable();
+        this.defaultInsertQuery = "INSERT INTO " + this.tableName + " (DATA) VALUES ('" + this.data + "')";
     }
 
     public String insertTable() {
-        return "INSERT INTO " + tableName + " (DATA) VALUES ('" + this.data + "')";
+        return this.defaultInsertQuery;
     }
 
 
@@ -72,7 +72,7 @@ public class JdbcWriter implements Writer<String> {
     public void recordWrite(DataType<String> dType, String data, int size, Status status, SendChannel record, int id) throws IOException {
         status.startTime = System.currentTimeMillis();
         try {
-            st.executeUpdate(this.insertQuery);
+            st.executeUpdate(insertTable());
         } catch (SQLException ex) {
             SbkLogger.log.error("JDBC: recordWrite failed !");
             throw  new IOException(ex);
@@ -84,9 +84,8 @@ public class JdbcWriter implements Writer<String> {
 
     @Override
     public CompletableFuture writeAsync(String data) throws IOException {
-        final String query = insertTable();
         try {
-            st.executeUpdate(query);
+            st.executeUpdate(insertTable());
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
