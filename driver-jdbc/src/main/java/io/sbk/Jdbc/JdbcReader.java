@@ -53,8 +53,12 @@ public class JdbcReader implements Reader<String> {
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
-        readQuery = "SELECT * from "+ this.tableName;
+        readQuery = readTable();
         res = null;
+    }
+
+    public String readTable() {
+        return "SELECT * from "+ this.tableName;
     }
 
     @Override

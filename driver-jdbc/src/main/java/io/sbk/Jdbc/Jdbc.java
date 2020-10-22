@@ -41,19 +41,23 @@ public class Jdbc implements Storage<String> {
     private final static String SQLITE_NAME = "sqlite";
 
     private final static String CONFIGFILE = "jdbc.properties";
-    private String driverType;
-    private String tableName;
-    private JdbcConfig config;
-    private DataType<String> dType;
+    public String driverType;
+    public String tableName;
+    public JdbcConfig config;
+    public DataType<String> dType;
 
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
+        addArgs(params, CONFIGFILE);
+    }
+
+    public void addArgs(final Parameters params, String configFile) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
-            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
                     JdbcConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -84,6 +88,36 @@ public class Jdbc implements Storage<String> {
         config.user = params.getOptionValue("user", config.user);
         config.password = params.getOptionValue("password", config.password);
         config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
+    }
+
+    public String createTable(final Parameters params) {
+        String query;
+        if (driverType.equalsIgnoreCase(DERBY_NAME) ) {
+            query = "CREATE TABLE " + tableName +
+                    "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
+                    ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+        } else if (driverType.equalsIgnoreCase(POSTGRESQL_NAME)) {
+            query = "CREATE TABLE " + tableName +
+                    "(ID BIGSERIAL PRIMARY KEY" +
+                    ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+        } else if (driverType.equalsIgnoreCase(MSSQL_NAME)) {
+            query = "CREATE TABLE " + tableName +
+                    "(ID BIGINT IDENTITY(1,1) PRIMARY KEY" +
+                    ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+        } else if (driverType.equalsIgnoreCase(SQLITE_NAME)) {
+            query = "CREATE TABLE " + tableName +
+                    "(ID INTEGER PRIMARY KEY AUTOINCREMENT" +
+                    ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+        } else {
+            query = "CREATE TABLE " + tableName +
+                    "(ID BIGINT PRIMARY KEY AUTO_INCREMENT" +
+                    ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
+        }
+        return query;
+    }
+
+    public String dropTable(final Parameters parameters) {
+        return "DROP TABLE " + tableName;
     }
 
     @Override
@@ -136,8 +170,8 @@ public class Jdbc implements Storage<String> {
             }
 
             if (config.reCreate) {
-                SbkLogger.log.info("Deleting the Table: "+tableName);
-                final String query = "DROP TABLE " + tableName;
+                SbkLogger.log.info("Deleting the Table: "+ tableName);
+                final String query = dropTable(params);
                 try {
                     st.execute(query);
                     if (!conn.getAutoCommit()) {
@@ -155,29 +189,7 @@ public class Jdbc implements Storage<String> {
 
             try {
                 SbkLogger.log.info("Creating the Table: " + tableName);
-                final String query;
-                if (driverType.equalsIgnoreCase(DERBY_NAME) ) {
-                    query = "CREATE TABLE " + tableName +
-                            "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
-                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-                } else if (driverType.equalsIgnoreCase(POSTGRESQL_NAME)) {
-                    query = "CREATE TABLE " + tableName +
-                            "(ID BIGSERIAL PRIMARY KEY" +
-                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-                } else if (driverType.equalsIgnoreCase(MSSQL_NAME)) {
-                    query = "CREATE TABLE " + tableName +
-                            "(ID BIGINT IDENTITY(1,1) PRIMARY KEY" +
-                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-                } else if (driverType.equalsIgnoreCase(SQLITE_NAME)) {
-                    query = "CREATE TABLE " + tableName +
-                            "(ID INTEGER PRIMARY KEY AUTOINCREMENT" +
-                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-                } else {
-                    query = "CREATE TABLE " + tableName +
-                            "(ID BIGINT PRIMARY KEY AUTO_INCREMENT" +
-                            ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-                }
-                st.execute(query);
+                st.execute(createTable(params));
                 if (!conn.getAutoCommit()) {
                     conn.commit();
                 }
