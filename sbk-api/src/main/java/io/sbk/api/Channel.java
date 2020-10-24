@@ -13,9 +13,10 @@ public interface Channel extends SendChannel {
 
     /**
      * Receive the benchmarking timestamp.
-     * @param  timeout  maximum time in milliseconds to wait for the data.
-     *                  If there is no data, the this method will return null data after timeout
-     *                  or it can return before the timeout with null value.
+     * @param  timeout      maximum time in milliseconds to wait for the data.
+     * @return TimeStamp    Time stamp data
+     *                      If there is no data, the this method will return null data after timeout
+     *                      or it can return before the timeout with null value.
      * return TimeStamp  Benchmarking Data. return null if there is no data.
      *
      */
