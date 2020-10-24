@@ -50,6 +50,7 @@ Currently SBK supports benchmarking of
 25. [RocksDB](https://rocksdb.org)
 26. [Apache Ignite](https://ignite.apache.org)
 27. [Apache CouchDB](https://couchdb.apache.org)
+28. [Apache Hive](https://hive.apache.org)
 
 In future, many more storage storage systems drivers will be plugged in. 
 
