@@ -51,7 +51,7 @@ COPY --chown=root:root driver-mongodb ${APP_HOME}/driver-mongodb
 COPY --chown=root:root driver-rocksdb ${APP_HOME}/driver-rocksdb
 COPY --chown=root:root driver-ignite ${APP_HOME}/driver-ignite
 COPY --chown=root:root driver-couchdb ${APP_HOME}/driver-couchdb
-
+COPY --chown=root:root driver-hive ${APP_HOME}/driver-hive
 
 ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  build --no-daemon --info --stacktrace
