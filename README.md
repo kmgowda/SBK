@@ -91,11 +91,10 @@ Running SBK locally:
 ```
 <SBK directory>/./build/distributions/sbk/bin/sbk -help
 ...
-usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
                      ConcurrentQ, CouchDB, FdbRecord, File, FileStream,
-                     FoundationDB, HDFS, Ignite, Jdbc, Kafka, MinIO,
+                     FoundationDB, HDFS, Hive, Ignite, Jdbc, Kafka, MinIO,
                      MongoDB, Nats, NatsStream, Nsq, Pravega, Pulsar,
                      RabbitMQ, RocketMQ, RocksDB]
  -context <arg>      Prometheus Metric context;default context:
@@ -114,6 +113,7 @@ usage: sbk
                      if -1, get the maximum throughput
  -time <arg>         Number of seconds this SBK runs (24hrs by default)
  -writers <arg>      Number of writers
+
 ```
 
 
@@ -432,9 +432,9 @@ usage: sbk -class Pulsar
  -class <arg>           Storage Driver Class,
                         Available Drivers [Artemis, AsyncFile, BookKeeper,
                         ConcurrentQ, CouchDB, FdbRecord, File, FileStream,
-                        FoundationDB, HDFS, Ignite, Jdbc, Kafka, MinIO,
-                        MongoDB, Nats, NatsStream, Nsq, Pravega, Pulsar,
-                        RabbitMQ, RocketMQ, RocksDB]
+                        FoundationDB, HDFS, Hive, Ignite, Jdbc, Kafka,
+                        MinIO, MongoDB, Nats, NatsStream, Nsq, Pravega,
+                        Pulsar, RabbitMQ, RocketMQ, RocksDB]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
                         8080/metrics; 'no' disables the  metrics
@@ -458,5 +458,6 @@ usage: sbk -class Pulsar
  -topic <arg>           Topic name, default : test
  -writeQuorum <arg>     WriteQuorum default: 1
  -writers <arg>         Number of writers
+
 
 ```
