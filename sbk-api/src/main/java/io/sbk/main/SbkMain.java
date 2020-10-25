@@ -136,7 +136,7 @@ public class SbkMain {
         }
 
         if (usageLine.equals(Config.NAME)) {
-            usageLine = usageLine + "-class "+ name;
+            usageLine = usageLine + " -class "+ name;
         }
 
         params = new SbkParameters(usageLine, config.DESC, driversList,  startTime);
