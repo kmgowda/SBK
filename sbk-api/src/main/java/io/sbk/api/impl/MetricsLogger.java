@@ -13,14 +13,12 @@ import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.sbk.api.ResultLogger;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
-public class MetricsLogger implements ResultLogger {
+public class MetricsLogger extends SystemResultLogger {
     private final String bytesName;
     private final String recordsName;
     private final String mbPsecName;
@@ -56,33 +54,34 @@ public class MetricsLogger implements ResultLogger {
     private final AtomicInteger percSeven;
     private final AtomicInteger percEight;
     private final MeterRegistry registry;
-    private final ResultLogger defaultLogger;
     private final int reportingInterval;
 
 
-    public MetricsLogger(String prefix, int writers, int readers, int reportingInterval,
-                         ResultLogger defaultLogger, CompositeMeterRegistry registry) {
+    public MetricsLogger(String header, String prefix, int writers, int readers,
+                         int reportingInterval, CompositeMeterRegistry registry) {
+        super(prefix);
+        final String metricPrefix = header.replace(" ", "_").toUpperCase() + "_" + prefix.replace(" ", "_");
+        final String metricUnit = unit.replace(" ", "_");
         this.registry = registry;
-        this.defaultLogger = defaultLogger;
         this.reportingInterval = reportingInterval;
-        this.bytesName = prefix + "Bytes";
-        this.recordsName = prefix + "Records";
-        this.mbPsecName = prefix + "MBPerSec";
-        this.recsPsecName = prefix + "RecordsPerSec";
-        this.avgLatencyName = prefix + "AvgLatency";
-        this.maxLatencyName = prefix + "MaxLatency";
-        this.lowerDiscardName = prefix + "LowerDiscardedLatencyRecords";
-        this.higherDiscardName = prefix + "HigherDiscardLatencyRecords";
-        this.percOneName = prefix + "10th";
-        this.percTwoName = prefix + "25th";
-        this.percThreeName = prefix + "50th";
-        this.percFourName = prefix + "75th";
-        this.percFiveName = prefix + "90th";
-        this.percSixName = prefix + "99th";
-        this.percSevenName = prefix + "99.9th";
-        this.percEightName = prefix + "99.99th";
-        this.writersName = prefix + "Writers";
-        this.readersName = prefix + "Readers";
+        this.bytesName = metricPrefix + "_Bytes";
+        this.recordsName = metricPrefix + "_Records";
+        this.mbPsecName = metricPrefix + "_MBPerSec";
+        this.recsPsecName = metricPrefix + "_RecordsPerSec";
+        this.avgLatencyName = metricPrefix + "_"+ metricUnit + "_AvgLatency";
+        this.maxLatencyName = metricPrefix + "_" + metricUnit +"_MaxLatency";
+        this.lowerDiscardName = metricPrefix + "_LowerDiscardedLatencyRecords";
+        this.higherDiscardName = metricPrefix + "_HigherDiscardLatencyRecords";
+        this.percOneName = metricPrefix + "_" + metricUnit + "_10th";
+        this.percTwoName = metricPrefix + "_" + metricUnit + "_25th";
+        this.percThreeName = metricPrefix +"_"+ metricUnit + "_50th";
+        this.percFourName = metricPrefix +"_" + metricUnit +"_75th";
+        this.percFiveName = metricPrefix +"_" + metricUnit +"_90th";
+        this.percSixName = metricPrefix + "_" + metricUnit +"_99th";
+        this.percSevenName = metricPrefix + "_" + metricUnit +"_99.9th";
+        this.percEightName = metricPrefix + "_" + metricUnit +"_99.99th";
+        this.writersName = metricPrefix + "_Writers";
+        this.readersName = metricPrefix + "_Readers";
         this.registry.gauge(this.writersName, writers);
         this.registry.gauge(this.readersName, readers);
         this.bytes = registry.counter(bytesName);
@@ -104,9 +103,9 @@ public class MetricsLogger implements ResultLogger {
     }
 
     @Override
-    public void print(String action, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
+    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
                long lowerDiscard, long higherDiscard, int one, int two, int three, int four, int five, int six, int seven, int eight) {
-        defaultLogger.print(action, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 lowerDiscard, higherDiscard, one, two, three, four, five, six, seven, eight);
         this.bytes.increment(bytes);
         this.records.increment(records);

@@ -10,11 +10,16 @@
 
 package io.sbk.api;
 
+import java.util.concurrent.TimeUnit;
+
 public class Config {
     final public static String NAME = "sbk";
     final public static String DESC = "Storage Benchmark Kit";
     final public static String SBK_APP_NAME = "sbk.applicationName";
     final public static String SBK_CLASS_NAME = "sbk.className";
+    final public static String SBK_MS_NAME = "ms";
+    final public static String SBK_NS_NAME = "ns";
+    final public static String SBK_MCS_NAME = "mcs";
 
     final public static int NS_PER_MICRO = 1000;
     final public static int MICROS_PER_MS = 1000;
@@ -31,6 +36,7 @@ public class Config {
 
     public String packageName;
     public boolean fork;
+    public TimeUnit timeUnit;
     public int reportingMS;
     public int qPerWorker;
     public int idleNS;
@@ -38,4 +44,14 @@ public class Config {
     public int maxWindowLatency;
     public int minLatency;
     public int maxLatency;
+
+    public static String timeUnitToString(TimeUnit timeUnit) {
+        if (timeUnit == TimeUnit.NANOSECONDS) {
+            return SBK_NS_NAME;
+        } else if (timeUnit == TimeUnit.MICROSECONDS) {
+            return SBK_MCS_NAME;
+        }
+        return SBK_MS_NAME;
+    }
+
 }
