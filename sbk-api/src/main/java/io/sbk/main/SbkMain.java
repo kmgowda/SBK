@@ -170,21 +170,20 @@ public class SbkMain {
         } else {
             action = "Writing";
         }
-        final ResultLogger logger = new SystemResultLogger();
+
+        final String prefix = name +" "+action;
         if (metricRegistry == null) {
-            metricsLogger = logger;
+            metricsLogger = new SystemResultLogger(prefix);
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-            final String prefix = config.NAME.toUpperCase() + "_" + name + "_" + action + "_";
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
-            metricsLogger = new MetricsLogger(
-                    prefix, params.getWritersCount(), params.getReadersCount(),
-                    config.reportingMS, logger, compositeLogger);
+            metricsLogger = new MetricsLogger(Config.NAME, prefix, params.getWritersCount(), params.getReadersCount(),
+                    config.reportingMS, compositeLogger);
         }
 
-        final Benchmark benchmark = new SbkBenchmark(action, config, params,
-                storage, logger, metricsLogger);
+        final Benchmark benchmark = new SbkBenchmark(config, params,
+                storage, metricsLogger);
         try {
             ret = benchmark.start(System.currentTimeMillis());
         } catch (IOException ex) {

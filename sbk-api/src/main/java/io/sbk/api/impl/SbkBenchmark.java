@@ -61,15 +61,13 @@ public class SbkBenchmark implements Benchmark {
     /**
      * Create SBK Benchmark.
      *
-     * @param  action   Action String
      * @param  config   Configuration parameters
      * @param  params   Benchmarking input Parameters
      * @param  storage  Storage device/client/driver for benchmarking
      * @param  logger   Result Logger
-     * @param  metricsLogger    Log the results to metrics logger
      */
-    public SbkBenchmark(String  action, Config config, Parameters params,
-                        Storage<Object> storage, ResultLogger logger, ResultLogger metricsLogger) {
+    public SbkBenchmark(Config config, Parameters params,
+                        Storage<Object> storage, ResultLogger logger) {
         this.params = params;
         this.storage = storage;
         if (config.maxQs > 0) {
@@ -85,15 +83,15 @@ public class SbkBenchmark implements Benchmark {
             executor = Executors.newFixedThreadPool(threadCount);
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new SbkPerformance(action, config, params.getWritersCount(),
-                                       params.getCsvFile(), metricsLogger, logger, executor);
+            writeStats = new SbkPerformance(config, params.getWritersCount(),
+                                       params.getCsvFile(), logger, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
-            readStats = new SbkPerformance(action, config, params.getReadersCount(),
-                                    params.getCsvFile(), metricsLogger, logger, executor);
+            readStats = new SbkPerformance(config, params.getReadersCount(),
+                                    params.getCsvFile(), logger, executor);
         } else {
             readStats = null;
         }

@@ -12,10 +12,10 @@ package io.sbk.api;
 /**
  * Interface for recoding/printing results.
  */
-public interface ResultLogger extends Logger {
+public interface Logger {
 
     /**
-     * Print the Total Periodic performance results.
+     * Print the Periodic performance results.
      * @param bytes number of bytes read/write
      * @param records data to write.
      * @param recsPerSec  records per second.
@@ -33,7 +33,7 @@ public interface ResultLogger extends Logger {
      * @param seven  99.9th Percentile
      * @param eight  99.99th Percentile
      */
-    void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                int maxLatency, long lowerDiscard, long higherDiscard, int one, int two, int three, int four,
                int five, int six, int seven, int eight);
 }
