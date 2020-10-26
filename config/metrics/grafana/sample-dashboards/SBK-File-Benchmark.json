@@ -1,34 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "6.6.1"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": ""
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -45,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -53,7 +23,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -77,9 +54,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -89,11 +67,15 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_AvgLatency",
+          "expr": "SBK_File_Reading_ms_AvgLatency",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Reading_MaxLatency",
+          "expr": "SBK_File_Reading_ms_MaxLatency",
+          "interval": "",
+          "legendFormat": "",
           "refId": "B"
         }
       ],
@@ -143,7 +125,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -167,9 +156,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -229,7 +219,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -253,9 +250,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -265,27 +263,39 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_50th",
+          "expr": "SBK_File_Writing_ms_50th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Writing_75th",
+          "expr": "SBK_File_Writing_ms_75th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_File_Writing_90th",
+          "expr": "SBK_File_Writing_ms_90th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_File_Writing_99th",
+          "expr": "SBK_File_Writing_ms_99th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_File_Writing_99_9th",
+          "expr": "SBK_File_Writing_ms_99_9th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_File_Writing_99_99th",
+          "expr": "SBK_File_Writing_ms_99_99th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "F"
         }
       ],
@@ -335,7 +345,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -359,9 +376,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -371,27 +389,39 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_50th",
+          "expr": "SBK_File_Reading_ms_50th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Reading_75th",
+          "expr": "SBK_File_Reading_ms_75th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_File_Reading_90th",
+          "expr": "SBK_File_Reading_ms_90th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_File_Reading_99th",
+          "expr": "SBK_File_Reading_ms_99th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_File_Reading_99_9th",
+          "expr": "SBK_File_Reading_ms_99_9th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_File_Reading_99_99th",
+          "expr": "SBK_File_Reading_ms_99_99th",
+          "interval": "",
+          "legendFormat": "",
           "refId": "F"
         }
       ],
@@ -441,7 +471,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -465,9 +502,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -477,11 +515,15 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_AvgLatency",
+          "expr": "SBK_File_Writing_ms_AvgLatency",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Writing_MaxLatency",
+          "expr": "SBK_File_Writing_ms_MaxLatency",
+          "interval": "",
+          "legendFormat": "",
           "refId": "B"
         }
       ],
@@ -531,7 +573,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -555,9 +604,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -617,7 +667,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -641,9 +698,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -703,7 +761,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -727,9 +792,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -789,7 +855,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -813,9 +886,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -875,7 +949,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -899,9 +980,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -961,7 +1043,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -985,9 +1074,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1047,7 +1137,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -1071,9 +1168,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1130,7 +1228,7 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 22,
+  "schemaVersion": 26,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1144,5 +1242,5 @@
   "timezone": "",
   "title": "SBK File Benchmark",
   "uid": "HuCNiWlZz",
-  "version": 2
+  "version": 3
 }
