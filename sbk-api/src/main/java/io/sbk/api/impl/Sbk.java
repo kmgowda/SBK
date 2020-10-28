@@ -59,13 +59,13 @@ public class Sbk {
         final Parameters params;
         final List<String> driversList;
         final ResultLogger metricsLogger;
-        final String version = io.sbk.main.SbkMain.class.getPackage().getImplementationVersion();
+        final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         Config config = null;
         CompletableFuture<Void> ret = null;
 
-        SbkLogger.log.info(IOUtils.toString(io.sbk.main.SbkMain.class.getClassLoader().getResourceAsStream(BANNERFILE)));
+        SbkLogger.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
         SbkLogger.log.info("Argument List: "+Arrays.toString(args));
         SbkLogger.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
@@ -74,7 +74,7 @@ public class Sbk {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        config = mapper.readValue(io.sbk.main.SbkMain.class.getClassLoader().getResourceAsStream(CONFIGFILE),
+        config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 Config.class);
 
         commandline = new DefaultParser().parse(new Options()
