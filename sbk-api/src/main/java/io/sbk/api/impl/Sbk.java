@@ -94,7 +94,7 @@ public class Sbk {
             if (sbkClassName != null && sbkClassName.length() > 0) {
                 className = sbkClassName;
             } else {
-                Parameters paramsHelp = new SbkParameters(usageLine, config.DESC,  driversList, startTime);
+                Parameters paramsHelp = new SbkParameters(usageLine, startTime, driversList);
                 metric.addArgs(paramsHelp);
                 paramsHelp.printHelp();
                 return;
@@ -122,7 +122,7 @@ public class Sbk {
             usageLine = usageLine + " -class "+ name;
         }
 
-        params = new SbkParameters(usageLine, config.DESC, driversList,  startTime);
+        params = new SbkParameters(usageLine, startTime, driversList);
         storage.addArgs(params);
         metric.addArgs(params);
         params.parseArgs(args);
