@@ -86,6 +86,7 @@ public class Sbk {
         final Metric metric = new MetricImpl();
         if (storage == null) {
             driversList =  getClassNames(config.packageName);
+            SbkLogger.log.info("Available Drivers : "+ driversList.size());
             String name  = commandline.getOptionValue("class", null);
             if (name == null) {
                 if (sbkClassName != null && sbkClassName.length() > 0) {
