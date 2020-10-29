@@ -142,7 +142,7 @@ final public class SbkPerformance implements Performance {
                             }
                         }
                         if (window.elapsedTimeMS(time) > windowInterval) {
-                            window.print(time, resultLogger::print);
+                            window.print(time, resultLogger);
                             window.reset(time);
                         }
                     }
