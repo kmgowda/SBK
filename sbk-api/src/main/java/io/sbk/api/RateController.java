@@ -19,16 +19,15 @@ public interface RateController {
      * Start the Rate Controller.
      *
      * @param recordsPerSec Records Per Second.
-     * @param time   start time
      */
-    void start(int recordsPerSec, long time);
+    void start(int recordsPerSec);
 
     /**
      * Blocks for small amounts of time to achieve targetThroughput/events per sec.
      *
-     * @param records current records
-     * @param time   current time
+     * @param records current cumulative records
+     * @param elapsedSec   Elapsed Seconds
      */
-    void control(long records, long time);
+    void control(long records, float elapsedSec);
 
 }
