@@ -132,9 +132,10 @@ public interface Writer<T>  {
     default void RecordsWriterSync(Worker writer, DataType<T> dType, T data, int size, RateController rController) throws IOException {
         final Status status = new Status();
         final int recordsCount = writer.params.getRecordsPerWriter();
+        final long loopStartTime = System.currentTimeMillis();
         int id = writer.id % writer.recordIDMax;
         int cnt = 0;
-        rController.start(writer.params.getRecordsPerSec(), System.currentTimeMillis());
+        rController.start(writer.params.getRecordsPerSec());
         while (cnt < recordsCount) {
             int loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             int i = 0;
@@ -146,7 +147,7 @@ public interface Writer<T>  {
                 }
                 i += status.records;
                 cnt += status.records;
-                rController.control(cnt, status.startTime);
+                rController.control(cnt,  (status.startTime - loopStartTime) / 1000.f);
             }
             sync();
         }
@@ -196,8 +197,9 @@ public interface Writer<T>  {
         int id = writer.id % writer.recordIDMax;
         int cnt = 0;
         status.startTime = System.currentTimeMillis();
+        final long loopStartTime = status.startTime;
         long msElapsed = status.startTime - startTime;
-        rController.start(writer.params.getRecordsPerSec(), status.startTime);
+        rController.start(writer.params.getRecordsPerSec());
         while (msElapsed < msToRun) {
             int i = 0;
             while ((msElapsed < msToRun) && (i < writer.params.getRecordsPerSync())) {
@@ -208,7 +210,7 @@ public interface Writer<T>  {
                 }
                 i += status.records;
                 cnt += status.records;
-                rController.control(cnt,  status.startTime);
+                rController.control(cnt,  (status.startTime - loopStartTime) / 1000.f);
                 msElapsed = status.startTime - startTime;
             }
             sync();
@@ -230,9 +232,10 @@ public interface Writer<T>  {
     default void RecordsWriterRW(Worker writer, DataType<T> dType, T data, int size, RateController rController) throws IOException {
         final Status status = new Status();
         final int recordsCount = writer.params.getRecordsPerWriter();
+        final long loopStartTime = System.currentTimeMillis();
         int id = writer.id % writer.recordIDMax;
         int cnt = 0;
-        rController.start(writer.params.getRecordsPerSec(), System.currentTimeMillis());
+        rController.start(writer.params.getRecordsPerSec());
         while (cnt < recordsCount) {
             int loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             int i = 0;
@@ -244,7 +247,7 @@ public interface Writer<T>  {
                 }
                 i += status.records;
                 cnt += status.records;
-                rController.control(cnt, status.startTime);
+                rController.control(cnt,  (status.startTime - loopStartTime) / 1000.f);
             }
             sync();
         }
@@ -269,8 +272,9 @@ public interface Writer<T>  {
         int id = writer.id % writer.recordIDMax;
         int cnt = 0;
         status.startTime = System.currentTimeMillis();
+        final long loopStartTime = status.startTime;
         long msElapsed = status.startTime - startTime;
-        rController.start(writer.params.getRecordsPerSec(), status.startTime);
+        rController.start(writer.params.getRecordsPerSec());
         while (msElapsed < msToRun) {
             int i = 0;
             while ((msElapsed < msToRun) && (i < writer.params.getRecordsPerSync())) {
@@ -281,7 +285,7 @@ public interface Writer<T>  {
                 }
                 i += status.records;
                 cnt += status.records;
-                rController.control(cnt,  status.startTime);
+                rController.control(cnt,  (status.startTime - loopStartTime) / 1000.f);
                 msElapsed = status.startTime - startTime;
             }
             sync();

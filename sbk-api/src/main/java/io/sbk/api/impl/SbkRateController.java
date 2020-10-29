@@ -14,7 +14,6 @@ import io.sbk.api.RateController;
 
 final public class SbkRateController implements RateController {
     private static final long MIN_SLEEP_NS = 2 * Config.NS_PER_MS;
-    private long startTime;
     private long sleepTimeNs;
     private int recordsPerSec;
     private long toSleepNs;
@@ -28,33 +27,29 @@ final public class SbkRateController implements RateController {
      * Start the Rate Controller.
      *
      * @param recordsPerSec Records Per Second.
-     * @param time   start time
      */
     @Override
-    public void start(int recordsPerSec, long time) {
+    public void start(final int recordsPerSec) {
         this.recordsPerSec = recordsPerSec;
-        this.startTime = time;
         this.sleepTimeNs = this.recordsPerSec > 0 ?
                 Config.NS_PER_SEC / this.recordsPerSec : 0;
     }
 
     /**
-     * Blocks for small amounts of time to achieve targetThroughput/events per sec.
+     * Blocks for small amounts of time to achieve target Throughput/events per sec.
      *
-     * @param events current events
-     * @param time   current time
+     * @param events    current cumulative events
+     * @param elapsedSec    Elapsed seconds
      */
     @Override
-    public void control(long events, long time) {
+    public void control(final long events, final float  elapsedSec) {
         if (this.recordsPerSec <= 0) {
             return;
         }
-        needSleep(events, time);
+        needSleep(events, elapsedSec);
     }
 
-    private void needSleep(long events, long time) {
-        float elapsedSec = (time - startTime) / 1000.f;
-
+    private void needSleep(final long events, final float elapsedSec) {
         if ((events / elapsedSec) < this.recordsPerSec) {
             return;
         }
