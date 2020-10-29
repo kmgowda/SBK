@@ -35,7 +35,6 @@ import static org.junit.Assert.assertNull;
 public class FileTest {
     final String[] drivers = {"File"};
     final String benchmarkName = Config.NAME + " -class file";
-    final String description = "File System Benchmarking";
     final List<String> driversList = Arrays.asList( drivers );
     private File file;
     private Parameters params;
@@ -43,8 +42,7 @@ public class FileTest {
     @Test
     public void testParseArgs() {
         final String[] args = {"-class", "file", "-size", "100", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {
@@ -59,8 +57,7 @@ public class FileTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsWritersCount() {
         final String[] args = {"-class", "file", "-size", "100", "-writers", "2", "records", "1"};
-        params = new SbkParameters(benchmarkName, description,
-                driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {
@@ -75,8 +72,7 @@ public class FileTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsReadersWritersCount() {
         final String[] args = {"-class", "file", "-size", "100", "-readers", "1", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {
@@ -91,8 +87,7 @@ public class FileTest {
     @Test
     public void testOpenAndCloseStorage() {
         final String[] args = {"-class", "file", "-size", "100", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {
@@ -121,8 +116,7 @@ public class FileTest {
     @Test
     public void testCreateWriter() {
         final String[] args = {"-class", "file", "-file", "test.txt", "-size", "100", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {
@@ -139,8 +133,7 @@ public class FileTest {
     public void testCreateReader() {
         final String[] writeArgs = {"-class", "file", "-file", "test.txt", "-size", "100", "-writers", "1", "records", "1"};
         final String[] readArgs = {"-class", "file", "-file", "test.txt", "-size", "100", "-readers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {
@@ -167,8 +160,7 @@ public class FileTest {
     @Test
     public void testCreateReaderFileNotFound() {
         final String[] args = {"-class", "file", "-file", "NoFile.sbk", "-size", "100", "-readers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.getDataType();
         file.addArgs(params);
@@ -194,8 +186,7 @@ public class FileTest {
         ByteBuffer readBuffer = null;
         String readData = null;
 
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {
@@ -278,8 +269,7 @@ public class FileTest {
         ByteBuffer readBuffer = null;
         String readData = null;
 
-        params = new SbkParameters(benchmarkName, description,
-                 driversList, System.currentTimeMillis());
+        params = new SbkParameters(benchmarkName, System.currentTimeMillis(), driversList);
         file = new File();
         file.addArgs(params);
         try {

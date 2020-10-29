@@ -27,7 +27,6 @@ import java.util.List;
 @Slf4j
 final public class SbkParameters implements Parameters {
     final private String benchmarkName;
-    final private String desc;
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
@@ -63,18 +62,20 @@ final public class SbkParameters implements Parameters {
     private double throughput;
     private CommandLine commandline;
 
-    public SbkParameters(String name, String desc, List<String> driversList, long startTime) {
+    public SbkParameters(String name, long startTime, List<String> driversList) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
-        this.desc = desc;
         this.timeout = TIMEOUT;
         this.driversList = driversList;
         this.startTime = startTime;
         this.commandline = null;
-        options.addOption("class", true, "Storage Driver Class,\n Available Drivers "
-                            + this.driversList.toString());
+
+        if (this.driversList != null) {
+            options.addOption("class", true, "Storage Driver Class,\n Available Drivers "
+                    + this.driversList.toString());
+        }
         options.addOption("writers", true, "Number of writers");
         options.addOption("readers", true, "Number of readers");
         options.addOption("records", true,

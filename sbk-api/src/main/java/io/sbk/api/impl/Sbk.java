@@ -47,25 +47,27 @@ public class Sbk {
     final static String CONFIGFILE = "sbk.properties";
     final static String BANNERFILE = "banner.txt";
 
-    public static void run(final String[] args) throws ParseException, IllegalArgumentException,
+    public static void run(final String[] args, final Storage<Object> storage,
+                           final String applicationName) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException {
-        long startTime = System.currentTimeMillis();
-        CommandLine commandline = null;
-        String className = null;
-        Storage obj = null;
-        String usageLine = null;
-        MeterRegistry metricRegistry = null;
+        final long startTime = System.currentTimeMillis();
+        List<String> driversList;
+        final CommandLine commandline;
+        final String className;
+        final String driverName;
+        final Storage storageDevice;
+        final String usageLine;
+        final MeterRegistry metricRegistry;
         final String action;
         final Parameters params;
-        final List<String> driversList;
         final ResultLogger metricsLogger;
-        final String version = io.sbk.main.SbkMain.class.getPackage().getImplementationVersion();
+        final Config config;
+        final CompletableFuture<Void> ret;
+        final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
-        Config config = null;
-        CompletableFuture<Void> ret = null;
 
-        SbkLogger.log.info(IOUtils.toString(io.sbk.main.SbkMain.class.getClassLoader().getResourceAsStream(BANNERFILE)));
+        SbkLogger.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
         SbkLogger.log.info("Argument List: "+Arrays.toString(args));
         SbkLogger.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
@@ -74,56 +76,63 @@ public class Sbk {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        config = mapper.readValue(io.sbk.main.SbkMain.class.getClassLoader().getResourceAsStream(CONFIGFILE),
+        config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 Config.class);
 
         commandline = new DefaultParser().parse(new Options()
                         .addOption("class", true, "Benchmark Class"),
                 args, true);
 
-        if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
-            usageLine = sbkApplicationName;
-        } else {
-            usageLine = Config.NAME;
-        }
-
         final Metric metric = new MetricImpl();
-        driversList =  getClassNames(config.packageName);
-        className = commandline.getOptionValue("class", null);
-        if (className == null) {
-            if (sbkClassName != null && sbkClassName.length() > 0) {
-                className = sbkClassName;
+        if (storage == null) {
+            driversList =  getClassNames(config.packageName);
+            String name  = commandline.getOptionValue("class", null);
+            if (name == null) {
+                if (sbkClassName != null && sbkClassName.length() > 0) {
+                    className = sbkClassName;
+                } else {
+                    final Parameters paramsHelp;
+                    if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
+                        paramsHelp = new SbkParameters(sbkApplicationName, startTime, driversList);
+                    } else {
+                        paramsHelp = new SbkParameters(Config.NAME, startTime, driversList);
+                    }
+                    metric.addArgs(paramsHelp);
+                    paramsHelp.printHelp();
+                    return;
+                }
             } else {
-                Parameters paramsHelp = new SbkParameters(usageLine, config.DESC,  driversList, startTime);
-                metric.addArgs(paramsHelp);
-                paramsHelp.printHelp();
+                className = name;
+            }
+            driverName = searchDriver(driversList, className);
+            if (driverName == null) {
+                SbkLogger.log.error("storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers");
                 return;
             }
-        }
-        final String name = searchDriver(driversList, className);
-        if (name == null) {
-            SbkLogger.log.error("storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers");
-            return;
-        }
-        try {
-            obj = (Storage) Class.forName(config.packageName + "." + name + "." + name).getConstructor().newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                NoSuchMethodException | InvocationTargetException ex) {
-            throw new IllegalArgumentException(ex);
+            try {
+                storageDevice = (Storage<?>) Class.forName(config.packageName + "." + driverName + "." + driverName).getConstructor().newInstance();
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                    NoSuchMethodException | InvocationTargetException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+            if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
+                usageLine = sbkApplicationName;
+            } else {
+                usageLine = Config.NAME + " -class "+ driverName;
+            }
+        } else {
+            storageDevice = storage;
+            driversList = null;
+            if (applicationName != null) {
+                usageLine = applicationName;
+            } else {
+                usageLine = storageDevice.getClass().getSimpleName();
+            }
+            driverName = usageLine;
         }
 
-        final Storage storage = obj;
-        if (storage == null) {
-            SbkLogger.log.error("Failure to create Benchmark object");
-            return;
-        }
-
-        if (usageLine.equals(Config.NAME)) {
-            usageLine = usageLine + " -class "+ name;
-        }
-
-        params = new SbkParameters(usageLine, config.DESC, driversList,  startTime);
-        storage.addArgs(params);
+        params = new SbkParameters(usageLine, startTime, driversList);
+        storageDevice.addArgs(params);
         metric.addArgs(params);
         params.parseArgs(args);
         if (params.hasOption("help")) {
@@ -131,7 +140,7 @@ public class Sbk {
             return;
         }
         metric.parseArgs(params);
-        storage.parseArgs(params);
+        storageDevice.parseArgs(params);
         metricRegistry = metric.createMetric(params);
 
         if (params.getReadersCount() > 0) {
@@ -144,7 +153,7 @@ public class Sbk {
             action = "Writing";
         }
 
-        final String prefix = name +" "+action;
+        final String prefix = driverName +" "+action;
         if (metricRegistry == null) {
             metricsLogger = new SystemResultLogger(prefix);
         } else {
@@ -156,7 +165,7 @@ public class Sbk {
         }
 
         final Benchmark benchmark = new SbkBenchmark(config, params,
-                storage, metricsLogger);
+                storageDevice, metricsLogger);
         ret = benchmark.start(System.currentTimeMillis());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -183,5 +192,4 @@ public class Sbk {
         }
         return null;
     }
-
 }
