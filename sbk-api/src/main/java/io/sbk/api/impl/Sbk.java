@@ -160,8 +160,8 @@ public class Sbk {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
-            metricsLogger = new MetricsLogger(Config.NAME, prefix, params.getWritersCount(), params.getReadersCount(),
-                    config.reportingMS, compositeLogger);
+            metricsLogger = new MetricsLogger(Config.NAME, prefix,
+                    params.getWritersCount(), params.getReadersCount(), compositeLogger);
         }
 
         final Benchmark benchmark = new SbkBenchmark(config, params,
