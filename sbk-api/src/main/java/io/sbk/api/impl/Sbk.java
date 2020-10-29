@@ -136,7 +136,6 @@ public class Sbk {
         metric.addArgs(params);
         params.parseArgs(args);
         if (params.hasOption("help")) {
-            params.printHelp();
             return;
         }
         metric.parseArgs(params);
