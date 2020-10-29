@@ -131,6 +131,7 @@ dependencies {
 	compile project(':driver-ignite')
 	compile project(':driver-couchdb')
 	compile project(':driver-hive')
+	compile project(':driver-null')
 }
 
 //create a single Jar with all dependencies

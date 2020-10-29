@@ -37,4 +37,5 @@ include 'driver-rocksdb'
 include 'driver-ignite'
 include 'driver-couchdb'
 include 'driver-hive'
+include 'driver-null'
 
