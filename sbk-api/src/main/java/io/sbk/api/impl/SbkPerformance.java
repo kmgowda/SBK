@@ -209,14 +209,14 @@ final public class SbkPerformance implements Performance {
      */
     @NotThreadSafe
     static private class LatencyRecorder {
+        public long validLatencyRecords;
+        public long lowerLatencyDiscardRecords;
+        public long higherLatencyDiscardRecords;
+        public long bytes;
+        public long totalLatency;
+        public int maxLatency;
         final private int baseLatency;
         final private long[] latencies;
-        private long validLatencyRecords;
-        private long lowerLatencyDiscardRecords;
-        private long higherLatencyDiscardRecords;
-        private long bytes;
-        private long totalLatency;
-        private int maxLatency;
 
         LatencyRecorder(int baseLatency, int latencyThreshold) {
             this.baseLatency = baseLatency;
@@ -234,7 +234,7 @@ final public class SbkPerformance implements Performance {
         }
 
 
-        private int[] getPercentiles(final double[] percentiles) {
+        public int[] getPercentiles(final double[] percentiles) {
             final int[] values = new int[percentiles.length];
             final long[] percentileIds = new long[percentiles.length];
             long cur = 0;
@@ -284,23 +284,6 @@ final public class SbkPerformance implements Performance {
             this.totalLatency += latency * events;
             this.maxLatency = Math.max(this.maxLatency, latency);
         }
-
-
-        /**
-         * Print the statistics
-         */
-        public void print(double elapsedSec, double[] percentiles, Logger logger) {
-            final long totalRecords  = this.validLatencyRecords +
-                    this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
-            final double recsPerSec = totalRecords / elapsedSec;
-            final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsedSec;
-            int[] pecs = getPercentiles(percentiles);
-
-            logger.print(this.bytes, totalRecords, recsPerSec, mbPerSec,
-                    this.totalLatency / (double) totalRecords, this.maxLatency,
-                    this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                    pecs[0], pecs[1], pecs[2], pecs[3], pecs[4], pecs[5], pecs[6], pecs[7]);
-        }
     }
 
     /**
@@ -308,7 +291,7 @@ final public class SbkPerformance implements Performance {
      */
     @NotThreadSafe
     static private class LatencyWindow extends LatencyRecorder {
-        final private double[] percentiles = {0.1, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
+        final private double[] percentiles = Config.PERCENTILES;
         private long startTime;
 
         LatencyWindow(long start, int baseLatency, int latencyThreshold) {
@@ -348,9 +331,17 @@ final public class SbkPerformance implements Performance {
          */
         public void print(long endTime, Logger logger) {
             final double elapsedSec = (endTime - startTime) / 1000.0;
-            print(elapsedSec, percentiles, logger);
-        }
+            final long totalRecords  = this.validLatencyRecords +
+                    this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
+            final double recsPerSec = totalRecords / elapsedSec;
+            final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsedSec;
+            int[] pecs = getPercentiles(percentiles);
 
+            logger.print(this.bytes, totalRecords, recsPerSec, mbPerSec,
+                    this.totalLatency / (double) totalRecords, this.maxLatency,
+                    this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
+                    pecs[0], pecs[1], pecs[2], pecs[3], pecs[4], pecs[5], pecs[6], pecs[7]);
+        }
     }
 
     @NotThreadSafe
