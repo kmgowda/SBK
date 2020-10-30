@@ -14,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -40,7 +39,6 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance statistics.
  */
 final public class SbkPerformance implements Performance {
-    final private TimeUnit timeUnit;
     final private String csvFile;
     final private int windowInterval;
     final private int idleNS;
@@ -59,7 +57,6 @@ final public class SbkPerformance implements Performance {
 
     public SbkPerformance(Config config, int workers, String csvFile,
                           ResultLogger periodicLogger, ExecutorService executor) {
-        this.timeUnit = config.timeUnit;
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
         this.baseLatency = Math.max(Config.DEFAULT_MIN_LATENCY, config.minLatency);
         this.windowInterval = Math.max(Config.MIN_REPORTING_INTERVAL_MS, config.reportingMS);
@@ -112,7 +109,7 @@ final public class SbkPerformance implements Performance {
             if (csvFile != null) {
                 try {
                     latencyWindow = new CSVLatencyWriter(startTime, baseLatency, maxLatency,
-                            csvFile, Config.timeUnitToString(timeUnit));
+                            csvFile, Config.timeUnitToString(Config.TIME_UNIT));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     return;

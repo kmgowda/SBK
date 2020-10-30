@@ -33,6 +33,7 @@ public class Config {
     final public static int MIN_IDLE_NS = NS_PER_MICRO;
     final public static int DEFAULT_WINDOW_LATENCY = MS_PER_MIN;
     final public static long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
+    final public static TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
     final public static  double[] PERCENTILES = {0.1, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999, 0.9999};
 
 
