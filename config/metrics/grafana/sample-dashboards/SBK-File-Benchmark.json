@@ -263,37 +263,37 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_ms_50th",
+          "expr": "SBK_File_Writing_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Writing_ms_75th",
+          "expr": "SBK_File_Writing_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_File_Writing_ms_90th",
+          "expr": "SBK_File_Writing_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_File_Writing_ms_99th",
+          "expr": "SBK_File_Writing_ms_99",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_File_Writing_ms_99_9th",
+          "expr": "SBK_File_Writing_ms_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_File_Writing_ms_99_99th",
+          "expr": "SBK_File_Writing_ms_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -389,37 +389,37 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_ms_50th",
+          "expr": "SBK_File_Reading_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Reading_ms_75th",
+          "expr": "SBK_File_Reading_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_File_Reading_ms_90th",
+          "expr": "SBK_File_Reading_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_File_Reading_ms_99th",
+          "expr": "SBK_File_Reading_ms_99",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_File_Reading_ms_99_9th",
+          "expr": "SBK_File_Reading_ms_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_File_Reading_ms_99_99th",
+          "expr": "SBK_File_Reading_ms_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -1235,7 +1235,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
