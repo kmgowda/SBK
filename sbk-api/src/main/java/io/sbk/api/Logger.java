@@ -24,16 +24,8 @@ public interface Logger {
      * @param maxLatency Maximum Latency.
      * @param lowerDiscard number of discarded latencies which are less than minimum latency.
      * @param higherDiscard number of discarded latencies which are higher than maximum latency.
-     * @param one 10th Percentile.
-     * @param two  25th Percentile.
-     * @param three 50th Percentile.
-     * @param four 75th Percentile
-     * @param five 95th Percentile
-     * @param six  99th Percentile
-     * @param seven  99.9th Percentile
-     * @param eight  99.99th Percentile
+     * @param percentiles Array of percentiles.
      */
     void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-               int maxLatency, long lowerDiscard, long higherDiscard, int one, int two, int three, int four,
-               int five, int six, int seven, int eight);
+               int maxLatency, long lowerDiscard, long higherDiscard, int[] percentiles);
 }
