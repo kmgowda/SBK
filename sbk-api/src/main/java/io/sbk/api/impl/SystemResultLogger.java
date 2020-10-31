@@ -10,40 +10,32 @@
 
 package io.sbk.api.impl;
 
-import io.sbk.api.Config;
 import io.sbk.api.ResultLogger;
-
 import java.text.DecimalFormat;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class for recoding/printing results on System.out.
  */
 public class SystemResultLogger implements ResultLogger {
     final public String prefix;
-    final public String unit;
+    final public String timeUnit;
     final public double[] percentiles;
     final public DecimalFormat format;
 
-    public SystemResultLogger(String prefix, double[] percentiles, TimeUnit timeUnit) {
+    public SystemResultLogger(String prefix, String timeUnit, double[] percentiles) {
         this.prefix = prefix;
+        this.timeUnit = timeUnit;
         this.percentiles = percentiles;
-        this.unit = Config.timeUnitToString(timeUnit);
         this.format = new DecimalFormat("0.##");
     }
-
-    public SystemResultLogger(String prefix, double[] percentiles) {
-         this(prefix, percentiles, TimeUnit.MILLISECONDS);
-    }
-
 
     public String buildPercentileString(int[] percentileValues) {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
                 if (i == 0) {
-                    out = new StringBuilder(String.format("%7d %s %sth", percentileValues[i], unit, format.format(percentiles[i])));
+                    out = new StringBuilder(String.format("%7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
                 } else {
-                    out.append(String.format(", %7d %s %sth", percentileValues[i], unit, format.format(percentiles[i])));
+                    out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
                 }
         }
         return out.toString();
@@ -54,7 +46,7 @@ public class SystemResultLogger implements ResultLogger {
         System.out.printf("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
                         " Discarded Latencies:%8d lower, %8d higher; " +
                         " Latency Percentiles: %s. \n",
-                prefix, records, recsPerSec, mbPerSec, avgLatency, unit, maxLatency, unit, lowerDiscard, higherDiscard,
+                prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit, lowerDiscard, higherDiscard,
                 buildPercentileString(percentileValues));
     }
 

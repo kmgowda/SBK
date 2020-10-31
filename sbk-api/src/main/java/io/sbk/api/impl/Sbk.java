@@ -155,12 +155,12 @@ public class Sbk {
 
         final String prefix = driverName +" "+action;
         if (metricRegistry == null) {
-            metricsLogger = new SystemResultLogger(prefix, Config.PERCENTILES);
+            metricsLogger = new SystemResultLogger(prefix, Config.timeUnitToString(Config.TIME_UNIT), Config.PERCENTILES);
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
-            metricsLogger = new MetricsLogger(Config.NAME, prefix, Config.PERCENTILES,
+            metricsLogger = new MetricsLogger(Config.NAME, prefix, Config.timeUnitToString(Config.TIME_UNIT), Config.PERCENTILES,
                     params.getWritersCount(), params.getReadersCount(), compositeLogger);
         }
 

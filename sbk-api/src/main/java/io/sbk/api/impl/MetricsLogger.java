@@ -30,12 +30,12 @@ public class MetricsLogger extends SystemResultLogger {
     final private AtomicInteger[] percentileGauges;
     final private MeterRegistry registry;
 
-    public MetricsLogger(String header, String prefix, double[] percentiles, int writers, int readers,
+    public MetricsLogger(String header, String prefix, String timeUnit, double[] percentiles, int writers, int readers,
                          CompositeMeterRegistry compositeRegistry) {
-        super(prefix, percentiles);
+        super(prefix, timeUnit, percentiles);
         final String metricPrefix = header.replace(" ", "_").toUpperCase() +
                 "_" + prefix.replace(" ", "_");
-        final String metricUnit = unit.replace(" ", "_");
+        final String metricUnit = timeUnit.replace(" ", "_");
         final String bytesName = metricPrefix + "_Bytes";
         final String recordsName = metricPrefix + "_Records";
         final String mbPsecName = metricPrefix + "_MBPerSec";

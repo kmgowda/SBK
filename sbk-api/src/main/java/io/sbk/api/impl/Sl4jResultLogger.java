@@ -13,16 +13,14 @@ package io.sbk.api.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Class for recoding/printing results on Sl4j.
  */
 public class Sl4jResultLogger extends SystemResultLogger {
     final private Logger log;
 
-    public Sl4jResultLogger(String prefix,  double[] percentiles, TimeUnit timeUnit) {
-        super(prefix, percentiles, timeUnit);
+    public Sl4jResultLogger(String prefix,  String timeUnit, double[] percentiles) {
+        super(prefix, timeUnit, percentiles);
         log = LoggerFactory.getLogger("SBK");
     }
 
@@ -31,7 +29,7 @@ public class Sl4jResultLogger extends SystemResultLogger {
         log.info(String.format("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
                         " Discarded Latencies:%8d lower, %8d higher; " +
                         " Latency Percentiles: %s.\n",
-                this.prefix + prefix, records, recsPerSec, mbPerSec, avgLatency, unit, maxLatency, unit, lowerDiscard, higherDiscard,
+                this.prefix + prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit, lowerDiscard, higherDiscard,
                 buildPercentileString(percentilesValues)));
     }
 
