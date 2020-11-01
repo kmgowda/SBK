@@ -129,14 +129,13 @@ final public class SbkPerformance implements Performance {
             window = new TimeWindow(baseLatency, maxWindowLatency, percentiles, startTime, windowInterval, idleNS);
             while (doWork) {
                 notFound = true;
-                for (Channel ch : channels) {
-                    t = ch.receive(windowInterval);
+                for (int i = 0; doWork && (i < channels.length); i++) {
+                    t = channels[i].receive(windowInterval);
                     if (t != null) {
                         notFound = false;
                         time = t.endTime;
                         if (t.isEnd()) {
                             doWork = false;
-                            break;
                         } else {
                             recordsCnt += t.records;
                             final int latency = (int) (t.endTime - t.startTime);
@@ -144,7 +143,9 @@ final public class SbkPerformance implements Performance {
                             latencyWindow.record(t.startTime, t.bytes, t.records, latency);
                             if (totalRecords > 0  && recordsCnt >= totalRecords) {
                                 doWork = false;
-                                break;
+                            }
+                            if (msToRun > 0 && (time - startTime) >= msToRun) {
+                                doWork = false;
                             }
                         }
                         if (window.elapsedTimeMS(time) > windowInterval) {
@@ -153,13 +154,16 @@ final public class SbkPerformance implements Performance {
                         }
                     }
                 }
-                if (notFound) {
-                    time = window.idleWaitPrint(time, resultLogger);
-                }
-                if ( msToRun > 0 && (time - startTime) >= msToRun) {
-                    doWork = false;
+                if (doWork) {
+                    if (notFound) {
+                        time = window.idleWaitPrint(time, resultLogger);
+                    }
+                    if (msToRun > 0 && (time - startTime) >= msToRun) {
+                        doWork = false;
+                    }
                 }
             }
+            window.printPendingData(time, resultLogger);
             latencyWindow.print(time, resultLogger::printTotal);
         }
     }
@@ -327,6 +331,7 @@ final public class SbkPerformance implements Performance {
          * Get the current time duration of this window
          *
          * @param time current time.
+         * @return elapsed Time in Milliseconds
          */
         public long elapsedTimeMS(long time) {
             return time - startTime;
@@ -334,10 +339,22 @@ final public class SbkPerformance implements Performance {
 
 
         /**
+         * print only if there is data recorded.
+         *
+         * @param time current time.
+         */
+        public void printPendingData(long time,  Logger logger) {
+            if (this.validLatencyRecords > 0 || this.lowerLatencyDiscardRecords > 0 ||
+                    this.higherLatencyDiscardRecords > 0) {
+                print(time, logger);
+            }
+        }
+
+        /**
          * Print the window statistics
          */
         public void print(long endTime, Logger logger) {
-            final double elapsedSec = (endTime - startTime) / 1000.0;
+            final double elapsedSec = Math.max((endTime - startTime) / 1000.0, 1.0);
             final long totalRecords  = this.validLatencyRecords +
                     this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
             final double recsPerSec = totalRecords / elapsedSec;
