@@ -66,6 +66,7 @@ public class Sbk {
         final CompletableFuture<Void> ret;
         final Time time;
         final String timeUnitName;
+        final double[] percentiles;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
@@ -154,6 +155,14 @@ public class Sbk {
             SbkLogger.log.error("storage driver: " + driverName+ " using invalid TimeUnit , Use either TimeUnit.MILLISECONDS or TimeUnit.NANOSECONDS");
             throw new IllegalArgumentException();
         }
+        percentiles = storageDevice.getPercentileIndices();
+        for (double p: percentiles) {
+            if (p < 0 || p > 100) {
+                SbkLogger.log.error("storage driver: " + driverName+ " Invalid percentiles indices : "+percentiles.toString());
+                SbkLogger.log.error("Percentile indices should be greater than 0 and less than 100");
+                throw new IllegalArgumentException();
+            }
+        }
         metricRegistry = metric.createMetric(params);
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
@@ -167,12 +176,12 @@ public class Sbk {
         timeUnitName = Config.timeUnitToString(timeUnit);
         final String prefix = driverName +" "+action;
         if (metricRegistry == null) {
-            metricsLogger = new SystemResultLogger(prefix, timeUnitName, storageDevice.getPercentileIndices());
+            metricsLogger = new SystemResultLogger(prefix, timeUnitName, percentiles);
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
-            metricsLogger = new MetricsLogger(Config.NAME, prefix, timeUnitName, storageDevice.getPercentileIndices(),
+            metricsLogger = new MetricsLogger(Config.NAME, prefix, timeUnitName, percentiles,
                     params.getWritersCount(), params.getReadersCount(), compositeLogger);
         }
 
