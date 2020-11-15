@@ -13,6 +13,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import io.sbk.api.Writer;
 import io.sbk.api.impl.SbkLogger;
 
@@ -69,15 +70,16 @@ public class JdbcWriter implements Writer<String> {
 
 
     @Override
-    public void recordWrite(DataType<String> dType, String data, int size, Status status, SendChannel record, int id) throws IOException {
-        status.startTime = System.currentTimeMillis();
+    public void recordWrite(DataType<String> dType, String data, int size, Time time,
+                            Status status, SendChannel record, int id) throws IOException {
+        status.startTime = time.getCurrentTime();
         try {
             st.executeUpdate(insertTable());
         } catch (SQLException ex) {
             SbkLogger.log.error("JDBC: recordWrite failed !");
             throw  new IOException(ex);
         }
-        status.endTime =  System.currentTimeMillis();
+        status.endTime =  time.getCurrentTime();
         record.send(id, status.startTime, status.endTime, size, 1);
     }
 

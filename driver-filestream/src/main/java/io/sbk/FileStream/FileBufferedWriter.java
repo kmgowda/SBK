@@ -12,6 +12,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import io.sbk.api.Writer;
 
 import java.io.BufferedOutputStream;
@@ -30,10 +31,10 @@ public class FileBufferedWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel record, int id) throws IOException {
-        status.startTime = System.currentTimeMillis();
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time, Status status, SendChannel record, int id) throws IOException {
+        status.startTime = time.getCurrentTime();
         out.write(data);
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         status.records = 1;
         status.bytes = size;
         record.send(id, status.startTime, status.endTime, size, 1);

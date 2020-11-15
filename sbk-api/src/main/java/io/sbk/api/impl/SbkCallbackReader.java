@@ -15,6 +15,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Callback;
+import io.sbk.api.Time;
 import io.sbk.api.Worker;
 
 import java.util.concurrent.CompletableFuture;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private DataType dataType;
+    final private Time time;
     final private CompletableFuture<Void> ret;
     final private Callback callback;
     final private AtomicLong readCnt;
@@ -30,9 +32,11 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private int totalRecords;
     private long beginTime;
 
-    public SbkCallbackReader(int readerId, int idMax, Parameters params, SendChannel sendChannel, DataType dataType) {
-        super(readerId, idMax, params, sendChannel);
+    public SbkCallbackReader(int readerId, int idMax, long startTime, Parameters params, SendChannel sendChannel,
+                             DataType dataType, Time time) {
+        super(readerId, idMax, startTime, params, sendChannel);
         this.dataType = dataType;
+        this.time = time;
         this.ret = new CompletableFuture<>();
         this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
@@ -76,11 +80,11 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     }
 
     final private void consumeRead(Object data) {
-        final long endTime = System.currentTimeMillis();
+        final long endTime = time.getCurrentTime();
         record(endTime, endTime, dataType.length(data), 1);
     }
 
     final private void consumeRW(Object data) {
-        record(dataType.getTime(data), System.currentTimeMillis(), dataType.length(data), 1);
+        record(dataType.getTime(data), time.getCurrentTime(), dataType.length(data), 1);
     }
 }

@@ -14,6 +14,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RateController;
 import io.sbk.api.SendChannel;
+import io.sbk.api.Time;
 import io.sbk.api.Worker;
 import io.sbk.api.Writer;
 
@@ -25,15 +26,18 @@ import java.io.IOException;
 public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private Writer<Object> writer;
+    final private Time time;
     final private RunBenchmark perf;
     final private RateController rCnt;
     final private Object payload;
     final private int dataSize;
 
-    public SbkWriter(int writerID, int idMax, Parameters params, SendChannel sendChannel, DataType<Object> dType, Writer<Object> writer) {
-        super(writerID, idMax, params, sendChannel);
+    public SbkWriter(int writerID, int idMax, long startTime, Parameters params, SendChannel sendChannel,
+                     DataType<Object> dType, Time time, Writer<Object> writer) {
+        super(writerID, idMax, startTime, params, sendChannel);
         this.dType = dType;
         this.writer = writer;
+        this.time = time;
         this.perf = createBenchmark();
         this.rCnt = new SbkRateController();
         this.payload = dType.create(params.getRecordSize());
@@ -73,32 +77,32 @@ public class SbkWriter extends Worker implements RunBenchmark {
     }
 
     private void RecordsWriter() throws  IOException {
-        writer.RecordsWriter(this, dType, payload, dataSize);
+        writer.RecordsWriter(this, dType, payload, dataSize, time);
     }
 
 
     private void RecordsWriterSync() throws  IOException {
-        writer.RecordsWriterSync(this, dType, payload, dataSize, rCnt);
+        writer.RecordsWriterSync(this, dType, payload, dataSize, time, rCnt);
     }
 
 
     private void RecordsWriterTime() throws  IOException {
-        writer.RecordsWriterTime(this, dType, payload, dataSize);
+        writer.RecordsWriterTime(this, dType, payload, dataSize, time);
     }
 
 
     private void RecordsWriterTimeSync() throws IOException {
-        writer.RecordsWriterTimeSync(this, dType, payload, dataSize, rCnt);
+        writer.RecordsWriterTimeSync(this, dType, payload, dataSize, time, rCnt);
     }
 
 
     private void RecordsWriterRW() throws IOException {
-        writer.RecordsWriterRW(this, dType, payload, dataSize, rCnt);
+        writer.RecordsWriterRW(this, dType, payload, dataSize, time, rCnt);
     }
 
 
     private void RecordsWriterTimeRW() throws IOException {
-        writer.RecordsWriterTimeRW(this, dType, payload, dataSize, rCnt);
+        writer.RecordsWriterTimeRW(this, dType, payload, dataSize, time, rCnt);
     }
 
 }

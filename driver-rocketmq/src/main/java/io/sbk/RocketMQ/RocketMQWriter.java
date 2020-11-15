@@ -9,6 +9,7 @@
  */
 package io.sbk.RocketMQ;
 import io.sbk.api.SendChannel;
+import io.sbk.api.Time;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -85,16 +86,16 @@ public class RocketMQWriter implements Writer<byte[]> {
     }
 
     // recordWrite override implementation , instead of completable future.
-    private long recordWriteImpl(byte[] data, int size, SendChannel record, int id) {
-        final long time = System.currentTimeMillis();
+    private long recordWriteImpl(byte[] data, int size, Time time, SendChannel record, int id) {
+        final long ctime = time.getCurrentTime();
         Message message = new Message(topicName, data);
 
         try {
             this.rmqProducer.send(message, new SendCallback() {
                 @Override
                 public void onSuccess(final SendResult sendResult) {
-                    final long endTime = System.currentTimeMillis();
-                    record.send(id, time, endTime, size, 1);
+                    final long endTime = time.getCurrentTime();
+                    record.send(id, ctime, endTime, size, 1);
                 }
 
                 @Override
@@ -106,7 +107,7 @@ public class RocketMQWriter implements Writer<byte[]> {
           ex.printStackTrace();
         }
 
-        return time;
+        return ctime;
     }
 
     //  writeAsync implementation for recordWriteImpl.

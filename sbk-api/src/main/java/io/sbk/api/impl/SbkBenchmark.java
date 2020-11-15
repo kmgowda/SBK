@@ -18,6 +18,7 @@ import io.sbk.api.Reader;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.Config;
 import io.sbk.api.Storage;
+import io.sbk.api.Time;
 import io.sbk.api.Writer;
 import lombok.Synchronized;
 
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
  */
 public class SbkBenchmark implements Benchmark {
     final private Storage<Object> storage;
+    final private Time time;
     final private ExecutorService executor;
     final private Parameters params;
     final private Performance writeStats;
@@ -64,12 +66,14 @@ public class SbkBenchmark implements Benchmark {
      * @param  config   Configuration parameters
      * @param  params   Benchmarking input Parameters
      * @param  storage  Storage device/client/driver for benchmarking
+     * @param  time     time interface
      * @param  logger   Result Logger
      */
     public SbkBenchmark(Config config, Parameters params,
-                        Storage<Object> storage, ResultLogger logger) {
+                        Storage<Object> storage, Time time, ResultLogger logger) {
         this.params = params;
         this.storage = storage;
+        this.time = time;
         if (config.maxQs > 0) {
             this.maxQs = config.maxQs;
         } else {
@@ -84,14 +88,18 @@ public class SbkBenchmark implements Benchmark {
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(config, params.getWritersCount(),
-                                       params.getCsvFile(), logger, executor);
+                    time, storage.getMinLatency(), storage.getMaxWindowLatency(),
+                    storage.getMaxLatency(), storage.getPercentileIndices(),
+                    logger, executor,  params.getCsvFile());
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
             readStats = new SbkPerformance(config, params.getReadersCount(),
-                                    params.getCsvFile(), logger, executor);
+                    time, storage.getMinLatency(), storage.getMaxWindowLatency(),
+                    storage.getMaxLatency(), storage.getPercentileIndices(),
+                    logger, executor, params.getCsvFile());
         } else {
             readStats = null;
         }
@@ -154,12 +162,14 @@ public class SbkBenchmark implements Benchmark {
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.get(), dType, writers.get(i)))
+                        .map(i -> new SbkWriter(i, maxQs, beginTime, params, writeStats.get(),
+                                dType, time, writers.get(i)))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, null, dType, writers.get(i)))
+                        .map(i -> new SbkWriter(i, maxQs, beginTime, params, null,
+                                dType, time, writers.get(i)))
                         .collect(Collectors.toList());
             }
         } else {
@@ -169,13 +179,15 @@ public class SbkBenchmark implements Benchmark {
         if (readers != null && readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i, maxQs, params, readStats.get(), dType, readers.get(i)))
+                    .map(i -> new SbkReader(i, maxQs, beginTime, params,
+                            readStats.get(), dType, time, readers.get(i)))
                     .collect(Collectors.toList());
             sbkCallbackReaders = null;
         } else if (callbackReaders != null && callbackReaders.size() > 0) {
             sbkCallbackReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkCallbackReader(i, maxQs, params, readStats.get(), dType))
+                    .map(i -> new SbkCallbackReader(i, maxQs, beginTime, params,
+                            readStats.get(), dType, time))
                     .collect(Collectors.toList());
             sbkReaders = null;
         } else {
@@ -183,7 +195,7 @@ public class SbkBenchmark implements Benchmark {
             sbkCallbackReaders = null;
         }
 
-        final long startTime = System.currentTimeMillis();
+        final long startTime = time.getCurrentTime();
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
             wStatFuture = writeStats.start(startTime, params.getSecondsToRun(), params.getRecordsPerWriter() * params.getWritersCount());
         } else {
@@ -248,7 +260,7 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (params.getSecondsToRun() > 0) {
-            timeoutExecutor.schedule(() -> stop(System.currentTimeMillis()),
+            timeoutExecutor.schedule(() -> stop(time.getCurrentTime()),
                     params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
         retFuture = chainFuture.thenRunAsync(() -> {
@@ -262,7 +274,7 @@ public class SbkBenchmark implements Benchmark {
             } catch (InterruptedException | ExecutionException ex) {
                 ex.printStackTrace();
             }
-            stop(System.currentTimeMillis());
+            stop(time.getCurrentTime());
         }, executor);
         return retFuture;
     }

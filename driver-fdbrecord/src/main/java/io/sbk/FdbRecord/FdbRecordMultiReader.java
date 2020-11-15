@@ -21,6 +21,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -68,7 +69,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     }
 
     @Override
-    public void recordRead(DataType<ByteString> dType, Status status, SendChannel sendChannel, int id)
+    public void recordRead(DataType<ByteString> dType, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
@@ -76,7 +77,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         } else {
             recs =  params.getRecordsPerSync();
         }
-        status.startTime = System.currentTimeMillis();
+        status.startTime = time.getCurrentTime();
         final Status ret = db.run(context -> {
             long startKey = key;
             Status stat = new Status();
@@ -99,7 +100,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         }
         status.records = ret.records;
         status.bytes = ret.bytes;
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         key += recs;
         cnt += recs;
         sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
@@ -107,7 +108,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
 
 
     @Override
-    public void recordReadTime(DataType<ByteString> dType, Status status, SendChannel sendChannel, int id)
+    public void recordReadTime(DataType<ByteString> dType, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
@@ -142,7 +143,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         status.startTime = ret.startTime;
         status.records = ret.records;
         status.bytes = ret.bytes;
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         key += status.records;
         cnt += status.records;
         sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);

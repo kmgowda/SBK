@@ -16,12 +16,14 @@ package io.sbk.api;
 public abstract class Worker {
     public final int id;
     public final int recordIDMax;
+    public final long startTime;
     public final Parameters params;
     public final SendChannel sendChannel;
 
-    public Worker(int workerID, int idMax, Parameters params, SendChannel sendChannel) {
+    public Worker(int workerID, int idMax, long startTime, Parameters params, SendChannel sendChannel) {
         this.id = workerID;
         this.recordIDMax = idMax;
+        this.startTime  = startTime;
         this.params = params;
         this.sendChannel = sendChannel;
     }

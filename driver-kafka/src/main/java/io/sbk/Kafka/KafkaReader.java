@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -38,10 +39,10 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, Status status, SendChannel sendChannel, int id) throws IOException {
-        status.startTime = System.currentTimeMillis();
+    public void recordRead(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+        status.startTime = time.getCurrentTime();
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         if (records.isEmpty()) {
             status.records = 0;
         } else {
@@ -56,9 +57,9 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordReadTime(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         if (records.isEmpty()) {
             status.records = 0;
         } else {

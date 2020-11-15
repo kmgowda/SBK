@@ -77,12 +77,6 @@ public interface Parameters {
     int getRecordsCount();
 
     /**
-     * Start time of SBK.
-     * @return   starting time of SBK in milliseconds.
-     */
-    long getStartTime();
-
-    /**
      * Size of the record/event to read or write.
      * @return   size of the record.
      */

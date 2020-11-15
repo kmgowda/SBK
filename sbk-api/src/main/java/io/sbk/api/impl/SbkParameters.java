@@ -33,8 +33,6 @@ final public class SbkParameters implements Parameters {
     final private List<String> driversList;
 
     @Getter
-    final private long startTime;
-    @Getter
     final private int timeout;
     @Getter
     private int recordsCount;
@@ -62,14 +60,13 @@ final public class SbkParameters implements Parameters {
     private double throughput;
     private CommandLine commandline;
 
-    public SbkParameters(String name, long startTime, List<String> driversList) {
+    public SbkParameters(String name, List<String> driversList) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
         this.timeout = TIMEOUT;
         this.driversList = driversList;
-        this.startTime = startTime;
         this.commandline = null;
 
         if (this.driversList != null) {

@@ -99,7 +99,7 @@ public class Kafka implements Storage<byte[]> {
             props.put(ConsumerConfig.GROUP_ID_CONFIG, config.topicName);
         } else {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            props.put(ConsumerConfig.GROUP_ID_CONFIG, Long.toString(params.getStartTime()));
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, Long.toString(System.currentTimeMillis()));
         }
         return props;
     }

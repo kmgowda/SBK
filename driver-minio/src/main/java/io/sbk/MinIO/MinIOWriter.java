@@ -20,6 +20,7 @@ import io.minio.errors.NoResponseException;
 import io.sbk.api.Parameters;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import io.sbk.api.Writer;
 import io.sbk.api.DataType;
 import org.xmlpull.v1.XmlPullParserException;
@@ -47,8 +48,9 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel record, int id) throws IOException {
-        status.startTime = System.currentTimeMillis();
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
+                            Status status, SendChannel record, int id) throws IOException {
+        status.startTime = time.getCurrentTime();
         dataStream.reset();
         try {
             client.putObject(config.bucketName, config.bucketName + "-" + UUID.randomUUID().toString(),
@@ -58,7 +60,7 @@ public class MinIOWriter implements Writer<byte[]> {
                 InsufficientDataException e) {
            throw new IOException(e);
         }
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         status.bytes = size;
         status.records = 1;
         record.send(id, status.startTime, status.endTime, size, 1);

@@ -25,6 +25,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.Config;
 import io.sbk.api.Storage;
+import io.sbk.api.Time;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +52,6 @@ public class Sbk {
     public static void run(final String[] args, final Storage<Object> storage,
                            final String applicationName) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException {
-        final long startTime = System.currentTimeMillis();
         List<String> driversList;
         final CommandLine commandline;
         final String className;
@@ -63,6 +64,7 @@ public class Sbk {
         final ResultLogger metricsLogger;
         final Config config;
         final CompletableFuture<Void> ret;
+        final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
@@ -94,9 +96,9 @@ public class Sbk {
                 } else {
                     final Parameters paramsHelp;
                     if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
-                        paramsHelp = new SbkParameters(sbkApplicationName, startTime, driversList);
+                        paramsHelp = new SbkParameters(sbkApplicationName,  driversList);
                     } else {
-                        paramsHelp = new SbkParameters(Config.NAME, startTime, driversList);
+                        paramsHelp = new SbkParameters(Config.NAME, driversList);
                     }
                     metric.addArgs(paramsHelp);
                     paramsHelp.printHelp();
@@ -132,7 +134,7 @@ public class Sbk {
             driverName = usageLine;
         }
 
-        params = new SbkParameters(usageLine, startTime, driversList);
+        params = new SbkParameters(usageLine, driversList);
         storageDevice.addArgs(params);
         metric.addArgs(params);
         params.parseArgs(args);
@@ -141,8 +143,16 @@ public class Sbk {
         }
         metric.parseArgs(params);
         storageDevice.parseArgs(params);
+        TimeUnit timeUnit = storageDevice.getTimeUnit();
+        if (timeUnit == TimeUnit.MILLISECONDS) {
+            time = new MilliSeconds();
+        } else if (timeUnit == TimeUnit.NANOSECONDS) {
+            time = new NanoSeconds();
+        } else {
+            SbkLogger.log.error("storage driver: " + driverName+ " using invalid TimeUnit , Use either TimeUnit.MILLISECONDS or TimeUnit.NANOSECONDS");
+            throw new IllegalArgumentException();
+        }
         metricRegistry = metric.createMetric(params);
-
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = "Write/Reading";
@@ -165,16 +175,16 @@ public class Sbk {
         }
 
         final Benchmark benchmark = new SbkBenchmark(config, params,
-                storageDevice, metricsLogger);
-        ret = benchmark.start(System.currentTimeMillis());
+                storageDevice, time, metricsLogger);
+        ret = benchmark.start(time.getCurrentTime());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
-            benchmark.stop(System.currentTimeMillis());
+            benchmark.stop(time.getCurrentTime());
         }));
 
         ret.get();
-        benchmark.stop(System.currentTimeMillis());
+        benchmark.stop(time.getCurrentTime());
     }
 
     private static List<String> getClassNames(String pkgName) {

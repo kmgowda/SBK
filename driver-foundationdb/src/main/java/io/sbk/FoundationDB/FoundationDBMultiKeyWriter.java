@@ -16,6 +16,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import io.sbk.api.Writer;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -67,21 +68,21 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void writeAsyncTime(DataType<byte[]> dType, byte[] data, int size, Status status) throws IOException {
+    public void writeAsyncTime(DataType<byte[]> dType, byte[] data, int size, Time time, Status status) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
             recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
         }
-        final long time = System.currentTimeMillis();
+        final long ctime = time.getCurrentTime();
         status.bytes = size * recs;
         status.records =  recs;
-        status.startTime = time;
+        status.startTime = ctime;
         db.run(tr -> {
             long keyCnt = key;
             for (int i = 0; i < recs; i++) {
-                tr.set(Tuple.from(keyCnt++).pack(), dType.setTime(data, time));
+                tr.set(Tuple.from(keyCnt++).pack(), dType.setTime(data, ctime));
             }
             return null;
         });
@@ -90,7 +91,8 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
+                            Status status, SendChannel sendChannel, int id) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
             recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
@@ -99,7 +101,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
         }
         status.bytes = size * recs;
         status.records =  recs;
-        status.startTime = System.currentTimeMillis();
+        status.startTime = time.getCurrentTime();
         db.run(tr -> {
             long keyCnt = key;
             for (int i = 0; i < recs; i++) {
@@ -107,7 +109,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
             }
             return null;
         });
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
         cnt += recs;

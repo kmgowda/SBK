@@ -23,6 +23,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -45,18 +46,18 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordRead(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
         InputStream inStream;
         try {
             for (Result<Item> result : results) {
-                status.startTime = System.currentTimeMillis();
+                status.startTime = time.getCurrentTime();
                 item = result.get();
                 status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
                 inStream = client.getObject(config.bucketName, item.objectName());
-                status.endTime = System.currentTimeMillis();
+                status.endTime = time.getCurrentTime();
                 sendChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
                 inStream.close();
               }
@@ -68,7 +69,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordReadTime(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -76,7 +77,7 @@ public class MinIOReader implements Reader<byte[]> {
         InputStream inStream;
         try {
             for (Result<Item> result : results) {
-                status.startTime = System.currentTimeMillis();
+                status.startTime = time.getCurrentTime();
                 item = result.get();
                 status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
                 byte[] inData = new byte[status.bytes];

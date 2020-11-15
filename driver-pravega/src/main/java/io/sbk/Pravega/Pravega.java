@@ -75,7 +75,7 @@ public class Pravega implements Storage<byte[]> {
         }
 
         if (config.recreate) {
-            rdGrpName = config.streamName + params.getStartTime();
+            rdGrpName = config.streamName + System.currentTimeMillis();
         } else {
             rdGrpName = config.streamName + "RdGrp";
         }
