@@ -65,6 +65,7 @@ public class Sbk {
         final Config config;
         final CompletableFuture<Void> ret;
         final Time time;
+        final String timeUnitName;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
@@ -144,6 +145,7 @@ public class Sbk {
         metric.parseArgs(params);
         storageDevice.parseArgs(params);
         TimeUnit timeUnit = storageDevice.getTimeUnit();
+        SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
         if (timeUnit == TimeUnit.MILLISECONDS) {
             time = new MilliSeconds();
         } else if (timeUnit == TimeUnit.NANOSECONDS) {
@@ -162,15 +164,15 @@ public class Sbk {
         } else {
             action = "Writing";
         }
-
+        timeUnitName = Config.timeUnitToString(timeUnit);
         final String prefix = driverName +" "+action;
         if (metricRegistry == null) {
-            metricsLogger = new SystemResultLogger(prefix, Config.timeUnitToString(timeUnit), storageDevice.getPercentileIndices());
+            metricsLogger = new SystemResultLogger(prefix, timeUnitName, storageDevice.getPercentileIndices());
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
-            metricsLogger = new MetricsLogger(Config.NAME, prefix, Config.timeUnitToString(timeUnit), storageDevice.getPercentileIndices(),
+            metricsLogger = new MetricsLogger(Config.NAME, prefix, timeUnitName, storageDevice.getPercentileIndices(),
                     params.getWritersCount(), params.getReadersCount(), compositeLogger);
         }
 

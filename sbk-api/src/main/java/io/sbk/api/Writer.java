@@ -10,8 +10,6 @@
 
 package io.sbk.api;
 
-import io.sbk.api.impl.SbkLogger;
-
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
