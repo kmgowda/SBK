@@ -12,6 +12,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import io.sbk.api.Writer;
 
 
@@ -40,11 +41,12 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Status status, SendChannel record, int id) throws IOException {
+    public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Time time,
+                            Status status, SendChannel record, int id) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
-        final long time = System.currentTimeMillis();
+        final long ctime = time.getCurrentTime();
 
-        status.startTime = time;
+        status.startTime = ctime;
         status.bytes = size;
         status.records = 1;
         out.write(buffer, pos, buffer,
@@ -52,8 +54,8 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
 
             @Override
             public void completed(Integer result, ByteBuffer attachment) {
-                final long endTime = System.currentTimeMillis();
-                record.send(id, time, endTime, result, 1);
+                final long endTime = time.getCurrentTime();
+                record.send(id, ctime, endTime, result, 1);
             }
 
             @Override

@@ -42,14 +42,14 @@ final public class SbkRateController implements RateController {
      * @param elapsedSec    Elapsed seconds
      */
     @Override
-    public void control(final long events, final float  elapsedSec) {
+    public void control(final long events, final double  elapsedSec) {
         if (this.recordsPerSec <= 0) {
             return;
         }
         needSleep(events, elapsedSec);
     }
 
-    private void needSleep(final long events, final float elapsedSec) {
+    private void needSleep(final long events, final double elapsedSec) {
         if ((events / elapsedSec) < this.recordsPerSec) {
             return;
         }

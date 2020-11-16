@@ -14,6 +14,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -45,15 +46,15 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordRead(DataType<ByteBuffer> dType, Status status, SendChannel sendChannel, int id) throws IOException {
-        final long time = System.currentTimeMillis();
+    public void recordRead(DataType<ByteBuffer> dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+        final long ctime = time.getCurrentTime();
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
-                        final long endTime = System.currentTimeMillis();
-                        sendChannel.send(id, time, endTime, result, 1);
+                        final long endTime = time.getCurrentTime();
+                        sendChannel.send(id, ctime, endTime, result, 1);
                     }
 
                     @Override
@@ -65,14 +66,14 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordReadTime(DataType<ByteBuffer> dType, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordReadTime(DataType<ByteBuffer> dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final ByteBuffer buffer =  dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
 
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
-                        final long endTime = System.currentTimeMillis();
+                        final long endTime = time.getCurrentTime();
                         sendChannel.send(id, dType.getTime(attachment), endTime, result, 1);
                     }
 

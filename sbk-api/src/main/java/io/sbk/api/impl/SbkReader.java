@@ -14,6 +14,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Reader;
+import io.sbk.api.Time;
 import io.sbk.api.Worker;
 
 import java.io.EOFException;
@@ -25,12 +26,15 @@ import java.io.IOException;
 public class SbkReader extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private Reader<Object> reader;
+    final private Time time;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, int idMax, Parameters params, SendChannel sendChannel, DataType<Object> dType, Reader<Object> reader) {
-        super(readerId, idMax, params, sendChannel);
+    public SbkReader(int readerId, int idMax, long startTime, Parameters params, SendChannel sendChannel,
+                     DataType<Object> dType, Time time, Reader<Object> reader) {
+        super(readerId, idMax, startTime, params, sendChannel);
         this.dType = dType;
         this.reader = reader;
+        this.time = time;
         this.perf = createBenchmark();
     }
 
@@ -50,19 +54,19 @@ public class SbkReader extends Worker implements RunBenchmark {
     }
 
     private void RecordsReader() throws EOFException, IOException {
-        reader.RecordsReader(this, dType);
+        reader.RecordsReader(this, dType, time);
     }
 
 
     private void RecordsReaderRW() throws EOFException, IOException {
-        reader.RecordsReaderRW(this, dType);
+        reader.RecordsReaderRW(this, dType, time);
     }
 
     private void RecordsTimeReader() throws EOFException, IOException {
-        reader.RecordsTimeReader(this, dType);
+        reader.RecordsTimeReader(this, dType, time);
     }
 
     private void RecordsTimeReaderRW() throws EOFException, IOException {
-        reader.RecordsTimeReaderRW(this, dType);
+        reader.RecordsTimeReaderRW(this, dType, time);
     }
 }

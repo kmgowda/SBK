@@ -17,6 +17,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.api.Time;
 import org.bson.Document;
 import org.bson.types.Binary;
 
@@ -58,7 +59,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType<byte[]> dType, Status status, SendChannel sendChannel, int id)
+    public void recordRead(DataType<byte[]> dType, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         byte[] result;
@@ -67,7 +68,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         } else {
             recs =  params.getRecordsPerSync();
         }
-        status.startTime = System.currentTimeMillis();
+        status.startTime = time.getCurrentTime();
         if (cursor == null) {
             cursor = databaseCollection.find().iterator();
         }
@@ -88,7 +89,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         if (status.records == 0) {
             throw new EOFException();
         }
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         key += recs;
         cnt += recs;
         sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
@@ -96,7 +97,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
 
 
     @Override
-    public void recordReadTime(DataType<byte[]> dType, Status status, SendChannel sendChannel, int id)
+    public void recordReadTime(DataType<byte[]> dType, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         byte[] result;
@@ -128,7 +129,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         if (status.records == 0) {
             throw new EOFException();
         }
-        status.endTime = System.currentTimeMillis();
+        status.endTime = time.getCurrentTime();
         key += status.records;
         cnt += status.records;
         sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);

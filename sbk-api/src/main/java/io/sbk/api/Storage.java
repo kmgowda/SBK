@@ -13,6 +13,7 @@ import io.sbk.api.impl.ByteArray;
 import java.io.IOException;
 import com.google.common.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Interface for Benchmarking.
@@ -101,4 +102,46 @@ public interface Storage<T> {
                     ", Override/Implement the 'dataType' method");
         }
     }
+
+    /**
+     * Default implementation of time Unit.
+     * Default time unit is Milliseconds.
+     * @return time unit.
+     */
+    default TimeUnit getTimeUnit() {
+        return TimeUnit.MILLISECONDS;
+    }
+
+    /**
+     * Default implementation of minimum latency.
+     * @return minimum latency value.
+     */
+    default int getMinLatency() {
+        return Config.DEFAULT_MIN_LATENCY;
+    }
+
+    /**
+     * Default implementation of Maximum latency.
+     * @return Maximum latency value.
+     */
+    default int getMaxWindowLatency() {
+        return Config.DEFAULT_WINDOW_LATENCY;
+    }
+
+    /**
+     * Default implementation of Maximum latency.
+     * @return Maximum latency value.
+     */
+    default int getMaxLatency() {
+        return Config.DEFAULT_MAX_LATENCY;
+    }
+
+    /**
+     * Default implementation of percentile Indices.
+     * @return array of percentile Indices.
+     */
+    default double[] getPercentileIndices() {
+        return Config.PERCENTILES;
+    }
+
 }

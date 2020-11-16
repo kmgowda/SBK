@@ -28,6 +28,6 @@ public interface RateController {
      * @param records current cumulative records
      * @param elapsedSec   Elapsed Seconds
      */
-    void control(long records, float elapsedSec);
+    void control(long records, double elapsedSec);
 
 }

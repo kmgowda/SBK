@@ -25,6 +25,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.ResultLogger;
 import io.sbk.api.Config;
 import io.sbk.api.Storage;
+import io.sbk.api.Time;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +52,6 @@ public class Sbk {
     public static void run(final String[] args, final Storage<Object> storage,
                            final String applicationName) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException {
-        final long startTime = System.currentTimeMillis();
         List<String> driversList;
         final CommandLine commandline;
         final String className;
@@ -63,6 +64,9 @@ public class Sbk {
         final ResultLogger metricsLogger;
         final Config config;
         final CompletableFuture<Void> ret;
+        final Time time;
+        final String timeUnitName;
+        final double[] percentiles;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
@@ -94,9 +98,9 @@ public class Sbk {
                 } else {
                     final Parameters paramsHelp;
                     if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
-                        paramsHelp = new SbkParameters(sbkApplicationName, startTime, driversList);
+                        paramsHelp = new SbkParameters(sbkApplicationName,  driversList);
                     } else {
-                        paramsHelp = new SbkParameters(Config.NAME, startTime, driversList);
+                        paramsHelp = new SbkParameters(Config.NAME, driversList);
                     }
                     metric.addArgs(paramsHelp);
                     paramsHelp.printHelp();
@@ -132,7 +136,7 @@ public class Sbk {
             driverName = usageLine;
         }
 
-        params = new SbkParameters(usageLine, startTime, driversList);
+        params = new SbkParameters(usageLine, driversList);
         storageDevice.addArgs(params);
         metric.addArgs(params);
         params.parseArgs(args);
@@ -141,8 +145,26 @@ public class Sbk {
         }
         metric.parseArgs(params);
         storageDevice.parseArgs(params);
+        TimeUnit timeUnit = storageDevice.getTimeUnit();
+        SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
+        if (timeUnit == TimeUnit.MILLISECONDS) {
+            time = new MilliSeconds();
+        } else if (timeUnit == TimeUnit.NANOSECONDS) {
+            time = new NanoSeconds();
+        } else {
+            SbkLogger.log.error("storage driver: " + driverName+ " using invalid TimeUnit , Use either TimeUnit.MILLISECONDS or TimeUnit.NANOSECONDS");
+            throw new IllegalArgumentException();
+        }
+        percentiles = storageDevice.getPercentileIndices();
+        for (double p: percentiles) {
+            if (p < 0 || p > 100) {
+                SbkLogger.log.error("storage driver: " + driverName+ " Invalid percentiles indices : "+percentiles.toString());
+                SbkLogger.log.error("Percentile indices should be greater than 0 and less than 100");
+                throw new IllegalArgumentException();
+            }
+        }
+        Arrays.sort(percentiles);
         metricRegistry = metric.createMetric(params);
-
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = "Write/Reading";
@@ -152,29 +174,30 @@ public class Sbk {
         } else {
             action = "Writing";
         }
-
+        timeUnitName = Config.timeUnitToString(timeUnit);
         final String prefix = driverName +" "+action;
         if (metricRegistry == null) {
-            metricsLogger = new SystemResultLogger(prefix, Config.timeUnitToString(Config.TIME_UNIT), Config.PERCENTILES);
+            metricsLogger = new SystemResultLogger(prefix, timeUnitName, percentiles);
         } else {
             final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
             compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeLogger.add(metricRegistry);
-            metricsLogger = new MetricsLogger(Config.NAME, prefix, Config.timeUnitToString(Config.TIME_UNIT), Config.PERCENTILES,
+            metricsLogger = new MetricsLogger(Config.NAME, prefix, timeUnitName, percentiles,
                     params.getWritersCount(), params.getReadersCount(), compositeLogger);
         }
 
         final Benchmark benchmark = new SbkBenchmark(config, params,
-                storageDevice, metricsLogger);
-        ret = benchmark.start(System.currentTimeMillis());
+                storageDevice, time, storageDevice.getMinLatency(), storageDevice.getMaxWindowLatency(),
+                storageDevice.getMaxLatency(), percentiles, metricsLogger);
+        ret = benchmark.start(time.getCurrentTime());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
-            benchmark.stop(System.currentTimeMillis());
+            benchmark.stop(time.getCurrentTime());
         }));
 
         ret.get();
-        benchmark.stop(System.currentTimeMillis());
+        benchmark.stop(time.getCurrentTime());
     }
 
     private static List<String> getClassNames(String pkgName) {
