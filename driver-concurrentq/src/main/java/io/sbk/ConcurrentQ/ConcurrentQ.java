@@ -16,15 +16,19 @@ import io.sbk.api.Reader;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class for Concurrent Queue Benchmarking.
  */
 public class ConcurrentQ implements Storage<byte[]> {
     private ConcurrentLinkedQueue<byte[]> queue;
+    private boolean nano = false;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
+        params.addOption("nano", true,
+                "Enable Nano seconds Time stamps, default : "+nano);
     }
 
     @Override
@@ -32,7 +36,7 @@ public class ConcurrentQ implements Storage<byte[]> {
         if (params.getReadersCount() < 1 || params.getWritersCount() < 1) {
             throw new IllegalArgumentException("Specify both Writer or readers for Java Concurrent Linked Queue");
         }
-
+        nano = Boolean.parseBoolean(params.getOptionValue("nano"));
     }
 
     @Override
@@ -62,6 +66,15 @@ public class ConcurrentQ implements Storage<byte[]> {
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public TimeUnit getTimeUnit() {
+        if (nano) {
+            return TimeUnit.NANOSECONDS;
+        } else {
+            return TimeUnit.MILLISECONDS;
         }
     }
 }
