@@ -171,15 +171,17 @@ final public class SbkParameters implements Parameters {
         } else {
             throughput = -1;
         }
-        if (writersCount > 0 && readersCount > 0) {
-            if (recordSize < DataType.TIME_HEADER_BYTES) {
-                throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be "+DataType.TIME_HEADER_BYTES);
-            }
-        }
 
         if (writersCount > 0) {
+
             if (recordSize == 0) {
                 throw new IllegalArgumentException("Error: Must specify the record 'size'");
+            }
+
+            if (readersCount > 0) {
+                if (recordSize < DataType.TIME_HEADER_BYTES) {
+                    throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be " + DataType.TIME_HEADER_BYTES);
+                }
             }
             writeAndRead = readersCount > 0;
             recordsPerWriter = recordsCount / writersCount;
