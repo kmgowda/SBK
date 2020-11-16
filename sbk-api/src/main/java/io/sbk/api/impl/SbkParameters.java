@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -169,6 +170,11 @@ final public class SbkParameters implements Parameters {
             throughput = Double.parseDouble(commandline.getOptionValue("throughput"));
         } else {
             throughput = -1;
+        }
+        if (writersCount > 0 && readersCount > 0) {
+            if (recordSize < DataType.TIME_HEADER_BYTES) {
+                throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be "+DataType.TIME_HEADER_BYTES);
+            }
         }
 
         if (writersCount > 0) {
