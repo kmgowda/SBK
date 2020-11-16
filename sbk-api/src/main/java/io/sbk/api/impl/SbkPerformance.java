@@ -10,7 +10,6 @@
 package io.sbk.api.impl;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -93,7 +92,6 @@ final public class SbkPerformance implements Performance {
         for (int i = 0; i < percentiles.length; i++) {
             this.percentiles[i] = percentiles[i] / 100.0;
         }
-        Arrays.sort(this.percentiles);
     }
 
     /**

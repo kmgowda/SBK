@@ -163,6 +163,7 @@ public class Sbk {
                 throw new IllegalArgumentException();
             }
         }
+        Arrays.sort(percentiles);
         metricRegistry = metric.createMetric(params);
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
@@ -186,7 +187,8 @@ public class Sbk {
         }
 
         final Benchmark benchmark = new SbkBenchmark(config, params,
-                storageDevice, time, metricsLogger);
+                storageDevice, time, storageDevice.getMinLatency(), storageDevice.getMaxWindowLatency(),
+                storageDevice.getMaxLatency(), percentiles, metricsLogger);
         ret = benchmark.start(time.getCurrentTime());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

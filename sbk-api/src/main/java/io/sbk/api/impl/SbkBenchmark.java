@@ -63,14 +63,20 @@ public class SbkBenchmark implements Benchmark {
     /**
      * Create SBK Benchmark.
      *
-     * @param  config   Configuration parameters
-     * @param  params   Benchmarking input Parameters
-     * @param  storage  Storage device/client/driver for benchmarking
-     * @param  time     time interface
-     * @param  logger   Result Logger
+     * @param  config               Configuration parameters
+     * @param  params               Benchmarking input Parameters
+     * @param  storage              Storage device/client/driver for benchmarking
+     * @param  time                 time interface
+     * @param  minLatency           minimum Latency
+     * @param  maxWindowLatency     maximum output window Latency
+     * @param  maxLatency           maximum Latency
+     * @param  percentiles          percentile indices
+     * @param  logger               Result Logger
      */
     public SbkBenchmark(Config config, Parameters params,
-                        Storage<Object> storage, Time time, ResultLogger logger) {
+                        Storage<Object> storage, Time time,
+                        int minLatency, int maxWindowLatency, int maxLatency, double[] percentiles,
+                        ResultLogger logger) {
         this.params = params;
         this.storage = storage;
         this.time = time;
@@ -88,8 +94,8 @@ public class SbkBenchmark implements Benchmark {
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(config, params.getWritersCount(),
-                    time, storage.getMinLatency(), storage.getMaxWindowLatency(),
-                    storage.getMaxLatency(), storage.getPercentileIndices(),
+                    time, minLatency, maxWindowLatency,
+                    maxLatency, percentiles,
                     logger, executor,  params.getCsvFile());
         } else {
             writeStats = null;
@@ -97,8 +103,8 @@ public class SbkBenchmark implements Benchmark {
 
         if (params.getReadersCount() > 0) {
             readStats = new SbkPerformance(config, params.getReadersCount(),
-                    time, storage.getMinLatency(), storage.getMaxWindowLatency(),
-                    storage.getMaxLatency(), storage.getPercentileIndices(),
+                    time, minLatency, maxWindowLatency,
+                    maxLatency, percentiles,
                     logger, executor, params.getCsvFile());
         } else {
             readStats = null;
