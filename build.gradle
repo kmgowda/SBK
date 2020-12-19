@@ -58,7 +58,6 @@ allprojects {
 	apply from: "$rootDir/gradle/idea.gradle"
 	apply from: "$rootDir/gradle/jacoco.gradle"
 	apply from: "$rootDir/gradle/java.gradle"
-	apply from: "$rootDir/gradle/maven.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
 	mainClassName = SbkMainClass
