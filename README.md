@@ -461,3 +461,65 @@ usage: sbk -class Pulsar
 
 
 ```
+
+
+## Use SBK git hub packages
+Instead of using entire SBK framework, if you just want use the SBK framework to measure the performance benchmarking of your storage device/software, then follow the below simple and easy steps
+
+1. Add the SBK git hub package repository and dependency in gradle build file of your project as follows
+
+```
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+dependencies {
+    implementation 'sbk:sbk-api:0.84'    
+}
+
+```
+   few points to remeber here
+   
+   *    you need to authenicate with your git hub user name (GITHUB_USERNAME) and git hub token (GITHUB_TOKEN) 
+   *    mavenCentral() repository is required to fetch the SBK's dependencies too.
+   *    check this example: [[File system benchmarking build](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/build.gradle)]
+
+
+2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
+
+   *    check this example: [[File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)]
+
+
+3. Create a Main method to supply the you storage class object to SBK to run/conduct the performance benchmarking
+
+```
+  public static void main(final String[] args) {
+        Storage device = new <your storage class, extending the Storage interface>;
+        try {
+            Sbk.run(args, device, <Name of the your performance benchmarking application> );
+        } catch (ParseException | IllegalArgumentException | IOException |
+                InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+        System.exit(0);
+    }
+
+```
+   *    check this example: [[Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)]
+   
+4. Thats' all .. run you main method to see the benchmarking results.    
+
+
