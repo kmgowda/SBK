@@ -40,8 +40,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/kmgowda/SBK")
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+                username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
+                password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
@@ -51,3 +51,56 @@ publishing {
         }
     }
 }
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.groupId = "io.github.kmgowda"
+
+            signing {
+                sign configurations.archives
+            }
+
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
+            }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
+                def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                authentication(userName: username, password: password)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
+                def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                authentication(userName: username, password: password)
+            }
+
+            pom.project {
+                name "SBK"
+                url "https://github.com/kmgowda/sbk"
+                description "Storage Benchmark Kit"
+                scm {
+                    url 'https://github.com/kmgowda/sbk/tree/master'
+                    connection 'scm:git:git://github.com/kmgowda/sbk.git'
+                    developerConnection 'scm:git:https://github.com/kmgowda/sbk.git'
+                }
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'kmgowda'
+                        name = 'Keshava Munegowda'
+                        email = 'keshava.gowda@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
