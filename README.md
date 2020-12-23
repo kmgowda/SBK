@@ -525,7 +525,7 @@ dependencies {
 ```
    *    check this example: [[Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)]
    
-4. Thats' all .. run you main method (your java application ) with -help to see the benchmarking options.    
+4. Thats' all .. run your main method (your java application ) with "-help" to see the benchmarking options.    
 
 
 
@@ -579,4 +579,4 @@ dependencies {
 ```
    *    check this example: [[Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)]
    
-4. Thats' all .. run you main method (your java application ) with -help to see the benchmarking options.    
+4. Thats' all .. run your main method (your java application ) with "-help" to see the benchmarking options.    
