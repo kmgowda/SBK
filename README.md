@@ -496,7 +496,7 @@ dependencies {
    *    check this example: [File system benchmarking git hub build](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/build.gradle)
 
 
-2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
+2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
 
    *    check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)
 
@@ -552,7 +552,7 @@ dependencies {
    *    check this example: [File system benchmarking jit pack build](https://github.com/kmgowda/sbk-examples/blob/main/jitpack/sbk-file/build.gradle)
 
 
-2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
+2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
 
    *    check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)
 
