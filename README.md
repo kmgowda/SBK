@@ -7,7 +7,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Storage Benchmark Kit  ![SBK](https://github.com/kmgowda/SBK/blob/gh-pages/images/SBK-log-small-1.png)
+# Storage Benchmark Kit  ![SBK](images/SBK-log-small-1.png)
 [![Build Status](https://travis-ci.org/kmgowda/SBK.svg?branch=master)](https://travis-ci.org/kmgowda/SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)  [![Api](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/javadoc/index.html) [![Version](https://img.shields.io/badge/release-0.84-blue)](https://github.com/kmgowda/SBK/releases/tag/0.84) [![](https://jitpack.io/v/kmgowda/SBK.svg)](https://jitpack.io/#kmgowda/SBK)
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system. If you are curious to measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  tool/frame work. It massively writes the data to storage system and reads the data from strorage system. The SBK supports multi writers and readers and also the End to End latency benchmarking. The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
@@ -15,10 +15,14 @@ The SBK (Storage Benchmark Kit) is an open source software frame-work for the pe
 ___
 
 <p align="center">
-Supported By
+   Supported By
 </p>
 
-[<p align="center"> <img src="https://github.com/kmgowda/SBK/blob/gh-pages/images/jetbrains.png" alt="Jet Brains" width="100" height="100" /></p>](https://www.jetbrains.com/?from=SBK)
+<p align="center">
+    <a href="https://www.jetbrains.com/?from=SBK">
+        <img src="images/jetbrains.png" alt="Jet Brains" width="100" height="100">
+    </a>
+</p>
 
 ___
 
@@ -169,7 +173,7 @@ When you run the SBK, by default it starts the http server and all the output be
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
-[![Pulsar Grafana Dashboard](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)
+[![Pulsar Grafana Dashboard](images/pulsar-grafana.jpg)](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)
 
 #### Port conflicts between strage servers and grafana/prometheus
 * If you have running Pulsar server in standalone/local mode or if you are running SBK in the same system in which Pulsar broker is also running, then using the local port 8080 conflicts with the Pulsar Admin which runs at same port. So, either you change the Pulsar admin port or change the SBK's http port usig **-metrics** option.
