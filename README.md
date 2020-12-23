@@ -508,7 +508,12 @@ dependencies {
   public static void main(final String[] args) {
         Storage device = new <your storage class, extending the Storage interface>;
         try {
+        
+            //Start the File system benchmarking here
+            
             Sbk.run(args, device, <Name of the your performance benchmarking application> );
+            
+            
         } catch (ParseException | IllegalArgumentException | IOException |
                 InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -558,7 +563,11 @@ dependencies {
   public static void main(final String[] args) {
         Storage device = new <your storage class, extending the Storage interface>;
         try {
+            
+           //Start the File system benchmarking here
+            
             Sbk.run(args, device, <Name of the your performance benchmarking application> );
+
         } catch (ParseException | IllegalArgumentException | IOException |
                 InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
