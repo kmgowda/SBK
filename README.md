@@ -464,7 +464,7 @@ usage: sbk -class Pulsar
 
 
 ## Use SBK git hub packages
-Instead of using entire SBK framework, if you just want use the [[SBK framework API](https://github.com/kmgowda?tab=packages&repo_name=SBK)] packages to measure the performance benchmarking of your storage device/software, then follow the below simple and easy steps.
+Instead of using entire SBK framework, if you just want use the [SBK framework API](https://github.com/kmgowda?tab=packages&repo_name=SBK) packages to measure the performance benchmarking of your storage device/software, then follow the below simple and easy steps.
 
 1. Add the SBK git hub package repository and dependency in gradle build file of your project as follows
 
@@ -493,12 +493,12 @@ dependencies {
    
    *    you need to authenicate with your git hub user name (GITHUB_USERNAME) and git hub token (GITHUB_TOKEN) 
    *    mavenCentral() repository is required to fetch the SBK's dependencies too.
-   *    check this example: [[File system benchmarking git hub build](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/build.gradle)]
+   *    check this example: [File system benchmarking git hub build](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/build.gradle)
 
 
-2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
+2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
 
-   *    check this example: [[File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)]
+   *    check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)
 
 
 3. Create a Main method to supply the you storage class object to SBK to run/conduct the performance benchmarking
@@ -522,14 +522,14 @@ dependencies {
     }
 
 ```
-   *    check this example: [[Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)]
+   *    check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
    
 4. Thats' all .. run your main method (your java application ) with "-help" to see the benchmarking options.    
 
 
 
 ## Use SBK from JitPack
-The SBK API package is avilable in [[JitPack Repository](https://jitpack.io/#kmgowda/SBK)] too..To use the SBK-API package from Jitpack, follow the below simple and easy steps
+The SBK API package is avilable in [JitPack Repository](https://jitpack.io/#kmgowda/SBK) too..To use the SBK-API package from Jitpack, follow the below simple and easy steps
 
 1. Add the SBK git hub package repository and dependency in gradle build file of your project as follows
 
@@ -549,12 +549,12 @@ dependencies {
    few points to remeber here
        
    *    mavenCentral() repository is required to fetch the SBK's dependencies too.
-   *    check this example: [[File system benchmarking jit pack build](https://github.com/kmgowda/sbk-examples/blob/main/jitpack/sbk-file/build.gradle)]
+   *    check this example: [File system benchmarking jit pack build](https://github.com/kmgowda/sbk-examples/blob/main/jitpack/sbk-file/build.gradle)
 
 
-2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
+2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
 
-   *    check this example: [[File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)]
+   *    check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)
 
 
 3. Create a Main method to supply the you storage class object to SBK to run/conduct the performance benchmarking
@@ -578,7 +578,7 @@ dependencies {
     }
 
 ```
-   *    check this example: [[Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)]
+   *    check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
    
 4. Thats' all .. run your main method (your java application ) with "-help" to see the benchmarking options.    
 
@@ -588,7 +588,7 @@ dependencies {
 
 
 ## Use SBK from Maven Central
-The SBK APIs Package is avilable at [[maven central](https://search.maven.org/classic/#artifactdetails%7Cio.github.kmgowda%7Csbk-api%7C0.84%7Cjar)] too.. to use the sbk-api package , follow below steps
+The SBK APIs Package is avilable at [maven central](https://search.maven.org/classic/#artifactdetails%7Cio.github.kmgowda%7Csbk-api%7C0.84%7Cjar) too.. to use the sbk-api package , follow below steps
 
 
 1. Add the SBK git hub package repository and dependency in gradle build file of your project as follows
@@ -607,12 +607,12 @@ dependencies {
    few points to remeber here
    
    *    mavenCentral() repository is required to fetch the SBK APIs package and its dependencies.
-   *    check this example: [[File system benchmarking maven build](https://github.com/kmgowda/sbk-examples/blob/main/maven-central/sbk-file/build.gradle)]
+   *    check this example: [File system benchmarking maven build](https://github.com/kmgowda/sbk-examples/blob/main/maven-central/sbk-file/build.gradle)
 
 
 2. Extend the storage interferce [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
 
-   *    check this example: [[File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)]
+   *    check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/tree/main/sbk-file/src/main/java)
 
 
 3. Create a Main method to supply the you storage class object to SBK to run/conduct the performance benchmarking
@@ -635,6 +635,6 @@ dependencies {
     }
 
 ```
-   *    check this example: [[Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)]
+   *    check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
    
 4. Thats' all .. run your main method (your java application ) with "-help" to see the benchmarking options.    
