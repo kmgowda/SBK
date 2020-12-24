@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public class Sbk {
     final static String BANNERFILE = "banner.txt";
 
     public static void run(final String[] args, final Storage<Object> storage,
-                           final String applicationName) throws ParseException, IllegalArgumentException,
+                           final String applicationName, ResultLogger outLogger) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException {
         List<String> driversList;
         final CommandLine commandline;
@@ -67,6 +68,7 @@ public class Sbk {
         final Time time;
         final String timeUnitName;
         final double[] percentiles;
+        final Metric metric;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
@@ -86,8 +88,11 @@ public class Sbk {
         commandline = new DefaultParser().parse(new Options()
                         .addOption("class", true, "Benchmark Class"),
                 args, true);
-
-        final Metric metric = new MetricImpl();
+        if (outLogger == null) {
+            metric = new MetricImpl();
+        } else {
+            metric = null;
+        }
         if (storage == null) {
             driversList =  getClassNames(config.packageName);
             SbkLogger.log.info("Available Drivers : "+ driversList.size());
@@ -102,7 +107,9 @@ public class Sbk {
                     } else {
                         paramsHelp = new SbkParameters(Config.NAME, driversList);
                     }
-                    metric.addArgs(paramsHelp);
+                    if (metric !=  null) {
+                        metric.addArgs(paramsHelp);
+                    }
                     paramsHelp.printHelp();
                     return;
                 }
@@ -138,12 +145,16 @@ public class Sbk {
 
         params = new SbkParameters(usageLine, driversList);
         storageDevice.addArgs(params);
-        metric.addArgs(params);
+        if (metric != null) {
+            metric.addArgs(params);
+        }
         params.parseArgs(args);
         if (params.hasOption("help")) {
             return;
         }
-        metric.parseArgs(params);
+        if (metric != null) {
+            metric.parseArgs(params);
+        }
         storageDevice.parseArgs(params);
         TimeUnit timeUnit = storageDevice.getTimeUnit();
         SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
@@ -164,7 +175,6 @@ public class Sbk {
             }
         }
         Arrays.sort(percentiles);
-        metricRegistry = metric.createMetric(params);
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = "Write/Reading";
@@ -176,16 +186,20 @@ public class Sbk {
         }
         timeUnitName = Config.timeUnitToString(timeUnit);
         final String prefix = driverName +" "+action;
-        if (metricRegistry == null) {
-            metricsLogger = new SystemResultLogger(prefix, timeUnitName, percentiles);
+        if (metric != null) {
+            metricRegistry = metric.createMetric(params);
+            if (metricRegistry == null) {
+                metricsLogger = new SystemResultLogger(prefix, timeUnitName, percentiles);
+            } else {
+                final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
+                compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
+                compositeLogger.add(metricRegistry);
+                metricsLogger = new MetricsLogger(Config.NAME, prefix, timeUnitName, percentiles,
+                        params.getWritersCount(), params.getReadersCount(), compositeLogger);
+            }
         } else {
-            final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-            compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
-            compositeLogger.add(metricRegistry);
-            metricsLogger = new MetricsLogger(Config.NAME, prefix, timeUnitName, percentiles,
-                    params.getWritersCount(), params.getReadersCount(), compositeLogger);
+            metricsLogger = outLogger;
         }
-
         final Benchmark benchmark = new SbkBenchmark(config, params,
                 storageDevice, time, storageDevice.getMinLatency(), storageDevice.getMaxWindowLatency(),
                 storageDevice.getMaxLatency(), percentiles, metricsLogger);
@@ -198,6 +212,18 @@ public class Sbk {
 
         ret.get();
         benchmark.stop(time.getCurrentTime());
+    }
+
+    public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
+                           final String applicationName, ResultLogger outLogger) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                 run(args, storage, applicationName, outLogger);
+            } catch (ParseException | IllegalArgumentException | IOException |
+                    InterruptedException | ExecutionException ex) {
+                throw new CompletionException(ex);
+            }
+        });
     }
 
     private static List<String> getClassNames(String pkgName) {
