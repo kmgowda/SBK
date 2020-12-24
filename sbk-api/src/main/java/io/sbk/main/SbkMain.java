@@ -23,7 +23,7 @@ public class SbkMain {
 
     public static void main(final String[] args) {
         try {
-            Sbk.run(args, null, null);
+            Sbk.run(args, null, null, null);
         } catch (ParseException | IllegalArgumentException | IOException |
                 InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
