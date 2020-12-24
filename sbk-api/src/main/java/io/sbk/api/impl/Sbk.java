@@ -216,7 +216,7 @@ public class Sbk {
 
     public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
                            final String applicationName, ResultLogger outLogger) {
-        return CompletableFuture.runAsync(()->{
+        return CompletableFuture.runAsync(() -> {
             try {
                  run(args, storage, applicationName, outLogger);
             } catch (ParseException | IllegalArgumentException | IOException |
