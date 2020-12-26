@@ -58,7 +58,7 @@ An example SBK command is as follows
 
 Note that **"social"** is the name of the data base used while starting the MySQL server and the same name should be used in the **-url** option of SBK jdbc command.
 
-An Example data base read command is as follows:
+An Example database read command is as follows:
 ```
  ./build/install/sbk/bin/sbk -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://localhost:3306/social -user root -password root  -table kmg_2 -size 100 -readers 1 -time 60
 ``` 
@@ -78,7 +78,7 @@ An example command to run the SBK benchmarking is
 ```
 ./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:5432/postgres -user root -password root  -table kmg_1 -size 100 -writers 1 -time 60
 ```
-Make sure the user name and passwords are same while running the postgreSQL server and SBK benchmarking.
+Make sure the username and passwords are same while running the postgreSQL server and SBK benchmarking.
 generally **'postgres'** is the name of the database available by default.
 
 ## JDBC PostgreSQL for CockroachDB Performance Benchmarking
@@ -115,3 +115,30 @@ An example command to run the SBK benchmarking is
 ./build/install/sbk/bin/sbk -class jdbc  -driver org.sqlite.JDBC -url jdbc:sqlite:test.db   -table kmg_2 -size 100 -writers 1 -time 60
 ```
 Note that, SQLite is a local on disk database, it does not supports multiple wrtiers and it supports mulitple readers benchmarking. 
+
+
+## JDBC with MariaDB
+The SBK is tested with MariaDB benchmarking too. you can find the mysql docker images here: https://hub.docker.com/_/mariadb
+
+command to pull the latest MariaDB docker image
+```
+docker pull mariadb:latest
+```
+
+Here is an example, to run with custom root password with the write access is as follows.
+
+```
+docker run -p 3306:3306 --name mariadb -e MYSQL_ROOT_PASSWORD=root -d mariadb:latest
+```
+
+An example SBK command is as follows
+```
+./build/install/sbk/bin/sbk -class jdbc -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -writers 1 -size 100 -time 60
+```
+
+Note that **"mysql"** is the name of the data base used while starting the MariaDB server and the same name should be used in the **-url** option of SBK jdbc command.
+
+An Example database read command is as follows:
+```
+./build/install/sbk/bin/sbk -class jdbc -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -time 60
+``` 

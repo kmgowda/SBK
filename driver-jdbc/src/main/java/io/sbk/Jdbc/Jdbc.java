@@ -109,6 +109,7 @@ public class Jdbc implements Storage<String> {
                     "(ID INTEGER PRIMARY KEY AUTOINCREMENT" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
         } else {
+            // This statement works for MySQL and MariaDB too..
             query = "CREATE TABLE " + tableName +
                     "(ID BIGINT PRIMARY KEY AUTO_INCREMENT" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
