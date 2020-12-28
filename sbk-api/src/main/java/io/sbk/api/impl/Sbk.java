@@ -185,7 +185,8 @@ public class Sbk {
             action = "Writing";
         }
         timeUnitName = Config.timeUnitToString(timeUnit);
-        final String prefix = driverName +" "+action;
+        //For metrics the driver name should be in Uppercase
+        final String prefix = driverName.toUpperCase() +" "+action;
         if (metric != null) {
             metricRegistry = metric.createMetric(params);
             if (metricRegistry == null) {

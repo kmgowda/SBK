@@ -78,6 +78,7 @@ allprojects {
 					'Implementation-Version': sbkVersion
 		}
 	}
+
 	distributions {
 		main {
 			distributionBaseName.set(archivesBaseName)
@@ -101,6 +102,19 @@ allprojects {
 	}
 
  */
+
+	task generateDashboards(type: Copy) {
+        if (project.path.startsWith(":driver-")) {
+			def outDir = 'build/dashboard'
+			def outFile = sbkProjectName+"-"+sbkVersion+".json"
+			def sbkClass = project.path.replace(":driver-","").toUpperCase()
+			from "$rootDir/sbk-dashboard-template.json"
+			into outDir
+			filter { line -> line.replaceAll('SBK@2020', sbkClass) }
+			rename 'sbk-dashboard-template.json', outFile
+        }
+	}
+
 }
 
 /* Include your driver below */
@@ -148,3 +162,5 @@ task buildJar(type: Jar) {
 	exclude 'META-INF/*.DSA'
 	with jar
 }
+
+

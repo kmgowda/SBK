@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -40,7 +40,7 @@
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 24,
+      "id": 4,
       "legend": {
         "avg": false,
         "current": false,
@@ -67,23 +67,15 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_ms_AvgLatency",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "SBK_BOOKKEEPER_Writing_MBPerSec",
           "refId": "A"
-        },
-        {
-          "expr": "SBK_File_Reading_ms_MaxLatency",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File read Avg and Max latency",
+      "title": "BOOKKEEPER Write Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -169,7 +161,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_RecordsPerSec",
+          "expr": "SBK_BOOKKEEPER_Writing_RecordsPerSec",
           "refId": "A"
         }
       ],
@@ -177,7 +169,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File Writing Records/Sec",
+      "title": "BOOKKEEPER Writing Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -263,47 +255,65 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_ms_50",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Writing_ms_75",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_File_Writing_ms_90",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_File_Writing_ms_99",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_File_Writing_ms_99_9",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_File_Writing_ms_99_99",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Writing_ms_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Writing_ms_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Writing_ms_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File Writing percentiles",
+      "title": "BOOKKEEPER Writing Percentiles",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -359,132 +369,6 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 6
-      },
-      "hiddenSeries": false,
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.2.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "SBK_File_Reading_ms_50",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_File_Reading_ms_75",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_File_Reading_ms_90",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "expr": "SBK_File_Reading_ms_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "expr": "SBK_File_Reading_ms_99_9",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "expr": "SBK_File_Reading_ms_99_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "File Reading Percentiles",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
         "y": 6
       },
       "hiddenSeries": false,
@@ -515,13 +399,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_ms_AvgLatency",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_AvgLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_File_Writing_ms_MaxLatency",
+          "expr": "SBK_BOOKKEEPER_Writing_ms_MaxLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -531,7 +415,101 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Writing Avg and Max latencies",
+      "title": "BOOKKEEPER Writing Avg and Max Latencies",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "hiddenSeries": false,
+      "id": 2,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_BOOKKEEPER_Writing_Writers",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "BOOKKEEPER Writers",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -590,7 +568,7 @@
         "y": 6
       },
       "hiddenSeries": false,
-      "id": 2,
+      "id": 8,
       "legend": {
         "avg": false,
         "current": false,
@@ -617,7 +595,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_Writers",
+          "expr": "SBK_BOOKKEEPER_Writing_Records_total",
           "refId": "A"
         }
       ],
@@ -625,7 +603,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File Writers",
+      "title": "BOOKKEEPER Write Bytes Total",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -684,7 +662,7 @@
         "y": 12
       },
       "hiddenSeries": false,
-      "id": 20,
+      "id": 18,
       "legend": {
         "avg": false,
         "current": false,
@@ -711,7 +689,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_RecordsPerSec",
+          "expr": "SBK_BOOKKEEPER_Reading_MBPerSec",
           "refId": "A"
         }
       ],
@@ -719,7 +697,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File Read records/sec",
+      "title": "BOOKKEEPER Read Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -778,7 +756,7 @@
         "y": 12
       },
       "hiddenSeries": false,
-      "id": 4,
+      "id": 20,
       "legend": {
         "avg": false,
         "current": false,
@@ -805,7 +783,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_MBPerSec",
+          "expr": "SBK_BOOKKEEPER_Reading_RecordsPerSec",
           "refId": "A"
         }
       ],
@@ -813,7 +791,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Write Throughput MB/s",
+      "title": "BOOKKEEPER Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -872,7 +850,7 @@
         "y": 12
       },
       "hiddenSeries": false,
-      "id": 18,
+      "id": 22,
       "legend": {
         "avg": false,
         "current": false,
@@ -899,15 +877,65 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_MBPerSec",
+          "expr": "SBK_BOOKKEEPER_Reading_ms_10",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File Read Throughput MB/s",
+      "title": "BOOKKEEPER Reading Percentiles",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -966,7 +994,7 @@
         "y": 18
       },
       "hiddenSeries": false,
-      "id": 16,
+      "id": 24,
       "legend": {
         "avg": false,
         "current": false,
@@ -993,15 +1021,23 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_Bytes_total",
+          "expr": "SBK_BOOKKEEPER_Reading_ms_AvgLatency",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_ms_MaxLatency",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File read bytes",
+      "title": "BOOKKEEPER Reading  Avg and Max Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1087,7 +1123,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Reading_Readers",
+          "expr": "SBK_BOOKKEEPER_Reading_Readers",
           "refId": "A"
         }
       ],
@@ -1095,7 +1131,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "File Readers",
+      "title": "BOOKKEEPER Readers",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1154,7 +1190,7 @@
         "y": 18
       },
       "hiddenSeries": false,
-      "id": 8,
+      "id": 16,
       "legend": {
         "avg": false,
         "current": false,
@@ -1181,7 +1217,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_File_Writing_Records_total",
+          "expr": "SBK_BOOKKEEPER_Reading_Bytes_total",
           "refId": "A"
         }
       ],
@@ -1189,7 +1225,209 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Write Bytes Total",
+      "title": "BOOKKEEPER Read Bytes Total",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 24
+      },
+      "hiddenSeries": false,
+      "id": 28,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_BOOKKEEPER_Writing_LowerDiscardedLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Writing_HigherDiscardLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "BOOKKEEPER Writing Discarded Latencies",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 24
+      },
+      "hiddenSeries": false,
+      "id": 26,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_LowerDiscardedLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_BOOKKEEPER_Reading_HigherDiscardLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "BOOKKEEPER Reading Discarded Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1240,7 +1478,6 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SBK File Benchmark",
-  "uid": "HuCNiWlZz",
-  "version": 3
+  "title": "SBK BOOKKEEPER Benchmark",
+  "version": 20
 }
