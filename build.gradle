@@ -10,7 +10,6 @@
  */
 
 import org.gradle.internal.jvm.Jvm
-import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
 	repositories {
