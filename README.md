@@ -163,13 +163,14 @@ Writing(Total)    1116193 records,   19795.9 records/sec,    18.88 MB/sec,     4
 ```
 
 ### Grafana Dashboards of SBK
-When you run the SBK, by default it starts the http server and all the output benchmark data are directed to the default port number: **8080** and **metrics** context.  if you want to change the port number and context, you can use the command line argument **-context** to change the same.  you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server. In case, if you are fetching metrics/benchmark data from remote http server , or from port number other than 8080 or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) too. Run the grafana server (cum client) to fetch the benchmark data from  prometheus, For example, if you are running local grafana server then by default it  fetchs the data from prometheus server at the local port 9090. you can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default user name / password. The few example dashboards to fetch the SBK benchmark data of Kafka, Pravega, Pulsar , local file system and Concurrent Queues from local prometheus are below. 
-
-1. [Kafka dashboard config](https://github.com/kmgowda/SBK/blob/master/config/metrics/grafana/sample-dashboards/SBK-Kafka-Benchmark.json)
-2. [Pulsar dashboard config](https://github.com/kmgowda/SBK/blob/master/config/metrics/grafana/sample-dashboards/SBK-Pulsar-Benchmark.json)
-3. [Pravega dashboard config](https://github.com/kmgowda/SBK/blob/master/config/metrics/grafana/sample-dashboards/SBK-Pravega-Benchmark.json)
-4. [File System dashboard config](https://github.com/kmgowda/SBK/blob/master/config/metrics/grafana/sample-dashboards/SBK-File-Benchmark.json)
-5. [Concurrent Q dashboard config](https://github.com/kmgowda/SBK/blob/master/config/metrics/grafana/sample-dashboards/SBK-Concurrent-Q-Benchmark.json)
+When you run the SBK, by default it starts the http server and all the output benchmark data are directed to the default port number: **8080** and **metrics** context.
+if you want to change the port number and context, you can use the command line argument **-context** to change the same.
+you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
+In case, if you are fetching metrics/benchmark data from remote http server , or from port number other than 8080 or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) too.
+Run the grafana server (cum client) to fetch the benchmark data from  prometheus.
+For example, if you are running local grafana server then by default it  fetches the data from prometheus server at the local port 9090.
+You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default user name / password.
+you can import the grafana dashboards to fetch the SBK benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/config/metrics/grafana/dashboards).
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
