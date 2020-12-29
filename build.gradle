@@ -108,10 +108,10 @@ allprojects {
 			def outDir = 'build/dashboard'
 			def outFile = sbkProjectName+"-"+sbkVersion+".json"
 			def sbkClass = project.path.replace(":driver-","").toUpperCase()
-			from "$rootDir/sbk-dashboard-template.json"
+			from "$rootDir/dashboard-template.json"
 			into outDir
 			filter { line -> line.replaceAll('SBK@2020', sbkClass) }
-			rename 'sbk-dashboard-template.json', outFile
+			rename 'dashboard-template.json', outFile
         }
 	}
 
