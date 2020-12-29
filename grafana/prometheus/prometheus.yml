@@ -34,4 +34,4 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-      - targets: ['localhost:8080', '127.0.0.1:8080', '192.168.0.120:8080']
+      - targets: ['localhost:8080', '127.0.0.1:8080', 'sbk:8080', '18.7.0.9:8080', '192.168.0.120:8080']
