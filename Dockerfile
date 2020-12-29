@@ -69,4 +69,6 @@ RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 
 RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}
 
+EXPOSE 8080
+
 ENTRYPOINT ["/opt/sbk/bin/sbk"]
