@@ -2,30 +2,30 @@ version: '3'
 services:
   prometheus:
     image: prom/prometheus
-    container_name: prometheus
-    hostname: prometheus
     volumes:
       - ./grafana/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
       - '9090:9090'
+    networks:
+      kmgbr:
+        ipv4_address: 18.7.0.7
 
   grafana:
     build: grafana
-    container_name: grafana
-    hostname: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=sbk
     depends_on:
       - prometheus
     ports:
       - "3000:3000"
+    networks:
+      kmgbr:
+        ipv4_address: 18.7.0.8
 
   sbk:
     image: kmgowda/sbk
-    container_name: sbk
-    hostname: sbk
     depends_on:
       - prometheus
       - grafana
@@ -33,3 +33,14 @@ services:
       - 8080
     ports:
       - "8080:8080"
+    networks:
+      kmgbr:
+        ipv4_address: 18.7.0.9
+
+networks:
+  kmgbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 18.7.0.0/16
+          gateway: 18.7.0.1
