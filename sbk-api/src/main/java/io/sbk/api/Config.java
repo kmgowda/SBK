@@ -37,6 +37,8 @@ public class Config {
     final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
     public String packageName;
+    public int port;
+    public String context;
     public boolean fork;
     public TimeUnit timeUnit;
     public int reportingMS;

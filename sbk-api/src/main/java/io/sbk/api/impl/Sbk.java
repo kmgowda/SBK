@@ -89,7 +89,7 @@ public class Sbk {
                         .addOption("class", true, "Benchmark Class"),
                 args, true);
         if (outLogger == null) {
-            metric = new MetricImpl();
+            metric = new MetricImpl(config.port, config.context);
         } else {
             metric = null;
         }

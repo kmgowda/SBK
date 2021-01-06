@@ -31,6 +31,6 @@ services:
       - prometheus
       - grafana
     expose:
-      - 8080
+      - 9718
     ports:
-      - "8080:8080"
+      - "9718:9718"

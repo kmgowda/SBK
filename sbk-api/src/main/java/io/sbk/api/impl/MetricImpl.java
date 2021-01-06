@@ -25,22 +25,26 @@ import java.net.InetSocketAddress;
  * Class for Implementing Prometheus MeterRegistry for metrics.
  */
 public class MetricImpl implements Metric {
-    private final static int DEFAULT_PORT = 8080;
-    private final static String DEFAULT_CONTEXT = "/metrics";
-    private final static String DEFAULT_FULL_CONTEXT = DEFAULT_PORT + DEFAULT_CONTEXT;
     private  int port;
     private String context;
     private boolean disabled;
 
+
+    public MetricImpl(int port, String context) {
+        this.port = port;
+        this.context = context;
+        this.disabled = false;
+    }
+
     @Override
     public void addArgs(final Parameters params) {
         params.addOption("context", true, "Prometheus Metric context;" +
-                "default context: " + DEFAULT_FULL_CONTEXT + "; 'no' disables the  metrics");
+                "default context: " + port + context + "; 'no' disables the metrics");
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        final String fullContext =  params.getOptionValue("context", DEFAULT_FULL_CONTEXT);
+        final String fullContext =  params.getOptionValue("context", port + context);
         if (fullContext.equalsIgnoreCase("no")) {
             disabled = true;
         } else {
@@ -49,8 +53,6 @@ public class MetricImpl implements Metric {
             port = Integer.parseInt(str[0]);
             if (str.length == 2 && str[1] != null) {
                 context = "/" + str[1];
-            } else {
-                context = DEFAULT_CONTEXT;
             }
         }
     }

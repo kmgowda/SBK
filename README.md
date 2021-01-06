@@ -102,7 +102,7 @@ Running SBK locally:
                      MongoDB, Nats, NatsStream, Nsq, Pravega, Pulsar,
                      RabbitMQ, RocketMQ, RocksDB]
  -context <arg>      Prometheus Metric context;default context:
-                     8080/metrics; 'no' disables the  metrics
+                     9718/metrics; 'no' disables the  metrics
  -help               Help message
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'time' not specified;
@@ -163,10 +163,10 @@ Writing(Total)    1116193 records,   19795.9 records/sec,    18.88 MB/sec,     4
 ```
 
 ### Grafana Dashboards of SBK
-When you run the SBK, by default it starts the http server and all the output benchmark data are directed to the default port number: **8080** and **metrics** context.
+When you run the SBK, by default it starts the http server and all the output benchmark data are directed to the default port number: **9718** and **metrics** context.
 if you want to change the port number and context, you can use the command line argument **-context** to change the same.
 you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
-In case, if you are fetching metrics/benchmark data from remote http server , or from port number other than 8080 or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) too.
+In case, if you are fetching metrics/benchmark data from remote http server , or from port number other than 9718 or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) too.
 Run the grafana server (cum client) to fetch the benchmark data from  prometheus.
 For example, if you are running local grafana server then by default it  fetches the data from prometheus server at the local port 9090.
 You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default user name / password.
@@ -177,7 +177,7 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 [![Pulsar Grafana Dashboard](images/pulsar-grafana.jpg)](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)
 
 #### Port conflicts between strage servers and grafana/prometheus
-* If you have running Pulsar server in standalone/local mode or if you are running SBK in the same system in which Pulsar broker is also running, then using the local port 8080 conflicts with the Pulsar Admin which runs at same port. So, either you change the Pulsar admin port or change the SBK's http port usig **-metrics** option.
+* If you have running Pulsar server in standalone/local mode or if you are running SBK in the same system in which Pulsar broker is also running, then using the local port 9718 conflicts with the Pulsar Admin which runs at same port. So, either you change the Pulsar admin port or change the SBK's http port usig **-metrics** option.
 * If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [prometheus configuraiton file](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) before deploying the prometheus. 
 
 
@@ -191,9 +191,9 @@ docker pull kmgowda/sbk
 
 you can strightaway run the docker image too, For example
 ```
-docker run  -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -time 60
+docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -time 60
 ```
-* Note that the option **-p 127.0.0.1:8080:8080/tcp** redirects the 8080 port to local port for fetch the performance metric data for Prometheus.  
+* Note that the option **-p 127.0.0.1:9718:9718/tcp** redirects the 9718 port to local port for fetch the performance metric data for Prometheus.  
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
 #### [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/config/kubernetes) 
@@ -442,7 +442,7 @@ usage: sbk -class Pulsar
                         Pulsar, RabbitMQ, RocketMQ, RocksDB]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
-                        8080/metrics; 'no' disables the  metrics
+                        9718/metrics; 'no' disables the  metrics
  -deduplication <arg>   Enable or Disable Deduplication; default: false
  -ensembleSize <arg>    EnsembleSize default: 1
  -help                  Help message

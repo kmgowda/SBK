@@ -23,5 +23,5 @@ ENV APP_NAME=sbk
 COPY --chown=root:root   build/install/${APP_NAME}   /opt/${APP_NAME}
 
 WORKDIR /opt/${APP_NAME}
-
+EXPOSE 9718
 ENTRYPOINT ["/opt/sbk/bin/sbk"]
