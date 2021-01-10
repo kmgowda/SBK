@@ -12,20 +12,15 @@ package io.sbk.api.impl;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.core.instrument.Clock;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.util.IOUtils;
-import io.micrometer.jmx.JmxConfig;
-import io.micrometer.jmx.JmxMeterRegistry;
+import io.sbk.api.Action;
 import io.sbk.api.Benchmark;
-import io.sbk.api.Metric;
+import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
-import io.sbk.api.ResultLogger;
 import io.sbk.api.Config;
 import io.sbk.api.Storage;
 import io.sbk.api.Time;
+import io.sbk.api.TimeUnit;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
@@ -40,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +45,7 @@ public class Sbk {
     final static String BANNERFILE = "banner.txt";
 
     public static void run(final String[] args, final Storage<Object> storage,
-                           final String applicationName, ResultLogger outLogger) throws ParseException, IllegalArgumentException,
+                           final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException {
         List<String> driversList;
         final CommandLine commandline;
@@ -59,16 +53,12 @@ public class Sbk {
         final String driverName;
         final Storage storageDevice;
         final String usageLine;
-        final MeterRegistry metricRegistry;
-        final String action;
+        final Action action;
         final Parameters params;
-        final ResultLogger metricsLogger;
+        final Logger logger;
         final Config config;
         final CompletableFuture<Void> ret;
         final Time time;
-        final String timeUnitName;
-        final double[] percentiles;
-        final Metric metric;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
@@ -88,11 +78,13 @@ public class Sbk {
         commandline = new DefaultParser().parse(new Options()
                         .addOption("class", true, "Benchmark Class"),
                 args, true);
+
         if (outLogger == null) {
-            metric = new MetricImpl(config.port, config.context);
+            logger = new PrometheusLogger();
         } else {
-            metric = null;
+            logger = outLogger;
         }
+
         if (storage == null) {
             driversList =  getClassNames(config.packageName);
             SbkLogger.log.info("Available Drivers : "+ driversList.size());
@@ -107,9 +99,7 @@ public class Sbk {
                     } else {
                         paramsHelp = new SbkParameters(Config.NAME, driversList);
                     }
-                    if (metric !=  null) {
-                        metric.addArgs(paramsHelp);
-                    }
+                    logger.addArgs(paramsHelp);
                     paramsHelp.printHelp();
                     return;
                 }
@@ -144,66 +134,36 @@ public class Sbk {
         }
 
         params = new SbkParameters(usageLine, driversList);
+        logger.addArgs(params);
         storageDevice.addArgs(params);
-        if (metric != null) {
-            metric.addArgs(params);
-        }
+
         params.parseArgs(args);
         if (params.hasOption("help")) {
             return;
         }
-        if (metric != null) {
-            metric.parseArgs(params);
-        }
+
+        logger.parseArgs(params);
         storageDevice.parseArgs(params);
-        TimeUnit timeUnit = storageDevice.getTimeUnit();
+        TimeUnit timeUnit = logger.getTimeUnit();
         SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
-        if (timeUnit == TimeUnit.MILLISECONDS) {
+        if (timeUnit == TimeUnit.ms) {
             time = new MilliSeconds();
-        } else if (timeUnit == TimeUnit.NANOSECONDS) {
+        } else if (timeUnit == TimeUnit.ns) {
             time = new NanoSeconds();
         } else {
-            SbkLogger.log.error("storage driver: " + driverName+ " using invalid TimeUnit , Use either TimeUnit.MILLISECONDS or TimeUnit.NANOSECONDS");
+            SbkLogger.log.error("storage driver: " + driverName+ " using invalid TimeUnit , Use either TimeUnit.ms or TimeUnit.ns");
             throw new IllegalArgumentException();
         }
-        percentiles = storageDevice.getPercentileIndices();
-        for (double p: percentiles) {
-            if (p < 0 || p > 100) {
-                SbkLogger.log.error("storage driver: " + driverName+ " Invalid percentiles indices : "+percentiles.toString());
-                SbkLogger.log.error("Percentile indices should be greater than 0 and less than 100");
-                throw new IllegalArgumentException();
-            }
-        }
-        Arrays.sort(percentiles);
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
-                action = "Write/Reading";
+                action = Action.Write_Reading;
             } else {
-                action = "Reading";
+                action = Action.Reading;
             }
         } else {
-            action = "Writing";
+            action = Action.Writing;
         }
-        timeUnitName = Config.timeUnitToString(timeUnit);
-        //For metrics the driver name should be in Uppercase
-        final String prefix = driverName.toUpperCase() +" "+action;
-        if (metric != null) {
-            metricRegistry = metric.createMetric(params);
-            if (metricRegistry == null) {
-                metricsLogger = new SystemResultLogger(prefix, timeUnitName, percentiles);
-            } else {
-                final CompositeMeterRegistry compositeLogger = Metrics.globalRegistry;
-                compositeLogger.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
-                compositeLogger.add(metricRegistry);
-                metricsLogger = new MetricsLogger(Config.NAME, prefix, timeUnitName, percentiles,
-                        params.getWritersCount(), params.getReadersCount(), compositeLogger);
-            }
-        } else {
-            metricsLogger = outLogger;
-        }
-        final Benchmark benchmark = new SbkBenchmark(config, params,
-                storageDevice, time, storageDevice.getMinLatency(), storageDevice.getMaxWindowLatency(),
-                storageDevice.getMaxLatency(), percentiles, metricsLogger);
+        final Benchmark benchmark = new SbkBenchmark(driverName, action, config, params, storageDevice, logger, time);
         ret = benchmark.start(time.getCurrentTime());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -216,7 +176,7 @@ public class Sbk {
     }
 
     public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
-                           final String applicationName, ResultLogger outLogger) {
+                           final String applicationName, Logger outLogger) {
         return CompletableFuture.runAsync(() -> {
             try {
                  run(args, storage, applicationName, outLogger);

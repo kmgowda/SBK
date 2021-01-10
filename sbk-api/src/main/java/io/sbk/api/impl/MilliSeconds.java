@@ -11,8 +11,7 @@
 package io.sbk.api.impl;
 import io.sbk.api.Config;
 import io.sbk.api.Time;
-
-import java.util.concurrent.TimeUnit;
+import io.sbk.api.TimeUnit;
 
 public class MilliSeconds implements Time {
 
@@ -21,7 +20,7 @@ public class MilliSeconds implements Time {
      * @return time Unit in milliseconds
      */
     public TimeUnit getTimeUnit() {
-        return TimeUnit.MILLISECONDS;
+        return TimeUnit.ms;
     }
 
 

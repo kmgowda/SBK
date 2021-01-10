@@ -11,8 +11,8 @@
 package io.sbk.api.impl;
 import io.sbk.api.Config;
 import io.sbk.api.Time;
+import io.sbk.api.TimeUnit;
 
-import java.util.concurrent.TimeUnit;
 
 public class NanoSeconds implements Time {
 
@@ -21,7 +21,7 @@ public class NanoSeconds implements Time {
      * @return time Unit in nanoseconds.;
      */
     public TimeUnit getTimeUnit() {
-        return TimeUnit.NANOSECONDS;
+        return TimeUnit.ns;
     }
 
 

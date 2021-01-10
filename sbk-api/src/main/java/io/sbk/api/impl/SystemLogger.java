@@ -10,24 +10,53 @@
 
 package io.sbk.api.impl;
 
-import io.sbk.api.ResultLogger;
+import io.sbk.api.Action;
+import io.sbk.api.Config;
+import io.sbk.api.Logger;
+import io.sbk.api.Parameters;
+
+import java.io.IOException;
 import java.text.DecimalFormat;
 
 /**
  * Class for recoding/printing results on System.out.
  */
-public class SystemResultLogger implements ResultLogger {
-    final public String prefix;
-    final public String timeUnit;
-    final public double[] percentiles;
+public class SystemLogger implements Logger {
     final public DecimalFormat format;
+    public String prefix;
+    public String timeUnit;
+    public double[] percentiles;
 
-    public SystemResultLogger(String prefix, String timeUnit, double[] percentiles) {
-        this.prefix = prefix;
-        this.timeUnit = timeUnit;
-        this.percentiles = percentiles;
-        this.format = new DecimalFormat("0.##");
+    public SystemLogger() {
+        this.format = new DecimalFormat(Config.SBK_PERCENTILE_FORMAT);
     }
+
+    @Override
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    }
+
+    @Override
+    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    }
+
+    @Override
+    public void open(final Parameters params, final String storageName, Action action) throws  IOException {
+        this.prefix = storageName+" "+action.name();
+        this.timeUnit = getTimeUnit().name();
+        this.percentiles = getPercentileIndices();
+        for (double p: this.percentiles) {
+            if (p < 0 || p > 100) {
+                SbkLogger.log.error("Invalid percentiles indices : " + percentiles.toString());
+                SbkLogger.log.error("Percentile indices should be greater than 0 and less than 100");
+                throw new IllegalArgumentException();
+            }
+        }
+    }
+
+    @Override
+    public void close(final Parameters params) throws IOException  {
+    }
+
 
     public String buildPercentileString(int[] percentileValues) {
         StringBuilder out = new StringBuilder();

@@ -13,12 +13,17 @@ import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.sbk.api.Config;
+import io.sbk.api.Print;
+
+import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
-public class MetricsLogger extends SystemResultLogger {
+public class MetricsLogger implements Print {
+    final public DecimalFormat format;
     final private Counter bytes;
     final private Counter records;
     final private Counter lowerDiscard;
@@ -30,11 +35,13 @@ public class MetricsLogger extends SystemResultLogger {
     final private AtomicInteger[] percentileGauges;
     final private MeterRegistry registry;
 
-    public MetricsLogger(String header, String prefix, String timeUnit, double[] percentiles, int writers, int readers,
+    public MetricsLogger(String storageName, String action, String timeUnit,
+                         double[] percentiles, int writers, int readers,
                          CompositeMeterRegistry compositeRegistry) {
-        super(prefix, timeUnit, percentiles);
-        final String metricPrefix = header.replace(" ", "_").toUpperCase() +
-                "_" + prefix.replace(" ", "_");
+        this.format = new DecimalFormat(Config.SBK_PERCENTILE_FORMAT);
+        final String metricPrefix = Config.NAME.replace(" ", "_").toUpperCase()
+                + "_" + storageName.replace(" ", "_").toUpperCase()
+                + "_" + action.replace(" ", "_");
         final String metricUnit = timeUnit.replace(" ", "_");
         final String bytesName = metricPrefix + "_Bytes";
         final String recordsName = metricPrefix + "_Records";
@@ -57,19 +64,21 @@ public class MetricsLogger extends SystemResultLogger {
         this.recsPsec = this.registry.gauge(recsPsecName, new AtomicDouble());
         this.avgLatency = this.registry.gauge(avgLatencyName, new AtomicDouble());
         this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicInteger());
-        this.percentileGauges = new AtomicInteger[this.percentiles.length];
-        for (int i = 0; i < this.percentiles.length; i++) {
+        this.percentileGauges = new AtomicInteger[percentiles.length];
+        for (int i = 0; i < percentiles.length; i++) {
             this.percentileGauges[i] = this.registry.gauge(metricPrefix + "_" + metricUnit + "_" + format.format(percentiles[i]),
                     new AtomicInteger());
 
         }
     }
 
+    public void close() {
+        registry.close();
+    }
+
     @Override
     public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-               long lowerDiscard, long higherDiscard, int[] percentileValues) {
-        super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                lowerDiscard, higherDiscard, percentileValues);
+                      long lowerDiscard, long higherDiscard, int[] percentileValues) {
         this.bytes.increment(bytes);
         this.records.increment(records);
         this.lowerDiscard.increment(lowerDiscard);
@@ -79,7 +88,9 @@ public class MetricsLogger extends SystemResultLogger {
         this.avgLatency.set(avgLatency);
         this.maxLatency.set(maxLatency);
         for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
-                    this.percentileGauges[i].set(percentileValues[i]);
+            this.percentileGauges[i].set(percentileValues[i]);
         }
     }
+
+
 }
