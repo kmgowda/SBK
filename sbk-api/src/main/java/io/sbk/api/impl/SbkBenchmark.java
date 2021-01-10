@@ -9,13 +9,14 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.Action;
 import io.sbk.api.CallbackReader;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
+import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
 import io.sbk.api.Reader;
-import io.sbk.api.ResultLogger;
 import io.sbk.api.Config;
 import io.sbk.api.Storage;
 import io.sbk.api.Time;
@@ -44,8 +45,11 @@ import java.util.stream.Stream;
  * Class for performing the benchmark.
  */
 public class SbkBenchmark implements Benchmark {
+    final private String storageName;
+    final private Action action;
     final private Storage<Object> storage;
     final private Time time;
+    final private Logger logger;
     final private ExecutorService executor;
     final private Parameters params;
     final private Performance writeStats;
@@ -63,22 +67,21 @@ public class SbkBenchmark implements Benchmark {
     /**
      * Create SBK Benchmark.
      *
+     * @param  storageName          Storage Name
+     * @param  action               Action
      * @param  config               Configuration parameters
      * @param  params               Benchmarking input Parameters
      * @param  storage              Storage device/client/driver for benchmarking
+     * @param  logger               output logger
      * @param  time                 time interface
-     * @param  minLatency           minimum Latency
-     * @param  maxWindowLatency     maximum output window Latency
-     * @param  maxLatency           maximum Latency
-     * @param  percentiles          percentile indices
-     * @param  logger               Result Logger
      */
-    public SbkBenchmark(Config config, Parameters params,
-                        Storage<Object> storage, Time time,
-                        int minLatency, int maxWindowLatency, int maxLatency, double[] percentiles,
-                        ResultLogger logger) {
+    public SbkBenchmark(String storageName, Action action, Config config,
+                        Parameters params, Storage<Object> storage, Logger logger, Time time) {
+        this.storageName = storageName;
+        this.action = action;
         this.params = params;
         this.storage = storage;
+        this.logger = logger;
         this.time = time;
         if (config.maxQs > 0) {
             this.maxQs = config.maxQs;
@@ -94,18 +97,14 @@ public class SbkBenchmark implements Benchmark {
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(config, params.getWritersCount(),
-                    time, minLatency, maxWindowLatency,
-                    maxLatency, percentiles,
-                    logger, executor,  params.getCsvFile());
+                     this.logger, this.time, executor,  params.getCsvFile());
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
             readStats = new SbkPerformance(config, params.getReadersCount(),
-                    time, minLatency, maxWindowLatency,
-                    maxLatency, percentiles,
-                    logger, executor, params.getCsvFile());
+                     this.logger, this.time, executor, params.getCsvFile());
         } else {
             readStats = null;
         }
@@ -131,6 +130,7 @@ public class SbkBenchmark implements Benchmark {
         if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
+        logger.open(params, storageName, action);
         storage.openStorage(params);
         final DataType<Object> dType = storage.getDataType();
         final AtomicInteger readersErrCnt = new AtomicInteger(0);
@@ -334,6 +334,7 @@ public class SbkBenchmark implements Benchmark {
         }
         try {
             storage.closeStorage(params);
+            logger.close(params);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

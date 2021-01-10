@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Class for recoding/printing results on Sl4j.
  */
-public class Sl4jResultLogger extends SystemResultLogger {
+public class Sl4jResultLogger extends SystemLogger {
     final private Logger log;
 
-    public Sl4jResultLogger(String prefix,  String timeUnit, double[] percentiles) {
-        super(prefix, timeUnit, percentiles);
+    public Sl4jResultLogger() {
+        super();
         log = LoggerFactory.getLogger("SBK");
     }
 

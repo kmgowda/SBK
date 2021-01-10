@@ -17,14 +17,12 @@ public class Config {
     final public static String DESC = "Storage Benchmark Kit";
     final public static String SBK_APP_NAME = "sbk.applicationName";
     final public static String SBK_CLASS_NAME = "sbk.className";
-    final public static String SBK_MS_NAME = "ms";
-    final public static String SBK_NS_NAME = "ns";
-    final public static String SBK_MCS_NAME = "mcs";
+    final public static String SBK_PERCENTILE_FORMAT = "0.##";
 
     final public static int NS_PER_MICRO = 1000;
     final public static int MICROS_PER_MS = 1000;
     final public static int MS_PER_SEC = 1000;
-    final public static int MIN_REPORTING_INTERVAL_MS = 5000;
+    final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5000;
     final public static int MIN_Q_PER_WORKER = 1;
     final public static int DEFAULT_MIN_LATENCY = 0;
     final public static int MS_PER_MIN = MS_PER_SEC * 60;
@@ -37,22 +35,9 @@ public class Config {
     final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
     public String packageName;
-    public int port;
-    public String context;
     public boolean fork;
     public TimeUnit timeUnit;
-    public int reportingMS;
     public int qPerWorker;
     public int idleNS;
     public int maxQs;
-
-    public static String timeUnitToString(TimeUnit timeUnit) {
-        if (timeUnit == TimeUnit.NANOSECONDS) {
-            return SBK_NS_NAME;
-        } else if (timeUnit == TimeUnit.MICROSECONDS) {
-            return SBK_MCS_NAME;
-        }
-        return SBK_MS_NAME;
-    }
-
 }
