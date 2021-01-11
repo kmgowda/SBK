@@ -29,9 +29,9 @@ public class SbkReader extends Worker implements RunBenchmark {
     final private Time time;
     final private RunBenchmark perf;
 
-    public SbkReader(int readerId, int idMax, long startTime, Parameters params, SendChannel sendChannel,
+    public SbkReader(int readerId, int idMax, Parameters params, SendChannel sendChannel,
                      DataType<Object> dType, Time time, Reader<Object> reader) {
-        super(readerId, idMax, startTime, params, sendChannel);
+        super(readerId, idMax, params, sendChannel);
         this.dType = dType;
         this.reader = reader;
         this.time = time;

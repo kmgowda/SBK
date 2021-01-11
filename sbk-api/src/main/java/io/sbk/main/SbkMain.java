@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Main class of SBK.
@@ -25,7 +26,7 @@ public class SbkMain {
         try {
             Sbk.run(args, null, null, null);
         } catch (ParseException | IllegalArgumentException | IOException |
-                InterruptedException | ExecutionException ex) {
+                TimeoutException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
             System.exit(1);
         }

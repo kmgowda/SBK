@@ -32,9 +32,9 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private Object payload;
     final private int dataSize;
 
-    public SbkWriter(int writerID, int idMax, long startTime, Parameters params, SendChannel sendChannel,
+    public SbkWriter(int writerID, int idMax, Parameters params, SendChannel sendChannel,
                      DataType<Object> dType, Time time, Writer<Object> writer) {
-        super(writerID, idMax, startTime, params, sendChannel);
+        super(writerID, idMax, params, sendChannel);
         this.dType = dType;
         this.writer = writer;
         this.time = time;
