@@ -120,13 +120,12 @@ public class SbkBenchmark implements Benchmark {
      * or exits if the input the number of records are written/read.
      * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
      *
-     * @param beginTime StartTime
      * @throws IOException If an exception occurred.
      * @throws IllegalStateException If an exception occurred.
      */
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long beginTime) throws IOException, IllegalStateException {
+    public CompletableFuture<Void> start() throws IOException, IllegalStateException {
         if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
@@ -168,13 +167,13 @@ public class SbkBenchmark implements Benchmark {
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, beginTime, params, writeStats.get(),
+                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.get(),
                                 dType, time, writers.get(i)))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, beginTime, params, null,
+                        .map(i -> new SbkWriter(i, maxQs,  params, null,
                                 dType, time, writers.get(i)))
                         .collect(Collectors.toList());
             }
@@ -185,14 +184,14 @@ public class SbkBenchmark implements Benchmark {
         if (readers != null && readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i, maxQs, beginTime, params,
+                    .map(i -> new SbkReader(i, maxQs, params,
                             readStats.get(), dType, time, readers.get(i)))
                     .collect(Collectors.toList());
             sbkCallbackReaders = null;
         } else if (callbackReaders != null && callbackReaders.size() > 0) {
             sbkCallbackReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkCallbackReader(i, maxQs, beginTime, params,
+                    .map(i -> new SbkCallbackReader(i, maxQs, params,
                             readStats.get(), dType, time))
                     .collect(Collectors.toList());
             sbkReaders = null;
@@ -201,14 +200,13 @@ public class SbkBenchmark implements Benchmark {
             sbkCallbackReaders = null;
         }
 
-        final long startTime = time.getCurrentTime();
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
-            wStatFuture = writeStats.start(startTime, params.getSecondsToRun(), params.getRecordsPerWriter() * params.getWritersCount());
+            wStatFuture = writeStats.start(params.getSecondsToRun(), params.getRecordsPerWriter() * params.getWritersCount());
         } else {
             wStatFuture = null;
         }
         if (readStats != null && (sbkReaders != null || sbkCallbackReaders != null)) {
-            rStatFuture = readStats.start(startTime, params.getSecondsToRun(), params.getRecordsPerReader() * params.getReadersCount());
+            rStatFuture = readStats.start(params.getSecondsToRun(), params.getRecordsPerReader() * params.getReadersCount());
         } else {
             rStatFuture = null;
         }
@@ -244,7 +242,7 @@ public class SbkBenchmark implements Benchmark {
             readFuturesCnt = readFutures.size();
         } else if (sbkCallbackReaders != null) {
             readFutures = sbkCallbackReaders.stream()
-                    .map(x -> x.start(startTime)).collect(Collectors.toList());
+                    .map(SbkCallbackReader::start).collect(Collectors.toList());
             for (int i = 0; i < params.getReadersCount(); i++) {
                 callbackReaders.get(i).start(sbkCallbackReaders.get(i));
             }
@@ -266,8 +264,7 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (params.getSecondsToRun() > 0) {
-            timeoutExecutor.schedule(() -> stop(time.getCurrentTime()),
-                    params.getSecondsToRun() + 1, TimeUnit.SECONDS);
+            timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
         retFuture = chainFuture.thenRunAsync(() -> {
             try {
@@ -280,7 +277,7 @@ public class SbkBenchmark implements Benchmark {
             } catch (InterruptedException | ExecutionException ex) {
                 ex.printStackTrace();
             }
-            stop(time.getCurrentTime());
+            stop();
         }, executor);
         return retFuture;
     }
@@ -291,19 +288,18 @@ public class SbkBenchmark implements Benchmark {
      * closes all writers/readers.
      * closes the storage device/client.
      *
-     * @param  endTime End Time.
      */
     @Override
     @Synchronized
-    public void stop(long endTime) {
+    public void stop() {
         if (retFuture == null) {
             return;
         }
         if (writeStats != null && !params.isWriteAndRead()) {
-            writeStats.stop(endTime);
+            writeStats.stop();
         }
         if (readStats != null) {
-            readStats.stop(endTime);
+            readStats.stop();
         }
         if (readers != null) {
             readers.forEach(c -> {

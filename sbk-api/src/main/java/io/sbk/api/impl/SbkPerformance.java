@@ -96,13 +96,11 @@ final public class SbkPerformance implements Performance {
      * Private class for start and end time.
      */
     final private class QueueProcessor implements Runnable {
-        final private long startTime;
         final private long msToRun;
         final private long totalRecords;
         final private double[] percentiles;
 
-        private QueueProcessor(long startTime, int secondsToRun, int records, double[] percentiles) {
-            this.startTime = startTime;
+        private QueueProcessor(int secondsToRun, int records, double[] percentiles) {
             this.msToRun = secondsToRun * Config.MS_PER_SEC;
             this.totalRecords = records;
             this.percentiles = percentiles;
@@ -111,6 +109,7 @@ final public class SbkPerformance implements Performance {
         public void run() {
             final TimeWindow window;
             final LatencyWindow latencyWindow;
+            final long startTime = time.getCurrentTime();
             boolean doWork = true;
             long ctime = startTime;
             long recordsCnt = 0;
@@ -513,9 +512,9 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long startTime, int secondsToRun, int records) {
+    public CompletableFuture<Void> start(int secondsToRun, int records) {
         if (this.retFuture == null) {
-            this.retFuture = CompletableFuture.runAsync(new QueueProcessor(startTime, secondsToRun,
+            this.retFuture = CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
                     records, percentiles),
                     executor);
         }
@@ -524,7 +523,8 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public void stop(long endTime)  {
+    public void stop()  {
+        long endTime = time.getCurrentTime();
         if (this.retFuture != null) {
             if (!this.retFuture.isDone()) {
                 for (Channel ch : channels) {

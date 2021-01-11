@@ -18,17 +18,15 @@ public interface Benchmark {
     /**
      * Start the Benchmark.
      *
-     * @param startTime start time.
      * @return CompletableFuture.
      * @throws IllegalStateException If an exception occurred.
      * @throws IOException If an exception occurred.
      */
-    CompletableFuture<Void> start(long startTime) throws IOException, IllegalStateException;
+    CompletableFuture<Void> start() throws IOException, IllegalStateException;
 
     /**
      * stop/shutdown the Benchmark.
      *
-     * @param endTime End time
      */
-    void stop(long endTime);
+    void stop();
 }

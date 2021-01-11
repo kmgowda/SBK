@@ -32,9 +32,9 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private int totalRecords;
     private long beginTime;
 
-    public SbkCallbackReader(int readerId, int idMax, long startTime, Parameters params, SendChannel sendChannel,
+    public SbkCallbackReader(int readerId, int idMax, Parameters params, SendChannel sendChannel,
                              DataType dataType, Time time) {
-        super(readerId, idMax, startTime, params, sendChannel);
+        super(readerId, idMax,  params, sendChannel);
         this.dataType = dataType;
         this.time = time;
         this.ret = new CompletableFuture<>();
@@ -51,13 +51,13 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     }
 
     @Override
-    public CompletableFuture<Void> start(long statTime) {
-        this.beginTime = statTime;
+    public CompletableFuture<Void> start() {
+        this.beginTime = time.getCurrentTime();
         return ret;
     }
 
     @Override
-    public void stop(long endTime) {
+    public void stop() {
         ret.complete(null);
     }
 

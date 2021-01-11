@@ -144,10 +144,11 @@ public interface Reader<T> {
      * @throws IOException If an exception occurred.
      */
     default void RecordsTimeReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
+        final long startTime = time.getCurrentTime();
         final Status status = new Status();
         final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
-        while (time.elapsedMilliSeconds(status.endTime, reader.startTime) < msToRun) {
+        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordRead(dType, time, status, reader.sendChannel, id++);
             if (id >= reader.recordIDMax) {
                 id = 0;
@@ -166,10 +167,11 @@ public interface Reader<T> {
      * @throws IOException If an exception occurred.
      */
     default void RecordsTimeReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
+        final long startTime = time.getCurrentTime();
         final Status status = new Status();
         final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
-        while (time.elapsedMilliSeconds(status.endTime, reader.startTime) < msToRun) {
+        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordReadTime(dType, time, status, reader.sendChannel, id++);
             if (id >= reader.recordIDMax) {
                 id = 0;

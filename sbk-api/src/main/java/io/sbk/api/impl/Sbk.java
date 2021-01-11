@@ -33,8 +33,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +46,64 @@ public class Sbk {
 
     public static void run(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
-             IOException, InterruptedException, ExecutionException {
+             IOException, InterruptedException, ExecutionException, TimeoutException {
+        runAsync(args, storage, applicationName, outLogger).get();
+    }
+
+    public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
+                           final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
+            IOException {
+        CompletableFuture<Void> ret;
+        try {
+            ret = new SbkCompletableFutureAsync(args, storage, applicationName, outLogger);
+        } catch (InstantiationException ex) {
+                ret = new CompletableFuture<>();
+                ret.complete(null);
+                return ret;
+        }
+        return ret;
+    }
+
+    private static class SbkCompletableFutureAsync extends CompletableFuture<Void> {
+        private final Benchmark benchmark;
+        private final CompletableFuture<Void> ret;
+
+        public SbkCompletableFutureAsync(final String[] args, final Storage<Object> storage,
+                                    final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
+                IOException, InstantiationException {
+            super();
+            benchmark = createBenchmark(args, storage, applicationName, outLogger);
+            ret = benchmark.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println();
+                benchmark.stop();
+            }));
+        }
+
+        @Override
+        public Void get() throws InterruptedException,
+                ExecutionException {
+            return ret.get();
+        }
+
+
+        @Override
+        public Void get(long timeout, java.util.concurrent.TimeUnit  unit) throws InterruptedException,
+                ExecutionException, TimeoutException {
+            return ret.get(timeout, unit);
+        }
+
+        @Override
+        public boolean complete(Void val) {
+            benchmark.stop();
+            return super.complete(val);
+        }
+    }
+
+
+    private static Benchmark createBenchmark(final String[] args, final Storage<Object> storage,
+                           final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
+            IOException, InstantiationException  {
         List<String> driversList;
         final CommandLine commandline;
         final String className;
@@ -57,7 +114,6 @@ public class Sbk {
         final Parameters params;
         final Logger logger;
         final Config config;
-        final CompletableFuture<Void> ret;
         final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
@@ -101,15 +157,16 @@ public class Sbk {
                     }
                     logger.addArgs(paramsHelp);
                     paramsHelp.printHelp();
-                    return;
+                    throw new InstantiationException("SBK Benchmark class driver not found!");
                 }
             } else {
                 className = name;
             }
             driverName = searchDriver(driversList, className);
             if (driverName == null) {
-                SbkLogger.log.error("storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers");
-                return;
+                String errMsg = "storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers";
+                SbkLogger.log.error(errMsg);
+                throw new InstantiationException(errMsg);
             }
             try {
                 storageDevice = (Storage<?>) Class.forName(config.packageName + "." + driverName + "." + driverName).getConstructor().newInstance();
@@ -139,7 +196,7 @@ public class Sbk {
 
         params.parseArgs(args);
         if (params.hasOption("help")) {
-            return;
+            throw new InstantiationException("print only help!");
         }
 
         logger.parseArgs(params);
@@ -163,28 +220,7 @@ public class Sbk {
         } else {
             action = Action.Writing;
         }
-        final Benchmark benchmark = new SbkBenchmark(driverName, action, config, params, storageDevice, logger, time);
-        ret = benchmark.start(time.getCurrentTime());
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println();
-            benchmark.stop(time.getCurrentTime());
-        }));
-
-        ret.get();
-        benchmark.stop(time.getCurrentTime());
-    }
-
-    public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
-                           final String applicationName, Logger outLogger) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                 run(args, storage, applicationName, outLogger);
-            } catch (ParseException | IllegalArgumentException | IOException |
-                    InterruptedException | ExecutionException ex) {
-                throw new CompletionException(ex);
-            }
-        });
+        return new SbkBenchmark(driverName, action, config, params, storageDevice, logger, time);
     }
 
     private static List<String> getClassNames(String pkgName) {
