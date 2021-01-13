@@ -47,7 +47,15 @@ public class Sbk {
     public static void run(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException, TimeoutException {
-        runAsync(args, storage, applicationName, outLogger).get();
+
+        final CompletableFuture<Void> ret = runAsync(args, storage, applicationName, outLogger);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println();
+            ret.complete(null);
+        }));
+
+        ret.get();
     }
 
     public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
@@ -74,10 +82,6 @@ public class Sbk {
             super();
             benchmark = createBenchmark(args, storage, applicationName, outLogger);
             ret = benchmark.start();
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                System.out.println();
-                benchmark.stop();
-            }));
         }
 
         @Override
