@@ -31,7 +31,7 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
     private final ClientCache<Long, byte[]> cache;
     private final IgniteClient client;
     private long key;
-    private int cnt;
+    private long cnt;
 
     public IgniteClientTransactionReader(int id, Parameters params, ClientCache<Long, byte[]> cache,
                                          IgniteClient client) throws IOException {
@@ -61,7 +61,7 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -94,7 +94,7 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }

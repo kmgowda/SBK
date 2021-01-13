@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.Config;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import lombok.Getter;
@@ -34,25 +35,25 @@ final public class SbkParameters implements Parameters {
     final private List<String> driversList;
 
     @Getter
-    final private int timeout;
-    @Getter
-    private int recordsCount;
+    final private int timeoutMS;
     @Getter
     private int recordSize;
-    @Getter
-    private int recordsPerSec;
-    @Getter
-    private int recordsPerWriter;
-    @Getter
-    private int recordsPerReader;
-    @Getter
-    private int recordsPerSync;
-    @Getter
-    private int secondsToRun;
     @Getter
     private int writersCount;
     @Getter
     private int readersCount;
+    @Getter
+    private int recordsPerSec;
+    @Getter
+    private int recordsPerSync;
+    @Getter
+    private long recordsCount;
+    @Getter
+    private long secondsToRun;
+    @Getter
+    private long recordsPerWriter;
+    @Getter
+    private long recordsPerReader;
     @Getter
     private String csvFile;
     @Getter
@@ -66,7 +67,7 @@ final public class SbkParameters implements Parameters {
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
-        this.timeout = TIMEOUT;
+        this.timeoutMS = Config.DEFAULT_TIMEOUT_MS;
         this.driversList = driversList;
         this.commandline = null;
 
@@ -76,6 +77,7 @@ final public class SbkParameters implements Parameters {
         }
         options.addOption("writers", true, "Number of writers");
         options.addOption("readers", true, "Number of readers");
+        options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("records", true,
                 "Number of records(events) if 'time' not specified;\n" +
                         "otherwise, Maximum records per second by writer(s) " +
@@ -83,8 +85,7 @@ final public class SbkParameters implements Parameters {
         options.addOption("sync", true,
                 "Each Writer calls flush/sync after writing <arg> number of of events(records)" +
                         " ; <arg> number of events(records) per Write or Read Transaction");
-        options.addOption("time", true, "Number of seconds this SBK runs (24hrs by default)");
-        options.addOption("size", true, "Size of each message (event or record)");
+        options.addOption("time", true, "Number of seconds to run; if not specified, runs forever");
         options.addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes 'records'\n" +
@@ -148,7 +149,7 @@ final public class SbkParameters implements Parameters {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");
         }
 
-        recordsCount = Integer.parseInt(commandline.getOptionValue("records", "0"));
+        recordsCount = Long.parseLong(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
         csvFile = commandline.getOptionValue("csv", null);
         int syncRecords = Integer.parseInt(commandline.getOptionValue("sync", "0"));
@@ -159,11 +160,11 @@ final public class SbkParameters implements Parameters {
         }
 
         if (commandline.hasOption("time")) {
-            secondsToRun = Integer.parseInt(commandline.getOptionValue("time"));
+            secondsToRun = Long.parseLong(commandline.getOptionValue("time"));
         } else if (recordsCount > 0) {
             secondsToRun = 0;
         } else {
-            secondsToRun = MAXTIME;
+            secondsToRun = Config.DEFAULT_RUNTIME_SECONDS;
         }
 
         if (commandline.hasOption("throughput")) {
@@ -186,7 +187,11 @@ final public class SbkParameters implements Parameters {
             writeAndRead = readersCount > 0;
             recordsPerWriter = recordsCount / writersCount;
             if (throughput < 0 && secondsToRun > 0) {
-                recordsPerSec = recordsCount / writersCount;
+                long recsPerSec = recordsCount / writersCount;
+                if (recsPerSec > Integer.MAX_VALUE) {
+                    throw new IllegalArgumentException("Error: The Records per Second value :" +recsPerSec +"is more than "+Integer.MAX_VALUE);
+                }
+                recordsPerSec = (int) recsPerSec;
             } else if (throughput > 0) {
                 recordsPerSec = (int) (((throughput * 1024 * 1024) / recordSize) / writersCount);
             } else {

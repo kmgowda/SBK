@@ -31,7 +31,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
     final private  MongoCollection<Document> databaseCollection;
     final private Parameters params;
     private long key;
-    private int cnt;
+    private long cnt;
     private MongoCursor<Document> cursor;
 
     public MongoDBMultiReader(int id, Parameters params, MongoDBConfig config,  MongoCollection<Document> databaseCollection) throws IOException {
@@ -64,7 +64,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         final int recs;
         byte[] result;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -102,7 +102,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         final int recs;
         byte[] result;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }

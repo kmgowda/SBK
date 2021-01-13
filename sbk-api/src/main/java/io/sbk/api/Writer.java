@@ -110,7 +110,7 @@ public interface Writer<T>  {
     default void RecordsWriter(Worker writer, DataType<T> dType, T data, int size, Time time) throws IOException {
         final Status status = new Status();
         int id = writer.id % writer.recordIDMax;
-        int i = 0;
+        long i = 0;
         while (i < writer.params.getRecordsCount()) {
             recordWrite(dType, data, size, time, status, writer.sendChannel, id);
             id += 1;
@@ -136,14 +136,14 @@ public interface Writer<T>  {
      */
     default void RecordsWriterSync(Worker writer, DataType<T> dType, T data, int size, Time time, RateController rController) throws IOException {
         final Status status = new Status();
-        final int recordsCount = writer.params.getRecordsPerWriter();
+        final long recordsCount = writer.params.getRecordsPerWriter();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
-        int cnt = 0;
+        long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
         while (cnt < recordsCount) {
-            int loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
-            int i = 0;
+            long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
+            long i = 0;
             while (i < loopMax) {
                 recordWrite(dType, data, size, time, status, writer.sendChannel, id);
                 id += 1;
@@ -170,17 +170,19 @@ public interface Writer<T>  {
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterTime(Worker writer, DataType<T> dType, T data, int size, Time time) throws IOException {
-        long startTime = time.getCurrentTime();
         final Status status = new Status();
         final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
+        long startTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         status.startTime = startTime;
-        while ((status.startTime - startTime) < msToRun) {
+        double msElapsed = 0;
+        while (msElapsed < msToRun) {
             recordWrite(dType, data, size, time, status, writer.sendChannel, id);
             id += 1;
             if (id >= writer.recordIDMax) {
                 id = 0;
             }
+            msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
         }
         sync();
     }
@@ -199,18 +201,17 @@ public interface Writer<T>  {
      */
     default void RecordsWriterTimeSync(Worker writer, DataType<T> dType, T data, int size,
                                        Time time, RateController rController) throws IOException {
-        long startTime = time.getCurrentTime();
         final Status status = new Status();
-        final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
+        final long secondsToRun = writer.params.getSecondsToRun();
+        final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         int cnt = 0;
-        status.startTime = startTime;
-        final long loopStartTime = status.startTime;
-        double msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
+        double secondsElapsed = 0;
+        status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (msElapsed < msToRun) {
+        while (secondsElapsed < secondsToRun) {
             int i = 0;
-            while ((msElapsed < msToRun) && (i < writer.params.getRecordsPerSync())) {
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
                 recordWrite(dType, data, size, time, status, writer.sendChannel, id);
                 id += 1;
                 if (id >= writer.recordIDMax) {
@@ -218,8 +219,8 @@ public interface Writer<T>  {
                 }
                 i += status.records;
                 cnt += status.records;
-                rController.control(cnt,  time.elapsedSeconds(status.startTime, loopStartTime));
-                msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
+                secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
+                rController.control(cnt,  secondsElapsed);
             }
             sync();
         }
@@ -240,14 +241,14 @@ public interface Writer<T>  {
      */
     default void RecordsWriterRW(Worker writer, DataType<T> dType, T data, int size, Time time, RateController rController) throws IOException {
         final Status status = new Status();
-        final int recordsCount = writer.params.getRecordsPerWriter();
+        final long recordsCount = writer.params.getRecordsPerWriter();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
-        int cnt = 0;
+        long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
         while (cnt < recordsCount) {
-            int loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
-            int i = 0;
+            long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
+            long i = 0;
             while (i < loopMax) {
                 writeAsyncTime(dType, data, size, time, status);
                 id += 1;
@@ -277,18 +278,17 @@ public interface Writer<T>  {
      */
     default void RecordsWriterTimeRW(Worker writer, DataType<T> dType, T data, int size,
                                      Time time, RateController rController) throws IOException {
-        long startTime = time.getCurrentTime();
         final Status status = new Status();
-        final long msToRun = writer.params.getSecondsToRun() * Config.MS_PER_SEC;
+        final long secondsToRun = writer.params.getSecondsToRun();
+        final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
-        int cnt = 0;
-        status.startTime = startTime;
-        final long loopStartTime = status.startTime;
-        double msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
+        long cnt = 0;
+        double secondsElapsed = 0;
+        status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (msElapsed < msToRun) {
-            int i = 0;
-            while ((msElapsed < msToRun) && (i < writer.params.getRecordsPerSync())) {
+        while (secondsElapsed < secondsToRun) {
+            long i = 0;
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
                 writeAsyncTime(dType, data, size, time, status);
                 id += 1;
                 if (id >= writer.recordIDMax) {
@@ -296,8 +296,8 @@ public interface Writer<T>  {
                 }
                 i += status.records;
                 cnt += status.records;
-                rController.control(cnt,  time.elapsedMilliSeconds(status.startTime, loopStartTime));
-                msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
+                secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
+                rController.control(cnt,  secondsElapsed);
             }
             sync();
         }

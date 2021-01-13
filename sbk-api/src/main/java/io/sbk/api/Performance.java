@@ -26,7 +26,7 @@ public interface Performance {
       * @throws IllegalStateException If an exception occurred.
       * @throws IOException If an exception occurred.
       */
-     CompletableFuture<Void> start(int secondsToRun, int records) throws IOException, IllegalStateException;
+     CompletableFuture<Void> start(long secondsToRun, long records) throws IOException, IllegalStateException;
 
      /**
       * stop/shutdown the Benchmark.

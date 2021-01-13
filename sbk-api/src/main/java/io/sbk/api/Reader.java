@@ -101,7 +101,8 @@ public interface Reader<T> {
      */
     default void RecordsReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
         final Status status = new Status();
-        int i = 0, id = reader.id % reader.recordIDMax;
+        int  id = reader.id % reader.recordIDMax;
+        long i = 0;
         while (i < reader.params.getRecordsPerReader()) {
             recordRead(dType, time, status, reader.sendChannel, id++);
             i += status.records;
@@ -123,7 +124,8 @@ public interface Reader<T> {
      */
     default void RecordsReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
         final Status status = new Status();
-        int i = 0, id = reader.id % reader.recordIDMax;
+        int id = reader.id % reader.recordIDMax;
+        long i = 0;
         while (i < reader.params.getRecordsPerReader()) {
             recordReadTime(dType, time, status, reader.sendChannel, id++);
             i += status.records;

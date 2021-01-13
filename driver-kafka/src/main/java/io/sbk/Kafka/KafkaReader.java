@@ -35,7 +35,7 @@ public class KafkaReader implements Reader<byte[]> {
     public KafkaReader(int id, Parameters params, String topicName, Properties consumerProps) throws IOException {
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
-        this.timeoutDuration = Duration.ofMillis(params.getTimeout());
+        this.timeoutDuration = Duration.ofMillis(params.getTimeoutMS());
     }
 
     @Override

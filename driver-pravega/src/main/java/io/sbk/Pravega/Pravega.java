@@ -93,7 +93,7 @@ public class Pravega implements Storage<byte[]> {
                     bgExecutor);
 
             streamHandle = new PravegaStreamHandler(config.scopeName, config.streamName, rdGrpName,
-                    config.controllerUri, config.segmentCount, params.getTimeout(), controller,
+                    config.controllerUri, config.segmentCount, params.getTimeoutMS(), controller,
                     bgExecutor);
 
             if (params.getWritersCount() > 0 && !streamHandle.create()) {

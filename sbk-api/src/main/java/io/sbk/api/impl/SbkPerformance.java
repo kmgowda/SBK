@@ -100,7 +100,7 @@ final public class SbkPerformance implements Performance {
         final private long totalRecords;
         final private double[] percentiles;
 
-        private QueueProcessor(int secondsToRun, int records, double[] percentiles) {
+        private QueueProcessor(long secondsToRun, long records, double[] percentiles) {
             this.msToRun = secondsToRun * Config.MS_PER_SEC;
             this.totalRecords = records;
             this.percentiles = percentiles;
@@ -512,7 +512,7 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(int secondsToRun, int records) {
+    public CompletableFuture<Void> start(long secondsToRun, long records) {
         if (this.retFuture == null) {
             this.retFuture = CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
                     records, percentiles),

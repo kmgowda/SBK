@@ -16,8 +16,6 @@ import org.apache.commons.cli.ParseException;
  * class for Command Line Parameters.
  */
 public interface Parameters {
-    int MAXTIME = 60 * 60 * 24;
-    int TIMEOUT = 1000;
 
     /**
      * Add the driver specific command line arguments.
@@ -62,7 +60,7 @@ public interface Parameters {
      * Get the execution time in seconds.
      * @return   seconds to run
      */
-    int getSecondsToRun();
+    long getSecondsToRun();
 
     /**
      * Check if the both read and writes are requested.
@@ -74,7 +72,7 @@ public interface Parameters {
      * Get the Total Number of records to read/writer.
      * @return   number of records.
      */
-    int getRecordsCount();
+    long getRecordsCount();
 
     /**
      * Size of the record/event to read or write.
@@ -110,13 +108,13 @@ public interface Parameters {
      * Get the Number of records per Reader.
      * @return   number of records.
      */
-    int getRecordsPerReader();
+    long getRecordsPerReader();
 
     /**
      * Get the Number of records per Writer.
      * @return   number of records.
      */
-    int getRecordsPerWriter();
+    long getRecordsPerWriter();
 
     /**
      * CSV file to store the write and read benchmarking data.
@@ -128,7 +126,7 @@ public interface Parameters {
      * Time out for data to read.
      * @return  time-out in milliseconds.
      */
-    int getTimeout();
+    int getTimeoutMS();
 
     /**
      * Print the -help output.
