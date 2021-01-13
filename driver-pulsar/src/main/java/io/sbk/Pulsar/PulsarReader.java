@@ -52,7 +52,7 @@ public class PulsarReader implements Reader<byte[]> {
     @Override
     public byte[] read() throws IOException {
         try {
-            return consumer.receive(params.getTimeout(), TimeUnit.SECONDS).getData();
+            return consumer.receive(params.getTimeoutMS(), TimeUnit.SECONDS).getData();
         } catch (PulsarClientException ex) {
             throw new IOException(ex);
         }

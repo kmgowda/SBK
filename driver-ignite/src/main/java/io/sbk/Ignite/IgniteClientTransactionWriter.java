@@ -31,7 +31,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
     private final ClientCache<Long, byte[]> cache;
     private final IgniteClient client;
     private long key;
-    private int cnt;
+    private long cnt;
 
     public IgniteClientTransactionWriter(int id, Parameters params, ClientCache<Long, byte[]> cache,
                                          IgniteClient client) throws IOException {
@@ -60,7 +60,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
     public void writeAsyncTime(DataType<byte[]> dType, byte[] data, int size, Time time, Status status) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
-            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
         }
@@ -83,7 +83,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
                             Status status, SendChannel sendChannel, int id) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
-            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
         }

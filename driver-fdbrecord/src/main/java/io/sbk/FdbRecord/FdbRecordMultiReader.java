@@ -35,7 +35,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     final private FDBDatabase db;
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
-    private int cnt;
+    private long cnt;
 
     public FdbRecordMultiReader(int id, Parameters params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
@@ -73,7 +73,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -112,7 +112,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }

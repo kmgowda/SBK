@@ -55,7 +55,7 @@ public class RabbitMQReader extends DefaultConsumer implements Reader<byte[]> {
     @Override
     public byte[] read() throws IOException {
         try {
-            return queue.poll(params.getTimeout(), TimeUnit.MILLISECONDS);
+            return queue.poll(params.getTimeoutMS(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
             throw new IOException(ex);

@@ -23,6 +23,9 @@ public class Config {
     final public static int MICROS_PER_MS = 1000;
     final public static int MS_PER_SEC = 1000;
     final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5000;
+    final public static int DEFAULT_TIMEOUT_MS = MS_PER_SEC;
+    final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / MS_PER_SEC;
+
     final public static int MIN_Q_PER_WORKER = 1;
     final public static int DEFAULT_MIN_LATENCY = 0;
     final public static int MS_PER_MIN = MS_PER_SEC * 60;
@@ -31,8 +34,9 @@ public class Config {
     final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 15;
     final public static int DEFAULT_WINDOW_LATENCY = MS_PER_MIN;
     final public static long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
-    final public static TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
     final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
+
+
 
     public String packageName;
     public boolean fork;

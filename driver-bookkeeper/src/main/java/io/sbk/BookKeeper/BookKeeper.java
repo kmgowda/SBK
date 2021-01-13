@@ -71,7 +71,7 @@ public class BookKeeper implements Storage<byte[]> {
         }
         conf = new DistributedLogConfiguration();
         conf.loadConf(propsConf);
-        conf.setReadAheadWaitTime(params.getTimeout());
+        conf.setReadAheadWaitTime(params.getTimeoutMS());
         if (params.hasOption("recreate")) {
             recreate = Boolean.parseBoolean(params.getOptionValue("recreate"));
         } else {

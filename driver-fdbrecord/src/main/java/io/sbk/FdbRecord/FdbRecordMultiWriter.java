@@ -67,7 +67,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     public void writeAsyncTime(DataType<ByteString> dType, ByteString data, int size, Time time, Status status) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
-            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
         }
@@ -95,7 +95,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     public void recordWrite(DataType<ByteString> dType, ByteString data, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
-            recs = Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
         } else {
             recs = params.getRecordsPerSync();
         }

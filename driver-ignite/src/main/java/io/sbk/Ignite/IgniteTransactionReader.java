@@ -30,7 +30,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
     private final IgniteCache<Long, byte[]> cache;
     private final org.apache.ignite.Ignite ignite;
     private long key;
-    private int cnt;
+    private long cnt;
 
     public IgniteTransactionReader(int id, Parameters params, IgniteCache<Long, byte[]> cache,
                                    org.apache.ignite.Ignite ignite) throws IOException {
@@ -60,7 +60,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }
@@ -93,7 +93,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
+            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
         } else {
             recs =  params.getRecordsPerSync();
         }

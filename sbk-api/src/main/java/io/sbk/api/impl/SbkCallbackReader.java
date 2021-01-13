@@ -29,7 +29,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private Callback callback;
     final private AtomicLong readCnt;
     final private long msToRun;
-    final private int totalRecords;
+    final private long totalRecords;
     private long beginTime;
 
     public SbkCallbackReader(int readerId, int idMax, Parameters params, SendChannel sendChannel,
