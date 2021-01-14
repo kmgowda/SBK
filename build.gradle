@@ -104,15 +104,31 @@ allprojects {
  */
 
 	task generateDashboards(type: Copy) {
-        if (project.path.startsWith(":driver-")) {
+		if (project.path.startsWith(":driver-")) {
 			def outDir = 'build/dashboard'
 			def outFile = sbkProjectName+"-"+sbkVersion+".json"
 			def sbkClass = project.path.replace(":driver-","").toUpperCase()
+
+			/*
+			call with parameter
+			./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/tmp"
+			to generate dashboard files on single folder
+			 */
+			if (project.hasProperty("outdir")) {
+				outDir = outdir
+				outFile = sbkProjectName+".json"
+			}
+
+
 			from "$rootDir/dashboard-template.json"
 			into outDir
 			filter { line -> line.replaceAll('SBK@2020', sbkClass) }
 			rename 'dashboard-template.json', outFile
-        }
+
+			doLast {
+				println "generatering file : " + outDir + "/" + outFile
+			}
+		}
 	}
 
 }
