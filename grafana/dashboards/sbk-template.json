@@ -67,7 +67,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Writing_MBPerSec",
+          "expr": "SBK_TEMPLATE_Writing_MBPerSec",
           "refId": "A"
         }
       ],
@@ -75,7 +75,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write Throughput MB/s",
+      "title": "TEMPLATE Write Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -161,7 +161,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Writing_RecordsPerSec",
+          "expr": "SBK_TEMPLATE_Writing_RecordsPerSec",
           "refId": "A"
         }
       ],
@@ -169,7 +169,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write Records/Sec",
+      "title": "TEMPLATE Write Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -255,13 +255,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Writing_ms_AvgLatency",
+          "expr": "SBK_TEMPLATE_Writing_ms_AvgLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_MaxLatency",
+          "expr": "SBK_TEMPLATE_Writing_ms_MaxLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -271,7 +271,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write Avg and Max Latencies",
+      "title": "TEMPLATE Write Avg and Max Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -357,55 +357,55 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Writing_ms_10",
+          "expr": "SBK_TEMPLATE_Writing_ms_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_25",
+          "expr": "SBK_TEMPLATE_Writing_ms_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_50",
+          "expr": "SBK_TEMPLATE_Writing_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_75",
+          "expr": "SBK_TEMPLATE_Writing_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_90",
+          "expr": "SBK_TEMPLATE_Writing_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_95",
+          "expr": "SBK_TEMPLATE_Writing_ms_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_99",
+          "expr": "SBK_TEMPLATE_Writing_ms_99",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_99_9",
+          "expr": "SBK_TEMPLATE_Writing_ms_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
         },
         {
-          "expr": "SBK_PULSAR_Writing_ms_99_99",
+          "expr": "SBK_TEMPLATE_Writing_ms_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -415,7 +415,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write Percentiles",
+      "title": "TEMPLATE Write Percentiles",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -501,7 +501,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Writing_Records_total",
+          "expr": "SBK_TEMPLATE_Writing_Records_total",
           "refId": "A"
         }
       ],
@@ -509,7 +509,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write Bytes Total",
+      "title": "TEMPLATE Write Bytes Total",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -594,13 +594,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Writing_LowerDiscardedLatencyRecords_total",
+          "expr": "SBK_TEMPLATE_Writing_LowerDiscardedLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Writing_HigherDiscardLatencyRecords_total",
+          "expr": "SBK_TEMPLATE_Writing_HigherDiscardLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -610,7 +610,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write Discarded Latencies",
+      "title": "TEMPLATE Write Discarded Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -696,7 +696,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Writing_Writers",
+          "expr": "SBK_TEMPLATE_Writing_Writers",
           "refId": "A"
         }
       ],
@@ -704,7 +704,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Writers",
+      "title": "TEMPLATE Writers",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -790,7 +790,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Reading_MBPerSec",
+          "expr": "SBK_TEMPLATE_Reading_MBPerSec",
           "refId": "A"
         }
       ],
@@ -798,7 +798,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Read Throughput MB/s",
+      "title": "TEMPLATE Read Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -884,7 +884,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Reading_RecordsPerSec",
+          "expr": "SBK_TEMPLATE_Reading_RecordsPerSec",
           "refId": "A"
         }
       ],
@@ -892,7 +892,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Read Records/Sec",
+      "title": "TEMPLATE Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -978,13 +978,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Reading_ms_AvgLatency",
+          "expr": "SBK_TEMPLATE_Reading_ms_AvgLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_MaxLatency",
+          "expr": "SBK_TEMPLATE_Reading_ms_MaxLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -994,7 +994,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Read Avg and Max Latencies",
+      "title": "TEMPLATE Read Avg and Max Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1080,55 +1080,55 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Reading_ms_10",
+          "expr": "SBK_TEMPLATE_Reading_ms_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_25",
+          "expr": "SBK_TEMPLATE_Reading_ms_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_50",
+          "expr": "SBK_TEMPLATE_Reading_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_75",
+          "expr": "SBK_TEMPLATE_Reading_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_90",
+          "expr": "SBK_TEMPLATE_Reading_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_95",
+          "expr": "SBK_TEMPLATE_Reading_ms_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_99",
+          "expr": "SBK_TEMPLATE_Reading_ms_99",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_99_9",
+          "expr": "SBK_TEMPLATE_Reading_ms_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
         },
         {
-          "expr": "SBK_PULSAR_Reading_ms_99_99",
+          "expr": "SBK_TEMPLATE_Reading_ms_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -1138,7 +1138,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Read Percentiles",
+      "title": "TEMPLATE Read Percentiles",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1224,7 +1224,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Reading_Bytes_total",
+          "expr": "SBK_TEMPLATE_Reading_Bytes_total",
           "refId": "A"
         }
       ],
@@ -1232,7 +1232,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Read Bytes Total",
+      "title": "TEMPLATE Read Bytes Total",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1317,13 +1317,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Reading_LowerDiscardedLatencyRecords_total",
+          "expr": "SBK_TEMPLATE_Reading_LowerDiscardedLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Reading_HigherDiscardLatencyRecords_total",
+          "expr": "SBK_TEMPLATE_Reading_HigherDiscardLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -1333,7 +1333,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Read Discarded Latencies",
+      "title": "TEMPLATE Read Discarded Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1419,7 +1419,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Reading_Readers",
+          "expr": "SBK_TEMPLATE_Reading_Readers",
           "refId": "A"
         }
       ],
@@ -1427,7 +1427,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Readers",
+      "title": "TEMPLATE Readers",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1512,7 +1512,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Write_Reading_MBPerSec",
+          "expr": "SBK_TEMPLATE_Write_Reading_MBPerSec",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1522,7 +1522,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write-Read Throughput MB/s",
+      "title": "TEMPLATE Write-Read Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1607,7 +1607,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Write_Reading_RecordsPerSec",
+          "expr": "SBK_TEMPLATE_Write_Reading_RecordsPerSec",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1617,7 +1617,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write-Read Records/Sec",
+      "title": "TEMPLATE Write-Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1702,13 +1702,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_AvgLatency",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_AvgLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_MaxLatency",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_MaxLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -1718,7 +1718,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write-Read Avg and Max Latencies",
+      "title": "TEMPLATE Write-Read Avg and Max Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1803,55 +1803,55 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_10",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_25",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_50",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_75",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_90",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_95",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_99",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_99",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_99_9",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_ms_99_99",
+          "expr": "SBK_TEMPLATE_Write_Reading_ms_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -1861,7 +1861,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write-Read Percentiles",
+      "title": "TEMPLATE Write-Read Percentiles",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1947,7 +1947,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Write_Reading_Bytes_total",
+          "expr": "SBK_TEMPLATE_Write_Reading_Bytes_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1957,7 +1957,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write-Read Bytes Total",
+      "title": "TEMPLATE Write-Read Bytes Total",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2042,13 +2042,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Write_Reading_LowerDiscardedLatencyRecords_total",
+          "expr": "SBK_TEMPLATE_Write_Reading_LowerDiscardedLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_HigherDiscardLatencyRecords_total",
+          "expr": "SBK_TEMPLATE_Write_Reading_HigherDiscardLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -2058,7 +2058,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write-Read  Discarded Latencies",
+      "title": "TEMPLATE Write-Read  Discarded Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2143,13 +2143,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_PULSAR_Write_Reading_Readers",
+          "expr": "SBK_TEMPLATE_Write_Reading_Readers",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_PULSAR_Write_Reading_Writers",
+          "expr": "SBK_TEMPLATE_Write_Reading_Writers",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -2159,7 +2159,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "PULSAR Write-Read  Writers and Readers",
+      "title": "TEMPLATE Write-Read  Writers and Readers",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2210,5 +2210,5 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SBK PULSAR Benchmark"
+  "title": "SBK TEMPLATE Benchmark"
 }

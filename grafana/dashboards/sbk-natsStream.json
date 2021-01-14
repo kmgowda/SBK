@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 19,
   "links": [],
   "panels": [
     {
@@ -34,7 +34,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 11,
         "w": 8,
         "x": 0,
         "y": 0
@@ -91,7 +91,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "MBs",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -104,7 +104,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -128,7 +128,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 11,
         "w": 8,
         "x": 8,
         "y": 0
@@ -169,7 +169,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Writing Records/Sec",
+      "title": "NATSSTREAM Write Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -185,7 +185,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "wps",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -198,7 +198,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -222,10 +222,112 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 11,
         "w": 8,
         "x": 16,
         "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 12,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Writing_ms_AvgLatency",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Writing_ms_MaxLatency",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Write Avg and Max Latencies",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 11
       },
       "hiddenSeries": false,
       "id": 10,
@@ -313,7 +415,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Writing Percentiles",
+      "title": "NATSSTREAM Write Percentiles",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -329,7 +431,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "ms",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -342,7 +444,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -366,13 +468,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
-        "x": 0,
-        "y": 6
+        "x": 8,
+        "y": 11
       },
       "hiddenSeries": false,
-      "id": 12,
+      "id": 8,
       "legend": {
         "avg": false,
         "current": false,
@@ -399,13 +501,106 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_NATSSTREAM_Writing_ms_AvgLatency",
+          "expr": "SBK_NATSSTREAM_Writing_Records_total",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Write Bytes Total",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 11
+      },
+      "hiddenSeries": false,
+      "id": 28,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Writing_LowerDiscardedLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_NATSSTREAM_Writing_ms_MaxLatency",
+          "expr": "SBK_NATSSTREAM_Writing_HigherDiscardLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -415,7 +610,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Writing Avg and Max Latencies",
+      "title": "NATSSTREAM Write Discarded Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -444,7 +639,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -468,10 +663,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
-        "x": 8,
-        "y": 6
+        "x": 0,
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 2,
@@ -538,7 +733,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -562,104 +757,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
-        "x": 16,
-        "y": 6
-      },
-      "hiddenSeries": false,
-      "id": 8,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.2.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "SBK_NATSSTREAM_Writing_Records_total",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "NATSSTREAM Write Bytes Total",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 12
+        "x": 8,
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 18,
@@ -713,7 +814,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "MBs",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -726,7 +827,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -750,10 +851,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
-        "x": 8,
-        "y": 12
+        "x": 16,
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 20,
@@ -807,7 +908,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "rps",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -820,7 +921,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -844,10 +945,112 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 11,
         "w": 8,
-        "x": 16,
-        "y": 12
+        "x": 0,
+        "y": 31
+      },
+      "hiddenSeries": false,
+      "id": 24,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Reading_ms_AvgLatency",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Reading_ms_MaxLatency",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Read Avg and Max Latencies",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 8,
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 22,
@@ -935,7 +1138,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Reading Percentiles",
+      "title": "NATSSTREAM Read Percentiles",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -951,7 +1154,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "ms",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -964,7 +1167,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -988,13 +1191,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 11,
         "w": 8,
-        "x": 0,
-        "y": 18
+        "x": 16,
+        "y": 31
       },
       "hiddenSeries": false,
-      "id": 24,
+      "id": 16,
       "legend": {
         "avg": false,
         "current": false,
@@ -1021,13 +1224,106 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_NATSSTREAM_Reading_ms_AvgLatency",
+          "expr": "SBK_NATSSTREAM_Reading_Bytes_total",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Read Bytes Total",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 42
+      },
+      "hiddenSeries": false,
+      "id": 26,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Reading_LowerDiscardedLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_NATSSTREAM_Reading_ms_MaxLatency",
+          "expr": "SBK_NATSSTREAM_Reading_HigherDiscardLatencyRecords_total",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -1037,7 +1333,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Reading  Avg and Max Latencies",
+      "title": "NATSSTREAM Read Discarded Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1066,7 +1362,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -1090,10 +1386,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
         "x": 8,
-        "y": 18
+        "y": 42
       },
       "hiddenSeries": false,
       "id": 14,
@@ -1160,7 +1456,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -1176,21 +1472,20 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
         "x": 16,
-        "y": 18
+        "y": 42
       },
       "hiddenSeries": false,
-      "id": 16,
+      "id": 32,
       "legend": {
         "avg": false,
         "current": false,
@@ -1217,7 +1512,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_NATSSTREAM_Reading_Bytes_total",
+          "expr": "SBK_NATSSTREAM_Write_Reading_MBPerSec",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -1225,7 +1522,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Read Bytes Total",
+      "title": "NATSSTREAM Write-Read Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1241,7 +1538,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "MBs",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1254,7 +1551,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -1267,7 +1564,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -1277,13 +1574,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 11,
         "w": 8,
         "x": 0,
-        "y": 24
+        "y": 52
       },
       "hiddenSeries": false,
-      "id": 28,
+      "id": 36,
       "legend": {
         "avg": false,
         "current": false,
@@ -1310,23 +1607,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_NATSSTREAM_Writing_LowerDiscardedLatencyRecords_total",
+          "expr": "SBK_NATSSTREAM_Write_Reading_RecordsPerSec",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
-        },
-        {
-          "expr": "SBK_NATSSTREAM_Writing_HigherDiscardLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Writing Discarded Latencies",
+      "title": "NATSSTREAM Write-Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1342,7 +1633,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "iops",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1355,7 +1646,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -1368,7 +1659,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -1378,13 +1669,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 6,
+        "h": 11,
         "w": 8,
         "x": 8,
-        "y": 24
+        "y": 52
       },
       "hiddenSeries": false,
-      "id": 26,
+      "id": 38,
       "legend": {
         "avg": false,
         "current": false,
@@ -1411,13 +1702,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_NATSSTREAM_Reading_LowerDiscardedLatencyRecords_total",
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_AvgLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_NATSSTREAM_Reading_HigherDiscardLatencyRecords_total",
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_MaxLatency",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -1427,7 +1718,347 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "NATSSTREAM Reading Discarded Latencies",
+      "title": "NATSSTREAM Write-Read Avg and Max Latencies",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 52
+      },
+      "hiddenSeries": false,
+      "id": 34,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_ms_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Write-Read Percentiles",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 63
+      },
+      "hiddenSeries": false,
+      "id": 30,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_Bytes_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Write-Read Bytes Total",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 63
+      },
+      "hiddenSeries": false,
+      "id": 42,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_LowerDiscardedLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_HigherDiscardLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Write-Read  Discarded Latencies",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1456,7 +2087,108 @@
           "logBase": 1,
           "max": null,
           "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 63
+      },
+      "hiddenSeries": false,
+      "id": 40,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.2.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_Readers",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_NATSSTREAM_Write_Reading_Writers",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NATSSTREAM Write-Read  Writers and Readers",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
           "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
         }
       ],
       "yaxis": {
@@ -1478,6 +2210,5 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SBK NATSSTREAM Benchmark",
-  "version": 20
+  "title": "SBK NATSSTREAM Benchmark"
 }
