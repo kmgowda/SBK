@@ -16,6 +16,8 @@ services:
     build: grafana
     container_name: grafana
     hostname: grafana
+    volumes:
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=sbk
     depends_on:
