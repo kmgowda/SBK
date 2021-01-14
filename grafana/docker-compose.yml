@@ -11,6 +11,8 @@ services:
       - '9090:9090'
   grafana:
     build: .
+    volumes:
+      - ./dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
