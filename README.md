@@ -132,45 +132,47 @@ Build only the SBK install binary
 ```
 ./gradlew installDist
 ```
-executable binary will be avialable at :  [SBK directory]/./build/install/sbk/bin/sbk
+executable binary will be available at :  [SBK directory]/./build/install/sbk/bin/sbk
 
 
 ## Running Performance benchmarking
 The SBK  can be executed to
- - write/read specific amount of events/records to/from the storage driver (device/cluster)
+ - write/read a specific amount of events/records to/from the storage driver (device/cluster)
  - write/read the events/records for the specified amount of time
  
 SBK outputs the data written/read , average throughput and latency , maximum latency  and the latency percentiles 10th, 25th, 50th, 75th, 95th, 99th , 99.9th and 99.99th for every 5 seconds time interval as show below.
 
 ```
-Writing     131673 records,   26032.6 records/sec,    24.83 MB/sec,     35.2 ms avg latency,     674 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      13 ms 10th,      16 ms 25th,      21 ms 50th,      26 ms 75th,     135 ms 95th,     351 ms 99th,     670 ms 99.9th,     671 ms 99.99th.
-Writing     154995 records,   30480.8 records/sec,    29.07 MB/sec,     32.2 ms avg latency,     255 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      13 ms 10th,      16 ms 25th,      20 ms 50th,      26 ms 75th,     114 ms 95th,     165 ms 99th,     251 ms 99.9th,     252 ms 99.99th.
-Writing     150029 records,   28387.7 records/sec,    27.07 MB/sec,     32.8 ms avg latency,     384 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      13 ms 10th,      17 ms 25th,      21 ms 50th,      29 ms 75th,     111 ms 95th,     188 ms 99th,     205 ms 99.9th,     206 ms 99.99th.
-Writing       9352 records,    1484.7 records/sec,     1.42 MB/sec,    378.4 ms avg latency,     669 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:     199 ms 10th,     251 ms 25th,     384 ms 50th,     457 ms 75th,     623 ms 95th,     662 ms 99th,     669 ms 99.9th,     669 ms 99.99th.
-Writing      50539 records,    9621.0 records/sec,     9.18 MB/sec,    155.3 ms avg latency,    3558 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      11 ms 10th,      14 ms 25th,      19 ms 50th,      89 ms 75th,     397 ms 95th,    3268 ms 99th,    3558 ms 99.9th,    3558 ms 99.99th.
-Writing     158236 records,   31640.9 records/sec,    30.18 MB/sec,     34.1 ms avg latency,     639 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      13 ms 10th,      16 ms 25th,      20 ms 50th,      26 ms 75th,     104 ms 95th,     518 ms 99th,     637 ms 99.9th,     637 ms 99.99th.
-Writing     159087 records,   31785.6 records/sec,    30.31 MB/sec,     30.9 ms avg latency,     457 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      10 ms 10th,      13 ms 25th,      16 ms 50th,      22 ms 75th,     108 ms 95th,     301 ms 99th,     456 ms 99.9th,     456 ms 99.99th.
-Writing     146443 records,   22265.9 records/sec,    21.23 MB/sec,     30.7 ms avg latency,    2035 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      12 ms 10th,      14 ms 25th,      18 ms 50th,      26 ms 75th,     108 ms 95th,     165 ms 99th,     184 ms 99.9th,     201 ms 99.99th.
-Writing      14746 records,    2778.6 records/sec,     2.65 MB/sec,    462.4 ms avg latency,    2072 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:     129 ms 10th,     181 ms 25th,     376 ms 50th,     515 ms 75th,    2021 ms 95th,    2035 ms 99th,    2036 ms 99.9th,    2036 ms 99.99th.
-Writing      46208 records,    9236.1 records/sec,     8.81 MB/sec,    118.6 ms avg latency,    2167 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      11 ms 10th,      15 ms 25th,      26 ms 50th,     113 ms 75th,     438 ms 95th,    1739 ms 99th,    2167 ms 99.9th,    2167 ms 99.99th.
+Pulsar Writing      841909 records,  168247.2 records/sec,    16.05 MB/sec,      5.8 ms avg latency,      55 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       5 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,      10 ms 99th,      31 ms 99.9th,      32 ms 99.99th. 
+Pulsar Writing      960268 records,  191976.8 records/sec,    18.31 MB/sec,      5.2 ms avg latency,      17 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       9 ms 99th,      11 ms 99.9th,      12 ms 99.99th. 
+Pulsar Writing      935007 records,  186777.3 records/sec,    17.81 MB/sec,      5.3 ms avg latency,      21 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,       9 ms 99th,      16 ms 99.9th,      17 ms 99.99th. 
+Pulsar Writing      953962 records,  190601.8 records/sec,    18.18 MB/sec,      5.2 ms avg latency,      24 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       9 ms 99th,      20 ms 99.9th,      20 ms 99.99th. 
+Pulsar Writing      921551 records,  184273.3 records/sec,    17.57 MB/sec,      5.4 ms avg latency,      28 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,      10 ms 99th,      22 ms 99.9th,      24 ms 99.99th. 
+Pulsar Writing      832041 records,  166341.7 records/sec,    15.86 MB/sec,      5.9 ms avg latency,     468 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,      13 ms 99th,     460 ms 99.9th,     461 ms 99.99th. 
+Pulsar Writing      957418 records,  191407.0 records/sec,    18.25 MB/sec,      5.2 ms avg latency,      44 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       9 ms 99th,      38 ms 99.9th,      40 ms 99.99th. 
+Pulsar Writing      962021 records,  192365.7 records/sec,    18.35 MB/sec,      5.1 ms avg latency,      32 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       9 ms 99th,      27 ms 99.9th,      27 ms 99.99th. 
+Pulsar Writing      966552 records,  193271.7 records/sec,    18.43 MB/sec,      5.1 ms avg latency,      14 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       8 ms 99th,      10 ms 99.9th,      11 ms 99.99th. 
+Pulsar Writing      975845 records,  195091.0 records/sec,    18.61 MB/sec,      5.1 ms avg latency,      19 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       8 ms 99th,      15 ms 99.9th,      16 ms 99.99th. 
+
 ```
 
 At the end of the benchmarking session, SBK outputs the total data written/read , average throughput and latency , maximum latency  and the latency percentiles 10th, 25th, 50th, 75th, 95th, 99th , 99.9th and 99.99th for the complete data records written/read.
 An example  final output is show as below:
 
 ```
-Writing(Total)    1116193 records,   19795.9 records/sec,    18.88 MB/sec,     49.7 ms avg latency,    3558 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      12 ms 10th,      15 ms 25th,      20 ms 50th,      27 ms 75th,     163 ms 95th,     538 ms 99th,    2167 ms 99.9th,    3557 ms 99.99th.
+Pulsar Writing(Total)     11168033 records,  186127.7 records/sec,    17.75 MB/sec,      5.3 ms avg latency,     468 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       4 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,       9 ms 99th,      20 ms 99.9th,     333 ms 99.99th. 
 ```
 
 ### Grafana Dashboards of SBK
 When you run the SBK, by default it starts the http server and all the output benchmark data are directed to the default port number: **9718** and **metrics** context.
 if you want to change the port number and context, you can use the command line argument **-context** to change the same.
 you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
-In case, if you are fetching metrics/benchmark data from remote http server , or from port number other than 9718 or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) too.
+If you want to include additional SBK nodes/instances to fetch the performance data or from port number other than 9718, you need to extend or update [targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json)   
+In case, if you are fetching metrics/benchmark data from remote http server ,  or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) too.
 Run the grafana server (cum client) to fetch the benchmark data from  prometheus.
 For example, if you are running local grafana server then by default it  fetches the data from prometheus server at the local port 9090.
 You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default user name / password.
-you can import the grafana dashboards to fetch the SBK benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/config/metrics/grafana/dashboards).
+you can import the grafana dashboards to fetch the SBK benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
@@ -182,7 +184,7 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 
 
 ## SBK Docker Containers
-The SBK Docker images are avilable at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
+The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
 
 The SBK docker image pull command is 
 ```
