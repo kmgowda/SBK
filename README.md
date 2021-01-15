@@ -56,7 +56,7 @@ Currently SBK supports benchmarking of
 27. [Apache CouchDB](https://couchdb.apache.org)
 28. [Apache Hive](https://hive.apache.org)
 
-In future, many more storage storage systems drivers will be plugged in. 
+In the future, many more storage systems drivers will be plugged in. 
 
 we welcome open source developers to contribute to this project by adding a driver your storage device and any features to SBK. Refer to : 
 * [[Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk)] for the Contributing guidlines.
@@ -178,9 +178,9 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 
 [![Pulsar Grafana Dashboard](images/pulsar-grafana.jpg)](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)
 
-#### Port conflicts between strage servers and grafana/prometheus
-* If you have running Pulsar server in standalone/local mode or if you are running SBK in the same system in which Pulsar broker is also running, then using the local port 9718 conflicts with the Pulsar Admin which runs at same port. So, either you change the Pulsar admin port or change the SBK's http port usig **-metrics** option.
-* If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [prometheus configuraiton file](https://github.com/kmgowda/SBK/blob/master/config/metrics/prometheus/sample-config/sbk-prometheus-sample-config.yml) before deploying the prometheus. 
+#### Port conflicts between storage servers and grafana/prometheus
+* If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) before deploying the prometheus. 
+* If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you change the SBK's http port usig **-metrics** option and you need change the [Prometheus targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json) too
 
 
 ## SBK Docker Containers
@@ -191,7 +191,7 @@ The SBK docker image pull command is
 docker pull kmgowda/sbk
 ```
 
-you can strightaway run the docker image too, For example
+you can straightaway run the docker image too, For example
 ```
 docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -time 60
 ```
@@ -354,7 +354,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
     
     * you have to implement the following methods of Benchmark Interface:
         
-      a). Add the Addtional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#addArgs-io.sbk.api.Parameters-)]
+      a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#addArgs-io.sbk.api.Parameters-)]
       * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
         
       b). Parse your driver specific paramters: [[parseArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#parseArgs-io.sbk.api.Parameters-)]
