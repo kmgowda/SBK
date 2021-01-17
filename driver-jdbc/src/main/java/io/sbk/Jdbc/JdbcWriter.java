@@ -64,7 +64,7 @@ public class JdbcWriter implements Writer<String> {
         this.defaultInsertQuery = "INSERT INTO " + this.config.table + " (DATA) VALUES ('" + this.data + "')";
     }
 
-    public String insertTable() {
+    public String gerWriteQuery() {
         return this.defaultInsertQuery;
     }
 
@@ -74,7 +74,7 @@ public class JdbcWriter implements Writer<String> {
                             Status status, SendChannel record, int id) throws IOException {
         status.startTime = time.getCurrentTime();
         try {
-            st.executeUpdate(insertTable());
+            st.executeUpdate(gerWriteQuery());
         } catch (SQLException ex) {
             SbkLogger.log.error("JDBC: recordWrite failed !");
             throw  new IOException(ex);
@@ -87,7 +87,7 @@ public class JdbcWriter implements Writer<String> {
     @Override
     public CompletableFuture writeAsync(String data) throws IOException {
         try {
-            st.executeUpdate(insertTable());
+            st.executeUpdate(gerWriteQuery());
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }

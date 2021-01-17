@@ -53,21 +53,21 @@ public class JdbcReader implements Reader<String> {
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
-        readQuery = readTable();
+        readQuery = "SELECT * from "+ config.table;
         res = null;
     }
 
-    public String readTable() {
-        return "SELECT * from "+ config.table;
+    public String getReadQuery() {
+        return readQuery;
     }
 
     @Override
     public String read() throws EOFException {
         if (res == null) {
             try {
-                res = st.executeQuery(readQuery);
+                res = st.executeQuery(getReadQuery());
             } catch (SQLException ex) {
-                SbkLogger.log.error("JDBC:JdbcReader "+readQuery+" failed");
+                SbkLogger.log.error("JDBC:JdbcReader "+getReadQuery()+" failed");
                 ex.printStackTrace();
                 res = null;
             }

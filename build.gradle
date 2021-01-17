@@ -162,6 +162,7 @@ dependencies {
 	compile project(':driver-hive')
 	compile project(':driver-null')
 	compile project(':driver-sqlite')
+	compile project(':driver-mysql')
 }
 
 //create a single Jar with all dependencies

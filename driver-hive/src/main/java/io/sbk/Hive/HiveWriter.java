@@ -28,7 +28,8 @@ public class HiveWriter extends JdbcWriter {
         this.id = 0;
     }
 
-    public String insertTable() {
+    @Override
+    public String gerWriteQuery() {
         this.id += 1;
         return "INSERT INTO " + config.table + " VALUES ("+  this.id +",'" + this.data + "')";
     }
