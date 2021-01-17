@@ -42,9 +42,17 @@ public class Jdbc implements Storage<String> {
 
     private final static String CONFIGFILE = "jdbc.properties";
     public String driverType;
-    public String tableName;
     public JdbcConfig config;
     public DataType<String> dType;
+
+    /**
+     * Get the JDBC config file.
+     * The first invocation of the method is always in addArgs.
+     * @return JDBC driver name
+     */
+    public String getConfigFile() {
+        return CONFIGFILE;
+    }
 
     /**
      * Get the JDBC Driver String.
@@ -56,6 +64,7 @@ public class Jdbc implements Storage<String> {
         return null;
     }
 
+
     /**
      * Query for Creating a Table.
      * @param params Parameters object to be extended.
@@ -65,24 +74,24 @@ public class Jdbc implements Storage<String> {
     public String createTableQuery(final Parameters params) throws IllegalArgumentException {
         String query;
         if (driverType.equalsIgnoreCase(DERBY_NAME) ) {
-            query = "CREATE TABLE " + tableName +
+            query = "CREATE TABLE " + config.table +
                     "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
         } else if (driverType.equalsIgnoreCase(POSTGRESQL_NAME)) {
-            query = "CREATE TABLE " + tableName +
+            query = "CREATE TABLE " + config.table +
                     "(ID BIGSERIAL PRIMARY KEY" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
         } else if (driverType.equalsIgnoreCase(MSSQL_NAME)) {
-            query = "CREATE TABLE " + tableName +
+            query = "CREATE TABLE " + config.table +
                     "(ID BIGINT IDENTITY(1,1) PRIMARY KEY" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
         } else if (driverType.equalsIgnoreCase(SQLITE_NAME)) {
-            query = "CREATE TABLE " + tableName +
+            query = "CREATE TABLE " + config.table +
                     "(ID INTEGER PRIMARY KEY AUTOINCREMENT" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
         } else {
             // This statement works for MySQL and MariaDB too..
-            query = "CREATE TABLE " + tableName +
+            query = "CREATE TABLE " + config.table +
                     "(ID BIGINT PRIMARY KEY AUTO_INCREMENT" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
         }
@@ -96,7 +105,30 @@ public class Jdbc implements Storage<String> {
      * @return Query String.
      */
     public String dropTableQuery(final Parameters params) throws IllegalArgumentException {
-        return "DROP TABLE " + tableName;
+        return "DROP TABLE " + config.table;
+    }
+
+    /**
+     * Add the driver specific command line arguments.
+     * @param params Parameters object to be extended.
+     * @param jdbcConfig JDBC Configuration.
+     * @throws IllegalArgumentException If an exception occurred.
+     */
+    public void addArgs(final Parameters params, JdbcConfig jdbcConfig) throws IllegalArgumentException {
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.config = jdbcConfig;
+
+        if (getDriver() == null) {
+            params.addOption("driver", true, "Database driver, default Driver: " + config.driver);
+        }
+
+        params.addOption("table", true, "table name, default table: " + config.table);
+        params.addOption("url", true, "Database url, default url: " + config.url);
+        params.addOption("user", true, "User Name, default User name: " + config.user);
+        params.addOption("password", true, "password, default password: " + config.password);
+        params.addOption("recreate", true,
+                "If the table is already existing, delete and recreate the same, default: " + config.reCreate);
     }
 
 
@@ -111,29 +143,19 @@ public class Jdbc implements Storage<String> {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
-            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
-                    JdbcConfig.class);
+             addArgs(params, mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
+                    JdbcConfig.class));
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
 
-        if (getDriver() == null) {
-            params.addOption("driver", true, "Database driver, default Driver: " + config.driver);
-        }
-
-        params.addOption("table", true, "table name ");
-        params.addOption("url", true, "Database url, default url: "+config.url);
-        params.addOption("user", true, "User Name, default User name: "+config.user);
-        params.addOption("password", true, "password, default password: "+config.password);
-        params.addOption("recreate", true,
-                "If the table is already existing, delete and recreate the same, default: "+config.reCreate);
     }
 
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
-        addArgs(params, CONFIGFILE);
+        addArgs(params, getConfigFile());
     }
 
 
@@ -142,10 +164,7 @@ public class Jdbc implements Storage<String> {
         if (params.getWritersCount() > 0 && params.getReadersCount() > 0) {
             throw new IllegalArgumentException("Error: JDBC: Specify either writers or readers, both are not allowed");
         }
-        tableName =  params.getOptionValue("table", null);
-        if (tableName == null) {
-            throw new IllegalArgumentException("Error: Must specify Table Name");
-        }
+        config.table =  params.getOptionValue("table", config.table);
         if (params.hasOption("driver")) {
             config.driver = params.getOptionValue("driver", config.driver);
         }
@@ -198,15 +217,15 @@ public class Jdbc implements Storage<String> {
         if (params.getWritersCount() > 0) {
 
             try {
-                if (tableExist(conn, tableName)) {
-                    SbkLogger.log.info("The Table: " + tableName + " already exists");
+                if (tableExist(conn, config.table)) {
+                    SbkLogger.log.info("The Table: " + config.table + " already exists");
                 }
             } catch (SQLException ex) {
                 SbkLogger.log.error(ex.getMessage());
             }
 
             if (config.reCreate) {
-                SbkLogger.log.info("Deleting the Table: "+ tableName);
+                SbkLogger.log.info("Deleting the Table: "+ config.table);
                 final String query = dropTableQuery(params);
                 try {
                     st.execute(query);
@@ -224,7 +243,7 @@ public class Jdbc implements Storage<String> {
             }
 
             try {
-                SbkLogger.log.info("Creating the Table: " + tableName);
+                SbkLogger.log.info("Creating the Table: " + config.table);
                 st.execute(createTableQuery(params));
                 if (!conn.getAutoCommit()) {
                     conn.commit();
@@ -286,7 +305,7 @@ public class Jdbc implements Storage<String> {
     @Override
     public Writer<String> createWriter(final int id, final Parameters params) {
         try {
-           return new JdbcWriter(id, params, tableName, config, dType);
+           return new JdbcWriter(id, params, config, dType);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -296,7 +315,7 @@ public class Jdbc implements Storage<String> {
     @Override
     public Reader<String> createReader(final int id, final Parameters params) {
         try {
-            return  new JdbcReader(id, params, tableName, config);
+            return  new JdbcReader(id, params, config);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

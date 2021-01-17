@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
  * Class for JDBC  Writer.
  */
 public class JdbcWriter implements Writer<String> {
-    final public String tableName;
+    final public JdbcConfig config;
     final public String  data;
     final private Connection conn;
     final private Statement st;
@@ -37,9 +37,8 @@ public class JdbcWriter implements Writer<String> {
     final private String  defaultInsertQuery;
 
     public JdbcWriter(int writerID, Parameters params,
-                      String tableName, JdbcConfig config, DataType<String> dType) throws IOException {
+                       JdbcConfig config, DataType<String> dType) throws IOException {
         final Properties props = new Properties();
-        this.tableName = tableName;
         this.dType = dType;
         if (config.user != null) {
             props.put("user", config.user);
@@ -60,8 +59,9 @@ public class JdbcWriter implements Writer<String> {
         } catch (SQLException ex) {
             throw  new IOException(ex);
         }
+        this.config = config;
         this.data = dType.create(params.getRecordSize());
-        this.defaultInsertQuery = "INSERT INTO " + this.tableName + " (DATA) VALUES ('" + this.data + "')";
+        this.defaultInsertQuery = "INSERT INTO " + this.config.table + " (DATA) VALUES ('" + this.data + "')";
     }
 
     public String insertTable() {

@@ -161,6 +161,7 @@ dependencies {
 	compile project(':driver-couchdb')
 	compile project(':driver-hive')
 	compile project(':driver-null')
+	compile project(':driver-sqlite')
 }
 
 //create a single Jar with all dependencies

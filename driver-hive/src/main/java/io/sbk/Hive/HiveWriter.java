@@ -23,14 +23,14 @@ public class HiveWriter extends JdbcWriter {
     private long id;
 
     public HiveWriter(int writerID, Parameters params,
-                      String tableName, JdbcConfig config, DataType<String> dType) throws IOException {
-        super(writerID, params, tableName, config, dType);
+                       JdbcConfig config, DataType<String> dType) throws IOException {
+        super(writerID, params, config, dType);
         this.id = 0;
     }
 
     public String insertTable() {
         this.id += 1;
-        return "INSERT INTO " + tableName + " VALUES ("+  this.id +",'" + this.data + "')";
+        return "INSERT INTO " + config.table + " VALUES ("+  this.id +",'" + this.data + "')";
     }
 
 }
