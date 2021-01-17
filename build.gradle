@@ -163,6 +163,7 @@ dependencies {
 	compile project(':driver-null')
 	compile project(':driver-sqlite')
 	compile project(':driver-mysql')
+	compile project(':driver-mariadb')
 }
 
 //create a single Jar with all dependencies
