@@ -38,7 +38,7 @@ public class Hive extends Jdbc {
     @Override
     public Writer<String> createWriter(final int id, final Parameters params) {
         try {
-            return new HiveWriter(id, params, tableName, config, dType);
+            return new HiveWriter(id, params, config, dType);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -52,7 +52,7 @@ public class Hive extends Jdbc {
 
     @Override
     public String createTableQuery(final Parameters params) throws IllegalArgumentException {
-        return  "CREATE TABLE " + tableName +
+        return  "CREATE TABLE " + config.table +
                 "(ID BIGINT" +
                 ", DATA VARCHAR(" + params.getRecordSize() + "))";
 
@@ -60,6 +60,6 @@ public class Hive extends Jdbc {
 
     @Override
     public String dropTableQuery(final Parameters parameters) throws IllegalArgumentException {
-        return "DROP TABLE " + tableName;
+        return "DROP TABLE " + config.table;
     }
 }

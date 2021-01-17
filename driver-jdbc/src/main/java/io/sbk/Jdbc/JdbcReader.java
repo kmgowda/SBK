@@ -26,14 +26,14 @@ import java.util.Properties;
  * Class for JDBC reader.
  */
 public class JdbcReader implements Reader<String> {
-    final private String tableName;
+    final public JdbcConfig config;
     final private Connection conn;
     final private Statement st;
     final private String readQuery;
     private ResultSet res;
 
-    public JdbcReader(int id, Parameters params, String tableName, JdbcConfig config) throws IOException {
-        this.tableName = tableName;
+    public JdbcReader(int id, Parameters params, JdbcConfig config) throws IOException {
+        this.config = config;
         final Properties props = new Properties();
         if (config.user != null) {
             props.put("user", config.user);
@@ -58,7 +58,7 @@ public class JdbcReader implements Reader<String> {
     }
 
     public String readTable() {
-        return "SELECT * from "+ this.tableName;
+        return "SELECT * from "+ config.table;
     }
 
     @Override

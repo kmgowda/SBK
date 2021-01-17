@@ -13,6 +13,7 @@ package io.sbk.Jdbc;
 public class JdbcConfig {
     public String driver;
     public String url;
+    public String table;
     public String user;
     public String password;
     public boolean reCreate;
