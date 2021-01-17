@@ -46,51 +46,23 @@ public class Jdbc implements Storage<String> {
     public JdbcConfig config;
     public DataType<String> dType;
 
-
-    @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
-        addArgs(params, CONFIGFILE);
+    /**
+     * Get the JDBC Driver String.
+     * This method is always invoked after reading the configuration file.
+     * The first invocation of the method is always in addArgs.
+     * @return JDBC driver name
+     */
+    public String getDriver() {
+        return null;
     }
 
-    public void addArgs(final Parameters params, String configFile) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        try {
-            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
-                    JdbcConfig.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new IllegalArgumentException(ex);
-        }
-
-        params.addOption("table", true, "table name ");
-        params.addOption("driver", true, "Database driver, default Driver: "+config.driver);
-        params.addOption("url", true, "Database url, default url: "+config.url);
-        params.addOption("user", true, "User Name, default User name: "+config.user);
-        params.addOption("password", true, "password, default password: "+config.password);
-        params.addOption("recreate", true,
-                "If the table is already existing, delete and recreate the same, default: "+config.reCreate);
-
-    }
-
-    @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        if (params.getWritersCount() > 0 && params.getReadersCount() > 0) {
-            throw new IllegalArgumentException("Error: JDBC: Specify either writers or readers, both are not allowed");
-        }
-        tableName =  params.getOptionValue("table", null);
-        if (tableName == null) {
-            throw new IllegalArgumentException("Error: Must specify Table Name");
-        }
-        config.driver = params.getOptionValue("driver", config.driver);
-        config.url = params.getOptionValue("url", config.url);
-        config.user = params.getOptionValue("user", config.user);
-        config.password = params.getOptionValue("password", config.password);
-        config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
-    }
-
-    public String createTable(final Parameters params) {
+    /**
+     * Query for Creating a Table.
+     * @param params Parameters object to be extended.
+     * @throws IllegalArgumentException If an exception occurred.
+     * @return Query String.
+     */
+    public String createTableQuery(final Parameters params) throws IllegalArgumentException {
         String query;
         if (driverType.equalsIgnoreCase(DERBY_NAME) ) {
             query = "CREATE TABLE " + tableName +
@@ -117,9 +89,72 @@ public class Jdbc implements Storage<String> {
         return query;
     }
 
-    public String dropTable(final Parameters parameters) {
+    /**
+     * Query for Deleting the Table.
+     * @param params Parameters object to be extended.
+     * @throws IllegalArgumentException If an exception occurred.
+     * @return Query String.
+     */
+    public String dropTableQuery(final Parameters params) throws IllegalArgumentException {
         return "DROP TABLE " + tableName;
     }
+
+
+    /**
+     * Add the driver specific command line arguments.
+     * @param params Parameters object to be extended.
+     * @param configFile Configuration file to read.
+     * @throws IllegalArgumentException If an exception occurred.
+     */
+    public void addArgs(final Parameters params, String configFile) throws IllegalArgumentException {
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        try {
+            config = mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
+                    JdbcConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+
+        if (getDriver() == null) {
+            params.addOption("driver", true, "Database driver, default Driver: " + config.driver);
+        }
+
+        params.addOption("table", true, "table name ");
+        params.addOption("url", true, "Database url, default url: "+config.url);
+        params.addOption("user", true, "User Name, default User name: "+config.user);
+        params.addOption("password", true, "password, default password: "+config.password);
+        params.addOption("recreate", true,
+                "If the table is already existing, delete and recreate the same, default: "+config.reCreate);
+    }
+
+
+    @Override
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
+        addArgs(params, CONFIGFILE);
+    }
+
+
+    @Override
+    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+        if (params.getWritersCount() > 0 && params.getReadersCount() > 0) {
+            throw new IllegalArgumentException("Error: JDBC: Specify either writers or readers, both are not allowed");
+        }
+        tableName =  params.getOptionValue("table", null);
+        if (tableName == null) {
+            throw new IllegalArgumentException("Error: Must specify Table Name");
+        }
+        if (params.hasOption("driver")) {
+            config.driver = params.getOptionValue("driver", config.driver);
+        }
+        config.url = params.getOptionValue("url", config.url);
+        config.user = params.getOptionValue("user", config.user);
+        config.password = params.getOptionValue("password", config.password);
+        config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
+    }
+
 
     @Override
     public void openStorage(final Parameters params) throws  IOException {
@@ -172,7 +207,7 @@ public class Jdbc implements Storage<String> {
 
             if (config.reCreate) {
                 SbkLogger.log.info("Deleting the Table: "+ tableName);
-                final String query = dropTable(params);
+                final String query = dropTableQuery(params);
                 try {
                     st.execute(query);
                     if (!conn.getAutoCommit()) {
@@ -190,7 +225,7 @@ public class Jdbc implements Storage<String> {
 
             try {
                 SbkLogger.log.info("Creating the Table: " + tableName);
-                st.execute(createTable(params));
+                st.execute(createTableQuery(params));
                 if (!conn.getAutoCommit()) {
                     conn.commit();
                 }

@@ -46,7 +46,12 @@ public class Hive extends Jdbc {
     }
 
     @Override
-    public String createTable(final Parameters params) {
+    public String getDriver() {
+        return config.driver;
+    }
+
+    @Override
+    public String createTableQuery(final Parameters params) throws IllegalArgumentException {
         return  "CREATE TABLE " + tableName +
                 "(ID BIGINT" +
                 ", DATA VARCHAR(" + params.getRecordSize() + "))";
@@ -54,7 +59,7 @@ public class Hive extends Jdbc {
     }
 
     @Override
-    public String dropTable(final Parameters parameters) {
+    public String dropTableQuery(final Parameters parameters) throws IllegalArgumentException {
         return "DROP TABLE " + tableName;
     }
 }
