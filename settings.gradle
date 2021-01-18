@@ -43,4 +43,5 @@ include 'driver-mysql'
 include 'driver-mariadb'
 include 'driver-postgresql'
 include 'driver-derby'
+include 'driver-mssql'
 

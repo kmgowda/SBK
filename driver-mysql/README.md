@@ -7,7 +7,8 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# MySQL Performance using SBK
+
+# MySQL Performance Benchmarking using SBK
 The MySQL driver for SBK supports multiple writers and multiple readers performance benchmarking. But, the End to End Latency benchmarking is not supported.
 The MySQL driver uses the auto incrementing index are primary key to support multiple writers.
 The MYSQL driver uses the JDBC for IO operations.
@@ -123,7 +124,7 @@ MySQL Reading(Total)        53854 records,   53854.0 records/sec,     5.14 MB/se
 ```
 
 
-## MariaDB performance using MySQL driver of SBK
+## MariaDB performance Benchmarking using MySQL driver of SBK
 The MariaDB is MySQL complaint. you can use the mariadb jdbc driver to conduct the performance benchmarking.
 you can find the mysql docker images here: https://hub.docker.com/_/mariadb
 

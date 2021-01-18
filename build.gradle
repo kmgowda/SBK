@@ -166,6 +166,7 @@ dependencies {
 	compile project(':driver-mariadb')
 	compile project(':driver-postgresql')
 	compile project(':driver-derby')
+	compile project(':driver-mssql')
 }
 
 //create a single Jar with all dependencies

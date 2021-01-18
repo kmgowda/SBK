@@ -93,7 +93,7 @@ An example command to run the SBK benchmarking is
 Make sure that you use root/root as username/password while running above benchmarking command.
  
 ## JDBC with Microsoft SQL Server
-The SBK with JDBC is tested with Microsoft SQL server. Visit this page : https://www.postgresql.org  to download developer or expression editions of MS SQL.
+The SBK with JDBC is tested with Microsoft SQL server. Visit this page : https://hub.docker.com/_/microsoft-mssql-server  to download developer or expression editions of MS SQL.
 you can run the MS SQL docker image as follows.
 
 ```

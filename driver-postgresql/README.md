@@ -7,12 +7,12 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# PostgreSQL Performance using SBK
+# PostgreSQL Performance benchmarking using SBK
 The PostgreSQL driver for SBK supports multiple writers and multiple readers performance benchmarking. But, the End to End Latency benchmarking is not supported.
 The PostgreSQL driver uses the auto incrementing index are primary key to support multiple writers.
 The PostgreSQL driver uses the JDBC for IO operations.
 
-As an example, to start the mysql storage server as a container is as follows:
+As an example, to start the PostgreSQL storage server as a container is as follows:
 
 ```
 docker run  -p 127.0.0.1:5432:5432/tcp  --name kmg-postgres -e POSTGRES_USER=root -e POSTGRES_PASSWORD=root -d postgres
