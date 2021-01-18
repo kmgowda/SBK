@@ -164,6 +164,7 @@ dependencies {
 	compile project(':driver-sqlite')
 	compile project(':driver-mysql')
 	compile project(':driver-mariadb')
+	compile project(':driver-postgresql')
 }
 
 //create a single Jar with all dependencies
