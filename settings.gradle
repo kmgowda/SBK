@@ -40,4 +40,5 @@ include 'driver-hive'
 include 'driver-null'
 include 'driver-sqlite'
 include 'driver-mysql'
+include 'driver-mariadb'
 

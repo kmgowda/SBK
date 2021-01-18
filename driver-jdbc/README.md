@@ -118,7 +118,7 @@ Note that, SQLite is a local on disk database, it does not supports multiple wrt
 
 
 ## JDBC with MariaDB
-The SBK is tested with MariaDB benchmarking too. you can find the mysql docker images here: https://hub.docker.com/_/mariadb
+The SBK is tested with MariaDB benchmarking too. you can find the mariadb docker images here: https://hub.docker.com/_/mariadb
 
 command to pull the latest MariaDB docker image
 ```
