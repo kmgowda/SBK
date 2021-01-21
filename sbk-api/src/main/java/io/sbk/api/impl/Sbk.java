@@ -44,6 +44,22 @@ public class Sbk {
     final static String CONFIGFILE = "sbk.properties";
     final static String BANNERFILE = "banner.txt";
 
+
+    /**
+     * Run the Performance Benchmarking .
+     * @param args command line arguments.
+     * @param storage storage object on which performance benchmarking will be conducted.
+     *                if you pass 'null', then name of the storage should be in args '-class' arguments
+     *                and storage object should be available in the package 'io.sbk.storage'.
+     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
+     * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus logger will be used.
+     * @throws ParseException If an exception occurred while parsing command line arguments.
+     * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
+     * @throws IOException If an exception occurred due to write or read failures.
+     * @throws InterruptedException If an exception occurred if the writers and readers are interrupted.
+     * @throws ExecutionException If an exception occurred.
+     * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
+     */
     public static void run(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException, TimeoutException {
@@ -58,6 +74,19 @@ public class Sbk {
         ret.get();
     }
 
+    /**
+     * Asynchronously Run the Performance Benchmarking .
+     * @param args command line arguments.
+     * @param storage storage object on which performance benchmarking will be conducted.
+     *                if you pass 'null', then name of the storage should be in args '-class' arguments
+     *                and storage object should be available in the package 'io.sbk.storage'.
+     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
+     * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus logger will be used.
+     * @throws ParseException If an exception occurred while parsing command line arguments.
+     * @return CompletableFuture instance.
+     * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
+     * @throws IOException If an exception occurred due to write or read failures.
+     */
     public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
             IOException {
