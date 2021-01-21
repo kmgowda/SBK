@@ -503,11 +503,11 @@ Instead of using entire SBK framework, if you just want use the [SBK framework A
    
     *  you need to authenticate with your git hub user name (GITHUB_USERNAME) and git hub token (GITHUB_TOKEN) 
     *  mavenCentral() repository is required to fetch the SBK's dependencies too.
-    *  check this example: [File system benchmarking git hub build](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/build.gradle)
+    *  check this example: [File system benchmarking git hub build](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/gitpackage-build.gradle)
   
-2. Extend the storage interface [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
+2. Extend the storage interface [Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html) by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
 
-    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/src/main/java/File.java)
+    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java)
 
 3. Create a Main method to supply your storage class object to SBK to run/conduct the performance benchmarking
 
@@ -530,7 +530,7 @@ Instead of using entire SBK framework, if you just want use the [SBK framework A
     }
 
    ```
-   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/src/main/java/File.java#L101)
+   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
 
@@ -556,10 +556,10 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
    ```
    few points to remember here     
     *  mavenCentral() repository is required to fetch the SBK's dependencies too.
-    *  check this example: [File system benchmarking jit pack build](https://github.com/kmgowda/sbk-examples/blob/main/jitpack/sbk-file/build.gradle)
+    *  check this example: [File system benchmarking jit pack build](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/jitpack-build.gradle)
 
-2. Extend the storage interface [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
-    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/src/main/java/File.java)
+2. Extend the storage interface [Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html) by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
+    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java)
 
 3. Create a Main method to supply your storage class object to SBK to run/conduct the performance benchmarking
 
@@ -581,7 +581,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
         System.exit(0);
     }
    ```
-   * check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/src/main/java/File.java#L101)
+   * check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.   
 
@@ -604,12 +604,12 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
    ```
    few points to remember here  
     *  mavenCentral() repository is required to fetch the SBK APIs package and its dependencies.
-    *  check this example: [File system benchmarking maven build](https://github.com/kmgowda/sbk-examples/blob/main/maven-central/sbk-file/build.gradle)
+    *  check this example: [File system benchmarking maven build](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/mavencentral-build.gradle)
 
-2. Extend the storage interface [[Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html)] by following steps 1 to 5 described in [[Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)]
-    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/src/main/java/File.java)
+2. Extend the storage interface [Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html) by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
+    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java)
 
-3. Create a Main method to supply the you storage class object to SBK to run/conduct the performance benchmarking
+3. Create a Main method to supply your storage class object to SBK to run/conduct the performance benchmarking
 
    ```
     public static void main(final String[] args) {
@@ -628,6 +628,6 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
         System.exit(0);
     }
    ```   
-   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/github-package/sbk-file/src/main/java/File.java#L101)
+   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
