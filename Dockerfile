@@ -53,6 +53,12 @@ COPY --chown=root:root driver-ignite ${APP_HOME}/driver-ignite
 COPY --chown=root:root driver-couchdb ${APP_HOME}/driver-couchdb
 COPY --chown=root:root driver-hive ${APP_HOME}/driver-hive
 COPY --chown=root:root driver-null ${APP_HOME}/driver-null
+COPY --chown=root:root driver-sqlite ${APP_HOME}/driver-sqlite
+COPY --chown=root:root driver-derby ${APP_HOME}/driver-derby
+COPY --chown=root:root driver-mysql ${APP_HOME}/driver-mysql
+COPY --chown=root:root driver-mssql ${APP_HOME}/driver-mssql
+COPY --chown=root:root driver-postgresql ${APP_HOME}/driver-postgresql
+COPY --chown=root:root driver-mariadb ${APP_HOME}/driver-mariadb
 
 
 ENV GRADLE_USER_HOME=/opt/SBK
