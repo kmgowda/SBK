@@ -17,8 +17,9 @@ import java.io.IOException;
  * Interface for Readers.
  */
 public interface Reader<T> {
+
     /**
-     * read the data.
+     * Read the data.
      * @return T return the data.
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
@@ -34,6 +35,9 @@ public interface Reader<T> {
     /**
      * Default implementation for Reading data using {@link Reader#read()}
      * and recording the benchmark statistics.
+     * The end time of the status parameter {@link Status#endTime} of this method determines
+     * the terminating condition for time based reader performance benchmarking.
+     * If you are intend to not use {@link Reader#read()} then you can override this method.
      * If you are intend to read multiple records then you can override this method.
      * otherwise, use the default implementation and don't override this method.
      *
@@ -63,6 +67,9 @@ public interface Reader<T> {
     /**
      * Default implementation for Reading data using {@link Reader#read()}, extracting start time from data
      * and recording the benchmark statistics.
+     * The end time of the status parameter {@link Status#endTime} of this method determines
+     * the terminating condition for time based reader performance benchmarking.
+     * If you are intend to not use {@link Reader#read()} then you can override this method.
      * If you are intend to read multiple records then you can override this method.
      * otherwise, use the default implementation and don't override this method.
      *
