@@ -21,14 +21,12 @@ import io.sbk.api.Config;
 import io.sbk.api.Storage;
 import io.sbk.api.Time;
 import io.sbk.api.TimeUnit;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +41,7 @@ import java.util.stream.Collectors;
 public class Sbk {
     final static String CONFIGFILE = "sbk.properties";
     final static String BANNERFILE = "banner.txt";
+    final static String CLASS_OPTION = "-class";
 
 
     /**
@@ -137,12 +136,9 @@ public class Sbk {
     private static Benchmark createBenchmark(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InstantiationException  {
-        List<String> driversList;
-        final CommandLine commandline;
         final String className;
         final String driverName;
         final Storage storageDevice;
-        final String usageLine;
         final Action action;
         final Parameters params;
         final Logger logger;
@@ -151,10 +147,11 @@ public class Sbk {
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
+        String usageLine;
 
         SbkLogger.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
-        SbkLogger.log.info("Argument List: "+Arrays.toString(args));
+        SbkLogger.log.info("Arguments List: "+Arrays.toString(args));
         SbkLogger.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
         SbkLogger.log.info(Config.SBK_CLASS_NAME + ": "+ sbkClassName);
 
@@ -164,10 +161,6 @@ public class Sbk {
         config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 Config.class);
 
-        commandline = new DefaultParser().parse(new Options()
-                        .addOption("class", true, "Benchmark Class"),
-                args, true);
-
         if (outLogger == null) {
             logger = new PrometheusLogger();
         } else {
@@ -175,25 +168,26 @@ public class Sbk {
         }
 
         if (storage == null) {
-            driversList =  getClassNames(config.packageName);
+            List<String> driversList =  getAvailableClassNames(config.packageName);
             SbkLogger.log.info("Available Drivers : "+ driversList.size());
-            String name  = commandline.getOptionValue("class", null);
+            if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
+                usageLine = sbkApplicationName;
+            } else {
+                usageLine = Config.NAME;
+            }
+            String name  = getClassName(args);
             if (name == null) {
                 if (sbkClassName != null && sbkClassName.length() > 0) {
                     className = sbkClassName;
                 } else {
-                    final Parameters paramsHelp;
-                    if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
-                        paramsHelp = new SbkParameters(sbkApplicationName,  driversList);
-                    } else {
-                        paramsHelp = new SbkParameters(Config.NAME, driversList);
-                    }
+                    final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
                     logger.addArgs(paramsHelp);
                     paramsHelp.printHelp();
                     throw new InstantiationException("SBK Benchmark class driver not found!");
                 }
             } else {
                 className = name;
+                usageLine += " "+CLASS_OPTION+" " + className;
             }
             driverName = searchDriver(driversList, className);
             if (driverName == null) {
@@ -207,14 +201,9 @@ public class Sbk {
                     NoSuchMethodException | InvocationTargetException ex) {
                 throw new IllegalArgumentException(ex);
             }
-            if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
-                usageLine = sbkApplicationName;
-            } else {
-                usageLine = Config.NAME + " -class "+ driverName;
-            }
+
         } else {
             storageDevice = storage;
-            driversList = null;
             if (applicationName != null) {
                 usageLine = applicationName;
             } else {
@@ -222,14 +211,19 @@ public class Sbk {
             }
             driverName = usageLine;
         }
-
-        params = new SbkParameters(usageLine, driversList);
+        params = new SbkParameters(usageLine, null);
         logger.addArgs(params);
         storageDevice.addArgs(params);
+        final String[] nextArgs = removeClassName(args);
 
-        params.parseArgs(args);
+        if (nextArgs == null) {
+            params.printHelp();
+            throw new InstantiationException("Insufficient command line arguments");
+        }
+        SbkLogger.log.info("Arguments to Driver '"+driverName + "' : "+Arrays.toString(nextArgs));
+        params.parseArgs(nextArgs);
         if (params.hasOption("help")) {
-            throw new InstantiationException("print only help!");
+            throw new InstantiationException("print help !");
         }
 
         logger.parseArgs(params);
@@ -256,7 +250,41 @@ public class Sbk {
         return new SbkBenchmark(driverName, action, config, params, storageDevice, logger, time);
     }
 
-    private static List<String> getClassNames(String pkgName) {
+    private static String[] removeClassName(String[] args) {
+        if (args.length < 3) {
+            return null;
+        }
+        List<String> ret = new ArrayList<>(args.length);
+        int i = 0;
+        while (i < args.length) {
+            if (args[i].equals(CLASS_OPTION)) {
+                i += 1;
+            } else {
+                ret.add(args[i]);
+            }
+            i += 1;
+        }
+        return ret.toArray(new String[0]);
+    }
+
+    private static String getClassName(String[] args) {
+        if (args == null || args.length < 2) {
+            return null;
+        }
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals(CLASS_OPTION)) {
+                if (i+1 < args.length) {
+                    return args[i+1];
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private static List<String> getAvailableClassNames(String pkgName) {
         Reflections reflections = new Reflections(pkgName);
         Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
         return subTypes.stream().map(i -> i.toString().substring(i.toString().lastIndexOf(".") + 1))

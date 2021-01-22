@@ -99,14 +99,16 @@ Running SBK locally:
 ```
 <SBK directory>/./build/distributions/sbk/bin/sbk -help
 ...
+usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     ConcurrentQ, CouchDB, FdbRecord, File, FileStream,
-                     FoundationDB, HDFS, Hive, Ignite, Jdbc, Kafka, MinIO,
-                     MongoDB, Nats, NatsStream, Nsq, Pravega, Pulsar,
-                     RabbitMQ, RocketMQ, RocksDB]
+                     ConcurrentQ, CouchDB, Derby, FdbRecord, File,
+                     FileStream, FoundationDB, HDFS, Hive, Ignite, Jdbc,
+                     Kafka, MariaDB, MinIO, MongoDB, MsSql, MySQL, Nats,
+                     NatsStream, Nsq, Null, PostgreSQL, Pravega, Pulsar,
+                     RabbitMQ, RocketMQ, RocksDB, SQLite]
  -context <arg>      Prometheus Metric context;default context:
-                     9718/metrics; 'no' disables the  metrics
+                     9718/metrics; 'no' disables the metrics
  -help               Help message
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'time' not specified;
@@ -119,7 +121,8 @@ Running SBK locally:
  -throughput <arg>   if > 0 , throughput in MB/s
                      if 0 , writes 'records'
                      if -1, get the maximum throughput
- -time <arg>         Number of seconds this SBK runs (24hrs by default)
+ -time <arg>         Number of seconds to run; if not specified, runs
+                     forever
  -writers <arg>      Number of writers
 
 ```
@@ -435,20 +438,14 @@ Example: For pulsar driver
 ```
 <SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
 
-usage: sbk -class Pulsar
+usage: sbk -class pulsar
  -ackQuorum <arg>       AckQuorum default: 1
  -admin <arg>           Admin URI, required to create the partitioned
                         topic, default: null
  -broker <arg>          Broker URI, default: tcp://localhost:6650
- -class <arg>           Storage Driver Class,
-                        Available Drivers [Artemis, AsyncFile, BookKeeper,
-                        ConcurrentQ, CouchDB, FdbRecord, File, FileStream,
-                        FoundationDB, HDFS, Hive, Ignite, Jdbc, Kafka,
-                        MinIO, MongoDB, Nats, NatsStream, Nsq, Pravega,
-                        Pulsar, RabbitMQ, RocketMQ, RocksDB]
  -cluster <arg>         Cluster name (optional parameter)
  -context <arg>         Prometheus Metric context;default context:
-                        9718/metrics; 'no' disables the  metrics
+                        9718/metrics; 'no' disables the metrics
  -deduplication <arg>   Enable or Disable Deduplication; default: false
  -ensembleSize <arg>    EnsembleSize default: 1
  -help                  Help message
@@ -465,11 +462,11 @@ usage: sbk -class Pulsar
  -throughput <arg>      if > 0 , throughput in MB/s
                         if 0 , writes 'records'
                         if -1, get the maximum throughput
- -time <arg>            Number of seconds this SBK runs (24hrs by default)
+ -time <arg>            Number of seconds to run; if not specified, runs
+                        forever
  -topic <arg>           Topic name, default : test
  -writeQuorum <arg>     WriteQuorum default: 1
  -writers <arg>         Number of writers
-
 
 ```
 
