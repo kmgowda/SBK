@@ -28,7 +28,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private CompletableFuture<Void> ret;
     final private Callback callback;
     final private AtomicLong readCnt;
-    final private long msToRun;
+    final private double msToRun;
     final private long totalRecords;
     private long beginTime;
 
@@ -67,7 +67,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % recordIDMax);
         sendChannel.send(id, startTime, endTime, dataSize, events);
-        if (this.msToRun > 0 && ((endTime - beginTime)  >= this.msToRun)) {
+        if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime)  >= this.msToRun)) {
             ret.complete(null);
         } else if (this.totalRecords > cnt) {
             ret.complete(null);
