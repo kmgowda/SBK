@@ -16,20 +16,7 @@ import java.io.IOException;
 /**
  * Interface for Basic Data Readers.
  */
-public interface DataReader<T> {
-
-    /**
-     * Open the data.
-     * @throws IOException If an exception occurred.
-     */
-    void open() throws IOException;
-
-    /**
-     * close the reader.
-     * @throws IOException If an exception occurred.
-     */
-    void close() throws IOException;
-
+public interface DataReader<T> extends IO {
 
     /**
      * Benchmarking reader by reading given number of records.

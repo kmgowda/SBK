@@ -15,19 +15,7 @@ import java.io.IOException;
 /**
  * Interface for Basic Data Writers.
  */
-public interface DataWriter<T>  {
-
-    /**
-     * open the Writer.
-     * @throws IOException If an exception occurred.
-     */
-    void open() throws IOException;
-
-    /**
-     * Close the  Writer.
-     * @throws IOException If an exception occurred.
-     */
-    void close() throws IOException;
+public interface DataWriter<T> extends IO {
 
     /**
      * writer benchmarking by writing given number of records.
