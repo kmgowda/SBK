@@ -68,7 +68,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void writeAsyncTime(DataType<byte[]> dType, byte[] data, int size, Time time, Status status) throws IOException {
+    public void writeSetTime(DataType<byte[]> dType, byte[] data, int size, Time time, Status status) throws IOException {
         final int recs;
         if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
             recs = (int) Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());

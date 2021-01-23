@@ -64,7 +64,7 @@ public interface Writer<T>  extends DataWriter<T> {
      * @param status  write status to return
      * @throws IOException If an exception occurred.
      */
-    default void writeAsyncTime(DataType<T> dType, T data, int size, Time time, Status status) throws IOException {
+    default void writeSetTime(DataType<T> dType, T data, int size, Time time, Status status) throws IOException {
         status.bytes = size;
         status.records = 1;
         status.startTime = time.getCurrentTime();
@@ -262,7 +262,7 @@ public interface Writer<T>  extends DataWriter<T> {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
             while (i < loopMax) {
-                writeAsyncTime(dType, data, size, time, status);
+                writeSetTime(dType, data, size, time, status);
                 id += 1;
                 if (id >= writer.recordIDMax) {
                     id = 0;
@@ -301,7 +301,7 @@ public interface Writer<T>  extends DataWriter<T> {
         while (secondsElapsed < secondsToRun) {
             long i = 0;
             while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
-                writeAsyncTime(dType, data, size, time, status);
+                writeSetTime(dType, data, size, time, status);
                 id += 1;
                 if (id >= writer.recordIDMax) {
                     id = 0;
