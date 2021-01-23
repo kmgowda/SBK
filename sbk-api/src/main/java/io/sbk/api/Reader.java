@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Interface for Readers.
  */
-public interface Reader<T> extends DataReader<T> {
+public interface Reader<T> extends DataRecordsReader<T> {
 
     /**
      * Read the data.
@@ -107,96 +107,5 @@ public interface Reader<T> extends DataReader<T> {
         }
     }
 
-    /**
-     * Default implementation for benchmarking reader by reading given number of records.
-     * This method uses the method {@link Reader#recordRead(DataType, Time, Status, SendChannel, int)}
-     *
-     * @param reader  Reader Descriptor
-     * @param dType  dataType
-     * @param time  time interface
-     * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
-     */
-    default void RecordsReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        final Status status = new Status();
-        int  id = reader.id % reader.recordIDMax;
-        long i = 0;
-        while (i < reader.params.getRecordsPerReader()) {
-            recordRead(dType, time, status, reader.sendChannel, id++);
-            i += status.records;
-            if (id >= reader.recordIDMax) {
-                id = 0;
-            }
-        }
-    }
-
-    /**
-     * Default implementation for benchmarking reader by reading given number of records.
-     * This method uses the method {@link Reader#recordReadTime(DataType, Time, Status, SendChannel, int)}}
-     *
-     * @param reader      Reader Descriptor
-     * @param dType     dataType
-     * @param time  time interface
-     * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
-     */
-    default void RecordsReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        final Status status = new Status();
-        int id = reader.id % reader.recordIDMax;
-        long i = 0;
-        while (i < reader.params.getRecordsPerReader()) {
-            recordReadTime(dType, time, status, reader.sendChannel, id++);
-            i += status.records;
-            if (id >= reader.recordIDMax) {
-                id = 0;
-            }
-        }
-    }
-
-    /**
-     * Default implementation for benchmarking reader by reading events/records for specific time duration.
-     * This method uses the method {@link Reader#recordRead(DataType, Time, Status, SendChannel, int)}
-     *
-     * @param reader  Reader Descriptor
-     * @param dType  dataType
-     * @param time  time interface
-     * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
-     */
-    default void RecordsTimeReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        final long startTime = time.getCurrentTime();
-        final Status status = new Status();
-        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
-        int id = reader.id % reader.recordIDMax;
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
-            recordRead(dType, time, status, reader.sendChannel, id++);
-            if (id >= reader.recordIDMax) {
-                id = 0;
-            }
-        }
-    }
-
-    /**
-     * Default implementation for benchmarking reader by reading events/records for specific time duration.
-     * This method uses the method {@link Reader#recordReadTime(DataType, Time, Status, SendChannel, int)}}
-     *
-     * @param reader  Reader Descriptor
-     * @param dType  dataType
-     * @param time  time interface
-     * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
-     */
-    default void RecordsTimeReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        final long startTime = time.getCurrentTime();
-        final Status status = new Status();
-        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
-        int id = reader.id % reader.recordIDMax;
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
-            recordReadTime(dType, time, status, reader.sendChannel, id++);
-            if (id >= reader.recordIDMax) {
-                id = 0;
-            }
-        }
-    }
 }
 
