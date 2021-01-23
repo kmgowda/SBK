@@ -10,8 +10,8 @@
 package io.sbk.Hive;
 
 import io.sbk.Jdbc.Jdbc;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
 
 import java.io.IOException;
 
@@ -36,7 +36,7 @@ public class Hive extends Jdbc {
     }
 
     @Override
-    public Writer<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final Parameters params) {
         try {
             return new HiveWriter(id, params, config, dType);
         } catch (IOException ex) {

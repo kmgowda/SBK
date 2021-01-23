@@ -13,10 +13,10 @@ package io.sbk.Pravega;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 
 import java.io.IOException;
 import java.net.URI;
@@ -124,7 +124,7 @@ public class Pravega implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new PravegaWriter(id, params, config.streamName, factory);
         } catch (IOException ex) {
@@ -135,7 +135,7 @@ public class Pravega implements Storage<byte[]> {
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new PravegaReader(id, params, config.streamName, rdGrpName, factory);
         } catch (IOException ex) {

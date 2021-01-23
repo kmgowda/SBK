@@ -9,10 +9,10 @@
  */
 package io.sbk.ConcurrentQ;
 
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -45,7 +45,7 @@ public class ConcurrentQ implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new CqWriter(queue);
         } catch (IOException ex) {
@@ -55,7 +55,7 @@ public class ConcurrentQ implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new CqReader(queue);
         } catch (IOException ex) {

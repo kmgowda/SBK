@@ -9,11 +9,11 @@
  */
 package io.sbk.AsyncFile;
 
+import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 import io.sbk.api.impl.NioByteBuffer;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class AsyncFile implements Storage<ByteBuffer> {
     }
 
     @Override
-    public Writer<ByteBuffer> createWriter(final int id, final Parameters params) {
+    public DataWriter<ByteBuffer> createWriter(final int id, final Parameters params) {
         try {
             return new AsyncFileWriter(id, params, fileName);
         } catch (IOException ex) {
@@ -66,7 +66,7 @@ public class AsyncFile implements Storage<ByteBuffer> {
     }
 
     @Override
-    public Reader<ByteBuffer> createReader(final int id, final Parameters params) {
+    public DataReader<ByteBuffer> createReader(final int id, final Parameters params) {
         try {
             return new AsyncFileReader(id, params, fileName);
         } catch (IOException ex) {

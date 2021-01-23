@@ -9,10 +9,11 @@
  */
 package io.sbk.Null;
 
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
-import io.sbk.api.Reader;
 import io.sbk.api.Storage;
-import io.sbk.api.Writer;
+
 
 import java.io.IOException;
 
@@ -38,12 +39,12 @@ public class Null implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         return new NullWriter();
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         return new NullReader();
     }
 }

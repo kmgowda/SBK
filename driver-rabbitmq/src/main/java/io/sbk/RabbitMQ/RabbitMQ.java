@@ -9,10 +9,11 @@
  */
 package io.sbk.RabbitMQ;
 import io.sbk.api.CallbackReader;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
+
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -81,7 +82,7 @@ public class RabbitMQ implements Storage<byte[]> {
     }
 
     @Override
-    public Writer createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new RabbitMQWriter(id, params, connection, topicName, isPersist);
         } catch (IOException ex) {
@@ -91,12 +92,12 @@ public class RabbitMQ implements Storage<byte[]> {
     }
 
     @Override
-    public Reader createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         return null;
     }
 
     @Override
-    public CallbackReader createCallbackReader(final int id, final Parameters params) {
+    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
             return new RabbitMQCallbackReader(id, params, connection, topicName, topicName + "-" + id);
         } catch (IOException ex) {

@@ -9,11 +9,11 @@
  */
 package io.sbk.Jdbc;
 
+import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 import io.sbk.api.impl.SbkLogger;
 import io.sbk.api.impl.StringHandler;
 
@@ -303,7 +303,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public Writer<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final Parameters params) {
         try {
            return new JdbcWriter(id, params, config, dType);
         } catch (IOException ex) {
@@ -313,7 +313,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public Reader<String> createReader(final int id, final Parameters params) {
+    public DataReader<String> createReader(final int id, final Parameters params) {
         try {
             return  new JdbcReader(id, params, config);
         } catch (IOException ex) {

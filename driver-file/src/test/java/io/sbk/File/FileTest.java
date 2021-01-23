@@ -202,7 +202,7 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        writer = file.createWriter(0, params);
+        writer = (Writer<ByteBuffer>) file.createWriter(0, params);
         byte[] byteData = data.getBytes();
         writeBuffer = file.getDataType().allocate(byteData.length);
         for (int i = 0; i < byteData.length; i++) {
@@ -233,7 +233,7 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        reader = file.createReader(0, params);
+        reader = (Reader<ByteBuffer>) file.createReader(0, params);
         try {
             readBuffer = reader.read();
             reader.close();
@@ -285,7 +285,7 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        writer = file.createWriter(0, params);
+        writer = (Writer<ByteBuffer>) file.createWriter(0, params);
         byte[] byteData = data.getBytes();
         writeBuffer = file.getDataType().allocate(byteData.length);
         for (int i = 0; i < byteData.length; i++) {
@@ -316,7 +316,7 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        reader = file.createReader(0, params);
+        reader = (Reader<ByteBuffer>) file.createReader(0, params);
         try {
             readBuffer = reader.read();
         } catch (IOException ex) {

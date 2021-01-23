@@ -12,10 +12,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.CallbackReader;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 import org.apache.activemq.artemis.api.core.RoutingType;
 import org.apache.activemq.artemis.api.core.SimpleString;
 import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
@@ -95,7 +95,7 @@ public class Artemis implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new ArtemisWriter(id, params, topicName, config, session);
         } catch (IOException ex) {
@@ -105,7 +105,7 @@ public class Artemis implements Storage<byte[]> {
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         return null;
     }
 

@@ -8,10 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Template;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 
 import java.io.IOException;
 
@@ -38,12 +38,12 @@ public class Template implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         return new TemplateWriter(id, params);
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         return new TemplateReader(id, params);
     }
 }
