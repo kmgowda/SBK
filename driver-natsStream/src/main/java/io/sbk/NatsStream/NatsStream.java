@@ -11,7 +11,7 @@ package io.sbk.NatsStream;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.sbk.api.CallbackReader;
+//import io.sbk.api.CallbackReader;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
@@ -80,11 +80,19 @@ public class NatsStream implements Storage<byte[]> {
         }
     }
 
+
     @Override
     public DataReader<byte[]> createReader(final int id, final Parameters params) {
-        return null;
+        try {
+            return new NatsStreamReader(id, params, topicName, topicName + "-" + id,
+                    config, optsBuilder);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
+    /*
     @Override
     public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
@@ -95,4 +103,5 @@ public class NatsStream implements Storage<byte[]> {
             return null;
         }
     }
+    */
 }
