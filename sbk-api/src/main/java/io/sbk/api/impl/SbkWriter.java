@@ -11,12 +11,12 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.DataType;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
 import io.sbk.api.RateController;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Time;
 import io.sbk.api.Worker;
-import io.sbk.api.Writer;
 
 import java.io.IOException;
 
@@ -25,7 +25,7 @@ import java.io.IOException;
  */
 public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
-    final private Writer<Object> writer;
+    final private DataWriter<Object> writer;
     final private Time time;
     final private RunBenchmark perf;
     final private RateController rCnt;
@@ -33,7 +33,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private int dataSize;
 
     public SbkWriter(int writerID, int idMax, Parameters params, SendChannel sendChannel,
-                     DataType<Object> dType, Time time, Writer<Object> writer) {
+                     DataType<Object> dType, Time time, DataWriter<Object> writer) {
         super(writerID, idMax, params, sendChannel);
         this.dType = dType;
         this.writer = writer;

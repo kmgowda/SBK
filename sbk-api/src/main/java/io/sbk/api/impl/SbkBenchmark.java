@@ -12,15 +12,15 @@ package io.sbk.api.impl;
 import io.sbk.api.Action;
 import io.sbk.api.CallbackReader;
 import io.sbk.api.Benchmark;
+import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
-import io.sbk.api.Reader;
 import io.sbk.api.Config;
 import io.sbk.api.Storage;
 import io.sbk.api.Time;
-import io.sbk.api.Writer;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -56,8 +56,8 @@ public class SbkBenchmark implements Benchmark {
     final private Performance readStats;
     final private int maxQs;
     final private ScheduledExecutorService timeoutExecutor;
-    private List<Writer<Object>> writers;
-    private List<Reader<Object>> readers;
+    private List<DataWriter<Object>> writers;
+    private List<DataReader<Object>> readers;
     private List<CallbackReader<Object>> callbackReaders;
 
 
@@ -164,6 +164,9 @@ public class SbkBenchmark implements Benchmark {
                 .collect(Collectors.toList());
 
         if (writers != null && writers.size() > 0) {
+            for (int i = 0; i < params.getWritersCount(); i++) {
+                writers.get(i).open();
+            }
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
@@ -182,6 +185,9 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (readers != null && readers.size() > 0) {
+            for (int i = 0; i < params.getWritersCount(); i++) {
+                writers.get(i).open();
+            }
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,

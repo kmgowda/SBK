@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Interface for Writers.
  */
-public interface Writer<T>  {
+public interface Writer<T>  extends DataWriter<T> {
 
     /**
      * Asynchronously Writes the data .
@@ -32,11 +32,23 @@ public interface Writer<T>  {
      */
     void sync() throws IOException;
 
+
+    /**
+     * open the Writer.
+     * @throws IOException If an exception occurred.
+     */
+    default void open() throws IOException {
+
+    }
+
     /**
      * Close the  Writer.
      * @throws IOException If an exception occurred.
      */
-    void close() throws IOException;
+    default void close() throws IOException {
+
+    }
+
 
     /**
      * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)})} with time

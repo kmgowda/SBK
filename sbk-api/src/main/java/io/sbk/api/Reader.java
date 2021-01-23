@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Interface for Readers.
  */
-public interface Reader<T> {
+public interface Reader<T> extends DataReader<T> {
 
     /**
      * Read the data.
@@ -26,11 +26,22 @@ public interface Reader<T> {
      */
     T read() throws EOFException, IOException;
 
+
     /**
-     * close the consumer/reader.
+     * open the Writer.
      * @throws IOException If an exception occurred.
      */
-    void close() throws IOException;
+    default void open() throws IOException {
+
+    }
+
+    /**
+     * Close the  Reader.
+     * @throws IOException If an exception occurred.
+     */
+    default void close() throws IOException {
+
+    }
 
     /**
      * Default implementation for Reading data using {@link Reader#read()}
