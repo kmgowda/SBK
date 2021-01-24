@@ -205,4 +205,64 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
         run(reader, dType, time, new ConsumeRW());
     }
 
+    /**
+     * Benchmarking reader by reading given number of records with Rate controlled.
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @param time  time interface
+     * @param rController Rate Controller
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException If an exception occurred.
+     */
+    public void RecordsReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
+        run(reader, dType, time, new ConsumeRead());
+    }
+
+    /**
+     * Benchmarking reader by reading given number of records with Rate controlled.
+     * used while another writer is writing the data.
+     *
+     * @param reader      Reader Descriptor
+     * @param dType     dataType
+     * @param time  time interface
+     * @param rController Rate Controller
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException If an exception occurred.
+     */
+    public void RecordsReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
+        run(reader, dType, time, new ConsumeRW());
+    }
+
+
+
+    /**
+     * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @param time  time interface
+     * @param rController Rate Controller
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException If an exception occurred.
+     */
+    public void RecordsTimeReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
+        run(reader, dType, time, new ConsumeRead());
+    }
+
+    /**
+     * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
+     * used while another writer is writing the data.
+     *
+     * @param reader  Reader Descriptor
+     * @param dType  dataType
+     * @param time  time interface
+     * @param rController Rate Controller
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException If an exception occurred.
+     */
+    public void RecordsTimeReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
+        run(reader, dType, time, new ConsumeRW());
+    }
+
 }

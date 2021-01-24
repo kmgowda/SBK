@@ -88,8 +88,8 @@ final public class SbkParameters implements Parameters {
         options.addOption("time", true, "Number of seconds to run; if not specified, runs forever");
         options.addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +
-                        "if 0 , writes 'records'\n" +
-                        "if -1, get the maximum throughput");
+                        "if 0 , writes/reads 'records'\n" +
+                        "if -1, get the maximum throughput (default: -1)");
         options.addOption("help", false, "Help message");
     }
 
@@ -173,8 +173,24 @@ final public class SbkParameters implements Parameters {
             throughput = -1;
         }
 
-        if (writersCount > 0) {
+        int workersCnt = writersCount;
+        if (workersCnt == 0) {
+            workersCnt = readersCount;
+        }
 
+        if (throughput < 0 && secondsToRun > 0) {
+            long recsPerSec = recordsCount / workersCnt;
+            if (recsPerSec > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("Error: The Records per Second value :" +recsPerSec +"is more than "+Integer.MAX_VALUE);
+            }
+            recordsPerSec = (int) recsPerSec;
+        } else if (throughput > 0) {
+            recordsPerSec = (int) (((throughput * 1024 * 1024) / recordSize) / workersCnt);
+        } else {
+            recordsPerSec = 0;
+        }
+
+        if (writersCount > 0) {
             if (recordSize == 0) {
                 throw new IllegalArgumentException("Error: Must specify the record 'size'");
             }
@@ -186,20 +202,8 @@ final public class SbkParameters implements Parameters {
             }
             writeAndRead = readersCount > 0;
             recordsPerWriter = recordsCount / writersCount;
-            if (throughput < 0 && secondsToRun > 0) {
-                long recsPerSec = recordsCount / writersCount;
-                if (recsPerSec > Integer.MAX_VALUE) {
-                    throw new IllegalArgumentException("Error: The Records per Second value :" +recsPerSec +"is more than "+Integer.MAX_VALUE);
-                }
-                recordsPerSec = (int) recsPerSec;
-            } else if (throughput > 0) {
-                recordsPerSec = (int) (((throughput * 1024 * 1024) / recordSize) / writersCount);
-            } else {
-                recordsPerSec = 0;
-            }
         } else {
             recordsPerWriter = 0;
-            recordsPerSec = 0;
             writeAndRead = false;
         }
 

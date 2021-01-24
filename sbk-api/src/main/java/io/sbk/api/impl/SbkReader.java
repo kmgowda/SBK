@@ -13,6 +13,7 @@ package io.sbk.api.impl;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
+import io.sbk.api.RateController;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Time;
 import io.sbk.api.Worker;
@@ -27,6 +28,7 @@ public class SbkReader extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataReader<Object> reader;
     final private Time time;
+    final private RateController rCnt;
     final private RunBenchmark perf;
 
     public SbkReader(int readerId, int idMax, Parameters params, SendChannel sendChannel,
@@ -35,6 +37,7 @@ public class SbkReader extends Worker implements RunBenchmark {
         this.dType = dType;
         this.reader = reader;
         this.time = time;
+        this.rCnt = new SbkRateController();
         this.perf = createBenchmark();
     }
 
@@ -46,9 +49,33 @@ public class SbkReader extends Worker implements RunBenchmark {
     private RunBenchmark createBenchmark() {
         final RunBenchmark perfReader;
         if (params.getSecondsToRun() > 0) {
-            perfReader = params.isWriteAndRead() ? this::RecordsTimeReaderRW : this::RecordsTimeReader;
+            if (params.isWriteAndRead() ) {
+                if (params.getRecordsPerSec() > 0) {
+                    perfReader = this::RecordsTimeReaderRWRateControl;
+                } else {
+                    perfReader = this::RecordsTimeReaderRW;
+                }
+            } else {
+                if (params.getRecordsPerSec() > 0) {
+                    perfReader = this::RecordsTimeReaderRateControl;
+                } else {
+                    perfReader = this::RecordsTimeReader;
+                }
+            }
         } else {
-            perfReader = params.isWriteAndRead() ? this::RecordsReaderRW : this::RecordsReader;
+            if (params.isWriteAndRead() ) {
+                if (params.getRecordsPerSec() > 0) {
+                    perfReader = this::RecordsReaderRWRateControl;
+                } else {
+                    perfReader = this::RecordsReaderRW;
+                }
+            } else {
+                if (params.getRecordsPerSec() > 0) {
+                    perfReader = this::RecordsReaderRateControl;
+                } else {
+                    perfReader = this::RecordsReader;
+                }
+            }
         }
         return perfReader;
     }
@@ -69,4 +96,21 @@ public class SbkReader extends Worker implements RunBenchmark {
     private void RecordsTimeReaderRW() throws EOFException, IOException {
         reader.RecordsTimeReaderRW(this, dType, time);
     }
+
+    private void RecordsReaderRateControl() throws EOFException, IOException {
+        reader.RecordsReaderRateControl(this, dType, time, rCnt);
+    }
+
+    private void RecordsReaderRWRateControl() throws EOFException, IOException {
+        reader.RecordsReaderRWRateControl(this, dType, time, rCnt);
+    }
+
+    private void RecordsTimeReaderRateControl() throws EOFException, IOException {
+        reader.RecordsTimeReaderRateControl(this, dType, time, rCnt);
+    }
+
+    private void RecordsTimeReaderRWRateControl() throws EOFException, IOException {
+        reader.RecordsTimeReaderRWRateControl(this, dType, time, rCnt);
+    }
+
 }
