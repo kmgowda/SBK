@@ -45,13 +45,13 @@ public class File implements Storage<ByteBuffer> {
             throw new IllegalArgumentException(ex);
         }
         params.addOption("file", true, "File name, default file name : "+config.fileName);
-        params.addOption("async", true, "Asynchronous File Read mode, Default : "+config.isAsync);
+        params.addOption("asyncthreads", true, "Asynchronous File Read mode, Default : "+config.asyncThreads);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         config.fileName =  params.getOptionValue("file", config.fileName);
-        config.isAsync =  Boolean.parseBoolean(params.getOptionValue("async", Boolean.toString(config.isAsync)));
+        config.asyncThreads =  Integer.parseInt(params.getOptionValue("asyncthreads", Integer.toString(config.asyncThreads)));
         if (params.getWritersCount() > 1) {
             throw new IllegalArgumentException("Writers should be only 1 for File writing");
         }
@@ -86,7 +86,7 @@ public class File implements Storage<ByteBuffer> {
     @Override
     public DataReader<ByteBuffer> createReader(final int id, final Parameters params) {
         try {
-            if (config.isAsync) {
+            if (config.asyncThreads > 0) {
                 SbkLogger.log.warn("Asynchronous File Reader initiated !");
                 return new FileAsyncReader(id, params, dType, config);
             } else {

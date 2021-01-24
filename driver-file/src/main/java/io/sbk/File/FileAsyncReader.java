@@ -21,6 +21,8 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Class for File Asynchronous Reader.
@@ -28,12 +30,12 @@ import java.util.concurrent.CompletableFuture;
 public class FileAsyncReader implements AsyncReader<ByteBuffer> {
     final private FileChannel in;
     final private DataType<ByteBuffer> dType;
-    final private ByteBuffer readBuffer;
+    final private ExecutorService executor;
 
     public FileAsyncReader(int id, Parameters params, DataType<ByteBuffer> dType, FileConfig config) throws IOException {
         this.in = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.READ);
         this.dType = dType;
-        this.readBuffer = dType.create(params.getRecordSize());
+        this.executor = Executors.newFixedThreadPool(config.asyncThreads);
     }
 
     @Override
@@ -50,7 +52,7 @@ public class FileAsyncReader implements AsyncReader<ByteBuffer> {
             } catch (IOException ex) {
                 ret.completeExceptionally(ex);
             }
-        });
+        }, executor);
         return ret;
     }
 
