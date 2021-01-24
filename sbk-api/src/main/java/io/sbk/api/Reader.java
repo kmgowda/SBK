@@ -44,6 +44,7 @@ public interface Reader<T> extends DataRecordsReader<T> {
      * otherwise, use the default implementation and don't override this method.
      *
      * @param dType      dataType
+     * @param size  size of the data in bytes
      * @param time  time interface
      * @param status     Timestamp
      * @param sendChannel to call for benchmarking
@@ -51,7 +52,7 @@ public interface Reader<T> extends DataRecordsReader<T> {
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordRead(DataType<T> dType, Time time, Status status, SendChannel sendChannel, int id)
+    default void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         status.startTime = time.getCurrentTime();
         final T ret = read();
@@ -76,6 +77,7 @@ public interface Reader<T> extends DataRecordsReader<T> {
      * otherwise, use the default implementation and don't override this method.
      *
      * @param dType      dataType
+     * @param size  size of the data in bytes
      * @param time  time interface
      * @param status     Timestamp
      * @param sendChannel to call for benchmarking
@@ -83,7 +85,7 @@ public interface Reader<T> extends DataRecordsReader<T> {
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void recordReadTime(DataType<T> dType, Time time, Status status, SendChannel sendChannel, int id)
+    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final T ret = read();
         if (ret == null) {

@@ -29,17 +29,15 @@ public class FileAsyncReader implements AsyncReader<ByteBuffer> {
     final private FileChannel in;
     final private DataType<ByteBuffer> dType;
     final private ByteBuffer readBuffer;
-    final private int size;
 
     public FileAsyncReader(int id, Parameters params, DataType<ByteBuffer> dType, FileConfig config) throws IOException {
         this.in = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.READ);
-        this.size = params.getRecordSize();
         this.dType = dType;
         this.readBuffer = dType.create(params.getRecordSize());
     }
 
     @Override
-    public CompletableFuture<ByteBuffer> readAsync() {
+    public CompletableFuture<ByteBuffer> readAsync(int size) {
         final CompletableFuture<ByteBuffer> ret = new CompletableFuture<>();
         CompletableFuture.runAsync(() -> {
             final ByteBuffer readBuffer = dType.create(size);

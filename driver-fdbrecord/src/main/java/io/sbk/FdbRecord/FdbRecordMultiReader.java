@@ -69,7 +69,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     }
 
     @Override
-    public void recordRead(DataType<ByteString> dType, Time time, Status status, SendChannel sendChannel, int id)
+    public void recordRead(DataType<ByteString> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
@@ -108,7 +108,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
 
 
     @Override
-    public void recordReadTime(DataType<ByteString> dType, Time time, Status status, SendChannel sendChannel, int id)
+    public void recordReadTime(DataType<ByteString> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         final int recs;
         if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {

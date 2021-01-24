@@ -46,7 +46,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordRead(DataType dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -69,7 +69,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordReadTime(DataType dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;

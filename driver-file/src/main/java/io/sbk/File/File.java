@@ -18,6 +18,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.impl.NioByteBuffer;
+import io.sbk.api.impl.SbkLogger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -50,7 +51,7 @@ public class File implements Storage<ByteBuffer> {
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         config.fileName =  params.getOptionValue("file", config.fileName);
-        config.isAsync =  Boolean.parseBoolean(params.getOptionValue("writers", Boolean.toString(config.isAsync)));
+        config.isAsync =  Boolean.parseBoolean(params.getOptionValue("async", Boolean.toString(config.isAsync)));
         if (params.getWritersCount() > 1) {
             throw new IllegalArgumentException("Writers should be only 1 for File writing");
         }
@@ -86,8 +87,10 @@ public class File implements Storage<ByteBuffer> {
     public DataReader<ByteBuffer> createReader(final int id, final Parameters params) {
         try {
             if (config.isAsync) {
+                SbkLogger.log.warn("Asynchronous File Reader initiated !");
                 return new FileAsyncReader(id, params, dType, config);
             } else {
+                SbkLogger.log.info("Synchronous File Reader initiated !");
                 return new FileReader(id, params, dType, config);
             }
         } catch (IOException ex) {
