@@ -61,10 +61,9 @@ public class NatsStreamReader extends AbstractCallbackReader<byte[]> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void stop() throws IOException {
         try {
             cn.close();
-            super.close();
         } catch (InterruptedException | TimeoutException ex) {
             throw new IOException(ex);
         }

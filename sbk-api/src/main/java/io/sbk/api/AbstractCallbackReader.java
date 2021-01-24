@@ -36,15 +36,22 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
      */
     public abstract void start(Callback<T> callback) throws IOException;
 
+    /**
+     * Stop the CallBack Reader.
+     * @throws IOException If an exception occurred.
+     */
+    public abstract void stop() throws IOException;
+
 
     /**
      * Close the CallBack Reader.
-     * while overriding this method, make sure that super.close() is called.
+     * stops the callback reader.
      *
      * @throws IOException If an exception occurred.
      */
     @Override
-    public void close() throws IOException {
+    public final void close() throws IOException {
+        stop();
         complete();
     }
 
