@@ -119,11 +119,12 @@ usage: sbk
                      number of of events(records) ; <arg> number of
                      events(records) per Write or Read Transaction
  -throughput <arg>   if > 0 , throughput in MB/s
-                     if 0 , writes 'records'
-                     if -1, get the maximum throughput
+                     if 0 , writes/reads 'records'
+                     if -1, get the maximum throughput (default: -1)
  -time <arg>         Number of seconds to run; if not specified, runs
                      forever
  -writers <arg>      Number of writers
+
 
 ```
 
@@ -269,9 +270,9 @@ in the case you want to write/read the certain number of records.events use the 
 ```
 
 ### 2 - Throughput Mode
-In this mode, the SBK  pushes the messages to the storage client(device/driver) with specified approximate maximum throughput in terms of Mega Bytes/second (MB/s).
+In this mode, the SBK  pushes/pull/from the messages to the storage client(device/driver) with specified approximate maximum throughput in terms of Mega Bytes/second (MB/s).
 This mode is used to find the least latency that can be obtained from the storage device or storage cluster (server) for given throughput.
-This mode is used only for write operation.
+
 
 ```
 For example:  The througput mode for pulsar 5 writers as follows
@@ -294,10 +295,9 @@ in the case you want to write/read the certain number of events use the -records
 ```
 
 ### 3 - Rate limiter Mode
-This mode is another form of controlling writers throughput by limiting the number of records per second.
-In this mode, the SBK  pushes the messages to the storage client (device/driver) with specified approximate maximum records per sec.
+This mode is another form of controlling writers/readers throughput by limiting the number of records per second.
+In this mode, the SBK  pushes/pull the messages to/from the storage client (device/driver) with specified approximate maximum records per sec.
 This mode is used to find the least latency  that can be obtained from the storage device or storage cluster (server) for events rate.
-This mode is used only for write operation.
 
 ```
 For example:  The Rate limiter Mode for pulsar 5 writers as follows
@@ -316,7 +316,7 @@ Note that in this mode, there is 'NO total number of events' to specify hence us
 
 ### 4 - End to End Latency Mode
 In this mode, the SBK  writes and read the messages to the storage client (device/driver) and records the end to end latency.
-End to end latency means the time duration between the beginning of the writing event/record to stream and the time after reading the event/record.
+End to end latency means the time duration between the beginning of the writing event/record to stream, and the time after reading the event/record.
 in this mode user must specify both the number of writers and readers.
 The -throughput option (Throughput mode) or -records (late limiter) can used to limit the writers throughput or records rate.
 
@@ -484,13 +484,14 @@ usage: sbk -class pulsar
                         events(records) per Write or Read Transaction
  -threads <arg>         io threads per Topic, default: 1
  -throughput <arg>      if > 0 , throughput in MB/s
-                        if 0 , writes 'records'
-                        if -1, get the maximum throughput
+                        if 0 , writes/reads 'records'
+                        if -1, get the maximum throughput (default: -1)
  -time <arg>            Number of seconds to run; if not specified, runs
                         forever
  -topic <arg>           Topic name, default : test
  -writeQuorum <arg>     WriteQuorum default: 1
  -writers <arg>         Number of writers
+
 
 ```
 
