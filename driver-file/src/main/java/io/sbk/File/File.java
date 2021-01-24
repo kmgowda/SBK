@@ -44,11 +44,13 @@ public class File implements Storage<ByteBuffer> {
             throw new IllegalArgumentException(ex);
         }
         params.addOption("file", true, "File name, default file name : "+config.fileName);
+        params.addOption("async", true, "Asynchronous File Read mode, Default : "+config.isAsync);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         config.fileName =  params.getOptionValue("file", config.fileName);
+        config.isAsync =  Boolean.parseBoolean(params.getOptionValue("writers", Boolean.toString(config.isAsync)));
         if (params.getWritersCount() > 1) {
             throw new IllegalArgumentException("Writers should be only 1 for File writing");
         }
@@ -83,7 +85,11 @@ public class File implements Storage<ByteBuffer> {
     @Override
     public DataReader<ByteBuffer> createReader(final int id, final Parameters params) {
         try {
-            return new FileReader(id, params, dType, config);
+            if (config.isAsync) {
+                return new FileAsyncReader(id, params, dType, config);
+            } else {
+                return new FileReader(id, params, dType, config);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

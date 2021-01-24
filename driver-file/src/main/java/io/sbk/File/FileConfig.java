@@ -11,6 +11,7 @@ package io.sbk.File;
 
 public class FileConfig {
     public String fileName;
+    public boolean isAsync;
     public boolean isAppend;
     public boolean reCreate;
     public boolean metaUpdate;
