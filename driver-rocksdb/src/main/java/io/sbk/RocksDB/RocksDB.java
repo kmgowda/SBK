@@ -13,10 +13,10 @@ package io.sbk.RocksDB;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDBException;
 
@@ -73,7 +73,7 @@ public class RocksDB implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new RocksDBWriter(id, params, db);
         } catch (IOException ex) {
@@ -83,7 +83,7 @@ public class RocksDB implements Storage<byte[]> {
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new RocksDBReader(id, params, db);
         } catch (IOException ex) {

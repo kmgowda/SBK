@@ -46,7 +46,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordRead(DataType<ByteBuffer> dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordRead(DataType<ByteBuffer> dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final long ctime = time.getCurrentTime();
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
@@ -66,7 +66,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordReadTime(DataType<ByteBuffer> dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordReadTime(DataType<ByteBuffer> dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final ByteBuffer buffer =  dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {

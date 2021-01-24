@@ -39,7 +39,7 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordRead(DataType dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         status.startTime = time.getCurrentTime();
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
         status.endTime = time.getCurrentTime();
@@ -57,7 +57,7 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordReadTime(DataType dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
         status.endTime = time.getCurrentTime();
         if (records.isEmpty()) {

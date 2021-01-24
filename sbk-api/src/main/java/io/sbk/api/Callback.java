@@ -10,13 +10,13 @@
 
 package io.sbk.api;
 
-public interface Callback {
+public interface Callback<T> {
 
     /**
      * Consume the data.
      * @param data data read from storage client/device.
      */
-    void consume(final Object data);
+    void consume(final T data);
 
     /**
      * Accept the benchmarking data.

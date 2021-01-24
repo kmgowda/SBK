@@ -9,11 +9,10 @@
  */
 package io.sbk.Nats;
 import io.sbk.api.CallbackReader;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
-
 import java.io.IOException;
 import io.nats.client.Options;
 
@@ -58,7 +57,7 @@ public class Nats implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new NatsWriter(id, params, topicName, options);
         } catch (IOException ex) {
@@ -68,7 +67,7 @@ public class Nats implements Storage<byte[]> {
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         return null;
     }
 

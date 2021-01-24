@@ -12,19 +12,22 @@ package io.sbk.api;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Interface for Readers.
+ * Interface for Asynchronous Readers.
  */
-public interface Reader<T> extends DataRecordsReader<T> {
+public interface AsyncReader<T> extends DataRecordsReader<T> {
 
     /**
-     * Read the data.
-     * @return T return the data.
+     * Read the dat asynchronously.
+     *
+     * @param size  size of the data in bytes to read.
+     * @return Completable Future.
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    T read() throws EOFException, IOException;
+    CompletableFuture<T> readAsync(int size) throws EOFException, IOException;
 
     /**
      * Close the  Reader.
@@ -35,11 +38,11 @@ public interface Reader<T> extends DataRecordsReader<T> {
     }
 
     /**
-     * Default implementation for Reading data using {@link Reader#read()}
+     * Default implementation for Reading data using {@link AsyncReader#readAsync(int)} ()}
      * and recording the benchmark statistics.
      * The end time of the status parameter {@link Status#endTime} of this method determines
      * the terminating condition for time based reader performance benchmarking.
-     * If you are intend to not use {@link Reader#read()} then you can override this method.
+     * If you are intend to not use {@link AsyncReader#readAsync(int)} ()} then you can override this method.
      * If you are intend to read multiple records then you can override this method.
      * otherwise, use the default implementation and don't override this method.
      *
@@ -55,15 +58,18 @@ public interface Reader<T> extends DataRecordsReader<T> {
     default void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
         status.startTime = time.getCurrentTime();
-        final T ret = read();
+        status.records = 1;
+        status.bytes = size;
+        status.endTime = status.startTime;
+        final CompletableFuture<T> ret = readAsync(size);
         if (ret == null) {
-            status.records = 0;
-            status.endTime = status.startTime;
+            throw new IOException();
         } else {
-            status.endTime = time.getCurrentTime();
-            status.bytes = dType.length(ret);
-            status.records = 1;
-            sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+            final long beginTime = status.startTime;
+            ret.thenAccept(d -> {
+                final long endTime = time.getCurrentTime();
+                sendChannel.send(id, beginTime, endTime, dType.length(d), status.records);
+            });
         }
     }
 
@@ -87,18 +93,19 @@ public interface Reader<T> extends DataRecordsReader<T> {
      */
     default void recordReadTime(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final T ret = read();
+        status.startTime = time.getCurrentTime();
+        status.records = 1;
+        status.bytes = size;
+        status.endTime = status.startTime;
+        final CompletableFuture<T> ret = readAsync(size);
         if (ret == null) {
-            status.endTime = time.getCurrentTime();
-            status.records = 0;
+            throw new IOException();
         } else {
-            status.startTime = dType.getTime(ret);
-            status.endTime = time.getCurrentTime();
-            status.bytes = dType.length(ret);
-            status.records = 1;
-            sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+            ret.thenAccept(d -> {
+                final long endTime = time.getCurrentTime();
+                    sendChannel.send(id, dType.getTime(d), endTime, dType.length(d), status.records);
+            });
         }
     }
-
 }
 

@@ -23,11 +23,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.google.protobuf.ByteString;
+import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
-import io.sbk.api.Reader;
 import io.sbk.api.Storage;
-import io.sbk.api.Writer;
 import io.sbk.api.impl.ProtoBufByteString;
 
 import java.io.IOException;
@@ -103,7 +103,7 @@ public class FdbRecord implements Storage<ByteString> {
     }
 
     @Override
-    public Writer<ByteString> createWriter(final int id, final Parameters params) {
+    public DataWriter<ByteString> createWriter(final int id, final Parameters params) {
         try {
             if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
                 return new FdbRecordMultiWriter(id, params, db, recordStoreProvider);
@@ -117,7 +117,7 @@ public class FdbRecord implements Storage<ByteString> {
     }
 
     @Override
-    public Reader<ByteString> createReader(final int id, final Parameters params) {
+    public DataReader<ByteString> createReader(final int id, final Parameters params) {
         try {
             if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
                 return new FdbRecordMultiReader(id, params, db, recordStoreProvider);

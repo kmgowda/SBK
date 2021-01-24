@@ -13,11 +13,12 @@ package io.sbk.CouchDB;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
-import io.sbk.api.Reader;
+
 import io.sbk.api.Storage;
-import io.sbk.api.Writer;
 import io.sbk.api.impl.JavaString;
 import io.sbk.api.impl.SbkLogger;
 import org.ektorp.CouchDbConnector;
@@ -93,7 +94,7 @@ public class CouchDB implements Storage<String> {
     }
 
     @Override
-    public Writer<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final Parameters params) {
         try {
             return new CouchDBWriter(id, params, config, db);
         } catch (IOException ex) {
@@ -103,7 +104,7 @@ public class CouchDB implements Storage<String> {
     }
 
     @Override
-    public Reader<String> createReader(final int id, final Parameters params) {
+    public DataReader<String> createReader(final int id, final Parameters params) {
         try {
             return new CouchDBReader(id, params, config, db);
         } catch (IOException ex) {

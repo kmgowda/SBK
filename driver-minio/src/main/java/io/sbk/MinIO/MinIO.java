@@ -12,11 +12,11 @@ package io.sbk.MinIO;
 import io.minio.Result;
 import io.minio.errors.InvalidArgumentException;
 import io.minio.messages.Item;
+import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 import io.sbk.api.impl.ByteArray;
 
 import java.io.IOException;
@@ -133,12 +133,12 @@ public class MinIO implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         return new MinIOWriter(id, params, config, mclient, dType);
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         return  new MinIOReader(id, params, config, mclient);
     }
 

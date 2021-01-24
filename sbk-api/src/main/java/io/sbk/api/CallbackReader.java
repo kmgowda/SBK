@@ -19,7 +19,7 @@ public interface CallbackReader<T> {
      * @param callback Reader callback.
      * @throws IOException If an exception occurred.
      */
-    void start(Callback callback) throws IOException;
+    void start(Callback<T> callback) throws IOException;
 
     /**
      * Close the AsyncReader.

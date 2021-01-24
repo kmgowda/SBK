@@ -11,11 +11,12 @@ package io.sbk.NatsStream;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.sbk.api.CallbackReader;
+//import io.sbk.api.CallbackReader;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
+
 
 import java.io.IOException;
 import io.nats.streaming.Options.Builder;
@@ -70,7 +71,7 @@ public class NatsStream implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new NatsStreamWriter(id, params, topicName, config, optsBuilder);
         } catch (IOException ex) {
@@ -79,11 +80,19 @@ public class NatsStream implements Storage<byte[]> {
         }
     }
 
+
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
-        return null;
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+        try {
+            return new NatsStreamReader(id, params, topicName, topicName + "-" + id,
+                    config, optsBuilder);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
+    /*
     @Override
     public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
@@ -94,4 +103,5 @@ public class NatsStream implements Storage<byte[]> {
             return null;
         }
     }
+    */
 }

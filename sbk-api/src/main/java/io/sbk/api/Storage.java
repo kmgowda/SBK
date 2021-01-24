@@ -51,13 +51,13 @@ public interface Storage<T> {
     void closeStorage(final Parameters params) throws IOException;
 
     /**
-     * Create a Single Writer / Producer.
+     * Create a Single Data Writer / Producer.
      * @param id Writer id
      * @param params Parameters object enclosing all commandline arguments,
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Writer return the Writer , null in case of failure
      */
-    Writer<T> createWriter(final int id, final Parameters params);
+    DataWriter<T> createWriter(final int id, final Parameters params);
 
     /**
      * Create a Single Reader / Consumer.
@@ -66,7 +66,7 @@ public interface Storage<T> {
      *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
      * @return Reader return the Reader , null in case of failure
      */
-    Reader<T> createReader(final int id, final Parameters params);
+    DataReader<T> createReader(final int id, final Parameters params);
 
     /**
      * Create a Single Async Reader / Consumer.

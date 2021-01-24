@@ -11,10 +11,10 @@ package io.sbk.Pulsar;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -117,7 +117,7 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new PulsarWriter(id, params, config.topicName, client);
         } catch (IOException ex) {
@@ -127,7 +127,7 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new PulsarReader(id, params, config.topicName, config.topicName+"rdGrp", client);
         } catch (IOException ex) {

@@ -9,10 +9,10 @@
  */
 package io.sbk.HDFS;
 
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.Writer;
-import io.sbk.api.Reader;
 
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -80,7 +80,7 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public Writer<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
         try {
             return new HDFSWriter(id, params, fileSystem, filePath, recreate);
         } catch (IOException ex) {
@@ -90,7 +90,7 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public Reader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final Parameters params) {
         try {
             return new HDFSReader(id, params, fileSystem, filePath);
         } catch (IOException ex) {
