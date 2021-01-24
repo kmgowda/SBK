@@ -205,7 +205,31 @@ docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -br
 * Note that the option **-p 127.0.0.1:9718:9718/tcp** redirects the 9718 port to local port for fetch the performance metric data for Prometheus.  
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
-#### [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/config/kubernetes) 
+### SBK Docker Compose
+
+The SBK docker compose consists of SBK docker image, Grafana and prometheus docker images. 
+The [grafana image](https://github.com/kmgowda/SBK/blob/master/grafana/Dockerfile) contains the [dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards) which can be directly deployed for the performance analytics.
+
+As an example, just follow the below steps to see the performance graphs
+
+1. In the SBK directory run the 'SBK' service of the [docker compose](https://github.com/kmgowda/SBK/blob/master/docker-compose.yml) file as follows.
+
+   ```
+   <SBK dir>% ./docker-compose run sbk  -class concurrentq -writers 1  -readers 5 -size 1000 -time 120 
+
+   ```
+
+1. login to [grafana local host port 3000](http://localhost:3000) with username **admin** and password **sbk**
+1. go to dashboard menu and pick the dashboard of the storage device on which you are running the performance benchmarking.
+   in the above example, you can choose the [Concurrent Queue dashboard](https://github.com/kmgowda/SBK/blob/master/grafana/dashboards/sbk-concurrentq.json).
+1. The SBK docker compose runs the SBK image as docker container. 
+   In case, if you are running SBK as an application, and you want to see the SBK performance graphs using Grafana,
+   then use [Grafana Docker compose](https://github.com/kmgowda/SBK/tree/master/grafana)
+
+   
+## SBK Kubernetes
+
+check these [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/kubernetes) 
 
 
 ## SBK Execution Modes
