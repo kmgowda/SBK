@@ -16,7 +16,13 @@ import java.io.IOException;
 /**
  * Interface for Basic Data Readers.
  */
-public interface DataReader<T> extends IO {
+public interface DataReader<T> {
+
+    /**
+     * Close the  Reader.
+     * @throws IOException If an exception occurred.
+     */
+    void close() throws IOException;
 
     /**
      * Benchmarking reader by reading given number of records.

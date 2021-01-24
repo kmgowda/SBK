@@ -164,9 +164,6 @@ public class SbkBenchmark implements Benchmark {
                 .collect(Collectors.toList());
 
         if (writers != null && writers.size() > 0) {
-            for (int i = 0; i < params.getWritersCount(); i++) {
-                writers.get(i).open();
-            }
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
@@ -185,9 +182,6 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (readers != null && readers.size() > 0) {
-            for (int i = 0; i < params.getWritersCount(); i++) {
-                writers.get(i).open();
-            }
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,

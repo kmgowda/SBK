@@ -48,17 +48,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
     public void close() throws IOException {
         complete();
     }
-
-    /**
-     * Open CallBack Reader.
-     * while overriding this method, make sure that super.close() is called.
-     *
-     * @throws IOException If an exception occurred.
-     */
-    @Override
-    public void open() throws IOException {
-    }
-
+    
 
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {

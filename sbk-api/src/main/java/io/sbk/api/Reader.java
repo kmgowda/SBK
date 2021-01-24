@@ -26,15 +26,6 @@ public interface Reader<T> extends DataRecordsReader<T> {
      */
     T read() throws EOFException, IOException;
 
-
-    /**
-     * open the Writer.
-     * @throws IOException If an exception occurred.
-     */
-    default void open() throws IOException {
-
-    }
-
     /**
      * Close the  Reader.
      * @throws IOException If an exception occurred.

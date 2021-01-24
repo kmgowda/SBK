@@ -27,14 +27,6 @@ public interface Writer<T>  extends DataRecordsWriter<T> {
     CompletableFuture<?> writeAsync(T data) throws IOException;
 
     /**
-     * open the Writer.
-     * @throws IOException If an exception occurred.
-     */
-    default void open() throws IOException {
-
-    }
-
-    /**
      * Close the  Writer.
      * @throws IOException If an exception occurred.
      */
