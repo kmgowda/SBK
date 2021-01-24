@@ -199,14 +199,16 @@ public class SbkBenchmark implements Benchmark {
             sbkReaders = null;
             sbkCallbackReaders = null;
         }
+        final long totalRecords  = params.getSecondsToRun() <= 0 ?
+                            params.getRecordsPerWriter() * params.getWritersCount() : 0;
 
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
-            wStatFuture = writeStats.start(params.getSecondsToRun(), params.getRecordsPerWriter() * params.getWritersCount());
+            wStatFuture = writeStats.start(params.getSecondsToRun(), totalRecords);
         } else {
             wStatFuture = null;
         }
         if (readStats != null && (sbkReaders != null || sbkCallbackReaders != null)) {
-            rStatFuture = readStats.start(params.getSecondsToRun(), params.getRecordsPerReader() * params.getReadersCount());
+            rStatFuture = readStats.start(params.getSecondsToRun(), totalRecords);
         } else {
             rStatFuture = null;
         }
