@@ -90,12 +90,12 @@ public interface Writer<T>  extends DataRecordsWriter<T> {
         ret = writeAsync(data);
         if (ret == null) {
             status.endTime = time.getCurrentTime();
-            sendChannel.send(id, status.startTime, status.endTime, size, 1);
+            sendChannel.send(id, status.startTime, status.endTime, size, status.records);
         } else {
             final long beginTime =  status.startTime;
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                sendChannel.send(id, beginTime, endTime, size, 1);
+                sendChannel.send(id, beginTime, endTime, size, status.records);
             });
         }
     }

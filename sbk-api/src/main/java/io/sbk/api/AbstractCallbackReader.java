@@ -48,7 +48,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
     public void close() throws IOException {
         complete();
     }
-    
+
 
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
