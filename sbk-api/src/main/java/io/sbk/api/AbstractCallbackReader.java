@@ -19,11 +19,10 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Abstract class for Callback Reader.
  */
-public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callback<T> {
+public abstract class AbstractCallbackReader<T> implements DataReader<T> {
     private DataType<T> dataType;
     private Time time;
     private CompletableFuture<Void> ret;
-    private Callback<T> callback;
     private AtomicLong readCnt;
     private long beginTime;
     private Worker reader;
@@ -49,9 +48,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
         complete();
     }
 
-
-    @Override
-    public void record(long startTime, long endTime, int dataSize, int events) {
+    public void recordBenchmark(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % reader.recordIDMax);
         reader.sendChannel.send(id, startTime, endTime, dataSize, events);
@@ -62,18 +59,31 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
         }
     }
 
-    @Override
-    public void consume(T data) {
-        callback.consume(data);
+
+    private class ConsumeRead implements Callback<T> {
+
+        public void consume(final T data) {
+            final long endTime = time.getCurrentTime();
+            recordBenchmark(endTime, endTime, dataType.length(data), 1);
+        }
+
+        public void record(long startTime, long endTime, int dataSize, int records) {
+            recordBenchmark(startTime, endTime, dataSize, records);
+        }
+
     }
 
-    private void consumeRead(T data) {
-        final long endTime = time.getCurrentTime();
-        record(endTime, endTime, dataType.length(data), 1);
-    }
 
-    private void consumeRW(T data) {
-        record(dataType.getTime(data), time.getCurrentTime(), dataType.length(data), 1);
+    private class ConsumeRW implements Callback<T> {
+
+        public void consume(final T data) {
+            recordBenchmark(dataType.getTime(data), time.getCurrentTime(), dataType.length(data), 1);
+        }
+
+        public void record(long startTime, long endTime, int dataSize, int records) {
+            recordBenchmark(startTime, endTime, dataSize, records);
+        }
+
     }
 
     /**
@@ -81,9 +91,10 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
      * @param reader  Reader Descriptor
      * @param dType  dataType
      * @param time  time interface
+     * @param callback  Callback interface
      * @throws IOException If an exception occurred.
      */
-    public void initialize(Worker reader, DataType<T> dType, Time time) throws IOException {
+    public void initialize(Worker reader, DataType<T> dType, Time time, Callback<T> callback) throws IOException {
         this.reader = reader;
         this.dataType = dType;
         this.time = time;
@@ -92,11 +103,6 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
         this.msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
         this.totalRecords = reader.params.getRecordsPerReader() * reader.params.getReadersCount();
         this.ret = new CompletableFuture<>();
-        if (reader.params.isWriteAndRead()) {
-            callback = this::consumeRW;
-        } else {
-            callback = this::consumeRead;
-        }
         start(callback);
     }
 
@@ -131,10 +137,11 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
      * @param reader  Reader Descriptor
      * @param dType  dataType
      * @param time  time interface
+     * @param callback  Callback interface
      * @throws IOException If an exception occurred.
      */
-    public void run(Worker reader, DataType<T> dType, Time time) throws IOException {
-        initialize(reader, dType, time);
+    public void run(Worker reader, DataType<T> dType, Time time, Callback<T> callback) throws IOException {
+        initialize(reader, dType, time, callback);
         waitToComplete();
     }
 
@@ -149,7 +156,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
      * @throws IOException If an exception occurred.
      */
     public void RecordsReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time);
+        run(reader, dType, time, new ConsumeRead());
     }
 
     /**
@@ -162,7 +169,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
      * @throws IOException If an exception occurred.
      */
     public void RecordsReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time);
+        run(reader, dType, time, new ConsumeRW());
     }
 
     /**
@@ -175,7 +182,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
      * @throws IOException If an exception occurred.
      */
     public void RecordsTimeReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time);
+        run(reader, dType, time, new ConsumeRead());
     }
 
     /**
@@ -188,7 +195,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T>, Callba
      * @throws IOException If an exception occurred.
      */
     public void RecordsTimeReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time);
+        run(reader, dType, time, new ConsumeRW());
     }
 
 }
