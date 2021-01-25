@@ -276,7 +276,7 @@ public class SbkBenchmark implements Benchmark {
                 if ((rStatFuture != null) && (readFuturesCnt != readersErrCnt.get()) ) {
                     rStatFuture.get();
                 }
-            } catch (InterruptedException | ExecutionException ex) {
+            }  catch (InterruptedException | ExecutionException ex) {
                 ex.printStackTrace();
             }
             stop();
