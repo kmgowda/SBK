@@ -30,9 +30,7 @@ public interface Reader<T> extends DataRecordsReader<T> {
      * Close the  Reader.
      * @throws IOException If an exception occurred.
      */
-    default void close() throws IOException {
-
-    }
+    void close() throws IOException;
 
     /**
      * Default implementation for Reading data using {@link Reader#read()}

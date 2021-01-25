@@ -30,9 +30,7 @@ public interface Writer<T>  extends DataRecordsWriter<T> {
      * Close the  Writer.
      * @throws IOException If an exception occurred.
      */
-    default void close() throws IOException {
-
-    }
+    void close() throws IOException;
 
     /**
      * Flush / Sync the  data.
