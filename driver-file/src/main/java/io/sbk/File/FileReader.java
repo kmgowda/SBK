@@ -38,7 +38,7 @@ public class FileReader implements Reader<ByteBuffer> {
         ByteBuffer retBuffer = readBuffer.slice();
         final int ret = in.read(retBuffer);
         if (ret <= 0) {
-            throw new EOFException("File Red: EOF");
+            throw new EOFException("File Read: EOF");
         }
         retBuffer.flip();
         return retBuffer;
