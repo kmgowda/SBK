@@ -554,9 +554,10 @@ final public class SbkPerformance implements Performance {
             qFuture = null;
         }
         if (ex != null) {
-            SbkLogger.log.info("Shutdown with Exception:" + ex.toString());
+            SbkLogger.log.warn("SBK Performance Shutdown with Exception:" + ex.toString());
             retFuture.completeExceptionally(ex);
         } else  {
+            SbkLogger.log.info("SBK Performance Shutdown" );
             retFuture.complete(null);
         }
         retFuture = null;
