@@ -69,7 +69,6 @@ public class Sbk {
             System.out.println();
             ret.complete(null);
         }));
-
         ret.get();
     }
 
@@ -123,6 +122,11 @@ public class Sbk {
         public Void get(long timeout, java.util.concurrent.TimeUnit  unit) throws InterruptedException,
                 ExecutionException, TimeoutException {
             return ret.get(timeout, unit);
+        }
+
+        @Override
+        public Void join() {
+            return ret.join();
         }
 
         @Override

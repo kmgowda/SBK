@@ -91,6 +91,10 @@ public interface Writer<T>  extends DataRecordsWriter<T> {
             sendChannel.send(id, status.startTime, status.endTime, size, status.records);
         } else {
             final long beginTime =  status.startTime;
+            ret.exceptionally(ex -> {
+                sendChannel.sendException(id, ex);
+                return null;
+            });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
                 sendChannel.send(id, beginTime, endTime, size, status.records);

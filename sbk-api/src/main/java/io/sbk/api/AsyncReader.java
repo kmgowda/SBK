@@ -66,6 +66,10 @@ public interface AsyncReader<T> extends DataRecordsReader<T> {
             throw new IOException();
         } else {
             final long beginTime = status.startTime;
+            ret.exceptionally(ex -> {
+                sendChannel.sendException(id, ex);
+                return null;
+            });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
                 sendChannel.send(id, beginTime, endTime, dType.length(d), status.records);

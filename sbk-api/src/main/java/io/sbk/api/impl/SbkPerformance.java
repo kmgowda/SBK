@@ -58,6 +58,10 @@ final public class SbkPerformance implements Performance {
     @GuardedBy("this")
     private CompletableFuture<Void> retFuture;
 
+    @GuardedBy("this")
+    private CompletableFuture<Void> qFuture;
+
+
     public SbkPerformance(Config config, int workers, Logger periodicLogger,
                           Time time, ExecutorService executor, String csvFile) {
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
@@ -83,7 +87,7 @@ final public class SbkPerformance implements Performance {
             this.index = workers;
         }
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new CQueueChannel(maxQs);
+            channels[i] = new CQueueChannel(maxQs, new OnError());
         }
         double[] percentilesIndices = periodicLogger.getPercentileIndices();
         this.percentiles = new double[percentilesIndices.length];
@@ -458,13 +462,22 @@ final public class SbkPerformance implements Performance {
         }
     }
 
+    interface Throw {
+        void onException(Throwable ex);
+    }
+
+
+
+
     @NotThreadSafe
     static final class CQueueChannel implements Channel {
         final private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
+        final private Throw eThrow;
         private int index;
 
-        public CQueueChannel(int qSize) {
+        public CQueueChannel(int qSize, Throw eThrow) {
             this.index = qSize;
+            this.eThrow = eThrow;
             this.cQueues = new ConcurrentLinkedQueue[qSize];
             for (int i = 0; i < cQueues.length; i++) {
                 cQueues[i] = new ConcurrentLinkedQueue<>();
@@ -490,9 +503,12 @@ final public class SbkPerformance implements Performance {
         }
 
         /* This Method is Thread Safe */
-        @Override
         public void send(int id, long startTime, long endTime, int bytes, int records) {
             cQueues[id].add(new TimeStamp(startTime, endTime, bytes, records));
+        }
+
+        public void sendException(int id, Throwable ex) {
+            eThrow.onException(ex);
         }
     }
 
@@ -509,37 +525,62 @@ final public class SbkPerformance implements Performance {
         return  channels[index];
     }
 
-
-    @Override
-    @Synchronized
-    public CompletableFuture<Void> start(long secondsToRun, long records) {
-        if (this.retFuture == null) {
-            this.retFuture = CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
-                    records, percentiles),
-                    executor);
+    final private class OnError implements Throw {
+        public void onException(Throwable ex) {
+            shutdown(ex);
         }
-        return this.retFuture;
     }
 
-    @Override
     @Synchronized
-    public void stop()  {
-        long endTime = time.getCurrentTime();
-        if (this.retFuture != null) {
-            if (!this.retFuture.isDone()) {
+    private void shutdown(Throwable ex) {
+        if (retFuture == null) {
+            return;
+        }
+        if (qFuture != null) {
+            if (!qFuture.isDone()) {
+                long endTime = time.getCurrentTime();
                 for (Channel ch : channels) {
                     ch.sendEndTime(endTime);
                 }
                 try {
-                    retFuture.get();
-                } catch (ExecutionException | InterruptedException ex) {
-                    ex.printStackTrace();
+                    qFuture.get();
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
                 }
                 for (Channel ch : channels) {
                     ch.clear();
                 }
             }
-            this.retFuture = null;
+            qFuture = null;
         }
+        if (ex != null) {
+            SbkLogger.log.warn("SBK Performance Shutdown with Exception:" + ex.toString());
+            retFuture.completeExceptionally(ex);
+        } else  {
+            SbkLogger.log.info("SBK Performance Shutdown" );
+            retFuture.complete(null);
+        }
+        retFuture = null;
+    }
+
+
+    @Override
+    @Synchronized
+    public CompletableFuture<Void> start(long secondsToRun, long records) {
+        if (retFuture == null) {
+            retFuture = new CompletableFuture<>();
+            qFuture =  CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
+                    records, percentiles),
+                    executor);
+            qFuture.whenComplete((ret, ex) -> {
+                shutdown(ex);
+            });
+        }
+        return retFuture;
+    }
+
+    @Override
+    public void stop()  {
+            shutdown(null);
     }
 }

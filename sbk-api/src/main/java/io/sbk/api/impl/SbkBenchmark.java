@@ -276,24 +276,25 @@ public class SbkBenchmark implements Benchmark {
                 if ((rStatFuture != null) && (readFuturesCnt != readersErrCnt.get()) ) {
                     rStatFuture.get();
                 }
-            } catch (InterruptedException | ExecutionException ex) {
-                ex.printStackTrace();
+            }  catch (InterruptedException | ExecutionException ex) {
+                shutdown(ex);
+                return;
             }
-            stop();
+            shutdown(null);
         }, executor);
+
         return retFuture;
     }
 
     /**
-     * Stop/shutdown SBK Benchmark.
+     * Shutdown SBK Benchmark.
      *
      * closes all writers/readers.
      * closes the storage device/client.
      *
      */
-    @Override
     @Synchronized
-    public void stop() {
+    private void shutdown(Throwable ex) {
         if (retFuture == null) {
             return;
         }
@@ -307,8 +308,8 @@ public class SbkBenchmark implements Benchmark {
             readers.forEach(c -> {
                 try {
                     c.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             });
         }
@@ -316,8 +317,8 @@ public class SbkBenchmark implements Benchmark {
             callbackReaders.forEach(c -> {
                 try {
                     c.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             });
         }
@@ -325,24 +326,45 @@ public class SbkBenchmark implements Benchmark {
             writers.forEach(c -> {
                 try {
                     c.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             });
         }
         try {
             storage.closeStorage(params);
             logger.close(params);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         executor.shutdown();
         try {
             executor.awaitTermination(1, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException e) {
             ex.printStackTrace();
         }
-        retFuture.complete(null);
+
+        if (ex != null) {
+            SbkLogger.log.warn("SBK Benchmark Shutdown with Exception "+ex.toString());
+            retFuture.completeExceptionally(ex);
+        } else {
+            SbkLogger.log.info("SBK Benchmark Shutdown");
+            retFuture.complete(null);
+        }
         retFuture = null;
+    }
+
+
+
+    /**
+     * Stop/shutdown SBK Benchmark.
+     *
+     * closes all writers/readers.
+     * closes the storage device/client.
+     *
+     */
+    @Override
+    public void stop() {
+        shutdown(null);
     }
 }
