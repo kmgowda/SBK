@@ -16,12 +16,14 @@ import io.sbk.api.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.api.Time;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Class for File Reader.
@@ -30,6 +32,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
     final private String fileName;
     final private Parameters params;
     final private AsynchronousFileChannel in;
+    final private AtomicBoolean isEOF;
     private long pos;
 
     public AsyncFileReader(int id, Parameters params, String fileName) throws IOException {
@@ -37,6 +40,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
         this.params = params;
         this.in = AsynchronousFileChannel.open(Paths.get(fileName), StandardOpenOption.READ);
         this.pos = 0;
+        this.isEOF = new AtomicBoolean(false);
     }
 
     @Override
@@ -54,11 +58,19 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = time.getCurrentTime();
-                        sendChannel.send(id, ctime, endTime, result, 1);
+                        if (result <= 0 && !isEOF.get()) {
+                            isEOF.set(true);
+                            sendChannel.sendException(id, new EOFException());
+                        } else {
+                            sendChannel.send(id, ctime, endTime, result, 1);
+                        }
                     }
 
                     @Override
-                    public void failed(Throwable exc, ByteBuffer attachment) {
+                    public void failed(Throwable ex, ByteBuffer attachment) {
+                        if (!isEOF.get()) {
+                            sendChannel.sendException(id, ex);
+                        }
                     }
                 });
         pos += dType.length(buffer);
@@ -74,11 +86,19 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = time.getCurrentTime();
-                        sendChannel.send(id, dType.getTime(attachment), endTime, result, 1);
+                        if (result <= 0 && !isEOF.get()) {
+                            isEOF.set(true);
+                            sendChannel.sendException(id, new EOFException());
+                        } else {
+                            sendChannel.send(id, dType.getTime(attachment), endTime, result, 1);
+                        }
                     }
 
                     @Override
-                    public void failed(Throwable exc, ByteBuffer attachment) {
+                    public void failed(Throwable ex, ByteBuffer attachment) {
+                        if (!isEOF.get()) {
+                            sendChannel.sendException(id, ex);
+                        }
                     }
                 });
         pos += dType.length(buffer);
