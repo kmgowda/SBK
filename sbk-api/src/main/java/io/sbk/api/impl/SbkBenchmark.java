@@ -268,11 +268,13 @@ public class SbkBenchmark implements Benchmark {
         if (params.getSecondsToRun() > 0) {
             timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
         }
+
         retFuture = chainFuture.thenRunAsync(() -> {
             try {
                 if ((wStatFuture != null) && (writeFuturesCnt != writersErrCnt.get())) {
                     wStatFuture.get();
                 }
+
                 if ((rStatFuture != null) && (readFuturesCnt != readersErrCnt.get()) ) {
                     rStatFuture.get();
                 }
@@ -282,6 +284,20 @@ public class SbkBenchmark implements Benchmark {
             }
             shutdown(null);
         }, executor);
+
+        if (wStatFuture != null && !wStatFuture.isDone()) {
+            wStatFuture.exceptionally(ex -> {
+                shutdown(ex);
+                return null;
+            });
+        }
+
+        if (rStatFuture != null && !rStatFuture.isDone()) {
+            rStatFuture.exceptionally(ex -> {
+                shutdown(ex);
+                return null;
+            });
+        }
 
         return retFuture;
     }
@@ -298,7 +314,13 @@ public class SbkBenchmark implements Benchmark {
         if (retFuture == null) {
             return;
         }
-        if (writeStats != null && !params.isWriteAndRead()) {
+
+        if (retFuture.isDone()) {
+            retFuture = null;
+            return;
+        }
+
+        if (writeStats != null ) {
             writeStats.stop();
         }
         if (readStats != null) {
