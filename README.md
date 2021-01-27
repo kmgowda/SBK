@@ -517,7 +517,7 @@ Instead of using entire SBK framework, if you just want use the [SBK framework A
     }
 
     dependencies {
-        implementation 'sbk:sbk-api:0.84'
+        implementation 'sbk:sbk-api:0.85'
     }
 
    ```
@@ -540,11 +540,14 @@ Instead of using entire SBK framework, if you just want use the [SBK framework A
         
             //Start the File system benchmarking here
             
-            Sbk.run(args, device, <Name of the your performance benchmarking application> );
+            Sbk.run(args  /* Command line Arguments */ , 
+                  device /* your storage deivce object */ , 
+                  null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
+                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by defalt */ );
             
             
         } catch (ParseException | IllegalArgumentException | IOException |
-                InterruptedException | ExecutionException ex) {
+                InterruptedException | ExecutionException | TimeoutException ex) {
             ex.printStackTrace();
             System.exit(1);
         }
@@ -572,7 +575,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
     }
 
     dependencies {
-        implementation 'com.github.kmgowda.SBK:sbk-api:0.84'
+        implementation 'com.github.kmgowda.SBK:sbk-api:0.85'
     }
    
    ```
@@ -592,16 +595,20 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
         
             //Start the File system benchmarking here
             
-            Sbk.run(args, device, <Name of the your performance benchmarking application> );
+            Sbk.run(args  /* Command line Arguments */ , 
+                  device /* your storage deivce object */ , 
+                  null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
+                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by defalt */ );
             
             
         } catch (ParseException | IllegalArgumentException | IOException |
-                InterruptedException | ExecutionException ex) {
+                InterruptedException | ExecutionException | TimeoutException ex) {
             ex.printStackTrace();
             System.exit(1);
         }
         System.exit(0);
     }
+
    ```
    * check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
    
@@ -621,7 +628,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     }
 
     dependencies {
-        implementation 'io.github.kmgowda:sbk-api:0.84'
+        implementation 'io.github.kmgowda:sbk-api:0.85'
     }
    ```
    few points to remember here  
@@ -637,19 +644,24 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     public static void main(final String[] args) {
         Storage device = new <your storage class, extending the Storage interface>;
         try {
+        
+            //Start the File system benchmarking here
             
-           //Start the File system benchmarking here
+            Sbk.run(args  /* Command line Arguments */ , 
+                  device /* your storage deivce object */ , 
+                  null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
+                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by defalt */ );
             
-            Sbk.run(args, device, <Name of the your performance benchmarking application> );
-
+            
         } catch (ParseException | IllegalArgumentException | IOException |
-                InterruptedException | ExecutionException ex) {
+                InterruptedException | ExecutionException | TimeoutException ex) {
             ex.printStackTrace();
             System.exit(1);
         }
         System.exit(0);
     }
+      
    ```   
-   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
+   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/Main.java#L20)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
