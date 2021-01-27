@@ -314,7 +314,13 @@ public class SbkBenchmark implements Benchmark {
         if (retFuture == null) {
             return;
         }
-        if (writeStats != null && !params.isWriteAndRead()) {
+
+        if (retFuture.isDone()) {
+            retFuture = null;
+            return;
+        }
+
+        if (writeStats != null ) {
             writeStats.stop();
         }
         if (readStats != null) {

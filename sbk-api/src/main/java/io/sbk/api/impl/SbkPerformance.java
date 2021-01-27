@@ -536,6 +536,12 @@ final public class SbkPerformance implements Performance {
         if (retFuture == null) {
             return;
         }
+
+        if (retFuture.isDone()) {
+            retFuture = null;
+            return;
+        }
+
         if (qFuture != null) {
             if (!qFuture.isDone()) {
                 long endTime = time.getCurrentTime();
