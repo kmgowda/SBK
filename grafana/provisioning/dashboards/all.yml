@@ -1,6 +1,9 @@
-- name: 'default'
-  org_id: 1
-  folder: ''
-  type: 'file'
-  options:
-    folder: '/var/lib/grafana/dashboards'
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    org_id: 1
+    folder: ''
+    type: 'file'
+    options:
+      path: '/var/lib/grafana/dashboards'

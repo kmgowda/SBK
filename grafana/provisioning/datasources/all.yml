@@ -1,7 +1,10 @@
+# config file version
+apiVersion: 1
+
 datasources:
   - name: 'Prometheus'
     type: 'prometheus'
-    access: 'browser'
-    url: 'http://localhost:9090'
+    access: 'proxy'
+    url: 'http://prometheus:9090'
     is_default: true
     editable: false
