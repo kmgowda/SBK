@@ -73,7 +73,7 @@ public class SystemLogger implements Logger {
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                        int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
         System.out.printf("%s %11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
-                        " %8d invalid Latencies; Discarded Latencies:%8d lower, %8d higher; " +
+                        " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher; " +
                         " Latency Percentiles: %s. \n",
                 prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit,
                 invalid, lowerDiscard, higherDiscard, buildPercentileString(percentileValues));
