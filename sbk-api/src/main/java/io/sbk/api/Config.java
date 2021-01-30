@@ -22,6 +22,7 @@ public class Config {
     final public static int NS_PER_MICRO = 1000;
     final public static int MICROS_PER_MS = 1000;
     final public static int MS_PER_SEC = 1000;
+    final public static int MICROS_PER_SEC = MICROS_PER_MS * MS_PER_SEC;
     final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5000;
     final public static int DEFAULT_TIMEOUT_MS = MS_PER_SEC;
     final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / MS_PER_SEC;

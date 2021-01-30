@@ -79,7 +79,7 @@ final public class SbkParameters implements Parameters {
         options.addOption("readers", true, "Number of readers");
         options.addOption("size", true, "Size of each message (event or record)");
         options.addOption("records", true,
-                "Number of records(events) if 'time' not specified;\n" +
+                "Number of records(events) if 'seconds' not specified;\n" +
                         "otherwise, Maximum records per second by writer(s) " +
                         "and/or Number of records per reader");
         options.addOption("sync", true,
