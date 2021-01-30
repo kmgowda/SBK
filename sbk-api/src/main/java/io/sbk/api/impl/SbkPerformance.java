@@ -296,8 +296,8 @@ final public class SbkPerformance implements Performance {
                 }
             }
             this.bytes += bytes;
-            this.totalLatency += (long) latency * events;
             this.maxLatency = Math.max(this.maxLatency, latency);
+            this.totalLatency += (long) latency * events;
         }
     }
 

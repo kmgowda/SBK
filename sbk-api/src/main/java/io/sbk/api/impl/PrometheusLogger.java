@@ -23,6 +23,7 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Action;
+import io.sbk.api.LatencyConfig;
 import io.sbk.api.MetricsConfig;
 import io.sbk.api.Parameters;
 import io.sbk.api.Print;
@@ -38,8 +39,12 @@ import java.util.Arrays;
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class PrometheusLogger extends SystemLogger {
-    final static String CONFIGFILE = "metrics.properties";
+    final static String CONFIG_FILE = "metrics.properties";
+    final static String LATENCY_MS_FILE = "latency-ms.properties";
+    final static String LATENCY_MCS_FILE = "latency-mcs.properties";
+    final static String LATENCY_NS_FILE = "latency-ns.properties";
     private MetricsConfig config;
+    private LatencyConfig latencyConfig;
     private boolean disabled;
     private double[] percentilesIndices;
     private MetricsLogger metricsLogger;
@@ -55,9 +60,16 @@ public class PrometheusLogger extends SystemLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
+            config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     MetricsConfig.class);
         } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+
+        try {
+            getLatencyConfig(config.timeUnit);
+        } catch (IOException ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
@@ -69,14 +81,51 @@ public class PrometheusLogger extends SystemLogger {
         }
         Arrays.sort(percentilesIndices);
 
-        params.addOption("context", true, "Prometheus Metric context;" +
-                "default context: " + config.port + config.context + "; 'no' disables the metrics");
+        params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
+                "; default: " + config.timeUnit.name());
+        params.addOption("context", true, "Prometheus Metric context" +
+                "; default context: " + config.port + config.context + "; 'no' disables the metrics");
+    }
+
+    private String getTimeUnitNames() {
+        String ret = "[";
+
+        for (TimeUnit value : TimeUnit.values()) {
+            ret += value.name() +":" +value.toString() + ", ";
+        }
+        ret += "]";
+
+        return ret.replace(", ]", "]");
+    }
+
+    private void getLatencyConfig(TimeUnit unit) throws IOException {
+        String file = LATENCY_MS_FILE;
+        if (unit == TimeUnit.mcs) {
+            file = LATENCY_MCS_FILE;
+        } else if (unit == TimeUnit.ns) {
+            file = LATENCY_NS_FILE;
+        }
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        latencyConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(file),
+                LatencyConfig.class);
 
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         super.parseArgs(params);
+        final TimeUnit timeUnit = TimeUnit.valueOf(params.getOptionValue("time", config.timeUnit.name()));
+        if (timeUnit != config.timeUnit) {
+            config.timeUnit = timeUnit;
+            try {
+                getLatencyConfig(config.timeUnit);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                throw new IllegalArgumentException(ex);
+            }
+        }
+
         final String fullContext =  params.getOptionValue("context", config.port + config.context);
         if (fullContext.equalsIgnoreCase("no")) {
             disabled = true;
@@ -118,17 +167,17 @@ public class PrometheusLogger extends SystemLogger {
 
     @Override
     public int getMinLatency() {
-        return config.minLatency;
+        return latencyConfig.minLatency;
     }
 
     @Override
     public int getMaxWindowLatency() {
-        return config.maxWindowLatency;
+        return latencyConfig.maxWindowLatency;
     }
 
     @Override
     public int getMaxLatency() {
-        return config.maxLatency;
+        return latencyConfig.maxLatency;
     }
 
     @Override

@@ -233,15 +233,17 @@ public class Sbk {
         logger.parseArgs(params);
         storageDevice.parseArgs(params);
         TimeUnit timeUnit = logger.getTimeUnit();
-        SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
-        if (timeUnit == TimeUnit.ms) {
-            time = new MilliSeconds();
+        if (timeUnit == TimeUnit.mcs) {
+            time = new MicroSeconds();
         } else if (timeUnit == TimeUnit.ns) {
             time = new NanoSeconds();
         } else {
-            SbkLogger.log.error("storage driver: " + driverName+ " using invalid TimeUnit , Use either TimeUnit.ms or TimeUnit.ns");
-            throw new IllegalArgumentException();
+            time = new MilliSeconds();
         }
+        SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
+        SbkLogger.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
+        SbkLogger.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
+        SbkLogger.log.info("Maximum Latency for Reporting Interval: "+logger.getMaxWindowLatency()+" "+timeUnit.name());
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = Action.Write_Reading;
