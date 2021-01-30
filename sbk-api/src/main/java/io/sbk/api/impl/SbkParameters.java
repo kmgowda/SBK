@@ -85,7 +85,7 @@ final public class SbkParameters implements Parameters {
         options.addOption("sync", true,
                 "Each Writer calls flush/sync after writing <arg> number of of events(records)" +
                         " ; <arg> number of events(records) per Write or Read Transaction");
-        options.addOption("time", true, "Number of seconds to run; if not specified, runs forever");
+        options.addOption("seconds", true, "Number of seconds to run; if not specified, runs forever");
         options.addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes/reads 'records'\n" +
@@ -159,8 +159,8 @@ final public class SbkParameters implements Parameters {
             recordsPerSync = Integer.MAX_VALUE;
         }
 
-        if (commandline.hasOption("time")) {
-            secondsToRun = Long.parseLong(commandline.getOptionValue("time"));
+        if (commandline.hasOption("seconds")) {
+            secondsToRun = Long.parseLong(commandline.getOptionValue("seconds"));
         } else if (recordsCount > 0) {
             secondsToRun = 0;
         } else {

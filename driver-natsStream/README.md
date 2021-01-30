@@ -19,6 +19,6 @@ docker run -p 4222:4222 -ti nats-streaming:latest
 you need to have Dockers installed on your system.
 An example, SBK benchmarkig command is
 ```
-./build/install/sbk/bin/sbk -class Natsstream -uri nats://localhost:4222  -cluster test-cluster -topic kmg-topic-2 -size 100 -writers 1 -readers 1   -time 60
+./build/install/sbk/bin/sbk -class Natsstream -uri nats://localhost:4222  -cluster test-cluster -topic kmg-topic-2 -size 100 -writers 1 -readers 1   -seconds 60
 ```
 

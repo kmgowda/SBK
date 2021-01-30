@@ -22,12 +22,12 @@ docker run -it -p 6650:6650 -p 8080:8080  apachepulsar/pulsar:latest bin/pulsar 
 An Example SBK command for single pulsar writer  is as follows
 
 ```
-./build/install/sbk/bin/sbk -class Pulsar -broker tcp://localhost:6650 -topic topic-k-10  -partitions 10   -writers 1  -size 100  -time 60 -context 8085
+./build/install/sbk/bin/sbk -class Pulsar -broker tcp://localhost:6650 -topic topic-k-10  -partitions 10   -writers 1  -size 100  -seconds 60 -context 8085
 ```
 In the above example, Note that Prometheus context port is 8085 (not the default 8080) because the default port is used by pulsar standalone admin .
 The output is as follows. 
 ```
-kmg@W10GRDN6H2:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-10  -partitions 10   -writers 1  -size 100  -time 60 -context 8085
+kmg@W10GRDN6H2:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-10  -partitions 10   -writers 1  -size 100  -seconds 60 -context 8085
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/mnt/c/KMG/kmg-linux/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/mnt/c/KMG/kmg-linux/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -43,7 +43,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2020-07-23 11:24:16 INFO SBK version: 0.81
-2020-07-23 11:24:16 INFO Argument List: [-class, Pulsar, -admin, http://localhost:8080, -broker, tcp://localhost:6650, -topic, topic-k-10, -partitions, 10, -writers, 1, -size, 100, -time, 60, -context, 8085]
+2020-07-23 11:24:16 INFO Argument List: [-class, Pulsar, -admin, http://localhost:8080, -broker, tcp://localhost:6650, -topic, topic-k-10, -partitions, 10, -writers, 1, -size, 100, -seconds, 60, -context, 8085]
 2020-07-23 11:24:17 INFO Reflections took 122 ms to scan 23 urls, producing 31 keys and 123 values
 2020-07-23 11:24:19 WARN [http://localhost:8080/admin/v2/persistent/public/default/topic-k-10/partitions?force=false] Failed to perform http delete request: org.apache.pulsar.shade.javax.ws.rs.NotFoundException: HTTP 404 Not Found
 2020-07-23 11:24:19 INFO [[id: 0xaf759f00, L:/127.0.0.1:52116 - R:localhost/127.0.0.1:6650]] Connected to server

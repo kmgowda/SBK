@@ -21,7 +21,7 @@ make sure that you have redirected the port 27017 from docker to local system
 
 Now, you can run the MongoDB writer benchmarking as follows. 
 ```
-kmg@W10GRDN6H2:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class mongodb -writers 1 -size 100 -time 60
+kmg@W10GRDN6H2:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class mongodb -writers 1 -size 100 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/mnt/c/KMG/kmg-linux/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/mnt/c/KMG/kmg-linux/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]

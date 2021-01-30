@@ -17,22 +17,22 @@ By default, the Derby Network client is tested, you can refer to this page : htt
 
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class jdbc  -url jdbc:derby://localhost:1527/dbs -table kmg_1 -size 100 -writers 1 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -url jdbc:derby://localhost:1527/dbs -table kmg_1 -size 100 -writers 1 -seconds 60
 ```
 
 you can specify the derby driver explicitly as follows
 ```
-./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.ClientDriver -url jdbc:derby://localhost:1527/dbs -table kmg_1 -size 100 -writers 1 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.ClientDriver -url jdbc:derby://localhost:1527/dbs -table kmg_1 -size 100 -writers 1 -seconds 60
 ```
 you can also specify the username and password in the above commands with -user and -password options. The default user name/password are admin/admin.
 
 Below is the exmaple SBK command for the Apache Derby Embedded Driver benchmarking.
 ```
-./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.EmbeddedDriver -url jdbc:derby:test.db   -table kmg_1 -size 100 -writers 1 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.EmbeddedDriver -url jdbc:derby:test.db   -table kmg_1 -size 100 -writers 1 -seconds 60
 ```
 The example command for read benchmarking is as follows.
 ```
-./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.EmbeddedDriver -url jdbc:derby:test.db   -table kmg_1 -size 100 -readers 1 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -driver org.apache.derby.jdbc.EmbeddedDriver -url jdbc:derby:test.db   -table kmg_1 -size 100 -readers 1 -seconds 60
 ```
 
 
@@ -53,19 +53,19 @@ docker run -p 3306:3306 -v /tmp:/tmp --name db --detach -e MYSQL_ROOT_PASSWORD="
 
 An example SBK command is as follows
 ```
- ./build/install/sbk/bin/sbk -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://localhost:3306/social -user root -password root  -table kmg_2 -size 100 -writers 1 -time 60
+ ./build/install/sbk/bin/sbk -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://localhost:3306/social -user root -password root  -table kmg_2 -size 100 -writers 1 -seconds 60
 ```
 
 Note that **"social"** is the name of the data base used while starting the MySQL server and the same name should be used in the **-url** option of SBK jdbc command.
 
 An Example database read command is as follows:
 ```
- ./build/install/sbk/bin/sbk -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://localhost:3306/social -user root -password root  -table kmg_2 -size 100 -readers 1 -time 60
+ ./build/install/sbk/bin/sbk -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://localhost:3306/social -user root -password root  -table kmg_2 -size 100 -readers 1 -seconds 60
 ``` 
 
 The MySQL database write benchmarking example using SBK docker images is
 ```
-docker run  -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk:latest -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://192.168.0.192:3306/social -user root -password root  -table kmg_2 -size 100 -writers 1 -time 60
+docker run  -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk:latest -class jdbc  -driver com.mysql.jdbc.Driver -url jdbc:mysql://192.168.0.192:3306/social -user root -password root  -table kmg_2 -size 100 -writers 1 -seconds 60
 ```
 
 ## JDBC with PostgreSQL
@@ -76,7 +76,7 @@ docker run  -p 127.0.0.1:5432:5432/tcp  --name kmg-postgres -e POSTGRES_USER=roo
 ```
 An example command to run the SBK benchmarking is
 ```
-./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:5432/postgres -user root -password root  -table kmg_1 -size 100 -writers 1 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:5432/postgres -user root -password root  -table kmg_1 -size 100 -writers 1 -seconds 60
 ```
 Make sure the username and passwords are same while running the postgreSQL server and SBK benchmarking.
 generally **'postgres'** is the name of the database available by default.
@@ -88,7 +88,7 @@ The default database name to access is **'defaultdb'** and the default port is 2
 
 An example command to run the SBK benchmarking is
 ```
-./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:26257/defaultdb  -user root -password root  -table test -size 100 -writers 5 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -driver org.postgresql.Driver -url jdbc:postgresql://localhost:26257/defaultdb  -user root -password root  -table test -size 100 -writers 5 -seconds 60
 ```
 Make sure that you use root/root as username/password while running above benchmarking command.
  
@@ -103,7 +103,7 @@ In the above example, the password `Kmg@1234` used for default user name `sa`
 
 An example command to run the SBK benchmarking is
 ```
-./build/install/sbk/bin/sbk -class jdbc  -driver com.microsoft.sqlserver.jdbc.SQLServerDriver -url jdbc:sqlserver://localhost:1433 -user sa -password Kmg@1234  -table kmg_1 -size 1000 -writers 1 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -driver com.microsoft.sqlserver.jdbc.SQLServerDriver -url jdbc:sqlserver://localhost:1433 -user sa -password Kmg@1234  -table kmg_1 -size 1000 -writers 1 -seconds 60
 ```
 Make sure the user name is `sa` and passwords are same while running the MS SQL server and SBK benchmarking.
 
@@ -112,7 +112,7 @@ The SBK with JDBC is tested with embedded SQL data base SQLite. Visit this page 
 
 An example command to run the SBK benchmarking is
 ```
-./build/install/sbk/bin/sbk -class jdbc  -driver org.sqlite.JDBC -url jdbc:sqlite:test.db   -table kmg_2 -size 100 -writers 1 -time 60
+./build/install/sbk/bin/sbk -class jdbc  -driver org.sqlite.JDBC -url jdbc:sqlite:test.db   -table kmg_2 -size 100 -writers 1 -seconds 60
 ```
 Note that, SQLite is a local on disk database, it does not supports multiple wrtiers and it supports mulitple readers benchmarking. 
 
@@ -133,12 +133,12 @@ docker run -p 3306:3306 --name mariadb -e MYSQL_ROOT_PASSWORD=root -d mariadb:la
 
 An example SBK command is as follows
 ```
-./build/install/sbk/bin/sbk -class jdbc -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -writers 1 -size 100 -time 60
+./build/install/sbk/bin/sbk -class jdbc -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -writers 1 -size 100 -seconds 60
 ```
 
 Note that **"mysql"** is the name of the data base used while starting the MariaDB server and the same name should be used in the **-url** option of SBK jdbc command.
 
 An Example database read command is as follows:
 ```
-./build/install/sbk/bin/sbk -class jdbc -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -time 60
+./build/install/sbk/bin/sbk -class jdbc -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -seconds 60
 ``` 

@@ -19,13 +19,13 @@ but you can change the path by passing arguments for the **-cfile** option.
 An Example SBK command for benchmarking single writer is as follows
 
 ```
-./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -time 30
+./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -seconds 30
 ```
 In the above example, the data size is 100 bytes and writer generates the linearly incrementing keys.
 example output:
 
 ```
- ./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -time 30
+ ./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -seconds 30
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -52,11 +52,11 @@ Writing(Total)      28846 records,     981.5 records/sec,     0.09 MB/sec,      
 
 An SBK command for End to End latency benchmarking is as follows:
 ```
-./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -readers 1 -time 30
+./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -readers 1 -seconds 30
 ```
 The output is as follows:
 ```
-./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -readers 1 -time 30
+./build/install/sbk/bin/sbk -class foundationdb -size 100 -writers 1 -readers 1 -seconds 30
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/data/kmg/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]

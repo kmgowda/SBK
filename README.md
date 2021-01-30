@@ -121,7 +121,7 @@ usage: sbk
  -throughput <arg>   if > 0 , throughput in MB/s
                      if 0 , writes/reads 'records'
                      if -1, get the maximum throughput (default: -1)
- -time <arg>         Number of seconds to run; if not specified, runs
+ -seconds <arg>         Number of seconds to run; if not specified, runs
                      forever
  -writers <arg>      Number of writers
 
@@ -201,7 +201,7 @@ docker pull kmgowda/sbk
 
 you can straightaway run the docker image too, For example
 ```
-docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -time 60
+docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -seconds 60
 ```
 * Note that the option **-p 127.0.0.1:9718:9718/tcp** redirects the 9718 port to local port for fetch the performance metric data for Prometheus.  
 * Avoid using the **--network host** option , because this option overrides the port redirection.
@@ -216,7 +216,7 @@ As an example, just follow the below steps to see the performance graphs
 1. In the SBK directory run the 'SBK' service of the [docker compose](https://github.com/kmgowda/SBK/blob/master/docker-compose.yml) file as follows.
 
    ```
-   <SBK dir>% ./docker-compose run sbk  -class concurrentq -writers 1  -readers 5 -size 1000 -time 120 
+   <SBK dir>% ./docker-compose run sbk  -class concurrentq -writers 1  -readers 5 -size 1000 -seconds 120 
 
    ```
 
@@ -252,17 +252,17 @@ By default, the SBK runs in Burst mode.
 ```
 For example: The Burst mode for pulsar single writer as follows
 
-<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 1 -size 1000  -time 60 -throughput -1
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 1 -size 1000  -seconds 60 -throughput -1
 
 
 The -throughput -1  indicates the burst mode. Note that, you dont supply the parameter -throughput then also its burst mode.
-This test will executed for 60 seconds because option -time 60 is used.
+This test will executed for 60 seconds because option -seconds 60 is used.
 This test tries to write and read events of size 1000 bytes to/from the topic 'topic-k-223'.
 The option '-broker tcp://localhost:6650' specifies the Pulsar broker IP address and port number for write operations.
 The option '-admin http://localhost:8080' specifies the Pulsar admin IP and port number for topic creation and deletion.
 Note that -producers 1 indicates 1 producer/writers.
 
-in the case you want to write/read the certain number of records.events use the -records option without -time option as follows
+in the case you want to write/read the certain number of records.events use the -records option without -seconds option as follows
 
 <SBK directory>/build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 1 -size 1000  -records 100000 -throughput -1
 
@@ -276,18 +276,18 @@ This mode is used to find the least latency that can be obtained from the storag
 
 ```
 For example:  The througput mode for pulsar 5 writers as follows
-<SBK directory> ./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 5 -size 1000  -time 120  -throughput 10
+<SBK directory> ./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 5 -size 1000  -seconds 120  -throughput 10
 
 The -throughput <positive number>  indicates the Throughput mode.
 
 This test will be executed with approximate max throughput of 10MB/sec.
-This test will executed for 120 seconds (2 minutes) because option -time 120 is used.
+This test will executed for 120 seconds (2 minutes) because option -seconds 120 is used.
 This test tries to write and read events of size 1000 bytes to/from the topic 'topic-k-223' of 1 partition.
 If the toic 'topic-k-223' is not existing , then it will be created with  1 segment.
 if the steam is already existing then it will be deleted and recreated with 1 segment.
 Note that -writers 5 indicates 5 producers/writers .
 
-in the case you want to write/read the certain number of events use the -records option without -time option as follows
+in the case you want to write/read the certain number of events use the -records option without -seconds option as follows
 
 <SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-k-223  -partitions 1  -writers 5 -size 1000  -records 1000000  -throughput 10
 
@@ -303,15 +303,15 @@ This mode is used to find the least latency  that can be obtained from the stora
 For example:  The Rate limiter Mode for pulsar 5 writers as follows
 
 <SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broke
-r tcp://localhost:6650 -topic topic-k-225  -partitions 10  -writers 5 -size 100  -time 60  -records 1000
+r tcp://localhost:6650 -topic topic-k-225  -partitions 10  -writers 5 -size 100  -seconds 60  -records 1000
 
 The -records <records numbes>  (1000) specifies the records per second to write.
 Note that the option "-throughput"  SHOULD NOT supplied for this  Rate limiter Mode.
 
 This test will be executed with approximate 1000 events per second by 5 writers.
 The topic "topic-k-225" with 10 partitions are created to run this test.
-This test will executed for 60seconds (1 minutes) because option -time 60 is used.
-Note that in this mode, there is 'NO total number of events' to specify hence user must supply the time to run using -time option.
+This test will executed for 60seconds (1 minutes) because option -seconds 60 is used.
+Note that in this mode, there is 'NO total number of events' to specify hence user must supply the time to run using -seconds option.
 ```
 
 ### 4 - End to End Latency Mode
@@ -323,7 +323,7 @@ The -throughput option (Throughput mode) or -records (late limiter) can used to 
 ```
 For example: The End to End latency of between single writer and single reader of pulsar is as follows:
 
-<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-km-1  -partitions 1  -writers 1 -readers 1 -size 1000 -throughput -1 -time 60 
+<SBK directory>./build/distributions/sbk/bin/sbk -class Pulsar -admin http://localhost:8080 -broker tcp://localhost:6650 -topic topic-km-1  -partitions 1  -writers 1 -readers 1 -size 1000 -throughput -1 -seconds 60 
 
 The user should specify both writers and readers count for write to read or End to End latency mode.
 The -throughput -1 specifies the writes tries to write the events at the maximum possible speed.
@@ -486,7 +486,7 @@ usage: sbk -class pulsar
  -throughput <arg>      if > 0 , throughput in MB/s
                         if 0 , writes/reads 'records'
                         if -1, get the maximum throughput (default: -1)
- -time <arg>            Number of seconds to run; if not specified, runs
+ -seconds <arg>            Number of seconds to run; if not specified, runs
                         forever
  -topic <arg>           Topic name, default : test
  -writeQuorum <arg>     WriteQuorum default: 1

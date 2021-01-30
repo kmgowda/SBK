@@ -19,6 +19,6 @@ or simple just execute the below command
 you need to have Dockers installed on your system.
 An example, SBK benchmarkig command is
 ```
-./build/install/sbk/bin/sbk -class Nats -uri nats://localhost:4222 -topic kmg-topic-1 -size 10 -writers 5 -readers 5 -time 60
+./build/install/sbk/bin/sbk -class Nats -uri nats://localhost:4222 -topic kmg-topic-1 -size 10 -writers 5 -readers 5 -seconds 60
 ```
 

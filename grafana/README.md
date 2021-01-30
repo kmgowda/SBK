@@ -20,6 +20,6 @@ As an example, just follow the below steps to see the performance graphs
 1. For example, if you are running the SBK performance benchmarking of file system as follows
 
    ```
-    <SBK dir>% ./build/install/sbk/bin/sbk -class file -writers 1 -size 100 -time 60
+    <SBK dir>% ./build/install/sbk/bin/sbk -class file -writers 1 -size 100 -seconds 60
    ```
 1. you can choose the [File system dashboard](https://github.com/kmgowda/SBK/blob/master/grafana/dashboards/sbk-file.json) to see the performance results graphs.  

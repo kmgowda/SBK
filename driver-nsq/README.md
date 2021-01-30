@@ -17,5 +17,5 @@ for docker deployment, refer to this page : https://nsq.io/deployment/docker.htm
 you need to have Dockers installed on your system.
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class nsq -uri localhost:4150 -topic kmg-topic-4 -size 100  -writers 1  -time 60
+./build/install/sbk/bin/sbk -class nsq -uri localhost:4150 -topic kmg-topic-4 -size 100  -writers 1  -seconds 60
 ```
