@@ -25,25 +25,25 @@ public class Sl4jResultLogger extends SystemLogger {
     }
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      int maxLatency, long lowerDiscard, long higherDiscard, int[] percentilesValues) {
+                      int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentilesValues) {
         log.info(String.format("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
-                        " Discarded Latencies:%8d lower, %8d higher; " +
+                        "%8d invalid Latencies; Discarded Latencies:%8d lower, %8d higher; " +
                         " Latency Percentiles: %s.\n",
-                this.prefix + prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit, lowerDiscard, higherDiscard,
-                buildPercentileString(percentilesValues)));
+                this.prefix + prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit,
+                invalid, lowerDiscard, higherDiscard, buildPercentileString(percentilesValues)));
     }
 
     @Override
     public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      int maxLatency, long lowerDiscard, long higherDiscard, int[] percentileValues) {
-        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, lowerDiscard, higherDiscard,
-                percentileValues);
+                      int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 
     @Override
     public void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                           int maxLatency, long lowerDiscard, long higherDiscard, int[] percentileValues) {
-        print(prefix + "(Total) ", bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, lowerDiscard, higherDiscard,
-                percentileValues);
+                           int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+        print(prefix + "(Total) ", bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 }

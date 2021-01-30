@@ -26,6 +26,7 @@ public class MetricsLogger implements Print {
     final public DecimalFormat format;
     final private Counter bytes;
     final private Counter records;
+    final private Counter invalidLatencyRecords;
     final private Counter lowerDiscard;
     final private Counter higherDiscard;
     final private AtomicDouble mbPsec;
@@ -49,6 +50,7 @@ public class MetricsLogger implements Print {
         final String recsPsecName = metricPrefix + "_RecordsPerSec";
         final String avgLatencyName = metricPrefix + "_" + metricUnit + "_AvgLatency";
         final String maxLatencyName = metricPrefix + "_" + metricUnit + "_MaxLatency";
+        final String invalidLatencyRecordsName = metricPrefix + "_InvalidLatencyRecords";
         final String lowerDiscardName = metricPrefix + "_LowerDiscardedLatencyRecords";
         final String higherDiscardName = metricPrefix + "_HigherDiscardLatencyRecords";
         final String writersName = metricPrefix + "_Writers";
@@ -60,6 +62,7 @@ public class MetricsLogger implements Print {
         this.records = this.registry.counter(recordsName);
         this.lowerDiscard = this.registry.counter(lowerDiscardName);
         this.higherDiscard = this.registry.counter(higherDiscardName);
+        this.invalidLatencyRecords = this.registry.counter(invalidLatencyRecordsName);
         this.mbPsec = this.registry.gauge(mbPsecName, new AtomicDouble());
         this.recsPsec = this.registry.gauge(recsPsecName, new AtomicDouble());
         this.avgLatency = this.registry.gauge(avgLatencyName, new AtomicDouble());
@@ -78,9 +81,10 @@ public class MetricsLogger implements Print {
 
     @Override
     public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-                      long lowerDiscard, long higherDiscard, int[] percentileValues) {
+                      long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
         this.bytes.increment(bytes);
         this.records.increment(records);
+        this.invalidLatencyRecords.increment(invalid);
         this.lowerDiscard.increment(lowerDiscard);
         this.higherDiscard.increment(higherDiscard);
         this.recsPsec.set(recsPerSec);

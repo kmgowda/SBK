@@ -376,7 +376,7 @@ final public class SbkPerformance implements Performance {
             final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
             int[] pecs = getPercentiles(percentiles);
             logger.print(this.bytes, totalRecords, recsPerSec, mbPerSec,
-                    avgLatency, this.maxLatency,
+                    avgLatency, this.maxLatency, this.invalidLatencyRecords,
                     this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                     pecs);
         }
