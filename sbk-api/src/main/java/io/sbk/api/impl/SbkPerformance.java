@@ -227,6 +227,7 @@ final public class SbkPerformance implements Performance {
         public long validLatencyRecords;
         public long lowerLatencyDiscardRecords;
         public long higherLatencyDiscardRecords;
+        public long invalidLatencyRecords;
         public long bytes;
         public long totalLatency;
         public int maxLatency;
@@ -243,6 +244,7 @@ final public class SbkPerformance implements Performance {
             this.validLatencyRecords = 0;
             this.lowerLatencyDiscardRecords = 0;
             this.higherLatencyDiscardRecords = 0;
+            this.invalidLatencyRecords = 0;
             this.bytes = 0;
             this.maxLatency = 0;
             this.totalLatency = 0;
@@ -284,20 +286,24 @@ final public class SbkPerformance implements Performance {
          * @param latency latency value in milliseconds.
          */
         public void record(int bytes, int events, int latency) {
-            if (latency < this.baseLatency) {
-                this.lowerLatencyDiscardRecords += events;
+            if (latency < 0) {
+                this.invalidLatencyRecords += events;
             } else {
-                final int index = latency - this.baseLatency;
-                if (index < this.latencies.length) {
-                    this.latencies[index] += events;
-                    this.validLatencyRecords += events;
+                this.totalLatency += (long) latency * events;
+                if (latency < this.baseLatency) {
+                    this.lowerLatencyDiscardRecords += events;
                 } else {
-                    this.higherLatencyDiscardRecords += events;
+                    final int index = latency - this.baseLatency;
+                    if (index < this.latencies.length) {
+                        this.latencies[index] += events;
+                        this.validLatencyRecords += events;
+                    } else {
+                        this.higherLatencyDiscardRecords += events;
+                    }
                 }
             }
             this.bytes += bytes;
             this.maxLatency = Math.max(this.maxLatency, latency);
-            this.totalLatency += (long) latency * events;
         }
     }
 
@@ -352,7 +358,7 @@ final public class SbkPerformance implements Performance {
          */
         public void printPendingData(long time,  Logger logger) {
             if (this.validLatencyRecords > 0 || this.lowerLatencyDiscardRecords > 0 ||
-                    this.higherLatencyDiscardRecords > 0) {
+                    this.higherLatencyDiscardRecords > 0 || this.invalidLatencyRecords > 0) {
                 print(time, logger);
             }
         }
@@ -362,13 +368,15 @@ final public class SbkPerformance implements Performance {
          */
         public void print(long endTime, Print logger) {
             final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
-            final long totalRecords  = this.validLatencyRecords +
+            final long totalLatencyRecords  = this.validLatencyRecords +
                     this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
+            final long totalRecords = totalLatencyRecords + this.invalidLatencyRecords;
             final double recsPerSec = totalRecords / elapsedSec;
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsedSec;
+            final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
             int[] pecs = getPercentiles(percentiles);
             logger.print(this.bytes, totalRecords, recsPerSec, mbPerSec,
-                    this.totalLatency / (double) totalRecords, this.maxLatency,
+                    avgLatency, this.maxLatency,
                     this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                     pecs);
         }
