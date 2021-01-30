@@ -16,6 +16,11 @@ public enum TimeUnit {
             return "MILLISECONDS";
         }
     },
+    mcs {
+        public String toString() {
+            return "MICROSECONDS";
+        }
+    },
     ns  {
         public String toString() {
             return "NANOSECONDS";
