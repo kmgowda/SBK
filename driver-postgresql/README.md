@@ -20,7 +20,7 @@ docker run  -p 127.0.0.1:5432:5432/tcp  --name kmg-postgres -e POSTGRES_USER=roo
 
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class postgresql  -size 100 -writers 1 -time 60 
+./build/install/sbk/bin/sbk -class postgresql  -size 100 -writers 1 -seconds 60 
 ```
 
 by default, the SBK uses the url: jdbc:postgresql://localhost:5432/postgres, and default table name is 'test'
@@ -29,7 +29,7 @@ the default username is 'root' and the default password is 'root'.
 Sample SBK PostgeSQL write output is follows
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class postgresql  -size 100 -writers 1 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class postgresql  -size 100 -writers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -45,7 +45,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-18 11:27:56 INFO SBK version: 0.841
-2021-01-18 11:27:56 INFO Argument List: [-class, postgresql, -size, 100, -writers, 1, -time, 60]
+2021-01-18 11:27:56 INFO Argument List: [-class, postgresql, -size, 100, -writers, 1, -seconds, 60]
 2021-01-18 11:27:56 INFO sbk.applicationName: sbk
 2021-01-18 11:27:56 INFO sbk.className: 
 2021-01-18 11:27:56 INFO Reflections took 55 ms to scan 30 urls, producing 41 keys and 147 values 
@@ -80,7 +80,7 @@ PostgreSQL Writing(Total)        75060 records,    1251.0 records/sec,     0.12 
 The sample SBK PostgeSQL read output is below
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class postgresql  -size 100 -readers 1 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class postgresql  -size 100 -readers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -96,7 +96,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-18 11:29:19 INFO SBK version: 0.841
-2021-01-18 11:29:19 INFO Argument List: [-class, postgresql, -size, 100, -readers, 1, -time, 60]
+2021-01-18 11:29:19 INFO Argument List: [-class, postgresql, -size, 100, -readers, 1, -seconds, 60]
 2021-01-18 11:29:19 INFO sbk.applicationName: sbk
 2021-01-18 11:29:19 INFO sbk.className: 
 2021-01-18 11:29:19 INFO Reflections took 58 ms to scan 30 urls, producing 41 keys and 147 values 

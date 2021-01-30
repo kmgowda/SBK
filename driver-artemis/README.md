@@ -23,6 +23,6 @@ user name and passwords are very important create the authenticated sessions.
 you need to have Dockers installed on your system.
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class artemis -uri tcp://localhost:61616   -topic kmg-topic-3 -size 100 -writers 1 -readers 1   -time 60
+./build/install/sbk/bin/sbk -class artemis -uri tcp://localhost:61616   -topic kmg-topic-3 -size 100 -writers 1 -readers 1   -seconds 60
 ```
 

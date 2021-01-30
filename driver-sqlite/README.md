@@ -13,7 +13,7 @@ The SQLite driver uses the JDBC for IO operations.
 
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class sqlite -size 100 -writers 1 -time 60 
+./build/install/sbk/bin/sbk -class sqlite -size 100 -writers 1 -seconds 60 
 ```
 
 by default, the SBK uses the local sqlite database: jdbc:sqlite:test.db, and default table name is 'test'
@@ -22,7 +22,7 @@ by default, the SBK uses the local sqlite database: jdbc:sqlite:test.db, and def
 Sample SBK SQLte write output
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class sqlite -size 100 -writers 1 -time 60 
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class sqlite -size 100 -writers 1 -seconds 60 
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -38,7 +38,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-17 15:07:31 INFO SBK version: 0.841
-2021-01-17 15:07:31 INFO Argument List: [-class, sqlite, -size, 100, -writers, 1, -time, 60]
+2021-01-17 15:07:31 INFO Argument List: [-class, sqlite, -size, 100, -writers, 1, -seconds, 60]
 2021-01-17 15:07:31 INFO sbk.applicationName: sbk
 2021-01-17 15:07:31 INFO sbk.className: 
 2021-01-17 15:07:32 INFO Reflections took 57 ms to scan 27 urls, producing 40 keys and 144 values 
@@ -71,7 +71,7 @@ SQLite Writing(Total)     21099577 records,  351659.6 records/sec,    33.54 MB/s
 ```
 The sample SBK SQLite read output is below
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class sqlite -size 100 -readers 1 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class sqlite -size 100 -readers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -87,7 +87,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-17 15:24:23 INFO SBK version: 0.841
-2021-01-17 15:24:23 INFO Argument List: [-class, sqlite, -size, 100, -readers, 1, -time, 60]
+2021-01-17 15:24:23 INFO Argument List: [-class, sqlite, -size, 100, -readers, 1, -seconds, 60]
 2021-01-17 15:24:23 INFO sbk.applicationName: sbk
 2021-01-17 15:24:23 INFO sbk.className: 
 2021-01-17 15:24:24 INFO Reflections took 59 ms to scan 27 urls, producing 40 keys and 144 values 

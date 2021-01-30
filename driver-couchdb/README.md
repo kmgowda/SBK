@@ -21,7 +21,7 @@ make sure you have redirected the port 5984 from docker to local system
 
 Now, you can run the CouchDB writer benchmarking as follows. 
 ```
-kmg@kmg:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class couchdb  -size 100 -writers 1 -time 60
+kmg@kmg:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class couchdb  -size 100 -writers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/mnt/d/kmg-linux/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/mnt/d/kmg-linux/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -37,7 +37,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2020-07-30 13:27:36 INFO SBK version: 0.81
-2020-07-30 13:27:36 INFO Argument List: [-class, couchdb, -size, 100, -writers, 1, -time, 60]
+2020-07-30 13:27:36 INFO Argument List: [-class, couchdb, -size, 100, -writers, 1, -seconds, 60]
 2020-07-30 13:27:37 INFO Reflections took 114 ms to scan 24 urls, producing 31 keys and 126 values
 2020-07-30 13:27:38 INFO The data base :demo not found
 Writing        267 records,      53.4 records/sec,     0.01 MB/sec,     18.6 ms avg latency,     104 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:      14 ms 10th,      16 ms 25th,      17 ms 50th,      19 ms 75th,      26 ms 95th,      68 ms 99th,     104 ms 99.9th,     104 ms 99.99th.
@@ -57,7 +57,7 @@ Writing(Total)       2900 records,      47.5 records/sec,     0.00 MB/sec,     2
 The sample output for the CouchDB read is as follows:
 
 ```
-kmg@kmg:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class couchdb  -size 100 -readers 1 -time 60
+kmg@kmg:~/kmg-linux/SBK$ ./build/install/sbk/bin/sbk -class couchdb  -size 100 -readers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/mnt/d/kmg-linux/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/mnt/d/kmg-linux/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -73,7 +73,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2020-07-30 13:29:37 INFO SBK version: 0.81
-2020-07-30 13:29:37 INFO Argument List: [-class, couchdb, -size, 100, -readers, 1, -time, 60]
+2020-07-30 13:29:37 INFO Argument List: [-class, couchdb, -size, 100, -readers, 1, -seconds, 60]
 2020-07-30 13:29:37 INFO Reflections took 115 ms to scan 24 urls, producing 31 keys and 126 values
 Reading        623 records,     124.6 records/sec,     0.05 MB/sec,      7.9 ms avg latency,      48 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       6 ms 10th,       6 ms 25th,       7 ms 50th,       8 ms 75th,      13 ms 95th,      25 ms 99th,      48 ms 99.9th,      48 ms 99.99th.
 Reading        697 records,     139.2 records/sec,     0.05 MB/sec,      7.2 ms avg latency,      25 ms max latency; Discarded Latencies:       0 lower,        0 higher;  Latency Percentiles:       5 ms 10th,       6 ms 25th,       6 ms 50th,       7 ms 75th,      13 ms 95th,      22 ms 99th,      25 ms 99.9th,      25 ms 99.99th.

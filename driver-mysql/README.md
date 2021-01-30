@@ -21,7 +21,7 @@ docker run -p 3306:3306 -v /tmp:/tmp --name db --detach -e MYSQL_ROOT_PASSWORD="
 
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class mysql  -size 100 -writers 1 -time 60 
+./build/install/sbk/bin/sbk -class mysql  -size 100 -writers 1 -seconds 60 
 ```
 
 by default, the SBK uses the url: jdbc:mysql://localhost:3306/social, and default table name is 'test'
@@ -30,7 +30,7 @@ here **social** is the database name , the default username is 'root' and the de
 Sample SBK MySQL write output is follows
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql  -size 100 -writers 1 -time 60 
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql  -size 100 -writers 1 -seconds 60 
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -46,7 +46,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-17 17:36:13 INFO SBK version: 0.841
-2021-01-17 17:36:13 INFO Argument List: [-class, mysql, -size, 100, -writers, 1, -time, 60]
+2021-01-17 17:36:13 INFO Argument List: [-class, mysql, -size, 100, -writers, 1, -seconds, 60]
 2021-01-17 17:36:13 INFO sbk.applicationName: sbk
 2021-01-17 17:36:13 INFO sbk.className: 
 2021-01-17 17:36:14 INFO Reflections took 62 ms to scan 28 urls, producing 40 keys and 145 values 
@@ -84,7 +84,7 @@ MySQL Writing(Total)        53850 records,     897.5 records/sec,     0.09 MB/se
 ```
 The sample SBK MySQL read output is below
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql  -size 100 -readers 1 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql  -size 100 -readers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -100,7 +100,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-17 17:46:23 INFO SBK version: 0.841
-2021-01-17 17:46:23 INFO Argument List: [-class, mysql, -size, 100, -readers, 1, -time, 60]
+2021-01-17 17:46:23 INFO Argument List: [-class, mysql, -size, 100, -readers, 1, -seconds, 60]
 2021-01-17 17:46:23 INFO sbk.applicationName: sbk
 2021-01-17 17:46:23 INFO sbk.className: 
 2021-01-17 17:46:23 INFO Reflections took 58 ms to scan 28 urls, producing 40 keys and 145 values 
@@ -141,7 +141,7 @@ docker run -p 3306:3306 --name mariadb -e MYSQL_ROOT_PASSWORD=root -d mariadb:la
 
 An example SBK command is as follows
 ```
-./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -writers 1 -size 100 -time 60
+./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -writers 1 -size 100 -seconds 60
 ```
 
 Note that **"mysql"** is the name of the data base used while starting the MariaDB server and the same name should be used in the **-url** option of SBK jdbc command.
@@ -149,7 +149,7 @@ Note that **"mysql"** is the name of the data base used while starting the Maria
 Sample SBK MySQL write output for MariaDB is as follows:
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -writers 1 -size 100 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -writers 1 -size 100 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -165,7 +165,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-17 17:52:20 INFO SBK version: 0.841
-2021-01-17 17:52:20 INFO Argument List: [-class, mysql, -driver, org.mariadb.jdbc.Driver, -url, jdbc:mariadb://localhost/mysql, -table, kmg, -user, root, -password, root, -writers, 1, -size, 100, -time, 60]
+2021-01-17 17:52:20 INFO Argument List: [-class, mysql, -driver, org.mariadb.jdbc.Driver, -url, jdbc:mariadb://localhost/mysql, -table, kmg, -user, root, -password, root, -writers, 1, -size, 100, -seconds, 60]
 2021-01-17 17:52:20 INFO sbk.applicationName: sbk
 2021-01-17 17:52:20 INFO sbk.className: 
 2021-01-17 17:52:21 INFO Reflections took 52 ms to scan 28 urls, producing 40 keys and 145 values 
@@ -200,13 +200,13 @@ MySQL Writing(Total)        62899 records,    1048.3 records/sec,     0.10 MB/se
 
 An Example database read command is as follows:
 ```
- ./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -time 60
+ ./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -seconds 60
 ``` 
 
 Sample SBK MySQL read output for MariaDB is as follows:
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mysql -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -222,7 +222,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-17 17:53:32 INFO SBK version: 0.841
-2021-01-17 17:53:32 INFO Argument List: [-class, mysql, -driver, org.mariadb.jdbc.Driver, -url, jdbc:mariadb://localhost/mysql, -table, kmg, -user, root, -password, root, -readers, 1, -size, 100, -time, 60]
+2021-01-17 17:53:32 INFO Argument List: [-class, mysql, -driver, org.mariadb.jdbc.Driver, -url, jdbc:mariadb://localhost/mysql, -table, kmg, -user, root, -password, root, -readers, 1, -size, 100, -seconds, 60]
 2021-01-17 17:53:32 INFO sbk.applicationName: sbk
 2021-01-17 17:53:32 INFO sbk.className: 
 2021-01-17 17:53:32 INFO Reflections took 55 ms to scan 28 urls, producing 40 keys and 145 values 

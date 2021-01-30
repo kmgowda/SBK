@@ -21,7 +21,7 @@ docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=root@1234' -p 1433:1433 -d mcr.mic
 
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class mssql  -size 100 -writers 1 -time 60 
+./build/install/sbk/bin/sbk -class mssql  -size 100 -writers 1 -seconds 60 
 ```
 
 by default, the SBK uses the url: jdbc:sqlserver://localhost:1433, and default table name is 'test'
@@ -30,7 +30,7 @@ the default username is 'sa' and the default password is 'root@1234'
 Sample SBK MicrosoftSQL write output is follows
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mssql  -size 100 -writers 1 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mssql  -size 100 -writers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -46,7 +46,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-18 15:55:04 INFO SBK version: 0.841
-2021-01-18 15:55:04 INFO Argument List: [-class, mssql, -size, 100, -writers, 1, -time, 60]
+2021-01-18 15:55:04 INFO Argument List: [-class, mssql, -size, 100, -writers, 1, -seconds, 60]
 2021-01-18 15:55:04 INFO sbk.applicationName: sbk
 2021-01-18 15:55:04 INFO sbk.className: 
 2021-01-18 15:55:04 INFO Reflections took 54 ms to scan 32 urls, producing 41 keys and 149 values 
@@ -81,7 +81,7 @@ MsSql Writing(Total)        54176 records,     902.9 records/sec,     0.09 MB/se
 The sample SBK MicrosoftSQL read output is below
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mssql  -size 100 -readers 1 -time 60
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class mssql  -size 100 -readers 1 -seconds 60
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -97,7 +97,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2021-01-18 15:57:50 INFO SBK version: 0.841
-2021-01-18 15:57:50 INFO Argument List: [-class, mssql, -size, 100, -readers, 1, -time, 60]
+2021-01-18 15:57:50 INFO Argument List: [-class, mssql, -size, 100, -readers, 1, -seconds, 60]
 2021-01-18 15:57:50 INFO sbk.applicationName: sbk
 2021-01-18 15:57:50 INFO sbk.className: 
 2021-01-18 15:57:50 INFO Reflections took 55 ms to scan 32 urls, producing 41 keys and 149 values 

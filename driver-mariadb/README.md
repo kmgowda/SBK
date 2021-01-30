@@ -14,7 +14,7 @@ docker run -p 3306:3306 --name mariadb -e MYSQL_ROOT_PASSWORD=root -d mariadb:la
 
 An example SBK command is as follows
 ```
-./build/install/sbk/bin/sbk -class mariadb  -writers 1 -size 100 -time 60
+./build/install/sbk/bin/sbk -class mariadb  -writers 1 -size 100 -seconds 60
 ```
 
 with default driver is 'org.mariadb.jdbc.Driver' and url 'jdbc:mariadb://localhost/mysql'

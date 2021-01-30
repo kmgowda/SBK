@@ -18,24 +18,24 @@ to see the existing buckets and objects.
 
 you can run the below command to see the writer benchmarking uploading the objects into https://play.min.io
 ```
-./build/install/sbk/bin/sbk -class minio -writers 1 -size 100 -time 60
+./build/install/sbk/bin/sbk -class minio -writers 1 -size 100 -seconds 60
 ```
 The above command creates the bucket named `sbk` with objects prefixed with `sbk-`
 
 For read performance benchmarking, you run the below command.
 ```
-./build/install/sbk/bin/sbk -class minio -writers 1 -size 100 -time 60
+./build/install/sbk/bin/sbk -class minio -writers 1 -size 100 -seconds 60
 ```
 
 The SBK Docker command writer benchmarking uploading the objects into https://play.min.io
 
 ```
-docker run -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk -class minio -writers 1 -size 10 -time 60
+docker run -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk -class minio -writers 1 -size 10 -seconds 60
 ```
 
 The SBK docker command to read the objects from https://play.min.io
 ```
-docker run -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk -class minio -readers 1 -size 10 -time 60
+docker run -p 127.0.0.1:8080:8080/tcp  kmgowda/sbk -class minio -readers 1 -size 10 -seconds 60
 ```
 
 you can override the default access key and secret key by using the options `-key` and `-secret`

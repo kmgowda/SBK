@@ -14,7 +14,7 @@ The Apache Hive driver uses the JDBC for IO operations.
 
 An example, SBK benchmarking command is
 ```
-./build/install/sbk/bin/sbk -class hive -table table1 -writers 1 -size 100 -time 120
+./build/install/sbk/bin/sbk -class hive -table table1 -writers 1 -size 100 -seconds 120
 ```
 
 by default, the SBK uses the local hive cluster url: jdbc:hive2://localhost:10000/default;auth=noSasl
@@ -31,7 +31,7 @@ you check your local host : http://localhost:8088 for to observe the IO operatio
 Sample SBK Hive write output
 
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class hive -table table1 -writers 1 -size 100 -time 120                                                       
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class hive -table table1 -writers 1 -size 100 -seconds 120                                                       
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -47,7 +47,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2020-10-18 15:52:30 INFO SBK version: 0.83
-2020-10-18 15:52:30 INFO Argument List: [-class, hive, -table, table1, -writers, 1, -size, 100, -time, 120]
+2020-10-18 15:52:30 INFO Argument List: [-class, hive, -table, table1, -writers, 1, -size, 100, -seconds, 120]
 2020-10-18 15:52:30 INFO sbk.applicationName: sbk
 2020-10-18 15:52:30 INFO sbk.className: 
 2020-10-18 15:52:30 INFO Reflections took 56 ms to scan 25 urls, producing 34 keys and 130 values 
@@ -95,7 +95,7 @@ Writing(Total)          7 records,       0.1 records/sec,     0.00 MB/sec,  1645
 ```
 The sample SBK Hive read output is below
 ```
-kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class hive -table table1 -readers 1 -size 100 -time 120
+kmg@kmgs-MacBook-Pro SBK % ./build/install/sbk/bin/sbk -class hive -table table1 -readers 1 -size 100 -seconds 120
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -111,7 +111,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
      |_____/  |____/  |_| \_\
 
 2020-10-18 15:57:08 INFO SBK version: 0.83
-2020-10-18 15:57:08 INFO Argument List: [-class, hive, -table, table1, -readers, 1, -size, 100, -time, 120]
+2020-10-18 15:57:08 INFO Argument List: [-class, hive, -table, table1, -readers, 1, -size, 100, -seconds, 120]
 2020-10-18 15:57:08 INFO sbk.applicationName: sbk
 2020-10-18 15:57:08 INFO sbk.className: 
 2020-10-18 15:57:08 INFO Reflections took 57 ms to scan 25 urls, producing 34 keys and 130 values 
