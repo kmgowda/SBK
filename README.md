@@ -114,6 +114,8 @@ usage: sbk
  -records <arg>      Number of records(events) if 'time' not specified;
                      otherwise, Maximum records per second by writer(s)
                      and/or Number of records per reader
+ -seconds <arg>      Number of seconds to run; if not specified, runs
+                     forever
  -size <arg>         Size of each message (event or record)
  -sync <arg>         Each Writer calls flush/sync after writing <arg>
                      number of of events(records) ; <arg> number of
@@ -121,8 +123,6 @@ usage: sbk
  -throughput <arg>   if > 0 , throughput in MB/s
                      if 0 , writes/reads 'records'
                      if -1, get the maximum throughput (default: -1)
- -seconds <arg>         Number of seconds to run; if not specified, runs
-                     forever
  -writers <arg>      Number of writers
 
 
@@ -486,7 +486,7 @@ usage: sbk -class pulsar
  -throughput <arg>      if > 0 , throughput in MB/s
                         if 0 , writes/reads 'records'
                         if -1, get the maximum throughput (default: -1)
- -seconds <arg>            Number of seconds to run; if not specified, runs
+ -seconds <arg>         Number of seconds to run; if not specified, runs
                         forever
  -topic <arg>           Topic name, default : test
  -writeQuorum <arg>     WriteQuorum default: 1
