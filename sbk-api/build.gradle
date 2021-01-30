@@ -11,7 +11,7 @@ buildscript {
         classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
     }
 }
-sourceCompatibility = 1.8
+
 
 repositories {
     mavenCentral()
