@@ -9,7 +9,7 @@
 ##
 
 # Building Container
-FROM gradle:6.0.1-jdk8 as GradleBuilder
+FROM gradle:6.0.1-jdk11 as GradleBuilder
 USER root
 
 COPY ca-certificates/* /usr/local/share/ca-certificates/
@@ -36,7 +36,7 @@ ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  :${SBK_DRIVER}:build --no-daemon --info --stacktrace
 
 # Runtime Container
-FROM openjdk:8-jre
+FROM openjdk:11-jre
 ENV APP_NAME=sbk
 ENV SBK_DRIVER=driver-file
 ENV APP_HOME=/opt/${APP_NAME}
@@ -45,5 +45,7 @@ COPY --from=GradleBuilder ${APP_HOME}/${SBK_DRIVER}/build/distributions/${APP_NA
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}
+
+EXPOSE 9718
 
 ENTRYPOINT ["/opt/sbk/bin/sbk-file"]
