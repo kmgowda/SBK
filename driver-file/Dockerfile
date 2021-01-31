@@ -46,4 +46,6 @@ COPY --from=GradleBuilder ${APP_HOME}/${SBK_DRIVER}/build/distributions/${APP_NA
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}
 
+EXPOSE 9718
+
 ENTRYPOINT ["/opt/sbk/bin/sbk-file"]
