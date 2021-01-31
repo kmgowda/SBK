@@ -16,4 +16,5 @@ public class KafkaConfig {
     public short replica;
     public short sync;
     public boolean create;
+    public boolean idempotence;
 }

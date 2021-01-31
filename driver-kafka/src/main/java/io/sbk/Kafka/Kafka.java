@@ -79,7 +79,7 @@ public class Kafka implements Storage<byte[]> {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         // Enabling the producer IDEMPOTENCE is must, to compare between Kafka and Pravega.
-        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, config.idempotence);
         return props;
     }
 
