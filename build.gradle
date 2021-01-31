@@ -131,6 +131,92 @@ allprojects {
 		}
 	}
 
+	task generateDockerfiles() {
+		def baseDriverToSkip="sbk-api"
+		def buffer = ""
+		def outDir = 'build/dockers'
+		def outFile = sbkProjectName+"-"+sbkVersion
+
+		/*
+       	 	call with parameter
+        	./gradlew generateDockerfiles -Poutdir="/Users/kmg/projects/SBK/dockers"
+        	to generate dashboard files on single folder
+        */
+		if (project.hasProperty("outdir")) {
+			outDir = outdir
+			outFile = sbkProjectName
+		}
+
+
+		if (project.path.startsWith(":driver-")) {
+			doLast {
+				println "generatering file : " + outDir + "/" + outFile
+
+				configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+					def id = artifact.moduleVersion.id
+					if (id.group.toString() == rootProject.name) {
+						if (id.name != baseDriverToSkip) {
+							buffer += "COPY --chown=root:root " +id.name +" \${APP_HOME}/" + id.name + "\n"
+						}
+					}
+				}
+				buffer += "COPY --chown=root:root " +project.name +" \${APP_HOME}/" + project.name + "\n"
+				copy {
+					from "$rootDir/driver-docker-template"
+					into outDir
+					filter { line -> line.replaceAll('PROJECT@SBK', project.name) }
+					filter { line -> line.replaceAll('APP@SBK', sbkProjectName) }
+					filter { line -> line.replace("COPY@SBK", buffer) }
+					rename 'driver-docker-template', outFile
+				}
+			}
+		} else if (project.name == rootProject.name) {
+			doLast {
+				println "generatering file : " + outDir + "/" + outFile
+
+				configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+					def id = artifact.moduleVersion.id
+					if (id.group.toString() == rootProject.name) {
+						if (id.name != baseDriverToSkip) {
+							buffer += "COPY --chown=root:root " +id.name +" \${APP_HOME}/" + id.name + "\n"
+						}
+					}
+				}
+				copy {
+					from "$rootDir/docker-template"
+					into outDir
+					filter { line -> line.replace("COPY@SBK", buffer) }
+					rename 'docker-template', outFile
+				}
+			}
+		}
+	}
+
+}
+
+task printDependencies {
+	doLast {
+		project.subprojects.findAll().each {
+			println "subproject : " + it.name
+			it.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+				def id = artifact.moduleVersion.id
+				if (id.group.toString() == rootProject.name) {
+					println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+				}
+			}
+			println()
+		}
+		println("Root project : "+rootProject.name)
+		configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+			def id = artifact.moduleVersion.id
+			if (id.group.toString() == rootProject.name) {
+				println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+			}
+		}
+		println()
+
+
+	}
 }
 
 /* Include your driver below */
