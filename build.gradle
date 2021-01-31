@@ -133,6 +133,31 @@ allprojects {
 
 }
 
+task printDependencies {
+	doLast {
+		project.subprojects.findAll().each {
+			println "subproject : " + it.name
+			it.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+				def id = artifact.moduleVersion.id
+				if (id.group.toString() == rootProject.name) {
+					println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+				}
+			}
+			println()
+		}
+		println("Root project : "+rootProject.name)
+		configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+			def id = artifact.moduleVersion.id
+			if (id.group.toString() == rootProject.name) {
+				println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+			}
+		}
+		println()
+
+
+	}
+}
+
 /* Include your driver below */
 dependencies {
 	compile project(":sbk-api")
