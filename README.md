@@ -70,7 +70,7 @@ we welcome open source developers to contribute to this project by adding a driv
 
 ### Prerequisites
 
-- Java 8+
+- Java 11+
 - Gradle 6+
 
 ### Building

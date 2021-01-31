@@ -155,7 +155,7 @@ public class Sbk {
 
         SbkLogger.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         SbkLogger.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
-        SbkLogger.log.info(Config.NAME.toUpperCase() +" version: "+version);
+        SbkLogger.log.info(Config.NAME.toUpperCase() +" Version: "+version);
         SbkLogger.log.info("Arguments List: "+Arrays.toString(args));
         SbkLogger.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
         SbkLogger.log.info(Config.SBK_CLASS_NAME + ": "+ sbkClassName);
