@@ -4,8 +4,7 @@ services:
     image: prom/prometheus
     hostname: prometheus
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/targets.json:/etc/prometheus/targets.json
+      - ./prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:

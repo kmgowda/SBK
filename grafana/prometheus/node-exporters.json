@@ -1,0 +1,7 @@
+[
+  {
+    "targets": [
+      "localhost:9100", "host.docker.internal:9100"
+    ]
+  }
+]

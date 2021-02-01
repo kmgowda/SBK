@@ -5,8 +5,7 @@ services:
     container_name: prometheus
     hostname: prometheus
     volumes:
-      - ./grafana/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./grafana/prometheus/targets.json:/etc/prometheus/targets.json
+      - ./grafana/prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
