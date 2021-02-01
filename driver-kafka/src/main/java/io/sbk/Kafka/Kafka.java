@@ -39,12 +39,12 @@ public class Kafka implements Storage<byte[]> {
     private Properties consumerConfig;
     private KafkaTopicHandler topicHandler;
 
-    @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+
+    public void addArgs(final Parameters params, String configFile) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            config = mapper.readValue(Objects.requireNonNull(Kafka.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+            config = mapper.readValue(Objects.requireNonNull(Kafka.class.getClassLoader().getResourceAsStream(configFile)),
                     KafkaConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -57,6 +57,11 @@ public class Kafka implements Storage<byte[]> {
         params.addOption("sync", true, "Minimum in-sync Replicas, default: "+ config.sync);
         params.addOption("create", true,
                 "Create (recreate) the topic, valid only for writers, default: " + config.create);
+    }
+
+    @Override
+    public void addArgs(final Parameters params) throws IllegalArgumentException {
+        addArgs(params, CONFIGFILE);
     }
 
     @Override
@@ -79,7 +84,7 @@ public class Kafka implements Storage<byte[]> {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         // Enabling the producer IDEMPOTENCE is must, to compare between Kafka and Pravega.
-        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, config.idempotence);
         return props;
     }
 

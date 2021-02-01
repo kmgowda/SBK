@@ -253,6 +253,7 @@ dependencies {
 	compile project(':driver-postgresql')
 	compile project(':driver-derby')
 	compile project(':driver-mssql')
+	compile project(':driver-redpanda')
 }
 
 //create a single Jar with all dependencies
