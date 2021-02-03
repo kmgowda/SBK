@@ -14,6 +14,7 @@ import io.sbk.api.Action;
 import io.sbk.api.Config;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
+import io.sbk.api.Time;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -40,7 +41,7 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public void open(final Parameters params, final String storageName, Action action) throws  IOException {
+    public void open(final Parameters params, final String storageName, Action action, Time time) throws  IOException {
         this.prefix = storageName+" "+action.name();
         this.timeUnit = getTimeUnit().name();
         this.percentiles = getPercentileIndices();

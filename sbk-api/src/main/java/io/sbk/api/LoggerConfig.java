@@ -9,8 +9,8 @@
  */
 package io.sbk.api;
 
-public class MetricsConfig {
-    public int port;
-    public String context;
-    public TimeUnit latencyTimeUnit;
+public class LoggerConfig {
+    public int reportingSeconds;
+    public TimeUnit timeUnit;
+    public String percentiles;
 }

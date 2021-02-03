@@ -15,9 +15,11 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.api.Config;
 import io.sbk.api.Print;
+import io.sbk.api.Time;
+import io.sbk.api.TimeUnit;
 
 import java.text.DecimalFormat;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
@@ -32,18 +34,24 @@ public class MetricsLogger implements Print {
     final private AtomicDouble mbPsec;
     final private AtomicDouble recsPsec;
     final private AtomicDouble avgLatency;
-    final private AtomicInteger maxLatency;
-    final private AtomicInteger[] percentileGauges;
+    final private AtomicLong maxLatency;
+    final private AtomicLong[] percentileGauges;
     final private MeterRegistry registry;
+    final private ConvertTime convert;
 
-    public MetricsLogger(String storageName, String action, String timeUnit,
-                         double[] percentiles, int writers, int readers,
-                         CompositeMeterRegistry compositeRegistry) {
+
+    private interface ConvertTime {
+        long toTimeUnit(long t);
+    }
+
+
+    public MetricsLogger(String storageName, String action, Time time, TimeUnit latencyTimeUnit,
+                         double[] percentiles, int writers, int readers, CompositeMeterRegistry compositeRegistry) {
         this.format = new DecimalFormat(Config.SBK_PERCENTILE_FORMAT);
         final String metricPrefix = Config.NAME.replace(" ", "_").toUpperCase()
                 + "_" + storageName.replace(" ", "_").toUpperCase()
                 + "_" + action.replace(" ", "_");
-        final String metricUnit = timeUnit.replace(" ", "_");
+        final String metricUnit = latencyTimeUnit.name().replace(" ", "_");
         final String bytesName = metricPrefix + "_Bytes";
         final String recordsName = metricPrefix + "_Records";
         final String mbPsecName = metricPrefix + "_MBPerSec";
@@ -66,18 +74,25 @@ public class MetricsLogger implements Print {
         this.mbPsec = this.registry.gauge(mbPsecName, new AtomicDouble());
         this.recsPsec = this.registry.gauge(recsPsecName, new AtomicDouble());
         this.avgLatency = this.registry.gauge(avgLatencyName, new AtomicDouble());
-        this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicInteger());
-        this.percentileGauges = new AtomicInteger[percentiles.length];
+        this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicLong());
+        this.percentileGauges = new AtomicLong[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
             this.percentileGauges[i] = this.registry.gauge(metricPrefix + "_" + metricUnit + "_" + format.format(percentiles[i]),
-                    new AtomicInteger());
-
+                    new AtomicLong());
+        }
+        if (latencyTimeUnit == TimeUnit.ns) {
+            convert = time::convertToNanoSeconds;
+        } else if (latencyTimeUnit == TimeUnit.mcs) {
+            convert = time::convertToMicroSeconds;
+        } else {
+            convert = time::convertToMilliSeconds;
         }
     }
 
     public void close() {
         registry.close();
     }
+
 
     @Override
     public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
@@ -89,10 +104,10 @@ public class MetricsLogger implements Print {
         this.higherDiscard.increment(higherDiscard);
         this.recsPsec.set(recsPerSec);
         this.mbPsec.set(mbPerSec);
-        this.avgLatency.set(avgLatency);
-        this.maxLatency.set(maxLatency);
+        this.avgLatency.set(convert.toTimeUnit((long) avgLatency));
+        this.maxLatency.set(convert.toTimeUnit(maxLatency));
         for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
-            this.percentileGauges[i].set(percentileValues[i]);
+            this.percentileGauges[i].set(convert.toTimeUnit(percentileValues[i]));
         }
     }
 
