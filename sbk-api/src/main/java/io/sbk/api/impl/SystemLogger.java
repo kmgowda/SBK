@@ -95,7 +95,7 @@ public class SystemLogger implements Logger {
     @Override
     public void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentilesValues) {
-        print(prefix + "(Total) ", bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        print("Total : " + prefix , bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentilesValues);
     }
 }
