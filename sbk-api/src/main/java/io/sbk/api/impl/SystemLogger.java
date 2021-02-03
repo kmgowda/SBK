@@ -17,18 +17,22 @@ import io.sbk.api.Parameters;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class for recoding/printing results on System.out.
  */
 public class SystemLogger implements Logger {
     final public DecimalFormat format;
+    final public AtomicInteger workers;
     public String prefix;
     public String timeUnit;
     public double[] percentiles;
 
+
     public SystemLogger() {
         this.format = new DecimalFormat(Config.SBK_PERCENTILE_FORMAT);
+        this.workers = new AtomicInteger(0);
     }
 
     @Override
@@ -57,6 +61,16 @@ public class SystemLogger implements Logger {
     public void close(final Parameters params) throws IOException  {
     }
 
+    @Override
+    public void setWritersCount(int writers) {
+        workers.set(writers);
+    }
+
+    @Override
+    public void setReadersCount(int writers) {
+        workers.set(writers);
+    }
+
 
     public String buildPercentileString(int[] percentileValues) {
         StringBuilder out = new StringBuilder();
@@ -72,10 +86,10 @@ public class SystemLogger implements Logger {
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                        int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
-        System.out.printf("%s %11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
+        System.out.printf("%s [%d] %11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
                         " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher; " +
                         " Latency Percentiles: %s. \n",
-                prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit,
+                prefix, workers.get(), records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit,
                 invalid, lowerDiscard, higherDiscard, buildPercentileString(percentileValues));
     }
 

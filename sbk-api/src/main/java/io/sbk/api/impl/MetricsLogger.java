@@ -33,6 +33,8 @@ public class MetricsLogger implements Print {
     final private AtomicDouble recsPsec;
     final private AtomicDouble avgLatency;
     final private AtomicInteger maxLatency;
+    final private AtomicInteger writers;
+    final private AtomicInteger readers;
     final private AtomicInteger[] percentileGauges;
     final private MeterRegistry registry;
 
@@ -56,8 +58,8 @@ public class MetricsLogger implements Print {
         final String writersName = metricPrefix + "_Writers";
         final String readersName = metricPrefix + "_Readers";
         this.registry = compositeRegistry;
-        this.registry.gauge(writersName, writers);
-        this.registry.gauge(readersName, readers);
+        this.writers = this.registry.gauge(writersName, new AtomicInteger());
+        this.readers = this.registry.gauge(readersName, new AtomicInteger());
         this.bytes = this.registry.counter(bytesName);
         this.records = this.registry.counter(recordsName);
         this.lowerDiscard = this.registry.counter(lowerDiscardName);
@@ -77,6 +79,14 @@ public class MetricsLogger implements Print {
 
     public void close() {
         registry.close();
+    }
+
+    public void setWriters(int writers) {
+        this.writers.set(writers);
+    }
+
+    public void setReaders(int writers) {
+        this.readers.set(writers);
     }
 
     @Override

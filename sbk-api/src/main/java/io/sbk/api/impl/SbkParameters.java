@@ -59,6 +59,12 @@ final public class SbkParameters implements Parameters {
     @Getter
     private boolean writeAndRead;
 
+    @Getter
+    private int delta;
+
+    @Getter
+    private int intervalSeconds;
+
     private double throughput;
     private CommandLine commandline;
 
@@ -90,6 +96,11 @@ final public class SbkParameters implements Parameters {
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes/reads 'records'\n" +
                         "if -1, get the maximum throughput (default: -1)");
+        options.addOption("delta", true,
+                "delta/batch of writers/readers to increase");
+
+        options.addOption("interval", true,
+                "interval in seconds to increase writers/readers");
         options.addOption("help", false, "Help message");
     }
 
@@ -144,6 +155,8 @@ final public class SbkParameters implements Parameters {
         }
         writersCount = Integer.parseInt(commandline.getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(commandline.getOptionValue("readers", "0"));
+        delta = Integer.parseInt(commandline.getOptionValue("delta", "1"));
+        intervalSeconds = Integer.parseInt(commandline.getOptionValue("interval", "0"));
 
         if (writersCount == 0 && readersCount == 0) {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");

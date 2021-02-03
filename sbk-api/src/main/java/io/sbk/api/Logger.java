@@ -49,6 +49,19 @@ public interface Logger extends Print {
 
 
     /**
+     * Set the Number Writers.
+     * @param writers New Writers count.
+     */
+    void setWritersCount(int writers);
+
+
+    /**
+     * Set the Number Readers.
+     * @param readers New readers count.
+     */
+    void setReadersCount(int readers);
+
+    /**
      * Print the Total Periodic performance results.
      * @param bytes number of bytes read/write
      * @param records data to write.

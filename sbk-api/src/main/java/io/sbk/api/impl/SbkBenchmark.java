@@ -213,15 +213,32 @@ public class SbkBenchmark implements Benchmark {
             rStatFuture = null;
         }
         if (sbkWriters != null) {
-            writeFutures = sbkWriters.stream()
-                    .map(x -> CompletableFuture.runAsync(() -> {
+            writeFutures = new ArrayList<>();
+
+            for (int i = 0; i < params.getWritersCount(); i += params.getDelta())  {
+                for (int j = 0; j < params.getDelta(); j++) {
+                    final int index = i + j;
+                    logger.setWritersCount(index+1);
+                    writeFutures.add(CompletableFuture.runAsync( () -> {
                         try {
-                            x.run();
-                        }  catch (IOException ex) {
+                            SbkLogger.log.info("Writer " + index +" started");
+                            sbkWriters.get(index).run();
+                        } catch (IOException ex) {
                             ex.printStackTrace();
                             writersErrCnt.incrementAndGet();
                         }
-                    }, executor)).collect(Collectors.toList());
+                    }));
+                }
+                if (params.getIntervalSeconds() > 0) {
+                    try {
+                        Thread.sleep(params.getIntervalSeconds() * Config.MS_PER_SEC);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                        throw new IOException(ex);
+                    }
+                }
+             }
+
             writeFuturesCnt = writeFutures.size();
         } else {
             writeFutures = null;
@@ -229,18 +246,35 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (sbkReaders != null) {
-            readFutures = sbkReaders.stream()
-                    .map(x -> CompletableFuture.runAsync(() -> {
+            readFutures = new ArrayList<>();
+
+            for (int i = 0; i < params.getReadersCount(); i += params.getDelta())  {
+                for (int j = 0; j < params.getDelta(); j++) {
+                    final int index = i + j;
+                    logger.setReadersCount(index+1);
+                    readFutures.add(CompletableFuture.runAsync( () -> {
                         try {
-                            x.run();
+                            SbkLogger.log.info("Reader " + index +" started");
+                            sbkReaders.get(index).run();
                         } catch (EOFException ex) {
-                            SbkLogger.log.info("Reader " + x.id +" exited with EOF");
+                            SbkLogger.log.info("Reader " + index+1 +" exited with EOF");
                             readersErrCnt.incrementAndGet();
                         } catch (IOException ex) {
                             ex.printStackTrace();
                             readersErrCnt.incrementAndGet();
                         }
-                    }, executor)).collect(Collectors.toList());
+                    }));
+                }
+                if (params.getIntervalSeconds() > 0) {
+                    try {
+                        Thread.sleep(params.getIntervalSeconds() * Config.MS_PER_SEC);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                        throw new IOException(ex);
+                    }
+                }
+            }
+
             readFuturesCnt = readFutures.size();
         } else if (sbkCallbackReaders != null) {
             readFutures = sbkCallbackReaders.stream()

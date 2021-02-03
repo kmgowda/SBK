@@ -140,4 +140,18 @@ public interface Parameters {
      * @throws ParseException If an exception occurred.
      */
     void parseArgs(String[] args) throws ParseException, IllegalArgumentException;
+
+
+    /**
+     * get the delta value to increase writers/readers.
+     * @return  delta value.
+     */
+    int getDelta();
+
+
+    /**
+     * get interval in seconds to increase the writers/readers.
+     * @return  get the interval in seconds .
+     */
+    int getIntervalSeconds();
 }

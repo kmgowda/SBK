@@ -26,10 +26,10 @@ public class Sl4jResultLogger extends SystemLogger {
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentilesValues) {
-        log.info(String.format("%s %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
+        log.info(String.format("%s[%d] %10d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
                         "%8d invalid latencies; Discarded Latencies:%8d lower, %8d higher; " +
                         " Latency Percentiles: %s.\n",
-                this.prefix + prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit,
+                this.prefix + prefix, workers.get(), records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit,
                 invalid, lowerDiscard, higherDiscard, buildPercentileString(percentilesValues)));
     }
 
