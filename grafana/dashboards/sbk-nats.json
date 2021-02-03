@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1612278631486,
+  "iteration": 1612327441656,
   "links": [],
   "panels": [
     {
@@ -289,7 +289,6 @@
           "custom": {},
           "links": [],
           "mappings": [],
-          "max": 100,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -372,6 +371,10 @@
       },
       "id": 12,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -379,8 +382,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -400,7 +402,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Write Avg and Max Latencies (Milliseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -950,7 +952,7 @@
               },
               {
                 "color": "red",
-                "value": 0
+                "value": 1
               }
             ]
           }
@@ -1012,7 +1014,7 @@
           "custom": {},
           "links": [],
           "mappings": [],
-          "max": 1000,
+          "max": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1067,6 +1069,10 @@
       },
       "id": 47,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -1074,8 +1080,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -1095,7 +1100,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Write Avg and Max Latencies (Microseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -1248,7 +1253,6 @@
           "custom": {},
           "links": [],
           "mappings": [],
-          "max": 100000,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1303,6 +1307,10 @@
       },
       "id": 48,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -1310,8 +1318,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -1331,7 +1338,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Write Avg and Max Latencies (Nanoseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "collapsed": false,
@@ -1604,7 +1611,6 @@
           "custom": {},
           "links": [],
           "mappings": [],
-          "max": 100,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1683,6 +1689,10 @@
       },
       "id": 24,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -1690,8 +1700,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -1711,7 +1720,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Read Avg and Max Latencies (Milliseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -2257,7 +2266,7 @@
               },
               {
                 "color": "red",
-                "value": 0
+                "value": 1
               }
             ]
           },
@@ -2320,7 +2329,6 @@
           "custom": {},
           "links": [],
           "mappings": [],
-          "max": 1000,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -2375,6 +2383,10 @@
       },
       "id": 43,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -2382,8 +2394,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -2403,7 +2414,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Read Avg and Max Latencies (Microseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -2556,7 +2567,6 @@
           "custom": {},
           "links": [],
           "mappings": [],
-          "max": 1000,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -2611,6 +2621,10 @@
       },
       "id": 44,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -2618,8 +2632,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -2639,7 +2652,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Read Avg and Max Latencies (Nanoseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "collapsed": false,
@@ -2915,7 +2928,6 @@
         "defaults": {
           "custom": {},
           "mappings": [],
-          "max": 100,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -2998,6 +3010,10 @@
       },
       "id": 38,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -3005,8 +3021,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -3026,7 +3041,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Write-Read Avg and Max Latencies (Milliseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -3645,7 +3660,6 @@
         "defaults": {
           "custom": {},
           "mappings": [],
-          "max": 1000,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -3704,6 +3718,10 @@
       },
       "id": 51,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -3711,8 +3729,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -3732,7 +3749,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Write-Read Avg and Max Latencies (Microseconds)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -3883,7 +3900,6 @@
         "defaults": {
           "custom": {},
           "mappings": [],
-          "max": 100000,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -3938,6 +3954,10 @@
       },
       "id": 52,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -3945,8 +3965,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -3966,7 +3985,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "NATS Write-Read Avg and Max Latencies (Nanoseconds)",
-      "type": "gauge"
+      "type": "stat"
     }
   ],
   "refresh": "5s",
