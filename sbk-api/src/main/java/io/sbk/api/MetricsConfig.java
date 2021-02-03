@@ -14,8 +14,5 @@ public class MetricsConfig {
     public int port;
     public String context;
     public TimeUnit timeUnit;
-    public int minLatency;
-    public int maxWindowLatency;
-    public int maxLatency;
     public String percentiles;
 }
