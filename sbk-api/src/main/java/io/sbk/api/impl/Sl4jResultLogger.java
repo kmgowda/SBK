@@ -25,10 +25,9 @@ public class Sl4jResultLogger extends SystemLogger {
     }
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentilesValues) {
-        log.info(String.format("%s %s\n", this.prefix,
-                buildResultString(bytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentilesValues)));
+                      int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+        log.info(buildResultString(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
+                invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
     @Override
