@@ -58,25 +58,31 @@ public class SystemLogger implements Logger {
     }
 
 
-    public String buildPercentileString(int[] percentileValues) {
+    public String buildResultString(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                               int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
         StringBuilder out = new StringBuilder();
+
+        out.append(String.format("%11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
+                        " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;", records, recsPerSec, mbPerSec, avgLatency,
+                timeUnit, maxLatency, timeUnit, invalid, lowerDiscard, higherDiscard));
+
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
-                if (i == 0) {
-                    out.append(String.format("%7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
-                } else {
-                    out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
-                }
+            if (i == 0) {
+                out.append(String.format("%7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
+            } else {
+                out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
+            }
         }
+        out.append(".");
         return out.toString();
     }
 
+
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                        int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
-        System.out.printf("%s %11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
-                        " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher; " +
-                        " Latency Percentiles: %s. \n",
-                prefix, records, recsPerSec, mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit,
-                invalid, lowerDiscard, higherDiscard, buildPercentileString(percentileValues));
+        System.out.printf("%s %s \n", prefix,
+                buildResultString(bytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
+                invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
     @Override
