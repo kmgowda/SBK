@@ -62,7 +62,7 @@ public class SystemLogger implements Logger {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
                 if (i == 0) {
-                    out = new StringBuilder(String.format("%7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
+                    out.append(String.format("%7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
                 } else {
                     out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
                 }
