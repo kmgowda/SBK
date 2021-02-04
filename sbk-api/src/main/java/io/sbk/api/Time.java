@@ -42,6 +42,28 @@ public interface Time {
      * @return elapsed time in seconds
      */
     double elapsedSeconds(long h, long l);
+
+    /**
+     * convert the time to Nanoseconds.
+     * @param t time stamp
+     * @return converted time in nanoseconds
+     */
+    long convertToNanoSeconds(long t);
+
+    /**
+     * convert the time to Micro seconds.
+     * @param t time stamp
+     * @return converted time in microseconds
+     */
+    long convertToMicroSeconds(long t);
+
+    /**
+     * convert the time to Milliseconds.
+     * @param t time stamp
+     * @return converted time in Milliseconds
+     */
+    long convertToMilliSeconds(long t);
+
 }
 
 

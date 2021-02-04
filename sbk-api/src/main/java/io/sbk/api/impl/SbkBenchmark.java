@@ -129,7 +129,7 @@ public class SbkBenchmark implements Benchmark {
         if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
-        logger.open(params, storageName, action);
+        logger.open(params, storageName, action, time);
         storage.openStorage(params);
         final DataType<Object> dType = storage.getDataType();
         final AtomicInteger readersErrCnt = new AtomicInteger(0);

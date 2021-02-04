@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1612327441656,
+  "iteration": 1612369710476,
   "links": [],
   "panels": [
     {
@@ -108,7 +108,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 12,
+        "h": 9,
         "w": 8,
         "x": 0,
         "y": 1
@@ -166,7 +166,7 @@
       "yaxes": [
         {
           "$$hashKey": "object:274",
-          "format": "short",
+          "format": "MBs",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -204,7 +204,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 12,
+        "h": 9,
         "w": 8,
         "x": 8,
         "y": 1
@@ -299,77 +299,49 @@
               },
               {
                 "color": "#EAB839",
-                "value": 1
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 5
-              },
-              {
-                "color": "#EF843C",
-                "value": 10
-              },
-              {
-                "color": "#E24D42",
-                "value": 20
-              },
-              {
-                "color": "#1F78C1",
-                "value": 30
-              },
-              {
-                "color": "#BA43A9",
-                "value": 40
-              },
-              {
-                "color": "#705DA0",
-                "value": 50
-              },
-              {
-                "color": "#508642",
-                "value": 60
-              },
-              {
-                "color": "#CCA300",
-                "value": 70
-              },
-              {
-                "color": "#447EBC",
-                "value": 80
-              },
-              {
-                "color": "#C15C17",
-                "value": 90
-              },
-              {
-                "color": "#890F02",
                 "value": 100
               },
               {
-                "color": "#0A437C",
-                "value": 200
-              },
-              {
-                "color": "#6D1F62",
+                "color": "#6ED0E0",
                 "value": 500
               },
               {
-                "color": "#584477",
+                "color": "#EF843C",
                 "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
               }
             ]
           },
-          "unit": "ms"
+          "unit": "ns"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
+        "h": 9,
         "w": 8,
         "x": 16,
         "y": 1
       },
-      "id": 12,
+      "id": 48,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -387,13 +359,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Writing_ms_AvgLatency",
+          "expr": "SBK_MARIADB_Writing_ns_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_MARIADB_Writing_ms_MaxLatency",
+          "expr": "SBK_MARIADB_Writing_ns_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -401,7 +373,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Write Avg and Max Latencies (Milliseconds)",
+      "title": "MARIADB Write Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -420,10 +392,328 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 8,
         "x": 0,
-        "y": 13
+        "y": 10
+      },
+      "hiddenSeries": false,
+      "id": 50,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.7",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Writing_ns_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_ns_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "MARIADB Write Percentiles (Nanoseconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ns",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 8,
+        "y": 10
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Writing_Writers",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Writers",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": [],
+          "mappings": [],
+          "max": 500,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 200
+              },
+              {
+                "color": "#1F78C1",
+                "value": 300
+              },
+              {
+                "color": "#BA43A9",
+                "value": 400
+              },
+              {
+                "color": "#705DA0",
+                "value": 500
+              },
+              {
+                "color": "#508642",
+                "value": 600
+              },
+              {
+                "color": "#CCA300",
+                "value": 700
+              },
+              {
+                "color": "#447EBC",
+                "value": 800
+              },
+              {
+                "color": "#C15C17",
+                "value": 900
+              },
+              {
+                "color": "#890F02",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 11,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Writing_MBPerSec",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Write Throughput MB/s",
+      "type": "gauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 10
       },
       "hiddenSeries": false,
       "id": 10,
@@ -553,10 +843,8 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
-          "decimals": 0,
           "links": [],
           "mappings": [],
-          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -566,39 +854,39 @@
                 "value": null
               },
               {
-                "color": "#6ED0E0",
-                "value": 10
+                "color": "#EAB839",
+                "value": 1073741824
               },
               {
-                "color": "#EAB839",
-                "value": 50
+                "color": "#6ED0E0",
+                "value": 10737418240
               },
               {
                 "color": "#EF843C",
-                "value": 100
+                "value": 107374182400
               },
               {
                 "color": "#E24D42",
-                "value": 500
+                "value": 1099511627776
               }
             ]
           },
-          "unit": "none"
+          "unit": "decbytes"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 7,
         "w": 3,
         "x": 8,
-        "y": 13
+        "y": 14
       },
-      "id": 2,
+      "id": 8,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -611,15 +899,84 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Writing_Writers",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "SBK_MARIADB_Writing_Records_total",
           "refId": "A"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Writers",
+      "title": "MARIADB Write Bytes Total",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 11,
+        "y": 16
+      },
+      "id": 28,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_LowerDiscardedLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Lower",
+          "queryType": "randomWalk",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_HigherDiscardLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Higher",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_InvalidLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Invalid/Negative",
+          "refId": "C"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Write Discarded Latencies",
       "type": "stat"
     },
     {
@@ -629,7 +986,7 @@
           "custom": {},
           "links": [],
           "mappings": [],
-          "max": 500,
+          "max": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -652,54 +1009,42 @@
               },
               {
                 "color": "#E24D42",
-                "value": 200
-              },
-              {
-                "color": "#1F78C1",
-                "value": 300
-              },
-              {
-                "color": "#BA43A9",
-                "value": 400
-              },
-              {
-                "color": "#705DA0",
                 "value": 500
               },
               {
-                "color": "#508642",
-                "value": 600
-              },
-              {
-                "color": "#CCA300",
-                "value": 700
-              },
-              {
-                "color": "#447EBC",
-                "value": 800
-              },
-              {
-                "color": "#C15C17",
-                "value": 900
-              },
-              {
-                "color": "#890F02",
+                "color": "#1F78C1",
                 "value": 1000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 10000
+              },
+              {
+                "color": "#705DA0",
+                "value": 100000
+              },
+              {
+                "color": "#508642",
+                "value": 1000000
               }
             ]
           },
-          "unit": "MBs"
+          "unit": "µs"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 11,
-        "y": 13
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 21
       },
-      "id": 4,
+      "id": 47,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -707,20 +1052,27 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Writing_MBPerSec",
+          "expr": "SBK_MARIADB_Writing_mcs_AvgLatency",
+          "interval": "",
+          "legendFormat": "Average Latency",
           "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Writing_mcs_MaxLatency",
+          "interval": "",
+          "legendFormat": "Max Latency",
+          "refId": "B"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Write Throughput MB/s",
-      "type": "gauge"
+      "title": "MARIADB Write Avg and Max Latencies (Microseconds)",
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -740,8 +1092,8 @@
       "gridPos": {
         "h": 10,
         "w": 8,
-        "x": 16,
-        "y": 13
+        "x": 8,
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 49,
@@ -883,419 +1235,67 @@
               },
               {
                 "color": "#EAB839",
-                "value": 1073741824
+                "value": 1
               },
               {
                 "color": "#6ED0E0",
-                "value": 10737418240
+                "value": 5
               },
               {
                 "color": "#EF843C",
-                "value": 107374182400
-              },
-              {
-                "color": "#E24D42",
-                "value": 1099511627776
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 8,
-        "y": 17
-      },
-      "id": 8,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Writing_Records_total",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Write Bytes Total",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 11,
-        "y": 19
-      },
-      "id": 28,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_LowerDiscardedLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Lower",
-          "queryType": "randomWalk",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_HigherDiscardLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Higher",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_InvalidLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Invalid/Negative",
-          "refId": "C"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Write Discarded Latencies",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": [],
-          "mappings": [],
-          "max": 0,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
                 "value": 10
               },
               {
-                "color": "#6ED0E0",
+                "color": "#E24D42",
+                "value": 20
+              },
+              {
+                "color": "#1F78C1",
+                "value": 30
+              },
+              {
+                "color": "#BA43A9",
+                "value": 40
+              },
+              {
+                "color": "#705DA0",
                 "value": 50
               },
               {
-                "color": "#EF843C",
+                "color": "#508642",
+                "value": 60
+              },
+              {
+                "color": "#CCA300",
+                "value": 70
+              },
+              {
+                "color": "#447EBC",
+                "value": 80
+              },
+              {
+                "color": "#C15C17",
+                "value": 90
+              },
+              {
+                "color": "#890F02",
                 "value": 100
               },
               {
-                "color": "#E24D42",
+                "color": "#0A437C",
+                "value": 200
+              },
+              {
+                "color": "#6D1F62",
                 "value": 500
               },
               {
-                "color": "#1F78C1",
+                "color": "#584477",
                 "value": 1000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 10000
-              },
-              {
-                "color": "#705DA0",
-                "value": 100000
-              },
-              {
-                "color": "#508642",
-                "value": 1000000
               }
             ]
           },
-          "unit": "µs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 0,
-        "y": 23
-      },
-      "id": 47,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Writing_mcs_AvgLatency",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_mcs_MaxLatency",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Write Avg and Max Latencies (Microseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 8,
-        "y": 23
-      },
-      "hiddenSeries": false,
-      "id": 50,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Writing_ns_10",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_25",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_50",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_75",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_90",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_95",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_99_9",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "expr": "SBK_MARIADB_Writing_ns_99_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "MARIADB Write Percentiles (Nanoseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "ns",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 100
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 500
-              },
-              {
-                "color": "#EF843C",
-                "value": 1000
-              },
-              {
-                "color": "#E24D42",
-                "value": 10000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 100000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 1000000
-              },
-              {
-                "color": "#705DA0",
-                "value": 10000000
-              },
-              {
-                "color": "#508642",
-                "value": 100000000
-              }
-            ]
-          },
-          "unit": "ns"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -1303,9 +1303,9 @@
         "h": 10,
         "w": 8,
         "x": 16,
-        "y": 23
+        "y": 21
       },
-      "id": 48,
+      "id": 12,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1323,13 +1323,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Writing_ns_AvgLatency",
+          "expr": "SBK_MARIADB_Writing_ms_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_MARIADB_Writing_ns_MaxLatency",
+          "expr": "SBK_MARIADB_Writing_ms_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -1337,7 +1337,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Write Avg and Max Latencies (Nanoseconds)",
+      "title": "MARIADB Write Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     },
     {
@@ -1347,7 +1347,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 31
       },
       "id": 58,
       "panels": [],
@@ -1430,10 +1430,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 12,
+        "h": 11,
         "w": 8,
         "x": 0,
-        "y": 34
+        "y": 32
       },
       "hiddenSeries": false,
       "id": 63,
@@ -1488,7 +1488,7 @@
       "yaxes": [
         {
           "$$hashKey": "object:323",
-          "format": "short",
+          "format": "MBs",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1526,10 +1526,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 12,
+        "h": 11,
         "w": 8,
         "x": 8,
-        "y": 34
+        "y": 32
       },
       "hiddenSeries": false,
       "id": 20,
@@ -1621,724 +1621,6 @@
               },
               {
                 "color": "#EAB839",
-                "value": 1
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 5
-              },
-              {
-                "color": "#EF843C",
-                "value": 10
-              },
-              {
-                "color": "#E24D42",
-                "value": 20
-              },
-              {
-                "color": "#1F78C1",
-                "value": 30
-              },
-              {
-                "color": "#BA43A9",
-                "value": 40
-              },
-              {
-                "color": "#705DA0",
-                "value": 50
-              },
-              {
-                "color": "#508642",
-                "value": 60
-              },
-              {
-                "color": "#CCA300",
-                "value": 70
-              },
-              {
-                "color": "#447EBC",
-                "value": 80
-              },
-              {
-                "color": "#C15C17",
-                "value": 90
-              },
-              {
-                "color": "#890F02",
-                "value": 100
-              },
-              {
-                "color": "#0A437C",
-                "value": 500
-              },
-              {
-                "color": "#6D1F62",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 8,
-        "x": 16,
-        "y": 34
-      },
-      "id": 24,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_ms_AvgLatency",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_MaxLatency",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Read Avg and Max Latencies (Milliseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 46
-      },
-      "hiddenSeries": false,
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_ms_10",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_25",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_50",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_75",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_90",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_95",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_99_9",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_ms_99_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "MARIADB Read Percentiles (Milli Seconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "ms",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 500
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 8,
-        "y": 46
-      },
-      "id": 14,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_Readers",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Readers",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": [],
-          "mappings": [],
-          "max": 500,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 200
-              },
-              {
-                "color": "#1F78C1",
-                "value": 300
-              },
-              {
-                "color": "#BA43A9",
-                "value": 400
-              },
-              {
-                "color": "#705DA0",
-                "value": 500
-              },
-              {
-                "color": "#508642",
-                "value": 600
-              },
-              {
-                "color": "#CCA300",
-                "value": 700
-              },
-              {
-                "color": "#447EBC",
-                "value": 800
-              },
-              {
-                "color": "#C15C17",
-                "value": 900
-              },
-              {
-                "color": "#890F02",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "MBs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 11,
-        "y": 46
-      },
-      "id": 18,
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_MBPerSec",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Read Throughput MB/s",
-      "type": "gauge"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 46
-      },
-      "hiddenSeries": false,
-      "id": 45,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_10",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_25",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_50",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_75",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_90",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_95",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_99_9",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_mcs_99_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "MARIADB Read Percentiles (Microseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "µs",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1073741824
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 10737418240
-              },
-              {
-                "color": "#EF843C",
-                "value": 107374182400
-              },
-              {
-                "color": "#E24D42",
-                "value": 1099511627776
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 8,
-        "y": 51
-      },
-      "id": 16,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_Bytes_total",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Read Bytes Total",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 11,
-        "y": 52
-      },
-      "id": 26,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Reading_LowerDiscardedLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Lower",
-          "queryType": "randomWalk",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_HigherDiscardLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Higher",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_MARIADB_Reading_InvalidLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Invalid/Negative",
-          "refId": "C"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Read Discarded Latencies",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
                 "value": 10
               },
               {
@@ -2371,17 +1653,17 @@
               }
             ]
           },
-          "unit": "µs"
+          "unit": "ns"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 8,
-        "x": 0,
-        "y": 57
+        "x": 16,
+        "y": 32
       },
-      "id": 43,
+      "id": 44,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -2399,13 +1681,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Reading_mcs_AvgLatency",
+          "expr": "SBK_MARIADB_Reading_ns_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_MARIADB_Reading_mcs_MaxLatency",
+          "expr": "SBK_MARIADB_Reading_ns_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -2413,7 +1695,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Read Avg and Max Latencies (Microseconds)",
+      "title": "MARIADB Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -2432,10 +1714,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 8,
-        "x": 8,
-        "y": 57
+        "x": 0,
+        "y": 43
       },
       "hiddenSeries": false,
       "id": 46,
@@ -2589,6 +1871,462 @@
               },
               {
                 "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 8,
+        "y": 43
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_Readers",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Readers",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": [],
+          "mappings": [],
+          "max": 500,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 200
+              },
+              {
+                "color": "#1F78C1",
+                "value": 300
+              },
+              {
+                "color": "#BA43A9",
+                "value": 400
+              },
+              {
+                "color": "#705DA0",
+                "value": 500
+              },
+              {
+                "color": "#508642",
+                "value": 600
+              },
+              {
+                "color": "#CCA300",
+                "value": 700
+              },
+              {
+                "color": "#447EBC",
+                "value": 800
+              },
+              {
+                "color": "#C15C17",
+                "value": 900
+              },
+              {
+                "color": "#890F02",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 11,
+        "y": 43
+      },
+      "id": 18,
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_MBPerSec",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Read Throughput MB/s",
+      "type": "gauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 43
+      },
+      "hiddenSeries": false,
+      "id": 22,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.7",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_ms_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "MARIADB Read Percentiles (Milli Seconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 1073741824
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10737418240
+              },
+              {
+                "color": "#EF843C",
+                "value": 107374182400
+              },
+              {
+                "color": "#E24D42",
+                "value": 1099511627776
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 8,
+        "y": 48
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_Bytes_total",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Read Bytes Total",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 11,
+        "y": 49
+      },
+      "id": 26,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_LowerDiscardedLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Lower",
+          "queryType": "randomWalk",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_HigherDiscardLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Higher",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_InvalidLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Invalid/Negative",
+          "refId": "C"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Read Discarded Latencies",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
                 "value": 1000
               },
               {
@@ -2609,17 +2347,17 @@
               }
             ]
           },
-          "unit": "ns"
+          "unit": "µs"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 8,
-        "x": 16,
-        "y": 57
+        "x": 0,
+        "y": 54
       },
-      "id": 44,
+      "id": 43,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -2637,13 +2375,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Reading_ns_AvgLatency",
+          "expr": "SBK_MARIADB_Reading_mcs_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_MARIADB_Reading_ns_MaxLatency",
+          "expr": "SBK_MARIADB_Reading_mcs_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -2651,7 +2389,269 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Read Avg and Max Latencies (Nanoseconds)",
+      "title": "MARIADB Read Avg and Max Latencies (Microseconds)",
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 8,
+        "y": 54
+      },
+      "hiddenSeries": false,
+      "id": 45,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.7",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_mcs_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "MARIADB Read Percentiles (Microseconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "µs",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 1
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 5
+              },
+              {
+                "color": "#EF843C",
+                "value": 10
+              },
+              {
+                "color": "#E24D42",
+                "value": 20
+              },
+              {
+                "color": "#1F78C1",
+                "value": 30
+              },
+              {
+                "color": "#BA43A9",
+                "value": 40
+              },
+              {
+                "color": "#705DA0",
+                "value": 50
+              },
+              {
+                "color": "#508642",
+                "value": 60
+              },
+              {
+                "color": "#CCA300",
+                "value": 70
+              },
+              {
+                "color": "#447EBC",
+                "value": 80
+              },
+              {
+                "color": "#C15C17",
+                "value": 90
+              },
+              {
+                "color": "#890F02",
+                "value": 100
+              },
+              {
+                "color": "#0A437C",
+                "value": 500
+              },
+              {
+                "color": "#6D1F62",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 54
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Reading_ms_AvgLatency",
+          "interval": "",
+          "legendFormat": "Average Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Reading_ms_MaxLatency",
+          "interval": "",
+          "legendFormat": "Max Latency",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Read Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     },
     {
@@ -2661,7 +2661,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 65
       },
       "id": 56,
       "panels": [],
@@ -2748,7 +2748,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 68
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 61,
@@ -2845,7 +2845,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 68
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 36,
@@ -2938,67 +2938,39 @@
               },
               {
                 "color": "#EAB839",
-                "value": 1
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 5
-              },
-              {
-                "color": "#EF843C",
                 "value": 10
               },
               {
-                "color": "#E24D42",
-                "value": 20
-              },
-              {
-                "color": "#1F78C1",
-                "value": 30
-              },
-              {
-                "color": "#BA43A9",
-                "value": 40
-              },
-              {
-                "color": "#705DA0",
+                "color": "#6ED0E0",
                 "value": 50
               },
               {
-                "color": "#508642",
-                "value": 60
-              },
-              {
-                "color": "#CCA300",
-                "value": 70
-              },
-              {
-                "color": "#447EBC",
-                "value": 80
-              },
-              {
-                "color": "#C15C17",
-                "value": 90
-              },
-              {
-                "color": "#890F02",
+                "color": "#EF843C",
                 "value": 100
               },
               {
-                "color": "#0A437C",
-                "value": 200
-              },
-              {
-                "color": "#6D1F62",
-                "value": 500
-              },
-              {
-                "color": "#584477",
+                "color": "#E24D42",
                 "value": 1000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 10000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 100000
+              },
+              {
+                "color": "#705DA0",
+                "value": 1000000
+              },
+              {
+                "color": "#508642",
+                "value": 10000000
               }
             ]
           },
-          "unit": "ms"
+          "unit": "ns"
         },
         "overrides": []
       },
@@ -3006,9 +2978,9 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 68
+        "y": 66
       },
-      "id": 38,
+      "id": 52,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -3026,13 +2998,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Write_Reading_ms_AvgLatency",
+          "expr": "SBK_MARIADB_Write_Reading_ns_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_MARIADB_Write_Reading_ms_MaxLatency",
+          "expr": "SBK_MARIADB_Write_Reading_ns_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -3040,7 +3012,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Write-Read Avg and Max Latencies (Milliseconds)",
+      "title": "MARIADB Write-Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -3061,7 +3033,324 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 79
+        "y": 77
+      },
+      "hiddenSeries": false,
+      "id": 54,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.7",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_ns_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "MARIADB Write-Read Percentiles (Nanoseconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ns",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 1073741824
+              },
+              {
+                "color": "#EF843C",
+                "value": 10737418240
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10737418240
+              },
+              {
+                "color": "#E24D42",
+                "value": 1099511627776
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 8,
+        "y": 77
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Write_Reading_Bytes_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Write-Read Bytes Total",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "max": 500,
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 200
+              },
+              {
+                "color": "#1F78C1",
+                "value": 300
+              },
+              {
+                "color": "#BA43A9",
+                "value": 400
+              },
+              {
+                "color": "#705DA0",
+                "value": 500
+              },
+              {
+                "color": "#508642",
+                "value": 600
+              },
+              {
+                "color": "#CCA300",
+                "value": 700
+              },
+              {
+                "color": "#447EBC",
+                "value": 800
+              },
+              {
+                "color": "#C15C17",
+                "value": 900
+              },
+              {
+                "color": "#890F02",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 11,
+        "y": 77
+      },
+      "id": 32,
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Write_Reading_MBPerSec",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Write-Read Throughput MB/s",
+      "type": "gauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 77
       },
       "hiddenSeries": false,
       "id": 34,
@@ -3188,84 +3477,13 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1073741824
-              },
-              {
-                "color": "#EF843C",
-                "value": 10737418240
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 10737418240
-              },
-              {
-                "color": "#E24D42",
-                "value": 1099511627776
-              }
-            ]
+          "custom": {
+            "align": null,
+            "filterable": false
           },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 8,
-        "y": 79
-      },
-      "id": 30,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Write_Reading_Bytes_total",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Write-Read Bytes Total",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
           "mappings": [],
-          "max": 500,
-          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -3288,54 +3506,26 @@
               },
               {
                 "color": "#E24D42",
-                "value": 200
-              },
-              {
-                "color": "#1F78C1",
-                "value": 300
-              },
-              {
-                "color": "#BA43A9",
-                "value": 400
-              },
-              {
-                "color": "#705DA0",
                 "value": 500
-              },
-              {
-                "color": "#508642",
-                "value": 600
-              },
-              {
-                "color": "#CCA300",
-                "value": 700
-              },
-              {
-                "color": "#447EBC",
-                "value": 800
-              },
-              {
-                "color": "#C15C17",
-                "value": 900
-              },
-              {
-                "color": "#890F02",
-                "value": 1000
               }
             ]
           },
-          "unit": "MBs"
+          "unit": "none"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 6,
-        "w": 5,
-        "x": 11,
-        "y": 79
+        "w": 3,
+        "x": 8,
+        "y": 82
       },
-      "id": 32,
+      "id": 40,
       "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -3343,22 +3533,195 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "textMode": "value_and_name"
       },
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Write_Reading_MBPerSec",
+          "expr": "SBK_MARIADB_Write_Reading_Readers",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "Readers",
           "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_Writers",
+          "interval": "",
+          "legendFormat": "Writers",
+          "refId": "B"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Write-Read Throughput MB/s",
-      "type": "gauge"
+      "title": "MARIADB Write-Read  Writers and Readers",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 11,
+        "y": 83
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Write_Reading_LowerDiscardedLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Lower",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_HigherDiscardLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Higher",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_InvalidLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Invalid/Negative",
+          "refId": "C"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Write-Read  Discarded Latencies",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 1000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 10000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 100000
+              },
+              {
+                "color": "#705DA0",
+                "value": 1000000
+              },
+              {
+                "color": "#508642",
+                "value": 10000000
+              },
+              {
+                "color": "#CCA300",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "µs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 0,
+        "y": 88
+      },
+      "id": 51,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "expr": "SBK_MARIADB_Write_Reading_mcs_AvgLatency",
+          "interval": "",
+          "legendFormat": "Average Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_MARIADB_Write_Reading_mcs_MaxLatency",
+          "interval": "",
+          "legendFormat": "Max Latency",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "MARIADB Write-Read Avg and Max Latencies (Microseconds)",
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -3377,8 +3740,8 @@
       "gridPos": {
         "h": 11,
         "w": 8,
-        "x": 16,
-        "y": 79
+        "x": 8,
+        "y": 88
       },
       "hiddenSeries": false,
       "id": 53,
@@ -3507,86 +3870,6 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": null,
-            "filterable": false
-          },
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 500
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 8,
-        "y": 84
-      },
-      "id": 40,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Write_Reading_Readers",
-          "interval": "",
-          "legendFormat": "Readers",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_Writers",
-          "interval": "",
-          "legendFormat": "Writers",
-          "refId": "B"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Write-Read  Writers and Readers",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
           "custom": {},
           "mappings": [],
           "noValue": "0",
@@ -3598,361 +3881,78 @@
                 "value": null
               },
               {
-                "color": "red",
+                "color": "#EAB839",
                 "value": 1
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 11,
-        "y": 85
-      },
-      "id": 42,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Write_Reading_LowerDiscardedLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Lower",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_HigherDiscardLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Higher",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_InvalidLatencyRecords_total",
-          "interval": "",
-          "legendFormat": "Invalid/Negative",
-          "refId": "C"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Write-Read  Discarded Latencies",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
               },
               {
                 "color": "#6ED0E0",
-                "value": 50
+                "value": 5
               },
               {
                 "color": "#EF843C",
-                "value": 100
+                "value": 10
               },
               {
                 "color": "#E24D42",
-                "value": 1000
+                "value": 20
               },
               {
                 "color": "#1F78C1",
-                "value": 10000
+                "value": 30
               },
               {
                 "color": "#BA43A9",
-                "value": 100000
+                "value": 40
               },
               {
                 "color": "#705DA0",
-                "value": 1000000
+                "value": 50
               },
               {
                 "color": "#508642",
-                "value": 10000000
+                "value": 60
               },
               {
                 "color": "#CCA300",
-                "value": 100000000
-              }
-            ]
-          },
-          "unit": "µs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 0,
-        "y": 90
-      },
-      "id": 51,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Write_Reading_mcs_AvgLatency",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_mcs_MaxLatency",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "MARIADB Write-Read Avg and Max Latencies (Microseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 8,
-        "y": 90
-      },
-      "hiddenSeries": false,
-      "id": 54,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_10",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_25",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_50",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_75",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_90",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_95",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_99_9",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "expr": "SBK_MARIADB_Write_Reading_ns_99_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "MARIADB Write-Read Percentiles (Nanoseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "ns",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
+                "value": 70
               },
               {
-                "color": "#EAB839",
-                "value": 10
+                "color": "#447EBC",
+                "value": 80
               },
               {
-                "color": "#6ED0E0",
-                "value": 50
+                "color": "#C15C17",
+                "value": 90
               },
               {
-                "color": "#EF843C",
+                "color": "#890F02",
                 "value": 100
               },
               {
-                "color": "#E24D42",
+                "color": "#0A437C",
+                "value": 200
+              },
+              {
+                "color": "#6D1F62",
+                "value": 500
+              },
+              {
+                "color": "#584477",
                 "value": 1000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 10000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 100000
-              },
-              {
-                "color": "#705DA0",
-                "value": 1000000
-              },
-              {
-                "color": "#508642",
-                "value": 10000000
               }
             ]
           },
-          "unit": "ns"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 8,
         "x": 16,
-        "y": 90
+        "y": 88
       },
-      "id": 52,
+      "id": 38,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -3970,13 +3970,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_MARIADB_Write_Reading_ns_AvgLatency",
+          "expr": "SBK_MARIADB_Write_Reading_ms_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_MARIADB_Write_Reading_ns_MaxLatency",
+          "expr": "SBK_MARIADB_Write_Reading_ms_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -3984,7 +3984,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "MARIADB Write-Read Avg and Max Latencies (Nanoseconds)",
+      "title": "MARIADB Write-Read Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     }
   ],

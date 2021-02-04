@@ -24,9 +24,11 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Action;
 import io.sbk.api.LatencyConfig;
+import io.sbk.api.LoggerConfig;
 import io.sbk.api.MetricsConfig;
 import io.sbk.api.Parameters;
 import io.sbk.api.Print;
+import io.sbk.api.Time;
 import io.sbk.api.TimeUnit;
 
 import java.io.IOException;
@@ -39,10 +41,12 @@ import java.util.Arrays;
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class PrometheusLogger extends SystemLogger {
+    final static String LOGGER_FILE = "logger.properties";
     final static String CONFIG_FILE = "metrics.properties";
     final static String LATENCY_MS_FILE = "latency-ms.properties";
     final static String LATENCY_MCS_FILE = "latency-mcs.properties";
     final static String LATENCY_NS_FILE = "latency-ns.properties";
+    private LoggerConfig loggerConfig;
     private MetricsConfig config;
     private LatencyConfig latencyConfig;
     private boolean disabled;
@@ -60,6 +64,8 @@ public class PrometheusLogger extends SystemLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
+            loggerConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(LOGGER_FILE),
+                    LoggerConfig.class);
             config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     MetricsConfig.class);
         } catch (Exception ex) {
@@ -68,13 +74,13 @@ public class PrometheusLogger extends SystemLogger {
         }
 
         try {
-            getLatencyConfig(config.timeUnit);
+            getLatencyConfig(loggerConfig.timeUnit);
         } catch (IOException ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
 
-        String[] percentilesList = config.percentiles.split(",");
+        String[] percentilesList = loggerConfig.percentiles.split(",");
         percentilesIndices = new double[percentilesList.length];
         for (int i = 0; i < percentilesList.length; i++) {
             percentilesIndices[i] = Double.parseDouble(percentilesList[i].trim());
@@ -82,7 +88,7 @@ public class PrometheusLogger extends SystemLogger {
         Arrays.sort(percentilesIndices);
 
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
-                "; default: " + config.timeUnit.name());
+                "; default: " + loggerConfig.timeUnit.name());
         params.addOption("context", true, "Prometheus Metric context" +
                 "; default context: " + config.port + config.context + "; 'no' disables the metrics");
     }
@@ -115,11 +121,11 @@ public class PrometheusLogger extends SystemLogger {
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         super.parseArgs(params);
-        final TimeUnit timeUnit = TimeUnit.valueOf(params.getOptionValue("time", config.timeUnit.name()));
-        if (timeUnit != config.timeUnit) {
-            config.timeUnit = timeUnit;
+        final TimeUnit timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
+        if (timeUnit != loggerConfig.timeUnit) {
+            loggerConfig.timeUnit = timeUnit;
             try {
-                getLatencyConfig(config.timeUnit);
+                getLatencyConfig(loggerConfig.timeUnit);
             } catch (IOException ex) {
                 ex.printStackTrace();
                 throw new IllegalArgumentException(ex);
@@ -157,12 +163,12 @@ public class PrometheusLogger extends SystemLogger {
 
     @Override
     public int getReportingIntervalSeconds() {
-        return config.reportingSeconds;
+        return loggerConfig.reportingSeconds;
     }
 
     @Override
     public TimeUnit getTimeUnit() {
-        return config.timeUnit;
+        return loggerConfig.timeUnit;
     }
 
     @Override
@@ -187,15 +193,15 @@ public class PrometheusLogger extends SystemLogger {
 
 
     @Override
-    public void open(final Parameters params, final String storageName, Action action) throws IllegalArgumentException, IOException {
-        super.open(params, storageName, action);
+    public void open(final Parameters params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
+        super.open(params, storageName, action, time);
         if (disabled) {
             printer = super::print;
         } else {
             final CompositeMeterRegistry compositeRegistry = Metrics.globalRegistry;
             compositeRegistry.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeRegistry.add(createPrometheusRegistry());
-            metricsLogger = new MetricsLogger(storageName, action.name(), timeUnit, percentiles,
+            metricsLogger = new MetricsLogger(storageName, action.name(), time, config.latencyTimeUnit, percentiles,
                     params.getWritersCount(), params.getReadersCount(), compositeRegistry);
             printer = this::printMetrics;
         }
@@ -209,8 +215,8 @@ public class PrometheusLogger extends SystemLogger {
         super.close(params);
     }
 
-    private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-                      long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+    private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
+                      long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
         metricsLogger.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
@@ -218,8 +224,8 @@ public class PrometheusLogger extends SystemLogger {
     }
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-               long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
+               long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         printer.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }

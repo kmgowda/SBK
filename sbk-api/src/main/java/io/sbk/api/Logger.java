@@ -36,9 +36,10 @@ public interface Logger extends Print {
      * @param params Parameters object to be parsed for driver specific parameters/arguments.
      * @param storageName The Name of the storage.
      * @param action  action to print
+     * @param time  time interface
      * @throws IOException If an exception occurred.
      */
-    void open(final Parameters params, final String storageName, final Action action) throws IOException;
+    void open(final Parameters params, final String storageName, final Action action, Time time) throws IOException;
 
     /**
      * Close the Logger.
@@ -62,8 +63,7 @@ public interface Logger extends Print {
      * @param percentiles Array of percentiles.
      */
     void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                    int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentiles);
-
+                    long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentiles);
 
     /**
      * Default implementation of Reporting interval.
