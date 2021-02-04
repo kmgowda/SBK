@@ -19,9 +19,17 @@ import java.util.concurrent.CompletableFuture;
  * Class for Writer.
  */
 public class NullWriter implements Writer<byte[]> {
+    long n;
+
+    public NullWriter(long n) {
+        this.n = n;
+    }
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
+        for (long i = 0; i < n; i++) {
+            //no op
+        }
         return null;
     }
 

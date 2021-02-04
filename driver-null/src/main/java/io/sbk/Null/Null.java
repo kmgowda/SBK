@@ -21,13 +21,20 @@ import java.io.IOException;
  * Class for Null Storage driver.
  */
 public class Null implements Storage<byte[]> {
+    private long n;
+
+    public Null() {
+        n = 0;
+    }
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
+        params.addOption("n", true, "iteration loop max value for writers, default value: " + n);
     }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
+       n =  Long.parseLong(params.getOptionValue("n", "0"));
     }
 
     @Override
@@ -40,7 +47,7 @@ public class Null implements Storage<byte[]> {
 
     @Override
     public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
-        return new NullWriter();
+        return new NullWriter(n);
     }
 
     @Override
