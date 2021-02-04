@@ -143,7 +143,7 @@ final public class SbkPerformance implements Performance {
                             doWork = false;
                         } else {
                             recordsCnt += t.records;
-                            final int latency = (int) (t.endTime - t.startTime);
+                            final long latency = t.endTime - t.startTime;
                             window.record(t.startTime, t.bytes, t.records, latency);
                             latencyWindow.record(t.startTime, t.bytes, t.records, latency);
                             if (totalRecords > 0  && recordsCnt >= totalRecords) {
@@ -230,8 +230,8 @@ final public class SbkPerformance implements Performance {
         public long invalidLatencyRecords;
         public long bytes;
         public long totalLatency;
-        public int maxLatency;
-        final private int baseLatency;
+        public long maxLatency;
+        final private long baseLatency;
         final private long[] latencies;
 
         LatencyRecorder(int baseLatency, int latencyThreshold) {
@@ -251,8 +251,8 @@ final public class SbkPerformance implements Performance {
         }
 
 
-        public int[] getPercentiles(final double[] percentiles) {
-            final int[] values = new int[percentiles.length];
+        public long[] getPercentiles(final double[] percentiles) {
+            final long[] values = new long[percentiles.length];
             final long[] percentileIds = new long[percentiles.length];
             long cur = 0;
             int index = 0;
@@ -285,16 +285,16 @@ final public class SbkPerformance implements Performance {
          * @param events number of events(records).
          * @param latency latency value in milliseconds.
          */
-        public void record(int bytes, int events, int latency) {
+        public void record(int bytes, int events, long latency) {
             if (latency < 0) {
                 this.invalidLatencyRecords += events;
             } else {
-                this.totalLatency += (long) latency * events;
+                this.totalLatency +=  latency * events;
                 if (latency < this.baseLatency) {
                     this.lowerLatencyDiscardRecords += events;
                 } else {
-                    final int index = latency - this.baseLatency;
-                    if (index < this.latencies.length) {
+                    final int index = (int) (latency - this.baseLatency);
+                    if ((index >= 0) &&  (index < this.latencies.length)) {
                         this.latencies[index] += events;
                         this.validLatencyRecords += events;
                     } else {
@@ -336,7 +336,7 @@ final public class SbkPerformance implements Performance {
          * @param events number of events(records).
          * @param latency latency value in milliseconds.
          */
-        public void record(long startTime, int bytes, int events, int latency) {
+        public void record(long startTime, int bytes, int events, long latency) {
             record(bytes, events, latency);
         }
 
@@ -374,7 +374,7 @@ final public class SbkPerformance implements Performance {
             final double recsPerSec = totalRecords / elapsedSec;
             final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsedSec;
             final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
-            int[] pecs = getPercentiles(percentiles);
+            long[] pecs = getPercentiles(percentiles);
             logger.print(this.bytes, totalRecords, recsPerSec, mbPerSec,
                     avgLatency, this.maxLatency, this.invalidLatencyRecords,
                     this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
@@ -450,7 +450,7 @@ final public class SbkPerformance implements Performance {
         }
 
         @Override
-        public void record(long startTime, int bytes, int events, int latency) {
+        public void record(long startTime, int bytes, int events, long latency) {
             try {
                 csvPrinter.printRecord(startTime, bytes, events, latency);
             } catch (IOException ex) {

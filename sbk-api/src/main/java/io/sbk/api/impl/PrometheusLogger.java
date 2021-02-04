@@ -215,8 +215,8 @@ public class PrometheusLogger extends SystemLogger {
         super.close(params);
     }
 
-    private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-                      long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+    private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
+                      long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
         metricsLogger.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
@@ -224,8 +224,8 @@ public class PrometheusLogger extends SystemLogger {
     }
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, int maxLatency,
-               long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
+               long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         printer.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }

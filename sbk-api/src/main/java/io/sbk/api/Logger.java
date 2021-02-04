@@ -63,7 +63,7 @@ public interface Logger extends Print {
      * @param percentiles Array of percentiles.
      */
     void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                    int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentiles);
+                    long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentiles);
 
 
     /**

@@ -60,7 +60,7 @@ public class SystemLogger implements Logger {
 
 
     public String buildResultString(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                               int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+                               long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         StringBuilder out = new StringBuilder();
 
         out.append(prefix);
@@ -81,21 +81,21 @@ public class SystemLogger implements Logger {
 
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                       int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         System.out.print(buildResultString(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
     @Override
     public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentileValues) {
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 
     @Override
     public void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      int maxLatency, long invalid, long lowerDiscard, long higherDiscard, int[] percentilesValues) {
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentilesValues) {
         print("Total : " + prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentilesValues);
     }
