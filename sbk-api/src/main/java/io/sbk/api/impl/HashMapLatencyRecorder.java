@@ -53,7 +53,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
                 }
             }
             latencies.remove(key);
-            cur = next +1;
+            cur = next;
         }
 
         return values;

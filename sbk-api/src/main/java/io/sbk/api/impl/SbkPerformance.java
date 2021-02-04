@@ -125,7 +125,7 @@ final public class SbkPerformance implements Performance {
             } else {
                 totalWindow = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
             }
-            window = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
+            window = new ArrayLatencyRecorder(baseLatency, maxWindowLatency, percentiles, time, startTime);
             while (doWork) {
                 notFound = true;
                 for (int i = 0; doWork && (i < channels.length); i++) {
