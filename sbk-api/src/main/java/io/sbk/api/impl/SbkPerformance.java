@@ -153,7 +153,7 @@ final public class SbkPerformance implements Performance {
                                 doWork = false;
                             }
                         }
-                        if (window.elapsedTimeMS(ctime) > windowInterval) {
+                        if ((window.elapsedTimeMS(ctime) > windowInterval) || (window.isOverflow())) {
                             window.print(ctime, logger);
                             window.reset(ctime);
                         }
@@ -165,6 +165,9 @@ final public class SbkPerformance implements Performance {
                     }
                     if (msToRun > 0 && time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
                         doWork = false;
+                    }
+                    if (latencyWindow.isOverflow()) {
+                        latencyWindow.print(ctime, logger::printTotal);
                     }
                 }
             }
@@ -348,6 +351,15 @@ final public class SbkPerformance implements Performance {
          */
         public long elapsedTimeMS(long currentTime) {
             return (long) time.elapsedMilliSeconds(currentTime, startTime);
+        }
+
+        /**
+         * is Overflow condition for this window
+         *
+         * @return isOverflow condition occurred or not
+         */
+        public boolean isOverflow() {
+            return (this.totalLatency > Config.LONG_MAX) || (this.bytes > Config.LONG_MAX);
         }
 
 

@@ -26,6 +26,7 @@ public class Config {
     final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5000;
     final public static int DEFAULT_TIMEOUT_MS = MS_PER_SEC;
     final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / MS_PER_SEC;
+    final public static long LONG_MAX = Long.MAX_VALUE / 256;
 
     final public static int MIN_Q_PER_WORKER = 1;
     final public static int DEFAULT_MIN_LATENCY = 0;

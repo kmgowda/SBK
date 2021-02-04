@@ -65,7 +65,6 @@ public interface Logger extends Print {
     void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                     long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentiles);
 
-
     /**
      * Default implementation of Reporting interval.
      * @return reporting time interval in seconds.
