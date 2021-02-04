@@ -20,6 +20,7 @@ import io.sbk.api.TimeUnit;
 
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
@@ -37,12 +38,7 @@ public class MetricsLogger implements Print {
     final private AtomicLong maxLatency;
     final private AtomicLong[] percentileGauges;
     final private MeterRegistry registry;
-    final private ConvertTime convert;
-
-
-    private interface ConvertTime {
-        long toTimeUnit(long t);
-    }
+    final private Function<Long, Long> convert;
 
 
     public MetricsLogger(String storageName, String action, Time time, TimeUnit latencyTimeUnit,
@@ -104,10 +100,10 @@ public class MetricsLogger implements Print {
         this.higherDiscard.increment(higherDiscard);
         this.recsPsec.set(recsPerSec);
         this.mbPsec.set(mbPerSec);
-        this.avgLatency.set(convert.toTimeUnit((long) avgLatency));
-        this.maxLatency.set(convert.toTimeUnit(maxLatency));
+        this.avgLatency.set(convert.apply((long) avgLatency));
+        this.maxLatency.set(convert.apply(maxLatency));
         for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
-            this.percentileGauges[i].set(convert.toTimeUnit(percentileValues[i]));
+            this.percentileGauges[i].set(convert.apply(percentileValues[i]));
         }
     }
 
