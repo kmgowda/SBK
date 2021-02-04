@@ -45,7 +45,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
             final long key  = keys.next();
             final long next =  cur + latencies.get(key);
             while (index < values.length) {
-                if (percentileIds[index] >= cur && percentileIds[index] < (cur + next)) {
+                if (percentileIds[index] >= cur && percentileIds[index] <  next) {
                     values[index] = key;
                     index += 1;
                 } else {
