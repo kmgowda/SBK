@@ -123,7 +123,7 @@ final public class SbkPerformance implements Performance {
                     return;
                 }
             } else {
-                totalWindow = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
+                totalWindow = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
             }
             window = new ArrayLatencyRecorder(baseLatency, maxWindowLatency, percentiles, time, startTime);
             while (doWork) {
