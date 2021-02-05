@@ -15,22 +15,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import io.sbk.api.Config;
 import io.sbk.api.Logger;
 import io.sbk.api.Performance;
-import io.sbk.api.Print;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Time;
 import io.sbk.api.TimeStamp;
 import io.sbk.api.Channel;
+import io.sbk.api.TimeUnit;
 import lombok.Synchronized;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -43,9 +37,8 @@ final public class SbkPerformance implements Performance {
     final private String csvFile;
     final private int windowInterval;
     final private int idleNS;
-    final private int baseLatency;
-    final private int maxWindowLatency;
-    final private int maxLatency;
+    final private long baseLatency;
+    final private long maxLatency;
     final private Time time;
     final private Logger logger;
     final private ExecutorService executor;
@@ -65,11 +58,8 @@ final public class SbkPerformance implements Performance {
     public SbkPerformance(Config config, int workers, Logger periodicLogger,
                           Time time, ExecutorService executor, String csvFile) {
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
-        this.baseLatency = Math.max(Config.DEFAULT_MIN_LATENCY, periodicLogger.getMinLatency());
-        this.maxWindowLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(periodicLogger.getMaxWindowLatency(), Config.DEFAULT_WINDOW_LATENCY));
-        this.maxLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(periodicLogger.getMaxLatency(), Config.DEFAULT_MAX_LATENCY));
+        this.baseLatency = periodicLogger.getMinLatency();
+        this.maxLatency = periodicLogger.getMaxLatency();
         this.windowInterval = periodicLogger.getReportingIntervalSeconds() * Config.MS_PER_SEC;
         this.csvFile = csvFile;
         this.time = time;
@@ -111,8 +101,9 @@ final public class SbkPerformance implements Performance {
         }
 
         public void run() {
-            final TimeWindow window;
-            final ArrayLatencyWindow latencyWindow;
+            final LatencyWindow window;
+            final LatencyWindow totalWindow;
+            final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowInterval, idleNS);
             final long startTime = time.getCurrentTime();
             boolean doWork = true;
             long ctime = startTime;
@@ -122,16 +113,21 @@ final public class SbkPerformance implements Performance {
 
             if (csvFile != null) {
                 try {
-                    latencyWindow = new CSVArrayLatencyWriter(baseLatency, maxLatency, percentiles, time, startTime,
+                    totalWindow = new CSVArrayLatencyWriter(baseLatency, maxLatency, percentiles, time, startTime,
                             csvFile, time.getTimeUnit().toString());
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     return;
                 }
             } else {
-                latencyWindow = new ArrayLatencyWindow(baseLatency, maxLatency, percentiles, time, startTime);
+                totalWindow = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
             }
-            window = new TimeWindow(baseLatency, maxWindowLatency, percentiles, time, startTime, windowInterval, idleNS);
+
+            if (time.getTimeUnit() == TimeUnit.ms) {
+                window = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
+            } else {
+                window = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
+            }
             while (doWork) {
                 notFound = true;
                 for (int i = 0; doWork && (i < channels.length); i++) {
@@ -145,7 +141,7 @@ final public class SbkPerformance implements Performance {
                             recordsCnt += t.records;
                             final long latency = t.endTime - t.startTime;
                             window.record(t.startTime, t.bytes, t.records, latency);
-                            latencyWindow.record(t.startTime, t.bytes, t.records, latency);
+                            totalWindow.record(t.startTime, t.bytes, t.records, latency);
                             if (totalRecords > 0  && recordsCnt >= totalRecords) {
                                 doWork = false;
                             }
@@ -156,23 +152,35 @@ final public class SbkPerformance implements Performance {
                         if ((window.elapsedTimeMS(ctime) > windowInterval) || (window.isOverflow())) {
                             window.print(ctime, logger);
                             window.reset(ctime);
+                            idleCounter.reset();
                         }
                     }
                 }
                 if (doWork) {
                     if (notFound) {
-                        ctime = window.idleWaitPrint(ctime, logger);
+                        if (idleCounter.waitAndCheck()) {
+                            ctime = time.getCurrentTime();
+                            final long diffTime = window.elapsedTimeMS(ctime);
+                            if (diffTime > windowInterval) {
+                                window.print(ctime, logger);
+                                window.reset(ctime);
+                                idleCounter.reset();
+                                idleCounter.setElastic(diffTime);
+                            } else {
+                                idleCounter.updateElastic(diffTime);
+                            }
+                        }
                     }
                     if (msToRun > 0 && time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
                         doWork = false;
                     }
-                    if (latencyWindow.isOverflow()) {
-                        latencyWindow.print(ctime, logger::printTotal);
+                    if (totalWindow.isOverflow()) {
+                        totalWindow.print(ctime, logger::printTotal);
                     }
                 }
             }
             window.printPendingData(ctime, logger);
-            latencyWindow.print(ctime, logger::printTotal);
+            totalWindow.print(ctime, logger::printTotal);
         }
     }
 
@@ -180,7 +188,7 @@ final public class SbkPerformance implements Performance {
      * Private class for counter implementation to reduce time.getCurrentTime() invocation.
      */
     @NotThreadSafe
-    final static private class ElasticCounter {
+    final static private class ElasticWaitCounter {
         final private int windowInterval;
         final private int idleNS;
         final private double countRatio;
@@ -189,7 +197,7 @@ final public class SbkPerformance implements Performance {
         private long idleCount;
         private long totalCount;
 
-        private ElasticCounter(int windowInterval, int idleNS) {
+        public ElasticWaitCounter(int windowInterval, int idleNS) {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
             double minWaitTimeMS = windowInterval / 50.0;
@@ -200,313 +208,27 @@ final public class SbkPerformance implements Performance {
             totalCount = 0;
         }
 
-        private boolean waitCheck() {
+        public boolean waitAndCheck() {
             LockSupport.parkNanos(idleNS);
             idleCount++;
             totalCount++;
             return idleCount > elasticCount;
         }
 
-        private void reset() {
+        public void reset() {
             idleCount = 0;
         }
 
-        private void updateElastic(long diffTime) {
+        public void updateElastic(long diffTime) {
             elasticCount = Math.max((long) (countRatio * (windowInterval - diffTime)), minIdleCount);
         }
 
-        private void setElastic(long diffTime) {
+        public void setElastic(long diffTime) {
             elasticCount =  (totalCount * windowInterval) / diffTime;
             totalCount = 0;
         }
     }
 
-    /**
-     *  Base class for Performance statistics.
-     */
-    @NotThreadSafe
-    static private class LatencyRecorder {
-        final public long lowLatency;
-        final public long highLatency;
-        public long validLatencyRecords;
-        public long lowerLatencyDiscardRecords;
-        public long higherLatencyDiscardRecords;
-        public long invalidLatencyRecords;
-        public long bytes;
-        public long totalLatency;
-        public long maxLatency;
-
-
-        LatencyRecorder(long baseLatency, long latencyThreshold) {
-            this.lowLatency = baseLatency;
-            this.highLatency = latencyThreshold;
-            reset();
-        }
-
-        public void reset() {
-            this.validLatencyRecords = 0;
-            this.lowerLatencyDiscardRecords = 0;
-            this.higherLatencyDiscardRecords = 0;
-            this.invalidLatencyRecords = 0;
-            this.bytes = 0;
-            this.maxLatency = 0;
-            this.totalLatency = 0;
-        }
-
-        /**
-         * is Overflow condition for this recorder
-         *
-         * @return isOverflow condition occurred or not
-         */
-        public boolean isOverflow() {
-            return (this.totalLatency > Config.LONG_MAX) || (this.bytes > Config.LONG_MAX);
-        }
-
-        /**
-         * Record the latency and return if the latecy is valid/not
-         *
-         * @param bytes number of bytes.
-         * @param events number of events(records).
-         * @param latency latency value in milliseconds.
-         * @return is valid latency record or not
-         */
-        public boolean recordLatency(int bytes, int events, long latency) {
-            this.bytes += bytes;
-            this.maxLatency = Math.max(this.maxLatency, latency);
-            if (latency < 0) {
-                this.invalidLatencyRecords += events;
-            } else {
-                this.totalLatency +=  latency * events;
-                if (latency < this.lowLatency) {
-                    this.lowerLatencyDiscardRecords += events;
-                } else if (latency > this.highLatency) {
-                    this.higherLatencyDiscardRecords += events;
-                } else {
-                    this.validLatencyRecords += events;
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    /**
-     *  class for Performance statistics.
-     */
-    @NotThreadSafe
-    static private class ArrayLatencyRecorder extends LatencyRecorder {
-        final private long[] latencies;
-
-        ArrayLatencyRecorder(int baseLatency, int latencyThreshold) {
-            super(baseLatency, latencyThreshold);
-            this.latencies = new long[latencyThreshold-baseLatency];
-            reset();
-        }
-
-        public long[] getPercentiles(final double[] percentiles) {
-            final long[] values = new long[percentiles.length];
-            final long[] percentileIds = new long[percentiles.length];
-            long cur = 0;
-            int index = 0;
-
-            for (int i = 0; i < percentileIds.length; i++) {
-                percentileIds[i] = (long) (validLatencyRecords * percentiles[i]);
-            }
-
-            for (int i = 0; i < Math.min(latencies.length, this.maxLatency+1); i++) {
-                if (latencies[i] > 0) {
-                    while (index < values.length) {
-                        if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
-                            values[index] = i + lowLatency;
-                            index += 1;
-                        } else {
-                            break;
-                        }
-                    }
-                    cur += latencies[i];
-                    latencies[i] = 0;
-                }
-            }
-            return values;
-        }
-
-        /**
-         * Record the latency
-         *
-         * @param bytes number of bytes.
-         * @param events number of events(records).
-         * @param latency latency value in milliseconds.
-         */
-        public void record(int bytes, int events, long latency) {
-            if (recordLatency(bytes, events, latency)) {
-                final int index = (int) (latency - this.lowLatency);
-                this.latencies[index] += events;
-            }
-        }
-    }
-
-    /**
-     * Private class for Performance statistics within a given time window.
-     */
-    @NotThreadSafe
-    static private class ArrayLatencyWindow extends ArrayLatencyRecorder {
-        final public Time time;
-        final private double[] percentiles;
-        private long startTime;
-
-        ArrayLatencyWindow(int baseLatency, int latencyThreshold, double[] percentiles, Time time, long start) {
-            super(baseLatency, latencyThreshold);
-            this.startTime = start;
-            this.time = time;
-            this.percentiles = percentiles;
-        }
-
-        public void reset(long start) {
-            reset();
-            this.startTime = start;
-        }
-
-        /**
-         * Record the latency
-         *
-         * @param startTime start time.
-         * @param bytes number of bytes.
-         * @param events number of events(records).
-         * @param latency latency value in milliseconds.
-         */
-        public void record(long startTime, int bytes, int events, long latency) {
-            record(bytes, events, latency);
-        }
-
-        /**
-         * Get the current time duration of this window
-         *
-         * @param currentTime current time.
-         * @return elapsed Time in Milliseconds
-         */
-        public long elapsedTimeMS(long currentTime) {
-            return (long) time.elapsedMilliSeconds(currentTime, startTime);
-        }
-
-
-        /**
-         * print only if there is data recorded.
-         *
-         * @param time current time.
-         */
-        public void printPendingData(long time,  Logger logger) {
-            if (this.validLatencyRecords > 0 || this.lowerLatencyDiscardRecords > 0 ||
-                    this.higherLatencyDiscardRecords > 0 || this.invalidLatencyRecords > 0) {
-                print(time, logger);
-            }
-        }
-
-        /**
-         * Print the window statistics
-         */
-        public void print(long endTime, Print logger) {
-            final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
-            final long totalLatencyRecords  = this.validLatencyRecords +
-                    this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
-            final long totalRecords = totalLatencyRecords + this.invalidLatencyRecords;
-            final double recsPerSec = totalRecords / elapsedSec;
-            final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsedSec;
-            final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
-            long[] pecs = getPercentiles(percentiles);
-            logger.print(this.bytes, totalRecords, recsPerSec, mbPerSec,
-                    avgLatency, this.maxLatency, this.invalidLatencyRecords,
-                    this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                    pecs);
-        }
-    }
-
-    @NotThreadSafe
-    final static private class TimeWindow extends ArrayLatencyWindow {
-        final private ElasticCounter idleCounter;
-        final private int windowInterval;
-
-        private TimeWindow(int baseLatency, int latencyThreshold, double[] percentiles, Time time,
-                           long start, int interval, int idleNS) {
-            super(baseLatency, latencyThreshold, percentiles, time, start);
-            this.idleCounter = new ElasticCounter(interval, idleNS);
-            this.windowInterval = interval;
-        }
-
-        @Override
-        public void reset(long start) {
-            super.reset(start);
-            this.idleCounter.reset();
-        }
-
-        private long waitCheckPrint(ElasticCounter counter, long ctime, Print logger) {
-            if (counter.waitCheck()) {
-                ctime = time.getCurrentTime();
-                final long diffTime = elapsedTimeMS(ctime);
-                if (diffTime > windowInterval) {
-                    print(ctime, logger);
-                    reset(ctime);
-                    counter.setElastic(diffTime);
-                } else {
-                    counter.updateElastic(diffTime);
-                }
-            }
-            return ctime;
-        }
-
-        private long  idleWaitPrint(long currentTime, Print logger) {
-                return waitCheckPrint(idleCounter, currentTime, logger);
-        }
-    }
-
-
-    @NotThreadSafe
-    static private class CSVArrayLatencyWriter extends ArrayLatencyWindow {
-        final private String csvFile;
-        final private CSVPrinter csvPrinter;
-
-        CSVArrayLatencyWriter(int baseLatency, int latencyThreshold, double[] percentiles, Time time, long start,
-                              String csvFile, String unitString) throws IOException {
-            super(baseLatency, latencyThreshold, percentiles, time, start);
-            this.csvFile = csvFile;
-            csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
-                    .withHeader("Start Time (" + unitString + ")", "data size (bytes)", "Records", " Latency (" + unitString + ")"));
-        }
-
-        private void readCSV() {
-            try {
-                CSVParser csvParser = new CSVParser(Files.newBufferedReader(Paths.get(csvFile)), CSVFormat.DEFAULT
-                        .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
-
-                for (CSVRecord csvEntry : csvParser) {
-                    super.record(Long.parseLong(csvEntry.get(0)), Integer.parseInt(csvEntry.get(1)),
-                            Integer.parseInt(csvEntry.get(2)), Integer.parseInt(csvEntry.get(3)));
-                }
-                csvParser.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-
-        @Override
-        public void record(long startTime, int bytes, int events, long latency) {
-            try {
-                csvPrinter.printRecord(startTime, bytes, events, latency);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-
-        @Override
-        public void print(long endTime, Print logger) {
-            try {
-                csvPrinter.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-            readCSV();
-            super.print(endTime, logger);
-        }
-    }
 
     interface Throw {
         void onException(Throwable ex);

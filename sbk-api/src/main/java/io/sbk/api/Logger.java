@@ -86,7 +86,7 @@ public interface Logger extends Print {
      * Default implementation of minimum latency.
      * @return minimum latency value.
      */
-    default int getMinLatency() {
+    default long getMinLatency() {
         return Config.DEFAULT_MIN_LATENCY;
     }
 
@@ -94,15 +94,7 @@ public interface Logger extends Print {
      * Default implementation of Maximum latency.
      * @return Maximum latency value.
      */
-    default int getMaxWindowLatency() {
-        return Config.DEFAULT_WINDOW_LATENCY;
-    }
-
-    /**
-     * Default implementation of Maximum latency.
-     * @return Maximum latency value.
-     */
-    default int getMaxLatency() {
+    default long getMaxLatency() {
         return Config.DEFAULT_MAX_LATENCY;
     }
 
