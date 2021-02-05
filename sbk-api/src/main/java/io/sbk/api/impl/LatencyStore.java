@@ -21,6 +21,7 @@ public abstract class LatencyStore extends LatencyRecorder {
         this.percentiles = percentiles;
     }
 
+    @Override
     public void reset() {
         super.reset();
     }

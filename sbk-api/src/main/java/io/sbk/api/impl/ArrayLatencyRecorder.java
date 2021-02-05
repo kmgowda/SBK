@@ -64,6 +64,7 @@ public class ArrayLatencyRecorder extends LatencyWindow {
      * @param events number of events(records).
      * @param latency latency value in milliseconds.
      */
+    @Override
     public void record(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
             final int index = (int) (latency - this.lowLatency);
