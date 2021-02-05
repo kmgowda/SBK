@@ -19,6 +19,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 public class LatencyRecorder {
     final public long lowLatency;
     final public long highLatency;
+    public long totalRecords;
     public long validLatencyRecords;
     public long lowerLatencyDiscardRecords;
     public long higherLatencyDiscardRecords;
@@ -35,6 +36,7 @@ public class LatencyRecorder {
     }
 
     public void reset() {
+        this.totalRecords = 0;
         this.validLatencyRecords = 0;
         this.lowerLatencyDiscardRecords = 0;
         this.higherLatencyDiscardRecords = 0;
@@ -50,7 +52,9 @@ public class LatencyRecorder {
      * @return isOverflow condition occurred or not
      */
     public boolean isOverflow() {
-        return (this.totalLatency > Config.LONG_MAX) || (this.bytes > Config.LONG_MAX);
+        return (this.totalLatency > Config.LONG_MAX) || (this.bytes > Config.LONG_MAX)
+                || (this.totalRecords > Config.LONG_MAX);
+
     }
 
     /**
@@ -63,6 +67,7 @@ public class LatencyRecorder {
      */
     public boolean record(int bytes, int events, long latency) {
         this.bytes += bytes;
+        this.totalRecords += events;
         this.maxLatency = Math.max(this.maxLatency, latency);
         if (latency < 0) {
             this.invalidLatencyRecords += events;

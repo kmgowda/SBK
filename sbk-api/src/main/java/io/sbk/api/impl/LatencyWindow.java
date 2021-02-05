@@ -50,7 +50,6 @@ public abstract class LatencyWindow extends LatencyStore {
         final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
-        final long totalRecords = totalLatencyRecords + this.invalidLatencyRecords;
         final double recsPerSec = totalRecords / elapsedSec;
         final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
@@ -69,8 +68,7 @@ public abstract class LatencyWindow extends LatencyStore {
      * @param printer printer interface.
      */
     public void printPendingData(long time,  Print printer) {
-        if (this.validLatencyRecords > 0 || this.lowerLatencyDiscardRecords > 0 ||
-                this.higherLatencyDiscardRecords > 0 || this.invalidLatencyRecords > 0) {
+        if (this.totalRecords > 0) {
             print(time, printer);
         }
     }
