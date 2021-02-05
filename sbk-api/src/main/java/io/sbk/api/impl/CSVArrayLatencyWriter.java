@@ -23,7 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @NotThreadSafe
-public class CSVArrayLatencyWriter extends ArrayLatencyRecorder {
+public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
     final private String csvFile;
     final private CSVPrinter csvPrinter;
 
