@@ -23,6 +23,7 @@ import io.sbk.api.SendChannel;
 import io.sbk.api.Time;
 import io.sbk.api.TimeStamp;
 import io.sbk.api.Channel;
+import io.sbk.api.TimeUnit;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -121,7 +122,12 @@ final public class SbkPerformance implements Performance {
             } else {
                 totalWindow = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
             }
-            window = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
+
+            if (time.getTimeUnit() == TimeUnit.ms) {
+                window = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
+            } else {
+                window = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
+            }
             while (doWork) {
                 notFound = true;
                 for (int i = 0; doWork && (i < channels.length); i++) {
