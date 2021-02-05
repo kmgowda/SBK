@@ -23,7 +23,7 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Action;
-import io.sbk.api.LatencyConfig;
+import io.sbk.api.Config;
 import io.sbk.api.LoggerConfig;
 import io.sbk.api.MetricsConfig;
 import io.sbk.api.Parameters;
@@ -43,16 +43,14 @@ import java.util.Arrays;
 public class PrometheusLogger extends SystemLogger {
     final static String LOGGER_FILE = "logger.properties";
     final static String CONFIG_FILE = "metrics.properties";
-    final static String LATENCY_MS_FILE = "latency-ms.properties";
-    final static String LATENCY_MCS_FILE = "latency-mcs.properties";
-    final static String LATENCY_NS_FILE = "latency-ns.properties";
     private LoggerConfig loggerConfig;
     private MetricsConfig config;
-    private LatencyConfig latencyConfig;
     private boolean disabled;
     private double[] percentilesIndices;
     private MetricsLogger metricsLogger;
     private Print printer;
+    private long minLatency;
+    private long maxLatency;
 
     public PrometheusLogger() {
         super();
@@ -69,13 +67,6 @@ public class PrometheusLogger extends SystemLogger {
             config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     MetricsConfig.class);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new IllegalArgumentException(ex);
-        }
-
-        try {
-            getLatencyConfig(loggerConfig.timeUnit);
-        } catch (IOException ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
@@ -104,34 +95,12 @@ public class PrometheusLogger extends SystemLogger {
         return ret.replace(", ]", "]");
     }
 
-    private void getLatencyConfig(TimeUnit unit) throws IOException {
-        String file = LATENCY_MS_FILE;
-        if (unit == TimeUnit.mcs) {
-            file = LATENCY_MCS_FILE;
-        } else if (unit == TimeUnit.ns) {
-            file = LATENCY_NS_FILE;
-        }
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        latencyConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(file),
-                LatencyConfig.class);
 
-    }
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         super.parseArgs(params);
-        final TimeUnit timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
-        if (timeUnit != loggerConfig.timeUnit) {
-            loggerConfig.timeUnit = timeUnit;
-            try {
-                getLatencyConfig(loggerConfig.timeUnit);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                throw new IllegalArgumentException(ex);
-            }
-        }
-
+        loggerConfig.timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
         final String fullContext =  params.getOptionValue("context", config.port + config.context);
         if (fullContext.equalsIgnoreCase("no")) {
             disabled = true;
@@ -143,6 +112,15 @@ public class PrometheusLogger extends SystemLogger {
                 config.context = "/" + str[1];
             }
         }
+
+        int val = 1;
+        if (loggerConfig.timeUnit == TimeUnit.ns) {
+                val = Config.NS_PER_MS;
+        } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
+            val = Config.MICROS_PER_MS;
+        }
+        minLatency = (long) (loggerConfig.minLatencyMS * val);
+        maxLatency = (long) (loggerConfig.maxLatencyMS * val);
 
     }
 
@@ -172,18 +150,13 @@ public class PrometheusLogger extends SystemLogger {
     }
 
     @Override
-    public int getMinLatency() {
-        return latencyConfig.minLatency;
+    public long getMinLatency() {
+        return minLatency;
     }
 
     @Override
-    public int getMaxWindowLatency() {
-        return latencyConfig.maxWindowLatency;
-    }
-
-    @Override
-    public int getMaxLatency() {
-        return latencyConfig.maxLatency;
+    public long getMaxLatency() {
+        return maxLatency;
     }
 
     @Override

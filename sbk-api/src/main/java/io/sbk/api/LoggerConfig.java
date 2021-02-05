@@ -12,5 +12,7 @@ package io.sbk.api;
 public class LoggerConfig {
     public int reportingSeconds;
     public TimeUnit timeUnit;
+    public float minLatencyMS;
+    public float maxLatencyMS;
     public String percentiles;
 }

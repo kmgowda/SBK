@@ -27,7 +27,7 @@ public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
     final private String csvFile;
     final private CSVPrinter csvPrinter;
 
-    CSVArrayLatencyWriter(int baseLatency, int latencyThreshold, double[] percentiles, Time time, long start,
+    CSVArrayLatencyWriter(long baseLatency, long latencyThreshold, double[] percentiles, Time time, long start,
                           String csvFile, String unitString) throws IOException {
         super(baseLatency, latencyThreshold, percentiles, time, start);
         this.csvFile = csvFile;

@@ -244,7 +244,6 @@ public class Sbk {
         SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
         SbkLogger.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
         SbkLogger.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
-        SbkLogger.log.info("Maximum Latency for Reporting Interval: "+logger.getMaxWindowLatency()+" "+timeUnit.name());
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = Action.Write_Reading;

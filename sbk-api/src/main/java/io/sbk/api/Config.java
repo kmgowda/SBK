@@ -29,12 +29,12 @@ public class Config {
     final public static long LONG_MAX = Long.MAX_VALUE / 256;
 
     final public static int MIN_Q_PER_WORKER = 1;
-    final public static int DEFAULT_MIN_LATENCY = 0;
+
     final public static int MS_PER_MIN = MS_PER_SEC * 60;
     final public static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
     final public static int MIN_IDLE_NS = NS_PER_MICRO;
-    final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 15;
-    final public static int DEFAULT_WINDOW_LATENCY = MS_PER_MIN;
+    final public static int DEFAULT_MIN_LATENCY = 0;
+    final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 3;
     final public static long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
     final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 

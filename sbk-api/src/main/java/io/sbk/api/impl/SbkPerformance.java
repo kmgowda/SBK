@@ -36,9 +36,8 @@ final public class SbkPerformance implements Performance {
     final private String csvFile;
     final private int windowInterval;
     final private int idleNS;
-    final private int baseLatency;
-    final private int maxWindowLatency;
-    final private int maxLatency;
+    final private long baseLatency;
+    final private long maxLatency;
     final private Time time;
     final private Logger logger;
     final private ExecutorService executor;
@@ -58,11 +57,8 @@ final public class SbkPerformance implements Performance {
     public SbkPerformance(Config config, int workers, Logger periodicLogger,
                           Time time, ExecutorService executor, String csvFile) {
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
-        this.baseLatency = Math.max(Config.DEFAULT_MIN_LATENCY, periodicLogger.getMinLatency());
-        this.maxWindowLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(periodicLogger.getMaxWindowLatency(), Config.DEFAULT_WINDOW_LATENCY));
-        this.maxLatency = Math.min(Integer.MAX_VALUE,
-                                    Math.max(periodicLogger.getMaxLatency(), Config.DEFAULT_MAX_LATENCY));
+        this.baseLatency = periodicLogger.getMinLatency();
+        this.maxLatency = periodicLogger.getMaxLatency();
         this.windowInterval = periodicLogger.getReportingIntervalSeconds() * Config.MS_PER_SEC;
         this.csvFile = csvFile;
         this.time = time;
@@ -125,7 +121,7 @@ final public class SbkPerformance implements Performance {
             } else {
                 totalWindow = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
             }
-            window = new ArrayLatencyRecorder(baseLatency, maxWindowLatency, percentiles, time, startTime);
+            window = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
             while (doWork) {
                 notFound = true;
                 for (int i = 0; doWork && (i < channels.length); i++) {
