@@ -103,7 +103,7 @@ final public class SbkPerformance implements Performance {
         public void run() {
             final LatencyWindow window;
             final LatencyWindow totalWindow;
-            final ElasticCounter idleCounter = new ElasticCounter(windowInterval, idleNS);
+            final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowInterval, idleNS);
             final long startTime = time.getCurrentTime();
             boolean doWork = true;
             long ctime = startTime;
@@ -188,7 +188,7 @@ final public class SbkPerformance implements Performance {
      * Private class for counter implementation to reduce time.getCurrentTime() invocation.
      */
     @NotThreadSafe
-    final static private class ElasticCounter {
+    final static private class ElasticWaitCounter {
         final private int windowInterval;
         final private int idleNS;
         final private double countRatio;
@@ -197,7 +197,7 @@ final public class SbkPerformance implements Performance {
         private long idleCount;
         private long totalCount;
 
-        public ElasticCounter(int windowInterval, int idleNS) {
+        public ElasticWaitCounter(int windowInterval, int idleNS) {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
             double minWaitTimeMS = windowInterval / 50.0;
