@@ -25,6 +25,11 @@ public abstract class LatencyWindow extends LatencyStore {
         this.startTime = startTime;
     }
 
+    /**
+     * Reset the window.
+     *
+     * @param startTime starting time.
+     */
     public void reset(long startTime) {
         super.reset();
         this.startTime = startTime;
@@ -37,7 +42,7 @@ public abstract class LatencyWindow extends LatencyStore {
      * @param currentTime current time.
      * @return elapsed Time in Milliseconds
      */
-    public long elapsedTimeMS(long currentTime) {
+    public long elapsedMilliSeconds(long currentTime) {
         return (long) time.elapsedMilliSeconds(currentTime, startTime);
     }
 

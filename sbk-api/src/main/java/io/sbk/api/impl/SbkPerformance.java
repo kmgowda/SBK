@@ -149,7 +149,7 @@ final public class SbkPerformance implements Performance {
                                 doWork = false;
                             }
                         }
-                        if ((window.elapsedTimeMS(ctime) > windowInterval) || (window.isOverflow())) {
+                        if ((window.elapsedMilliSeconds(ctime) > windowInterval) || (window.isOverflow())) {
                             window.print(ctime, logger);
                             window.reset(ctime);
                             idleCounter.reset();
@@ -160,7 +160,7 @@ final public class SbkPerformance implements Performance {
                     if (notFound) {
                         if (idleCounter.waitAndCheck()) {
                             ctime = time.getCurrentTime();
-                            final long diffTime = window.elapsedTimeMS(ctime);
+                            final long diffTime = window.elapsedMilliSeconds(ctime);
                             if (diffTime > windowInterval) {
                                 window.print(ctime, logger);
                                 window.reset(ctime);
