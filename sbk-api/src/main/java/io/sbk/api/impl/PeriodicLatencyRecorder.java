@@ -16,6 +16,13 @@ package io.sbk.api.impl;
 public interface PeriodicLatencyRecorder {
 
     /**
+     * Start the window.
+     *
+     * @param startTime starting time.
+     */
+    void start(long startTime);
+
+    /**
      * Reset the window.
      *
      * @param startTime starting time.
@@ -50,7 +57,7 @@ public interface PeriodicLatencyRecorder {
 
 
     /**
-     * print the Latency Results.
+     * print the periodic Latency Results.
      *
      * @param currentTime current time.
      */
