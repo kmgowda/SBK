@@ -25,7 +25,6 @@ public class ArrayLatencyRecorder extends LatencyWindow {
         super(lowLatency, highLatency, percentiles, time, startTime);
         final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
-        reset();
     }
 
     @Override

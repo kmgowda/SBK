@@ -26,7 +26,6 @@ public class HashMapLatencyRecorder extends LatencyWindow {
     HashMapLatencyRecorder(long lowLatency, long highLatency, double[] percentiles, Time time, long startTime) {
         super(lowLatency, highLatency, percentiles, time, startTime);
         this.latencies = new HashMap<>();
-        reset();
     }
 
     @Override
