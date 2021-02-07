@@ -19,10 +19,9 @@ public abstract class LatencyWindow extends LatencyStore {
     final public Time time;
     public long startTime;
 
-    LatencyWindow(long lowLatency, long highLatency, double[] percentiles, Time time, long startTime) {
+    LatencyWindow(long lowLatency, long highLatency, double[] percentiles, Time time) {
         super(lowLatency, highLatency, percentiles);
         this.time = time;
-        this.startTime = startTime;
     }
 
     /**

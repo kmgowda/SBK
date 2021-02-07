@@ -74,9 +74,10 @@ public class SbkBenchmark implements Benchmark {
      * @param  storage              Storage device/client/driver for benchmarking
      * @param  logger               output logger
      * @param  time                 time interface
+     * @throws IOException          If Exception occurs.
      */
     public SbkBenchmark(String storageName, Action action, Config config,
-                        Parameters params, Storage<Object> storage, Logger logger, Time time) {
+                        Parameters params, Storage<Object> storage, Logger logger, Time time) throws IOException {
         this.storageName = storageName;
         this.action = action;
         this.params = params;
@@ -97,14 +98,18 @@ public class SbkBenchmark implements Benchmark {
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new SbkPerformance(config, params.getWritersCount(),
-                     this.logger, this.time, executor,  params.getCsvFile());
+                    new SbkLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                            time, action, logger, logger::printTotal, params.getCsvFile()),
+                    logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
             readStats = new SbkPerformance(config, params.getReadersCount(),
-                     this.logger, this.time, executor, params.getCsvFile());
+                    new SbkLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                            time, action, logger, logger::printTotal, params.getCsvFile()),
+                    logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
         } else {
             readStats = null;
         }
@@ -167,7 +172,7 @@ public class SbkBenchmark implements Benchmark {
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.get(),
+                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.getSendChannel(),
                                 dType, time, writers.get(i)))
                         .collect(Collectors.toList());
             } else {
@@ -185,14 +190,14 @@ public class SbkBenchmark implements Benchmark {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,
-                            readStats.get(), dType, time, readers.get(i)))
+                            readStats.getSendChannel(), dType, time, readers.get(i)))
                     .collect(Collectors.toList());
             sbkCallbackReaders = null;
         } else if (callbackReaders != null && callbackReaders.size() > 0) {
             sbkCallbackReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkCallbackReader(i, maxQs, params,
-                            readStats.get(), dType, time))
+                            readStats.getSendChannel(), dType, time))
                     .collect(Collectors.toList());
             sbkReaders = null;
         } else {

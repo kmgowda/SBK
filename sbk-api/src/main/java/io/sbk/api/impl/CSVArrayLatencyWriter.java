@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.Action;
 import io.sbk.api.Print;
 import io.sbk.api.Time;
 import org.apache.commons.csv.CSVFormat;
@@ -27,12 +28,12 @@ public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
     final private String csvFile;
     final private CSVPrinter csvPrinter;
 
-    CSVArrayLatencyWriter(long baseLatency, long latencyThreshold, double[] percentiles, Time time, long start,
-                          String csvFile, String unitString) throws IOException {
-        super(baseLatency, latencyThreshold, percentiles, time, start);
+    CSVArrayLatencyWriter(long baseLatency, long latencyThreshold, double[] percentiles, Time time,
+                          Action action, String csvFile) throws IOException {
+        super(baseLatency, latencyThreshold, percentiles, time);
         this.csvFile = csvFile;
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
-                .withHeader("Start Time (" + unitString + ")", "data size (bytes)", "Records", " Latency (" + unitString + ")"));
+                .withHeader("Start Time (" + time.getTimeUnit().toString() + ")", "data size (bytes)", "Records", action.name()+" Latency (" + time.getTimeUnit().name() + ")"));
     }
 
     private void readCSV() {

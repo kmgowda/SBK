@@ -90,6 +90,8 @@ final public class SbkParameters implements Parameters {
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes/reads 'records'\n" +
                         "if -1, get the maximum throughput (default: -1)");
+        options.addOption("csv", true, "csv file to store the latency values " +
+                "if 'no', then disable csv file creation");
         options.addOption("help", false, "Help message");
     }
 

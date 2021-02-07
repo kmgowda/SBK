@@ -9,7 +9,6 @@
  */
 package io.sbk.api.impl;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -17,13 +16,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 
 import io.sbk.api.Config;
-import io.sbk.api.Logger;
 import io.sbk.api.Performance;
+import io.sbk.api.PeriodicLatencyRecorder;
 import io.sbk.api.SendChannel;
 import io.sbk.api.Time;
 import io.sbk.api.TimeStamp;
 import io.sbk.api.Channel;
-import io.sbk.api.TimeUnit;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -34,16 +32,12 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance statistics.
  */
 final public class SbkPerformance implements Performance {
-    final private String csvFile;
-    final private int windowInterval;
+    final private int windowIntervalMS;
     final private int idleNS;
-    final private long baseLatency;
-    final private long maxLatency;
     final private Time time;
-    final private Logger logger;
+    final private PeriodicLatencyRecorder latencyLogger;
     final private ExecutorService executor;
     final private Channel[] channels;
-    final private double[] percentiles;
 
     @GuardedBy("this")
     private int index;
@@ -55,15 +49,12 @@ final public class SbkPerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public SbkPerformance(Config config, int workers, Logger periodicLogger,
-                          Time time, ExecutorService executor, String csvFile) {
+    public SbkPerformance(Config config, int workers, PeriodicLatencyRecorder periodicLogger,
+                          int reportingIntervalMS, Time time, ExecutorService executor) {
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
-        this.baseLatency = periodicLogger.getMinLatency();
-        this.maxLatency = periodicLogger.getMaxLatency();
-        this.windowInterval = periodicLogger.getReportingIntervalSeconds() * Config.MS_PER_SEC;
-        this.csvFile = csvFile;
+        this.windowIntervalMS = reportingIntervalMS;
         this.time = time;
-        this.logger = periodicLogger;
+        this.latencyLogger = periodicLogger;
         this.executor = executor;
         this.retFuture = null;
         int maxQs;
@@ -79,11 +70,6 @@ final public class SbkPerformance implements Performance {
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
-        double[] percentilesIndices = periodicLogger.getPercentiles();
-        this.percentiles = new double[percentilesIndices.length];
-        for (int i = 0; i < percentiles.length; i++) {
-            this.percentiles[i] = percentilesIndices[i] / 100.0;
-        }
     }
 
     /**
@@ -92,18 +78,14 @@ final public class SbkPerformance implements Performance {
     final private class QueueProcessor implements Runnable {
         final private long msToRun;
         final private long totalRecords;
-        final private double[] percentiles;
 
-        private QueueProcessor(long secondsToRun, long records, double[] percentiles) {
+        private QueueProcessor(long secondsToRun, long records) {
             this.msToRun = secondsToRun * Config.MS_PER_SEC;
             this.totalRecords = records;
-            this.percentiles = percentiles;
         }
 
         public void run() {
-            final LatencyWindow window;
-            final LatencyWindow totalWindow;
-            final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowInterval, idleNS);
+            final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, idleNS);
             final long startTime = time.getCurrentTime();
             boolean doWork = true;
             long ctime = startTime;
@@ -111,27 +93,11 @@ final public class SbkPerformance implements Performance {
             boolean notFound;
             TimeStamp t;
 
-            if (csvFile != null) {
-                try {
-                    totalWindow = new CSVArrayLatencyWriter(baseLatency, maxLatency, percentiles, time, startTime,
-                            csvFile, time.getTimeUnit().toString());
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                    return;
-                }
-            } else {
-                totalWindow = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
-            }
-
-            if (time.getTimeUnit() == TimeUnit.ms) {
-                window = new ArrayLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
-            } else {
-                window = new HashMapLatencyRecorder(baseLatency, maxLatency, percentiles, time, startTime);
-            }
+            latencyLogger.start(startTime);
             while (doWork) {
                 notFound = true;
                 for (int i = 0; doWork && (i < channels.length); i++) {
-                    t = channels[i].receive(windowInterval);
+                    t = channels[i].receive(windowIntervalMS);
                     if (t != null) {
                         notFound = false;
                         ctime = t.endTime;
@@ -140,8 +106,7 @@ final public class SbkPerformance implements Performance {
                         } else {
                             recordsCnt += t.records;
                             final long latency = t.endTime - t.startTime;
-                            window.record(t.startTime, t.bytes, t.records, latency);
-                            totalWindow.record(t.startTime, t.bytes, t.records, latency);
+                            latencyLogger.record(t.startTime, t.bytes, t.records, latency);
                             if (totalRecords > 0  && recordsCnt >= totalRecords) {
                                 doWork = false;
                             }
@@ -149,9 +114,9 @@ final public class SbkPerformance implements Performance {
                                 doWork = false;
                             }
                         }
-                        if ((window.elapsedMilliSeconds(ctime) > windowInterval) || (window.isOverflow())) {
-                            window.print(ctime, logger);
-                            window.reset(ctime);
+                        if ((latencyLogger.elapsedMilliSeconds(ctime) > windowIntervalMS) || (latencyLogger.isOverflow())) {
+                            latencyLogger.print(ctime);
+                            latencyLogger.reset(ctime);
                             idleCounter.reset();
                         }
                     }
@@ -160,10 +125,10 @@ final public class SbkPerformance implements Performance {
                     if (notFound) {
                         if (idleCounter.waitAndCheck()) {
                             ctime = time.getCurrentTime();
-                            final long diffTime = window.elapsedMilliSeconds(ctime);
-                            if (diffTime > windowInterval) {
-                                window.print(ctime, logger);
-                                window.reset(ctime);
+                            final long diffTime = latencyLogger.elapsedMilliSeconds(ctime);
+                            if (diffTime > windowIntervalMS) {
+                                latencyLogger.print(ctime);
+                                latencyLogger.reset(ctime);
                                 idleCounter.reset();
                                 idleCounter.setElastic(diffTime);
                             } else {
@@ -174,13 +139,9 @@ final public class SbkPerformance implements Performance {
                     if (msToRun > 0 && time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
                         doWork = false;
                     }
-                    if (totalWindow.isOverflow()) {
-                        totalWindow.print(ctime, logger::printTotal);
-                    }
                 }
             }
-            window.printPendingData(ctime, logger);
-            totalWindow.print(ctime, logger::printTotal);
+            latencyLogger.printTotal(ctime);
         }
     }
 
@@ -282,7 +243,7 @@ final public class SbkPerformance implements Performance {
 
     @Override
     @Synchronized
-    public SendChannel get() {
+    public SendChannel getSendChannel() {
         if (channels.length == 1) {
                 return channels[0];
         }
@@ -344,7 +305,7 @@ final public class SbkPerformance implements Performance {
         if (retFuture == null) {
             retFuture = new CompletableFuture<>();
             qFuture =  CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
-                    records, percentiles),
+                    records),
                     executor);
             qFuture.whenComplete((ret, ex) -> {
                 shutdown(ex);

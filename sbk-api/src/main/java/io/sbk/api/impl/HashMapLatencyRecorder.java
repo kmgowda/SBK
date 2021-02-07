@@ -23,8 +23,8 @@ import java.util.Iterator;
 public class HashMapLatencyRecorder extends LatencyWindow {
     final private HashMap<Long, Long> latencies;
 
-    HashMapLatencyRecorder(long lowLatency, long highLatency, double[] percentiles, Time time, long startTime) {
-        super(lowLatency, highLatency, percentiles, time, startTime);
+    HashMapLatencyRecorder(long lowLatency, long highLatency, double[] percentiles, Time time) {
+        super(lowLatency, highLatency, percentiles, time);
         this.latencies = new HashMap<>();
     }
 
