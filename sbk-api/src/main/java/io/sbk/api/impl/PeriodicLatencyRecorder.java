@@ -8,8 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
 */
 
-package io.sbk.api;
-
+package io.sbk.api.impl;
 
 /**
  * Interface for recording latencies.
@@ -23,6 +22,12 @@ public interface PeriodicLatencyRecorder {
      */
     void reset(long startTime);
 
+    /**
+     * is Overflow condition for this recorder.
+     *
+     * @return isOverflow condition occurred or not
+     */
+    boolean isOverflow();
 
     /**
      * Get the current time duration of this window.
