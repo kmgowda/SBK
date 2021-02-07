@@ -42,7 +42,7 @@ public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
 
             for (CSVRecord csvEntry : csvParser) {
                 super.record(Long.parseLong(csvEntry.get(0)), Integer.parseInt(csvEntry.get(1)),
-                        Integer.parseInt(csvEntry.get(2)), Integer.parseInt(csvEntry.get(3)));
+                        Integer.parseInt(csvEntry.get(2)), Long.parseLong(csvEntry.get(3)));
             }
             csvParser.close();
         } catch (IOException ex) {
@@ -53,7 +53,9 @@ public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
     @Override
     public void record(long startTime, int bytes, int events, long latency) {
         try {
-            csvPrinter.printRecord(startTime, bytes, events, latency);
+            if (latency >= lowLatency && latency <= highLatency) {
+                csvPrinter.printRecord(startTime, bytes, events, latency);
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
