@@ -9,7 +9,6 @@
  */
 package io.sbk.api.impl;
 
-import io.sbk.api.Config;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -19,6 +18,9 @@ import javax.annotation.concurrent.NotThreadSafe;
 public class LatencyRecorder {
     final public long lowLatency;
     final public long highLatency;
+    final public long totalLatencyMax;
+    final public long totalRecordsMax;
+    final public long bytesMax;
     public long totalRecords;
     public long validLatencyRecords;
     public long lowerLatencyDiscardRecords;
@@ -29,12 +31,19 @@ public class LatencyRecorder {
     public long maxLatency;
 
 
-    LatencyRecorder(long baseLatency, long latencyThreshold) {
+    LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax) {
         this.lowLatency = baseLatency;
         this.highLatency = latencyThreshold;
+        this.totalLatencyMax = totalLatencyMax;
+        this.totalRecordsMax = totalRecordsMax;
+        this.bytesMax = bytesMax;
         reset();
     }
 
+
+    /**
+     * Reset all recording variables.
+     */
     public void reset() {
         this.totalRecords = 0;
         this.validLatencyRecords = 0;
@@ -52,8 +61,8 @@ public class LatencyRecorder {
      * @return isOverflow condition occurred or not
      */
     public boolean isOverflow() {
-        return (this.totalLatency > Config.LONG_MAX) || (this.bytes > Config.LONG_MAX)
-                || (this.totalRecords > Config.LONG_MAX);
+        return (totalLatency > totalLatencyMax) || (bytes > bytesMax)
+                || (totalRecords > totalRecordsMax);
 
     }
 

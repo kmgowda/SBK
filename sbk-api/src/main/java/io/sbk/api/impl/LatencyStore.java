@@ -16,8 +16,9 @@ import javax.annotation.concurrent.NotThreadSafe;
 public abstract class LatencyStore extends LatencyRecorder {
     public final double[] percentiles;
 
-    LatencyStore(long lowLatency, long highLatency, double[] percentiles) {
-        super(lowLatency, highLatency);
+    LatencyStore(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
+                 double[] percentiles) {
+        super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
         this.percentiles = percentiles;
     }
 

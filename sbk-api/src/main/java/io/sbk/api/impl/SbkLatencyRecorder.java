@@ -42,21 +42,25 @@ public class SbkLatencyRecorder implements PeriodicLatencyRecorder {
         final long memSizeMB = ((highLatency - lowLatency) * Config.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
         if (memSizeMB < Config.MAX_LATENCY_MEMORY_MB) {
             SbkLogger.log.info("Window Latency Store: Array");
-            window = new ArrayLatencyRecorder(lowLatency, highLatency, this.percentiles, time);
+            window = new ArrayLatencyRecorder(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                    this.percentiles, time);
             deletecsvFile = false;
             if (outFile == null || outFile.equalsIgnoreCase("no")) {
                 csvFile = null;
                 SbkLogger.log.info("Total Latency Store: HashMap");
-                totalWindow = new HashMapLatencyRecorder(lowLatency, highLatency, this.percentiles, time);
+                totalWindow = new HashMapLatencyRecorder(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                        this.percentiles, time);
             } else {
                 csvFile = outFile;
                 deleteFile(csvFile);
                 SbkLogger.log.info("Total Latency Store CSV file:" + csvFile);
-                totalWindow = new CSVArrayLatencyWriter(lowLatency, highLatency, this.percentiles, time, action, csvFile);
+                totalWindow = new CSVArrayLatencyWriter(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                        this.percentiles, time, action, csvFile);
             }
         } else {
             SbkLogger.log.info("Window Latency Store: HashMap");
-            window = new HashMapLatencyRecorder(lowLatency, highLatency, this.percentiles, time);
+            window = new HashMapLatencyRecorder(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                    this.percentiles, time);
 
             if (outFile == null) {
                 csvFile = Config.NAME.toUpperCase() + "-" + action.name() + "-" + String.format("%04d", new Random().nextInt(10000)) + ".csv";
@@ -67,11 +71,13 @@ public class SbkLatencyRecorder implements PeriodicLatencyRecorder {
             }
             if (csvFile.equalsIgnoreCase("no")) {
                 SbkLogger.log.info("Total Latency Store: HashMap");
-                totalWindow = new HashMapLatencyRecorder(lowLatency, highLatency, this.percentiles, time);
+                totalWindow = new HashMapLatencyRecorder(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                        this.percentiles, time);
             } else {
                 deleteFile(csvFile);
                 SbkLogger.log.info("Total Latency Store CSV file: " + csvFile);
-                totalWindow = new CSVArrayLatencyWriter(lowLatency, highLatency, this.percentiles, time, action, csvFile);
+                totalWindow = new CSVArrayLatencyWriter(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                        this.percentiles, time, action, csvFile);
             }
         }
     }

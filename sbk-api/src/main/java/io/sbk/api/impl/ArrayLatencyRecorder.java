@@ -21,8 +21,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 public class ArrayLatencyRecorder extends LatencyWindow {
     final private long[] latencies;
 
-    ArrayLatencyRecorder(long lowLatency, long highLatency, double[] percentiles, Time time) {
-        super(lowLatency, highLatency, percentiles, time);
+    ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
+        super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
     }
