@@ -79,7 +79,7 @@ final public class SbkPerformance implements Performance {
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
-        double[] percentilesIndices = periodicLogger.getPercentileIndices();
+        double[] percentilesIndices = periodicLogger.getPercentiles();
         this.percentiles = new double[percentilesIndices.length];
         for (int i = 0; i < percentiles.length; i++) {
             this.percentiles[i] = percentilesIndices[i] / 100.0;

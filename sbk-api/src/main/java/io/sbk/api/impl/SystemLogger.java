@@ -44,7 +44,7 @@ public class SystemLogger implements Logger {
     public void open(final Parameters params, final String storageName, Action action, Time time) throws  IOException {
         this.prefix = storageName+" "+action.name();
         this.timeUnit = getTimeUnit().name();
-        this.percentiles = getPercentileIndices();
+        this.percentiles = getPercentiles();
         for (double p: this.percentiles) {
             if (p < 0 || p > 100) {
                 SbkLogger.log.error("Invalid percentiles indices : " + percentiles.toString());

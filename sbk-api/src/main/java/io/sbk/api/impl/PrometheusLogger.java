@@ -160,7 +160,7 @@ public class PrometheusLogger extends SystemLogger {
     }
 
     @Override
-    public double[] getPercentileIndices() {
+    public double[] getPercentiles() {
         return percentilesIndices;
     }
 

@@ -102,7 +102,7 @@ public interface Logger extends Print {
      * Default implementation of percentile Indices.
      * @return array of percentile Indices.
      */
-    default double[] getPercentileIndices() {
+    default double[] getPercentiles() {
         return Config.PERCENTILES;
     }
 }
