@@ -28,7 +28,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
 
     CompositeHashMapLatencyRecorder(LatencyWindow window, Print logger, Print loggerTotal) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
-                window.totalRecordsMax, window.bytesMax, window.percentileFractions, window.time);
+                window.totalRecordsMax, window.totalBytesMax, window.percentileFractions, window.time);
         this.window = window;
         this.windowLogger = logger;
         this.loggerTotal = loggerTotal;
@@ -81,7 +81,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     public void updateLatencyRecords(LatencyRecorder latencies) {
         this.totalRecords += latencies.totalRecords;
         this.totalLatency += latencies.totalLatency;
-        this.bytes += latencies.bytes;
+        this.totalBytes += latencies.totalBytes;
         this.invalidLatencyRecords += latencies.invalidLatencyRecords;
         this.lowerLatencyDiscardRecords += latencies.lowerLatencyDiscardRecords;
         this.higherLatencyDiscardRecords += latencies.higherLatencyDiscardRecords;

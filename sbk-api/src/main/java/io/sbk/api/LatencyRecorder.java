@@ -20,23 +20,23 @@ public class LatencyRecorder {
     final public long highLatency;
     final public long totalLatencyMax;
     final public long totalRecordsMax;
-    final public long bytesMax;
+    final public long totalBytesMax;
     public long totalRecords;
     public long validLatencyRecords;
     public long lowerLatencyDiscardRecords;
     public long higherLatencyDiscardRecords;
     public long invalidLatencyRecords;
-    public long bytes;
+    public long totalBytes;
     public long totalLatency;
     public long maxLatency;
 
 
-    public LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax) {
+    public LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long totalBytesMax) {
         this.lowLatency = baseLatency;
         this.highLatency = latencyThreshold;
         this.totalLatencyMax = totalLatencyMax;
         this.totalRecordsMax = totalRecordsMax;
-        this.bytesMax = bytesMax;
+        this.totalBytesMax = totalBytesMax;
         reset();
     }
 
@@ -50,7 +50,7 @@ public class LatencyRecorder {
         this.lowerLatencyDiscardRecords = 0;
         this.higherLatencyDiscardRecords = 0;
         this.invalidLatencyRecords = 0;
-        this.bytes = 0;
+        this.totalBytes = 0;
         this.maxLatency = 0;
         this.totalLatency = 0;
     }
@@ -61,7 +61,7 @@ public class LatencyRecorder {
      * @return isOverflow condition occurred or not
      */
     public boolean isOverflow() {
-        return (totalLatency > totalLatencyMax) || (bytes > bytesMax)
+        return (totalLatency > totalLatencyMax) || (totalBytes > totalBytesMax)
                 || (totalRecords > totalRecordsMax);
 
     }
@@ -75,7 +75,7 @@ public class LatencyRecorder {
      * @return is valid latency record or not
      */
     public boolean record(int bytes, int events, long latency) {
-        this.bytes += bytes;
+        this.totalBytes += bytes;
         this.totalRecords += events;
         this.maxLatency = Math.max(this.maxLatency, latency);
         if (latency < 0) {
