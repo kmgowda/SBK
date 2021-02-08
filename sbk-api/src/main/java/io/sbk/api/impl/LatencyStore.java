@@ -10,8 +10,10 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.CloneLatencies;
+import io.sbk.api.LatencyRecorder;
+
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.function.BiConsumer;
 
 @NotThreadSafe
 public abstract class LatencyStore extends LatencyRecorder {
@@ -30,8 +32,8 @@ public abstract class LatencyStore extends LatencyRecorder {
 
     /**
      * get the Percentiles.
-     * @param copyLatencies  Copy Latency values.
+     * @param cloneLatencies  Copy Latency records.
      * @return Array of percentiles.
      */
-    abstract public long[] getPercentiles(BiConsumer<Long, Long> copyLatencies);
+    abstract public long[] getPercentiles(CloneLatencies cloneLatencies);
 }

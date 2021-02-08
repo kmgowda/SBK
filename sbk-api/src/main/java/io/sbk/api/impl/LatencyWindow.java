@@ -9,10 +9,10 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.CloneLatencies;
 import io.sbk.api.Print;
 import io.sbk.api.Time;
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.function.BiConsumer;
 
 
 @NotThreadSafe
@@ -52,7 +52,7 @@ public abstract class LatencyWindow extends LatencyStore {
      * @param logger printer interface.
      * @param copyLatencies  Copy Latency values
      */
-    public void print(long endTime, Print logger, BiConsumer<Long, Long> copyLatencies) {
+    public void print(long endTime, Print logger, CloneLatencies copyLatencies) {
         final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
@@ -74,7 +74,7 @@ public abstract class LatencyWindow extends LatencyStore {
      * @param printer printer interface.
      * @param copyLatencies copy Latency values
      */
-    public void printPendingData(long time,  Print printer, BiConsumer<Long, Long> copyLatencies) {
+    public void printPendingData(long time,  Print printer, CloneLatencies copyLatencies) {
         if (this.totalRecords > 0) {
             print(time, printer, copyLatencies);
         }

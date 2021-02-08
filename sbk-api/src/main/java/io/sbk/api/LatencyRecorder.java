@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.api;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -31,7 +31,7 @@ public class LatencyRecorder {
     public long maxLatency;
 
 
-    LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax) {
+    public LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax) {
         this.lowLatency = baseLatency;
         this.highLatency = latencyThreshold;
         this.totalLatencyMax = totalLatencyMax;

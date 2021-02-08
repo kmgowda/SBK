@@ -10,11 +10,11 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.CloneLatencies;
 import io.sbk.api.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.function.BiConsumer;
 
 
 /**
@@ -31,11 +31,15 @@ public class HashMapLatencyRecorder extends LatencyWindow {
     }
 
     @Override
-    public long[] getPercentiles(BiConsumer<Long, Long> copyLatencies) {
+    public long[] getPercentiles(CloneLatencies copyLatencies) {
         final long[] values = new long[percentiles.length];
         final long[] percentileIds = new long[percentiles.length];
         long cur = 0;
         int index = 0;
+
+        if (copyLatencies != null) {
+            copyLatencies.updateLatencyRecords(this);
+        }
 
         for (int i = 0; i < percentileIds.length; i++) {
             percentileIds[i] = (long) (validLatencyRecords * percentiles[i]);
@@ -48,7 +52,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
             final long next =  cur + val;
 
             if (copyLatencies != null) {
-                copyLatencies.accept( key, val);
+                copyLatencies.copyLatency( key, val);
             }
 
             while (index < values.length) {

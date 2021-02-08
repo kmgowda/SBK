@@ -11,6 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
+import io.sbk.api.CloneLatencies;
 import io.sbk.api.Print;
 import io.sbk.api.Time;
 import org.apache.commons.csv.CSVFormat;
@@ -22,7 +23,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.function.BiConsumer;
 
 @NotThreadSafe
 public class CSVHashMapLatencyRecorder extends HashMapLatencyRecorder {
@@ -64,7 +64,7 @@ public class CSVHashMapLatencyRecorder extends HashMapLatencyRecorder {
     }
 
     @Override
-    public void print(long endTime, Print logger, BiConsumer<Long, Long> copyLatencies) {
+    public void print(long endTime, Print logger, CloneLatencies copyLatencies) {
         try {
             csvPrinter.close();
         } catch (IOException ex) {

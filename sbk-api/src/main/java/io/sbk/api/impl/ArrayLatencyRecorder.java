@@ -10,10 +10,10 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.CloneLatencies;
 import io.sbk.api.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.function.BiConsumer;
 
 /**
  *  class for Performance statistics.
@@ -29,11 +29,15 @@ public class ArrayLatencyRecorder extends LatencyWindow {
     }
 
     @Override
-    public long[] getPercentiles(BiConsumer<Long, Long> copyLatencies) {
+    public long[] getPercentiles(CloneLatencies copyLatencies) {
         final long[] values = new long[percentiles.length];
         final long[] percentileIds = new long[percentiles.length];
         long cur = 0;
         int index = 0;
+
+        if (copyLatencies != null) {
+            copyLatencies.updateLatencyRecords(this);
+        }
 
         for (int i = 0; i < percentileIds.length; i++) {
             percentileIds[i] = (long) (validLatencyRecords * percentiles[i]);
@@ -43,7 +47,7 @@ public class ArrayLatencyRecorder extends LatencyWindow {
             if (latencies[i] > 0) {
 
                 if (copyLatencies != null) {
-                    copyLatencies.accept((long) i, latencies[i]);
+                    copyLatencies.copyLatency(i, latencies[i]);
                 }
 
                 while (index < values.length) {
