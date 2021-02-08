@@ -19,6 +19,8 @@ public class Config {
     final public static String SBK_CLASS_NAME = "sbk.className";
     final public static String SBK_PERCENTILE_FORMAT = "0.##";
 
+    final public static int MIN_DATA_RW_SIZE = DataType.TIME_HEADER_BYTES + 2;
+
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
     final public static int MAX_LATENCY_MEMORY_MB = 64;
 

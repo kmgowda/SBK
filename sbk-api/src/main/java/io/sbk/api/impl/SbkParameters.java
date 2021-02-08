@@ -10,7 +10,6 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Config;
-import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -203,8 +202,8 @@ final public class SbkParameters implements Parameters {
             }
 
             if (readersCount > 0) {
-                if (recordSize < DataType.TIME_HEADER_BYTES) {
-                    throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be " + DataType.TIME_HEADER_BYTES);
+                if (recordSize < Config.MIN_DATA_RW_SIZE) {
+                    throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be " + Config.MIN_DATA_RW_SIZE);
                 }
             }
             writeAndRead = readersCount > 0;
