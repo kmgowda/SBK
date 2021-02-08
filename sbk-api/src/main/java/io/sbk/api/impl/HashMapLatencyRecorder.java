@@ -24,7 +24,8 @@ import java.util.function.BiConsumer;
 public class HashMapLatencyRecorder extends LatencyWindow {
     final private HashMap<Long, Long> latencies;
 
-    HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
+    HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
+                           double[] percentiles, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new HashMap<>();
     }

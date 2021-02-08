@@ -25,12 +25,12 @@ import java.nio.file.Paths;
 import java.util.function.BiConsumer;
 
 @NotThreadSafe
-public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
+public class CSVHashMapLatencyRecorder extends HashMapLatencyRecorder {
     final private String csvFile;
     final private CSVPrinter csvPrinter;
 
-    CSVArrayLatencyWriter(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax,
-                          double[] percentiles, Time time, Action action, String csvFile) throws IOException {
+    CSVHashMapLatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax,
+                              double[] percentiles, Time time, Action action, String csvFile) throws IOException {
         super(baseLatency, latencyThreshold, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.csvFile = csvFile;
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT

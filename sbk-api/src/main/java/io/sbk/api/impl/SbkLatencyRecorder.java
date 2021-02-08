@@ -54,7 +54,7 @@ public class SbkLatencyRecorder implements PeriodicLatencyRecorder {
                 csvFile = outFile;
                 deleteFile(csvFile);
                 SbkLogger.log.info("Total Latency Store CSV file:" + csvFile);
-                totalWindow = new CSVArrayLatencyWriter(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                totalWindow = new CSVHashMapLatencyRecorder(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
                         this.percentiles, time, action, csvFile);
             }
         } else {
@@ -76,7 +76,7 @@ public class SbkLatencyRecorder implements PeriodicLatencyRecorder {
             } else {
                 deleteFile(csvFile);
                 SbkLogger.log.info("Total Latency Store CSV file: " + csvFile);
-                totalWindow = new CSVArrayLatencyWriter(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
+                totalWindow = new CSVHashMapLatencyRecorder(lowLatency, highLatency, Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX,
                         this.percentiles, time, action, csvFile);
             }
         }
