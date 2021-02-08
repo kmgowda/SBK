@@ -27,7 +27,7 @@ public interface PeriodicLatencyRecorder {
      *
      * @param startTime starting time.
      */
-    void reset(long startTime);
+    void resetWindow(long startTime);
 
     /**
      * is Overflow condition for this recorder.

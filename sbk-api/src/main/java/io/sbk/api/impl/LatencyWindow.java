@@ -60,11 +60,11 @@ public abstract class LatencyWindow extends LatencyRecorder {
         final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
-        final double recsPerSec = totalRecords / elapsedSec;
+        final double recsPerSec = this.totalRecords / elapsedSec;
         final double mbPerSec = (this.totalBytes / (1024.0 * 1024.0)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
         long[] pecs = getPercentiles(copyLatencies);
-        logger.print(this.totalBytes, totalRecords, recsPerSec, mbPerSec,
+        logger.print(this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                 pecs);

@@ -106,7 +106,7 @@ public class SbkLatencyRecorder implements PeriodicLatencyRecorder {
      *
      * @param startTime starting time.
      */
-    public void reset(long startTime) {
+    public void resetWindow(long startTime) {
         window.reset(startTime);
     }
 

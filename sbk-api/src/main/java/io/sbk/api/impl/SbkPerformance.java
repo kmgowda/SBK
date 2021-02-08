@@ -116,7 +116,7 @@ final public class SbkPerformance implements Performance {
                         }
                         if ((latencyLogger.elapsedMilliSeconds(ctime) > windowIntervalMS) || (latencyLogger.isOverflow())) {
                             latencyLogger.print(ctime);
-                            latencyLogger.reset(ctime);
+                            latencyLogger.resetWindow(ctime);
                             idleCounter.reset();
                         }
                     }
@@ -128,7 +128,7 @@ final public class SbkPerformance implements Performance {
                             final long diffTime = latencyLogger.elapsedMilliSeconds(ctime);
                             if (diffTime > windowIntervalMS) {
                                 latencyLogger.print(ctime);
-                                latencyLogger.reset(ctime);
+                                latencyLogger.resetWindow(ctime);
                                 idleCounter.reset();
                                 idleCounter.setElastic(diffTime);
                             } else {
