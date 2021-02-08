@@ -36,26 +36,34 @@ final public class SbkParameters implements Parameters {
 
     @Getter
     final private int timeoutMS;
+
     @Getter
     private int recordSize;
+
     @Getter
     private int writersCount;
+
     @Getter
     private int readersCount;
+
     @Getter
     private int recordsPerSec;
+
     @Getter
     private int recordsPerSync;
+
     @Getter
     private long recordsCount;
+
     @Getter
     private long secondsToRun;
+
     @Getter
     private long recordsPerWriter;
+
     @Getter
     private long recordsPerReader;
-    @Getter
-    private String csvFile;
+
     @Getter
     private boolean writeAndRead;
 
@@ -90,8 +98,6 @@ final public class SbkParameters implements Parameters {
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes/reads 'records'\n" +
                         "if -1, get the maximum throughput (default: -1)");
-        options.addOption("csv", true, "csv file to store the latency values " +
-                "if 'no', then disable csv file creation");
         options.addOption("help", false, "Help message");
     }
 
@@ -153,7 +159,6 @@ final public class SbkParameters implements Parameters {
 
         recordsCount = Long.parseLong(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
-        csvFile = commandline.getOptionValue("csv", null);
         int syncRecords = Integer.parseInt(commandline.getOptionValue("sync", "0"));
         if (syncRecords > 0) {
             recordsPerSync = syncRecords;

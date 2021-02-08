@@ -117,12 +117,6 @@ public interface Parameters {
     long getRecordsPerWriter();
 
     /**
-     * CSV file to store the write and read benchmarking data.
-     * @return   Name of the CSV file.
-     */
-    String getCsvFile();
-
-    /**
      * Time out for data to read.
      * @return  time-out in milliseconds.
      */
