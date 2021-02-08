@@ -20,7 +20,7 @@ public class Config {
     final public static String SBK_PERCENTILE_FORMAT = "0.##";
 
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
-    final public static int MAX_LATENCY_MEMORY_MB = 128;
+    final public static int MAX_LATENCY_MEMORY_MB = 64;
 
     final public static int NS_PER_MICRO = 1000;
     final public static int MICROS_PER_MS = 1000;

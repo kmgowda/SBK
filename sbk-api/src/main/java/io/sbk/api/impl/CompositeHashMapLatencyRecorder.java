@@ -28,7 +28,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
 
     CompositeHashMapLatencyRecorder(LatencyWindow window, Print logger, Print loggerTotal) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
-                window.totalRecordsMax, window.bytesMax, window.percentiles, window.time);
+                window.totalRecordsMax, window.bytesMax, window.percentileFractions, window.time);
         this.window = window;
         this.windowLogger = logger;
         this.loggerTotal = loggerTotal;

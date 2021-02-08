@@ -19,6 +19,7 @@ import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
 import io.sbk.api.Performance;
 import io.sbk.api.Config;
+import io.sbk.api.PeriodicLatencyRecorder;
 import io.sbk.api.Storage;
 import io.sbk.api.Time;
 import lombok.Synchronized;
@@ -84,6 +85,7 @@ public class SbkBenchmark implements Benchmark {
         this.storage = storage;
         this.logger = logger;
         this.time = time;
+
         if (config.maxQs > 0) {
             this.maxQs = config.maxQs;
         } else {
@@ -97,24 +99,47 @@ public class SbkBenchmark implements Benchmark {
             executor = Executors.newFixedThreadPool(threadCount);
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new SbkPerformance(config, params.getWritersCount(),
-                    new SbkLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                            time, action, logger, logger::printTotal, params.getCsvFile()),
+            writeStats = new SbkPerformance(config, params.getWritersCount(), createLatencyRecorder(),
                     logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
-            readStats = new SbkPerformance(config, params.getReadersCount(),
-                    new SbkLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                            time, action, logger, logger::printTotal, params.getCsvFile()),
+            readStats = new SbkPerformance(config, params.getReadersCount(), createLatencyRecorder(),
                     logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
         } else {
             readStats = null;
         }
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = null;
+    }
+
+
+    private PeriodicLatencyRecorder createLatencyRecorder() {
+        final long memSizeMB = ((logger.getMaxLatency() - logger.getMinLatency()) * Config.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
+        final double[] percentiles = logger.getPercentiles();
+        final double[] percentileFractions = new double[percentiles.length];
+        final LatencyWindow window;
+        final PeriodicLatencyRecorder latencyRecorder;
+
+        for (int i = 0; i < percentiles.length; i++) {
+           percentileFractions[i] = percentiles[i] / 100.0;
+        }
+
+        if (memSizeMB < Config.MAX_LATENCY_MEMORY_MB) {
+            window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time);
+            latencyRecorder = new CompositeHashMapLatencyRecorder(window, logger, logger::printTotal);
+            SbkLogger.log.info("Window Latency Store: Array, Total Latency Store: HashMap");
+        } else {
+            window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time);
+            final long maxHeapBytes = Config.MAX_LATENCY_MEMORY_MB * 2 * 1024 * 1024;
+            latencyRecorder = new CompositeCSVLatencyRecorder(window, logger, logger::printTotal, maxHeapBytes);
+            SbkLogger.log.info("Window Latency Store: HashMap, Total Latency Store: HashMap and CSV file");
+        }
+        return latencyRecorder;
     }
 
     /**

@@ -18,13 +18,14 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
 public abstract class LatencyWindow extends LatencyRecorder {
-    final public double[] percentiles;
+    final public double[] percentileFractions;
     final public Time time;
     public long startTime;
 
-    LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
+    LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
+                  double[] percentilesFractions, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
-        this.percentiles = percentiles;
+        this.percentileFractions = percentilesFractions;
         this.time = time;
     }
 

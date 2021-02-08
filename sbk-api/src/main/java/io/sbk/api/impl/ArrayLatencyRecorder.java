@@ -30,8 +30,8 @@ public class ArrayLatencyRecorder extends LatencyWindow {
 
     @Override
     public long[] getPercentiles(CloneLatencies copyLatencies) {
-        final long[] values = new long[percentiles.length];
-        final long[] percentileIds = new long[percentiles.length];
+        final long[] values = new long[percentileFractions.length];
+        final long[] percentileIds = new long[percentileFractions.length];
         long cur = 0;
         int index = 0;
 
@@ -40,7 +40,7 @@ public class ArrayLatencyRecorder extends LatencyWindow {
         }
 
         for (int i = 0; i < percentileIds.length; i++) {
-            percentileIds[i] = (long) (validLatencyRecords * percentiles[i]);
+            percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
         }
 
         for (int i = 0; i < Math.min(latencies.length, this.maxLatency+1); i++) {
