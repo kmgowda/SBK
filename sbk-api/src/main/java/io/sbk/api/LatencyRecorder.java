@@ -7,9 +7,8 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.api;
 
-import io.sbk.api.Config;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -19,29 +18,39 @@ import javax.annotation.concurrent.NotThreadSafe;
 public class LatencyRecorder {
     final public long lowLatency;
     final public long highLatency;
+    final public long totalLatencyMax;
+    final public long totalRecordsMax;
+    final public long totalBytesMax;
     public long totalRecords;
     public long validLatencyRecords;
     public long lowerLatencyDiscardRecords;
     public long higherLatencyDiscardRecords;
     public long invalidLatencyRecords;
-    public long bytes;
+    public long totalBytes;
     public long totalLatency;
     public long maxLatency;
 
 
-    LatencyRecorder(long baseLatency, long latencyThreshold) {
+    public LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long totalBytesMax) {
         this.lowLatency = baseLatency;
         this.highLatency = latencyThreshold;
+        this.totalLatencyMax = totalLatencyMax;
+        this.totalRecordsMax = totalRecordsMax;
+        this.totalBytesMax = totalBytesMax;
         reset();
     }
 
+
+    /**
+     * Reset all recording variables.
+     */
     public void reset() {
         this.totalRecords = 0;
         this.validLatencyRecords = 0;
         this.lowerLatencyDiscardRecords = 0;
         this.higherLatencyDiscardRecords = 0;
         this.invalidLatencyRecords = 0;
-        this.bytes = 0;
+        this.totalBytes = 0;
         this.maxLatency = 0;
         this.totalLatency = 0;
     }
@@ -52,8 +61,8 @@ public class LatencyRecorder {
      * @return isOverflow condition occurred or not
      */
     public boolean isOverflow() {
-        return (this.totalLatency > Config.LONG_MAX) || (this.bytes > Config.LONG_MAX)
-                || (this.totalRecords > Config.LONG_MAX);
+        return (totalLatency > totalLatencyMax) || (totalBytes > totalBytesMax)
+                || (totalRecords > totalRecordsMax);
 
     }
 
@@ -66,7 +75,7 @@ public class LatencyRecorder {
      * @return is valid latency record or not
      */
     public boolean record(int bytes, int events, long latency) {
-        this.bytes += bytes;
+        this.totalBytes += bytes;
         this.totalRecords += events;
         this.maxLatency = Math.max(this.maxLatency, latency);
         if (latency < 0) {

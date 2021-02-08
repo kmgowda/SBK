@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.CloneLatencies;
 import io.sbk.api.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -21,26 +22,34 @@ import javax.annotation.concurrent.NotThreadSafe;
 public class ArrayLatencyRecorder extends LatencyWindow {
     final private long[] latencies;
 
-    ArrayLatencyRecorder(long lowLatency, long highLatency, double[] percentiles, Time time, long startTime) {
-        super(lowLatency, highLatency, percentiles, time, startTime);
+    ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
+        super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
-        reset();
     }
 
     @Override
-    public long[] getPercentiles() {
-        final long[] values = new long[percentiles.length];
-        final long[] percentileIds = new long[percentiles.length];
+    public long[] getPercentiles(CloneLatencies copyLatencies) {
+        final long[] values = new long[percentileFractions.length];
+        final long[] percentileIds = new long[percentileFractions.length];
         long cur = 0;
         int index = 0;
 
+        if (copyLatencies != null) {
+            copyLatencies.updateLatencyRecords(this);
+        }
+
         for (int i = 0; i < percentileIds.length; i++) {
-            percentileIds[i] = (long) (validLatencyRecords * percentiles[i]);
+            percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
         }
 
         for (int i = 0; i < Math.min(latencies.length, this.maxLatency+1); i++) {
             if (latencies[i] > 0) {
+
+                if (copyLatencies != null) {
+                    copyLatencies.copyLatency(i, latencies[i]);
+                }
+
                 while (index < values.length) {
                     if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
                         values[index] = i + lowLatency;

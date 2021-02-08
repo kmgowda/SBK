@@ -10,7 +10,6 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Config;
-import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,26 +35,34 @@ final public class SbkParameters implements Parameters {
 
     @Getter
     final private int timeoutMS;
+
     @Getter
     private int recordSize;
+
     @Getter
     private int writersCount;
+
     @Getter
     private int readersCount;
+
     @Getter
     private int recordsPerSec;
+
     @Getter
     private int recordsPerSync;
+
     @Getter
     private long recordsCount;
+
     @Getter
     private long secondsToRun;
+
     @Getter
     private long recordsPerWriter;
+
     @Getter
     private long recordsPerReader;
-    @Getter
-    private String csvFile;
+
     @Getter
     private boolean writeAndRead;
 
@@ -151,7 +158,6 @@ final public class SbkParameters implements Parameters {
 
         recordsCount = Long.parseLong(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
-        csvFile = commandline.getOptionValue("csv", null);
         int syncRecords = Integer.parseInt(commandline.getOptionValue("sync", "0"));
         if (syncRecords > 0) {
             recordsPerSync = syncRecords;
@@ -196,8 +202,8 @@ final public class SbkParameters implements Parameters {
             }
 
             if (readersCount > 0) {
-                if (recordSize < DataType.TIME_HEADER_BYTES) {
-                    throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be " + DataType.TIME_HEADER_BYTES);
+                if (recordSize < Config.MIN_DATA_RW_SIZE) {
+                    throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be " + Config.MIN_DATA_RW_SIZE);
                 }
             }
             writeAndRead = readersCount > 0;

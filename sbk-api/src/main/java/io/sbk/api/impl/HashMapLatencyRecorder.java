@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.CloneLatencies;
 import io.sbk.api.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.HashMap;
@@ -21,29 +22,39 @@ import java.util.Iterator;
  */
 @NotThreadSafe
 public class HashMapLatencyRecorder extends LatencyWindow {
-    final private HashMap<Long, Long> latencies;
+    final public HashMap<Long, Long> latencies;
 
-    HashMapLatencyRecorder(long lowLatency, long highLatency, double[] percentiles, Time time, long startTime) {
-        super(lowLatency, highLatency, percentiles, time, startTime);
+    HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
+                           double[] percentiles, Time time) {
+        super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new HashMap<>();
-        reset();
     }
 
     @Override
-    public long[] getPercentiles() {
-        final long[] values = new long[percentiles.length];
-        final long[] percentileIds = new long[percentiles.length];
+    public long[] getPercentiles(CloneLatencies copyLatencies) {
+        final long[] values = new long[percentileFractions.length];
+        final long[] percentileIds = new long[percentileFractions.length];
         long cur = 0;
         int index = 0;
 
+        if (copyLatencies != null) {
+            copyLatencies.updateLatencyRecords(this);
+        }
+
         for (int i = 0; i < percentileIds.length; i++) {
-            percentileIds[i] = (long) (validLatencyRecords * percentiles[i]);
+            percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
         }
 
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
         while (keys.hasNext()) {
             final long key  = keys.next();
-            final long next =  cur + latencies.get(key);
+            final long val = latencies.get(key);
+            final long next =  cur + val;
+
+            if (copyLatencies != null) {
+                copyLatencies.copyLatency( key, val);
+            }
+
             while (index < values.length) {
                 if (percentileIds[index] >= cur && percentileIds[index] <  next) {
                     values[index] = key;
