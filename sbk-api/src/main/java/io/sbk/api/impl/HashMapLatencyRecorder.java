@@ -22,7 +22,7 @@ import java.util.Iterator;
  */
 @NotThreadSafe
 public class HashMapLatencyRecorder extends LatencyWindow {
-    final private HashMap<Long, Long> latencies;
+    final public HashMap<Long, Long> latencies;
 
     HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                            double[] percentiles, Time time) {
