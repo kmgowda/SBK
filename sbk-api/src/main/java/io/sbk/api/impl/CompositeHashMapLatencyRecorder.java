@@ -41,7 +41,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      */
     public void start(long startTime) {
         window.reset(startTime);
-        reset(startTime);
+        this.startTime = startTime;
     }
 
     /**
