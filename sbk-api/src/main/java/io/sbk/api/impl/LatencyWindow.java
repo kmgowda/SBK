@@ -10,18 +10,21 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.CloneLatencies;
+import io.sbk.api.LatencyRecorder;
 import io.sbk.api.Print;
 import io.sbk.api.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 
 
 @NotThreadSafe
-public abstract class LatencyWindow extends LatencyStore {
+public abstract class LatencyWindow extends LatencyRecorder {
+    final public double[] percentiles;
     final public Time time;
     public long startTime;
 
     LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
-        super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles);
+        super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
+        this.percentiles = percentiles;
         this.time = time;
     }
 
@@ -89,4 +92,11 @@ public abstract class LatencyWindow extends LatencyStore {
      * @param latency latency value in milliseconds.
      */
     abstract void record(long startTime, int bytes, int events, long latency);
+
+    /**
+     * get the Percentiles.
+     * @param cloneLatencies  Copy Latency records.
+     * @return Array of percentiles.
+     */
+    abstract public long[] getPercentiles(CloneLatencies cloneLatencies);
 }
