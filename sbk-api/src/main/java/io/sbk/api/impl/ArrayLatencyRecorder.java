@@ -13,6 +13,7 @@ package io.sbk.api.impl;
 import io.sbk.api.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.function.BiConsumer;
 
 /**
  *  class for Performance statistics.
@@ -28,7 +29,7 @@ public class ArrayLatencyRecorder extends LatencyWindow {
     }
 
     @Override
-    public long[] getPercentiles() {
+    public long[] getPercentiles(BiConsumer<Long, Long> copyLatencies) {
         final long[] values = new long[percentiles.length];
         final long[] percentileIds = new long[percentiles.length];
         long cur = 0;
@@ -40,6 +41,11 @@ public class ArrayLatencyRecorder extends LatencyWindow {
 
         for (int i = 0; i < Math.min(latencies.length, this.maxLatency+1); i++) {
             if (latencies[i] > 0) {
+
+                if (copyLatencies != null) {
+                    copyLatencies.accept((long) i, latencies[i]);
+                }
+
                 while (index < values.length) {
                     if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
                         values[index] = i + lowLatency;

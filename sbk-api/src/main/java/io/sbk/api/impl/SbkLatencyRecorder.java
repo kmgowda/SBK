@@ -150,7 +150,7 @@ public class SbkLatencyRecorder implements PeriodicLatencyRecorder {
      * @param currentTime current time.
      */
     public void print(long currentTime) {
-        window.print(currentTime, windowLogger);
+        window.print(currentTime, windowLogger, null);
     }
 
     /**
@@ -159,8 +159,8 @@ public class SbkLatencyRecorder implements PeriodicLatencyRecorder {
      * @param endTime current time.
      */
     public void printTotal(long endTime) {
-        window.printPendingData(endTime, windowLogger);
-        totalWindow.print(endTime, totalWindowLogger);
+        window.printPendingData(endTime, windowLogger, null);
+        totalWindow.print(endTime, totalWindowLogger, null);
         if (csvFile != null && deletecsvFile) {
             deleteFile(csvFile);
             SbkLogger.log.info("CSV File: "+csvFile+" Deleted");

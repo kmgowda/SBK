@@ -12,6 +12,7 @@ package io.sbk.api.impl;
 import io.sbk.api.Print;
 import io.sbk.api.Time;
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.function.BiConsumer;
 
 
 @NotThreadSafe
@@ -49,15 +50,16 @@ public abstract class LatencyWindow extends LatencyStore {
      * Print the window statistics.
      * @param endTime End time.
      * @param logger printer interface.
+     * @param copyLatencies  Copy Latency values
      */
-    public void print(long endTime, Print logger) {
+    public void print(long endTime, Print logger, BiConsumer<Long, Long> copyLatencies) {
         final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
         final double recsPerSec = totalRecords / elapsedSec;
         final double mbPerSec = (this.bytes / (1024.0 * 1024.0)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
-        long[] pecs = getPercentiles();
+        long[] pecs = getPercentiles(copyLatencies);
         logger.print(this.bytes, totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
@@ -70,10 +72,11 @@ public abstract class LatencyWindow extends LatencyStore {
      *
      * @param time current time.
      * @param printer printer interface.
+     * @param copyLatencies copy Latency values
      */
-    public void printPendingData(long time,  Print printer) {
+    public void printPendingData(long time,  Print printer, BiConsumer<Long, Long> copyLatencies) {
         if (this.totalRecords > 0) {
-            print(time, printer);
+            print(time, printer, copyLatencies);
         }
     }
 

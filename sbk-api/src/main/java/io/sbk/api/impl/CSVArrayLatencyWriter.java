@@ -22,6 +22,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.function.BiConsumer;
 
 @NotThreadSafe
 public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
@@ -63,13 +64,13 @@ public class CSVArrayLatencyWriter extends HashMapLatencyRecorder {
     }
 
     @Override
-    public void print(long endTime, Print logger) {
+    public void print(long endTime, Print logger, BiConsumer<Long, Long> copyLatencies) {
         try {
             csvPrinter.close();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
         readCSV();
-        super.print(endTime, logger);
+        super.print(endTime, logger, copyLatencies);
     }
 }
