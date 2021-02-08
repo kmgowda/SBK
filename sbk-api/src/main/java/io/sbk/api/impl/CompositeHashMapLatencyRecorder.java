@@ -86,7 +86,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
         this.lowerLatencyDiscardRecords += latencies.lowerLatencyDiscardRecords;
         this.higherLatencyDiscardRecords += latencies.higherLatencyDiscardRecords;
         this.validLatencyRecords += latencies.validLatencyRecords;
-        this.maxLatency += Math.max(this.maxLatency, latencies.maxLatency);
+        this.maxLatency = Math.max(this.maxLatency, latencies.maxLatency);
     }
 
     @Override
