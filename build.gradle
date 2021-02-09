@@ -254,6 +254,7 @@ dependencies {
 	compile project(':driver-derby')
 	compile project(':driver-mssql')
 	compile project(':driver-redpanda')
+	compile project(':driver-csv')
 }
 
 //create a single Jar with all dependencies

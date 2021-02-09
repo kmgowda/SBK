@@ -45,4 +45,5 @@ include 'driver-postgresql'
 include 'driver-derby'
 include 'driver-mssql'
 include 'driver-redpanda'
+include 'driver-csv'
 
