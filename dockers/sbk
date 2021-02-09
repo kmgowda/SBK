@@ -60,6 +60,7 @@ COPY --chown=root:root driver-rocksdb ${APP_HOME}/driver-rocksdb
 COPY --chown=root:root driver-ignite ${APP_HOME}/driver-ignite
 COPY --chown=root:root driver-couchdb ${APP_HOME}/driver-couchdb
 COPY --chown=root:root driver-null ${APP_HOME}/driver-null
+COPY --chown=root:root driver-csv ${APP_HOME}/driver-csv
 
 
 

@@ -115,7 +115,7 @@ public class PrometheusLogger extends SystemLogger {
 
         int val = 1;
         if (loggerConfig.timeUnit == TimeUnit.ns) {
-                val = Config.NS_PER_MS;
+            val = Config.NS_PER_MS;
         } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
             val = Config.MICROS_PER_MS;
         }
