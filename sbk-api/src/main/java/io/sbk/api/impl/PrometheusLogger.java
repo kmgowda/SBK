@@ -119,8 +119,8 @@ public class PrometheusLogger extends SystemLogger {
         } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
             val = Config.MICROS_PER_MS;
         }
-        minLatency = (long) (loggerConfig.minLatencyMS * val);
-        maxLatency = (long) (loggerConfig.maxLatencyMS * val);
+        minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
+        maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
 
     }
 
