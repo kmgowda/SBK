@@ -17,6 +17,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Random;
 
+@NotThreadSafe
 public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder {
     final private long maxHeapBytes;
     final private int incBytes;
