@@ -31,7 +31,7 @@ public class CSVHashMapLatencyRecorder extends HashMapLatencyRecorder {
 
     CSVHashMapLatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                               double[] percentiles, Time time, Action action, String csvFile) throws IOException {
-        super(baseLatency, latencyThreshold, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
+        super(baseLatency, latencyThreshold, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time, Integer.MAX_VALUE);
         this.csvFile = csvFile;
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
                 .withHeader("Start Time (" + time.getTimeUnit().toString() + ")", "data size (bytes)", "Records", action.name()+" Latency (" + time.getTimeUnit().name() + ")"));

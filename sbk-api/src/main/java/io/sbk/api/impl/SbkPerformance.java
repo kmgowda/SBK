@@ -114,7 +114,7 @@ final public class SbkPerformance implements Performance {
                                 doWork = false;
                             }
                         }
-                        if ((latencyLogger.elapsedMilliSeconds(ctime) > windowIntervalMS) || (latencyLogger.isOverflow())) {
+                        if (latencyLogger.elapsedMilliSeconds(ctime) > windowIntervalMS) {
                             latencyLogger.print(ctime);
                             latencyLogger.resetWindow(ctime);
                             idleCounter.reset();

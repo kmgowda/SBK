@@ -27,32 +27,30 @@ import java.util.Random;
 
 @NotThreadSafe
 public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder {
-    final private long maxHeapBytes;
-    final private int incBytes;
     final private String csvFile;
-    private long heapBytesCnt;
     private CSVPrinter csvPrinter;
 
-    CompositeCSVLatencyRecorder(LatencyWindow window, Print logger, Print loggerTotal, long maxHeapBytes) {
-        super(window, logger, loggerTotal);
-        this.maxHeapBytes = maxHeapBytes;
-        this.incBytes = Config.LATENCY_VALUE_SIZE_BYTES * 2;
-        this.heapBytesCnt = 0;
+    CompositeCSVLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
+        super(window, maxHashMapSizeMB, logger, loggerTotal);
         csvFile = Config.NAME.toUpperCase() + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv";
         csvPrinter = null;
     }
 
-    @Override
-    public void copyLatency(long latency, long events) {
-        Long val = latencies.get(latency);
-        if (val == null) {
-            val = 0L;
-        } else {
-            heapBytesCnt += incBytes;
+    /**
+     * Record the latency.
+     *
+     * @param startTime start time of the event.
+     * @param bytes number of bytes
+     * @param events number of events (records)
+     * @param latency latency value
+     */
+    public void record(long startTime, int bytes, int events, long latency) {
+        window.record(startTime, bytes, events, latency);
+        if (window.isOverflow()) {
+            window.print(startTime, windowLogger, this);
+            window.reset(startTime);
         }
-        latencies.put(latency, val + events);
     }
-
 
     /**
      * print the periodic Latency Results.
@@ -60,9 +58,9 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      * @param currentTime current time.
      */
     public void print(long currentTime) {
-        super.print(currentTime);
+        window.print(currentTime, windowLogger, this);
 
-        if (heapBytesCnt > maxHeapBytes) {
+        if (hashMapBytesCount > maxHashMapSizeBytes) {
             if (csvPrinter == null) {
                 deleteFile(csvFile);
                 try {
@@ -70,7 +68,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
                             .withHeader(" Latency (" + time.getTimeUnit().name() + ")", "Records"));
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                    heapBytesCnt = 0;
+                    hashMapBytesCount = 0;
                     return;
                 }
             }
@@ -81,12 +79,12 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
                     csvPrinter.printRecord(key, latencies.get(key));
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                    heapBytesCnt = 0;
+                    hashMapBytesCount = 0;
                     return;
                 }
                 latencies.remove(key);
             }
-            heapBytesCnt = 0;
+            hashMapBytesCount = 0;
         }
     }
 
@@ -103,6 +101,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
         try {
             CSVParser csvParser = new CSVParser(Files.newBufferedReader(Paths.get(csvFile)), CSVFormat.DEFAULT
                     .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+            hashMapBytesCount = 0;
             for (CSVRecord csvEntry : csvParser) {
                 copyLatency(Long.parseLong(csvEntry.get(0)), Long.parseLong(csvEntry.get(1)));
             }

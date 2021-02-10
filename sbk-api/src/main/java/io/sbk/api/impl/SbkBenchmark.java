@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 public class SbkBenchmark implements Benchmark {
     final private String storageName;
     final private Action action;
+    final private Config config;
     final private Storage<Object> storage;
     final private Time time;
     final private Logger logger;
@@ -81,6 +82,7 @@ public class SbkBenchmark implements Benchmark {
                         Parameters params, Storage<Object> storage, Logger logger, Time time) throws IOException {
         this.storageName = storageName;
         this.action = action;
+        this.config = config;
         this.params = params;
         this.storage = storage;
         this.logger = logger;
@@ -127,17 +129,22 @@ public class SbkBenchmark implements Benchmark {
            percentileFractions[i] = percentiles[i] / 100.0;
         }
 
-        if (memSizeMB < Config.MAX_LATENCY_MEMORY_MB) {
+        if (memSizeMB < config.maxArraySizeMB) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time);
-            latencyRecorder = new CompositeHashMapLatencyRecorder(window, logger, logger::printTotal);
-            SbkLogger.log.info("Window Latency Store: Array, Total Latency Store: HashMap");
+            SbkLogger.log.info("Window Latency Store: Array");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time);
-            final long maxHeapBytes = Config.MAX_LATENCY_MEMORY_MB * 2 * 1024 * 1024;
-            latencyRecorder = new CompositeCSVLatencyRecorder(window, logger, logger::printTotal, maxHeapBytes);
-            SbkLogger.log.info("Window Latency Store: HashMap, Total Latency Store: HashMap and CSV file");
+                    Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time, config.maxHashMapSizeMB);
+            SbkLogger.log.info("Window Latency Store: HashMap");
+
+        }
+        if (config.csv) {
+            latencyRecorder = new CompositeCSVLatencyRecorder(window, config.maxHashMapSizeMB, logger, logger::printTotal);
+            SbkLogger.log.info("Total Window Latency Store: HashMap and CSV file");
+        } else {
+            latencyRecorder = new CompositeHashMapLatencyRecorder(window, config.maxHashMapSizeMB, logger, logger::printTotal);
+            SbkLogger.log.info("Total Window Latency Store: HashMap");
         }
         return latencyRecorder;
     }

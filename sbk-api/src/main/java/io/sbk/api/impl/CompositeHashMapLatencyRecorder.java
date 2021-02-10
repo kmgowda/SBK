@@ -26,9 +26,9 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     final public Print windowLogger;
     final public Print loggerTotal;
 
-    CompositeHashMapLatencyRecorder(LatencyWindow window, Print logger, Print loggerTotal) {
+    CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
-                window.totalRecordsMax, window.totalBytesMax, window.percentileFractions, window.time);
+                window.totalRecordsMax, window.totalBytesMax, window.percentileFractions, window.time, maxHashMapSizeMB);
         this.window = window;
         this.windowLogger = logger;
         this.loggerTotal = loggerTotal;
@@ -75,6 +75,14 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      */
     public void record(long startTime, int bytes, int events, long latency) {
         window.record(startTime, bytes, events, latency);
+        if (window.isOverflow()) {
+            window.print(startTime, windowLogger, this);
+            window.reset(startTime);
+            if (isOverflow()) {
+                print(startTime, loggerTotal, null);
+                reset(startTime);
+            }
+        }
     }
 
     @Override
@@ -91,7 +99,13 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
 
     @Override
     public void copyLatency(long latency, long events) {
-        latencies.put(latency, latencies.getOrDefault(latency, 0L) + events);
+        Long val = latencies.get(latency);
+        if (val == null) {
+            val = 0L;
+        } else {
+            hashMapBytesCount += incBytes;
+        }
+        latencies.put(latency, val + events);
     }
 
 
@@ -102,6 +116,10 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      */
     public void print(long currentTime) {
         window.print(currentTime, windowLogger, this);
+        if (isOverflow()) {
+            print(currentTime, loggerTotal, null);
+            start(currentTime);
+        }
     }
 
     /**
