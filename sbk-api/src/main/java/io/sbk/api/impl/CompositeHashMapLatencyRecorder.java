@@ -11,6 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.CloneLatencies;
+import io.sbk.api.Config;
 import io.sbk.api.LatencyRecorder;
 import io.sbk.api.PeriodicLatencyRecorder;
 import io.sbk.api.Print;
@@ -95,6 +96,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
         this.higherLatencyDiscardRecords += latencies.higherLatencyDiscardRecords;
         this.validLatencyRecords += latencies.validLatencyRecords;
         this.maxLatency = Math.max(this.maxLatency, latencies.maxLatency);
+        this.minLatency = Math.min(this.minLatency, latencies.minLatency);
     }
 
     @Override
@@ -102,7 +104,6 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
         Long val = latencies.get(latency);
         if (val == null) {
             val = 0L;
-        } else {
             hashMapBytesCount += incBytes;
         }
         latencies.put(latency, val + events);
@@ -117,6 +118,13 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     public void print(long currentTime) {
         window.print(currentTime, windowLogger, this);
         if (isOverflow()) {
+            if (hashMapBytesCount > maxHashMapSizeBytes) {
+                SbkLogger.log.warn("Hash Map memory size: " + maxHashMapSizeMB +
+                        " exceeded! Current HashMap size in MB: " + (hashMapBytesCount / Config.BYTES_PER_MB));
+            } else {
+                SbkLogger.log.warn("Total Bytes: " + totalBytes + ",  Total Records:" + totalRecords +
+                        ", Total Latency: "+  totalLatency );
+            }
             print(currentTime, loggerTotal, null);
             start(currentTime);
         }

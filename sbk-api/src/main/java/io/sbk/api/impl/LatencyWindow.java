@@ -10,6 +10,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.CloneLatencies;
+import io.sbk.api.Config;
 import io.sbk.api.LatencyRecorder;
 import io.sbk.api.Print;
 import io.sbk.api.Time;
@@ -61,7 +62,7 @@ public abstract class LatencyWindow extends LatencyRecorder {
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
         final double recsPerSec = this.totalRecords / elapsedSec;
-        final double mbPerSec = (this.totalBytes / (1024.0 * 1024.0)) / elapsedSec;
+        final double mbPerSec = (this.totalBytes / (Config.BYTES_PER_MB * 1.0d)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
         long[] pecs = getPercentiles(copyLatencies);
         logger.print(this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,

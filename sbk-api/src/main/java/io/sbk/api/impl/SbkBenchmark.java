@@ -119,7 +119,8 @@ public class SbkBenchmark implements Benchmark {
 
 
     private PeriodicLatencyRecorder createLatencyRecorder() {
-        final long memSizeMB = ((logger.getMaxLatency() - logger.getMinLatency()) * Config.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
+        final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
+        final long memSizeMB = (latencyRange * Config.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
         final double[] percentiles = logger.getPercentiles();
         final double[] percentileFractions = new double[percentiles.length];
         final LatencyWindow window;
@@ -129,7 +130,7 @@ public class SbkBenchmark implements Benchmark {
            percentileFractions[i] = percentiles[i] / 100.0;
         }
 
-        if (memSizeMB < config.maxArraySizeMB) {
+        if (memSizeMB < config.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time);
             SbkLogger.log.info("Window Latency Store: Array");
