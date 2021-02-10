@@ -43,7 +43,9 @@ public class ArrayLatencyRecorder extends LatencyWindow {
             percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
         }
 
-        for (int i = 0; i < Math.min(latencies.length, this.maxLatency+1); i++) {
+        for (int i = Math.max((int) (this.minLatency - this.lowLatency), 0);
+             i < Math.min(latencies.length, this.maxLatency+1); i++) {
+
             if (latencies[i] > 0) {
 
                 if (copyLatencies != null) {

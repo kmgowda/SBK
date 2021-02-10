@@ -22,6 +22,8 @@ public class Config {
     final public static int MIN_DATA_RW_SIZE = DataType.TIME_HEADER_BYTES + 2;
 
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
+    final public static int BYTES_PER_KB = 1024;
+    final public static int BYTES_PER_MB = BYTES_PER_KB * BYTES_PER_KB;
 
     final public static int NS_PER_MICRO = 1000;
     final public static int MICROS_PER_MS = 1000;

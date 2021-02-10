@@ -34,7 +34,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new HashMap<>();
         this.maxHashMapSizeMB = maxHashMapSizeMB;
-        this.maxHashMapSizeBytes = ((long) maxHashMapSizeMB) * 1024 * 1024;
+        this.maxHashMapSizeBytes = ((long) maxHashMapSizeMB) * Config.BYTES_PER_MB;
         this.incBytes = Config.LATENCY_VALUE_SIZE_BYTES * 2;
         this.hashMapBytesCount = 0;
     }
@@ -66,7 +66,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
             final long next =  cur + val;
 
             if (copyLatencies != null) {
-                copyLatencies.copyLatency( key, val);
+                copyLatencies.copyLatency(key, val);
             }
 
             while (index < values.length) {
@@ -98,7 +98,6 @@ public class HashMapLatencyRecorder extends LatencyWindow {
             Long val = latencies.get(latency);
             if (val == null) {
                 val = 0L;
-            } else {
                 hashMapBytesCount += incBytes;
             }
             latencies.put(latency, val + events);
