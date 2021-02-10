@@ -11,6 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.CloneLatencies;
+import io.sbk.api.Config;
 import io.sbk.api.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.HashMap;
@@ -23,11 +24,24 @@ import java.util.Iterator;
 @NotThreadSafe
 public class HashMapLatencyRecorder extends LatencyWindow {
     final public HashMap<Long, Long> latencies;
+    final public int maxHashMapSizeMB;
+    final public long maxHashMapSizeBytes;
+    final public int incBytes;
+    public long hashMapBytesCount;
 
     HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
-                           double[] percentiles, Time time) {
+                           double[] percentiles, Time time, int maxHashMapSizeMB) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new HashMap<>();
+        this.maxHashMapSizeMB = maxHashMapSizeMB;
+        this.maxHashMapSizeBytes = ((long) maxHashMapSizeMB) * 1024 * 1024;
+        this.incBytes = Config.LATENCY_VALUE_SIZE_BYTES * 2;
+        this.hashMapBytesCount = 0;
+    }
+
+    @Override
+    public  boolean isOverflow() {
+        return (this.hashMapBytesCount > this.maxHashMapSizeBytes ) || super.isOverflow();
     }
 
     @Override
@@ -66,7 +80,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
             cur = next;
             latencies.remove(key);
         }
-
+        hashMapBytesCount = 0;
         return values;
     }
 
@@ -81,7 +95,13 @@ public class HashMapLatencyRecorder extends LatencyWindow {
     @Override
     public void record(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
-            latencies.put(latency, latencies.getOrDefault(latency, 0L) + events);
+            Long val = latencies.get(latency);
+            if (val == null) {
+                val = 0L;
+            } else {
+                hashMapBytesCount += incBytes;
+            }
+            latencies.put(latency, val + events);
         }
     }
 }

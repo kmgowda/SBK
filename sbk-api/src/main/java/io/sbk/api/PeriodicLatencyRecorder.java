@@ -30,13 +30,6 @@ public interface PeriodicLatencyRecorder {
     void resetWindow(long startTime);
 
     /**
-     * is Overflow condition for this recorder.
-     *
-     * @return isOverflow condition occurred or not
-     */
-    boolean isOverflow();
-
-    /**
      * Get the current time duration of this window.
      *
      * @param currentTime current time.
