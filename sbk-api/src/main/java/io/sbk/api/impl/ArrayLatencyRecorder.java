@@ -21,12 +21,24 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class ArrayLatencyRecorder extends LatencyWindow {
     final private long[] latencies;
+    private int minIndex;
+    private int maxIndex;
 
     ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
+        this.minIndex = size;
+        this.maxIndex = 0;
     }
+
+    @Override
+    public void reset(long startTime) {
+        super.reset(startTime);
+        this.maxIndex = 0;
+        this.minIndex = Integer.MAX_VALUE;
+    }
+
 
     @Override
     public long[] getPercentiles(CloneLatencies copyLatencies) {
@@ -43,8 +55,7 @@ public class ArrayLatencyRecorder extends LatencyWindow {
             percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
         }
 
-        for (int i = Math.max((int) (this.minValidLatency - this.lowLatency), 0);
-             i < Math.min(latencies.length, this.maxLatency+1); i++) {
+        for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
 
             if (latencies[i] > 0) {
 
@@ -79,6 +90,8 @@ public class ArrayLatencyRecorder extends LatencyWindow {
     public void record(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
             final int index = (int) (latency - this.lowLatency);
+            this.minIndex = Math.min(this.minIndex, index);
+            this.maxIndex = Math.max(this.maxIndex, index);
             this.latencies[index] += events;
         }
     }

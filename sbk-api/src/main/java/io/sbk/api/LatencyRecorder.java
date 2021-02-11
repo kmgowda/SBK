@@ -28,7 +28,6 @@ public class LatencyRecorder {
     public long invalidLatencyRecords;
     public long totalBytes;
     public long totalLatency;
-    public long minValidLatency;
     public long maxLatency;
 
 
@@ -54,7 +53,6 @@ public class LatencyRecorder {
         this.totalBytes = 0;
         this.maxLatency = 0;
         this.totalLatency = 0;
-        this.minValidLatency = Long.MAX_VALUE;
     }
 
     /**
@@ -90,7 +88,6 @@ public class LatencyRecorder {
                 this.higherLatencyDiscardRecords += events;
             } else {
                 this.validLatencyRecords += events;
-                this.minValidLatency = Math.min(this.minValidLatency, latency);
                 return true;
             }
         }
