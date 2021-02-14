@@ -57,10 +57,12 @@ public class SbkBenchmark implements Benchmark {
     final private Performance writeStats;
     final private Performance readStats;
     final private int maxQs;
+    final private double[] percentileFractions;
     final private ScheduledExecutorService timeoutExecutor;
     private List<DataWriter<Object>> writers;
     private List<DataReader<Object>> readers;
     private List<CallbackReader<Object>> callbackReaders;
+
 
 
     @GuardedBy("this")
@@ -87,6 +89,12 @@ public class SbkBenchmark implements Benchmark {
         this.storage = storage;
         this.logger = logger;
         this.time = time;
+        final double[] percentiles = logger.getPercentiles();
+        percentileFractions = new double[percentiles.length];
+
+        for (int i = 0; i < percentiles.length; i++) {
+            percentileFractions[i] = percentiles[i] / 100.0;
+        }
 
         if (config.maxQs > 0) {
             this.maxQs = config.maxQs;
@@ -121,14 +129,8 @@ public class SbkBenchmark implements Benchmark {
     private PeriodicLatencyRecorder createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * Config.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
-        final double[] percentiles = logger.getPercentiles();
-        final double[] percentileFractions = new double[percentiles.length];
         final LatencyWindow window;
         final PeriodicLatencyRecorder latencyRecorder;
-
-        for (int i = 0; i < percentiles.length; i++) {
-           percentileFractions[i] = percentiles[i] / 100.0;
-        }
 
         if (memSizeMB < config.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
