@@ -9,13 +9,15 @@
  */
 package io.sbk.BookKeeper;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import io.sbk.api.Parameters;
 import io.sbk.api.impl.SbkParameters;
 import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
 import static org.junit.Assert.assertNotNull;
 
 //create the test Class for Bookkeeper Benchmarking
@@ -81,6 +83,7 @@ public class BookKeeperTest {
         bk.addArgs(params);
 
     }
+
     /**
     Test code for parseArgs.
      */
