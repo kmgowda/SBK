@@ -54,28 +54,28 @@ public class MilliSeconds implements Time {
 
     /**
      * convert the time to Nanoseconds.
-     * @param t time stamp
+     * @param t time duration in milliseconds
      * @return converted time in nanoseconds
      */
-    public long convertToNanoSeconds(long t) {
+    public double convertToNanoSeconds(double t) {
         return t * Config.NS_PER_MS;
     }
 
     /**
      * convert the time to Micro seconds.
-     * @param t time stamp
+     * @param t time duration in milliseconds
      * @return converted time in microseconds
      */
-    public long convertToMicroSeconds(long t) {
+    public double convertToMicroSeconds(double t) {
         return t * Config.MICROS_PER_MS;
     }
 
     /**
      * convert the time to Milliseconds.
-     * @param t time stamp
+     * @param t time duration in milliseconds
      * @return converted time in Milliseconds
      */
-    public long convertToMilliSeconds(long t) {
+    public double convertToMilliSeconds(double t) {
         return t;
     }
 
