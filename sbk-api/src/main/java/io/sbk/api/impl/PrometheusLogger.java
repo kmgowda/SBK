@@ -183,6 +183,7 @@ public class PrometheusLogger extends SystemLogger {
             printer = this::printMetrics;
             server = createHttpServer(prometheusRegistry);
         }
+        SbkLogger.log.info("PrometheusLogger Started");
     }
 
     @Override
@@ -194,6 +195,7 @@ public class PrometheusLogger extends SystemLogger {
             server.stop(0);
         }
         super.close(params);
+        SbkLogger.log.info("PrometheusLogger Stopped");
     }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,

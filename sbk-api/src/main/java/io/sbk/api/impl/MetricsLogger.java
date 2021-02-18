@@ -19,7 +19,6 @@ import io.sbk.api.Time;
 import io.sbk.api.TimeUnit;
 
 import java.text.DecimalFormat;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
@@ -34,8 +33,8 @@ public class MetricsLogger implements Print {
     final private AtomicDouble mbPsec;
     final private AtomicDouble recsPsec;
     final private AtomicDouble avgLatency;
-    final private AtomicLong maxLatency;
-    final private AtomicLong[] percentileGauges;
+    final private AtomicDouble maxLatency;
+    final private AtomicDouble[] percentileGauges;
     final private MeterRegistry registry;
     final private Convert convert;
 
@@ -72,11 +71,11 @@ public class MetricsLogger implements Print {
         this.mbPsec = this.registry.gauge(mbPsecName, new AtomicDouble());
         this.recsPsec = this.registry.gauge(recsPsecName, new AtomicDouble());
         this.avgLatency = this.registry.gauge(avgLatencyName, new AtomicDouble());
-        this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicLong());
-        this.percentileGauges = new AtomicLong[percentiles.length];
+        this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicDouble());
+        this.percentileGauges = new AtomicDouble[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
             this.percentileGauges[i] = this.registry.gauge(metricPrefix + "_" + metricUnit + "_" + format.format(percentiles[i]),
-                    new AtomicLong());
+                    new AtomicDouble());
         }
         if (latencyTimeUnit == TimeUnit.ns) {
             convert = time::convertToNanoSeconds;
@@ -103,9 +102,9 @@ public class MetricsLogger implements Print {
         this.recsPsec.set(recsPerSec);
         this.mbPsec.set(mbPerSec);
         this.avgLatency.set(convert.apply(avgLatency));
-        this.maxLatency.set((long) convert.apply((double) maxLatency));
+        this.maxLatency.set(convert.apply((double) maxLatency));
         for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
-            this.percentileGauges[i].set((long) convert.apply((double) percentileValues[i]));
+            this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));
         }
     }
 
