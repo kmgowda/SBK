@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.core.instrument.Clock;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.jmx.JmxConfig;
@@ -35,6 +34,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -48,6 +48,7 @@ public class PrometheusLogger extends SystemLogger {
     private boolean disabled;
     private double[] percentilesIndices;
     private MetricsLogger metricsLogger;
+    private HttpServer server;
     private Print printer;
     private long minLatency;
     private long maxLatency;
@@ -124,19 +125,18 @@ public class PrometheusLogger extends SystemLogger {
 
     }
 
-    public MeterRegistry createPrometheusRegistry() throws IOException {
-        final PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
-        HttpServer server = HttpServer.create(new InetSocketAddress(config.port), 0);
+    private HttpServer createHttpServer(PrometheusMeterRegistry prometheusRegistry) throws IOException {
+        final HttpServer server = HttpServer.create(new InetSocketAddress(config.port), 0);
         server.createContext(config.context, httpExchange -> {
             String response = prometheusRegistry.scrape();
             httpExchange.sendResponseHeaders(200, response.getBytes().length);
             try (OutputStream os = httpExchange.getResponseBody()) {
-                    os.write(response.getBytes());
+                os.write(response.getBytes());
             }
         });
-        new Thread(server::start).start();
-        return prometheusRegistry;
+        server.setExecutor(Executors.newSingleThreadExecutor());
+        server.start();
+        return server;
     }
 
     @Override
@@ -170,14 +170,20 @@ public class PrometheusLogger extends SystemLogger {
         super.open(params, storageName, action, time);
         if (disabled) {
             printer = super::print;
+            metricsLogger = null;
+            server = null;
         } else {
             final CompositeMeterRegistry compositeRegistry = Metrics.globalRegistry;
+            final PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+            prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
             compositeRegistry.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
-            compositeRegistry.add(createPrometheusRegistry());
+            compositeRegistry.add(prometheusRegistry);
             metricsLogger = new MetricsLogger(storageName, action.name(), time, config.latencyTimeUnit, percentiles,
                     params.getWritersCount(), params.getReadersCount(), compositeRegistry);
             printer = this::printMetrics;
+            server = createHttpServer(prometheusRegistry);
         }
+        SbkLogger.log.info("PrometheusLogger Started");
     }
 
     @Override
@@ -185,7 +191,11 @@ public class PrometheusLogger extends SystemLogger {
         if (metricsLogger != null) {
             metricsLogger.close();
         }
+        if (server != null) {
+            server.stop(0);
+        }
         super.close(params);
+        SbkLogger.log.info("PrometheusLogger Stopped");
     }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,

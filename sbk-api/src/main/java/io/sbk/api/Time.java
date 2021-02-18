@@ -45,24 +45,24 @@ public interface Time {
 
     /**
      * convert the time to Nanoseconds.
-     * @param t time stamp
+     * @param t time duration
      * @return converted time in nanoseconds
      */
-    long convertToNanoSeconds(long t);
+    double convertToNanoSeconds(double t);
 
     /**
      * convert the time to Micro seconds.
-     * @param t time stamp
+     * @param t time duration
      * @return converted time in microseconds
      */
-    long convertToMicroSeconds(long t);
+    double convertToMicroSeconds(double t);
 
     /**
      * convert the time to Milliseconds.
-     * @param t time stamp
+     * @param t time duration
      * @return converted time in Milliseconds
      */
-    long convertToMilliSeconds(long t);
+    double convertToMilliSeconds(double t);
 
 }
 
