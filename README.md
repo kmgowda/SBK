@@ -8,9 +8,18 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 -->
 # Storage Benchmark Kit  ![SBK](images/SBK-log-small-1.png)
+
+###  _Any Storage System_  ...  _Any Payload_  ...  _Any Time Stamp_  ...
+
+
 [![Build Status](https://travis-ci.org/kmgowda/SBK.svg?branch=master)](https://travis-ci.org/kmgowda/SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)  [![Api](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/javadoc/index.html) [![Version](https://img.shields.io/badge/release-0.85-blue)](https://github.com/kmgowda/SBK/releases/tag/0.85) [![](https://jitpack.io/v/kmgowda/SBK.svg)](https://jitpack.io/#kmgowda/SBK)
 
-The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system. If you are curious to measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself a very high-performance benchmark  tool/frame work. It massively writes the data to storage system and reads the data from strorage system. The SBK supports multi writers and readers and also the End to End latency benchmarking. The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
+The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system.
+If you are curious to measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you.
+The SBK itself a very high-performance benchmark  tool/framework.
+It massively writes the data to storage system and reads the data from storage system.
+The SBK supports multi writers and readers and also the End to End latency benchmarking.
+The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
 
 ___
 
@@ -26,8 +35,15 @@ ___
 
 ___
 
-Currently, SBK supports benchmarking of,
+The design principle of SBK is the **Performance Benchmarking of _'Any Storage System'_ with _'Any Type of data payload'_ and _'Any Time Stamp'_**,
+because, the SBK is not specific to particular type of storage system,
+it can be used for performance benchmarking of any storage system, let it be file system, databases , any distributed storage systems or message queues by adding SBK driver which specifies the IO operations of storage system.
+you can find the list of supported drivers below.
+The SBK supports variety of payloads too, such as byte array, byte buffer, string, and you can add your own payload type.
+The Latency values can be measured either in milliseconds, microseconds or nanoseconds using SBK.
 
+
+### SBK supports performance benchmarking of following storage systems.
 1. [Local mounted File Systems](https://github.com/kmgowda/SBK/tree/master/driver-file)
 1. [Java Concurrent Queue [Message Queue]](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html)   
 1. [Apache Kafka](https://kafka.apache.org)
