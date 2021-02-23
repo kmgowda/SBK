@@ -185,7 +185,7 @@ you can import the grafana dashboards to fetch the SBK benchmark data of the exi
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
-[![Pulsar Grafana Dashboard](images/pulsar-grafana.png)](https://github.com/kmgowda/SBK/blob/gh-pages/images/pulsar-grafana.jpg)
+[![Pulsar Grafana Dashboard](images/pulsar-grafana.png)](https://github.com/kmgowda/SBK/blob/master/images/pulsar-grafana.png)
 
 #### Port conflicts between storage servers and grafana/prometheus
 * If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) before deploying the prometheus. 
