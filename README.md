@@ -11,7 +11,7 @@ You may obtain a copy of the License at
 
 [![Build Status](https://travis-ci.org/kmgowda/SBK.svg?branch=master)](https://travis-ci.org/kmgowda/SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)  [![Api](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/javadoc/index.html) [![Version](https://img.shields.io/badge/release-0.85-blue)](https://github.com/kmgowda/SBK/releases/tag/0.85) [![](https://jitpack.io/v/kmgowda/SBK.svg)](https://jitpack.io/#kmgowda/SBK)
 
->  **_Any Storage System_  ...  _Any Payload_  ...  _Any Time Stamp_  ...**
+>  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system.
 If you are curious to measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you.
