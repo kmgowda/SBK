@@ -42,7 +42,7 @@ The SBK supports variety of payloads too, such as byte array, byte buffer, strin
 The Latency values can be measured either in milliseconds, microseconds or nanoseconds using SBK.
 
 
-### SBK supports performance benchmarking of following storage systems.
+*SBK supports performance benchmarking of following storage systems*
 1. [Local mounted File Systems](https://github.com/kmgowda/SBK/tree/master/driver-file)
 1. [Java Concurrent Queue [Message Queue]](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html)   
 1. [Apache Kafka](https://kafka.apache.org)
@@ -75,8 +75,7 @@ The Latency values can be measured either in milliseconds, microseconds or nanos
 1. [MariaDB](https://github.com/kmgowda/SBK/tree/master/driver-mariadb)
 1. [Redpanda](https://github.com/kmgowda/SBK/tree/master/driver-redpanda)
 
-
-In the future, many more storage systems drivers will be plugged in. 
+*In the future, many more storage systems drivers will be plugged in* 
 
 we welcome open source developers to contribute to this project by adding a driver your storage device and any features to SBK. Refer to : 
 * [[Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk)] for the Contributing guidlines.
