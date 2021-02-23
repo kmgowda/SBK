@@ -58,6 +58,7 @@ Currently, SBK supports benchmarking of,
 1. [Apache CouchDB](https://couchdb.apache.org)
 1. [Apache Hive](https://hive.apache.org)
 1. [MariaDB](https://github.com/kmgowda/SBK/tree/master/driver-mariadb)
+1. [Redpanda](https://github.com/kmgowda/SBK/tree/master/driver-redpanda)
 
 
 In the future, many more storage systems drivers will be plugged in. 
