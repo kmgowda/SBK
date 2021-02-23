@@ -11,7 +11,7 @@ You may obtain a copy of the License at
 
 Run the below command to generate the docker image:
 
-docker build -f ./<File name> ./../ --tag <Image name>
+docker build -f ./[File name] ./../ --tag [Image name]
 
 
 Example:
