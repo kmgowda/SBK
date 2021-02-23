@@ -110,3 +110,6 @@ Pulsar Writing     722486 records,  144410.6 records/sec,    13.77 MB/sec,      
 Pulsar Writing     931596 records,  186244.7 records/sec,    17.76 MB/sec,      5.3 ms avg latency,      18 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,       6 ms 90th,       7 ms 95th,       9 ms 99th,      12 ms 99.9th,      16 ms 99.99th.
 Total : Pulsar Writing    6484499 records,  106289.3 records/sec,    10.14 MB/sec,      5.8 ms avg latency,     473 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,       7 ms 90th,       8 ms 95th,      12 ms 99th,      37 ms 99.9th,     467 ms 99.99th.
 ```
+
+
+Refer this page : https://pulsar.apache.org/docs/en/standalone/ to setup the pulsar in standalone mode.
