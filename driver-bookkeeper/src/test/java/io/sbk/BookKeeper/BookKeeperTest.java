@@ -16,7 +16,6 @@ import io.sbk.api.impl.SbkParameters;
 import org.apache.commons.cli.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.assertNotNull;
