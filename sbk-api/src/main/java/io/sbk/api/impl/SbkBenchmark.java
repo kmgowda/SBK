@@ -10,7 +10,6 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
-import io.sbk.api.CallbackReader;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
@@ -61,7 +60,7 @@ public class SbkBenchmark implements Benchmark {
     final private ScheduledExecutorService timeoutExecutor;
     private List<DataWriter<Object>> writers;
     private List<DataReader<Object>> readers;
-    private List<CallbackReader<Object>> callbackReaders;
+
 
 
 
@@ -176,7 +175,6 @@ public class SbkBenchmark implements Benchmark {
         final AtomicInteger writersErrCnt = new AtomicInteger(0);
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
-        final List<SbkCallbackReader> sbkCallbackReaders;
         final List<CompletableFuture<Void>> writeFutures;
         final List<CompletableFuture<Void>> readFutures;
         final CompletableFuture<Void> wStatFuture;
@@ -194,12 +192,6 @@ public class SbkBenchmark implements Benchmark {
         readers = IntStream.range(0, params.getReadersCount())
                 .boxed()
                 .map(i -> storage.createReader(i, params))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        callbackReaders = IntStream.range(0, params.getReadersCount())
-                .boxed()
-                .map(i -> storage.createCallbackReader(i, params))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -227,17 +219,8 @@ public class SbkBenchmark implements Benchmark {
                     .map(i -> new SbkReader(i, maxQs, params,
                             readStats.getSendChannel(), dType, time, readers.get(i)))
                     .collect(Collectors.toList());
-            sbkCallbackReaders = null;
-        } else if (callbackReaders != null && callbackReaders.size() > 0) {
-            sbkCallbackReaders = IntStream.range(0, params.getReadersCount())
-                    .boxed()
-                    .map(i -> new SbkCallbackReader(i, maxQs, params,
-                            readStats.getSendChannel(), dType, time))
-                    .collect(Collectors.toList());
+        }  else {
             sbkReaders = null;
-        } else {
-            sbkReaders = null;
-            sbkCallbackReaders = null;
         }
 
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
@@ -246,7 +229,7 @@ public class SbkBenchmark implements Benchmark {
         } else {
             wStatFuture = null;
         }
-        if (readStats != null && (sbkReaders != null || sbkCallbackReaders != null)) {
+        if (readStats != null && sbkReaders != null) {
             rStatFuture = readStats.start(params.getSecondsToRun(), params.getSecondsToRun() <= 0 ?
                     params.getRecordsPerReader() * params.getReadersCount() : 0);
         } else {
@@ -281,13 +264,6 @@ public class SbkBenchmark implements Benchmark {
                             readersErrCnt.incrementAndGet();
                         }
                     }, executor)).collect(Collectors.toList());
-            readFuturesCnt = readFutures.size();
-        } else if (sbkCallbackReaders != null) {
-            readFutures = sbkCallbackReaders.stream()
-                    .map(SbkCallbackReader::start).collect(Collectors.toList());
-            for (int i = 0; i < params.getReadersCount(); i++) {
-                callbackReaders.get(i).start(sbkCallbackReaders.get(i));
-            }
             readFuturesCnt = readFutures.size();
         } else {
             readFutures = null;
@@ -368,15 +344,6 @@ public class SbkBenchmark implements Benchmark {
         }
         if (readers != null) {
             readers.forEach(c -> {
-                try {
-                    c.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-        if (callbackReaders != null) {
-            callbackReaders.forEach(c -> {
                 try {
                     c.close();
                 } catch (IOException e) {

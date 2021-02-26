@@ -68,20 +68,6 @@ public interface Storage<T> {
      */
     DataReader<T> createReader(final int id, final Parameters params);
 
-    /**
-     * Create a Single Async Reader / Consumer.
-     * By default, No Async readers (push readers) for storage.
-     * Hence, returns null.
-     * If your storage device supports only the Async read, then implement this method.
-     *
-     * @param id Reader id
-     * @param params Parameters object enclosing all commandline arguments,
-     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
-     * @return Reader return the Async Reader , null in case of failure
-     */
-    default CallbackReader<T> createCallbackReader(final int id, final Parameters params)  {
-        return null;
-    }
 
     /**
      * Default implementation to create a payload or data to write/read.

@@ -11,7 +11,6 @@ package io.sbk.Artemis;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.sbk.api.CallbackReader;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
@@ -106,11 +105,6 @@ public class Artemis implements Storage<byte[]> {
 
     @Override
     public DataReader<byte[]> createReader(final int id, final Parameters params) {
-        return null;
-    }
-
-    @Override
-    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
             return new ArtemisCallbackReader(id, params, topicName, topicName + "-" + id,
                     config, session);

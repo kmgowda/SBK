@@ -12,6 +12,12 @@ package io.sbk.api;
 
 import java.io.IOException;
 
+
+/**
+ * Call back Reader Interface.
+ * Deprecated
+ * This interface is replaced by Abstract class AbstractCallbackReader.
+ */
 public interface CallbackReader<T> {
 
     /**

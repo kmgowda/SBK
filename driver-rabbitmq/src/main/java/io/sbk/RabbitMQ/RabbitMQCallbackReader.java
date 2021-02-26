@@ -9,7 +9,7 @@
  */
 package io.sbk.RabbitMQ;
 
-import io.sbk.api.CallbackReader;
+import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Parameters;
 import io.sbk.api.Callback;
 
@@ -27,41 +27,54 @@ import com.rabbitmq.client.Envelope;
 
 
 /**
- * Class for RabbitMQ Async Reader.
+ * Class for RabbitMQ Callback Reader.
  */
-public class RabbitMQCallbackReader extends DefaultConsumer implements CallbackReader<byte[]> {
+public class RabbitMQCallbackReader extends AbstractCallbackReader<byte[]> {
     final private Channel channel;
     final private Parameters params;
     final private String queueName;
-    private Callback callback;
+    private DefaultConsumer consumer;
 
     public RabbitMQCallbackReader(int readerId, Parameters params, Connection connection, String topicName,
-                                  String queueName) throws IOException {
-        super(connection.createChannel());
+                                    String queueName) throws IOException {
+        channel = connection.createChannel();
         this.params = params;
         this.queueName = queueName;
-        channel = super.getChannel();
         channel.exchangeDeclare(topicName, BuiltinExchangeType.FANOUT);
         channel.queueDeclare(queueName, true, false, false, Collections.emptyMap());
         channel.queueBind(queueName, topicName, "");
-        this.callback = null;
+        this.consumer = null;
     }
 
-    @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) {
-        if (callback != null) {
-            callback.consume(body);
+    private static class Consumer extends DefaultConsumer {
+        private Channel channel;
+        private Callback<byte[]> callback;
+
+
+        public Consumer(Channel channel, Callback<byte[]> callback) {
+            super(channel);
+            this.channel = channel;
+            this.callback = callback;
         }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) {
+            if (callback != null) {
+                callback.consume(body);
+            }
+        }
+
+    }
+
+
+    @Override
+    public void start(Callback<byte[]> callback) throws IOException {
+        this.consumer = new Consumer(channel, callback);
+        channel.basicConsume(queueName, true, this.consumer);
     }
 
     @Override
-    public void start(Callback callback) throws IOException {
-        this.callback = callback;
-        channel.basicConsume(queueName, true, this);
-    }
-
-    @Override
-    public void close() throws IOException {
+    public void stop() throws IOException {
         try {
             if (this.channel.isOpen()) {
                 this.channel.close();

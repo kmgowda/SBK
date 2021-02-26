@@ -12,7 +12,7 @@ package io.sbk.Nsq;
 import com.github.brainlag.nsq.NSQConsumer;
 import com.github.brainlag.nsq.lookup.DefaultNSQLookup;
 import com.github.brainlag.nsq.lookup.NSQLookup;
-import io.sbk.api.CallbackReader;
+import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Parameters;
 import io.sbk.api.Callback;
 
@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * Class for Nsq Push Reader.
  */
-public class NsqCallbackReader  implements CallbackReader<byte[]> {
+public class NsqCallbackReader extends AbstractCallbackReader<byte[]> {
     final private String topicName;
     final private String subscriptionName;
     final private  NSQLookup lookup;
@@ -47,7 +47,7 @@ public class NsqCallbackReader  implements CallbackReader<byte[]> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void stop() throws IOException {
         consumer.shutdown();
     }
 }
