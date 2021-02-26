@@ -7,9 +7,7 @@
         *
         *     http://www.apache.org/licenses/LICENSE-2.0
         */
-        package io.sbk.BookKeeper;
-
-
+package io.sbk.BookKeeper;
 import io.sbk.api.Config;
 import io.sbk.api.Parameters;
 import io.sbk.api.impl.SbkParameters;
@@ -28,7 +26,6 @@ public class BookKeeperTest {
     final String[] drivers = {"BookKeeper"};
     final String benchmarkName = Config.NAME + " -class bookkeeper";
     final List<String> driversList = Arrays.asList( drivers );
-
     private Parameters params;
     private BookKeeper bk;
 
