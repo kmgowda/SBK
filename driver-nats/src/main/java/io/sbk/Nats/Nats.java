@@ -8,7 +8,6 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Nats;
-import io.sbk.api.CallbackReader;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
@@ -68,11 +67,6 @@ public class Nats implements Storage<byte[]> {
 
     @Override
     public DataReader<byte[]> createReader(final int id, final Parameters params) {
-        return null;
-    }
-
-    @Override
-    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
             return new NatsCallbackReader(id, params, topicName, topicName + "-" + id, options);
         } catch (IOException ex) {
@@ -80,4 +74,5 @@ public class Nats implements Storage<byte[]> {
             return null;
         }
     }
+
 }

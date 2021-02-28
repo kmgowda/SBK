@@ -21,7 +21,11 @@ import io.sbk.api.Worker;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
-
+/**
+ * SBK Callback reader implementation.
+ * Deprecated
+ * This interface is replaced by Abstract class AbstractCallbackReader and SbkReader.
+ */
 public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private DataType dataType;
     final private Time time;

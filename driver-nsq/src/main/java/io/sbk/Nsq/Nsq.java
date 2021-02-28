@@ -11,7 +11,6 @@ package io.sbk.Nsq;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.sbk.api.CallbackReader;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
@@ -78,11 +77,6 @@ public class Nsq implements Storage<byte[]> {
 
     @Override
     public DataReader<byte[]> createReader(final int id, final Parameters params) {
-        return null;
-    }
-
-    @Override
-    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
             return new NsqCallbackReader(id, params, topicName,
                     topicName + "-" + id, config);

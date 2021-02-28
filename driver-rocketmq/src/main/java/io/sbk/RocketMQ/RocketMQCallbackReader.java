@@ -9,7 +9,7 @@
  */
 package io.sbk.RocketMQ;
 
-import io.sbk.api.CallbackReader;
+import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Parameters;
 import io.sbk.api.Callback;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
@@ -23,7 +23,7 @@ import java.io.IOException;
 /**
  * Class for Asynchronous RocketMQ Reader.
  */
-public class RocketMQCallbackReader implements CallbackReader<byte[]> {
+public class RocketMQCallbackReader extends AbstractCallbackReader<byte[]> {
     final private DefaultMQPushConsumer rmqConsumer;
     final private Parameters params;
 
@@ -45,7 +45,7 @@ public class RocketMQCallbackReader implements CallbackReader<byte[]> {
       }
 
     @Override
-    public void start(Callback callback) throws IOException {
+    public void start(Callback<byte[]> callback) throws IOException {
         try {
             rmqConsumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
                 for (MessageExt message : msgs) {
@@ -61,7 +61,7 @@ public class RocketMQCallbackReader implements CallbackReader<byte[]> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void stop() throws IOException {
         rmqConsumer.shutdown();
     }
 }

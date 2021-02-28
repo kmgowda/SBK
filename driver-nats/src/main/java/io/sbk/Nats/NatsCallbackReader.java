@@ -9,7 +9,7 @@
  */
 package io.sbk.Nats;
 
-import io.sbk.api.CallbackReader;
+import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Parameters;
 import io.sbk.api.Callback;
 
@@ -24,7 +24,7 @@ import io.nats.client.Options;
 /**
  * Class for NATS Push Reader.
  */
-public class NatsCallbackReader  implements CallbackReader<byte[]> {
+public class NatsCallbackReader  extends AbstractCallbackReader<byte[]> {
     final private String topic;
     final private String subscriptionName;
     final private Connection cn;
@@ -57,7 +57,7 @@ public class NatsCallbackReader  implements CallbackReader<byte[]> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void stop() throws IOException {
         try {
             cn.close();
         } catch (InterruptedException ex) {

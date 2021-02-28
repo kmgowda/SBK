@@ -12,7 +12,6 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
-import io.sbk.api.CallbackReader;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
@@ -42,6 +41,7 @@ public class RocketMQ implements Storage<byte[]> {
     private int partitions;
     private DefaultMQAdminExt rmqAdmin;
     private RocketMQClientConfig rmqClientConfig;
+    private boolean async;
 
     public static String getRandomString() {
         byte[] buffer = new byte[5];
@@ -55,6 +55,7 @@ public class RocketMQ implements Storage<byte[]> {
         params.addOption("topic", true, "Topic name");
         params.addOption("nameserver", true, "Name Server URI");
         params.addOption("partitions", true, "Number of partitions of the topic (default: 1)");
+        params.addOption("async", true, "Start the callback reader, default: false");
     }
 
     @Override
@@ -71,6 +72,7 @@ public class RocketMQ implements Storage<byte[]> {
         subscriptionName = topicName + getRandomString();
         clusterName =  params.getOptionValue("cluster", DEFAULT_CLUSTER);
         partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
+        async = Boolean.parseBoolean(params.getOptionValue("async", "false"));
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -132,17 +134,15 @@ public class RocketMQ implements Storage<byte[]> {
 
     @Override
     public DataReader<byte[]> createReader(final int id, final Parameters params) {
-        return null;
-    }
-
-    @Override
-    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
-            return new RocketMQCallbackReader(id, params, namesAdr, topicName, rmqClientConfig, subscriptionName);
+            if (async) {
+                return new RocketMQCallbackReader(id, params, namesAdr, topicName, rmqClientConfig, subscriptionName);
+            } else {
+                return new RocketMQReader(id, params, namesAdr, topicName, rmqClientConfig, subscriptionName);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
         }
     }
-
 }

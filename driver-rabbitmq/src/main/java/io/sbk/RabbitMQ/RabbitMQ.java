@@ -8,7 +8,6 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RabbitMQ;
-import io.sbk.api.CallbackReader;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
@@ -19,6 +18,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import io.sbk.api.impl.SbkLogger;
 
 
 /**
@@ -33,6 +33,7 @@ public class RabbitMQ implements Storage<byte[]> {
     private Boolean isPersist;
     private String user;
     private String password;
+    private boolean async;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
@@ -41,6 +42,7 @@ public class RabbitMQ implements Storage<byte[]> {
         params.addOption("persist", true, "keep messages persistent");
         params.addOption("user", true, "user name, default: " + USER);
         params.addOption("password", true, "user password, default: " + PASSWORD);
+        params.addOption("async", true, "Start the callback reader, default: false");
     }
 
     @Override
@@ -57,6 +59,7 @@ public class RabbitMQ implements Storage<byte[]> {
         isPersist = Boolean.parseBoolean(params.getOptionValue("persist", "false"));
         user = params.getOptionValue("user", USER);
         password = params.getOptionValue("password", PASSWORD);
+        async = Boolean.parseBoolean(params.getOptionValue("async", "false"));
     }
 
     @Override
@@ -93,13 +96,14 @@ public class RabbitMQ implements Storage<byte[]> {
 
     @Override
     public DataReader<byte[]> createReader(final int id, final Parameters params) {
-        return null;
-    }
-
-    @Override
-    public CallbackReader<byte[]> createCallbackReader(final int id, final Parameters params) {
         try {
-            return new RabbitMQCallbackReader(id, params, connection, topicName, topicName + "-" + id);
+            if (async) {
+                SbkLogger.log.info("Starting RabbitMQ CallbackReader");
+                return new RabbitMQCallbackReader(id, params, connection, topicName, topicName + "-" + id);
+            } else {
+                SbkLogger.log.info("Starting RabbitMQ Reader");
+                return new RabbitMQReader(id, params, connection, topicName, topicName + "-" + id);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

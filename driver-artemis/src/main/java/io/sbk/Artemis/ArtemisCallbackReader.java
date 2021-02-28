@@ -9,7 +9,7 @@
  */
 package io.sbk.Artemis;
 
-import io.sbk.api.CallbackReader;
+import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Parameters;
 import io.sbk.api.Callback;
 import io.sbk.api.impl.SbkLogger;
@@ -25,7 +25,7 @@ import java.io.IOException;
 /**
  * Class for Artemis Push Reader.
  */
-public class ArtemisCallbackReader  implements CallbackReader<byte[]> {
+public class ArtemisCallbackReader  extends AbstractCallbackReader<byte[]> {
     private final ClientConsumer consumer;
     private final ClientSession session;
 
@@ -48,7 +48,7 @@ public class ArtemisCallbackReader  implements CallbackReader<byte[]> {
     }
 
     @Override
-    public void start(Callback callback) throws IOException {
+    public void start(Callback<byte[]> callback) throws IOException {
         try {
             consumer.setMessageHandler(message -> {
                 byte[] payload = new byte[message.getBodyBuffer().readableBytes()];
@@ -66,7 +66,7 @@ public class ArtemisCallbackReader  implements CallbackReader<byte[]> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void stop() throws IOException {
         try {
             consumer.close();
         } catch (ActiveMQException ex) {
