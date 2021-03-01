@@ -9,14 +9,14 @@
  */
 package io.sbk.BookKeeper;
 
-
+import io.sbk.api.Config;
 import io.sbk.api.Parameters;
 import io.sbk.api.impl.SbkParameters;
+import org.apache.commons.cli.ParseException;
+import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import static org.junit.Assert.assertNotNull;
 
 //create the test Class for Bookkeeper Benchmarking
@@ -24,21 +24,15 @@ public class BookKeeperTest {
     /**.
      *  * Initializing variable        */
     private final static String CONFIGFILE = "BookKeeper.properties";
-    // test list of driver strings
-    /** Adding Driver List. */
-    private  List<String> driverList =  new ArrayList<>();
-    private String benchmarkName = "BookkeeperBench";
-
-    /** BookKeeperTest Method.
-     */
-    public BookKeeperTest() {
-
-    }
+    final String[] drivers = {"BookKeeper"};
+    final String benchmarkName = Config.NAME + " -class bookkeeper";
+    final List<String> driversList = Arrays.asList( drivers );
+    private Parameters params;
+    private BookKeeper bk;
 
     @Test
-    public void addArgsTest() throws Exception {
-        driverList.add("bookkeeper");
-        Parameters params = new SbkParameters(benchmarkName, driverList);
+    public void addArgsTest() {
+        params = new SbkParameters(benchmarkName, driversList);
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
         params.addOption("ensembleSize", true,
@@ -49,19 +43,17 @@ public class BookKeeperTest {
                 "AckQuorum(default value is in " + CONFIGFILE + " )");
         params.addOption("recreate", true,
                 "If the log is already existing, delete and recreate the same");
-        BookKeeper bk = new BookKeeper();
+        bk = new BookKeeper();
         bk.addArgs(params);
 
     }
 
     /**
-    Test code for parseArgs.
+     Test code for parseArgs.
      */
     @Test
-    public void parseArgs() throws Exception {
-        List<String> listStrings = new ArrayList<String>();
-        driverList.add("bookkeeper");
-        Parameters params = new SbkParameters(benchmarkName, driverList);
+    public void parseArgs() {
+        params = new SbkParameters(benchmarkName, driversList);
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
         params.addOption("ensembleSize", true,
@@ -72,8 +64,8 @@ public class BookKeeperTest {
                 "AckQuorum (default value is in " + CONFIGFILE + " )");
         params.addOption("recreate", true,
                 "If the log is already exist, delete and recreate the same)");
-        BookKeeper bk = new BookKeeper();
-        // doThrow(IllegalArgumentException.class).when(params).parseArgs(any());
+        bk = new BookKeeper();
+
         Exception exception = null;
         try {
             bk.parseArgs(params);
@@ -82,5 +74,35 @@ public class BookKeeperTest {
         }
         assertNotNull(exception);
 
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseArgsNullLogName() {
+        final String[] args = {"-class", "bookkeeper", "-uri", "distributedlog://localhost:2181/streams", "-writers", "1", "-size", "100"};
+        params = new SbkParameters(benchmarkName, driversList);
+        bk = new BookKeeper();
+        bk.addArgs(params);
+        try {
+            params.parseArgs(args);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            Assert.fail("ParseArgs Failed!");
+        }
+        bk.parseArgs(params);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseArgsNullUri() {
+    final String[] args = {"-class", "bookkeeper", "-log", "logName", "writers", "1", "size", "100" };
+    params = new SbkParameters(benchmarkName, driversList);
+    bk = new BookKeeper();
+    bk.addArgs(params);
+    try {
+        params.parseArgs(args);
+    } catch (ParseException ex) {
+        ex.printStackTrace();
+        Assert.fail("ParseArgs Failed!");
+    }
+        bk.parseArgs(params);
     }
 }
