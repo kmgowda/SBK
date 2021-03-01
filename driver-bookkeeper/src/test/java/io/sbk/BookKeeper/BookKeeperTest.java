@@ -30,14 +30,8 @@ public class BookKeeperTest {
     private Parameters params;
     private BookKeeper bk;
 
-    /** BookKeeperTest Method.
-
-     public BookKeeperTest() {
-
-     }*/
-
     @Test
-    public void addArgsTest() throws Exception {
+    public void addArgsTest() {
         params = new SbkParameters(benchmarkName, driversList);
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
@@ -58,7 +52,7 @@ public class BookKeeperTest {
      Test code for parseArgs.
      */
     @Test
-    public void parseArgs() throws Exception {
+    public void parseArgs() {
         params = new SbkParameters(benchmarkName, driversList);
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
@@ -71,7 +65,7 @@ public class BookKeeperTest {
         params.addOption("recreate", true,
                 "If the log is already exist, delete and recreate the same)");
         bk = new BookKeeper();
-        // doThrow(IllegalArgumentException.class).when(params).parseArgs(any());
+
         Exception exception = null;
         try {
             bk.parseArgs(params);
