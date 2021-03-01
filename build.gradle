@@ -20,10 +20,13 @@ buildscript {
 			url "https://plugins.gradle.org/m2/"
 		}
 	}
-
+	dependencies {
+		classpath "gradle.plugin.com.palantir.graal:gradle-graal:0.7.2"
+	}
 	println "Build JVM Version is : " + Jvm.current()
 
 }
+
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -46,6 +49,7 @@ allprojects {
 	apply plugin: 'idea'
 	apply plugin: 'eclipse'
 	apply plugin: 'application'
+	apply plugin: "com.palantir.graal"
 
 	dependencies {
 		compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
@@ -72,6 +76,10 @@ allprojects {
 	archivesBaseName = sbkProjectName
 	version = sbkVersion
 	applicationName = archivesBaseName
+	def sbkClass = rootProject.name
+	if (project.path.startsWith(":driver-")) {
+		sbkClass = project.path.replace(":driver-","")
+	}
 	jar {
 		manifest {
 			attributes	'Implementation-Title': archivesBaseName,
@@ -86,10 +94,6 @@ allprojects {
 	}
 
 	application {
-		def sbkClass = ""
-		if (project.path.startsWith(":driver-")) {
-			sbkClass = project.path.replace(":driver-","")
-		}
 		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, "-Dsbk.className="+sbkClass]
 	}
 /*
@@ -107,7 +111,7 @@ allprojects {
 		if (project.path.startsWith(":driver-")) {
 			def outDir = 'build/dashboard'
 			def outFile = sbkProjectName+"-"+sbkVersion+".json"
-			def sbkClass = project.path.replace(":driver-","").toUpperCase()
+			def sbkClassUpperCase = sbkClass.toUpperCase()
 
 			/*
 			call with parameter
@@ -122,7 +126,7 @@ allprojects {
 
 			from "$rootDir/dashboard-template.json"
 			into outDir
-			filter { line -> line.replaceAll('SBK@2020', sbkClass) }
+			filter { line -> line.replaceAll('SBK@2020', sbkClassUpperCase) }
 			rename 'dashboard-template.json', outFile
 
 			doLast {
@@ -190,6 +194,17 @@ allprojects {
 				}
 			}
 		}
+	}
+
+	graal {
+		def className = sbkClass.capitalize();
+		mainClass SbkMainClass
+		outputName sbkProjectName
+		javaVersion '11'
+		graalVersion '21.0.0'
+		option "-Dsbk.applicationName=$applicationName"
+		option "-Dsbk.className=$sbkClass"
+		option "--initialize-at-build-time=io.sbk.$className"
 	}
 
 }
