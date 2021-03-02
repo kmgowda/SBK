@@ -1,0 +1,114 @@
+[
+  {
+    "name" : "io.sbk.api.impl.Sbk",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name" : "io.sbk.api.Config",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "fields":[
+      {"name":"packageName", "allowWrite": true},
+      {"name":"fork", "allowWrite": true},
+      {"name":"timeUnit", "allowWrite": true},
+      {"name":"qPerWorker", "allowWrite": true},
+      {"name":"idleNS", "allowWrite": true},
+      {"name":"maxQs", "allowWrite": true},
+      {"name":"maxArraySizeMB", "allowWrite": true},
+      {"name":"maxHashMapSizeMB", "allowWrite": true},
+      {"name":"csv", "allowWrite": true}
+    ]
+  },
+  {
+    "name" : "io.sbk.api.LoggerConfig",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "fields":[
+      {"name":"reportingSeconds", "allowWrite": true},
+      {"name":"timeUnit", "allowWrite": true},
+      {"name":"minLatencyMS", "allowWrite": true},
+      {"name":"maxLatencyMS", "allowWrite": true},
+      {"name":"percentiles", "allowWrite": true}
+    ]
+  },
+  {
+    "name" : "io.sbk.api.MetricsConfig",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "fields":[
+      {"name":"port", "allowWrite": true},
+      {"name":"context", "allowWrite": true},
+      {"name":"latencyTimeUnit", "allowWrite": true}
+    ]
+  },
+  {
+    "name" : "io.sbk.api.Storage",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name" : "io.sbk.File.File",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name" : "io.sbk.File.FileConfig",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "fields":[
+      {"name":"fileName", "allowWrite": true},
+      {"name":"asyncThreads", "allowWrite": true},
+      {"name":"isAppend", "allowWrite": true},
+      {"name":"reCreate", "allowWrite": true},
+      {"name":"metaUpdate", "allowWrite": true}
+    ]
+  },
+  {
+    "name" : "java.lang.String",
+    "fields" : [
+      { "name" : "value", "allowWrite" : true },
+      { "name" : "hash" }
+    ],
+    "methods" : [
+      { "name" : "<init>", "parameterTypes" : [] },
+      { "name" : "<init>", "parameterTypes" : ["char[]"] },
+      { "name" : "charAt" },
+      { "name" : "format", "parameterTypes" : ["java.lang.String", "java.lang.Object[]"] }
+    ]
+  },
+  {
+    "name" : "java.lang.String$CaseInsensitiveComparator",
+    "methods" : [
+      { "name" : "compare" }
+    ]
+  }
+]
