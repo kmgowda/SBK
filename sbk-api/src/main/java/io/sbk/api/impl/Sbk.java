@@ -23,12 +23,15 @@ import io.sbk.api.Time;
 import io.sbk.api.TimeUnit;
 import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
+import org.reflections.ReflectionsException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -141,7 +144,6 @@ public class Sbk {
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InstantiationException  {
         final String className;
-        final String driverName;
         final Storage storageDevice;
         final Action action;
         final Parameters params;
@@ -151,6 +153,7 @@ public class Sbk {
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
+        String driverName;
         String usageLine;
 
         SbkLogger.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
@@ -166,15 +169,17 @@ public class Sbk {
         config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 Config.class);
 
-        if (outLogger == null) {
-            logger = new PrometheusLogger();
-        } else {
-            logger = outLogger;
-        }
+        logger = Objects.requireNonNullElseGet(outLogger, PrometheusLogger::new);
 
         if (storage == null) {
-            List<String> driversList =  getAvailableClassNames(config.packageName);
-            SbkLogger.log.info("Available Drivers : "+ driversList.size());
+            List<String> driversList;
+            try {
+                driversList = getAvailableClassNames(config.packageName);
+                SbkLogger.log.info("Available Drivers : "+ driversList.size());
+            } catch (ReflectionsException ex) {
+                SbkLogger.log.warn(ex.toString());
+                driversList = new LinkedList<>();
+            }
             if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
                 usageLine = sbkApplicationName;
             } else {
@@ -194,12 +199,23 @@ public class Sbk {
                 className = name;
                 usageLine += " "+CLASS_OPTION+" " + className;
             }
-            driverName = searchDriver(driversList, className);
+            driverName = null;
+            if (driversList.size() > 0) {
+                driverName = searchDriver(driversList, className);
+                if (driverName == null) {
+                    String msg = "storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers";
+                    SbkLogger.log.warn(msg);
+                }
+            }
             if (driverName == null) {
-                String errMsg = "storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers";
+                driverName = className;
+            }
+            if (driverName.length() == 0) {
+                String errMsg = "No storage driver name supplied/found";
                 SbkLogger.log.error(errMsg);
                 throw new InstantiationException(errMsg);
             }
+
             try {
                 storageDevice = (Storage<?>) Class.forName(config.packageName + "." + driverName + "." + driverName).getConstructor().newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
@@ -209,11 +225,7 @@ public class Sbk {
 
         } else {
             storageDevice = storage;
-            if (applicationName != null) {
-                usageLine = applicationName;
-            } else {
-                usageLine = storageDevice.getClass().getSimpleName();
-            }
+            usageLine = Objects.requireNonNullElseGet(applicationName, () -> storageDevice.getClass().getSimpleName());
             driverName = usageLine;
         }
         params = new SbkParameters(usageLine, null);
@@ -290,7 +302,7 @@ public class Sbk {
     }
 
 
-    private static List<String> getAvailableClassNames(String pkgName) {
+    private static List<String> getAvailableClassNames(String pkgName) throws ReflectionsException {
         Reflections reflections = new Reflections(pkgName);
         Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
         return subTypes.stream().map(i -> i.toString().substring(i.toString().lastIndexOf(".") + 1))

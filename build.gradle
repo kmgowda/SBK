@@ -205,6 +205,10 @@ allprojects {
 		option "-Dsbk.applicationName=$applicationName"
 		option "-Dsbk.className=$sbkClass"
 		option "--initialize-at-build-time=io.sbk.$className"
+		option "-H:ResourceConfigurationFiles=$rootDir/resource-config.json"
+		option "-H:ReflectionConfigurationFiles=$rootDir/reflection-config.json"
+		option "--no-fallback"
+		option "-H:Optimize=3"
 	}
 
 }
