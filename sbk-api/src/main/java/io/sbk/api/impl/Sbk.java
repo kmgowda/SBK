@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -155,7 +156,6 @@ public class Sbk {
         String driverName;
         String usageLine;
 
-
         SbkLogger.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         SbkLogger.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
         SbkLogger.log.info(Config.NAME.toUpperCase() +" Version: "+version);
@@ -168,23 +168,18 @@ public class Sbk {
 
         config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 Config.class);
-        SbkLogger.log.info(" config.packageName : "+ config.packageName);
 
-        if (outLogger == null) {
-            logger = new PrometheusLogger();
-        } else {
-            logger = outLogger;
-        }
+        logger = Objects.requireNonNullElseGet(outLogger, PrometheusLogger::new);
 
         if (storage == null) {
             List<String> driversList;
             try {
                 driversList = getAvailableClassNames(config.packageName);
+                SbkLogger.log.info("Available Drivers : "+ driversList.size());
             } catch (ReflectionsException ex) {
                 SbkLogger.log.info(ex.toString());
                 driversList = new LinkedList<>();
             }
-            SbkLogger.log.info("Available Drivers : "+ driversList.size());
             if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
                 usageLine = sbkApplicationName;
             } else {
@@ -204,13 +199,23 @@ public class Sbk {
                 className = name;
                 usageLine += " "+CLASS_OPTION+" " + className;
             }
-            driverName = searchDriver(driversList, className);
-            if (driverName == null) {
-                String errMsg = "storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers";
-                SbkLogger.log.error(errMsg);
-                driverName = className;
-                //throw new InstantiationException(errMsg);
+            driverName = null;
+            if (driversList.size() > 0) {
+                driverName = searchDriver(driversList, className);
+                if (driverName == null) {
+                    String msg = "storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers";
+                    SbkLogger.log.warn(msg);
+                }
             }
+            if (driverName == null) {
+                driverName = className;
+            }
+            if (driverName.length() == 0) {
+                String errMsg = "No storage driver name supplied/found";
+                SbkLogger.log.error(errMsg);
+                throw new InstantiationException(errMsg);
+            }
+
             try {
                 storageDevice = (Storage<?>) Class.forName(config.packageName + "." + driverName + "." + driverName).getConstructor().newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |

@@ -208,6 +208,7 @@ allprojects {
 		option "-H:ResourceConfigurationFiles=$rootDir/resource-config.json"
 		option "-H:ReflectionConfigurationFiles=$rootDir/reflection-config.json"
 		option "--no-fallback"
+		option "-H:Optimize=3"
 	}
 
 }
