@@ -177,7 +177,7 @@ public class Sbk {
                 driversList = getAvailableClassNames(config.packageName);
                 SbkLogger.log.info("Available Drivers : "+ driversList.size());
             } catch (ReflectionsException ex) {
-                SbkLogger.log.info(ex.toString());
+                SbkLogger.log.warn(ex.toString());
                 driversList = new LinkedList<>();
             }
             if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
@@ -225,11 +225,7 @@ public class Sbk {
 
         } else {
             storageDevice = storage;
-            if (applicationName != null) {
-                usageLine = applicationName;
-            } else {
-                usageLine = storageDevice.getClass().getSimpleName();
-            }
+            usageLine = Objects.requireNonNullElseGet(applicationName, () -> storageDevice.getClass().getSimpleName());
             driverName = usageLine;
         }
         params = new SbkParameters(usageLine, null);
