@@ -13,7 +13,7 @@ git:
 language: java
 install: true
 jdk:
-  - openjdk8
+  - openjdk11
 
 env:
   global:
