@@ -202,9 +202,9 @@ allprojects {
 		outputName sbkProjectName
 		javaVersion '11'
 		graalVersion '21.0.0'
-		option "-Dsbk.applicationName=$applicationName"
-		option "-Dsbk.className=$sbkClass"
+		option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
 		option "--initialize-at-build-time=io.sbk.$className"
+		option "-H:+AllowIncompleteClasspath"
 		option "-H:ResourceConfigurationFiles=$rootDir/resource-config.json"
 		option "-H:ReflectionConfigurationFiles=$rootDir/reflection-config.json"
 		option "--no-fallback"
