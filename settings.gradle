@@ -46,4 +46,5 @@ include 'driver-derby'
 include 'driver-mssql'
 include 'driver-redpanda'
 include 'driver-csv'
+include 'driver-redis'
 
