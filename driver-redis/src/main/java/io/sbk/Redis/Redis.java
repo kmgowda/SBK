@@ -36,8 +36,8 @@ public class Redis implements Storage<String> {
 
     @Override
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
-        listName =  params.getOptionValue("topic", "list-1");
-        serverUri = params.getOptionValue("broker", "localhost");
+        listName =  params.getOptionValue("list", "list-1");
+        serverUri = params.getOptionValue("uri", "localhost");
     }
 
     @Override
