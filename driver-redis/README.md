@@ -8,7 +8,7 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 -->
 # Redis Performance benchmarking using SBK
-The Redis driver for SBK supports multi writers and readers performance benchmarking. It also supports the End to End Latency benchmarking.
+The Redis driver for SBK supports multi writers and readers performance benchmarking.
 
 
 An example, SBK benchmarking command is

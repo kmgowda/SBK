@@ -37,6 +37,9 @@ public class Redis implements Storage<String> {
     public void parseArgs(final Parameters params) throws IllegalArgumentException {
         listName =  params.getOptionValue("list", "list-1");
         serverUri = params.getOptionValue("uri", "localhost");
+        if (params.isWriteAndRead()) {
+            throw new IllegalArgumentException("End to End Latency Not Supported");
+        }
     }
 
     @Override
