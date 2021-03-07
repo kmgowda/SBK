@@ -115,7 +115,7 @@ allprojects {
 
 			/*
 			call with parameter
-			./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/tmp"
+			./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/grafana/dashboards"
 			to generate dashboard files on single folder
 			 */
 			if (project.hasProperty("outdir")) {

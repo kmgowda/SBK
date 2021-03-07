@@ -220,6 +220,9 @@ public class Sbk {
                 storageDevice = (Storage<?>) Class.forName(config.packageName + "." + driverName + "." + driverName).getConstructor().newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                     NoSuchMethodException | InvocationTargetException ex) {
+                final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
+                logger.addArgs(paramsHelp);
+                paramsHelp.printHelp();
                 throw new IllegalArgumentException(ex);
             }
 
