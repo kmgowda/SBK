@@ -75,4 +75,10 @@ public class StringHandler implements DataType<String> {
     public long getTime(String data) {
         return Long.parseLong(data.substring(0, TIME_HEADER_SIZE));
     }
+
+    @Override
+    public int getWriteReadMinSize() {
+        return TIME_HEADER_SIZE;
+    }
+
 }

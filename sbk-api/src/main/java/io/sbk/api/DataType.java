@@ -50,4 +50,11 @@ public interface DataType<T> {
      * @return long return the time set by last {@link DataType#setTime(Object, long)}}.
      */
     long getTime(T data);
+
+
+    /**
+     * Get minimum Write and Read Data Size.
+     * @return int minimum data size Write and Read.
+     */
+    int getWriteReadMinSize();
 }

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Action;
 import io.sbk.api.Benchmark;
+import io.sbk.api.DataType;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
 import io.sbk.api.Config;
@@ -248,6 +249,22 @@ public class Sbk {
 
         logger.parseArgs(params);
         storageDevice.parseArgs(params);
+        final DataType dType = storageDevice.getDataType();
+        if (dType == null) {
+            String errMsg = "No storage Data type";
+            SbkLogger.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
+
+        int minSize = dType.getWriteReadMinSize();
+        if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
+            String errMsg =
+                    "Invalid record size: "+ params.getRecordSize() +
+                            ", For both Writers and Readers, minimum data size should be "+ minSize +
+                            " for data type: " +dType.getClass().getName();
+            SbkLogger.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
         TimeUnit timeUnit = logger.getTimeUnit();
         if (timeUnit == TimeUnit.mcs) {
             time = new MicroSeconds();
@@ -268,7 +285,7 @@ public class Sbk {
         } else {
             action = Action.Writing;
         }
-        return new SbkBenchmark(driverName, action, config, params, storageDevice, logger, time);
+        return new SbkBenchmark(driverName, action, config, params, storageDevice, dType, logger, time);
     }
 
     private static String[] removeClassName(String[] args) {

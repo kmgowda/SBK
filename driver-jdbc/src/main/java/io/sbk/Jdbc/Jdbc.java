@@ -43,7 +43,7 @@ public class Jdbc implements Storage<String> {
     private final static String CONFIGFILE = "jdbc.properties";
     public String driverType;
     public JdbcConfig config;
-    public DataType<String> dType;
+    final public DataType<String> dType =  new StringHandler();
 
     /**
      * Get the JDBC config file.
@@ -183,7 +183,6 @@ public class Jdbc implements Storage<String> {
             SbkLogger.log.error("The JDBC Driver: "+ config.driver+" not found");
             throw new IOException(ex);
         }
-        dType = new StringHandler();
         final Connection conn;
         final Statement st;
         final Properties props = new Properties();

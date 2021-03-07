@@ -76,4 +76,14 @@ public class NioByteBuffer implements DataType<ByteBuffer> {
     public long getTime(ByteBuffer data) {
         return data.getLong(0);
     }
+
+    /**
+     * Get minimum Write and Read Data Size.
+     * @return int minimum data size Write and Read.
+     */
+    @Override
+    public int getWriteReadMinSize() {
+        return TIME_HEADER_BYTES;
+    }
+
 }

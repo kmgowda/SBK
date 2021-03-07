@@ -26,7 +26,6 @@ public class Redis implements Storage<String> {
     private Jedis jedis;
     private String listName;
     private String serverUri;
-    private DataType<String> dType;
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
@@ -43,8 +42,6 @@ public class Redis implements Storage<String> {
     @Override
     public void openStorage(final Parameters params) throws  IOException {
         jedis = new Jedis(serverUri);
-        dType = new StringHandler();
-
     }
 
     @Override
@@ -74,6 +71,6 @@ public class Redis implements Storage<String> {
 
     @Override
     public DataType<String> getDataType() {
-        return this.dType;
+        return new StringHandler();
     }
 }
