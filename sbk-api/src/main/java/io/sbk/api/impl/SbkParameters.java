@@ -201,11 +201,6 @@ final public class SbkParameters implements Parameters {
                 throw new IllegalArgumentException("Error: Must specify the record 'size'");
             }
 
-            if (readersCount > 0) {
-                if (recordSize < Config.MIN_DATA_RW_SIZE) {
-                    throw new IllegalArgumentException("Error: In case of write and read, minimum data size should be " + Config.MIN_DATA_RW_SIZE);
-                }
-            }
             writeAndRead = readersCount > 0;
             recordsPerWriter = recordsCount / writersCount;
         } else {

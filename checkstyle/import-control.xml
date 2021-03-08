@@ -58,4 +58,5 @@
     <allow pkg="com.mongodb" />
     <allow pkg="org.bson" />
     <allow pkg="org.ektorp" />
+    <allow pkg="redis.clients" />
 </import-control>

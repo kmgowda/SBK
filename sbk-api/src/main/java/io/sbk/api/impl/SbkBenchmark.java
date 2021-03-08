@@ -49,6 +49,7 @@ public class SbkBenchmark implements Benchmark {
     final private Action action;
     final private Config config;
     final private Storage<Object> storage;
+    final private DataType<Object> dType;
     final private Time time;
     final private Logger logger;
     final private ExecutorService executor;
@@ -61,9 +62,6 @@ public class SbkBenchmark implements Benchmark {
     private List<DataWriter<Object>> writers;
     private List<DataReader<Object>> readers;
 
-
-
-
     @GuardedBy("this")
     private CompletableFuture<Void> retFuture;
 
@@ -75,13 +73,16 @@ public class SbkBenchmark implements Benchmark {
      * @param  config               Configuration parameters
      * @param  params               Benchmarking input Parameters
      * @param  storage              Storage device/client/driver for benchmarking
+     * @param  dType                Data Type.
      * @param  logger               output logger
      * @param  time                 time interface
      * @throws IOException          If Exception occurs.
      */
     public SbkBenchmark(String storageName, Action action, Config config,
-                        Parameters params, Storage<Object> storage, Logger logger, Time time) throws IOException {
+                        Parameters params, Storage<Object> storage,
+                        DataType<Object> dType, Logger logger, Time time) throws IOException {
         this.storageName = storageName;
+        this.dType = dType;
         this.action = action;
         this.config = config;
         this.params = params;
@@ -170,7 +171,6 @@ public class SbkBenchmark implements Benchmark {
         }
         logger.open(params, storageName, action, time);
         storage.openStorage(params);
-        final DataType<Object> dType = storage.getDataType();
         final AtomicInteger readersErrCnt = new AtomicInteger(0);
         final AtomicInteger writersErrCnt = new AtomicInteger(0);
         final List<SbkWriter> sbkWriters;
@@ -382,7 +382,6 @@ public class SbkBenchmark implements Benchmark {
         }
         retFuture = null;
     }
-
 
 
     /**

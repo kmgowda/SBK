@@ -16,8 +16,8 @@ import java.util.Random;
  * Class for processing byte[] data.
  */
 public class StringHandler implements DataType<String> {
-    final static int TIME_HEADER_SIZE = 22;
-    final static String FORMAT_STRING = "%0"+TIME_HEADER_SIZE+"d";
+    final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
+    final static String FORMAT_STRING = "%0"+ TIME_HEADER_SIZE + "d";
 
     /**
      * Create byte array data.
@@ -75,4 +75,10 @@ public class StringHandler implements DataType<String> {
     public long getTime(String data) {
         return Long.parseLong(data.substring(0, TIME_HEADER_SIZE));
     }
+
+    @Override
+    public int getWriteReadMinSize() {
+        return TIME_HEADER_SIZE;
+    }
+
 }

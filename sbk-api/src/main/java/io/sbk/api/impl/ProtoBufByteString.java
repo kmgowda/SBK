@@ -78,5 +78,16 @@ public class ProtoBufByteString implements DataType<ByteString> {
     public long getTime(ByteString data) {
         return data.asReadOnlyByteBuffer().getLong(0);
     }
+
+
+    /**
+     * Get minimum Write and Read Data Size.
+     * @return int minimum data size Write and Read.
+     */
+    @Override
+    public int getWriteReadMinSize() {
+        return TIME_HEADER_BYTES;
+    }
+
 }
 

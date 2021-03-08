@@ -75,4 +75,13 @@ public class ByteArray implements DataType<byte[]> {
     public long getTime(byte[] data) {
         return ByteBuffer.allocate(TIME_HEADER_BYTES).put(data, 0, TIME_HEADER_BYTES).getLong(0);
     }
+
+    /**
+     * Get minimum Write and Read Data Size.
+     * @return int minimum data size Write and Read.
+     */
+    @Override
+    public int getWriteReadMinSize() {
+        return TIME_HEADER_BYTES;
+    }
 }

@@ -76,4 +76,14 @@ public class JavaString implements DataType<String> {
     public long getTime(String data) {
         return Long.parseLong(data.substring(0, TIME_HEADER_BYTES));
     }
+
+
+    /**
+     * Get minimum Write and Read Data Size.
+     * @return int minimum data size Write and Read.
+     */
+    @Override
+    public int getWriteReadMinSize() {
+        return TIME_HEADER_BYTES;
+    }
 }
