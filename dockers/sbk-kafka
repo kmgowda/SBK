@@ -10,6 +10,7 @@
 
 # Building Container
 FROM gradle:6.0.1-jdk11 as GradleBuilder
+MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 USER root
 
 COPY ca-certificates/* /usr/local/share/ca-certificates/
