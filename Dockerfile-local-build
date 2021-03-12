@@ -10,7 +10,8 @@
 
 # Running Container
 
-FROM openjdk:8-jre
+FROM openjdk:11-jre
+MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 
 USER root
 
