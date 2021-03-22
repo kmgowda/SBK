@@ -61,6 +61,9 @@ As an example, just follow the below steps to see the performance graphs
    ```
    kubectl expose deployment grafana --type=LoadBalancer --name=grafana-ext
    ```
+   the execution of above command is one time activity; if you delete and recreate the grafana service, you need not 
+   execute the above command again.
+
 1. now, you will get the external IP address for grafana service. check the output as follows.
    ```
    kmg@kmgs-MBP grafana % kubectl get svc

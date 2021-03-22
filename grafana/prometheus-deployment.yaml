@@ -33,7 +33,7 @@ spec:
       restartPolicy: Always
       volumes:
         - hostPath:
-            path: "/Users/kmg/projects/SBK/grafana/prometheus"
+            path: /Users/kmg/projects/SBK/grafana/prometheus
             type: Directory
           name: etc-prometheus
 status: {}

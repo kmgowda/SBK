@@ -38,15 +38,15 @@ spec:
       restartPolicy: Always
       volumes:
         - hostPath:
-            path: "/Users/kmg/projects/SBK/grafana/dashboards"
+            path: /Users/kmg/projects/SBK/grafana/dashboards
             type: Directory
           name: grafana-dashboards
         - hostPath:
-            path: "/Users/kmg/projects/SBK/grafana/provisioning"
+            path: /Users/kmg/projects/SBK/grafana/provisioning
             type: Directory
           name: grafana-provisioning
         - hostPath:
-            path: "/Users/kmg/projects/SBK/grafana/config.ini"
+            path: /Users/kmg/projects/SBK/grafana/config.ini
             type: File
           name: grafana-config
 status: {}
