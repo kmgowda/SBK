@@ -42,9 +42,13 @@ This command displays the token which is generally a larger size string, copy it
 ## SBK docker image with Kubernetes and command line arguments
 you can directly run the SBK image with command line arguments , below is an example
 ```
-kubectl run busybox  --image=kmgowda/sbk:latest -- -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -seconds 60
+kubectl run sbk --restart=Never --expose=true  --port=9718 --hostport=9718  --image=kmgowda/sbk:latest -- -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -seconds 60
 ```
 
-even though -seconds 60 is specified, the kubectl system always reruns the sbk image.
-
 to pass the command line arguments to SBK image , **"--"** prefix is used before **-class** argument.
+
+
+Example benchmarking command for a file write with busy box is as follows:
+```
+kubectl run sbk --restart=Never --expose=true  --port=9718 --hostport=9718  --image=kmgowda/sbk:latest -- -class  file  -writers 1  -size 100 -seconds 60
+```

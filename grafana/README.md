@@ -64,6 +64,11 @@ As an example, just follow the below steps to see the performance graphs
    the execution of above command is one time activity; if you delete and recreate the grafana service, you need not 
    execute the above command again.
 
+1. Optionally you can expose the prometheus port too as follows
+   ```
+   kubectl expose deployment prometheus --type=LoadBalancer --name=prometheus-ext
+   ```
+
 1. now, you will get the external IP address for grafana service. check the output as follows.
    ```
    kmg@kmgs-MBP grafana % kubectl get svc
