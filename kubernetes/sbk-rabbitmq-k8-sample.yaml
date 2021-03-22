@@ -30,3 +30,5 @@ spec:
           env:
             - name: JAVA_OPTS
               value: "-Xmx1g -Xms1g"
+          ports:
+            - containerPort: 9718
