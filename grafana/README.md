@@ -26,7 +26,12 @@ As an example, just follow the below steps to see the performance graphs
 
 # Grafana with kubernetes
 
-1. use the below command to run the grafana , prometheus pods and deployments
+1. Update the [prometheus mount path](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus-deployment.yaml#L36) to your local <SBK folder>/grafana/prometheus folder. 
+1. Update the [Grafana dashboards path](https://github.com/kmgowda/SBK/blob/master/grafana/grafana-deployment.yaml#L41) to your local <SBK folder>/grafana/dashboards folder.    
+1. Update the [Grafana provisioning path](https://github.com/kmgowda/SBK/blob/master/grafana/grafana-deployment.yaml#L45) to your local <SBK folder>/grafana/provisioning folder, 
+1. Update the [Grafana config file](https://github.com/kmgowda/SBK/blob/master/grafana/grafana-deployment.yaml#L49) 
+   to you local <SBK folder>/grafana/config.ini,  
+1. Use the below command to run the grafana , prometheus pods and deployments
 
    ```
    <SBK dir/grafana>% kubectl apply -f grafana-deployment.yaml -f grafana-service.yaml -f prometheus-deployment.yaml -f  prometheus-service.yaml
@@ -82,7 +87,7 @@ As an example, just follow the below steps to see the performance graphs
    'admin' and password 'admin'.
 
 
-Helper kubctle commands to clean the pods , deployment and services
+Helper kubctl commands to clean the pods , deployment and services
 
 ```
 kubectl delete --all pods 
