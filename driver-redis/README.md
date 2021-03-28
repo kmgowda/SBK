@@ -9,6 +9,7 @@ You may obtain a copy of the License at
 -->
 # Redis Performance benchmarking using SBK
 The Redis driver for SBK supports multi writers and readers performance benchmarking.
+The Redis pub sub is used for end to end latency benchmarking.
 
 
 An example, SBK benchmarking command is
@@ -120,6 +121,60 @@ Total : Redis Reading      78187 records,    1352.5 records/sec,     0.01 MB/sec
 2021-03-07 12:21:03 INFO SBK Benchmark Shutdown
 
 ```
+
+The sample SBK Redis End to End benchmarking output is below
+```
+kmg@kmgs-MBP SBK % ./build/install/sbk/bin/sbk -class redis -size 100 -writers 1 -readers 1 -seconds 60        
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.14.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
+2021-03-28 13:35:19 INFO 
+       _____   ____    _   __
+      / ____| |  _ \  | | / /
+     | (___   | |_) | | |/ /
+      \___ \  |  _ <  |   <
+      ____) | | |_) | | |\ \
+     |_____/  |____/  |_| \_\
+
+2021-03-28 13:35:19 INFO Java Runtime Version: 11.0.8+11
+2021-03-28 13:35:19 INFO SBK Version: 0.861
+2021-03-28 13:35:19 INFO Arguments List: [-class, redis, -size, 100, -writers, 1, -readers, 1, -seconds, 60]
+2021-03-28 13:35:19 INFO sbk.applicationName: sbk
+2021-03-28 13:35:19 INFO sbk.className: sbk
+2021-03-28 13:35:19 INFO Reflections took 55 ms to scan 35 urls, producing 53 keys and 178 values 
+2021-03-28 13:35:19 INFO Available Drivers : 34
+2021-03-28 13:35:19 INFO Arguments to Driver 'Redis' : [-size, 100, -writers, 1, -readers, 1, -seconds, 60]
+2021-03-28 13:35:19 INFO Time Unit: MILLISECONDS
+2021-03-28 13:35:19 INFO Minimum Latency: 0 ms
+2021-03-28 13:35:19 INFO Maximum Latency: 180000 ms
+2021-03-28 13:35:19 INFO Window Latency Store: Array
+2021-03-28 13:35:19 INFO Total Window Latency Store: HashMap
+2021-03-28 13:35:19 INFO PrometheusLogger Started
+2021-03-28 13:35:19 INFO Starting Redis Publisher : 0
+2021-03-28 13:35:19 INFO Starting Redis Consumer : 0
+Redis Write_Reading       5182 records,    1036.0 records/sec,     0.10 MB/sec,      1.0 ms avg latency,      20 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,      20 ms 99.99th.
+Redis Write_Reading       5185 records,    1036.6 records/sec,     0.10 MB/sec,      1.0 ms avg latency,       2 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Redis Write_Reading       5401 records,    1079.6 records/sec,     0.10 MB/sec,      0.9 ms avg latency,       2 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       1 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Redis Write_Reading       5312 records,    1062.2 records/sec,     0.10 MB/sec,      0.9 ms avg latency,       9 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       9 ms 99.99th.
+Redis Write_Reading       5215 records,    1042.8 records/sec,     0.10 MB/sec,      1.0 ms avg latency,       2 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Redis Write_Reading       5299 records,    1059.6 records/sec,     0.10 MB/sec,      0.9 ms avg latency,       2 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Redis Write_Reading       5407 records,    1081.2 records/sec,     0.10 MB/sec,      0.9 ms avg latency,      67 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       1 ms 99th,       2 ms 99.9th,      67 ms 99.99th.
+Redis Write_Reading       5245 records,    1048.4 records/sec,     0.10 MB/sec,      1.0 ms avg latency,       3 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       3 ms 99.99th.
+Redis Write_Reading       5493 records,    1098.4 records/sec,     0.10 MB/sec,      0.9 ms avg latency,       3 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      0 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       1 ms 99th,       2 ms 99.9th,       3 ms 99.99th.
+Redis Write_Reading       5393 records,    1078.4 records/sec,     0.10 MB/sec,      0.9 ms avg latency,       3 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       3 ms 99.99th.
+Redis Write_Reading       5209 records,    1041.6 records/sec,     0.10 MB/sec,      1.0 ms avg latency,       2 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Redis Write_Reading       5347 records,    1072.6 records/sec,     0.10 MB/sec,      0.9 ms avg latency,       2 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       2 ms 99.99th.
+Total : Redis Write_Reading      63688 records,    1061.4 records/sec,     0.10 MB/sec,      0.9 ms avg latency,      67 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      1 ms 10th,       1 ms 25th,       1 ms 50th,       1 ms 75th,       1 ms 90th,       1 ms 95th,       2 ms 99th,       2 ms 99.9th,       3 ms 99.99th.
+2021-03-28 13:36:19 INFO SBK Performance Shutdown
+2021-03-28 13:36:21 WARN redis.clients.jedis.exceptions.JedisConnectionException: java.net.SocketException: Socket is closed
+2021-03-28 13:36:21 INFO PrometheusLogger Stopped
+2021-03-28 13:36:22 INFO SBK Benchmark Shutdown
+
+```
+
 
 
 ## Redis Dockers
