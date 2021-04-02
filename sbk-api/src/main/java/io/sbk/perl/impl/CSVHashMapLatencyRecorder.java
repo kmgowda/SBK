@@ -10,7 +10,6 @@
 
 package io.sbk.perl.impl;
 
-import io.sbk.api.Action;
 import io.sbk.perl.CloneLatencies;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
@@ -30,11 +29,11 @@ public class CSVHashMapLatencyRecorder extends HashMapLatencyRecorder {
     final private CSVPrinter csvPrinter;
 
     CSVHashMapLatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long bytesMax,
-                              double[] percentiles, Time time, Action action, String csvFile) throws IOException {
+                              double[] percentiles, Time time, String action, String csvFile) throws IOException {
         super(baseLatency, latencyThreshold, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time, Integer.MAX_VALUE);
         this.csvFile = csvFile;
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
-                .withHeader("Start Time (" + time.getTimeUnit().toString() + ")", "data size (bytes)", "Records", action.name()+" Latency (" + time.getTimeUnit().name() + ")"));
+                .withHeader("Start Time (" + time.getTimeUnit().toString() + ")", "data size (bytes)", "Records", action+" Latency (" + time.getTimeUnit().name() + ")"));
     }
 
     private void readCSV() {

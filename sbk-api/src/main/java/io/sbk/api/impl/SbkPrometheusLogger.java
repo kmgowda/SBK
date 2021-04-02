@@ -162,7 +162,7 @@ public class SbkPrometheusLogger extends SystemLogger {
             prometheusLogger.stop();
         }
         super.close(params);
-        Printer.log.info("SBK PrometheusLogger Stoped");
+        Printer.log.info("SBK PrometheusLogger Stopped");
     }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
