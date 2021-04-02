@@ -23,7 +23,7 @@ import java.text.DecimalFormat;
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
-public class MetricsLogger implements Print {
+final public class MetricsLogger implements Print {
     final public DecimalFormat format;
     final private Counter bytes;
     final private Counter records;
@@ -107,6 +107,4 @@ public class MetricsLogger implements Print {
             this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));
         }
     }
-
-
 }

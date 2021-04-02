@@ -19,6 +19,7 @@ import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
 /**
  * Class for recoding/printing results on System.out.
@@ -48,7 +49,7 @@ public class SystemLogger implements Logger {
         this.percentiles = getPercentiles();
         for (double p: this.percentiles) {
             if (p < 0 || p > 100) {
-                Printer.log.error("Invalid percentiles indices : " + percentiles.toString());
+                Printer.log.error("Invalid percentiles indices : " + Arrays.toString(percentiles));
                 Printer.log.error("Percentile indices should be greater than 0 and less than 100");
                 throw new IllegalArgumentException();
             }
