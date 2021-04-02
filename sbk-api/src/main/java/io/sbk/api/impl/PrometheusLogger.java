@@ -22,13 +22,15 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Action;
-import io.sbk.api.Config;
-import io.sbk.api.LoggerConfig;
-import io.sbk.api.MetricsConfig;
+import io.sbk.perl.Config;
+import io.sbk.perl.LoggerConfig;
+import io.sbk.perl.MetricsConfig;
 import io.sbk.api.Parameters;
-import io.sbk.api.Print;
-import io.sbk.api.Time;
-import io.sbk.api.TimeUnit;
+import io.sbk.perl.Print;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
+import io.sbk.perl.impl.MetricsLogger;
+import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -183,7 +185,7 @@ public class PrometheusLogger extends SystemLogger {
             printer = this::printMetrics;
             server = createHttpServer(prometheusRegistry);
         }
-        SbkLogger.log.info("PrometheusLogger Started");
+        Printer.log.info("PrometheusLogger Started");
     }
 
     @Override
@@ -195,7 +197,7 @@ public class PrometheusLogger extends SystemLogger {
             server.stop(0);
         }
         super.close(params);
-        SbkLogger.log.info("PrometheusLogger Stopped");
+        Printer.log.info("PrometheusLogger Stopped");
     }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,

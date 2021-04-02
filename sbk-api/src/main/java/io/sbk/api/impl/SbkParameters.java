@@ -9,7 +9,7 @@
  */
 package io.sbk.api.impl;
 
-import io.sbk.api.Config;
+import io.sbk.perl.Config;
 import io.sbk.api.Parameters;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

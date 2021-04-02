@@ -20,7 +20,7 @@ import io.sbk.api.Parameters;
 
 import io.sbk.api.Storage;
 import io.sbk.api.impl.JavaString;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DocumentNotFoundException;
@@ -79,7 +79,7 @@ public class CouchDB implements Storage<String> {
                 dbInstance.deleteDatabase(config.dbName);
             }
         } catch (DocumentNotFoundException ex) {
-            SbkLogger.log.info("The data base : " + config.dbName + " not found");
+            Printer.log.info("The data base : " + config.dbName + " not found");
         }
         // if the second parameter is true, the database will be created if it
         // doesn't exists

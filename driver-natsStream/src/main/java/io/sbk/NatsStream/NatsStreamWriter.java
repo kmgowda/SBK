@@ -9,9 +9,9 @@
  */
 package io.sbk.NatsStream;
 import io.sbk.api.DataType;
-import io.sbk.api.SendChannel;
+import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
 
@@ -22,7 +22,7 @@ import io.nats.streaming.Options.Builder;
 import io.nats.streaming.AckHandler;
 import io.nats.streaming.NatsStreaming;
 import io.nats.streaming.StreamingConnection;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 
 /**
  * Class for NATS Stream Writer.
@@ -52,7 +52,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
         final String[] guid = new String[1];
         final AckHandler acb = (s, e) -> {
             if ((e != null) || !guid[0].equals(s)) {
-                SbkLogger.log.error("NAT Streaming Writer failed !");
+                Printer.log.error("NAT Streaming Writer failed !");
             } else {
                 final long endTime = time.getCurrentTime();
                 record.send(id, ctime, endTime, size, 1);

@@ -7,13 +7,13 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
-import io.sbk.api.CloneLatencies;
-import io.sbk.api.Config;
-import io.sbk.api.LatencyRecorder;
-import io.sbk.api.Print;
-import io.sbk.api.Time;
+import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.Config;
+import io.sbk.perl.LatencyRecorder;
+import io.sbk.perl.Print;
+import io.sbk.perl.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 
 

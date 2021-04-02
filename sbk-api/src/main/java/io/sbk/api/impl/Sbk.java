@@ -18,10 +18,14 @@ import io.sbk.api.Benchmark;
 import io.sbk.api.DataType;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
-import io.sbk.api.Config;
+import io.sbk.perl.Config;
 import io.sbk.api.Storage;
-import io.sbk.api.Time;
-import io.sbk.api.TimeUnit;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
+import io.sbk.perl.impl.MicroSeconds;
+import io.sbk.perl.impl.MilliSeconds;
+import io.sbk.perl.impl.NanoSeconds;
+import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
@@ -157,12 +161,12 @@ public class Sbk {
         String driverName;
         String usageLine;
 
-        SbkLogger.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
-        SbkLogger.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
-        SbkLogger.log.info(Config.NAME.toUpperCase() +" Version: "+version);
-        SbkLogger.log.info("Arguments List: "+Arrays.toString(args));
-        SbkLogger.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
-        SbkLogger.log.info(Config.SBK_CLASS_NAME + ": "+ sbkClassName);
+        Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
+        Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info(Config.NAME.toUpperCase() +" Version: "+version);
+        Printer.log.info("Arguments List: "+Arrays.toString(args));
+        Printer.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
+        Printer.log.info(Config.SBK_CLASS_NAME + ": "+ sbkClassName);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -176,9 +180,9 @@ public class Sbk {
             List<String> driversList;
             try {
                 driversList = getAvailableClassNames(config.packageName);
-                SbkLogger.log.info("Available Drivers : "+ driversList.size());
+                Printer.log.info("Available Drivers : "+ driversList.size());
             } catch (ReflectionsException ex) {
-                SbkLogger.log.warn(ex.toString());
+                Printer.log.warn(ex.toString());
                 driversList = new LinkedList<>();
             }
             if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
@@ -205,7 +209,7 @@ public class Sbk {
                 driverName = searchDriver(driversList, className);
                 if (driverName == null) {
                     String msg = "storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers";
-                    SbkLogger.log.warn(msg);
+                    Printer.log.warn(msg);
                 }
             }
             if (driverName == null) {
@@ -213,7 +217,7 @@ public class Sbk {
             }
             if (driverName.length() == 0) {
                 String errMsg = "No storage driver name supplied/found";
-                SbkLogger.log.error(errMsg);
+                Printer.log.error(errMsg);
                 throw new InstantiationException(errMsg);
             }
 
@@ -241,7 +245,7 @@ public class Sbk {
             params.printHelp();
             throw new InstantiationException("Insufficient command line arguments");
         }
-        SbkLogger.log.info("Arguments to Driver '"+driverName + "' : "+Arrays.toString(nextArgs));
+        Printer.log.info("Arguments to Driver '"+driverName + "' : "+Arrays.toString(nextArgs));
         params.parseArgs(nextArgs);
         if (params.hasOption("help")) {
             throw new InstantiationException("print help !");
@@ -252,7 +256,7 @@ public class Sbk {
         final DataType dType = storageDevice.getDataType();
         if (dType == null) {
             String errMsg = "No storage Data type";
-            SbkLogger.log.error(errMsg);
+            Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
 
@@ -262,7 +266,7 @@ public class Sbk {
                     "Invalid record size: "+ params.getRecordSize() +
                             ", For both Writers and Readers, minimum data size should be "+ minSize +
                             " for data type: " +dType.getClass().getName();
-            SbkLogger.log.error(errMsg);
+            Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
         TimeUnit timeUnit = logger.getTimeUnit();
@@ -273,9 +277,9 @@ public class Sbk {
         } else {
             time = new MilliSeconds();
         }
-        SbkLogger.log.info("Time Unit: "+ timeUnit.toString());
-        SbkLogger.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
-        SbkLogger.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
+        Printer.log.info("Time Unit: "+ timeUnit.toString());
+        Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
+        Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = Action.Write_Reading;

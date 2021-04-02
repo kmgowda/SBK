@@ -11,11 +11,11 @@ package io.sbk.Jdbc;
 
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.SendChannel;
+import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
 import io.sbk.api.Writer;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -76,7 +76,7 @@ public class JdbcWriter implements Writer<String> {
         try {
             st.executeUpdate(gerWriteQuery());
         } catch (SQLException ex) {
-            SbkLogger.log.error("JDBC: recordWrite failed !");
+            Printer.log.error("JDBC: recordWrite failed !");
             throw  new IOException(ex);
         }
         status.endTime =  time.getCurrentTime();

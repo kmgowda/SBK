@@ -10,6 +10,10 @@
 
 package io.sbk.api;
 
+import io.sbk.perl.Config;
+import io.sbk.perl.SendChannel;
+import io.sbk.perl.Time;
+
 import java.io.IOException;
 
 /**
@@ -51,7 +55,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @throws IOException If an exception occurred.
      */
     void recordWrite(DataType<T> dType, T data, int size, Time time,
-                             Status status, SendChannel sendChannel, int id) throws IOException;
+                     Status status, SendChannel sendChannel, int id) throws IOException;
 
 
     /**

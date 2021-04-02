@@ -15,8 +15,8 @@ import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.RateController;
 import io.sbk.api.RunBenchmark;
-import io.sbk.api.SendChannel;
-import io.sbk.api.Time;
+import io.sbk.perl.SendChannel;
+import io.sbk.perl.Time;
 import io.sbk.api.Worker;
 
 import java.io.EOFException;

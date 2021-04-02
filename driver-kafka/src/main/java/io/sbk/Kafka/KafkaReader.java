@@ -18,9 +18,9 @@ import java.time.Duration;
 import java.util.Properties;
 import java.util.Arrays;
 
-import io.sbk.api.SendChannel;
+import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;

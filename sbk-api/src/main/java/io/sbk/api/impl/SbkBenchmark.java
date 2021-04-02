@@ -16,11 +16,18 @@ import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
-import io.sbk.api.Performance;
-import io.sbk.api.Config;
-import io.sbk.api.PeriodicLatencyRecorder;
+import io.sbk.perl.Performance;
+import io.sbk.perl.Config;
+import io.sbk.perl.PeriodicLatencyRecorder;
 import io.sbk.api.Storage;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
+import io.sbk.perl.impl.ArrayLatencyRecorder;
+import io.sbk.perl.impl.CompositeCSVLatencyRecorder;
+import io.sbk.perl.impl.CompositeHashMapLatencyRecorder;
+import io.sbk.perl.impl.HashMapLatencyRecorder;
+import io.sbk.perl.impl.LatencyWindow;
+import io.sbk.perl.impl.CQueuePerformance;
+import io.sbk.system.Printer;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -109,14 +116,14 @@ public class SbkBenchmark implements Benchmark {
             executor = Executors.newFixedThreadPool(threadCount);
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new SbkPerformance(config, params.getWritersCount(), createLatencyRecorder(),
+            writeStats = new CQueuePerformance(config, params.getWritersCount(), createLatencyRecorder(),
                     logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
-            readStats = new SbkPerformance(config, params.getReadersCount(), createLatencyRecorder(),
+            readStats = new CQueuePerformance(config, params.getReadersCount(), createLatencyRecorder(),
                     logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
         } else {
             readStats = null;
@@ -135,19 +142,19 @@ public class SbkBenchmark implements Benchmark {
         if (memSizeMB < config.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time);
-            SbkLogger.log.info("Window Latency Store: Array");
+            Printer.log.info("Window Latency Store: Array");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time, config.maxHashMapSizeMB);
-            SbkLogger.log.info("Window Latency Store: HashMap");
+            Printer.log.info("Window Latency Store: HashMap");
 
         }
         if (config.csv) {
             latencyRecorder = new CompositeCSVLatencyRecorder(window, config.maxHashMapSizeMB, logger, logger::printTotal);
-            SbkLogger.log.info("Total Window Latency Store: HashMap and CSV file");
+            Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {
             latencyRecorder = new CompositeHashMapLatencyRecorder(window, config.maxHashMapSizeMB, logger, logger::printTotal);
-            SbkLogger.log.info("Total Window Latency Store: HashMap");
+            Printer.log.info("Total Window Latency Store: HashMap");
         }
         return latencyRecorder;
     }
@@ -257,7 +264,7 @@ public class SbkBenchmark implements Benchmark {
                         try {
                             x.run();
                         } catch (EOFException ex) {
-                            SbkLogger.log.info("Reader " + x.id +" exited with EOF");
+                            Printer.log.info("Reader " + x.id +" exited with EOF");
                             readersErrCnt.incrementAndGet();
                         } catch (IOException ex) {
                             ex.printStackTrace();
@@ -374,10 +381,10 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (ex != null) {
-            SbkLogger.log.warn("SBK Benchmark Shutdown with Exception "+ex.toString());
+            Printer.log.warn("SBK Benchmark Shutdown with Exception "+ex.toString());
             retFuture.completeExceptionally(ex);
         } else {
-            SbkLogger.log.info("SBK Benchmark Shutdown");
+            Printer.log.info("SBK Benchmark Shutdown");
             retFuture.complete(null);
         }
         retFuture = null;

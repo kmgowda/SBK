@@ -7,16 +7,16 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.sbk.api.Config;
-import io.sbk.api.Print;
-import io.sbk.api.Time;
-import io.sbk.api.TimeUnit;
+import io.sbk.perl.Config;
+import io.sbk.perl.Print;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
 
 import java.text.DecimalFormat;
 
@@ -44,7 +44,7 @@ public class MetricsLogger implements Print {
 
     public MetricsLogger(String storageName, String action, Time time, TimeUnit latencyTimeUnit,
                          double[] percentiles, int writers, int readers, CompositeMeterRegistry compositeRegistry) {
-        this.format = new DecimalFormat(Config.SBK_PERCENTILE_FORMAT);
+        this.format = new DecimalFormat(Config.PERCENTILE_FORMAT);
         final String metricPrefix = Config.NAME.replace(" ", "_").toUpperCase()
                 + "_" + storageName.replace(" ", "_").toUpperCase()
                 + "_" + action.replace(" ", "_");

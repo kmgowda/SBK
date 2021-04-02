@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.perl;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,9 +17,8 @@ public class Config {
     final public static String DESC = "Storage Benchmark Kit";
     final public static String SBK_APP_NAME = "sbk.applicationName";
     final public static String SBK_CLASS_NAME = "sbk.className";
-    final public static String SBK_PERCENTILE_FORMAT = "0.##";
+    final public static String PERCENTILE_FORMAT = "0.##";
 
-    final public static int MIN_DATA_RW_SIZE = DataType.TIME_HEADER_BYTES + 2;
 
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
     final public static int BYTES_PER_KB = 1024;

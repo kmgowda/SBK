@@ -34,7 +34,7 @@ import io.pravega.client.segment.impl.Segment;
 import io.pravega.client.stream.impl.StreamImpl;
 import io.pravega.client.ClientConfig;
 import io.pravega.client.stream.Stream;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 
 /**
  * Class for Pravega stream and segments.
@@ -78,13 +78,13 @@ public class PravegaStreamHandler {
     public void scale() throws InterruptedException, ExecutionException, TimeoutException {
         StreamSegments segments = controller.getCurrentSegments(scope, stream).join();
         final int nseg = segments.getSegments().size();
-        SbkLogger.log.info("Current segments of the stream: " + stream + " = " + nseg);
+        Printer.log.info("Current segments of the stream: " + stream + " = " + nseg);
 
         if (nseg == segCount) {
             return;
         }
 
-        SbkLogger.log.info("The stream: " + stream + " will be manually scaling to " + segCount + " segments");
+        Printer.log.info("The stream: " + stream + " will be manually scaling to " + segCount + " segments");
 
         /*
          * Note that the Upgrade stream API does not change the number of segments;
@@ -116,13 +116,13 @@ public class PravegaStreamHandler {
             throw new TimeoutException("ERROR : Scale operation on stream " + stream + " did not complete");
         }
 
-        SbkLogger.log.info("Number of Segments after manual scale: " +
+        Printer.log.info("Number of Segments after manual scale: " +
                 controller.getCurrentSegments(scope, stream)
                         .get().getSegments().size());
     }
 
     public void recreate() throws InterruptedException, ExecutionException, TimeoutException {
-        SbkLogger.log.info("Sealing and Deleteing the stream : " + stream + " and then recreating the same");
+        Printer.log.info("Sealing and Deleteing the stream : " + stream + " and then recreating the same");
         CompletableFuture<Boolean> sealStatus = controller.sealStream(scope, stream);
         if (!sealStatus.get(timeout, TimeUnit.SECONDS)) {
             throw new TimeoutException("ERROR : Segment sealing operation on stream " + stream + " did not complete");
@@ -157,7 +157,7 @@ public class PravegaStreamHandler {
         try {
             readerGroupManager.deleteReaderGroup(rdGrpName);
         } catch (RuntimeException e) {
-            SbkLogger.log.error("Cannot delete reader group " + rdGrpName + " because it is already deleted");
+            Printer.log.error("Cannot delete reader group " + rdGrpName + " because it is already deleted");
         }
     }
 }

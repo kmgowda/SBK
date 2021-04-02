@@ -8,10 +8,11 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
-import io.sbk.api.Config;
-import io.sbk.api.Print;
+import io.sbk.perl.Config;
+import io.sbk.perl.Print;
+import io.sbk.system.Printer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -30,7 +31,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
     final private String csvFile;
     private CSVPrinter csvPrinter;
 
-    CompositeCSVLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
+    public CompositeCSVLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
         super(window, maxHashMapSizeMB, logger, loggerTotal);
         csvFile = Config.NAME.toUpperCase() + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv";
         csvPrinter = null;
@@ -119,7 +120,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
     public void printTotal(long endTime) {
         window.printPendingData(endTime, windowLogger, this);
         if (csvPrinter != null) {
-            SbkLogger.log.info("Reading CSV file :" +csvFile +" ...");
+            Printer.log.info("Reading CSV file :" +csvFile +" ...");
             try {
                 csvPrinter.close();
             } catch (IOException ex) {
@@ -127,7 +128,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
             }
             readCSV();
             deleteFile(csvFile);
-            SbkLogger.log.info("Deleted CSV file :" +csvFile);
+           Printer.log.info("Deleted CSV file :" +csvFile);
         }
         print(endTime, loggerTotal, null);
     }

@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,13 +15,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 
-import io.sbk.api.Config;
-import io.sbk.api.Performance;
-import io.sbk.api.PeriodicLatencyRecorder;
-import io.sbk.api.SendChannel;
-import io.sbk.api.Time;
-import io.sbk.api.TimeStamp;
-import io.sbk.api.Channel;
+import io.sbk.perl.Config;
+import io.sbk.system.Printer;
+import io.sbk.perl.Performance;
+import io.sbk.perl.PeriodicLatencyRecorder;
+import io.sbk.perl.SendChannel;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeStamp;
+import io.sbk.perl.Channel;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -31,7 +32,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 /**
  * Class for Performance statistics.
  */
-final public class SbkPerformance implements Performance {
+final public class CQueuePerformance implements Performance {
     final private int windowIntervalMS;
     final private int idleNS;
     final private Time time;
@@ -49,8 +50,8 @@ final public class SbkPerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public SbkPerformance(Config config, int workers, PeriodicLatencyRecorder periodicLogger,
-                          int reportingIntervalMS, Time time, ExecutorService executor) {
+    public CQueuePerformance(Config config, int workers, PeriodicLatencyRecorder periodicLogger,
+                             int reportingIntervalMS, Time time, ExecutorService executor) {
         this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
         this.time = time;
@@ -289,10 +290,10 @@ final public class SbkPerformance implements Performance {
             qFuture = null;
         }
         if (ex != null) {
-            SbkLogger.log.warn("SBK Performance Shutdown with Exception:" + ex.toString());
+            Printer.log.warn("SBK Performance Shutdown with Exception:" + ex.toString());
             retFuture.completeExceptionally(ex);
         } else  {
-            SbkLogger.log.info("SBK Performance Shutdown" );
+            Printer.log.info("SBK Performance Shutdown" );
             retFuture.complete(null);
         }
         retFuture = null;

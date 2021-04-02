@@ -8,13 +8,15 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
-import io.sbk.api.CloneLatencies;
-import io.sbk.api.Config;
-import io.sbk.api.LatencyRecorder;
-import io.sbk.api.PeriodicLatencyRecorder;
-import io.sbk.api.Print;
+import io.sbk.system.Printer;
+import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.Config;
+import io.sbk.perl.LatencyRecorder;
+import io.sbk.perl.PeriodicLatencyRecorder;
+import io.sbk.perl.Print;
+
 import javax.annotation.concurrent.NotThreadSafe;
 
 
@@ -27,7 +29,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     final public Print windowLogger;
     final public Print loggerTotal;
 
-    CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
+    public CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
                 window.totalRecordsMax, window.totalBytesMax, window.percentileFractions, window.time, maxHashMapSizeMB);
         this.window = window;
@@ -118,10 +120,10 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
         window.print(currentTime, windowLogger, this);
         if (isOverflow()) {
             if (hashMapBytesCount > maxHashMapSizeBytes) {
-                SbkLogger.log.warn("Hash Map memory size: " + maxHashMapSizeMB +
+                Printer.log.warn("Hash Map memory size: " + maxHashMapSizeMB +
                         " exceeded! Current HashMap size in MB: " + (hashMapBytesCount / Config.BYTES_PER_MB));
             } else {
-                SbkLogger.log.warn("Total Bytes: " + totalBytes + ",  Total Records:" + totalRecords +
+                Printer.log.warn("Total Bytes: " + totalBytes + ",  Total Records:" + totalRecords +
                         ", Total Latency: "+  totalLatency );
             }
             print(currentTime, loggerTotal, null);

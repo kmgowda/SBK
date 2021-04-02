@@ -8,8 +8,8 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RocketMQ;
-import io.sbk.api.SendChannel;
-import io.sbk.api.Time;
+import io.sbk.perl.SendChannel;
+import io.sbk.perl.Time;
 import io.sbk.api.Writer;
 import io.sbk.api.Parameters;
 import org.apache.rocketmq.client.exception.MQClientException;

@@ -11,10 +11,11 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
-import io.sbk.api.Config;
+import io.sbk.perl.Config;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
+import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -29,7 +30,7 @@ public class SystemLogger implements Logger {
     public double[] percentiles;
 
     public SystemLogger() {
-        this.format = new DecimalFormat(Config.SBK_PERCENTILE_FORMAT);
+        this.format = new DecimalFormat(Config.PERCENTILE_FORMAT);
     }
 
     @Override
@@ -47,8 +48,8 @@ public class SystemLogger implements Logger {
         this.percentiles = getPercentiles();
         for (double p: this.percentiles) {
             if (p < 0 || p > 100) {
-                SbkLogger.log.error("Invalid percentiles indices : " + percentiles.toString());
-                SbkLogger.log.error("Percentile indices should be greater than 0 and less than 100");
+                Printer.log.error("Invalid percentiles indices : " + percentiles.toString());
+                Printer.log.error("Percentile indices should be greater than 0 and less than 100");
                 throw new IllegalArgumentException();
             }
         }

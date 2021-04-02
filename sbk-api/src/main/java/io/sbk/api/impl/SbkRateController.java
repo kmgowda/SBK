@@ -9,7 +9,7 @@
  */
 
 package io.sbk.api.impl;
-import io.sbk.api.Config;
+import io.sbk.perl.Config;
 import io.sbk.api.RateController;
 
 final public class SbkRateController implements RateController {
