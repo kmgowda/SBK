@@ -42,8 +42,9 @@ final public class MetricsLogger implements Print {
         double apply(double val);
     }
 
-    public MetricsLogger(String header, String storageName, String action, Time time, TimeUnit latencyTimeUnit,
-                         double[] percentiles, int writers, int readers, CompositeMeterRegistry compositeRegistry) {
+    public MetricsLogger(String header, String storageName, String action, Time time,
+                         int writers, int readers, double[] percentiles, TimeUnit latencyTimeUnit,
+                         CompositeMeterRegistry compositeRegistry) {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
         final String metricPrefix = header.replace(" ", "_").toUpperCase()
                 + "_" + storageName.replace(" ", "_").toUpperCase()
