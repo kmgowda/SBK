@@ -12,13 +12,8 @@ package io.sbk.perl;
 
 import java.util.concurrent.TimeUnit;
 
-public class Config {
-    final public static String NAME = "sbk";
-    final public static String DESC = "Storage Benchmark Kit";
-    final public static String SBK_APP_NAME = "sbk.applicationName";
-    final public static String SBK_CLASS_NAME = "sbk.className";
+public class PerlConfig {
     final public static String PERCENTILE_FORMAT = "0.##";
-
 
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
     final public static int BYTES_PER_KB = 1024;
@@ -43,10 +38,6 @@ public class Config {
     final public static long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
     final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
-
-
-    public String packageName;
-    public boolean fork;
     public TimeUnit timeUnit;
     public int qPerWorker;
     public int idleNS;

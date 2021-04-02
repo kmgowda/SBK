@@ -11,7 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
 import io.sbk.perl.Time;
@@ -30,7 +30,7 @@ public class SystemLogger implements Logger {
     public double[] percentiles;
 
     public SystemLogger() {
-        this.format = new DecimalFormat(Config.PERCENTILE_FORMAT);
+        this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
     }
 
     @Override

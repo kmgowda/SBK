@@ -10,7 +10,7 @@
 package io.sbk.perl.impl;
 
 import io.sbk.perl.CloneLatencies;
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
@@ -62,7 +62,7 @@ public abstract class LatencyWindow extends LatencyRecorder {
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
         final double recsPerSec = this.totalRecords / elapsedSec;
-        final double mbPerSec = (this.totalBytes / (Config.BYTES_PER_MB * 1.0d)) / elapsedSec;
+        final double mbPerSec = (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0d)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
         long[] pecs = getPercentiles(copyLatencies);
         logger.print(this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,

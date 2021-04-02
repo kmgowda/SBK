@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.perl.SendChannel;
 import io.sbk.perl.Time;
 
@@ -109,7 +109,7 @@ public interface DataRecordsReader<T> extends DataReader<T> {
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
+        final long msToRun = reader.params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
@@ -203,7 +203,7 @@ public interface DataRecordsReader<T> extends DataReader<T> {
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
+        final long msToRun = reader.params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
         final long loopStartTime = time.getCurrentTime();
         double secondsElapsed = 0;

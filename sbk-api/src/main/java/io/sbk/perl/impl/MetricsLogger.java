@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
@@ -42,10 +42,10 @@ public class MetricsLogger implements Print {
         double apply(double val);
     }
 
-    public MetricsLogger(String storageName, String action, Time time, TimeUnit latencyTimeUnit,
+    public MetricsLogger(String header, String storageName, String action, Time time, TimeUnit latencyTimeUnit,
                          double[] percentiles, int writers, int readers, CompositeMeterRegistry compositeRegistry) {
-        this.format = new DecimalFormat(Config.PERCENTILE_FORMAT);
-        final String metricPrefix = Config.NAME.replace(" ", "_").toUpperCase()
+        this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
+        final String metricPrefix = header.replace(" ", "_").toUpperCase()
                 + "_" + storageName.replace(" ", "_").toUpperCase()
                 + "_" + action.replace(" ", "_");
         final String metricUnit = latencyTimeUnit.name().replace(" ", "_");

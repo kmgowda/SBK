@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.system.Printer;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PeriodicLatencyRecorder;
@@ -50,21 +50,21 @@ final public class CQueuePerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerformance(Config config, int workers, PeriodicLatencyRecorder periodicLogger,
+    public CQueuePerformance(PerlConfig perlConfig, int workers, PeriodicLatencyRecorder periodicLogger,
                              int reportingIntervalMS, Time time, ExecutorService executor) {
-        this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
+        this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
         this.time = time;
         this.latencyLogger = periodicLogger;
         this.executor = executor;
         this.retFuture = null;
         int maxQs;
-        if (config.maxQs > 0) {
-            maxQs = config.maxQs;
+        if (perlConfig.maxQs > 0) {
+            maxQs = perlConfig.maxQs;
             this.channels = new CQueueChannel[1];
             this.index = 1;
         } else {
-            maxQs =  Math.max(Config.MIN_Q_PER_WORKER, config.qPerWorker);
+            maxQs =  Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
             this.channels = new CQueueChannel[workers];
             this.index = workers;
         }
@@ -81,7 +81,7 @@ final public class CQueuePerformance implements Performance {
         final private long totalRecords;
 
         private QueueProcessor(long secondsToRun, long records) {
-            this.msToRun = secondsToRun * Config.MS_PER_SEC;
+            this.msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
             this.totalRecords = records;
         }
 
@@ -163,7 +163,7 @@ final public class CQueuePerformance implements Performance {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
             double minWaitTimeMS = windowInterval / 50.0;
-            countRatio = (Config.NS_PER_MS * 1.0) / idleNS;
+            countRatio = (PerlConfig.NS_PER_MS * 1.0) / idleNS;
             minIdleCount = (long) (countRatio * minWaitTimeMS);
             elasticCount = minIdleCount;
             idleCount = 0;

@@ -22,7 +22,8 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Action;
-import io.sbk.perl.Config;
+import io.sbk.api.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.perl.LoggerConfig;
 import io.sbk.perl.MetricsConfig;
 import io.sbk.api.Parameters;
@@ -118,9 +119,9 @@ public class PrometheusLogger extends SystemLogger {
 
         int val = 1;
         if (loggerConfig.timeUnit == TimeUnit.ns) {
-            val = Config.NS_PER_MS;
+            val = PerlConfig.NS_PER_MS;
         } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
-            val = Config.MICROS_PER_MS;
+            val = PerlConfig.MICROS_PER_MS;
         }
         minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
         maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
@@ -180,8 +181,8 @@ public class PrometheusLogger extends SystemLogger {
             prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
             compositeRegistry.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
             compositeRegistry.add(prometheusRegistry);
-            metricsLogger = new MetricsLogger(storageName, action.name(), time, config.latencyTimeUnit, percentiles,
-                    params.getWritersCount(), params.getReadersCount(), compositeRegistry);
+            metricsLogger = new MetricsLogger(Config.NAME, storageName, action.name(), time, config.latencyTimeUnit,
+                    percentiles, params.getWritersCount(), params.getReadersCount(), compositeRegistry);
             printer = this::printMetrics;
             server = createHttpServer(prometheusRegistry);
         }

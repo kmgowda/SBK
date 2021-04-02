@@ -15,10 +15,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Action;
 import io.sbk.api.Benchmark;
+import io.sbk.api.Config;
 import io.sbk.api.DataType;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.api.Storage;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
@@ -153,7 +154,7 @@ public class Sbk {
         final Action action;
         final Parameters params;
         final Logger logger;
-        final Config config;
+        final PerlConfig perlConfig;
         final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
@@ -171,15 +172,15 @@ public class Sbk {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
-                Config.class);
+        perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
+                PerlConfig.class);
 
         logger = Objects.requireNonNullElseGet(outLogger, PrometheusLogger::new);
 
         if (storage == null) {
             List<String> driversList;
             try {
-                driversList = getAvailableClassNames(config.packageName);
+                driversList = getAvailableClassNames(Config.PACKAGE_NAME);
                 Printer.log.info("Available Drivers : "+ driversList.size());
             } catch (ReflectionsException ex) {
                 Printer.log.warn(ex.toString());
@@ -222,7 +223,8 @@ public class Sbk {
             }
 
             try {
-                storageDevice = (Storage<?>) Class.forName(config.packageName + "." + driverName + "." + driverName).getConstructor().newInstance();
+                storageDevice =
+                        (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + driverName + "." + driverName).getConstructor().newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                     NoSuchMethodException | InvocationTargetException ex) {
                 final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
@@ -289,7 +291,7 @@ public class Sbk {
         } else {
             action = Action.Writing;
         }
-        return new SbkBenchmark(driverName, action, config, params, storageDevice, dType, logger, time);
+        return new SbkBenchmark(driverName, action, perlConfig, params, storageDevice, dType, logger, time);
     }
 
     private static String[] removeClassName(String[] args) {

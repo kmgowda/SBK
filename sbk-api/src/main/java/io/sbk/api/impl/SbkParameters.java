@@ -9,7 +9,7 @@
  */
 package io.sbk.api.impl;
 
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.api.Parameters;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +74,7 @@ final public class SbkParameters implements Parameters {
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
-        this.timeoutMS = Config.DEFAULT_TIMEOUT_MS;
+        this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
         this.driversList = driversList;
         this.commandline = null;
 
@@ -170,7 +170,7 @@ final public class SbkParameters implements Parameters {
         } else if (recordsCount > 0) {
             secondsToRun = 0;
         } else {
-            secondsToRun = Config.DEFAULT_RUNTIME_SECONDS;
+            secondsToRun = PerlConfig.DEFAULT_RUNTIME_SECONDS;
         }
 
         if (commandline.hasOption("throughput")) {

@@ -12,7 +12,7 @@ package io.sbk.perl.impl;
 
 import io.sbk.system.Printer;
 import io.sbk.perl.CloneLatencies;
-import io.sbk.perl.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.PeriodicLatencyRecorder;
 import io.sbk.perl.Print;
@@ -121,7 +121,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
         if (isOverflow()) {
             if (hashMapBytesCount > maxHashMapSizeBytes) {
                 Printer.log.warn("Hash Map memory size: " + maxHashMapSizeMB +
-                        " exceeded! Current HashMap size in MB: " + (hashMapBytesCount / Config.BYTES_PER_MB));
+                        " exceeded! Current HashMap size in MB: " + (hashMapBytesCount / PerlConfig.BYTES_PER_MB));
             } else {
                 Printer.log.warn("Total Bytes: " + totalBytes + ",  Total Records:" + totalRecords +
                         ", Total Latency: "+  totalLatency );

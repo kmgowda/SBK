@@ -9,7 +9,7 @@
  */
 package io.sbk.File;
 
-import io.sbk.perl.Config;
+import io.sbk.api.Config;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.Writer;

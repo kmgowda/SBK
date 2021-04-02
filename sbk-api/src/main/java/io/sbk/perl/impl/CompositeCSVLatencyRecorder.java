@@ -10,7 +10,6 @@
 
 package io.sbk.perl.impl;
 
-import io.sbk.perl.Config;
 import io.sbk.perl.Print;
 import io.sbk.system.Printer;
 import org.apache.commons.csv.CSVFormat;
@@ -24,16 +23,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.Random;
 
 @NotThreadSafe
 public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder {
     final private String csvFile;
     private CSVPrinter csvPrinter;
 
-    public CompositeCSVLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
+    public CompositeCSVLatencyRecorder( LatencyWindow window, int maxHashMapSizeMB, Print logger,
+                                       Print loggerTotal, String fileName) {
         super(window, maxHashMapSizeMB, logger, loggerTotal);
-        csvFile = Config.NAME.toUpperCase() + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv";
+        csvFile = fileName;
         csvPrinter = null;
     }
 
