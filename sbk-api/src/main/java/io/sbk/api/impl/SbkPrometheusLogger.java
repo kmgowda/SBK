@@ -148,7 +148,7 @@ public class SbkPrometheusLogger extends SystemLogger {
             printer = super::print;
             prometheusLogger = null;
         } else {
-            prometheusLogger = new PrometheusLogger(Config.NAME, storageName, action.name(), time,
+            prometheusLogger = new PrometheusLogger(Config.NAME+" "+storageName, action.name(), time,
                      params.getWritersCount(), params.getReadersCount(), percentiles, config);
             prometheusLogger.start();
             printer = this::printMetrics;
@@ -162,7 +162,7 @@ public class SbkPrometheusLogger extends SystemLogger {
             prometheusLogger.stop();
         }
         super.close(params);
-        Printer.log.info("SBK PrometheusLogger Stopped");
+        Printer.log.info("SBK PrometheusLogger Shutdown");
     }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,

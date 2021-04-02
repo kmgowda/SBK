@@ -32,14 +32,14 @@ public class PrometheusLogger implements Print {
     final private MetricsLogger metricsLogger;
     final private HttpServer server;
 
-    public PrometheusLogger(String header, String storageName, String action, Time time,
-                             int writers, int readers, double[] percentiles, MetricsConfig config) throws IOException {
+    public PrometheusLogger(String header, String action, Time time, int writers, int readers,
+                            double[] percentiles, MetricsConfig config) throws IOException {
         final CompositeMeterRegistry compositeRegistry = Metrics.globalRegistry;
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
         compositeRegistry.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
         compositeRegistry.add(prometheusRegistry);
-        metricsLogger = new MetricsLogger(header, storageName, action, time, writers, readers, percentiles,
+        metricsLogger = new MetricsLogger(header, action, time, writers, readers, percentiles,
                 config.latencyTimeUnit, compositeRegistry);
         server = createHttpServer(prometheusRegistry, config);
     }

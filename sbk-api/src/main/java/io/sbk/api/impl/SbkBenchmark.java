@@ -324,7 +324,7 @@ public class SbkBenchmark implements Benchmark {
                 return null;
             });
         }
-
+        Printer.log.info("SBK Benchmark Started");
         return retFuture;
     }
 

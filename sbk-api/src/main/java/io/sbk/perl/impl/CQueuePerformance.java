@@ -93,7 +93,7 @@ final public class CQueuePerformance implements Performance {
             long recordsCnt = 0;
             boolean notFound;
             TimeStamp t;
-
+            Printer.log.info("Performance Logger Started" );
             latencyLogger.start(startTime);
             while (doWork) {
                 notFound = true;
@@ -290,10 +290,10 @@ final public class CQueuePerformance implements Performance {
             qFuture = null;
         }
         if (ex != null) {
-            Printer.log.warn("SBK Performance Shutdown with Exception:" + ex.toString());
+            Printer.log.warn("Performance Logger Shutdown with Exception:" + ex.toString());
             retFuture.completeExceptionally(ex);
         } else  {
-            Printer.log.info("SBK Performance Shutdown" );
+            Printer.log.info("Performance Logger Shutdown" );
             retFuture.complete(null);
         }
         retFuture = null;

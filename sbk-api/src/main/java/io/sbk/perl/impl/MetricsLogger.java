@@ -42,13 +42,12 @@ final public class MetricsLogger implements Print {
         double apply(double val);
     }
 
-    public MetricsLogger(String header, String storageName, String action, Time time,
+    public MetricsLogger(String header, String action, Time time,
                          int writers, int readers, double[] percentiles, TimeUnit latencyTimeUnit,
                          CompositeMeterRegistry compositeRegistry) {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
-        final String metricPrefix = header.replace(" ", "_").toUpperCase()
-                + "_" + storageName.replace(" ", "_").toUpperCase()
-                + "_" + action.replace(" ", "_");
+        final String metricPrefix = header.replace(" ", "_").toUpperCase() + "_"
+                + action.replace(" ", "_");
         final String metricUnit = latencyTimeUnit.name().replace(" ", "_");
         final String bytesName = metricPrefix + "_Bytes";
         final String recordsName = metricPrefix + "_Records";
