@@ -10,12 +10,12 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.api.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
-import io.sbk.api.SendChannel;
+import io.sbk.perl.SendChannel;
 import io.sbk.api.Callback;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
 import io.sbk.api.Worker;
 
 import java.util.concurrent.CompletableFuture;
@@ -44,7 +44,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
         this.ret = new CompletableFuture<>();
         this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
-        this.msToRun = params.getSecondsToRun() * Config.MS_PER_SEC;
+        this.msToRun = params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
         this.totalRecords = params.getRecordsPerReader() * params.getReadersCount();
 
         if (params.isWriteAndRead()) {

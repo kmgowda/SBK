@@ -13,7 +13,7 @@ import io.sbk.api.Config;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 import io.sbk.api.Writer;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 import io.sbk.api.impl.SbkParameters;
 import org.apache.commons.cli.ParseException;
 import org.junit.Assert;
@@ -248,12 +248,12 @@ public class FileTest {
             arr[i] = readBuffer.get();
         }
         readData = new String(arr, StandardCharsets.UTF_8);
-        SbkLogger.log.info("Write Data: " + data);
-        SbkLogger.log.info("Reader Data: " + readData);
+        Printer.log.info("Write Data: " + data);
+        Printer.log.info("Reader Data: " + readData);
         assertEquals(0, data.compareTo(readData));
         writeBuffer.flip();
-        SbkLogger.log.info("WriteBuffer : " + writeBuffer.toString());
-        SbkLogger.log.info("ReaderBuffer: " + readBuffer.toString());
+        Printer.log.info("WriteBuffer : " + writeBuffer.toString());
+        Printer.log.info("ReaderBuffer: " + readBuffer.toString());
         assertEquals(0, writeBuffer.compareTo(readBuffer));
     }
 
@@ -329,18 +329,18 @@ public class FileTest {
             arr[i] = readBuffer.get();
         }
         readData = new String(arr, StandardCharsets.UTF_8);
-        SbkLogger.log.info("Write Data: " + data);
-        SbkLogger.log.info("Reader Data: " + readData);
+        Printer.log.info("Write Data: " + data);
+        Printer.log.info("Reader Data: " + readData);
         assertEquals(0, data.compareTo(readData));
         writeBuffer.flip();
-        SbkLogger.log.info("WriteBuffer : " + writeBuffer.toString());
-        SbkLogger.log.info("ReaderBuffer: " + readBuffer.toString());
+        Printer.log.info("WriteBuffer : " + writeBuffer.toString());
+        Printer.log.info("ReaderBuffer: " + readBuffer.toString());
         assertEquals(0, writeBuffer.compareTo(readBuffer));
         // read again
         try {
             reader.read();
         } catch (EOFException ex) {
-            SbkLogger.log.info("Got EOF Expected");
+            Printer.log.info("Got EOF Expected");
         } catch (IOException ex) {
             ex.printStackTrace();
             Assert.fail("Reader Failed");

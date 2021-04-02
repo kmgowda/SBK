@@ -8,10 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
-import io.sbk.api.CloneLatencies;
-import io.sbk.api.Time;
+import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -24,7 +24,7 @@ public class ArrayLatencyRecorder extends LatencyWindow {
     private int minIndex;
     private int maxIndex;
 
-    ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
+    public ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];

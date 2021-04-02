@@ -16,7 +16,7 @@ import io.sbk.api.Parameters;
 
 import java.io.IOException;
 
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 import io.sbk.api.impl.StringHandler;
 import redis.clients.jedis.Jedis;
 
@@ -62,10 +62,10 @@ public class Redis implements Storage<String> {
     public DataWriter<String> createWriter(final int id, final Parameters params) {
         try {
             if (params.isWriteAndRead()) {
-                SbkLogger.log.info("Starting Redis Publisher : "+id);
+                Printer.log.info("Starting Redis Publisher : "+id);
                 return new RedisPublisher(id, params, jedis, listName);
             } else {
-                SbkLogger.log.info("Starting Redis Writer : "+id);
+                Printer.log.info("Starting Redis Writer : "+id);
                 return new RedisWriter(id, params, jedis, listName);
             }
         } catch (IOException ex) {
@@ -78,10 +78,10 @@ public class Redis implements Storage<String> {
     public DataReader<String> createReader(final int id, final Parameters params) {
         try {
             if (params.isWriteAndRead()) {
-                SbkLogger.log.info("Starting Redis Consumer : "+id);
+                Printer.log.info("Starting Redis Consumer : "+id);
                 return new RedisConsumer(id, params, jedisConsumer, listName);
             } else {
-                SbkLogger.log.info("Starting Redis Reader : "+id);
+                Printer.log.info("Starting Redis Reader : "+id);
                 return new RedisReader(id, params, jedis, listName);
             }
         } catch (IOException ex) {

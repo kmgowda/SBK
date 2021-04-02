@@ -8,10 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
-import io.sbk.api.Config;
-import io.sbk.api.Time;
-import io.sbk.api.TimeUnit;
+package io.sbk.perl.impl;
+import io.sbk.perl.PerlConfig;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
 
 public class MilliSeconds implements Time {
 
@@ -49,7 +49,7 @@ public class MilliSeconds implements Time {
      * @return elapsed time in seconds
      */
     public double elapsedSeconds(long h, long l) {
-        return (h-l) / (Config.MS_PER_SEC * 1.0);
+        return (h-l) / (PerlConfig.MS_PER_SEC * 1.0);
     }
 
     /**
@@ -58,7 +58,7 @@ public class MilliSeconds implements Time {
      * @return converted time in nanoseconds
      */
     public double convertToNanoSeconds(double t) {
-        return t * Config.NS_PER_MS;
+        return t * PerlConfig.NS_PER_MS;
     }
 
     /**
@@ -67,7 +67,7 @@ public class MilliSeconds implements Time {
      * @return converted time in microseconds
      */
     public double convertToMicroSeconds(double t) {
-        return t * Config.MICROS_PER_MS;
+        return t * PerlConfig.MICROS_PER_MS;
     }
 
     /**

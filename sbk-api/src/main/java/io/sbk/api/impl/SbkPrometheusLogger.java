@@ -12,48 +12,38 @@ package io.sbk.api.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import com.sun.net.httpserver.HttpServer;
-import io.micrometer.core.instrument.Clock;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.micrometer.jmx.JmxConfig;
-import io.micrometer.jmx.JmxMeterRegistry;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.micrometer.prometheus.PrometheusRenameFilter;
 import io.sbk.api.Action;
 import io.sbk.api.Config;
-import io.sbk.api.LoggerConfig;
-import io.sbk.api.MetricsConfig;
+import io.sbk.perl.PerlConfig;
+import io.sbk.perl.LoggerConfig;
+import io.sbk.perl.MetricsConfig;
 import io.sbk.api.Parameters;
-import io.sbk.api.Print;
-import io.sbk.api.Time;
-import io.sbk.api.TimeUnit;
+import io.sbk.perl.Print;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
+import io.sbk.perl.impl.PrometheusLogger;
+import io.sbk.system.Printer;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
 
 
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class PrometheusLogger extends SystemLogger {
+public class SbkPrometheusLogger extends SystemLogger {
     final static String LOGGER_FILE = "logger.properties";
     final static String CONFIG_FILE = "metrics.properties";
     private LoggerConfig loggerConfig;
     private MetricsConfig config;
     private boolean disabled;
     private double[] percentilesIndices;
-    private MetricsLogger metricsLogger;
-    private HttpServer server;
+    private PrometheusLogger prometheusLogger;
     private Print printer;
     private long minLatency;
     private long maxLatency;
 
-    public PrometheusLogger() {
+    public SbkPrometheusLogger() {
         super();
     }
 
@@ -116,27 +106,13 @@ public class PrometheusLogger extends SystemLogger {
 
         int val = 1;
         if (loggerConfig.timeUnit == TimeUnit.ns) {
-            val = Config.NS_PER_MS;
+            val = PerlConfig.NS_PER_MS;
         } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
-            val = Config.MICROS_PER_MS;
+            val = PerlConfig.MICROS_PER_MS;
         }
         minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
         maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
 
-    }
-
-    private HttpServer createHttpServer(PrometheusMeterRegistry prometheusRegistry) throws IOException {
-        final HttpServer server = HttpServer.create(new InetSocketAddress(config.port), 0);
-        server.createContext(config.context, httpExchange -> {
-            String response = prometheusRegistry.scrape();
-            httpExchange.sendResponseHeaders(200, response.getBytes().length);
-            try (OutputStream os = httpExchange.getResponseBody()) {
-                os.write(response.getBytes());
-            }
-        });
-        server.setExecutor(Executors.newSingleThreadExecutor());
-        server.start();
-        return server;
     }
 
     @Override
@@ -170,39 +146,30 @@ public class PrometheusLogger extends SystemLogger {
         super.open(params, storageName, action, time);
         if (disabled) {
             printer = super::print;
-            metricsLogger = null;
-            server = null;
+            prometheusLogger = null;
         } else {
-            final CompositeMeterRegistry compositeRegistry = Metrics.globalRegistry;
-            final PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-            prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
-            compositeRegistry.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
-            compositeRegistry.add(prometheusRegistry);
-            metricsLogger = new MetricsLogger(storageName, action.name(), time, config.latencyTimeUnit, percentiles,
-                    params.getWritersCount(), params.getReadersCount(), compositeRegistry);
+            prometheusLogger = new PrometheusLogger(Config.NAME+" "+storageName, action.name(), time,
+                     params.getWritersCount(), params.getReadersCount(), percentiles, config);
+            prometheusLogger.start();
             printer = this::printMetrics;
-            server = createHttpServer(prometheusRegistry);
         }
-        SbkLogger.log.info("PrometheusLogger Started");
+        Printer.log.info("SBK PrometheusLogger Started");
     }
 
     @Override
     public void close(final Parameters params) throws IllegalArgumentException, IOException  {
-        if (metricsLogger != null) {
-            metricsLogger.close();
-        }
-        if (server != null) {
-            server.stop(0);
+        if (prometheusLogger != null) {
+            prometheusLogger.stop();
         }
         super.close(params);
-        SbkLogger.log.info("PrometheusLogger Stopped");
+        Printer.log.info("SBK PrometheusLogger Shutdown");
     }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
                       long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
-        metricsLogger.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        prometheusLogger.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 

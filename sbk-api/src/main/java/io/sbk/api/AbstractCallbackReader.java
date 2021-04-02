@@ -10,6 +10,9 @@
 
 package io.sbk.api;
 
+import io.sbk.perl.PerlConfig;
+import io.sbk.perl.Time;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -107,7 +110,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
         this.time = time;
         this.readCnt = new AtomicLong(0);
         this.beginTime = time.getCurrentTime();
-        this.msToRun = reader.params.getSecondsToRun() * Config.MS_PER_SEC;
+        this.msToRun = reader.params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
         this.totalRecords = reader.params.getRecordsPerReader() * reader.params.getReadersCount();
         this.ret = new CompletableFuture<>();
         start(callback);

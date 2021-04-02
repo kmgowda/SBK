@@ -7,12 +7,12 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.system;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final public class SbkLogger {
+final public class Printer {
     final private static String LOGGER_NAME = "SBK";
     final public static Logger log = LoggerFactory.getLogger(LOGGER_NAME);
 }

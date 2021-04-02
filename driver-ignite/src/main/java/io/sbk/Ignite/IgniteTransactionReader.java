@@ -13,9 +13,9 @@ package io.sbk.Ignite;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.SendChannel;
+import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.transactions.Transaction;
 

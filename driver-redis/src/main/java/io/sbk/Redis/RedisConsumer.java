@@ -13,7 +13,7 @@ package io.sbk.Redis;
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
 import io.sbk.api.Parameters;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -42,7 +42,7 @@ public class RedisConsumer extends AbstractCallbackReader<String> {
                 }
             }, channelName);
         } catch (JedisConnectionException ex) {
-            SbkLogger.log.warn(ex.toString());
+            Printer.log.warn(ex.toString());
         }
     }
 

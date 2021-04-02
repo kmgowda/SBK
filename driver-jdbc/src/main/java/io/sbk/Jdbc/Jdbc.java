@@ -14,7 +14,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 import io.sbk.api.impl.StringHandler;
 
 import java.io.IOException;
@@ -180,7 +180,7 @@ public class Jdbc implements Storage<String> {
         try {
             Class.forName(config.driver);
         } catch (ClassNotFoundException ex) {
-            SbkLogger.log.error("The JDBC Driver: "+ config.driver+" not found");
+            Printer.log.error("The JDBC Driver: "+ config.driver+" not found");
             throw new IOException(ex);
         }
         final Connection conn;
@@ -206,9 +206,9 @@ public class Jdbc implements Storage<String> {
             driverType = getDriverType(config.url);
             final DatabaseMetaData dbmd = conn.getMetaData();
 
-            SbkLogger.log.info("JDBC Driver Type: " + driverType);
-            SbkLogger.log.info("JDBC Driver Name: " + dbmd.getDriverName());
-            SbkLogger.log.info("JDBC Driver Version: " + dbmd.getDriverVersion());
+            Printer.log.info("JDBC Driver Type: " + driverType);
+            Printer.log.info("JDBC Driver Name: " + dbmd.getDriverName());
+            Printer.log.info("JDBC Driver Version: " + dbmd.getDriverVersion());
             st = conn.createStatement();
         } catch (SQLException ex) {
             throw  new IOException(ex);
@@ -217,14 +217,14 @@ public class Jdbc implements Storage<String> {
 
             try {
                 if (tableExist(conn, config.table)) {
-                    SbkLogger.log.info("The Table: " + config.table + " already exists");
+                    Printer.log.info("The Table: " + config.table + " already exists");
                 }
             } catch (SQLException ex) {
-                SbkLogger.log.error(ex.getMessage());
+                Printer.log.error(ex.getMessage());
             }
 
             if (config.reCreate) {
-                SbkLogger.log.info("Deleting the Table: "+ config.table);
+                Printer.log.info("Deleting the Table: "+ config.table);
                 final String query = dropTableQuery(params);
                 try {
                     st.execute(query);
@@ -232,27 +232,27 @@ public class Jdbc implements Storage<String> {
                         conn.commit();
                     }
                 } catch (SQLException ex) {
-                    SbkLogger.log.info(ex.getMessage());
+                    Printer.log.info(ex.getMessage());
                     try {
                         conn.rollback();
                     } catch (SQLException e) {
-                        SbkLogger.log.error(e.getMessage());
+                        Printer.log.error(e.getMessage());
                     }
                 }
             }
 
             try {
-                SbkLogger.log.info("Creating the Table: " + config.table);
+                Printer.log.info("Creating the Table: " + config.table);
                 st.execute(createTableQuery(params));
                 if (!conn.getAutoCommit()) {
                     conn.commit();
                 }
             } catch ( SQLException ex) {
-                SbkLogger.log.info(ex.getMessage());
+                Printer.log.info(ex.getMessage());
                 try {
                     conn.rollback();
                 } catch (SQLException e) {
-                    SbkLogger.log.error(e.getMessage());
+                    Printer.log.error(e.getMessage());
                 }
             }
             try {

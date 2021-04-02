@@ -7,23 +7,23 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.sbk.api.Config;
-import io.sbk.api.Print;
-import io.sbk.api.Time;
-import io.sbk.api.TimeUnit;
+import io.sbk.perl.PerlConfig;
+import io.sbk.perl.Print;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
 
 import java.text.DecimalFormat;
 
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
-public class MetricsLogger implements Print {
+final public class MetricsLogger implements Print {
     final public DecimalFormat format;
     final private Counter bytes;
     final private Counter records;
@@ -42,12 +42,12 @@ public class MetricsLogger implements Print {
         double apply(double val);
     }
 
-    public MetricsLogger(String storageName, String action, Time time, TimeUnit latencyTimeUnit,
-                         double[] percentiles, int writers, int readers, CompositeMeterRegistry compositeRegistry) {
-        this.format = new DecimalFormat(Config.SBK_PERCENTILE_FORMAT);
-        final String metricPrefix = Config.NAME.replace(" ", "_").toUpperCase()
-                + "_" + storageName.replace(" ", "_").toUpperCase()
-                + "_" + action.replace(" ", "_");
+    public MetricsLogger(String header, String action, Time time,
+                         int writers, int readers, double[] percentiles, TimeUnit latencyTimeUnit,
+                         CompositeMeterRegistry compositeRegistry) {
+        this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
+        final String metricPrefix = header.replace(" ", "_").toUpperCase() + "_"
+                + action.replace(" ", "_");
         final String metricUnit = latencyTimeUnit.name().replace(" ", "_");
         final String bytesName = metricPrefix + "_Bytes";
         final String recordsName = metricPrefix + "_Records";
@@ -107,6 +107,4 @@ public class MetricsLogger implements Print {
             this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));
         }
     }
-
-
 }

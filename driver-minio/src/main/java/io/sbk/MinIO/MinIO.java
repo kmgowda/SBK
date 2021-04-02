@@ -39,7 +39,7 @@ import io.minio.errors.InvalidEndpointException;
 import io.minio.errors.InvalidPortException;
 import io.minio.errors.NoResponseException;
 import io.minio.errors.RegionConflictException;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 
 /**
  * Class for MinIO.
@@ -94,16 +94,16 @@ public class MinIO implements Storage<byte[]> {
             // Check if the bucket already exists.
             boolean isExist = mclient.bucketExists(config.bucketName);
             if (isExist) {
-                SbkLogger.log.info("Bucket '" + config.bucketName +"' already exists.");
+                Printer.log.info("Bucket '" + config.bucketName +"' already exists.");
                 if (config.reCreate && params.getWritersCount() > 0) {
-                    SbkLogger.log.info("Deleting the Bucket: " + config.bucketName );
+                    Printer.log.info("Deleting the Bucket: " + config.bucketName );
                     //Delete all existing objects first
                     final Iterable<Result<Item>> results =
                             mclient.listObjects(config.bucketName, config.bucketName, false);
                     Item item;
                     for (Result<Item> result : results) {
                         item = result.get();
-                        SbkLogger.log.info("Deleting the object: " + item.objectName() );
+                        Printer.log.info("Deleting the object: " + item.objectName() );
                         mclient.removeObject(config.bucketName, item.objectName());
                     }
                     mclient.removeBucket(config.bucketName);
@@ -112,11 +112,11 @@ public class MinIO implements Storage<byte[]> {
             } else if (params.getWritersCount() < 1) {
                 throw  new IOException("Bucket '" + config.bucketName +"' does not exist.");
             } else {
-                SbkLogger.log.info("Bucket '" + config.bucketName +"' does not exist.");
+                Printer.log.info("Bucket '" + config.bucketName +"' does not exist.");
             }
 
             if (!isExist && params.getWritersCount() > 0) {
-                SbkLogger.log.info("Creating the Bucket: " + config.bucketName );
+                Printer.log.info("Creating the Bucket: " + config.bucketName );
                 mclient.makeBucket(config.bucketName);
             }
         } catch (InvalidPortException | InvalidEndpointException | org.xmlpull.v1.XmlPullParserException |

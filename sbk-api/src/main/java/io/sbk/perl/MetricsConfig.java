@@ -7,12 +7,10 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api;
+package io.sbk.perl;
 
-public class LoggerConfig {
-    public int reportingSeconds;
-    public TimeUnit timeUnit;
-    public float minLatencyMS;
-    public float maxLatencyMS;
-    public String percentiles;
+public class MetricsConfig {
+    public int port;
+    public String context;
+    public TimeUnit latencyTimeUnit;
 }

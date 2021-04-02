@@ -18,7 +18,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.Parameters;
 import io.sbk.api.impl.NioByteBuffer;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -87,10 +87,10 @@ public class File implements Storage<ByteBuffer> {
     public DataReader<ByteBuffer> createReader(final int id, final Parameters params) {
         try {
             if (config.asyncThreads > 0) {
-                SbkLogger.log.warn("Asynchronous File Reader initiated !");
+                Printer.log.warn("Asynchronous File Reader initiated !");
                 return new FileAsyncReader(id, params, dType, config);
             } else {
-                SbkLogger.log.info("Synchronous File Reader initiated !");
+                Printer.log.info("Synchronous File Reader initiated !");
                 return new FileReader(id, params, dType, config);
             }
         } catch (IOException ex) {

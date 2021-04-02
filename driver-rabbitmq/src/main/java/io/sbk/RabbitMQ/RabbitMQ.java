@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 
 
 /**
@@ -98,10 +98,10 @@ public class RabbitMQ implements Storage<byte[]> {
     public DataReader<byte[]> createReader(final int id, final Parameters params) {
         try {
             if (async) {
-                SbkLogger.log.info("Starting RabbitMQ CallbackReader");
+                Printer.log.info("Starting RabbitMQ CallbackReader");
                 return new RabbitMQCallbackReader(id, params, connection, topicName, topicName + "-" + id);
             } else {
-                SbkLogger.log.info("Starting RabbitMQ Reader");
+                Printer.log.info("Starting RabbitMQ Reader");
                 return new RabbitMQReader(id, params, connection, topicName, topicName + "-" + id);
             }
         } catch (IOException ex) {

@@ -11,7 +11,7 @@ package io.sbk.Jdbc;
 
 import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
-import io.sbk.api.impl.SbkLogger;
+import io.sbk.system.Printer;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -67,7 +67,7 @@ public class JdbcReader implements Reader<String> {
             try {
                 res = st.executeQuery(getReadQuery());
             } catch (SQLException ex) {
-                SbkLogger.log.error("JDBC:JdbcReader "+getReadQuery()+" failed");
+                Printer.log.error("JDBC:JdbcReader "+getReadQuery()+" failed");
                 ex.printStackTrace();
                 res = null;
             }
@@ -79,7 +79,7 @@ public class JdbcReader implements Reader<String> {
                     throw  new EOFException("JDBC : file red EOF");
                 }
             } catch ( SQLException ex) {
-                SbkLogger.log.error("JDBC:JdbcReader result next failed");
+                Printer.log.error("JDBC:JdbcReader result next failed");
                 ex.printStackTrace();
             }
         }
@@ -91,7 +91,7 @@ public class JdbcReader implements Reader<String> {
         try {
             conn.close();
         } catch (SQLException ex) {
-            SbkLogger.log.error("JDBC:JdbcReader close failed");
+            Printer.log.error("JDBC:JdbcReader close failed");
             ex.printStackTrace();
         }
     }

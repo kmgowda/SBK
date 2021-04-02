@@ -9,6 +9,11 @@
  */
 package io.sbk.api;
 
+import io.sbk.perl.PerlConfig;
+import io.sbk.perl.Print;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
+
 import java.io.IOException;
 
 /**
@@ -70,7 +75,7 @@ public interface Logger extends Print {
      * @return reporting time interval in seconds.
      */
     default int getReportingIntervalSeconds() {
-        return Config.DEFAULT_REPORTING_INTERVAL_SECONDS;
+        return PerlConfig.DEFAULT_REPORTING_INTERVAL_SECONDS;
     }
 
     /**
@@ -87,7 +92,7 @@ public interface Logger extends Print {
      * @return minimum latency value.
      */
     default long getMinLatency() {
-        return Config.DEFAULT_MIN_LATENCY;
+        return PerlConfig.DEFAULT_MIN_LATENCY;
     }
 
     /**
@@ -95,7 +100,7 @@ public interface Logger extends Print {
      * @return Maximum latency value.
      */
     default long getMaxLatency() {
-        return Config.DEFAULT_MAX_LATENCY;
+        return PerlConfig.DEFAULT_MAX_LATENCY;
     }
 
     /**
@@ -103,6 +108,6 @@ public interface Logger extends Print {
      * @return array of percentile Indices.
      */
     default double[] getPercentiles() {
-        return Config.PERCENTILES;
+        return PerlConfig.PERCENTILES;
     }
 }

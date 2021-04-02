@@ -11,16 +11,24 @@ package io.sbk.api.impl;
 
 import io.sbk.api.Action;
 import io.sbk.api.Benchmark;
+import io.sbk.api.Config;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
-import io.sbk.api.Performance;
-import io.sbk.api.Config;
-import io.sbk.api.PeriodicLatencyRecorder;
+import io.sbk.perl.Performance;
+import io.sbk.perl.PerlConfig;
+import io.sbk.perl.PeriodicLatencyRecorder;
 import io.sbk.api.Storage;
-import io.sbk.api.Time;
+import io.sbk.perl.Time;
+import io.sbk.perl.impl.ArrayLatencyRecorder;
+import io.sbk.perl.impl.CompositeCSVLatencyRecorder;
+import io.sbk.perl.impl.CompositeHashMapLatencyRecorder;
+import io.sbk.perl.impl.HashMapLatencyRecorder;
+import io.sbk.perl.impl.LatencyWindow;
+import io.sbk.perl.impl.CQueuePerformance;
+import io.sbk.system.Printer;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -29,6 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -47,7 +56,7 @@ import java.util.stream.Stream;
 public class SbkBenchmark implements Benchmark {
     final private String storageName;
     final private Action action;
-    final private Config config;
+    final private PerlConfig perlConfig;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
     final private Time time;
@@ -70,7 +79,7 @@ public class SbkBenchmark implements Benchmark {
      *
      * @param  storageName          Storage Name
      * @param  action               Action
-     * @param  config               Configuration parameters
+     * @param  perlConfig               Configuration parameters
      * @param  params               Benchmarking input Parameters
      * @param  storage              Storage device/client/driver for benchmarking
      * @param  dType                Data Type.
@@ -78,13 +87,13 @@ public class SbkBenchmark implements Benchmark {
      * @param  time                 time interface
      * @throws IOException          If Exception occurs.
      */
-    public SbkBenchmark(String storageName, Action action, Config config,
+    public SbkBenchmark(String storageName, Action action, PerlConfig perlConfig,
                         Parameters params, Storage<Object> storage,
                         DataType<Object> dType, Logger logger, Time time) throws IOException {
         this.storageName = storageName;
         this.dType = dType;
         this.action = action;
-        this.config = config;
+        this.perlConfig = perlConfig;
         this.params = params;
         this.storage = storage;
         this.logger = logger;
@@ -96,28 +105,28 @@ public class SbkBenchmark implements Benchmark {
             percentileFractions[i] = percentiles[i] / 100.0;
         }
 
-        if (config.maxQs > 0) {
-            this.maxQs = config.maxQs;
+        if (perlConfig.maxQs > 0) {
+            this.maxQs = perlConfig.maxQs;
         } else {
-            this.maxQs = Math.max(Config.MIN_Q_PER_WORKER, config.qPerWorker);
+            this.maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
         }
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 10;
-        if (config.fork) {
+        if (Config.USE_FORK) {
             executor = new ForkJoinPool(threadCount);
         } else {
             executor = Executors.newFixedThreadPool(threadCount);
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new SbkPerformance(config, params.getWritersCount(), createLatencyRecorder(),
-                    logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
+            writeStats = new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
+                    logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
-            readStats = new SbkPerformance(config, params.getReadersCount(), createLatencyRecorder(),
-                    logger.getReportingIntervalSeconds() * Config.MS_PER_SEC, this.time, executor);
+            readStats = new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
+                    logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
         } else {
             readStats = null;
         }
@@ -128,26 +137,27 @@ public class SbkBenchmark implements Benchmark {
 
     private PeriodicLatencyRecorder createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
-        final long memSizeMB = (latencyRange * Config.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
+        final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
         final LatencyWindow window;
         final PeriodicLatencyRecorder latencyRecorder;
 
-        if (memSizeMB < config.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
+        if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time);
-            SbkLogger.log.info("Window Latency Store: Array");
+                    PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
+            Printer.log.info("Window Latency Store: Array");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    Config.LONG_MAX, Config.LONG_MAX, Config.LONG_MAX, percentileFractions, time, config.maxHashMapSizeMB);
-            SbkLogger.log.info("Window Latency Store: HashMap");
+                    PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time, perlConfig.maxHashMapSizeMB);
+            Printer.log.info("Window Latency Store: HashMap");
 
         }
-        if (config.csv) {
-            latencyRecorder = new CompositeCSVLatencyRecorder(window, config.maxHashMapSizeMB, logger, logger::printTotal);
-            SbkLogger.log.info("Total Window Latency Store: HashMap and CSV file");
+        if (perlConfig.csv) {
+            latencyRecorder = new CompositeCSVLatencyRecorder(window, perlConfig.maxHashMapSizeMB, logger, logger::printTotal,
+                    Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv" );
+            Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {
-            latencyRecorder = new CompositeHashMapLatencyRecorder(window, config.maxHashMapSizeMB, logger, logger::printTotal);
-            SbkLogger.log.info("Total Window Latency Store: HashMap");
+            latencyRecorder = new CompositeHashMapLatencyRecorder(window, perlConfig.maxHashMapSizeMB, logger, logger::printTotal);
+            Printer.log.info("Total Window Latency Store: HashMap");
         }
         return latencyRecorder;
     }
@@ -257,7 +267,7 @@ public class SbkBenchmark implements Benchmark {
                         try {
                             x.run();
                         } catch (EOFException ex) {
-                            SbkLogger.log.info("Reader " + x.id +" exited with EOF");
+                            Printer.log.info("Reader " + x.id +" exited with EOF");
                             readersErrCnt.incrementAndGet();
                         } catch (IOException ex) {
                             ex.printStackTrace();
@@ -314,7 +324,7 @@ public class SbkBenchmark implements Benchmark {
                 return null;
             });
         }
-
+        Printer.log.info("SBK Benchmark Started");
         return retFuture;
     }
 
@@ -374,10 +384,10 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (ex != null) {
-            SbkLogger.log.warn("SBK Benchmark Shutdown with Exception "+ex.toString());
+            Printer.log.warn("SBK Benchmark Shutdown with Exception "+ex.toString());
             retFuture.completeExceptionally(ex);
         } else {
-            SbkLogger.log.info("SBK Benchmark Shutdown");
+            Printer.log.info("SBK Benchmark Shutdown");
             retFuture.complete(null);
         }
         retFuture = null;

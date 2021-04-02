@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,13 +15,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 
-import io.sbk.api.Config;
-import io.sbk.api.Performance;
-import io.sbk.api.PeriodicLatencyRecorder;
-import io.sbk.api.SendChannel;
-import io.sbk.api.Time;
-import io.sbk.api.TimeStamp;
-import io.sbk.api.Channel;
+import io.sbk.perl.PerlConfig;
+import io.sbk.system.Printer;
+import io.sbk.perl.Performance;
+import io.sbk.perl.PeriodicLatencyRecorder;
+import io.sbk.perl.SendChannel;
+import io.sbk.perl.Time;
+import io.sbk.perl.TimeStamp;
+import io.sbk.perl.Channel;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -31,7 +32,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 /**
  * Class for Performance statistics.
  */
-final public class SbkPerformance implements Performance {
+final public class CQueuePerformance implements Performance {
     final private int windowIntervalMS;
     final private int idleNS;
     final private Time time;
@@ -49,21 +50,21 @@ final public class SbkPerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public SbkPerformance(Config config, int workers, PeriodicLatencyRecorder periodicLogger,
-                          int reportingIntervalMS, Time time, ExecutorService executor) {
-        this.idleNS = Math.max(Config.MIN_IDLE_NS, config.idleNS);
+    public CQueuePerformance(PerlConfig perlConfig, int workers, PeriodicLatencyRecorder periodicLogger,
+                             int reportingIntervalMS, Time time, ExecutorService executor) {
+        this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
         this.time = time;
         this.latencyLogger = periodicLogger;
         this.executor = executor;
         this.retFuture = null;
         int maxQs;
-        if (config.maxQs > 0) {
-            maxQs = config.maxQs;
+        if (perlConfig.maxQs > 0) {
+            maxQs = perlConfig.maxQs;
             this.channels = new CQueueChannel[1];
             this.index = 1;
         } else {
-            maxQs =  Math.max(Config.MIN_Q_PER_WORKER, config.qPerWorker);
+            maxQs =  Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
             this.channels = new CQueueChannel[workers];
             this.index = workers;
         }
@@ -80,7 +81,7 @@ final public class SbkPerformance implements Performance {
         final private long totalRecords;
 
         private QueueProcessor(long secondsToRun, long records) {
-            this.msToRun = secondsToRun * Config.MS_PER_SEC;
+            this.msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
             this.totalRecords = records;
         }
 
@@ -92,7 +93,7 @@ final public class SbkPerformance implements Performance {
             long recordsCnt = 0;
             boolean notFound;
             TimeStamp t;
-
+            Printer.log.info("Performance Logger Started" );
             latencyLogger.start(startTime);
             while (doWork) {
                 notFound = true;
@@ -162,7 +163,7 @@ final public class SbkPerformance implements Performance {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
             double minWaitTimeMS = windowInterval / 50.0;
-            countRatio = (Config.NS_PER_MS * 1.0) / idleNS;
+            countRatio = (PerlConfig.NS_PER_MS * 1.0) / idleNS;
             minIdleCount = (long) (countRatio * minWaitTimeMS);
             elasticCount = minIdleCount;
             idleCount = 0;
@@ -289,10 +290,10 @@ final public class SbkPerformance implements Performance {
             qFuture = null;
         }
         if (ex != null) {
-            SbkLogger.log.warn("SBK Performance Shutdown with Exception:" + ex.toString());
+            Printer.log.warn("Performance Logger Shutdown with Exception:" + ex.toString());
             retFuture.completeExceptionally(ex);
         } else  {
-            SbkLogger.log.info("SBK Performance Shutdown" );
+            Printer.log.info("Performance Logger Shutdown" );
             retFuture.complete(null);
         }
         retFuture = null;

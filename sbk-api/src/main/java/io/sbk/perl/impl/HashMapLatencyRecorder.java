@@ -8,11 +8,12 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.perl.impl;
 
-import io.sbk.api.CloneLatencies;
-import io.sbk.api.Config;
-import io.sbk.api.Time;
+import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.PerlConfig;
+import io.sbk.perl.Time;
+
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,13 +30,13 @@ public class HashMapLatencyRecorder extends LatencyWindow {
     final public int incBytes;
     public long hashMapBytesCount;
 
-    HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
-                           double[] percentiles, Time time, int maxHashMapSizeMB) {
+    public HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
+                                  double[] percentiles, Time time, int maxHashMapSizeMB) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new HashMap<>();
         this.maxHashMapSizeMB = maxHashMapSizeMB;
-        this.maxHashMapSizeBytes = ((long) maxHashMapSizeMB) * Config.BYTES_PER_MB;
-        this.incBytes = Config.LATENCY_VALUE_SIZE_BYTES * 2;
+        this.maxHashMapSizeBytes = ((long) maxHashMapSizeMB) * PerlConfig.BYTES_PER_MB;
+        this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
         this.hashMapBytesCount = 0;
     }
 
