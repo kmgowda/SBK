@@ -21,7 +21,7 @@ import io.sbk.api.Parameters;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
-import io.sbk.perl.impl.PrometheusLogger;
+import io.sbk.perl.impl.RWPrometheusMetricsServer;
 import io.sbk.system.Printer;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class SbkPrometheusLogger extends SystemLogger {
     private MetricsConfig config;
     private boolean disabled;
     private double[] percentilesIndices;
-    private PrometheusLogger prometheusLogger;
+    private RWPrometheusMetricsServer prometheusServer;
     private Print printer;
     private long minLatency;
     private long maxLatency;
@@ -146,11 +146,11 @@ public class SbkPrometheusLogger extends SystemLogger {
         super.open(params, storageName, action, time);
         if (disabled) {
             printer = super::print;
-            prometheusLogger = null;
+            prometheusServer = null;
         } else {
-            prometheusLogger = new PrometheusLogger(Config.NAME+" "+storageName, action.name(), time,
-                     params.getWritersCount(), params.getReadersCount(), percentiles, config);
-            prometheusLogger.start();
+            prometheusServer = new RWPrometheusMetricsServer(Config.NAME+" "+storageName, action.name(), percentiles,
+                    time, config,  params.getReadersCount(), params.getWritersCount());
+            prometheusServer.start();
             printer = this::printMetrics;
         }
         Printer.log.info("SBK PrometheusLogger Started");
@@ -158,8 +158,8 @@ public class SbkPrometheusLogger extends SystemLogger {
 
     @Override
     public void close(final Parameters params) throws IllegalArgumentException, IOException  {
-        if (prometheusLogger != null) {
-            prometheusLogger.stop();
+        if (prometheusServer != null) {
+            prometheusServer.stop();
         }
         super.close(params);
         Printer.log.info("SBK PrometheusLogger Shutdown");
@@ -169,7 +169,7 @@ public class SbkPrometheusLogger extends SystemLogger {
                       long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
-        prometheusLogger.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        prometheusServer.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 

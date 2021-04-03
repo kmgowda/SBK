@@ -23,7 +23,9 @@ import java.text.DecimalFormat;
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
-final public class MetricsLogger implements Print {
+public class MetricsLogger implements Print {
+    final public String metricPrefix;
+    final public MeterRegistry registry;
     final public DecimalFormat format;
     final private Counter bytes;
     final private Counter records;
@@ -35,18 +37,16 @@ final public class MetricsLogger implements Print {
     final private AtomicDouble avgLatency;
     final private AtomicDouble maxLatency;
     final private AtomicDouble[] percentileGauges;
-    final private MeterRegistry registry;
     final private Convert convert;
 
     private interface Convert {
         double apply(double val);
     }
 
-    public MetricsLogger(String header, String action, Time time,
-                         int writers, int readers, double[] percentiles, TimeUnit latencyTimeUnit,
-                         CompositeMeterRegistry compositeRegistry) {
+    public MetricsLogger(String header, String action, double[] percentiles,
+                         Time time, TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
-        final String metricPrefix = header.replace(" ", "_").toUpperCase() + "_"
+        this.metricPrefix = header.replace(" ", "_").toUpperCase() + "_"
                 + action.replace(" ", "_");
         final String metricUnit = latencyTimeUnit.name().replace(" ", "_");
         final String bytesName = metricPrefix + "_Bytes";
@@ -58,11 +58,7 @@ final public class MetricsLogger implements Print {
         final String invalidLatencyRecordsName = metricPrefix + "_InvalidLatencyRecords";
         final String lowerDiscardName = metricPrefix + "_LowerDiscardedLatencyRecords";
         final String higherDiscardName = metricPrefix + "_HigherDiscardLatencyRecords";
-        final String writersName = metricPrefix + "_Writers";
-        final String readersName = metricPrefix + "_Readers";
         this.registry = compositeRegistry;
-        this.registry.gauge(writersName, writers);
-        this.registry.gauge(readersName, readers);
         this.bytes = this.registry.counter(bytesName);
         this.records = this.registry.counter(recordsName);
         this.lowerDiscard = this.registry.counter(lowerDiscardName);
