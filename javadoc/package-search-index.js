@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.sbk.api"},{"l":"io.sbk.api.impl"},{"l":"io.sbk.main"}]
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.sbk.api"},{"l":"io.sbk.api.impl"},{"l":"io.sbk.main"},{"l":"io.sbk.perl"},{"l":"io.sbk.perl.impl"},{"l":"io.sbk.system"}]
