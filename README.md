@@ -74,6 +74,7 @@ The Latency values can be measured either in milliseconds, microseconds or nanos
 1. [Apache Hive](https://hive.apache.org)
 1. [MariaDB](https://github.com/kmgowda/SBK/tree/master/driver-mariadb)
 1. [Redpanda](https://github.com/kmgowda/SBK/tree/master/driver-redpanda)
+1. [Redis](https://github.com/kmgowda/SBK/tree/master/driver-redis)
 
 *In the future, many more storage systems drivers will be plugged in* 
 
