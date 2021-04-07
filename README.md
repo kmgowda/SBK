@@ -15,7 +15,7 @@ You may obtain a copy of the License at
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system.
 If you are curious to measure the  maximum throughput performance of your storage device/system, then SBK is the right software for you.
-The SBK itself a very high-performance benchmark  tool/framework.
+The SBK itself a very high-performance benchmark tool/framework.
 It massively writes the data to storage system and reads the data from storage system.
 The SBK supports multi writers and readers and also the End to End latency benchmarking.
 The percentiles are calculated for complete data written/read without any sampling; hence the percentiles are 100% accurate.
@@ -79,7 +79,7 @@ The Latency values can be measured either in milliseconds, microseconds or nanos
 *In the future, many more storage systems drivers will be plugged in* 
 
 we welcome open source developers to contribute to this project by adding a driver your storage device and any features to SBK. Refer to : 
-* [[Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk)] for the Contributing guidlines.
+* [[Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk)] for the Contributing guidelines.
 * [[Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver (storage device driver or client) for performance benchmarking.  
 
 ## Build SBK
@@ -193,9 +193,9 @@ if you want to change the port number and context, you can use the command line 
 you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
 If you want to include additional SBK nodes/instances to fetch the performance data or from port number other than 9718, you need to extend or update [targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json)   
 In case, if you are fetching metrics/benchmark data from remote http server ,  or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) too.
-Run the grafana server (cum client) to fetch the benchmark data from  prometheus.
+Run the grafana server (cum a client) to fetch the benchmark data from  prometheus.
 For example, if you are running local grafana server then by default it  fetches the data from prometheus server at the local port 9090.
-You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default user name / password.
+You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default username / password.
 you can import the grafana dashboards to fetch the SBK benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
@@ -204,7 +204,9 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 
 #### Port conflicts between storage servers and grafana/prometheus
 * If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) before deploying the prometheus. 
-* If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you change the SBK's http port usig **-metrics** option and you need change the [Prometheus targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json) too
+* If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you 
+  can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json]
+  (https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json) too
 
 
 ## SBK Docker Containers
@@ -219,7 +221,8 @@ you can straightaway run the docker image too, For example
 ```
 docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -seconds 60
 ```
-* Note that the option **-p 127.0.0.1:9718:9718/tcp** redirects the 9718 port to local port for fetch the performance metric data for Prometheus.  
+* Note that the option **-p 127.0.0.1:9718:9718/tcp** redirects the 9718 port to local port to fetch the performance 
+  metric data for Prometheus.  
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
 ### SBK Docker Compose
@@ -242,11 +245,14 @@ As an example, just follow the below steps to see the performance graphs
 1. The SBK docker compose runs the SBK image as docker container. 
    In case, if you are running SBK as an application, and you want to see the SBK performance graphs using Grafana,
    then use [Grafana Docker compose](https://github.com/kmgowda/SBK/tree/master/grafana)
-
+   
    
 ## SBK Kubernetes
 
-check these [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/kubernetes) 
+check these [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/kubernetes) for details 
+on SBK as kubernetes pod.
+If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment]
+(https://github.com/kmgowda/SBK/tree/master/grafana#grafana-with-kubernetes)
 
 
 ## SBK Execution Modes
@@ -353,9 +359,9 @@ All submissions to the master are done through pull requests. If you'd like to m
 3. Make your changes. 
     * you can refer ([Oracle Java Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for coding style; however, Running the Gradle build helps you to fix the Coding syte issues too. 
 4. Verify all changes are working and Gradle build checkstyle is good.
-5. Submit a pull request with Issue numer, Description and your Sign-off.
+5. Submit a pull request with Issue number, Description and your Sign-off.
 
-Make sure that you update the issue with all details of testing you have done; it will helpful for me to review and merge.
+Make sure that you update the issue with all details of testing you have done; it will be helpful for me to review and merge.
 
 Another important point to consider is how to keep up with changes against the base the branch (the one your pull request is comparing against). Let's assume that the base branch is master. To make sure that your changes reflect the recent commits, I recommend that you rebase frequently. The command I suggest you use is:
 
@@ -366,7 +372,7 @@ git push --force origin <pr-branch-name>
 in the above, I'm assuming that:
 
 * upstream is kmgowda/SBK.git
-* origin is youraccount/SBK.git
+* origin is <your account>/SBK.git
 
 The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
 
@@ -385,7 +391,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
 
 ## Add your driver to SBK
-1. Create the gradle sub project preferable with the name **driver-<your driver(storage device) name>**.
+1. Create the gradle subproject preferable with the name **driver-<your driver(storage device) name>**.
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
 
@@ -404,21 +410,21 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#addArgs-io.sbk.api.Parameters-)]
       * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
         
-      b). Parse your driver specific paramters: [[parseArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#parseArgs-io.sbk.api.Parameters-)]
+      b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#parseArgs-io.sbk.api.Parameters-)]
         
       c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#openStorage-io.sbk.api.Parameters-)]
         
       d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#closeStorage-io.sbk.api.Parameters-)]
         
       e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#createWriter-int-io.sbk.api.Parameters-)]
-        * Create Writer will be called multiple times by SBK incase of Multi writers are specified in the command line.   
+        * Create Writer will be called multiple times by SBK in case of Multi writers are specified in the command line.   
         
       f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#createReader-int-io.sbk.api.Parameters-)]
-        * Create Reader will be called multiple times by SBK incase of Multi readers are specified in the command line. 
+        * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line. 
         
       g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html#getDataType--)]
         * In case if your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
-        * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implemenation.
+        * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
 
     
 4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html)]
@@ -433,7 +439,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
         
       c). Close the Writer: [[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#close--)]
         
-      d). In case , if you want to have your own recordWrite implemenation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#recordWrite-byte:A-io.sbk.perl.SendChannel-)]
+      d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Writer.html#recordWrite-byte:A-io.sbk.perl.SendChannel-)]
 
 
 5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html)]
@@ -442,21 +448,23 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
     * you have to implement the following methods of Reader class:
         
-      a). Read Data (synchronous reades): [[read](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#read--)]
+      i). Read Data 
+      1. for synchronous reads: [[read](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#read--)]
+      2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/AsyncReader.html)]
         
-      b). Close the Reader:[[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#close--)] 
+      ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#close--)] 
 
 
-6.  Add the Gradle dependecy [ compile project(":sbk-api")]   to your sub-project (driver)
+6.  Add the Gradle dependency [ compile project(":sbk-api")] to your sub-project (driver)
 
     * see the Example:[[Pulsar Gradle Build](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle)]
 
 
-7. Add your sub project to main gradle as dependency.
+7. Add your subproject to main gradle as dependency.
 
     * see the Example: [[SBK Gradle](https://github.com/kmgowda/sbk/blob/master/build.gradle#L66)]
     
-    * make sure that gradle settings file: [[SBK Gradle Settings](https://github.com/kmgowda/sbk/blob/master/settings.gradle#L13)] has your Storage driver sub project name
+    * make sure that gradle settings file: [[SBK Gradle Settings](https://github.com/kmgowda/sbk/blob/master/settings.gradle#L13)] has your Storage driver subproject name
 
 
 8. That's all ; Now, Build the SBK included your driver with the command:
@@ -472,7 +480,7 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
 
-9.  To invoke the benchmarking of the your driver you have issue the parameters "-class < your driver name>"
+9.  To invoke the benchmarking of the driver you have issue the parameters "-class < your driver name>"
 
 Example: For pulsar driver
 ```
@@ -515,7 +523,7 @@ usage: sbk -class pulsar
 
 
 ## Use SBK git hub packages
-Instead of using entire SBK framework, if you just want use the [SBK framework API](https://github.com/kmgowda?tab=packages&repo_name=SBK) packages to measure the performance benchmarking of your storage device/software, then follow the below simple and easy steps.
+Instead of using entire SBK framework, if you just want to use the [SBK framework API](https://github.com/kmgowda?tab=packages&repo_name=SBK) packages to measure the performance benchmarking of your storage device/software, then follow the below simple and easy steps.
 
 1. Add the SBK git hub package repository and dependency in gradle build file of your project as follows
     
@@ -541,7 +549,7 @@ Instead of using entire SBK framework, if you just want use the [SBK framework A
    ```
    few points to remember here
    
-    *  you need to authenticate with your git hub user name (GITHUB_USERNAME) and git hub token (GITHUB_TOKEN) 
+    *  you need to authenticate with your git hub username (GITHUB_USERNAME) and git hub token (GITHUB_TOKEN) 
     *  mavenCentral() repository is required to fetch the SBK's dependencies too.
     *  check this example: [File system benchmarking git hub build](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/gitpackage-build.gradle)
   
@@ -561,7 +569,7 @@ Instead of using entire SBK framework, if you just want use the [SBK framework A
             Sbk.run(args  /* Command line Arguments */ , 
                   device /* your storage deivce object */ , 
                   null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
-                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by defalt */ );
+                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by default */ );
             
             
         } catch (ParseException | IllegalArgumentException | IOException |
@@ -616,7 +624,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
             Sbk.run(args  /* Command line Arguments */ , 
                   device /* your storage deivce object */ , 
                   null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
-                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by defalt */ );
+                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by default */ );
             
             
         } catch (ParseException | IllegalArgumentException | IOException |
@@ -635,7 +643,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
 
 
 ## Use SBK from Maven Central
-The SBK APIs Package is available at [maven central](https://search.maven.org/classic/#artifactdetails%7Cio.github.kmgowda%7Csbk-api%7C0.84%7Cjar) too.. to use the sbk-api package , follow below steps
+The SBK APIs Package is available at [maven central](https://search.maven.org/classic/#artifactdetails%7Cio.github.kmgowda%7Csbk-api%7C0.84%7Cjar) too. to use the sbk-api package, follow below steps
 
 
 1. Add the SBK git hub package repository and dependency in gradle build file of your project as follows
@@ -668,7 +676,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
             Sbk.run(args  /* Command line Arguments */ , 
                   device /* your storage deivce object */ , 
                   null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
-                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by defalt */ );
+                  null /* Logger, if you dont have your own logger, then prometheus logger will be used by default */ );
             
             
         } catch (ParseException | IllegalArgumentException | IOException |
