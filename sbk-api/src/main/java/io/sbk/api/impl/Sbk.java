@@ -209,7 +209,7 @@ public class Sbk {
             if (driversList.size() > 0) {
                 driverName = searchDriver(driversList, className);
                 if (driverName == null) {
-                    String msg = "storage driver: " + className+ " not found in the SBK, run with -help to see the supported drivers";
+                    String msg = "storage driver: " + className+ " not found in the SBK";
                     Printer.log.warn(msg);
                 }
             }
@@ -230,7 +230,8 @@ public class Sbk {
                 final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
                 logger.addArgs(paramsHelp);
                 paramsHelp.printHelp();
-                throw new IllegalArgumentException(ex);
+                String errMsg = "storage driver: " + driverName+ " Instantiation failed";
+                throw new InstantiationException(errMsg);
             }
 
         } else {
