@@ -444,14 +444,15 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
 5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html)]
 
-    * See the Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
-
     * you have to implement the following methods of Reader class:
         
       i). Read Data 
       1. for synchronous reads: [[read](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#read--)]
+         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
       2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/AsyncReader.html)]
-      3. for call-back reads : [[Abstract callback Reader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/AbstractCallbackReader.html)]
+         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/driver-file/src/main/java/io/sbk/File/FileAsyncReader.java)]
+      3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/AbstractCallbackReader.html)]
+         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/driver-rabbitmq/src/main/java/io/sbk/RabbitMQ/RabbitMQCallbackReader.java)]
         
       ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Reader.html#close--)] 
 
