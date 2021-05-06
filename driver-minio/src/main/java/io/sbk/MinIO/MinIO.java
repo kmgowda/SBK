@@ -50,12 +50,24 @@ public class MinIO implements Storage<byte[]> {
     private MinioClient mclient;
     private DataType<byte[]> dType;
 
+
+    /**
+     * Get the JDBC config file.
+     * The first invocation of the method is always in addArgs.
+     * @return JDBC driver name
+     */
+    public String getConfigFile() {
+        return CONFIGFILE;
+    }
+
+
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            config = mapper.readValue(Objects.requireNonNull(MinIO.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+            config = mapper.readValue(
+                    Objects.requireNonNull(MinIO.class.getClassLoader().getResourceAsStream(getConfigFile())),
                     MinIOConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
