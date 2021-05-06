@@ -275,6 +275,7 @@ dependencies {
 	compile project(':driver-redpanda')
 	compile project(':driver-csv')
 	compile project(':driver-redis')
+	compile project(':driver-seaweedS3')
 }
 
 //create a single Jar with all dependencies
