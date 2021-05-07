@@ -59,4 +59,5 @@
     <allow pkg="org.bson" />
     <allow pkg="org.ektorp" />
     <allow pkg="redis.clients" />
+    <allow pkg="com.datastax" />
 </import-control>

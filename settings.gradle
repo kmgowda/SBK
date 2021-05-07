@@ -48,4 +48,5 @@ include 'driver-redpanda'
 include 'driver-csv'
 include 'driver-redis'
 include 'driver-seaweedS3'
+include 'driver-cassandra'
 
