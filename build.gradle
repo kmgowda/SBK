@@ -276,6 +276,7 @@ dependencies {
 	compile project(':driver-csv')
 	compile project(':driver-redis')
 	compile project(':driver-seaweedS3')
+	compile project(':driver-cassandra')
 }
 
 //create a single Jar with all dependencies
