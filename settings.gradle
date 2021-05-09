@@ -50,4 +50,5 @@ include 'driver-redis'
 include 'driver-seaweedS3'
 include 'driver-cassandra'
 include 'driver-db2'
+include 'driver-seaweedfs'
 

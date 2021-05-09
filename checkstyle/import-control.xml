@@ -60,4 +60,6 @@
     <allow pkg="org.ektorp" />
     <allow pkg="redis.clients" />
     <allow pkg="com.datastax" />
+    <allow pkg="seaweedfs.client" />
+    <allow pkg="seaweed.hdfs" />
 </import-control>
