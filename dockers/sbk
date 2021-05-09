@@ -52,6 +52,7 @@ COPY --chown=root:root driver-mysql ${APP_HOME}/driver-mysql
 COPY --chown=root:root driver-postgresql ${APP_HOME}/driver-postgresql
 COPY --chown=root:root driver-derby ${APP_HOME}/driver-derby
 COPY --chown=root:root driver-mssql ${APP_HOME}/driver-mssql
+COPY --chown=root:root driver-db2 ${APP_HOME}/driver-db2
 COPY --chown=root:root driver-jdbc ${APP_HOME}/driver-jdbc
 COPY --chown=root:root driver-seaweedS3 ${APP_HOME}/driver-seaweedS3
 COPY --chown=root:root driver-minio ${APP_HOME}/driver-minio
