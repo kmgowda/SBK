@@ -13,7 +13,7 @@ package io.sbk.SeaweedS3;
 import io.sbk.MinIO.MinIO;
 
 public class SeaweedS3 extends MinIO {
-    private final static String CONFIGFILE = "seaweedS3.properties";
+    private final static String CONFIGFILE = "seaweeds3.properties";
 
     @Override
     public String getConfigFile() {

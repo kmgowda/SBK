@@ -275,7 +275,7 @@ dependencies {
 	compile project(':driver-redpanda')
 	compile project(':driver-csv')
 	compile project(':driver-redis')
-	compile project(':driver-seaweedS3')
+	compile project(':driver-seaweeds3')
 	compile project(':driver-cassandra')
 	compile project(':driver-db2')
 }
