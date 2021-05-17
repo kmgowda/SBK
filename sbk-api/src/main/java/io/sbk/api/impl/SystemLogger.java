@@ -11,8 +11,8 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
+import io.sbk.api.RWLogger;
 import io.sbk.perl.PerlConfig;
-import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
 import io.sbk.perl.Time;
 import io.sbk.system.Printer;
@@ -20,19 +20,23 @@ import io.sbk.system.Printer;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class for recoding/printing results on System.out.
  */
-public class SystemLogger implements Logger {
+public class SystemLogger implements RWLogger {
     final public DecimalFormat format;
     public String prefix;
     public String timeUnit;
     public double[] percentiles;
+    private AtomicInteger writers;
+    private AtomicInteger readers;
 
     public SystemLogger() {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
     }
+
 
     @Override
     public void addArgs(final Parameters params) throws IllegalArgumentException {
@@ -54,18 +58,30 @@ public class SystemLogger implements Logger {
                 throw new IllegalArgumentException();
             }
         }
+        this.writers = new AtomicInteger(0);
+        this.readers = new AtomicInteger(0);
     }
 
     @Override
     public void close(final Parameters params) throws IOException  {
     }
 
+    @Override
+    public void setWritersCount(int writers) {
+        this.writers.set(writers);
+    }
+
+    @Override
+    public void setReadersCount(int readers) {
+        this.readers.set(readers);
+    }
 
     public String buildResultString(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                                long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         StringBuilder out = new StringBuilder();
 
         out.append(prefix);
+        out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
         out.append(String.format("%11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
                         " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;", records, recsPerSec, mbPerSec, avgLatency,
                 timeUnit, maxLatency, timeUnit, invalid, lowerDiscard, higherDiscard));
