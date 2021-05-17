@@ -17,8 +17,8 @@ import io.sbk.api.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
-import io.sbk.api.Logger;
 import io.sbk.api.Parameters;
+import io.sbk.api.RWLogger;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.Storage;
 import io.sbk.perl.Time;
@@ -60,7 +60,8 @@ public class Sbk {
      *                if you pass 'null', then name of the storage should be in args '-class' arguments
      *                and storage object should be available in the package 'io.sbk.storage'.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
-     * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus logger will be used.
+     * @param outLogger RWLogger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                  logger will be used.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
@@ -69,7 +70,7 @@ public class Sbk {
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
     public static void run(final String[] args, final Storage<Object> storage,
-                           final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
+                           final String applicationName, RWLogger outLogger) throws ParseException, IllegalArgumentException,
              IOException, InterruptedException, ExecutionException, TimeoutException {
 
         final CompletableFuture<Void> ret = runAsync(args, storage, applicationName, outLogger);
@@ -88,14 +89,16 @@ public class Sbk {
      *                if you pass 'null', then name of the storage should be in args '-class' arguments
      *                and storage object should be available in the package 'io.sbk.storage'.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
-     * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus logger will be used.
+     * @param outLogger RWLogger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                  logger will be used.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @return CompletableFuture instance.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
      */
     public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
-                           final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
+                           final String applicationName, RWLogger outLogger) throws ParseException,
+            IllegalArgumentException,
             IOException {
         CompletableFuture<Void> ret;
         try {
@@ -113,8 +116,8 @@ public class Sbk {
         private final CompletableFuture<Void> ret;
 
         public SbkCompletableFutureAsync(final String[] args, final Storage<Object> storage,
-                                    final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
-                IOException, InstantiationException {
+                                    final String applicationName, RWLogger outLogger) throws ParseException,
+                IllegalArgumentException, IOException, InstantiationException {
             super();
             benchmark = createBenchmark(args, storage, applicationName, outLogger);
             ret = benchmark.start();
@@ -147,13 +150,14 @@ public class Sbk {
 
 
     private static Benchmark createBenchmark(final String[] args, final Storage<Object> storage,
-                           final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
+                           final String applicationName, RWLogger outLogger) throws ParseException,
+            IllegalArgumentException,
             IOException, InstantiationException  {
         final String className;
         final Storage storageDevice;
         final Action action;
         final Parameters params;
-        final Logger logger;
+        final RWLogger rwLogger;
         final PerlConfig perlConfig;
         final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
@@ -175,7 +179,7 @@ public class Sbk {
         perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 PerlConfig.class);
 
-        logger = Objects.requireNonNullElseGet(outLogger, SbkPrometheusLogger::new);
+        rwLogger = Objects.requireNonNullElseGet(outLogger, SbkPrometheusLogger::new);
 
         if (storage == null) {
             List<String> driversList;
@@ -197,7 +201,7 @@ public class Sbk {
                     className = sbkClassName;
                 } else {
                     final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
-                    logger.addArgs(paramsHelp);
+                    rwLogger.addArgs(paramsHelp);
                     paramsHelp.printHelp();
                     throw new InstantiationException("SBK Benchmark class driver not found!");
                 }
@@ -228,7 +232,7 @@ public class Sbk {
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                     NoSuchMethodException | InvocationTargetException ex) {
                 final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
-                logger.addArgs(paramsHelp);
+                rwLogger.addArgs(paramsHelp);
                 paramsHelp.printHelp();
                 String errMsg = "storage driver: " + driverName+ " Instantiation failed";
                 throw new InstantiationException(errMsg);
@@ -240,7 +244,7 @@ public class Sbk {
             driverName = usageLine;
         }
         params = new SbkParameters(usageLine, null);
-        logger.addArgs(params);
+        rwLogger.addArgs(params);
         storageDevice.addArgs(params);
         final String[] nextArgs = removeClassName(args);
 
@@ -254,7 +258,7 @@ public class Sbk {
             throw new InstantiationException("print help !");
         }
 
-        logger.parseArgs(params);
+        rwLogger.parseArgs(params);
         storageDevice.parseArgs(params);
         final DataType dType = storageDevice.getDataType();
         if (dType == null) {
@@ -272,7 +276,7 @@ public class Sbk {
             Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
-        TimeUnit timeUnit = logger.getTimeUnit();
+        TimeUnit timeUnit = rwLogger.getTimeUnit();
         if (timeUnit == TimeUnit.mcs) {
             time = new MicroSeconds();
         } else if (timeUnit == TimeUnit.ns) {
@@ -281,8 +285,8 @@ public class Sbk {
             time = new MilliSeconds();
         }
         Printer.log.info("Time Unit: "+ timeUnit.toString());
-        Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
-        Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
+        Printer.log.info("Minimum Latency: "+rwLogger.getMinLatency()+" "+timeUnit.name());
+        Printer.log.info("Maximum Latency: "+rwLogger.getMaxLatency()+" "+timeUnit.name());
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = Action.Write_Reading;
@@ -292,7 +296,7 @@ public class Sbk {
         } else {
             action = Action.Writing;
         }
-        return new SbkBenchmark(driverName, action, perlConfig, params, storageDevice, dType, logger, time);
+        return new SbkBenchmark(driverName, action, perlConfig, params, storageDevice, dType, rwLogger, time);
     }
 
     private static String[] removeClassName(String[] args) {

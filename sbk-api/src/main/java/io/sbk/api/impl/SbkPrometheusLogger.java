@@ -21,7 +21,6 @@ import io.sbk.api.Parameters;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
-import io.sbk.perl.impl.RWPrometheusMetricsServer;
 import io.sbk.system.Printer;
 
 import java.io.IOException;
@@ -38,7 +37,7 @@ public class SbkPrometheusLogger extends SystemLogger {
     private MetricsConfig config;
     private boolean disabled;
     private double[] percentilesIndices;
-    private RWPrometheusMetricsServer prometheusServer;
+    private RWMetricsPrometheusServer prometheusServer;
     private Print printer;
     private long minLatency;
     private long maxLatency;
@@ -148,8 +147,7 @@ public class SbkPrometheusLogger extends SystemLogger {
             printer = super::print;
             prometheusServer = null;
         } else {
-            prometheusServer = new RWPrometheusMetricsServer(Config.NAME+" "+storageName, action.name(), percentiles,
-                    time, config,  params.getReadersCount(), params.getWritersCount());
+            prometheusServer = new RWMetricsPrometheusServer(Config.NAME+" "+storageName, action.name(), percentiles, time, config);
             prometheusServer.start();
             printer = this::printMetrics;
         }
@@ -164,6 +162,20 @@ public class SbkPrometheusLogger extends SystemLogger {
         super.close(params);
         Printer.log.info("SBK PrometheusLogger Shutdown");
     }
+
+
+    @Override
+    public void setWritersCount(int writers) {
+        super.setWritersCount(writers);
+        prometheusServer.setWritersCount(writers);
+    }
+
+    @Override
+    public void setReadersCount(int readers) {
+        super.setReadersCount(readers);
+        prometheusServer.setReadersCount(readers);
+    }
+
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
                       long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {

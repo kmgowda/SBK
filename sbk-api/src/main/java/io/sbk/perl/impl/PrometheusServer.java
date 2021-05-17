@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl;
+package io.sbk.perl.impl;
 
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.core.instrument.Clock;
@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-public abstract class PrometheusServer extends CompositeMeterRegistry {
+public  class PrometheusServer extends CompositeMeterRegistry {
     final private int port;
     final private String context;
     final private PrometheusMeterRegistry prometheusRegistry;
