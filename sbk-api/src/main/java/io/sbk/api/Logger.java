@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * Interface for recoding/printing results.
  */
-public interface Logger extends Print {
+public interface Logger extends Print, RWCount {
 
     /**
      * Add the Metric type specific command line arguments.

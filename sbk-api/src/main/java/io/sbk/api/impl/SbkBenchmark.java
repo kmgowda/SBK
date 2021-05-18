@@ -16,7 +16,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
-import io.sbk.api.RWLogger;
+import io.sbk.api.Logger;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.PeriodicLatencyRecorder;
@@ -60,7 +60,7 @@ public class SbkBenchmark implements Benchmark {
     final private Storage<Object> storage;
     final private DataType<Object> dType;
     final private Time time;
-    final private RWLogger rwLogger;
+    final private Logger logger;
     final private ExecutorService executor;
     final private Parameters params;
     final private Performance writeStats;
@@ -83,22 +83,22 @@ public class SbkBenchmark implements Benchmark {
      * @param  params               Benchmarking input Parameters
      * @param  storage              Storage device/client/driver for benchmarking
      * @param  dType                Data Type.
-     * @param  rwLogger               output logger
+     * @param  logger               output logger
      * @param  time                 time interface
      * @throws IOException          If Exception occurs.
      */
     public SbkBenchmark(String storageName, Action action, PerlConfig perlConfig,
                         Parameters params, Storage<Object> storage,
-                        DataType<Object> dType, RWLogger rwLogger, Time time) throws IOException {
+                        DataType<Object> dType, Logger logger, Time time) throws IOException {
         this.storageName = storageName;
         this.dType = dType;
         this.action = action;
         this.perlConfig = perlConfig;
         this.params = params;
         this.storage = storage;
-        this.rwLogger = rwLogger;
+        this.logger = logger;
         this.time = time;
-        final double[] percentiles = rwLogger.getPercentiles();
+        final double[] percentiles = logger.getPercentiles();
         percentileFractions = new double[percentiles.length];
 
         for (int i = 0; i < percentiles.length; i++) {
@@ -119,14 +119,14 @@ public class SbkBenchmark implements Benchmark {
         }
         if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
             writeStats = new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
-                    rwLogger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
+                    logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
         } else {
             writeStats = null;
         }
 
         if (params.getReadersCount() > 0) {
             readStats = new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
-                    rwLogger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
+                    logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
         } else {
             readStats = null;
         }
@@ -136,27 +136,27 @@ public class SbkBenchmark implements Benchmark {
 
 
     private PeriodicLatencyRecorder createLatencyRecorder() {
-        final long latencyRange = rwLogger.getMaxLatency() - rwLogger.getMinLatency();
+        final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
         final LatencyWindow window;
         final PeriodicLatencyRecorder latencyRecorder;
 
         if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
-            window = new ArrayLatencyRecorder(rwLogger.getMinLatency(), rwLogger.getMaxLatency(),
+            window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
             Printer.log.info("Window Latency Store: Array");
         } else {
-            window = new HashMapLatencyRecorder(rwLogger.getMinLatency(), rwLogger.getMaxLatency(),
+            window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time, perlConfig.maxHashMapSizeMB);
             Printer.log.info("Window Latency Store: HashMap");
 
         }
         if (perlConfig.csv) {
-            latencyRecorder = new CompositeCSVLatencyRecorder(window, perlConfig.maxHashMapSizeMB, rwLogger, rwLogger::printTotal,
+            latencyRecorder = new CompositeCSVLatencyRecorder(window, perlConfig.maxHashMapSizeMB, logger, logger::printTotal,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv" );
             Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {
-            latencyRecorder = new CompositeHashMapLatencyRecorder(window, perlConfig.maxHashMapSizeMB, rwLogger, rwLogger::printTotal);
+            latencyRecorder = new CompositeHashMapLatencyRecorder(window, perlConfig.maxHashMapSizeMB, logger, logger::printTotal);
             Printer.log.info("Total Window Latency Store: HashMap");
         }
         return latencyRecorder;
@@ -179,7 +179,7 @@ public class SbkBenchmark implements Benchmark {
         if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
-        rwLogger.open(params, storageName, action, time);
+        logger.open(params, storageName, action, time);
         storage.openStorage(params);
         final AtomicInteger readersErrCnt = new AtomicInteger(0);
         final AtomicInteger writersErrCnt = new AtomicInteger(0);
@@ -280,8 +280,8 @@ public class SbkBenchmark implements Benchmark {
             readFuturesCnt = 0;
         }
 
-        rwLogger.setWritersCount(writeFuturesCnt);
-        rwLogger.setReadersCount(readFuturesCnt);
+        logger.setWritersCount(writeFuturesCnt);
+        logger.setReadersCount(readFuturesCnt);
         if (writeFutures != null && readFutures != null) {
             chainFuture = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
                     collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
@@ -374,7 +374,7 @@ public class SbkBenchmark implements Benchmark {
         }
         try {
             storage.closeStorage(params);
-            rwLogger.close(params);
+            logger.close(params);
         } catch (IOException e) {
             e.printStackTrace();
         }

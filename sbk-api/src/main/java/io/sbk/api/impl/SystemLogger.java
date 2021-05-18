@@ -11,7 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
-import io.sbk.api.RWLogger;
+import io.sbk.api.Logger;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.Parameters;
 import io.sbk.perl.Time;
@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for recoding/printing results on System.out.
  */
-public class SystemLogger implements RWLogger {
+public class SystemLogger implements Logger {
     final public DecimalFormat format;
     public String prefix;
     public String timeUnit;
