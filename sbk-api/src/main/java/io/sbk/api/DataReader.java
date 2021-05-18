@@ -30,97 +30,111 @@ public interface DataReader<T> {
      * Benchmarking reader by reading given number of records.
      *
      * @param reader  Reader Descriptor
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException;
+    void RecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException, IOException;
 
     /**
      * Benchmarking reader by reading given number of records.
      * used while another writer is writing the data.
      *
      * @param reader      Reader Descriptor
+     * @param recordsCount Records count
      * @param dType     dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException;
+    void RecordsReaderRW(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException, IOException;
 
     /**
      * Benchmarking reader by reading events/records for specific time duration.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsTimeReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException;
+    void RecordsTimeReader(Worker reader, long secondsToRun, DataType<T> dType, Time time) throws EOFException,
+            IOException;
 
     /**
      * Benchmarking reader by reading events/records for specific time duration.
      * used while another writer is writing the data.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsTimeReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException;
+    void RecordsTimeReaderRW(Worker reader, long secondsToRun, DataType<T> dType, Time time) throws EOFException,
+            IOException;
 
 
     /**
      * Benchmarking reader by reading given number of records with Rate controlled.
      *
      * @param reader  Reader Descriptor
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException;
+    void RecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
+                                  RateController rController) throws EOFException, IOException;
 
     /**
      * Benchmarking reader by reading given number of records with Rate controlled.
      * used while another writer is writing the data.
      *
      * @param reader      Reader Descriptor
+     * @param recordsCount Records count
      * @param dType     dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException;
+    void RecordsReaderRWRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
+                                     RateController rController) throws EOFException, IOException;
 
     /**
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsTimeReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException;
+    void RecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
+                                       RateController rController) throws EOFException, IOException;
 
     /**
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
      * used while another writer is writing the data.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    void RecordsTimeReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException;
+    void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
+                                         RateController rController) throws EOFException, IOException;
 }
 

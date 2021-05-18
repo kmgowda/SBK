@@ -64,17 +64,18 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * sync is invoked after writing all the records.
      *
      * @param writer Writer Descriptor
+     * @param recordsCount Records Count
      * @param dType  Data Type interface
      * @param data  data to write
      * @param size  size of the data
      * @param time  time interface
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriter(Worker writer, DataType<T> dType, T data, int size, Time time) throws IOException {
+    default void RecordsWriter(Worker writer, long recordsCount, DataType<T> dType, T data, int size, Time time) throws IOException {
         final Status status = new Status();
         int id = writer.id % writer.recordIDMax;
         long i = 0;
-        while (i < writer.params.getRecordsCount()) {
+        while (i < recordsCount) {
             recordWrite(dType, data, size, time, status, writer.sendChannel, id);
             id += 1;
             if (id >= writer.recordIDMax) {
@@ -91,6 +92,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
+     * @param recordsCount Records Count
      * @param dType  Data Type interface
      * @param data  data to write
      * @param size  size of the data
@@ -98,9 +100,9 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @param rController Rate Controller
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriterSync(Worker writer, DataType<T> dType, T data, int size, Time time, RateController rController) throws IOException {
+    default void RecordsWriterSync(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                   Time time,  RateController rController) throws IOException {
         final Status status = new Status();
-        final long recordsCount = writer.params.getRecordsPerWriter();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         long cnt = 0;
@@ -128,15 +130,17 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * sync is invoked after writing records for given time.
      *
      * @param writer Writer Descriptor
+     * @param secondsToRun Number of seconds to Run
      * @param dType  Data Type interface
      * @param data  data to write
      * @param size  size of the data
      * @param time  time interface
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriterTime(Worker writer, DataType<T> dType, T data, int size, Time time) throws IOException {
+    default void RecordsWriterTime(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                   Time time) throws IOException {
         final Status status = new Status();
-        final long msToRun = writer.params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
+        final long msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
         long startTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         status.startTime = startTime;
@@ -158,6 +162,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
+     * @param secondsToRun Number of seconds to Run
      * @param dType  Data Type interface
      * @param data  data to write
      * @param size  size of the data
@@ -165,10 +170,9 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @param rController Rate Controller
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriterTimeSync(Worker writer, DataType<T> dType, T data, int size,
+    default void RecordsWriterTimeSync(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
                                        Time time, RateController rController) throws IOException {
         final Status status = new Status();
-        final long secondsToRun = writer.params.getSecondsToRun();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         int cnt = 0;
@@ -198,6 +202,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
+     * @param recordsCount Records Count
      * @param dType  Data Type interface
      * @param data  data to write
      * @param size  size of the data
@@ -205,9 +210,9 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @param rController Rate Controller
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriterRW(Worker writer, DataType<T> dType, T data, int size, Time time, RateController rController) throws IOException {
+    default void RecordsWriterRW(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                 Time time,  RateController rController) throws IOException {
         final Status status = new Status();
-        final long recordsCount = writer.params.getRecordsPerWriter();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         long cnt = 0;
@@ -235,6 +240,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * sync is invoked after writing given set of records.
      *
      * @param writer Writer Descriptor
+     * @param secondsToRun Number of seconds to Run
      * @param dType  Data Type interface
      * @param data  data to write
      * @param size  size of the data
@@ -242,10 +248,9 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @param rController Rate Controller
      * @throws IOException If an exception occurred.
      */
-    default void RecordsWriterTimeRW(Worker writer, DataType<T> dType, T data, int size,
-                                     Time time, RateController rController) throws IOException {
+    default void RecordsWriterTimeRW(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                     Time time,  RateController rController) throws IOException {
         final Status status = new Status();
-        final long secondsToRun = writer.params.getSecondsToRun();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         long cnt = 0;

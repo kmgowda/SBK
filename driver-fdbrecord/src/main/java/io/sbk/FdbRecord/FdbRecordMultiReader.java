@@ -71,12 +71,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     @Override
     public void recordRead(DataType<ByteString> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs;
-        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
-        } else {
-            recs =  params.getRecordsPerSync();
-        }
+        final int recs =  params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
         final Status ret = db.run(context -> {
             long startKey = key;
@@ -110,12 +105,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     @Override
     public void recordReadTime(DataType<ByteString> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs;
-        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
-        } else {
-            recs =  params.getRecordsPerSync();
-        }
+        final int recs =  params.getRecordsPerSync();
         final Status ret = db.run(context -> {
             long startKey = key;
             Status stat = new Status();

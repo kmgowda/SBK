@@ -80,9 +80,9 @@ final public class CQueuePerformance implements Performance {
         final private long msToRun;
         final private long totalRecords;
 
-        private QueueProcessor(long secondsToRun, long records) {
+        private QueueProcessor(long secondsToRun, long recordsCount) {
             this.msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
-            this.totalRecords = records;
+            this.totalRecords = recordsCount;
         }
 
         public void run() {
@@ -302,11 +302,11 @@ final public class CQueuePerformance implements Performance {
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long secondsToRun, long records) {
+    public CompletableFuture<Void> start(long secondsToRun, long recordsCount) {
         if (retFuture == null) {
             retFuture = new CompletableFuture<>();
             qFuture =  CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
-                    records),
+                            recordsCount),
                     executor);
             qFuture.whenComplete((ret, ex) -> {
                 shutdown(ex);

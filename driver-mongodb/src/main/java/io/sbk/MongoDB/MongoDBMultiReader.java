@@ -61,13 +61,8 @@ public class MongoDBMultiReader implements Reader<byte[]> {
     @Override
     public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs;
+        final int recs =  params.getRecordsPerSync();
         byte[] result;
-        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
-        } else {
-            recs =  params.getRecordsPerSync();
-        }
         status.startTime = time.getCurrentTime();
         if (cursor == null) {
             cursor = databaseCollection.find().iterator();
@@ -99,13 +94,8 @@ public class MongoDBMultiReader implements Reader<byte[]> {
     @Override
     public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs;
+        final int recs =  params.getRecordsPerSync();
         byte[] result;
-        if (params.getRecordsPerReader() > 0 && params.getRecordsPerReader() > cnt) {
-            recs = (int) Math.min(params.getRecordsPerReader() - cnt, params.getRecordsPerSync());
-        } else {
-            recs =  params.getRecordsPerSync();
-        }
         if (cursor == null) {
             cursor = databaseCollection.find().iterator();
         }

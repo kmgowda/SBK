@@ -21,12 +21,13 @@ public interface Performance {
       * Start the performance Benchmark.
       *
       * @param secondsToRun number of seconds to Run
-      * @param records Maximum number of records to count.If this value 0 or less than 0,then runs till secondsToRun.
+      * @param recordsCount Maximum number of records to count.
+      *                If this value 0 or less than 0,then run the benchmark till secondsToRun.
       * @return CompletableFuture.
       * @throws IllegalStateException If an exception occurred.
       * @throws IOException If an exception occurred.
       */
-     CompletableFuture<Void> start(long secondsToRun, long records) throws IOException, IllegalStateException;
+     CompletableFuture<Void> start(long secondsToRun, long recordsCount) throws IOException, IllegalStateException;
 
      /**
       * stop/shutdown the Benchmark.
@@ -35,9 +36,9 @@ public interface Performance {
      void stop();
 
      /**
-     * Get the Time recorder for benchmarking.
-     *
-     * @return RecordTime Interface if its available ; returns null in case of failure.
-     */
+      * Get the SendChannel to get the benchmark results.
+      *
+      * @return SendChannel to get the benchmark results.
+      */
      SendChannel getSendChannel();
 }

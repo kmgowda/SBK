@@ -32,20 +32,17 @@ import io.sbk.system.Printer;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -179,10 +176,9 @@ public class SbkBenchmark implements Benchmark {
         if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
+        Printer.log.info("SBK Benchmark Started");
         logger.open(params, storageName, action, time);
         storage.openStorage(params);
-        final AtomicInteger readersErrCnt = new AtomicInteger(0);
-        final AtomicInteger writersErrCnt = new AtomicInteger(0);
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
         final List<CompletableFuture<Void>> writeFutures;
@@ -190,8 +186,6 @@ public class SbkBenchmark implements Benchmark {
         final CompletableFuture<Void> wStatFuture;
         final CompletableFuture<Void> rStatFuture;
         final CompletableFuture<Void> chainFuture;
-        final int readFuturesCnt;
-        final int writeFuturesCnt;
 
         writers = IntStream.range(0, params.getWritersCount())
                 .boxed()
@@ -234,84 +228,89 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
-            wStatFuture = writeStats.start(params.getSecondsToRun(), params.getSecondsToRun() <= 0 ?
-                    params.getRecordsPerWriter() * params.getWritersCount() : 0);
+            wStatFuture = writeStats.start(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             wStatFuture = null;
         }
         if (readStats != null && sbkReaders != null) {
-            rStatFuture = readStats.start(params.getSecondsToRun(), params.getSecondsToRun() <= 0 ?
-                    params.getRecordsPerReader() * params.getReadersCount() : 0);
+            rStatFuture = readStats.start(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             rStatFuture = null;
         }
         if (sbkWriters != null) {
-            writeFutures = sbkWriters.stream()
-                    .map(x -> CompletableFuture.runAsync(() -> {
-                        try {
-                            x.run();
-                        }  catch (IOException ex) {
-                            ex.printStackTrace();
-                            writersErrCnt.incrementAndGet();
-                        }
-                    }, executor)).collect(Collectors.toList());
-            writeFuturesCnt = writeFutures.size();
+            writeFutures = new ArrayList<>();
+            long secondsToRun = params.getTotalSecondsToRun();
+            final long recordsPerWriter = secondsToRun <= 0 ? params.getTotalRecords() / params.getWritersCount()
+                    : 0;
+            final long delta = recordsPerWriter > 0 ?
+                    params.getTotalRecords() - (recordsPerWriter * params.getWritersCount()) : 0;
+
+            int i = 0;
+            while (i < params.getWritersCount()) {
+                logger.setWritersCount(i+1);
+                for (int j = 0; j < Math.min(params.getWritersStep(), params.getWritersCount()-i); j++) {
+                    writeFutures.add(sbkWriters.get(i+j).run(secondsToRun, i+j+1 == params.getWritersCount() ?
+                            recordsPerWriter + delta : recordsPerWriter));
+                }
+                i += params.getWritersStep();
+                if (params.getWritersStepSeconds() > 0 &&  i < params.getWritersCount()) {
+                    try {
+                        Thread.sleep((long) params.getWritersStepSeconds() * PerlConfig.MS_PER_SEC);
+                        secondsToRun -=  params.getWritersStepSeconds();
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                        throw new IOException(ex);
+                    }
+                }
+            }
         } else {
             writeFutures = null;
-            writeFuturesCnt = 0;
         }
 
         if (sbkReaders != null) {
-            readFutures = sbkReaders.stream()
-                    .map(x -> CompletableFuture.runAsync(() -> {
-                        try {
-                            x.run();
-                        } catch (EOFException ex) {
-                            Printer.log.info("Reader " + x.id +" exited with EOF");
-                            readersErrCnt.incrementAndGet();
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                            readersErrCnt.incrementAndGet();
-                        }
-                    }, executor)).collect(Collectors.toList());
-            readFuturesCnt = readFutures.size();
+            readFutures = new ArrayList<>();
+            long secondsToRun = params.getTotalSecondsToRun();
+            final long recordsPerReader = secondsToRun <= 0 ? params.getTotalRecords() / params.getReadersCount()
+                    : 0;
+            final long delta = recordsPerReader > 0 ?
+                    params.getTotalRecords() - (recordsPerReader * params.getReadersCount()) : 0;
+
+            int i = 0;
+            while (i < params.getReadersCount())  {
+                logger.setReadersCount(i+1);
+                for (int j = 0; j < Math.min(params.getReadersStep(), params.getReadersCount()-i); j++) {
+                    readFutures.add(sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
+                            recordsPerReader + delta : recordsPerReader));
+                }
+                i += params.getReadersStep();
+                if (params.getReadersStepSeconds() > 0 && i < params.getReadersCount()) {
+                    try {
+                        Thread.sleep((long) params.getReadersStepSeconds() * PerlConfig.MS_PER_SEC);
+                        secondsToRun -=  params.getReadersStepSeconds();
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                        throw new IOException(ex);
+                    }
+                }
+            }
         } else {
             readFutures = null;
-            readFuturesCnt = 0;
         }
 
-        logger.setWritersCount(writeFuturesCnt);
-        logger.setReadersCount(readFuturesCnt);
         if (writeFutures != null && readFutures != null) {
             chainFuture = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
                     collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
         } else if (readFutures != null) {
-            chainFuture = CompletableFuture.allOf(new ArrayList<>(readFutures).toArray(new CompletableFuture[readFutures.size()]));
+            chainFuture = CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0]));
         } else if (writeFutures != null) {
-            chainFuture = CompletableFuture.allOf(new ArrayList<>(writeFutures).toArray(new CompletableFuture[writeFutures.size()]));
+            chainFuture = CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0]));
         } else {
             throw new IllegalStateException("No Writers and/or Readers\n");
         }
 
-        if (params.getSecondsToRun() > 0) {
-            timeoutExecutor.schedule(this::stop, params.getSecondsToRun() + 1, TimeUnit.SECONDS);
+        if (params.getTotalSecondsToRun() > 0) {
+            timeoutExecutor.schedule(this::stop, params.getTotalSecondsToRun() + 1, TimeUnit.SECONDS);
         }
-
-        retFuture = chainFuture.thenRunAsync(() -> {
-            try {
-                if ((wStatFuture != null) && (writeFuturesCnt != writersErrCnt.get())) {
-                    wStatFuture.get();
-                }
-
-                if ((rStatFuture != null) && (readFuturesCnt != readersErrCnt.get()) ) {
-                    rStatFuture.get();
-                }
-            }  catch (InterruptedException | ExecutionException ex) {
-                shutdown(ex);
-                return;
-            }
-            shutdown(null);
-        }, executor);
 
         if (wStatFuture != null && !wStatFuture.isDone()) {
             wStatFuture.exceptionally(ex -> {
@@ -326,7 +325,9 @@ public class SbkBenchmark implements Benchmark {
                 return null;
             });
         }
-        Printer.log.info("SBK Benchmark Started");
+
+        retFuture = chainFuture.thenRunAsync(this::stop, executor);
+
         return retFuture;
     }
 

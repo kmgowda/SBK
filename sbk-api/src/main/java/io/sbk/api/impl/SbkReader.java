@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.BiConsumer;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.Parameters;
@@ -18,9 +19,11 @@ import io.sbk.api.RunBenchmark;
 import io.sbk.perl.SendChannel;
 import io.sbk.perl.Time;
 import io.sbk.api.Worker;
+import io.sbk.system.Printer;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Reader Benchmarking Implementation.
@@ -30,7 +33,7 @@ public class SbkReader extends Worker implements RunBenchmark {
     final private DataReader<Object> reader;
     final private Time time;
     final private RateController rCnt;
-    final private RunBenchmark perf;
+    final private BiConsumer perf;
 
     public SbkReader(int readerId, int idMax, Parameters params, SendChannel sendChannel,
                      DataType<Object> dType, Time time, DataReader<Object> reader) {
@@ -43,13 +46,28 @@ public class SbkReader extends Worker implements RunBenchmark {
     }
 
     @Override
-    public void run() throws EOFException, IOException {
-        perf.run();
-     }
+    public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
+            IllegalStateException {
+        return  CompletableFuture.runAsync( () -> {
+            try {
+                if (secondsToRun > 0) {
+                    Printer.log.info("Reader " + id +" started , seconds to run: "+secondsToRun);
+                } else {
+                    Printer.log.info("Reader " + id +" started , records per writer: "+recordsCount);
+                }
+                perf.apply(secondsToRun, recordsCount);
+                Printer.log.info("Reader " + id + " exited");
+            } catch (EOFException ex) {
+                Printer.log.info("Reader " + id + " exited with EOF");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+    }
 
-    private RunBenchmark createBenchmark() {
-        final RunBenchmark perfReader;
-        if (params.getSecondsToRun() > 0) {
+    private BiConsumer createBenchmark() {
+        final BiConsumer perfReader;
+        if (params.getTotalSecondsToRun() > 0) {
             if (params.isWriteAndRead() ) {
                 if (params.getRecordsPerSec() > 0) {
                     perfReader = this::RecordsTimeReaderRWRateControl;
@@ -81,37 +99,37 @@ public class SbkReader extends Worker implements RunBenchmark {
         return perfReader;
     }
 
-    private void RecordsReader() throws EOFException, IOException {
-        reader.RecordsReader(this, dType, time);
+    private void RecordsReader(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsReader(this, recordsCount, dType, time);
     }
 
 
-    private void RecordsReaderRW() throws EOFException, IOException {
-        reader.RecordsReaderRW(this, dType, time);
+    private void RecordsReaderRW(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsReaderRW(this, recordsCount, dType, time);
     }
 
-    private void RecordsTimeReader() throws EOFException, IOException {
-        reader.RecordsTimeReader(this, dType, time);
+    private void RecordsTimeReader(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsTimeReader(this, secondsToRun, dType, time);
     }
 
-    private void RecordsTimeReaderRW() throws EOFException, IOException {
-        reader.RecordsTimeReaderRW(this, dType, time);
+    private void RecordsTimeReaderRW(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsTimeReaderRW(this, secondsToRun, dType, time);
     }
 
-    private void RecordsReaderRateControl() throws EOFException, IOException {
-        reader.RecordsReaderRateControl(this, dType, time, rCnt);
+    private void RecordsReaderRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsReaderRateControl(this, recordsCount, dType, time,  rCnt);
     }
 
-    private void RecordsReaderRWRateControl() throws EOFException, IOException {
-        reader.RecordsReaderRWRateControl(this, dType, time, rCnt);
+    private void RecordsReaderRWRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsReaderRWRateControl(this, recordsCount, dType, time,  rCnt);
     }
 
-    private void RecordsTimeReaderRateControl() throws EOFException, IOException {
-        reader.RecordsTimeReaderRateControl(this, dType, time, rCnt);
+    private void RecordsTimeReaderRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsTimeReaderRateControl(this, secondsToRun, dType, time,  rCnt);
     }
 
-    private void RecordsTimeReaderRWRateControl() throws EOFException, IOException {
-        reader.RecordsTimeReaderRWRateControl(this, dType, time, rCnt);
+    private void RecordsTimeReaderRWRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
+        reader.RecordsTimeReaderRWRateControl(this, secondsToRun, dType, time,  rCnt);
     }
 
 }

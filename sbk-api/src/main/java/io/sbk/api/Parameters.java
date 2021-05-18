@@ -60,7 +60,7 @@ public interface Parameters {
      * Get the execution time in seconds.
      * @return   seconds to run
      */
-    long getSecondsToRun();
+    long getTotalSecondsToRun();
 
     /**
      * Check if the both read and writes are requested.
@@ -72,7 +72,7 @@ public interface Parameters {
      * Get the Total Number of records to read/writer.
      * @return   number of records.
      */
-    long getRecordsCount();
+    long getTotalRecords();
 
     /**
      * Size of the record/event to read or write.
@@ -105,22 +105,38 @@ public interface Parameters {
     int getReadersCount();
 
     /**
-     * Get the Number of records per Reader.
-     * @return   number of records.
-     */
-    long getRecordsPerReader();
-
-    /**
-     * Get the Number of records per Writer.
-     * @return   number of records.
-     */
-    long getRecordsPerWriter();
-
-    /**
      * Time out for data to read.
      * @return  time-out in milliseconds.
      */
     int getTimeoutMS();
+
+
+    /**
+     * get the number of writers / step to increase.
+     * @return  delta value.
+     */
+    int getWritersStep();
+
+
+    /**
+     * get duration of writers step in seconds.
+     * @return  get the interval in seconds .
+     */
+    int getWritersStepSeconds();
+
+
+    /**
+     * get the number of readers / step to increase.
+     * @return  delta value.
+     */
+    int getReadersStep();
+
+
+    /**
+     * get duration of readers step in seconds.
+     * @return  get the interval in seconds .
+     */
+    int getReadersStepSeconds();
 
     /**
      * Print the -help output.

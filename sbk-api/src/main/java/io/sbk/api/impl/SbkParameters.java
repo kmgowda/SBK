@@ -52,16 +52,22 @@ final public class SbkParameters implements Parameters {
     private int recordsPerSync;
 
     @Getter
-    private long recordsCount;
+    private long totalRecords;
 
     @Getter
-    private long secondsToRun;
+    private long totalSecondsToRun;
 
     @Getter
-    private long recordsPerWriter;
+    private int writersStep;
 
     @Getter
-    private long recordsPerReader;
+    private int writersStepSeconds;
+
+    @Getter
+    private int readersStep;
+
+    @Getter
+    private int readersStepSeconds;
 
     @Getter
     private boolean writeAndRead;
@@ -97,6 +103,14 @@ final public class SbkParameters implements Parameters {
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes/reads 'records'\n" +
                         "if -1, get the maximum throughput (default: -1)");
+        options.addOption("wstep", true,
+                "number of writers / step,  (default : 1)");
+        options.addOption("wsec", true,
+                "number of seconds / step for writers,  (default : 0)");
+        options.addOption("rstep", true,
+                "number of readers / step (default : 1) ");
+        options.addOption("rsec", true,
+                "number of seconds / step for readers (default: 0) ");
         options.addOption("help", false, "Help message");
     }
 
@@ -156,7 +170,7 @@ final public class SbkParameters implements Parameters {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");
         }
 
-        recordsCount = Long.parseLong(commandline.getOptionValue("records", "0"));
+        totalRecords = Long.parseLong(commandline.getOptionValue("records", "0"));
         recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
         int syncRecords = Integer.parseInt(commandline.getOptionValue("sync", "0"));
         if (syncRecords > 0) {
@@ -166,11 +180,11 @@ final public class SbkParameters implements Parameters {
         }
 
         if (commandline.hasOption("seconds")) {
-            secondsToRun = Long.parseLong(commandline.getOptionValue("seconds"));
-        } else if (recordsCount > 0) {
-            secondsToRun = 0;
+            totalSecondsToRun = Long.parseLong(commandline.getOptionValue("seconds"));
+        } else if (totalRecords > 0) {
+            totalSecondsToRun = 0;
         } else {
-            secondsToRun = PerlConfig.DEFAULT_RUNTIME_SECONDS;
+            totalSecondsToRun = PerlConfig.DEFAULT_RUNTIME_SECONDS;
         }
 
         if (commandline.hasOption("throughput")) {
@@ -179,13 +193,18 @@ final public class SbkParameters implements Parameters {
             throughput = -1;
         }
 
+        writersStep = Integer.parseInt(commandline.getOptionValue("wstep", "1"));
+        writersStepSeconds = Integer.parseInt(commandline.getOptionValue("wsec", "0"));
+        readersStep = Integer.parseInt(commandline.getOptionValue("rstep", "1"));
+        readersStepSeconds = Integer.parseInt(commandline.getOptionValue("rsec", "0"));
+
         int workersCnt = writersCount;
         if (workersCnt == 0) {
             workersCnt = readersCount;
         }
 
-        if (throughput < 0 && secondsToRun > 0) {
-            long recsPerSec = recordsCount / workersCnt;
+        if (throughput < 0 && totalSecondsToRun > 0) {
+            long recsPerSec = totalRecords / workersCnt;
             if (recsPerSec > Integer.MAX_VALUE) {
                 throw new IllegalArgumentException("Error: The Records per Second value :" +recsPerSec +"is more than "+Integer.MAX_VALUE);
             }
@@ -200,18 +219,9 @@ final public class SbkParameters implements Parameters {
             if (recordSize == 0) {
                 throw new IllegalArgumentException("Error: Must specify the record 'size'");
             }
-
             writeAndRead = readersCount > 0;
-            recordsPerWriter = recordsCount / writersCount;
         } else {
-            recordsPerWriter = 0;
             writeAndRead = false;
-        }
-
-        if (readersCount > 0) {
-            recordsPerReader = recordsCount / readersCount;
-        } else {
-            recordsPerReader = 0;
         }
     }
 }
