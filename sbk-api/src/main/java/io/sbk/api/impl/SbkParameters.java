@@ -104,13 +104,13 @@ final public class SbkParameters implements Parameters {
                         "if 0 , writes/reads 'records'\n" +
                         "if -1, get the maximum throughput (default: -1)");
         options.addOption("wstep", true,
-                "number of writers / step,  (default : 1)");
+                "Number of writers/step, default: 1");
         options.addOption("wsec", true,
-                "number of seconds / step for writers,  (default : 0)");
+                "Number of seconds/step for writers, default: 0");
         options.addOption("rstep", true,
-                "number of readers / step (default : 1) ");
+                "Number of readers/step, default: 1");
         options.addOption("rsec", true,
-                "number of seconds / step for readers (default: 0) ");
+                "Number of seconds/step for readers, default: 0");
         options.addOption("help", false, "Help message");
     }
 
