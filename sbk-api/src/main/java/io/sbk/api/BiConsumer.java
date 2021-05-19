@@ -10,24 +10,21 @@
 
 package io.sbk.api;
 
+import java.io.EOFException;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
-/**
- * Interface for executing writers/readers benchmarks.
- */
-public interface RunBenchmark {
+public interface BiConsumer {
 
     /**
-     * Run the performance Benchmark.
+     * Apply the Benchmark.
      *
      * @param secondsToRun number of seconds to Run
      * @param recordsCount Maximum number of records to count.
      *                If this value 0 or less than 0,then run the benchmark till secondsToRun.
-     * @return CompletableFuture.
+     *
      * @throws IllegalStateException If an exception occurred.
-     * @throws IOException End of File exception
+     * @throws EOFException End of File exception
+     * @throws IOException If an exception occurred.
      */
-    CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException,
-            IllegalStateException;
+    void apply(long secondsToRun, long recordsCount) throws IOException, EOFException, IllegalStateException;
 }

@@ -30,7 +30,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
     private long beginTime;
     private Worker reader;
     private double msToRun;
-    private long totalRecords;
+    private long recordsCount;
 
     /**
      * set the Callback and start the CallBack Reader.
@@ -64,7 +64,7 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
         reader.sendChannel.send(id, startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && ((endTime - beginTime)  >= this.msToRun)) {
             complete();
-        } else if (this.totalRecords > cnt) {
+        } else if (this.recordsCount > cnt) {
             complete();
         }
     }
@@ -99,19 +99,22 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
     /**
      * Default Implementation to initialize the callback reader.
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @param callback  Callback interface
      * @throws IOException If an exception occurred.
      */
-    public void initialize(Worker reader, DataType<T> dType, Time time, Callback<T> callback) throws IOException {
+    public void initialize(Worker reader, long secondsToRun, long recordsCount, DataType<T> dType, Time time,
+                           Callback<T> callback) throws IOException {
         this.reader = reader;
         this.dataType = dType;
         this.time = time;
         this.readCnt = new AtomicLong(0);
         this.beginTime = time.getCurrentTime();
-        this.msToRun = reader.params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
-        this.totalRecords = reader.params.getRecordsPerReader() * reader.params.getReadersCount();
+        this.msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
+        this.recordsCount = recordsCount;
         this.ret = new CompletableFuture<>();
         start(callback);
     }
@@ -145,13 +148,16 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
     /**
      * Default Implementation run the Benchmark.
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @param callback  Callback interface
      * @throws IOException If an exception occurred.
      */
-    public void run(Worker reader, DataType<T> dType, Time time, Callback<T> callback) throws IOException {
-        initialize(reader, dType, time, callback);
+    public void run(Worker reader, long secondsToRun, long recordsCount, DataType<T> dType, Time time,
+                    Callback<T> callback) throws IOException {
+        initialize(reader, secondsToRun, recordsCount, dType, time, callback);
         waitToComplete();
     }
 
@@ -160,66 +166,75 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
      * Implementation for benchmarking reader by reading given number of records.
      *
      * @param reader  Reader Descriptor
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRead());
+    public void RecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException,
+            IOException {
+        run(reader, 0, recordsCount, dType, time, new ConsumeRead());
     }
 
     /**
      * Default implementation for benchmarking reader by reading given number of records.
      *
      * @param reader      Reader Descriptor
+     * @param recordsCount Records count
      * @param dType     dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRW());
+    public void RecordsReaderRW(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException,
+            IOException {
+        run(reader, 0, recordsCount, dType, time, new ConsumeRW());
     }
 
     /**
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsTimeReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRead());
+    public void RecordsTimeReader(Worker reader, long secondsToRun, DataType<T> dType, Time time)
+            throws EOFException, IOException {
+        run(reader, secondsToRun, 0, dType, time, new ConsumeRead());
     }
 
     /**
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsTimeReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRW());
+    public void RecordsTimeReaderRW(Worker reader, long secondsToRun, DataType<T> dType, Time time) throws EOFException, IOException {
+        run(reader, secondsToRun, 0, dType, time, new ConsumeRW());
     }
 
     /**
      * Benchmarking reader by reading given number of records with Rate controlled.
      *
      * @param reader  Reader Descriptor
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRead());
+    public void RecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
+                                         RateController rController) throws EOFException, IOException {
+        run(reader, 0, recordsCount, dType, time, new ConsumeRead());
     }
 
     /**
@@ -227,14 +242,16 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
      * used while another writer is writing the data.
      *
      * @param reader      Reader Descriptor
+     * @param recordsCount Records count
      * @param dType     dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRW());
+    public void RecordsReaderRWRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
+                                           RateController rController) throws EOFException, IOException {
+        run(reader, 0, recordsCount, dType, time, new ConsumeRW());
     }
 
 
@@ -243,14 +260,16 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsTimeReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRead());
+    public void RecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
+                                             RateController rController) throws EOFException, IOException {
+        run(reader, secondsToRun, 0, dType, time, new ConsumeRead());
     }
 
     /**
@@ -258,14 +277,16 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
      * used while another writer is writing the data.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    public void RecordsTimeReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        run(reader, dType, time, new ConsumeRW());
+    public void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
+                                               RateController rController) throws EOFException, IOException {
+        run(reader, secondsToRun, 0, dType, time, new ConsumeRW());
     }
 
 }

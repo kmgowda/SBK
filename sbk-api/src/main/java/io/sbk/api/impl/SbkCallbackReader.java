@@ -44,8 +44,8 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
         this.ret = new CompletableFuture<>();
         this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
-        this.msToRun = params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
-        this.totalRecords = params.getRecordsPerReader() * params.getReadersCount();
+        this.msToRun = params.getTotalSecondsToRun() * PerlConfig.MS_PER_SEC;
+        this.totalRecords = params.getTotalRecords();
 
         if (params.isWriteAndRead()) {
             callback = this::consumeRW;

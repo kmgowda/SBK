@@ -95,11 +95,12 @@ public class Sbk {
      * @return CompletableFuture instance.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
+     * @throws InterruptedException If an exception occurred due to writers or readers interrupted.
+     * @throws ExecutionException If an exception occurred due to writers or readers exceptions.
      */
     public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException,
-            IllegalArgumentException,
-            IOException {
+            IllegalArgumentException, IOException, InterruptedException, ExecutionException {
         CompletableFuture<Void> ret;
         try {
             ret = new SbkCompletableFutureAsync(args, storage, applicationName, outLogger);
@@ -117,7 +118,8 @@ public class Sbk {
 
         public SbkCompletableFutureAsync(final String[] args, final Storage<Object> storage,
                                     final String applicationName, Logger outLogger) throws ParseException,
-                IllegalArgumentException, IOException, InstantiationException {
+                IllegalArgumentException, IOException, InterruptedException, ExecutionException,
+                InstantiationException {
             super();
             benchmark = createBenchmark(args, storage, applicationName, outLogger);
             ret = benchmark.start();

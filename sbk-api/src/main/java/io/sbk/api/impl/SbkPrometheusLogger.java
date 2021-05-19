@@ -111,7 +111,6 @@ public class SbkPrometheusLogger extends SystemLogger {
         }
         minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
         maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
-
     }
 
     @Override
@@ -163,19 +162,29 @@ public class SbkPrometheusLogger extends SystemLogger {
         Printer.log.info("SBK PrometheusLogger Shutdown");
     }
 
-
     @Override
-    public void setWritersCount(int writers) {
-        super.setWritersCount(writers);
-        prometheusServer.setWritersCount(writers);
+    public void incrementWriters(int val) {
+        super.incrementWriters(val);
+        prometheusServer.incrementWriters(val);
     }
 
     @Override
-    public void setReadersCount(int readers) {
-        super.setReadersCount(readers);
-        prometheusServer.setReadersCount(readers);
+    public void decrementWriters(int val) {
+        super.decrementWriters(val);
+        prometheusServer.decrementWriters(val);
     }
 
+    @Override
+    public void incrementReaders(int val) {
+        super.incrementReaders(val);
+        prometheusServer.incrementReaders(val);
+    }
+
+    @Override
+    public void decrementReaders(int val) {
+       super.decrementReaders(val);
+       prometheusServer.decrementReaders(val);
+    }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
                       long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {

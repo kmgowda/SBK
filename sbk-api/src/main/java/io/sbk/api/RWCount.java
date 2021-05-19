@@ -13,16 +13,26 @@ package io.sbk.api;
 public interface RWCount {
 
     /**
-     * Set the Number Writers.
-     * @param writers New Writers count.
+     * Increment Writers.
+     * @param val increment value.
      */
-    void setWritersCount(int writers);
-
+    void incrementWriters(int val);
 
     /**
-     * Set the Number Readers.
-     * @param readers New readers count.
+     * Decrement Writers.
+     * @param val decrement value.
      */
-    void setReadersCount(int readers);
+    void decrementWriters(int val);
 
+    /**
+     * Increment Readers.
+     * @param val increment value.
+     */
+    void incrementReaders(int val);
+
+    /**
+     * Decrement Readers.
+     * @param val decrement value.
+     */
+    void decrementReaders(int val);
 }

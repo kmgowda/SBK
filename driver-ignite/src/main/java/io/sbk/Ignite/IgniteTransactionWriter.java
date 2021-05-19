@@ -57,12 +57,7 @@ public class IgniteTransactionWriter implements Writer<byte[]> {
 
     @Override
     public void writeSetTime(DataType<byte[]> dType, byte[] data, int size, Time time, Status status) throws IOException {
-        final int recs;
-        if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
-            recs = (int) Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
-        } else {
-            recs = params.getRecordsPerSync();
-        }
+        final int recs =  params.getRecordsPerSync();
         final long ctime = time.getCurrentTime();
         status.bytes = size * recs;
         status.records =  recs;
@@ -80,12 +75,7 @@ public class IgniteTransactionWriter implements Writer<byte[]> {
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
                             Status status, SendChannel sendChannel, int id) throws IOException {
-        final int recs;
-        if (params.getRecordsPerWriter() > 0 && params.getRecordsPerWriter() > cnt) {
-            recs = (int) Math.min(params.getRecordsPerWriter() - cnt, params.getRecordsPerSync());
-        } else {
-            recs = params.getRecordsPerSync();
-        }
+        final int recs = params.getRecordsPerSync();
         status.bytes = size * recs;
         status.records =  recs;
         status.startTime = time.getCurrentTime();

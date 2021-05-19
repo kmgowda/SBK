@@ -60,12 +60,13 @@ public interface DataRecordsReader<T> extends DataReader<T> {
     }
 
 
-    default void genericRecordsReader(Worker reader, DataType<T> dType, Time time, RecordTime<T> recordTime) throws EOFException, IOException {
+    default void genericRecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time,
+                                      RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
         int  id = reader.id % reader.recordIDMax;
         long i = 0;
-        while (i < reader.params.getRecordsPerReader()) {
+        while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
             i += status.records;
             if (id >= reader.recordIDMax) {
@@ -80,13 +81,15 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, SendChannel, int)}
      *
      * @param reader  Reader Descriptor
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        genericRecordsReader(reader, dType, time, this::recordRead);
+    default void RecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException,
+            IOException {
+        genericRecordsReader(reader, recordsCount, dType, time,  this::recordRead);
     }
 
 
@@ -95,21 +98,25 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, SendChannel, int)}
      *
      * @param reader      Reader Descriptor
+     * @param recordsCount Records count
      * @param dType     dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        genericRecordsReader(reader, dType, time, this::recordReadTime);
+    default void RecordsReaderRW(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException,
+            IOException {
+        genericRecordsReader(reader,  recordsCount, dType, time, this::recordReadTime);
     }
 
 
-    default void genericRecordsTimeReader(Worker reader, DataType<T> dType, Time time, RecordTime<T> recordTime) throws EOFException, IOException {
+    default void genericRecordsTimeReader(Worker reader, long secondsToRun, DataType<T> dType, Time time,
+                                           RecordTime<T> recordTime) throws EOFException,
+            IOException {
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = reader.params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
+        final long msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
@@ -124,13 +131,15 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, SendChannel, int)}
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsTimeReader(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        genericRecordsTimeReader(reader, dType, time, this::recordRead);
+    default void RecordsTimeReader(Worker reader, long secondsToRun, DataType<T> dType, Time time) throws EOFException,
+            IOException {
+        genericRecordsTimeReader(reader, secondsToRun, dType, time, this::recordRead);
 
     }
 
@@ -139,16 +148,17 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, SendChannel, int)}
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsTimeReaderRW(Worker reader, DataType<T> dType, Time time) throws EOFException, IOException {
-        genericRecordsTimeReader(reader, dType, time, this::recordReadTime);
+    default void RecordsTimeReaderRW(Worker reader, long secondsToRun, DataType<T> dType, Time time) throws EOFException, IOException {
+        genericRecordsTimeReader(reader, secondsToRun, dType, time,  this::recordReadTime);
     }
 
-    default void genericRecordsReaderRateControl(Worker reader, DataType<T> dType, Time time,
+    default void genericRecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                                  RateController rController, RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
@@ -157,7 +167,7 @@ public interface DataRecordsReader<T> extends DataReader<T> {
         double secondsElapsed = 0;
         final long loopStartTime = time.getCurrentTime();
         rController.start(reader.params.getRecordsPerSec());
-        while (i < reader.params.getRecordsPerReader()) {
+        while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
             i += status.records;
             if (id >= reader.recordIDMax) {
@@ -172,14 +182,17 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Benchmarking reader by reading given number of records with Rate controlled.
      *
      * @param reader  Reader Descriptor
+     * @param recordsCount Records count
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        genericRecordsReaderRateControl(reader, dType, time, rController, this::recordRead);
+    default void RecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
+                                           RateController rController) throws EOFException,
+            IOException {
+        genericRecordsReaderRateControl(reader, recordsCount, dType, time, rController, this::recordRead);
     }
 
     /**
@@ -187,23 +200,25 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * used while another writer is writing the data.
      *
      * @param reader      Reader Descriptor
+     * @param recordsCount Records count
      * @param dType     dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        genericRecordsReaderRateControl(reader, dType, time, rController, this::recordReadTime);
+    default void RecordsReaderRWRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
+                                            RateController rController) throws EOFException, IOException {
+        genericRecordsReaderRateControl(reader,  recordsCount, dType, time, rController, this::recordReadTime);
     }
 
 
-    default void genericRecordsTimeReaderRateControl(Worker reader, DataType<T> dType, Time time,
+    default void genericRecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                                      RateController rController, RecordTime<T> recordTime) throws EOFException, IOException {
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = reader.params.getSecondsToRun() * PerlConfig.MS_PER_SEC;
+        final long msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
         final long loopStartTime = time.getCurrentTime();
         double secondsElapsed = 0;
@@ -224,14 +239,17 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsTimeReaderRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        genericRecordsTimeReaderRateControl(reader, dType, time, rController, this::recordRead);
+    default void RecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
+                                                RateController rController) throws EOFException,
+            IOException {
+        genericRecordsTimeReaderRateControl(reader, secondsToRun, dType, time,  rController, this::recordRead);
     }
 
     /**
@@ -239,13 +257,15 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * used while another writer is writing the data.
      *
      * @param reader  Reader Descriptor
+     * @param secondsToRun  Number of seconds to run
      * @param dType  dataType
      * @param time  time interface
      * @param rController Rate Controller
      * @throws EOFException If the End of the file occurred.
      * @throws IOException If an exception occurred.
      */
-    default void RecordsTimeReaderRWRateControl(Worker reader, DataType<T> dType, Time time, RateController rController) throws EOFException, IOException {
-        genericRecordsTimeReaderRateControl(reader, dType, time, rController, this::recordReadTime);
+    default void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
+                                                RateController rController) throws EOFException, IOException {
+        genericRecordsTimeReaderRateControl(reader, secondsToRun, dType, time,  rController, this::recordReadTime);
     }
 }

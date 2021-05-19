@@ -10,16 +10,21 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.BiConsumer;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
 import io.sbk.api.RateController;
 import io.sbk.api.RunBenchmark;
+
 import io.sbk.perl.SendChannel;
 import io.sbk.perl.Time;
 import io.sbk.api.Worker;
+import io.sbk.system.Printer;
 
+import java.io.EOFException;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Writer Benchmarking Implementation.
@@ -28,7 +33,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataWriter<Object> writer;
     final private Time time;
-    final private RunBenchmark perf;
+    final private BiConsumer perf;
     final private RateController rCnt;
     final private Object payload;
     final private int dataSize;
@@ -46,14 +51,26 @@ public class SbkWriter extends Worker implements RunBenchmark {
     }
 
     @Override
-    public void run() throws IOException {
-        perf.run();
+    public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
+            IllegalStateException {
+        return  CompletableFuture.runAsync( () -> {
+            try {
+                if (secondsToRun > 0) {
+                    Printer.log.info("Writer " + id +" started , run seconds: "+secondsToRun);
+                } else {
+                    Printer.log.info("Writer " + id +" started , records: "+recordsCount);
+                }
+                perf.apply(secondsToRun, recordsCount);
+                Printer.log.info("Writer " + id +" exited");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
-
-    private RunBenchmark createBenchmark() {
-        final RunBenchmark perfWriter;
-        if (params.getSecondsToRun() > 0) {
+    private BiConsumer createBenchmark() {
+        final BiConsumer perfWriter;
+        if (params.getTotalSecondsToRun() > 0) {
             if (params.isWriteAndRead()) {
                 perfWriter = this::RecordsWriterTimeRW;
             } else {
@@ -77,33 +94,32 @@ public class SbkWriter extends Worker implements RunBenchmark {
         return perfWriter;
     }
 
-    private void RecordsWriter() throws  IOException {
-        writer.RecordsWriter(this, dType, payload, dataSize, time);
+    private void RecordsWriter(long secondsToRun, long recordsCount) throws  IOException {
+        writer.RecordsWriter(this, recordsCount, dType, payload, dataSize, time);
     }
 
 
-    private void RecordsWriterSync() throws  IOException {
-        writer.RecordsWriterSync(this, dType, payload, dataSize, time, rCnt);
+    private void RecordsWriterSync(long secondsToRun, long recordsCount) throws  IOException {
+        writer.RecordsWriterSync(this, recordsCount, dType, payload, dataSize, time, rCnt);
     }
 
 
-    private void RecordsWriterTime() throws  IOException {
-        writer.RecordsWriterTime(this, dType, payload, dataSize, time);
+    private void RecordsWriterTime(long secondsToRun, long recordsCount) throws  IOException {
+        writer.RecordsWriterTime(this, secondsToRun, dType, payload, dataSize, time);
     }
 
 
-    private void RecordsWriterTimeSync() throws IOException {
-        writer.RecordsWriterTimeSync(this, dType, payload, dataSize, time, rCnt);
+    private void RecordsWriterTimeSync(long secondsToRun, long recordsCount) throws IOException {
+        writer.RecordsWriterTimeSync(this, secondsToRun, dType, payload, dataSize, time, rCnt);
     }
 
 
-    private void RecordsWriterRW() throws IOException {
-        writer.RecordsWriterRW(this, dType, payload, dataSize, time, rCnt);
+    private void RecordsWriterRW(long secondsToRun, long recordsCount) throws IOException {
+        writer.RecordsWriterRW(this, recordsCount, dType, payload, dataSize, time, rCnt);
     }
 
-
-    private void RecordsWriterTimeRW() throws IOException {
-        writer.RecordsWriterTimeRW(this, dType, payload, dataSize, time, rCnt);
+    private void RecordsWriterTimeRW(long secondsToRun, long recordsCount) throws IOException {
+        writer.RecordsWriterTimeRW(this, secondsToRun, dType, payload, dataSize, time, rCnt);
     }
 
 }
