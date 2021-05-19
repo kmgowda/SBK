@@ -232,12 +232,12 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
-            wStatFuture = writeStats.start(params.getTotalSecondsToRun(), params.getTotalRecords());
+            wStatFuture = writeStats.run(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             wStatFuture = null;
         }
         if (readStats != null && sbkReaders != null) {
-            rStatFuture = readStats.start(params.getTotalSecondsToRun(), params.getTotalRecords());
+            rStatFuture = readStats.run(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             rStatFuture = null;
         }

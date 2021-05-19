@@ -15,7 +15,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Parameters;
 import io.sbk.api.RateController;
-import io.sbk.api.RunBenchmark;
+import io.sbk.perl.RunBenchmark;
 
 import io.sbk.perl.SendChannel;
 import io.sbk.perl.Time;

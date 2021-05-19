@@ -302,7 +302,7 @@ final public class CQueuePerformance implements Performance {
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start(long secondsToRun, long recordsCount) {
+    public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
         if (retFuture == null) {
             retFuture = new CompletableFuture<>();
             qFuture =  CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
