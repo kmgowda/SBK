@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -172,7 +173,8 @@ public class SbkBenchmark implements Benchmark {
      */
     @Override
     @Synchronized
-    public CompletableFuture<Void> start() throws IOException, IllegalStateException {
+    public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException,
+            IllegalStateException {
         if (retFuture != null) {
             throw  new IllegalStateException("SbkBenchmark is already started\n");
         }
@@ -186,6 +188,8 @@ public class SbkBenchmark implements Benchmark {
         final CompletableFuture<Void> wStatFuture;
         final CompletableFuture<Void> rStatFuture;
         final CompletableFuture<Void> chainFuture;
+        final CompletableFuture<Void> writersCB;
+        final CompletableFuture<Void> readersCB;
 
         writers = IntStream.range(0, params.getWritersCount())
                 .boxed()
@@ -239,62 +243,85 @@ public class SbkBenchmark implements Benchmark {
         }
         if (sbkWriters != null) {
             writeFutures = new ArrayList<>();
-            long secondsToRun = params.getTotalSecondsToRun();
-            final long recordsPerWriter = secondsToRun <= 0 ? params.getTotalRecords() / params.getWritersCount()
-                    : 0;
+
+            final long recordsPerWriter = params.getTotalSecondsToRun() <= 0 ?
+                    params.getTotalRecords() / params.getWritersCount() : 0;
             final long delta = recordsPerWriter > 0 ?
                     params.getTotalRecords() - (recordsPerWriter * params.getWritersCount()) : 0;
 
-            int i = 0;
-            while (i < params.getWritersCount()) {
-                logger.setWritersCount(i+1);
-                for (int j = 0; j < Math.min(params.getWritersStep(), params.getWritersCount()-i); j++) {
-                    writeFutures.add(sbkWriters.get(i+j).run(secondsToRun, i+j+1 == params.getWritersCount() ?
-                            recordsPerWriter + delta : recordsPerWriter));
-                }
-                i += params.getWritersStep();
-                if (params.getWritersStepSeconds() > 0 &&  i < params.getWritersCount()) {
-                    try {
-                        Thread.sleep((long) params.getWritersStepSeconds() * PerlConfig.MS_PER_SEC);
-                        secondsToRun -=  params.getWritersStepSeconds();
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                        throw new IOException(ex);
+            writersCB = CompletableFuture.runAsync( () -> {
+                long secondsToRun = params.getTotalSecondsToRun();
+                int i = 0;
+                while (i < params.getWritersCount()) {
+                    logger.setWritersCount(i + 1);
+                    for (int j = 0; j < Math.min(params.getWritersStep(), params.getWritersCount() - i); j++) {
+                        try {
+                            writeFutures.add(sbkWriters.get(i + j).run(secondsToRun, i + j + 1 == params.getWritersCount() ?
+                                    recordsPerWriter + delta : recordsPerWriter));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    i += params.getWritersStep();
+                    if (params.getWritersStepSeconds() > 0 && i < params.getWritersCount()) {
+                        try {
+                            Thread.sleep((long) params.getWritersStepSeconds() * PerlConfig.MS_PER_SEC);
+                            secondsToRun -= params.getWritersStepSeconds();
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
-            }
+            }, executor);
         } else {
+            writersCB = null;
             writeFutures = null;
         }
 
         if (sbkReaders != null) {
             readFutures = new ArrayList<>();
-            long secondsToRun = params.getTotalSecondsToRun();
-            final long recordsPerReader = secondsToRun <= 0 ? params.getTotalRecords() / params.getReadersCount()
-                    : 0;
+
+            final long recordsPerReader = params.getTotalSecondsToRun() <= 0 ?
+                    params.getTotalRecords() / params.getReadersCount() : 0;
             final long delta = recordsPerReader > 0 ?
                     params.getTotalRecords() - (recordsPerReader * params.getReadersCount()) : 0;
 
-            int i = 0;
-            while (i < params.getReadersCount())  {
-                logger.setReadersCount(i+1);
-                for (int j = 0; j < Math.min(params.getReadersStep(), params.getReadersCount()-i); j++) {
-                    readFutures.add(sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
-                            recordsPerReader + delta : recordsPerReader));
-                }
-                i += params.getReadersStep();
-                if (params.getReadersStepSeconds() > 0 && i < params.getReadersCount()) {
-                    try {
-                        Thread.sleep((long) params.getReadersStepSeconds() * PerlConfig.MS_PER_SEC);
-                        secondsToRun -=  params.getReadersStepSeconds();
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                        throw new IOException(ex);
+            readersCB = CompletableFuture.runAsync(() -> {
+                long secondsToRun = params.getTotalSecondsToRun();
+                int i = 0;
+                while (i < params.getReadersCount())  {
+                    logger.setReadersCount(i+1);
+                    for (int j = 0; j < Math.min(params.getReadersStep(), params.getReadersCount()-i); j++) {
+                        try {
+                            readFutures.add(sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
+                                    recordsPerReader + delta : recordsPerReader));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    i += params.getReadersStep();
+                    if (params.getReadersStepSeconds() > 0 && i < params.getReadersCount()) {
+                        try {
+                            Thread.sleep((long) params.getReadersStepSeconds() * PerlConfig.MS_PER_SEC);
+                            secondsToRun -=  params.getReadersStepSeconds();
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
-            }
+            }, executor);
+
         } else {
+            readersCB = null;
             readFutures = null;
+        }
+
+        if (writersCB != null) {
+            writersCB.get();
+        }
+
+        if (readersCB != null) {
+            readersCB.get();
         }
 
         if (writeFutures != null && readFutures != null) {

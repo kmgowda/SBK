@@ -12,6 +12,7 @@ package io.sbk.api;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public interface Benchmark {
 
@@ -19,10 +20,12 @@ public interface Benchmark {
      * Start the Benchmark.
      *
      * @return CompletableFuture.
-     * @throws IllegalStateException If an exception occurred.
      * @throws IOException If an exception occurred.
+     * @throws InterruptedException If an exception occurred
+     * @throws ExecutionException If an exception occurred
+     * @throws IllegalStateException If an exception occurred.
      */
-    CompletableFuture<Void> start() throws IOException, IllegalStateException;
+    CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException, IllegalStateException;
 
     /**
      * stop/shutdown the Benchmark.

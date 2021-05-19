@@ -10,7 +10,6 @@
 
 package io.sbk.api;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,9 +26,8 @@ public interface RunBenchmark {
      *                If this value 0 or less than 0,then run the benchmark till secondsToRun.
      * @return CompletableFuture.
      * @throws IllegalStateException If an exception occurred.
-     * @throws EOFException End of File exception
-     * @throws IOException If an exception occurred.
+     * @throws IOException End of File exception
      */
-    CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
+    CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException,
             IllegalStateException;
 }
