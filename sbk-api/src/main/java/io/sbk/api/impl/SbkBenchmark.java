@@ -253,11 +253,21 @@ public class SbkBenchmark implements Benchmark {
                 long secondsToRun = params.getTotalSecondsToRun();
                 int i = 0;
                 while (i < params.getWritersCount()) {
-                    logger.setWritersCount(i + 1);
-                    for (int j = 0; j < Math.min(params.getWritersStep(), params.getWritersCount() - i); j++) {
+                    final int stepCnt = Math.min(params.getWritersStep(), params.getWritersCount() - i);
+                    logger.incrementWriters(stepCnt);
+                    for (int j = 0; j < stepCnt; j++) {
                         try {
-                            writeFutures.add(sbkWriters.get(i + j).run(secondsToRun, i + j + 1 == params.getWritersCount() ?
-                                    recordsPerWriter + delta : recordsPerWriter));
+                            CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
+                                    i + j + 1 == params.getWritersCount() ?
+                                    recordsPerWriter + delta : recordsPerWriter);
+                            ret.exceptionally(ex -> {
+                                logger.decrementWriters(1);
+                                return null;
+                            });
+                            ret.thenAccept(d -> {
+                                logger.decrementWriters(1);
+                            });
+                            writeFutures.add(ret);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -273,6 +283,8 @@ public class SbkBenchmark implements Benchmark {
                     }
                 }
             }, executor);
+            Printer.log.info("SBK Benchmark initiated Writers");
+
         } else {
             writersCB = null;
             writeFutures = null;
@@ -290,11 +302,20 @@ public class SbkBenchmark implements Benchmark {
                 long secondsToRun = params.getTotalSecondsToRun();
                 int i = 0;
                 while (i < params.getReadersCount())  {
-                    logger.setReadersCount(i+1);
+                    int stepCnt = Math.min(params.getReadersStep(), params.getReadersCount()-i);
+                    logger.incrementReaders(stepCnt);
                     for (int j = 0; j < Math.min(params.getReadersStep(), params.getReadersCount()-i); j++) {
                         try {
-                            readFutures.add(sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
-                                    recordsPerReader + delta : recordsPerReader));
+                            CompletableFuture<Void> ret = sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
+                                    recordsPerReader + delta : recordsPerReader);
+                            ret.exceptionally(ex -> {
+                                logger.decrementReaders(1);
+                                return null;
+                            });
+                            ret.thenAccept(d -> {
+                                logger.decrementReaders(1);
+                            });
+                            readFutures.add(ret);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -310,7 +331,7 @@ public class SbkBenchmark implements Benchmark {
                     }
                 }
             }, executor);
-
+            Printer.log.info("SBK Benchmark initiated Readers");
         } else {
             readersCB = null;
             readFutures = null;

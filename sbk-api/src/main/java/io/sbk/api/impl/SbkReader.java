@@ -51,9 +51,9 @@ public class SbkReader extends Worker implements RunBenchmark {
         return  CompletableFuture.runAsync( () -> {
             try {
                 if (secondsToRun > 0) {
-                    Printer.log.info("Reader " + id +" started , seconds to run: "+secondsToRun);
+                    Printer.log.info("Reader " + id +" started , run seconds: "+secondsToRun);
                 } else {
-                    Printer.log.info("Reader " + id +" started , records per writer: "+recordsCount);
+                    Printer.log.info("Reader " + id +" started , records: "+recordsCount);
                 }
                 perf.apply(secondsToRun, recordsCount);
                 Printer.log.info("Reader " + id + " exited");

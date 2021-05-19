@@ -25,24 +25,41 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RWMetricsLogger extends MetricsLogger implements RWCount {
     final private AtomicInteger writers;
     final private AtomicInteger readers;
+    final private AtomicInteger maxWriters;
+    final private AtomicInteger maxReaders;
 
     public RWMetricsLogger(String header, String action, double[] percentiles, Time time, TimeUnit latencyTimeUnit,
                          CompositeMeterRegistry compositeRegistry) {
        super(header, action,  percentiles, time, latencyTimeUnit, compositeRegistry);
        final String writersName = metricPrefix + "_Writers";
        final String readersName = metricPrefix + "_Readers";
+       final String maxWritersName = metricPrefix + "_Max_Writers";
+       final String maxReadersName = metricPrefix + "_Max_Readers";
        this.writers = this.registry.gauge(writersName, new AtomicInteger());
        this.readers = this.registry.gauge(readersName, new AtomicInteger());
+       this.maxWriters = this.registry.gauge(maxWritersName, new AtomicInteger());
+       this.maxReaders = this.registry.gauge(maxReadersName, new AtomicInteger());
     }
 
     @Override
-    public void setWritersCount(int writers) {
-        this.writers.set(writers);
+    public void incrementWriters(int val) {
+        this.writers.set(writers.get() + val);
+        this.maxWriters.set(maxWriters.get() + val);
     }
 
-   @Override
-   public void setReadersCount(int readers) {
-        this.readers.set(readers);
-   }
+    @Override
+    public void decrementWriters(int val) {
+        this.writers.set(Math.max(writers.get()-val, 0));
+    }
 
+    @Override
+    public void incrementReaders(int val) {
+        this.readers.set(readers.get() + val);
+        this.maxReaders.set(maxReaders.get() + val);
+    }
+
+    @Override
+    public void decrementReaders(int val) {
+        this.readers.set(Math.max(readers.get() - val, 0));
+    }
 }
