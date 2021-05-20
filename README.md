@@ -75,6 +75,9 @@ The Latency values can be measured either in milliseconds, microseconds or nanos
 1. [MariaDB](https://github.com/kmgowda/SBK/tree/master/driver-mariadb)
 1. [Redpanda](https://github.com/kmgowda/SBK/tree/master/driver-redpanda)
 1. [Redis](https://github.com/kmgowda/SBK/tree/master/driver-redis)
+1. [SeaweedFS S3](https://github.com/kmgowda/SBK/tree/master/driver-seaweeds3)
+1. [Cassandra](https://github.com/kmgowda/SBK/tree/master/driver-cassandra)
+1. [Db2](https://github.com/kmgowda/SBK/tree/master/driver-db2)
 
 *In the future, many more storage systems drivers will be plugged in* 
 
@@ -118,11 +121,12 @@ Running SBK locally:
 usage: sbk
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     CSV, ConcurrentQ, CouchDB, Derby, FdbRecord, File,
-                     FileStream, FoundationDB, HDFS, Hive, Ignite, Jdbc,
-                     Kafka, MariaDB, MinIO, MongoDB, MsSql, MySQL, Nats,
-                     NatsStream, Nsq, Null, PostgreSQL, Pravega, Pulsar,
-                     RabbitMQ, RedPanda, RocketMQ, RocksDB, SQLite]
+                     CSV, Cassandra, ConcurrentQ, CouchDB, Db2, Derby,
+                     FdbRecord, File, FileStream, FoundationDB, HDFS,
+                     Hive, Ignite, Jdbc, Kafka, MariaDB, MinIO, MongoDB,
+                     MsSql, MySQL, Nats, NatsStream, Nsq, Null,
+                     PostgreSQL, Pravega, Pulsar, RabbitMQ, RedPanda,
+                     Redis, RocketMQ, RocksDB, SQLite, SeaweedS3]
  -context <arg>      Prometheus Metric context; default context:
                      9718/metrics; 'no' disables the metrics
  -help               Help message
@@ -130,6 +134,8 @@ usage: sbk
  -records <arg>      Number of records(events) if 'seconds' not specified;
                      otherwise, Maximum records per second by writer(s)
                      and/or Number of records per reader
+ -rsec <arg>         Number of seconds/step for readers, default: 0
+ -rstep <arg>        Number of readers/step, default: 1
  -seconds <arg>      Number of seconds to run; if not specified, runs
                      forever
  -size <arg>         Size of each message (event or record)
@@ -142,6 +148,8 @@ usage: sbk
  -time <arg>         Latency Time Unit [ms:MILLISECONDS, mcs:MICROSECONDS,
                      ns:NANOSECONDS]; default: ms
  -writers <arg>      Number of writers
+ -wsec <arg>         Number of seconds/step for writers, default: 0
+ -wstep <arg>        Number of writers/step, default: 1
 
 
 ```
@@ -169,14 +177,18 @@ The SBK  can be executed to
 SBK outputs the data written/read , average throughput and latency , maximum latency  and the latency percentiles 10th, 25th, 50th, 75th, 95th, 99th , 99.9th and 99.99th for every 5 seconds time interval as show below.
 
 ```
-Pulsar Writing    1500124 records,  299964.8 records/sec,    28.61 MB/sec,      3.2 ms avg latency,      42 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       5 ms 90th,       5 ms 95th,       6 ms 99th,       9 ms 99.9th,      21 ms 99.99th.
-Pulsar Writing    1539995 records,  307937.4 records/sec,    29.37 MB/sec,      3.2 ms avg latency,      14 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       6 ms 99th,       9 ms 99.9th,      11 ms 99.99th.
-Pulsar Writing    1534073 records,  306691.9 records/sec,    29.25 MB/sec,      3.2 ms avg latency,      76 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       6 ms 99th,      36 ms 99.9th,      74 ms 99.99th.
-Pulsar Writing    1546930 records,  309200.5 records/sec,    29.49 MB/sec,      3.2 ms avg latency,      24 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       6 ms 99th,       9 ms 99.9th,      23 ms 99.99th.
-Pulsar Writing    1619653 records,  323801.1 records/sec,    30.88 MB/sec,      3.0 ms avg latency,      12 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       5 ms 99th,       8 ms 99.9th,      10 ms 99.99th.
-Pulsar Writing    1573613 records,  314596.8 records/sec,    30.00 MB/sec,      3.1 ms avg latency,      23 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       5 ms 99th,      10 ms 99.9th,      21 ms 99.99th.
-Pulsar Writing    1565730 records,  312958.2 records/sec,    29.85 MB/sec,      3.1 ms avg latency,      25 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       6 ms 99th,      20 ms 99.9th,      23 ms 99.99th.
-Pulsar Writing    1580433 records,  316023.4 records/sec,    30.14 MB/sec,      3.1 ms avg latency,      25 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       5 ms 99th,      22 ms 99.9th,      22 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      832450 records,  166423.4 records/sec,    15.87 MB/sec,      5.8 ms avg latency,      67 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       6 ms 75th,       8 ms 90th,       9 ms 95th,      12 ms 99th,      16 ms 99.9th,      26 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      978068 records,  195418.2 records/sec,    18.64 MB/sec,      5.1 ms avg latency,      70 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       8 ms 99th,      66 ms 99.9th,      67 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      994458 records,  198732.6 records/sec,    18.95 MB/sec,      5.0 ms avg latency,      18 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       7 ms 99th,      13 ms 99.9th,      13 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      991436 records,  198089.1 records/sec,    18.89 MB/sec,      5.0 ms avg latency,      32 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       8 ms 99th,      28 ms 99.9th,      28 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      967234 records,  193408.1 records/sec,    18.44 MB/sec,      5.1 ms avg latency,     104 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       7 ms 99th,     100 ms 99.9th,     100 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      971933 records,  194308.9 records/sec,    18.53 MB/sec,      5.1 ms avg latency,      18 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       7 ms 95th,       9 ms 99th,      12 ms 99.9th,      14 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      995450 records,  199050.2 records/sec,    18.98 MB/sec,      5.0 ms avg latency,      26 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       7 ms 99th,      18 ms 99.9th,      23 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,     1005407 records,  201041.2 records/sec,    19.17 MB/sec,      4.9 ms avg latency,      13 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       7 ms 99th,       9 ms 99.9th,      10 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      971825 records,  194209.6 records/sec,    18.52 MB/sec,      5.1 ms avg latency,      15 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       8 ms 99th,      10 ms 99.9th,      11 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      996529 records,  199226.1 records/sec,    19.00 MB/sec,      5.0 ms avg latency,      26 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       8 ms 99th,      17 ms 99.9th,      18 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,      999380 records,  199836.0 records/sec,    19.06 MB/sec,      5.0 ms avg latency,      13 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       7 ms 99th,       9 ms 99.9th,      10 ms 99.99th.
+
 
 ```
 
@@ -184,7 +196,8 @@ At the end of the benchmarking session, SBK outputs the total data written/read 
 An example  final output is show as below:
 
 ```
-Total : Pulsar Writing   92396507 records,  307987.3 records/sec,    29.37 MB/sec,      3.2 ms avg latency,     142 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      2 ms 10th,       3 ms 25th,       3 ms 50th,       3 ms 75th,       4 ms 90th,       5 ms 95th,       6 ms 99th,      21 ms 99.9th,      49 ms 99.99th.
+Total : Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,    11692470 records,  194874.5 records/sec,    18.58 MB/sec,      5.1 ms avg latency,     104 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher;      4 ms 10th,       5 ms 25th,       5 ms 50th,       5 ms 75th,       6 ms 90th,       6 ms 95th,       8 ms 99th,      14 ms 99.9th,      67 ms 99.99th.
+
 ```
 
 ### Grafana Dashboards of SBK
