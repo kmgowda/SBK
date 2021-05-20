@@ -251,8 +251,9 @@ public class SbkBenchmark implements Benchmark {
 
             writersCB = CompletableFuture.runAsync( () -> {
                 long secondsToRun = params.getTotalSecondsToRun();
+                boolean doWork = true;
                 int i = 0;
-                while (i < params.getWritersCount()) {
+                while (i < params.getWritersCount() && doWork) {
                     final int stepCnt = Math.min(params.getWritersStep(), params.getWritersCount() - i);
                     logger.incrementWriters(stepCnt);
                     for (int j = 0; j < stepCnt; j++) {
@@ -276,7 +277,12 @@ public class SbkBenchmark implements Benchmark {
                     if (params.getWritersStepSeconds() > 0 && i < params.getWritersCount()) {
                         try {
                             Thread.sleep((long) params.getWritersStepSeconds() * PerlConfig.MS_PER_SEC);
-                            secondsToRun -= params.getWritersStepSeconds();
+                            if (params.getTotalSecondsToRun() > 0) {
+                                secondsToRun -= params.getWritersStepSeconds();
+                                if (secondsToRun <= 0) {
+                                    doWork = false;
+                                }
+                            }
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
@@ -300,8 +306,9 @@ public class SbkBenchmark implements Benchmark {
 
             readersCB = CompletableFuture.runAsync(() -> {
                 long secondsToRun = params.getTotalSecondsToRun();
+                boolean doWork = true;
                 int i = 0;
-                while (i < params.getReadersCount())  {
+                while (i < params.getReadersCount() && doWork)  {
                     int stepCnt = Math.min(params.getReadersStep(), params.getReadersCount()-i);
                     logger.incrementReaders(stepCnt);
                     for (int j = 0; j < Math.min(params.getReadersStep(), params.getReadersCount()-i); j++) {
@@ -324,7 +331,12 @@ public class SbkBenchmark implements Benchmark {
                     if (params.getReadersStepSeconds() > 0 && i < params.getReadersCount()) {
                         try {
                             Thread.sleep((long) params.getReadersStepSeconds() * PerlConfig.MS_PER_SEC);
-                            secondsToRun -=  params.getReadersStepSeconds();
+                            if (params.getTotalSecondsToRun() > 0) {
+                                secondsToRun -= params.getReadersStepSeconds();
+                                if (secondsToRun <= 0) {
+                                    doWork = false;
+                                }
+                            }
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
