@@ -21,9 +21,9 @@ public interface RunBenchmark {
     /**
      * Run the performance Benchmark.
      *
-     * @param secondsToRun number of seconds to Run
-     * @param recordsCount Maximum number of records to count.
-     *                If this value 0 or less than 0,then run the benchmark till secondsToRun.
+     * @param secondsToRun Number of seconds to Run
+     * @param recordsCount If secondsToRun is 0, then this indicates the total number of records to benchmark or
+     *                     read/write. If secondsToRun is > 0, then this parameter is ignored.
      * @return CompletableFuture.
      * @throws IllegalStateException If an exception occurred.
      * @throws IOException End of File exception

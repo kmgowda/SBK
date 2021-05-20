@@ -108,10 +108,11 @@ final public class CQueuePerformance implements Performance {
                             recordsCnt += t.records;
                             final long latency = t.endTime - t.startTime;
                             latencyLogger.record(t.startTime, t.bytes, t.records, latency);
-                            if (totalRecords > 0  && recordsCnt >= totalRecords) {
-                                doWork = false;
-                            }
-                            if (msToRun > 0 && time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
+                            if (msToRun > 0) {
+                                if (time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
+                                    doWork = false;
+                                }
+                            } else if (totalRecords > 0  && recordsCnt >= totalRecords) {
                                 doWork = false;
                             }
                         }
