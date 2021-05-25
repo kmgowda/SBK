@@ -14,7 +14,7 @@ import io.sbk.system.Printer;
 import io.sbk.perl.CloneLatencies;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.LatencyRecorder;
-import io.sbk.perl.PeriodicLatencyRecorder;
+import io.sbk.perl.PeriodicRecorder;
 import io.sbk.perl.Print;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -24,7 +24,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements CloneLatencies, PeriodicLatencyRecorder {
+public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements CloneLatencies, PeriodicRecorder {
     final public LatencyWindow window;
     final public Print windowLogger;
     final public Print loggerTotal;
@@ -71,13 +71,13 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     /**
      * Record the latency.
      *
-     * @param startTime start time of the event.
+     * @param startTime start time
+     * @param endTime end time
      * @param bytes number of bytes
      * @param events number of events (records)
-     * @param latency latency value
      */
-    public void record(long startTime, int bytes, int events, long latency) {
-        window.record(startTime, bytes, events, latency);
+    public void record(long startTime, long endTime, int bytes, int events) {
+        window.record(startTime, bytes, events, time.elapsed(endTime, startTime));
         if (window.isOverflow()) {
             window.print(startTime, windowLogger, this);
             window.reset(startTime);

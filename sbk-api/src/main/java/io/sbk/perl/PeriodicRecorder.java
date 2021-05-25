@@ -13,7 +13,7 @@ package io.sbk.perl;
 /**
  * Interface for recording latencies.
  */
-public interface PeriodicLatencyRecorder {
+public interface PeriodicRecorder {
 
     /**
      * Start the window.
@@ -41,12 +41,12 @@ public interface PeriodicLatencyRecorder {
     /**
      * Record the latency.
      *
-     * @param startTime start time of the event.
+     * @param startTime start time
+     * @param endTime end time
      * @param bytes number of bytes
      * @param events number of events (records)
-     * @param latency latency value
      */
-    void record(long startTime, int bytes, int events, long latency);
+    void record(long startTime, long endTime, int bytes, int events);
 
 
     /**

@@ -19,7 +19,7 @@ import io.sbk.api.Parameters;
 import io.sbk.api.Logger;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.PeriodicLatencyRecorder;
+import io.sbk.perl.PeriodicRecorder;
 import io.sbk.api.Storage;
 import io.sbk.perl.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
@@ -133,11 +133,11 @@ public class SbkBenchmark implements Benchmark {
     }
 
 
-    private PeriodicLatencyRecorder createLatencyRecorder() {
+    private PeriodicRecorder createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
         final LatencyWindow window;
-        final PeriodicLatencyRecorder latencyRecorder;
+        final PeriodicRecorder latencyRecorder;
 
         if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
