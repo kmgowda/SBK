@@ -28,7 +28,17 @@ public interface Time {
 
 
     /**
-     * get the current Time.
+     * get the duration between two time stamps.
+     * @param h time stamp
+     * @param l time stamp, the l should be less than h
+     * @return elapsed time.
+     */
+    default long elapsed(long h, long l) {
+        return h-l;
+    }
+
+    /**
+     * get the elapsed Time in milliseconds.
      * @param h time stamp
      * @param l time stamp, the l should be less than h
      * @return elapsed time in milliseconds
@@ -36,7 +46,7 @@ public interface Time {
     double elapsedMilliSeconds(long h, long l);
 
     /**
-     * get the current Time.
+     * get the elapsed Time in seconds.
      * @param h time stamp
      * @param l time stamp, the l should be less than h
      * @return elapsed time in seconds

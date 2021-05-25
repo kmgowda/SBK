@@ -40,7 +40,7 @@ public class MicroSeconds implements Time {
      * @return elapsed time in milliseconds
      */
     public double elapsedMilliSeconds(long h, long l) {
-        return (h-l) / (PerlConfig.MICROS_PER_MS * 1.0);
+        return elapsed(h, l) / (PerlConfig.MICROS_PER_MS * 1.0);
     }
 
     /**
@@ -50,7 +50,7 @@ public class MicroSeconds implements Time {
      * @return elapsed time in seconds
      */
     public double elapsedSeconds(long h, long l) {
-        return (h-l) / (PerlConfig.MICROS_PER_SEC  * 1.0);
+        return elapsed(h, l) / (PerlConfig.MICROS_PER_SEC  * 1.0);
     }
 
     /**

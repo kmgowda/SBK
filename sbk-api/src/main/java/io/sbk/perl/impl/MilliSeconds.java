@@ -33,23 +33,23 @@ public class MilliSeconds implements Time {
     }
 
     /**
-     * get the current Time.
+     * get the elapsed time .
      * @param h time stamp in milliseconds
      * @param l time stamp in milliseconds, the l should be less than h
      * @return elapsed time in milliseconds
      */
     public double elapsedMilliSeconds(long h, long l) {
-        return h-l;
+        return elapsed(h, l);
     }
 
     /**
-     * get the current Time.
+     * get the elapsed tiome.
      * @param h time stamp in milliseconds
      * @param l time stamp in milliseconds, the l should be less than h
      * @return elapsed time in seconds
      */
     public double elapsedSeconds(long h, long l) {
-        return (h-l) / (PerlConfig.MS_PER_SEC * 1.0);
+        return elapsed(h, l) / (PerlConfig.MS_PER_SEC * 1.0);
     }
 
     /**
