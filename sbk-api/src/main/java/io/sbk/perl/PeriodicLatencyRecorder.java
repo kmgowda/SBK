@@ -57,9 +57,9 @@ public interface PeriodicLatencyRecorder {
     void print(long currentTime);
 
     /**
-     * print the Final Latency Results.
+     * Stop the window.
      *
      * @param endTime current time.
      */
-    void printTotal(long endTime);
+    void stop(long endTime);
 }

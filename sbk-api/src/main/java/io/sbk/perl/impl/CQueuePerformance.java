@@ -143,7 +143,7 @@ final public class CQueuePerformance implements Performance {
                     }
                 }
             }
-            latencyLogger.printTotal(ctime);
+            latencyLogger.stop(ctime);
         }
     }
 

@@ -116,7 +116,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      *
      * @param endTime current time.
      */
-    public void printTotal(long endTime) {
+    public void stop(long endTime) {
         window.printPendingData(endTime, windowLogger, this);
         if (csvPrinter != null) {
             Printer.log.info("Reading CSV file :" +csvFile +" ...");

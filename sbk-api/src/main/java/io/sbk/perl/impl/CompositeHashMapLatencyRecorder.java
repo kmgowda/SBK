@@ -136,7 +136,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      *
      * @param endTime current time.
      */
-    public void printTotal(long endTime) {
+    public void stop(long endTime) {
         window.printPendingData(endTime, windowLogger, this);
         print(endTime, loggerTotal, null);
     }
