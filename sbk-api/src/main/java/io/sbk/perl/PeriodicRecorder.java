@@ -16,21 +16,21 @@ package io.sbk.perl;
 public interface PeriodicRecorder {
 
     /**
-     * Start the window.
+     * Start the Recorder.
      *
      * @param startTime starting time.
      */
     void start(long startTime);
 
     /**
-     * Reset the window.
+     * Start the Recording window.
      *
      * @param startTime starting time.
      */
-    void resetWindow(long startTime);
+    void startWindow(long startTime);
 
     /**
-     * Get the current time duration of this window.
+     * Get the current time duration of this window starting from startWindow.
      *
      * @param currentTime current time.
      * @return elapsed Time in Milliseconds from the startTime.
@@ -39,7 +39,7 @@ public interface PeriodicRecorder {
 
 
     /**
-     * Record the latency.
+     * Record the Event/record.
      *
      * @param startTime start time
      * @param endTime end time
@@ -50,14 +50,15 @@ public interface PeriodicRecorder {
 
 
     /**
-     * print the periodic Latency Results.
+     * Stop the Recording window.
+     * Results from startWindow to this method are printed /flushed.
      *
      * @param currentTime current time.
      */
-    void print(long currentTime);
+    void stopWindow(long currentTime);
 
     /**
-     * Stop the window.
+     * Stop the Recorder.
      *
      * @param endTime current time.
      */

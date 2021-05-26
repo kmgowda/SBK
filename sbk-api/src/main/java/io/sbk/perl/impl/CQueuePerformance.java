@@ -95,6 +95,7 @@ final public class CQueuePerformance implements Performance {
             TimeStamp t;
             Printer.log.info("Performance Logger Started" );
             periodicLogger.start(startTime);
+            periodicLogger.startWindow(startTime);
             while (doWork) {
                 notFound = true;
                 for (int i = 0; doWork && (i < channels.length); i++) {
@@ -116,8 +117,8 @@ final public class CQueuePerformance implements Performance {
                             }
                         }
                         if (periodicLogger.elapsedMilliSeconds(ctime) > windowIntervalMS) {
-                            periodicLogger.print(ctime);
-                            periodicLogger.resetWindow(ctime);
+                            periodicLogger.stopWindow(ctime);
+                            periodicLogger.startWindow(ctime);
                             idleCounter.reset();
                         }
                     }
@@ -128,8 +129,8 @@ final public class CQueuePerformance implements Performance {
                             ctime = time.getCurrentTime();
                             final long diffTime = periodicLogger.elapsedMilliSeconds(ctime);
                             if (diffTime > windowIntervalMS) {
-                                periodicLogger.print(ctime);
-                                periodicLogger.resetWindow(ctime);
+                                periodicLogger.stopWindow(ctime);
+                                periodicLogger.startWindow(ctime);
                                 idleCounter.reset();
                                 idleCounter.setElastic(diffTime);
                             } else {

@@ -43,7 +43,6 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      * @param startTime starting time.
      */
     public void start(long startTime) {
-        window.reset(startTime);
         reset(startTime);
     }
 
@@ -52,7 +51,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      *
      * @param startTime starting time.
      */
-    public void resetWindow(long startTime) {
+    public void startWindow(long startTime) {
         window.reset(startTime);
     }
 
@@ -116,7 +115,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      *
      * @param currentTime current time.
      */
-    public void print(long currentTime) {
+    public void stopWindow(long currentTime) {
         window.print(currentTime, windowLogger, this);
         if (isOverflow()) {
             if (hashMapBytesCount > maxHashMapSizeBytes) {
