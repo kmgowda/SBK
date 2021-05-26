@@ -71,20 +71,6 @@ public abstract class LatencyWindow extends LatencyRecorder {
                 pecs);
     }
 
-
-    /**
-     * print only if there is data recorded.
-     *
-     * @param time current time.
-     * @param printer printer interface.
-     * @param copyLatencies copy Latency values
-     */
-    public void printPendingData(long time,  Print printer, ReportLatencies copyLatencies) {
-        if (this.totalRecords > 0) {
-            print(time, printer, copyLatencies);
-        }
-    }
-
     /**
      * Record the latency.
      *

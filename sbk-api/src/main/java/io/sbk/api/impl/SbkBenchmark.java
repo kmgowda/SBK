@@ -150,11 +150,13 @@ public class SbkBenchmark implements Benchmark {
 
         }
         if (perlConfig.csv) {
-            latencyRecorder = new CompositeCSVLatencyRecorder(window, perlConfig.maxHashMapSizeMB, logger, logger::printTotal,
+            latencyRecorder = new CompositeCSVLatencyRecorder(window, perlConfig.maxHashMapSizeMB,
+                    logger, logger::printTotal, logger,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv" );
             Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {
-            latencyRecorder = new CompositeHashMapLatencyRecorder(window, perlConfig.maxHashMapSizeMB, logger, logger::printTotal);
+            latencyRecorder = new CompositeHashMapLatencyRecorder(window, perlConfig.maxHashMapSizeMB,
+                    logger, logger::printTotal, logger);
             Printer.log.info("Total Window Latency Store: HashMap");
         }
         return latencyRecorder;

@@ -11,6 +11,7 @@
 package io.sbk.perl.impl;
 
 import io.sbk.perl.LatencyRecord;
+import io.sbk.perl.ReportLatenciesWindow;
 import io.sbk.system.Printer;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
@@ -28,13 +29,16 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     final public LatencyWindow window;
     final public Print windowLogger;
     final public Print loggerTotal;
+    final public ReportLatenciesWindow latencyReportWindow;
 
-    public CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
+    public CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger,
+                                           Print loggerTotal, ReportLatenciesWindow latencyReportWindow) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
                 window.totalRecordsMax, window.totalBytesMax, window.percentileFractions, window.time, maxHashMapSizeMB);
         this.window = window;
         this.windowLogger = logger;
         this.loggerTotal = loggerTotal;
+        this.latencyReportWindow = latencyReportWindow;
     }
 
     /**
@@ -53,6 +57,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      */
     public void startWindow(long startTime) {
         window.reset(startTime);
+        latencyReportWindow.openWindow();
     }
 
 
@@ -97,6 +102,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
         this.higherLatencyDiscardRecords += record.higherLatencyDiscardRecords;
         this.validLatencyRecords += record.validLatencyRecords;
         this.maxLatency = Math.max(this.maxLatency, record.maxLatency);
+        latencyReportWindow.reportLatencyRecord(record);
     }
 
     @Override
@@ -107,6 +113,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
             hashMapBytesCount += incBytes;
         }
         latencies.put(latency, val + count);
+        latencyReportWindow.reportLatency(latency, count);
     }
 
 
@@ -128,6 +135,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
             print(currentTime, loggerTotal, null);
             start(currentTime);
         }
+        latencyReportWindow.closeWindow();
     }
 
     /**
@@ -136,7 +144,10 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      * @param endTime current time.
      */
     public void stop(long endTime) {
-        window.printPendingData(endTime, windowLogger, this);
+        if (window.totalRecords > 0) {
+            window.print(endTime, windowLogger, this);
+            latencyReportWindow.closeWindow();
+        }
         print(endTime, loggerTotal, null);
     }
 

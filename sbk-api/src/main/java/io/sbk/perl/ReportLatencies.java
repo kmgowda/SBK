@@ -10,9 +10,22 @@
 
 package io.sbk.perl;
 
+
 public interface ReportLatencies {
 
+    /**
+     * Report a latency Record.
+     *
+     * @param record Latency Record
+     */
     void reportLatencyRecord(LatencyRecord record);
 
+
+    /**
+     * Report one latency .
+     *
+     * @param latency Latency value
+     * @param count  Number of times the latency value is observed
+     */
     void reportLatency(long latency, long count);
 }
