@@ -10,10 +10,11 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.perl.LatencyRecord;
+import io.sbk.perl.ReportLatenciesWindow;
 import io.sbk.system.Printer;
-import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.perl.Print;
 
@@ -24,17 +25,20 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements CloneLatencies, PeriodicRecorder {
+public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements ReportLatencies, PeriodicRecorder {
     final public LatencyWindow window;
     final public Print windowLogger;
     final public Print loggerTotal;
+    final public ReportLatenciesWindow latencyReportWindow;
 
-    public CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger, Print loggerTotal) {
+    public CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger,
+                                           Print loggerTotal, ReportLatenciesWindow latencyReportWindow) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
                 window.totalRecordsMax, window.totalBytesMax, window.percentileFractions, window.time, maxHashMapSizeMB);
         this.window = window;
         this.windowLogger = logger;
         this.loggerTotal = loggerTotal;
+        this.latencyReportWindow = latencyReportWindow;
     }
 
     /**
@@ -43,7 +47,6 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      * @param startTime starting time.
      */
     public void start(long startTime) {
-        window.reset(startTime);
         reset(startTime);
     }
 
@@ -52,8 +55,9 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      *
      * @param startTime starting time.
      */
-    public void resetWindow(long startTime) {
+    public void startWindow(long startTime) {
         window.reset(startTime);
+        latencyReportWindow.openWindow();
     }
 
 
@@ -89,25 +93,27 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     }
 
     @Override
-    public void updateLatencyRecords(LatencyRecorder latencies) {
-        this.totalRecords += latencies.totalRecords;
-        this.totalLatency += latencies.totalLatency;
-        this.totalBytes += latencies.totalBytes;
-        this.invalidLatencyRecords += latencies.invalidLatencyRecords;
-        this.lowerLatencyDiscardRecords += latencies.lowerLatencyDiscardRecords;
-        this.higherLatencyDiscardRecords += latencies.higherLatencyDiscardRecords;
-        this.validLatencyRecords += latencies.validLatencyRecords;
-        this.maxLatency = Math.max(this.maxLatency, latencies.maxLatency);
+    public void reportLatencyRecord(LatencyRecord record) {
+        this.totalRecords += record.totalRecords;
+        this.totalLatency += record.totalLatency;
+        this.totalBytes += record.totalBytes;
+        this.invalidLatencyRecords += record.invalidLatencyRecords;
+        this.lowerLatencyDiscardRecords += record.lowerLatencyDiscardRecords;
+        this.higherLatencyDiscardRecords += record.higherLatencyDiscardRecords;
+        this.validLatencyRecords += record.validLatencyRecords;
+        this.maxLatency = Math.max(this.maxLatency, record.maxLatency);
+        latencyReportWindow.reportLatencyRecord(record);
     }
 
     @Override
-    public void copyLatency(long latency, long events) {
+    public void reportLatency(long latency, long count) {
         Long val = latencies.get(latency);
         if (val == null) {
             val = 0L;
             hashMapBytesCount += incBytes;
         }
-        latencies.put(latency, val + events);
+        latencies.put(latency, val + count);
+        latencyReportWindow.reportLatency(latency, count);
     }
 
 
@@ -116,7 +122,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      *
      * @param currentTime current time.
      */
-    public void print(long currentTime) {
+    public void stopWindow(long currentTime) {
         window.print(currentTime, windowLogger, this);
         if (isOverflow()) {
             if (hashMapBytesCount > maxHashMapSizeBytes) {
@@ -129,6 +135,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
             print(currentTime, loggerTotal, null);
             start(currentTime);
         }
+        latencyReportWindow.closeWindow();
     }
 
     /**
@@ -137,7 +144,10 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      * @param endTime current time.
      */
     public void stop(long endTime) {
-        window.printPendingData(endTime, windowLogger, this);
+        if (window.totalRecords > 0) {
+            window.print(endTime, windowLogger, this);
+            latencyReportWindow.closeWindow();
+        }
         print(endTime, loggerTotal, null);
     }
 

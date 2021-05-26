@@ -10,7 +10,7 @@
 
 package io.sbk.perl.impl;
 
-import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -41,14 +41,14 @@ public class ArrayLatencyRecorder extends LatencyWindow {
 
 
     @Override
-    public long[] getPercentiles(CloneLatencies copyLatencies) {
+    public long[] getPercentiles(ReportLatencies copyLatencies) {
         final long[] values = new long[percentileFractions.length];
         final long[] percentileIds = new long[percentileFractions.length];
         long cur = 0;
         int index = 0;
 
         if (copyLatencies != null) {
-            copyLatencies.updateLatencyRecords(this);
+            copyLatencies.reportLatencyRecord(this);
         }
 
         for (int i = 0; i < percentileIds.length; i++) {
@@ -60,7 +60,7 @@ public class ArrayLatencyRecorder extends LatencyWindow {
             if (latencies[i] > 0) {
 
                 if (copyLatencies != null) {
-                    copyLatencies.copyLatency(i, latencies[i]);
+                    copyLatencies.reportLatency(i, latencies[i]);
                 }
 
                 while (index < values.length) {

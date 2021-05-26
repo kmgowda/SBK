@@ -9,7 +9,7 @@
  */
 package io.sbk.perl.impl;
 
-import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.Print;
@@ -57,7 +57,7 @@ public abstract class LatencyWindow extends LatencyRecorder {
      * @param logger printer interface.
      * @param copyLatencies  Copy Latency values
      */
-    public void print(long endTime, Print logger, CloneLatencies copyLatencies) {
+    public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
         final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
@@ -69,20 +69,6 @@ public abstract class LatencyWindow extends LatencyRecorder {
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                 pecs);
-    }
-
-
-    /**
-     * print only if there is data recorded.
-     *
-     * @param time current time.
-     * @param printer printer interface.
-     * @param copyLatencies copy Latency values
-     */
-    public void printPendingData(long time,  Print printer, CloneLatencies copyLatencies) {
-        if (this.totalRecords > 0) {
-            print(time, printer, copyLatencies);
-        }
     }
 
     /**
@@ -97,8 +83,8 @@ public abstract class LatencyWindow extends LatencyRecorder {
 
     /**
      * get the Percentiles.
-     * @param cloneLatencies  Copy Latency records.
+     * @param reportLatencies  Copy Latency records.
      * @return Array of percentiles.
      */
-    abstract public long[] getPercentiles(CloneLatencies cloneLatencies);
+    abstract public long[] getPercentiles(ReportLatencies reportLatencies);
 }

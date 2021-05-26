@@ -7,12 +7,17 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-
 package io.sbk.perl;
 
-public interface CloneLatencies {
+public interface ReportLatenciesWindow extends ReportLatencies {
 
-    void updateLatencyRecords(LatencyRecorder latencies);
+    /**
+     * open the reporting window.
+     */
+    void openWindow();
 
-    void copyLatency(long latency, long events);
+    /**
+     * close the reporting window.
+     */
+    void closeWindow();
 }

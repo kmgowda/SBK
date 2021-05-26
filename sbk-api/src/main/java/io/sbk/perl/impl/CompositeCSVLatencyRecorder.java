@@ -11,6 +11,7 @@
 package io.sbk.perl.impl;
 
 import io.sbk.perl.Print;
+import io.sbk.perl.ReportLatenciesWindow;
 import io.sbk.system.Printer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -29,9 +30,9 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
     final private String csvFile;
     private CSVPrinter csvPrinter;
 
-    public CompositeCSVLatencyRecorder( LatencyWindow window, int maxHashMapSizeMB, Print logger,
-                                       Print loggerTotal, String fileName) {
-        super(window, maxHashMapSizeMB, logger, loggerTotal);
+    public CompositeCSVLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger,
+                                       Print loggerTotal, ReportLatenciesWindow latencyReportWindow, String fileName) {
+        super(window, maxHashMapSizeMB, logger, loggerTotal, latencyReportWindow);
         csvFile = fileName;
         csvPrinter = null;
     }
@@ -103,7 +104,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
                     .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
             hashMapBytesCount = 0;
             for (CSVRecord csvEntry : csvParser) {
-                copyLatency(Long.parseLong(csvEntry.get(0)), Long.parseLong(csvEntry.get(1)));
+                reportLatency(Long.parseLong(csvEntry.get(0)), Long.parseLong(csvEntry.get(1)));
             }
             csvParser.close();
         } catch (IOException ex) {
@@ -117,7 +118,10 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      * @param endTime current time.
      */
     public void stop(long endTime) {
-        window.printPendingData(endTime, windowLogger, this);
+        if (window.totalRecords > 0) {
+            window.print(endTime, windowLogger, this);
+        }
+
         if (csvPrinter != null) {
             Printer.log.info("Reading CSV file :" +csvFile +" ...");
             try {

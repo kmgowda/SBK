@@ -9,8 +9,10 @@
  */
 package io.sbk.api;
 
+import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Print;
+import io.sbk.perl.ReportLatenciesWindow;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 
@@ -19,7 +21,7 @@ import java.io.IOException;
 /**
  * Interface for recoding/printing results.
  */
-public interface Logger extends Print, RWCount {
+public interface Logger extends Print, RWCount, ReportLatenciesWindow {
 
     /**
      * Add the Metric type specific command line arguments.
@@ -110,4 +112,39 @@ public interface Logger extends Print, RWCount {
     default double[] getPercentiles() {
         return PerlConfig.PERCENTILES;
     }
+
+    /**
+     * open the reporting window.
+     */
+    default void openWindow() {
+
+    }
+
+    /**
+     * close the reporting window.
+     */
+    default void closeWindow() {
+
+    }
+
+    /**
+     * Report a latency Record.
+     *
+     * @param record Latency Record
+     */
+    default void reportLatencyRecord(LatencyRecord record) {
+
+    }
+
+
+    /**
+     * Report one latency .
+     *
+     * @param latency Latency value
+     * @param count  Number of times the latency value is observed
+     */
+    default void reportLatency(long latency, long count) {
+
+    }
+
 }
