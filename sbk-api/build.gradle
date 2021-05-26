@@ -23,8 +23,9 @@ dependencies {
     compile "org.slf4j:slf4j-api:1.7.14"
     compile "org.slf4j:slf4j-simple:1.7.14"
     compile 'org.projectlombok:lombok:1.18.10'
-    annotationProcessor 'org.projectlombok:lombok:1.18.10'
     compile 'org.reflections:reflections:0.9.12'
+    compile 'javax.annotation:javax.annotation-api:1.3.2'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
     compile 'io.micrometer:micrometer-registry-jmx:latest.release'
     compile 'io.micrometer:micrometer-registry-prometheus:latest.release'
     compile group: 'commons-configuration', name: 'commons-configuration', version: '1.10'
