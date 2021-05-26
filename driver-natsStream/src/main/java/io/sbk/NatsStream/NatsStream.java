@@ -14,7 +14,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class NatsStream implements Storage<byte[]> {
     private Builder optsBuilder;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -49,7 +49,7 @@ public class NatsStream implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         topicName =  params.getOptionValue("topic", null);
         if (topicName == null) {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
@@ -59,18 +59,18 @@ public class NatsStream implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         optsBuilder =  new Builder();
         optsBuilder.natsUrl(config.uri);
         optsBuilder.maxPubAcksInFlight(config.maxPubAcksInFlight);
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             return new NatsStreamWriter(id, params, topicName, config, optsBuilder);
         } catch (IOException ex) {
@@ -81,7 +81,7 @@ public class NatsStream implements Storage<byte[]> {
 
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             return new NatsStreamReader(id, params, topicName, topicName + "-" + id,
                     config, optsBuilder);

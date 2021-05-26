@@ -11,7 +11,7 @@ package io.sbk.MongoDB;
 
 import com.mongodb.client.MongoCollection;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -27,11 +27,11 @@ import java.util.concurrent.CompletableFuture;
  */
 public class MongoDBMultiWriter implements Writer<byte[]> {
     final private MongoCollection<Document> databaseCollection;
-    final private Parameters params;
+    final private ParameterOptions params;
     private long key;
     private long cnt;
 
-    public MongoDBMultiWriter(int id, Parameters params, MongoDBConfig config,
+    public MongoDBMultiWriter(int id, ParameterOptions params, MongoDBConfig config,
                               MongoCollection<Document> databaseCollection) throws IOException {
         this.key = MongoDB.generateStartKey(id);
         this.cnt = 0;

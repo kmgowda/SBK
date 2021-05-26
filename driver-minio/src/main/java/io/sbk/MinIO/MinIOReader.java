@@ -19,7 +19,7 @@ import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
 import io.minio.messages.Item;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
@@ -35,11 +35,11 @@ import java.security.NoSuchAlgorithmException;
  * Class for MinIO Reader.
  */
 public class MinIOReader implements Reader<byte[]> {
-    final private Parameters params;
+    final private ParameterOptions params;
     final private MinIOConfig config;
     final private MinioClient client;
 
-    public MinIOReader(int id, Parameters params, MinIOConfig config, MinioClient client)  {
+    public MinIOReader(int id, ParameterOptions params, MinIOConfig config, MinioClient client)  {
         this.params  = params;
         this.config = config;
         this.client = client;

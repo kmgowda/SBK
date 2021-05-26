@@ -9,7 +9,7 @@
  */
 package io.sbk.CSV;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -26,7 +26,7 @@ public class CSVWriter implements Writer<String> {
     private CSVPrinter csvPrinter;
     private long key;
 
-    public CSVWriter(int id, Parameters params, CSVConfig config) throws IOException {
+    public CSVWriter(int id, ParameterOptions params, CSVConfig config) throws IOException {
         java.io.File file = new java.io.File(config.fileName);
         file.delete();
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(config.fileName)), CSVFormat.DEFAULT

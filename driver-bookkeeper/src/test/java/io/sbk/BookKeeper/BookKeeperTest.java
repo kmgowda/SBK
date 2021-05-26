@@ -10,7 +10,7 @@
 package io.sbk.BookKeeper;
 
 import io.sbk.api.Config;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.impl.SbkParameters;
 import org.apache.commons.cli.ParseException;
 import org.junit.Assert;
@@ -27,7 +27,7 @@ public class BookKeeperTest {
     final String[] drivers = {"BookKeeper"};
     final String benchmarkName = Config.NAME + " -class bookkeeper";
     final List<String> driversList = Arrays.asList( drivers );
-    private Parameters params;
+    private ParameterOptions params;
     private BookKeeper bk;
 
     @Test

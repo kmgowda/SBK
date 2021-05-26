@@ -16,7 +16,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.impl.ByteArray;
 
 import java.io.IOException;
@@ -62,7 +62,7 @@ public class MinIO implements Storage<byte[]> {
 
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -84,7 +84,7 @@ public class MinIO implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.bucketName =  params.getOptionValue("bucket", config.bucketName);
         config.url = params.getOptionValue("url", config.url);
         config.accessKey = params.getOptionValue("key", config.accessKey);
@@ -98,7 +98,7 @@ public class MinIO implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         try {
             // Create a minioClient with the MinIO Server name, Port, Access key and Secret key.
             mclient = new MinioClient(config.url, config.accessKey, config.secretKey);
@@ -141,16 +141,16 @@ public class MinIO implements Storage<byte[]> {
 
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         return new MinIOWriter(id, params, config, mclient, dType);
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         return  new MinIOReader(id, params, config, mclient);
     }
 

@@ -13,7 +13,7 @@ package io.sbk.FoundationDB;
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import java.io.EOFException;
@@ -27,7 +27,7 @@ public class FoundationDBReader implements Reader<byte[]> {
     final private Database db;
     private long key;
 
-    public FoundationDBReader(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
+    public FoundationDBReader(int id, ParameterOptions params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.key = FoundationDB.generateStartKey(id);
         this.config = config;
         if (config.multiClient) {

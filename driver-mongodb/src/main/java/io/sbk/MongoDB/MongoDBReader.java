@@ -13,7 +13,7 @@ package io.sbk.MongoDB;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import org.bson.Document;
 import org.bson.types.Binary;
@@ -26,11 +26,11 @@ import java.io.IOException;
  */
 public class MongoDBReader implements Reader<byte[]> {
     final private  MongoCollection<Document> databaseCollection;
-    final private Parameters params;
+    final private ParameterOptions params;
     private long key;
     private int cnt;
 
-    public MongoDBReader(int id, Parameters params, MongoDBConfig config,  MongoCollection<Document> databaseCollection) throws IOException {
+    public MongoDBReader(int id, ParameterOptions params, MongoDBConfig config, MongoCollection<Document> databaseCollection) throws IOException {
         this.key = MongoDB.generateStartKey(id);
         this.cnt = 0;
         this.params = params;

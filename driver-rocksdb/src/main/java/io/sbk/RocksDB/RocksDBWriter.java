@@ -10,7 +10,7 @@
 
 package io.sbk.RocksDB;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -25,7 +25,7 @@ public class RocksDBWriter implements Writer<byte[]> {
     final private RocksDB db;
     private long key;
 
-    public RocksDBWriter(int id, Parameters params, RocksDB db) throws IOException {
+    public RocksDBWriter(int id, ParameterOptions params, RocksDB db) throws IOException {
         this.key = io.sbk.RocksDB.RocksDB.generateStartKey(id);
         this.db = db;
         try {

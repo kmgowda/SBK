@@ -10,7 +10,7 @@
 
 package io.sbk.CouchDB;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import org.ektorp.CouchDbConnector;
 
@@ -24,10 +24,10 @@ import java.util.concurrent.CompletableFuture;
  */
 public class CouchDBWriter implements Writer<String> {
     final private CouchDbConnector db;
-    final private Parameters params;
+    final private ParameterOptions params;
     private long key;
 
-    public CouchDBWriter(int id, Parameters params, CouchDBConfig config, CouchDbConnector db) throws IOException {
+    public CouchDBWriter(int id, ParameterOptions params, CouchDBConfig config, CouchDbConnector db) throws IOException {
         this.key = CouchDB.generateStartKey(id);
         this.params = params;
         this.db = db;

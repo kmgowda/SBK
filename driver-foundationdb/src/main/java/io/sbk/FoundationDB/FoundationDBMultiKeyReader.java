@@ -14,7 +14,7 @@ import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
@@ -27,13 +27,13 @@ import java.io.IOException;
  * Class for Reader.
  */
 public class FoundationDBMultiKeyReader implements Reader<byte[]> {
-    final private Parameters params;
+    final private ParameterOptions params;
     final private FoundationDBConfig config;
     final private Database db;
     private long key;
     private int cnt;
 
-    public FoundationDBMultiKeyReader(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
+    public FoundationDBMultiKeyReader(int id, ParameterOptions params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.params = params;
         this.config = config;
         this.key = FoundationDB.generateStartKey(id);

@@ -13,7 +13,7 @@ import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -25,13 +25,13 @@ import java.util.concurrent.CompletableFuture;
  * Class for Multi Key Writer.
  */
 public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
-    final private Parameters params;
+    final private ParameterOptions params;
     final private FoundationDBConfig config;
     final private Database db;
     private long key;
     private int cnt;
 
-    public FoundationDBMultiKeyWriter(int id, Parameters params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
+    public FoundationDBMultiKeyWriter(int id, ParameterOptions params, FoundationDBConfig config, FDB fdb, Database db) throws IOException {
         this.params = params;
         this.config = config;
         this.key = FoundationDB.generateStartKey(id);

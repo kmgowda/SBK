@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.perl.PerlConfig;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.DefaultParser;
@@ -26,7 +26,7 @@ import java.util.List;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-final public class SbkParameters implements Parameters {
+final public class SbkParameters implements ParameterOptions {
     final private String benchmarkName;
     final private Options options;
     final private HelpFormatter formatter;

@@ -16,7 +16,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.impl.NioByteBuffer;
 import io.sbk.system.Printer;
 
@@ -33,7 +33,7 @@ public class File implements Storage<ByteBuffer> {
     private DataType<ByteBuffer> dType;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -49,7 +49,7 @@ public class File implements Storage<ByteBuffer> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.fileName =  params.getOptionValue("file", config.fileName);
         config.asyncThreads =  Integer.parseInt(params.getOptionValue("asyncthreads", Integer.toString(config.asyncThreads)));
         if (params.getWritersCount() > 1) {
@@ -61,7 +61,7 @@ public class File implements Storage<ByteBuffer> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         if (config.reCreate && params.getWritersCount() > 0) {
             java.io.File file = new java.io.File(config.fileName);
             file.delete();
@@ -69,12 +69,12 @@ public class File implements Storage<ByteBuffer> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
 
     }
 
     @Override
-    public DataWriter<ByteBuffer> createWriter(final int id, final Parameters params) {
+    public DataWriter<ByteBuffer> createWriter(final int id, final ParameterOptions params) {
         try {
             return new FileWriter(id, params, config);
         } catch (IOException ex) {
@@ -84,7 +84,7 @@ public class File implements Storage<ByteBuffer> {
     }
 
     @Override
-    public DataReader<ByteBuffer> createReader(final int id, final Parameters params) {
+    public DataReader<ByteBuffer> createReader(final int id, final ParameterOptions params) {
         try {
             if (config.asyncThreads > 0) {
                 Printer.log.warn("Asynchronous File Reader initiated !");

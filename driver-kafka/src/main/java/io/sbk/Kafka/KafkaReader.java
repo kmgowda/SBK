@@ -10,7 +10,7 @@
 package io.sbk.Kafka;
 
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class KafkaReader implements Reader<byte[]> {
     final private KafkaConsumer<byte[], byte[]> consumer;
     final private Duration timeoutDuration;
 
-    public KafkaReader(int id, Parameters params, String topicName, Properties consumerProps) throws IOException {
+    public KafkaReader(int id, ParameterOptions params, String topicName, Properties consumerProps) throws IOException {
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
         this.timeoutDuration = Duration.ofMillis(params.getTimeoutMS());

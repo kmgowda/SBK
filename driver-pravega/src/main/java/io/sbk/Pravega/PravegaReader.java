@@ -10,7 +10,7 @@
 
 package io.sbk.Pravega;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import io.pravega.client.stream.EventStreamReader;
@@ -26,10 +26,10 @@ import java.io.IOException;
  * Class for Pravega reader/consumer.
  */
 public class PravegaReader implements Reader<byte[]> {
-    private final Parameters params;
+    private final ParameterOptions params;
     private final EventStreamReader<byte[]> reader;
 
-    public PravegaReader(int id, Parameters params, String streamName,
+    public PravegaReader(int id, ParameterOptions params, String streamName,
                          String readergrp, EventStreamClientFactory factory) throws IOException {
         final String readerSt = Integer.toString(id);
         this.params = params;

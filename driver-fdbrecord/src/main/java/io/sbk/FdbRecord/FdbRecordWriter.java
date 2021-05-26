@@ -13,7 +13,7 @@ import com.apple.foundationdb.record.provider.foundationdb.FDBDatabase;
 import com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext;
 import com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore;
 import com.google.protobuf.ByteString;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class FdbRecordWriter implements Writer<ByteString> {
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
 
-    public FdbRecordWriter(int id, Parameters params, FDBDatabase db,
+    public FdbRecordWriter(int id, ParameterOptions params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
         this.key = FdbRecord.generateStartKey(id);
         this.db = db;

@@ -137,7 +137,6 @@ public interface Logger extends Print, RWCount, ReportLatenciesWindow {
 
     }
 
-
     /**
      * Report one latency .
      *

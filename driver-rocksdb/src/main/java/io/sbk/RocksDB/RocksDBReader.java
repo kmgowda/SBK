@@ -10,7 +10,7 @@
 
 package io.sbk.RocksDB;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -22,11 +22,11 @@ import java.io.IOException;
  * Class for Reader.
  */
 public class RocksDBReader implements Reader<byte[]> {
-    final Parameters params;
+    final ParameterOptions params;
     final private RocksDB db;
     private long key;
 
-    public RocksDBReader(int id, Parameters params, RocksDB db) throws IOException {
+    public RocksDBReader(int id, ParameterOptions params, RocksDB db) throws IOException {
         this.key = io.sbk.RocksDB.RocksDB.generateStartKey(id);
         this.params = params;
         this.db = db;

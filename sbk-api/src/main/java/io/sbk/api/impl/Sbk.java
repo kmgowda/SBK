@@ -17,7 +17,7 @@ import io.sbk.api.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Logger;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.Storage;
@@ -158,7 +158,7 @@ public class Sbk {
         final String className;
         final Storage storageDevice;
         final Action action;
-        final Parameters params;
+        final ParameterOptions params;
         final Logger logger;
         final PerlConfig perlConfig;
         final Time time;
@@ -202,7 +202,7 @@ public class Sbk {
                 if (sbkClassName != null && sbkClassName.length() > 0) {
                     className = sbkClassName;
                 } else {
-                    final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
+                    final ParameterOptions paramsHelp = new SbkParameters(usageLine, driversList);
                     logger.addArgs(paramsHelp);
                     paramsHelp.printHelp();
                     throw new InstantiationException("SBK Benchmark class driver not found!");
@@ -233,7 +233,7 @@ public class Sbk {
                         (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + driverName + "." + driverName).getConstructor().newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                     NoSuchMethodException | InvocationTargetException ex) {
-                final Parameters paramsHelp = new SbkParameters(usageLine, driversList);
+                final ParameterOptions paramsHelp = new SbkParameters(usageLine, driversList);
                 logger.addArgs(paramsHelp);
                 paramsHelp.printHelp();
                 String errMsg = "storage driver: " + driverName+ " Instantiation failed";

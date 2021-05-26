@@ -16,7 +16,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import io.sbk.api.Storage;
 import io.sbk.api.impl.JavaString;
@@ -40,7 +40,7 @@ public class CouchDB implements Storage<String> {
     private CouchDbConnector db;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -58,7 +58,7 @@ public class CouchDB implements Storage<String> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.url =  params.getOptionValue("url", config.url);
         config.dbName =  params.getOptionValue("db", config.dbName);
         config.user =  params.getOptionValue("user", config.user);
@@ -66,7 +66,7 @@ public class CouchDB implements Storage<String> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         HttpClient httpClient = new StdHttpClient.Builder()
                 .url(config.url).username(config.user)
                 .password(config.password)
@@ -87,14 +87,14 @@ public class CouchDB implements Storage<String> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         if (db != null) {
             db.cleanupViews();
         }
     }
 
     @Override
-    public DataWriter<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         try {
             return new CouchDBWriter(id, params, config, db);
         } catch (IOException ex) {
@@ -104,7 +104,7 @@ public class CouchDB implements Storage<String> {
     }
 
     @Override
-    public DataReader<String> createReader(final int id, final Parameters params) {
+    public DataReader<String> createReader(final int id, final ParameterOptions params) {
         try {
             return new CouchDBReader(id, params, config, db);
         } catch (IOException ex) {

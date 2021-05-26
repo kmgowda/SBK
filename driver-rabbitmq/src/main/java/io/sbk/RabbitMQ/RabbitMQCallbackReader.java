@@ -10,7 +10,7 @@
 package io.sbk.RabbitMQ;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
 
 import java.io.IOException;
@@ -31,12 +31,12 @@ import com.rabbitmq.client.Envelope;
  */
 public class RabbitMQCallbackReader extends AbstractCallbackReader<byte[]> {
     final private Channel channel;
-    final private Parameters params;
+    final private ParameterOptions params;
     final private String queueName;
     private DefaultConsumer consumer;
 
-    public RabbitMQCallbackReader(int readerId, Parameters params, Connection connection, String topicName,
-                                    String queueName) throws IOException {
+    public RabbitMQCallbackReader(int readerId, ParameterOptions params, Connection connection, String topicName,
+                                  String queueName) throws IOException {
         channel = connection.createChannel();
         this.params = params;
         this.queueName = queueName;

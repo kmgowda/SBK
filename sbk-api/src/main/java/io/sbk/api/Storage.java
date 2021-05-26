@@ -25,48 +25,48 @@ public interface Storage<T> {
      * @param params Parameters object to be extended.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    void addArgs(final Parameters params) throws IllegalArgumentException;
+    void addArgs(final ParameterOptions params) throws IllegalArgumentException;
 
     /**
      * Parse the driver specific command line arguments.
      * @param params Parameters object to be parsed for driver specific parameters/arguments.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    void parseArgs(final Parameters params) throws IllegalArgumentException;
+    void parseArgs(final ParameterOptions params) throws IllegalArgumentException;
 
     /**
      * Open the storage device / client to perform the benchmarking.
      * @param params Parameters object enclosing all commandline arguments,
-     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
+     *              see {@link ParameterOptions} to get the basic benchmarking parameters.
      * @throws IOException If an exception occurred.
      */
-    void openStorage(final Parameters params) throws IOException;
+    void openStorage(final ParameterOptions params) throws IOException;
 
     /**
      * Close the Storage device / client.
      * @param params Parameters object enclosing all commandline arguments,
-     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
+     *              see {@link ParameterOptions} to get the basic benchmarking parameters.
      * @throws IOException If an exception occurred.
      */
-    void closeStorage(final Parameters params) throws IOException;
+    void closeStorage(final ParameterOptions params) throws IOException;
 
     /**
      * Create a Single Data Writer / Producer.
      * @param id Writer id
      * @param params Parameters object enclosing all commandline arguments,
-     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
+     *              see {@link ParameterOptions} to get the basic benchmarking parameters.
      * @return Writer return the Writer , null in case of failure
      */
-    DataWriter<T> createWriter(final int id, final Parameters params);
+    DataWriter<T> createWriter(final int id, final ParameterOptions params);
 
     /**
      * Create a Single Reader / Consumer.
      * @param id Reader id
      * @param params Parameters object enclosing all commandline arguments,
-     *              see {@link io.sbk.api.Parameters} to get the basic benchmarking parameters.
+     *              see {@link ParameterOptions} to get the basic benchmarking parameters.
      * @return Reader return the Reader , null in case of failure
      */
-    DataReader<T> createReader(final int id, final Parameters params);
+    DataReader<T> createReader(final int id, final ParameterOptions params);
 
 
     /**

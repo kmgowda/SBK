@@ -11,7 +11,7 @@ package io.sbk.RocketMQ;
 import io.sbk.perl.SendChannel;
 import io.sbk.perl.Time;
 import io.sbk.api.Writer;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -29,7 +29,7 @@ public class RocketMQWriter implements Writer<byte[]> {
     final private DefaultMQProducer rmqProducer;
     final private String topicName;
 
-    public RocketMQWriter(int writerID, Parameters params, String namesAdr,
+    public RocketMQWriter(int writerID, ParameterOptions params, String namesAdr,
                           String topicName, RocketMQClientConfig config) throws IOException {
         this.topicName = topicName;
         rmqProducer = new DefaultMQProducer("ProducerGroup_" + RocketMQ.getRandomString());

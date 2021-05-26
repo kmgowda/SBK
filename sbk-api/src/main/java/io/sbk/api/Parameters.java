@@ -7,12 +7,10 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
+
 package io.sbk.api;
 
-/**
- * class for Command Line Parameters.
- */
-public interface Parameters extends InputOptions {
+public interface Parameters {
 
     /**
      * Get the execution time in seconds.

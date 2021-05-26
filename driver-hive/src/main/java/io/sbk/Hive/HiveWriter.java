@@ -12,7 +12,7 @@ package io.sbk.Hive;
 import io.sbk.Jdbc.JdbcConfig;
 import io.sbk.Jdbc.JdbcWriter;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 
@@ -22,7 +22,7 @@ import java.io.IOException;
 public class HiveWriter extends JdbcWriter {
     private long id;
 
-    public HiveWriter(int writerID, Parameters params,
+    public HiveWriter(int writerID, ParameterOptions params,
                        JdbcConfig config, DataType<String> dType) throws IOException {
         super(writerID, params, config, dType);
         this.id = 0;

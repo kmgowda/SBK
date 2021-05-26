@@ -14,7 +14,7 @@ import com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext;
 import com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore;
 import com.google.protobuf.ByteString;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -28,14 +28,14 @@ import java.util.function.Function;
  * Class for Writer.
  */
 public class FdbRecordMultiWriter implements Writer<ByteString> {
-    final private Parameters params;
+    final private ParameterOptions params;
     final private FDBDatabase db;
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
     private int cnt;
 
-    public FdbRecordMultiWriter(int id, Parameters params, FDBDatabase db,
-                           Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
+    public FdbRecordMultiWriter(int id, ParameterOptions params, FDBDatabase db,
+                                Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
         this.params = params;
         this.key = FdbRecord.generateStartKey(id);
         this.db = db;

@@ -17,7 +17,7 @@ import com.apple.foundationdb.tuple.Tuple;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
@@ -31,14 +31,14 @@ import java.util.function.Function;
  * Class for Reader.
  */
 public class FdbRecordMultiReader implements Reader<ByteString> {
-    final private Parameters params;
+    final private ParameterOptions params;
     final private FDBDatabase db;
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
     private long cnt;
 
-    public FdbRecordMultiReader(int id, Parameters params, FDBDatabase db,
-                           Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
+    public FdbRecordMultiReader(int id, ParameterOptions params, FDBDatabase db,
+                                Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
         this.params = params;
         this.key = FdbRecord.generateStartKey(id);
         this.cnt = 0;

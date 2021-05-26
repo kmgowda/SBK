@@ -9,7 +9,7 @@
  */
 package io.sbk.Kafka;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -30,7 +30,7 @@ public class KafkaWriter implements Writer<byte[]> {
     final private KafkaProducer<byte[], byte[]> producer;
     final private String topicName;
 
-    public KafkaWriter(int id, Parameters params, String topicName, Properties producerProps) throws IOException {
+    public KafkaWriter(int id, ParameterOptions params, String topicName, Properties producerProps) throws IOException {
         this.topicName = topicName;
         this.producer = new KafkaProducer<>(producerProps);
     }

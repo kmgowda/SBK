@@ -10,7 +10,7 @@
 package io.sbk.Cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import java.io.IOException;
 import java.util.UUID;
@@ -20,7 +20,7 @@ public class CassandraWriter implements Writer<String> {
     final public CassandraConfig config;
     final public CqlSession session;
 
-    public CassandraWriter(int writerID, Parameters params,
+    public CassandraWriter(int writerID, ParameterOptions params,
                       CassandraConfig config, CqlSession session) throws IOException {
         this.config = config;
         this.session = session;

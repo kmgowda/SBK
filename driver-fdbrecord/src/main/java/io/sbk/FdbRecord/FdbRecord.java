@@ -26,7 +26,7 @@ import com.google.protobuf.ByteString;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.impl.ProtoBufByteString;
 
@@ -44,7 +44,7 @@ public class FdbRecord implements Storage<ByteString> {
     private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -60,7 +60,7 @@ public class FdbRecord implements Storage<ByteString> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         if (params.getReadersCount() > 0 && params.getWritersCount() > 0) {
             throw new IllegalArgumentException("Specify either Writer or readers ; both are not allowed");
         }
@@ -70,7 +70,7 @@ public class FdbRecord implements Storage<ByteString> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         db = FDBDatabaseFactory.instance().getDatabase(config.cFile);
 
         // Define the keyspace for our application
@@ -98,12 +98,12 @@ public class FdbRecord implements Storage<ByteString> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         db.close();
     }
 
     @Override
-    public DataWriter<ByteString> createWriter(final int id, final Parameters params) {
+    public DataWriter<ByteString> createWriter(final int id, final ParameterOptions params) {
         try {
             if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
                 return new FdbRecordMultiWriter(id, params, db, recordStoreProvider);
@@ -117,7 +117,7 @@ public class FdbRecord implements Storage<ByteString> {
     }
 
     @Override
-    public DataReader<ByteString> createReader(final int id, final Parameters params) {
+    public DataReader<ByteString> createReader(final int id, final ParameterOptions params) {
         try {
             if (params.getRecordsPerSync() < Integer.MAX_VALUE && params.getRecordsPerSync() > 1) {
                 return new FdbRecordMultiReader(id, params, db, recordStoreProvider);

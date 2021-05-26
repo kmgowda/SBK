@@ -9,7 +9,7 @@
  */
 package io.sbk.HDFS;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class HDFSReader implements Reader<byte[]> {
     final private FSDataInputStream in;
     final private byte[] readBuffer;
 
-    public HDFSReader(int id, Parameters params, FileSystem fileSystem, Path filePath) throws IOException {
+    public HDFSReader(int id, ParameterOptions params, FileSystem fileSystem, Path filePath) throws IOException {
         this.in = fileSystem.open(filePath);
         this.readBuffer = new byte[params.getRecordSize()];
     }

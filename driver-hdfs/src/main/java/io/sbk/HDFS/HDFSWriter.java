@@ -9,7 +9,7 @@
  */
 package io.sbk.HDFS;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -28,7 +28,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 public class HDFSWriter implements Writer<byte[]> {
     final private FSDataOutputStream out;
 
-    public HDFSWriter(int id, Parameters params, FileSystem fileSystem, Path filePath,
+    public HDFSWriter(int id, ParameterOptions params, FileSystem fileSystem, Path filePath,
                       boolean recreate) throws IOException {
         if (recreate) {
             out = fileSystem.create(filePath, true, params.getRecordSize());

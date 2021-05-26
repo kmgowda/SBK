@@ -11,7 +11,7 @@
 package io.sbk.Ignite;
 
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -26,13 +26,13 @@ import java.util.concurrent.CompletableFuture;
  * Class for Writer.
  */
 public class IgniteTransactionWriter implements Writer<byte[]> {
-    private final Parameters params;
+    private final ParameterOptions params;
     private final IgniteCache<Long, byte[]> cache;
     private final org.apache.ignite.Ignite ignite;
     private long key;
     private long cnt;
 
-    public IgniteTransactionWriter(int id, Parameters params, IgniteCache<Long, byte[]> cache,
+    public IgniteTransactionWriter(int id, ParameterOptions params, IgniteCache<Long, byte[]> cache,
                                    org.apache.ignite.Ignite ignite) throws IOException {
         this.params = params;
         this.cache = cache;

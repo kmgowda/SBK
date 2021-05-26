@@ -10,7 +10,7 @@
 
 package io.sbk.Ignite;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import org.apache.ignite.client.ClientCache;
 
@@ -24,7 +24,7 @@ public class IgniteClientWriter implements Writer<byte[]> {
     private long key;
     private ClientCache<Long, byte[]> cache;
 
-    public IgniteClientWriter(int id, Parameters params, ClientCache<Long, byte[]> cache) throws IOException {
+    public IgniteClientWriter(int id, ParameterOptions params, ClientCache<Long, byte[]> cache) throws IOException {
         this.key = Ignite.generateStartKey(id);
         this.cache = cache;
     }

@@ -10,7 +10,7 @@
 package io.sbk.Artemis;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
 import io.sbk.system.Printer;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
@@ -29,7 +29,7 @@ public class ArtemisCallbackReader  extends AbstractCallbackReader<byte[]> {
     private final ClientConsumer consumer;
     private final ClientSession session;
 
-    public ArtemisCallbackReader(int readerId, Parameters params, String topicName,
+    public ArtemisCallbackReader(int readerId, ParameterOptions params, String topicName,
                                  String subscriptionName, ArtemisClientConfig config, ClientSession session) throws IOException {
         this.session = session;
         try {

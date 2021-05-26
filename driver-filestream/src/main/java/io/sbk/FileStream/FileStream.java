@@ -15,7 +15,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -28,7 +28,7 @@ public class FileStream implements Storage<byte[]> {
     private FileStreamConfig config;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -48,7 +48,7 @@ public class FileStream implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         if (params.getWritersCount() > 1) {
             throw new IllegalArgumentException("Writers should be only 1 for File writing");
         }
@@ -62,7 +62,7 @@ public class FileStream implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         if (config.reCreate && params.getWritersCount() > 0) {
             java.io.File file = new java.io.File(config.fileName);
             file.delete();
@@ -70,12 +70,12 @@ public class FileStream implements Storage<byte[]> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
 
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             if (config.isBuffered) {
                 return new FileBufferedWriter(id, params, config);
@@ -89,7 +89,7 @@ public class FileStream implements Storage<byte[]> {
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             if (config.isBuffered) {
                 return new FileBufferedReader(id, params, config);

@@ -9,7 +9,7 @@
  */
 package io.sbk.AsyncFile;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -34,7 +34,7 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
     final private AsynchronousFileChannel out;
     private long pos;
 
-    public AsyncFileWriter(int id, Parameters params, String fileName) throws IOException {
+    public AsyncFileWriter(int id, ParameterOptions params, String fileName) throws IOException {
         this.fileName = fileName;
         this.out = AsynchronousFileChannel.open(Paths.get(fileName), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         this.pos = 0;

@@ -13,7 +13,7 @@ package io.sbk.api.impl;
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
 import io.sbk.perl.RunBenchmark;
 import io.sbk.perl.SendChannel;
@@ -35,7 +35,7 @@ public class SbkReader extends Worker implements RunBenchmark {
     final private RateController rCnt;
     final private BiConsumer perf;
 
-    public SbkReader(int readerId, int idMax, Parameters params, SendChannel sendChannel,
+    public SbkReader(int readerId, int idMax, ParameterOptions params, SendChannel sendChannel,
                      DataType<Object> dType, Time time, DataReader<Object> reader) {
         super(readerId, idMax, params, sendChannel);
         this.dType = dType;

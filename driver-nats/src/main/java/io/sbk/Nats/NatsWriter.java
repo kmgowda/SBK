@@ -11,7 +11,7 @@ package io.sbk.Nats;
 import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.sbk.api.Writer;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -26,7 +26,7 @@ public class NatsWriter implements Writer<byte[]> {
     final private Connection producer;
     final private String topic;
 
-    public NatsWriter(int writerID, Parameters params,
+    public NatsWriter(int writerID, ParameterOptions params,
                            String topicName, Options option) throws IOException {
         this.topic = topicName;
         try {

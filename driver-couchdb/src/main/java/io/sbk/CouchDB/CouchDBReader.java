@@ -10,7 +10,7 @@
 
 package io.sbk.CouchDB;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
@@ -25,11 +25,11 @@ import java.util.Map;
  */
 public class CouchDBReader implements Reader<String> {
     final private CouchDbConnector db;
-    final private Parameters params;
+    final private ParameterOptions params;
     private long key;
     private int cnt;
 
-    public CouchDBReader(int id, Parameters params, CouchDBConfig config, CouchDbConnector db) throws IOException {
+    public CouchDBReader(int id, ParameterOptions params, CouchDBConfig config, CouchDbConnector db) throws IOException {
         this.key = CouchDB.generateStartKey(id);
         this.cnt = 0;
         this.params = params;

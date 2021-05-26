@@ -10,7 +10,7 @@
 
 package io.sbk.Redis;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import redis.clients.jedis.Jedis;
@@ -22,7 +22,7 @@ public class RedisReader implements Reader<String> {
     final private Jedis jedis;
     final private String listName;
 
-    public RedisReader(int id, Parameters params, Jedis jedis, String listName) throws IOException {
+    public RedisReader(int id, ParameterOptions params, Jedis jedis, String listName) throws IOException {
         this.jedis = jedis;
         this.listName = listName;
     }

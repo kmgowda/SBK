@@ -13,7 +13,7 @@ import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
 import io.sbk.api.Writer;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
 import org.apache.activemq.artemis.api.core.client.ClientMessage;
 import org.apache.activemq.artemis.api.core.client.ClientProducer;
@@ -29,7 +29,7 @@ public class ArtemisWriter implements Writer<byte[]> {
     final private  ClientSession session;
     final private  ClientProducer producer;
 
-    public ArtemisWriter(int writerID, Parameters params,
+    public ArtemisWriter(int writerID, ParameterOptions params,
                             String topicName, ArtemisClientConfig config, ClientSession session) throws IOException {
         this.session = session;
         try {

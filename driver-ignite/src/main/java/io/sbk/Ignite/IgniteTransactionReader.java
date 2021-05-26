@@ -11,7 +11,7 @@
 package io.sbk.Ignite;
 
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
@@ -26,13 +26,13 @@ import java.io.IOException;
  * Class for Reader.
  */
 public class IgniteTransactionReader implements Reader<byte[]> {
-    private final Parameters params;
+    private final ParameterOptions params;
     private final IgniteCache<Long, byte[]> cache;
     private final org.apache.ignite.Ignite ignite;
     private long key;
     private long cnt;
 
-    public IgniteTransactionReader(int id, Parameters params, IgniteCache<Long, byte[]> cache,
+    public IgniteTransactionReader(int id, ParameterOptions params, IgniteCache<Long, byte[]> cache,
                                    org.apache.ignite.Ignite ignite) throws IOException {
         this.params = params;
         this.cache = cache;

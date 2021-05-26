@@ -10,7 +10,7 @@
 package io.sbk.Pulsar;
 
 import io.sbk.api.Reader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -26,9 +26,9 @@ import org.apache.pulsar.client.api.SubscriptionInitialPosition;
  */
 public class PulsarReader implements Reader<byte[]> {
     final private Consumer<byte[]> consumer;
-    final private Parameters params;
+    final private ParameterOptions params;
 
-    public PulsarReader(int readerId, Parameters params, String topicName,
+    public PulsarReader(int readerId, ParameterOptions params, String topicName,
                         String subscriptionName, PulsarClient client) throws  IOException {
         this.params = params;
         final  SubscriptionInitialPosition position = params.isWriteAndRead() ? SubscriptionInitialPosition.Latest :

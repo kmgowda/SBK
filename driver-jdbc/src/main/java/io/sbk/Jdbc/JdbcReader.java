@@ -9,7 +9,7 @@
  */
 package io.sbk.Jdbc;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.system.Printer;
 
@@ -32,7 +32,7 @@ public class JdbcReader implements Reader<String> {
     final private String readQuery;
     private ResultSet res;
 
-    public JdbcReader(int id, Parameters params, JdbcConfig config) throws IOException {
+    public JdbcReader(int id, ParameterOptions params, JdbcConfig config) throws IOException {
         this.config = config;
         final Properties props = new Properties();
         if (config.user != null) {

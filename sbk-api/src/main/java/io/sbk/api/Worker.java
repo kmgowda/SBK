@@ -21,7 +21,7 @@ public abstract class Worker {
     public final Parameters params;
     public final SendChannel sendChannel;
 
-    public Worker(int workerID, int idMax,  Parameters params, SendChannel sendChannel) {
+    public Worker(int workerID, int idMax, Parameters params, SendChannel sendChannel) {
         this.id = workerID;
         this.recordIDMax = idMax;
         this.params = params;

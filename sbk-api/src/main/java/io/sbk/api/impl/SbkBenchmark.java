@@ -15,7 +15,7 @@ import io.sbk.api.Config;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Logger;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PerlConfig;
@@ -60,7 +60,7 @@ public class SbkBenchmark implements Benchmark {
     final private Time time;
     final private Logger logger;
     final private ExecutorService executor;
-    final private Parameters params;
+    final private ParameterOptions params;
     final private Performance writeStats;
     final private Performance readStats;
     final private int maxQs;
@@ -86,7 +86,7 @@ public class SbkBenchmark implements Benchmark {
      * @throws IOException          If Exception occurs.
      */
     public SbkBenchmark(String storageName, Action action, PerlConfig perlConfig,
-                        Parameters params, Storage<Object> storage,
+                        ParameterOptions params, Storage<Object> storage,
                         DataType<Object> dType, Logger logger, Time time) throws IOException {
         this.storageName = storageName;
         this.dType = dType;

@@ -12,7 +12,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 
@@ -31,19 +31,19 @@ public class Redis implements Storage<String> {
     private String serverUri;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("list", true, "List /Channel name");
         params.addOption("uri", true, "Server URI");
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         listName =  params.getOptionValue("list", "list-1");
         serverUri = params.getOptionValue("uri", "localhost");
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         jedis = new Jedis(serverUri);
         if (params.isWriteAndRead()) {
             jedisConsumer = new Jedis(serverUri);
@@ -51,7 +51,7 @@ public class Redis implements Storage<String> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         jedis.close();
         if (params.isWriteAndRead()) {
             jedisConsumer.close();
@@ -59,7 +59,7 @@ public class Redis implements Storage<String> {
     }
 
     @Override
-    public DataWriter<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         try {
             if (params.isWriteAndRead()) {
                 Printer.log.info("Starting Redis Publisher : "+id);
@@ -75,7 +75,7 @@ public class Redis implements Storage<String> {
     }
 
     @Override
-    public DataReader<String> createReader(final int id, final Parameters params) {
+    public DataReader<String> createReader(final int id, final ParameterOptions params) {
         try {
             if (params.isWriteAndRead()) {
                 Printer.log.info("Starting Redis Consumer : "+id);

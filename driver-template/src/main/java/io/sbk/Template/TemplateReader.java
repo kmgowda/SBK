@@ -10,7 +10,7 @@
 package io.sbk.Template;
 
 import io.sbk.api.Reader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 
@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class TemplateReader implements Reader<byte[]> {
 
-    public TemplateReader(int readerId, Parameters params) {
+    public TemplateReader(int readerId, ParameterOptions params) {
     }
 
     @Override
