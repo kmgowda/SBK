@@ -14,10 +14,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Action;
 import io.sbk.api.Config;
+import io.sbk.api.InputOptions;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.LoggerConfig;
 import io.sbk.perl.MetricsConfig;
-import io.sbk.api.Parameters;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
@@ -47,7 +47,7 @@ public class SbkPrometheusLogger extends SystemLogger {
     }
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -88,7 +88,7 @@ public class SbkPrometheusLogger extends SystemLogger {
 
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         loggerConfig.timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
         final String fullContext =  params.getOptionValue("context", config.port + config.context);
@@ -140,7 +140,7 @@ public class SbkPrometheusLogger extends SystemLogger {
 
 
     @Override
-    public void open(final Parameters params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
+    public void open(final InputOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
         if (disabled) {
             printer = super::print;
@@ -154,7 +154,7 @@ public class SbkPrometheusLogger extends SystemLogger {
     }
 
     @Override
-    public void close(final Parameters params) throws IllegalArgumentException, IOException  {
+    public void close(final InputOptions params) throws IllegalArgumentException, IOException  {
         if (prometheusServer != null) {
             prometheusServer.stop();
         }

@@ -9,52 +9,10 @@
  */
 package io.sbk.api;
 
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
 /**
  * class for Command Line Parameters.
  */
-public interface Parameters {
-
-    /**
-     * Add the driver specific command line arguments.
-     * @param name Name of the parameter to add.
-     * @param hasArg flag signalling if an argument is required after this option.
-     * @param description Self-documenting description.
-     * @return Options return the added options
-     */
-    Options addOption(String name, boolean hasArg, String description);
-
-    /**
-     * Parse the driver specific command line arguments.
-     * @param name Name of the parameter to add.
-     * @param description Self-documenting description.
-     * @return Options return the added options
-     */
-    Options addOption(String name, String description);
-
-    /**
-     * Returns whether the named Option is a member of this Parameters.
-     * @param name name of the parameter option
-     * @return  true if the named Option is a member of this Options
-     */
-    boolean hasOption(String name);
-
-    /**
-     * Retrieve the Option matching the parameter name specified.
-     * @param name Name of the parameter.
-     * @return  parameter value
-     */
-    String getOptionValue(String name);
-
-    /**
-     * Retrieve the Option matching the parameter name specified.
-     * @param name Name of the parameter.
-     * @param defaultValue default value if the parameter not found
-     * @return   parameter value
-     */
-    String getOptionValue(String name, String defaultValue);
+public interface Parameters extends InputOptions {
 
     /**
      * Get the execution time in seconds.
@@ -138,16 +96,4 @@ public interface Parameters {
      */
     int getReadersStepSeconds();
 
-    /**
-     * Print the -help output.
-     */
-    void printHelp();
-
-    /**
-     * Parse the command line arguments.
-     * @param args list of command line arguments.
-     * @throws IllegalArgumentException If an exception occurred.
-     * @throws ParseException If an exception occurred.
-     */
-    void parseArgs(String[] args) throws ParseException, IllegalArgumentException;
 }

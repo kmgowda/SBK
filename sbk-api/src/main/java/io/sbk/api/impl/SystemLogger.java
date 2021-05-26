@@ -11,9 +11,9 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
+import io.sbk.api.InputOptions;
 import io.sbk.api.Logger;
 import io.sbk.perl.PerlConfig;
-import io.sbk.api.Parameters;
 import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 
@@ -30,7 +30,7 @@ public class SystemLogger implements Logger {
     public String prefix;
     public String timeUnit;
     public double[] percentiles;
-    public Parameters params;
+    public InputOptions params;
     public AtomicInteger writers;
     public AtomicInteger readers;
     public AtomicInteger maxWriters;
@@ -42,15 +42,15 @@ public class SystemLogger implements Logger {
 
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final InputOptions params) throws IllegalArgumentException {
     }
 
     @Override
-    public void open(final Parameters params, final String storageName, Action action, Time time) throws  IOException {
+    public void open(final InputOptions params, final String storageName, Action action, Time time) throws  IOException {
         this.params = params;
         this.prefix = storageName+" "+action.name();
         this.timeUnit = getTimeUnit().name();
@@ -69,21 +69,21 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public void close(final Parameters params) throws IOException  {
+    public void close(final InputOptions params) throws IOException  {
     }
 
-    private void incrementAtomic(AtomicInteger counter,  int max, int val) {
-        counter.set(Math.min(counter.get()+val, max));
+    private void incrementAtomic(AtomicInteger counter,   int val) {
+        counter.set(counter.get()+val);
     }
 
     private void decrementAtomic(AtomicInteger counter, int val) {
-        counter.set(Math.max(counter.get()-val, 0));
+        counter.set(counter.get()-val);
     }
 
     @Override
     public void incrementWriters(int val) {
-        incrementAtomic(writers, params.getWritersCount(), val);
-        incrementAtomic(maxWriters, params.getWritersCount(), val);
+        incrementAtomic(writers,  val);
+        incrementAtomic(maxWriters,  val);
     }
 
     @Override
@@ -93,8 +93,8 @@ public class SystemLogger implements Logger {
 
     @Override
     public void incrementReaders(int val) {
-        incrementAtomic(readers, params.getReadersCount(), val);
-        incrementAtomic(maxReaders, params.getReadersCount(), val);
+        incrementAtomic(readers, val);
+        incrementAtomic(maxReaders, val);
     }
 
     @Override

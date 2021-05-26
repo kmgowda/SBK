@@ -25,35 +25,36 @@ public interface Logger extends Print, RWCount, ReportLatenciesWindow {
 
     /**
      * Add the Metric type specific command line arguments.
-     * @param params Parameters object to be extended.
+     * @param params InputOptions object to be extended.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    void addArgs(final Parameters params) throws IllegalArgumentException;
+    void addArgs(final InputOptions params) throws IllegalArgumentException;
 
     /**
      * Parse the Metric specific command line arguments.
-     * @param params Parameters object to be parsed for driver specific parameters/arguments.
+     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    void parseArgs(final Parameters params) throws IllegalArgumentException;
+    void parseArgs(final InputOptions params) throws IllegalArgumentException;
 
 
     /**
      * Open the Logger.
-     * @param params Parameters object to be parsed for driver specific parameters/arguments.
+     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
      * @param storageName The Name of the storage.
      * @param action  action to print
      * @param time  time interface
      * @throws IOException If an exception occurred.
      */
-    void open(final Parameters params, final String storageName, final Action action, Time time) throws IOException;
+    void open(final InputOptions params, final String storageName, final Action action, Time time)
+            throws IOException;
 
     /**
      * Close the Logger.
-     * @param params Parameters object to be parsed for driver specific parameters/arguments.
+     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
      * @throws IOException If an exception occurred.
      */
-    void close(final Parameters params) throws IOException;
+    void close(final InputOptions params) throws IOException;
 
 
     /**
