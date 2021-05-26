@@ -10,7 +10,7 @@
 
 package io.sbk.perl.impl;
 
-import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
 import org.apache.commons.csv.CSVFormat;
@@ -63,7 +63,7 @@ public class CSVHashMapLatencyRecorder extends HashMapLatencyRecorder {
     }
 
     @Override
-    public void print(long endTime, Print logger, CloneLatencies copyLatencies) {
+    public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
         try {
             csvPrinter.close();
         } catch (IOException ex) {

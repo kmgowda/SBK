@@ -10,10 +10,10 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.perl.LatencyRecord;
 import io.sbk.system.Printer;
-import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.perl.Print;
 
@@ -24,7 +24,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements CloneLatencies, PeriodicRecorder {
+public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements ReportLatencies, PeriodicRecorder {
     final public LatencyWindow window;
     final public Print windowLogger;
     final public Print loggerTotal;
@@ -88,25 +88,25 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     }
 
     @Override
-    public void updateLatencyRecords(LatencyRecorder latencies) {
-        this.totalRecords += latencies.totalRecords;
-        this.totalLatency += latencies.totalLatency;
-        this.totalBytes += latencies.totalBytes;
-        this.invalidLatencyRecords += latencies.invalidLatencyRecords;
-        this.lowerLatencyDiscardRecords += latencies.lowerLatencyDiscardRecords;
-        this.higherLatencyDiscardRecords += latencies.higherLatencyDiscardRecords;
-        this.validLatencyRecords += latencies.validLatencyRecords;
-        this.maxLatency = Math.max(this.maxLatency, latencies.maxLatency);
+    public void reportLatencyRecord(LatencyRecord record) {
+        this.totalRecords += record.totalRecords;
+        this.totalLatency += record.totalLatency;
+        this.totalBytes += record.totalBytes;
+        this.invalidLatencyRecords += record.invalidLatencyRecords;
+        this.lowerLatencyDiscardRecords += record.lowerLatencyDiscardRecords;
+        this.higherLatencyDiscardRecords += record.higherLatencyDiscardRecords;
+        this.validLatencyRecords += record.validLatencyRecords;
+        this.maxLatency = Math.max(this.maxLatency, record.maxLatency);
     }
 
     @Override
-    public void copyLatency(long latency, long events) {
+    public void reportLatency(long latency, long count) {
         Long val = latencies.get(latency);
         if (val == null) {
             val = 0L;
             hashMapBytesCount += incBytes;
         }
-        latencies.put(latency, val + events);
+        latencies.put(latency, val + count);
     }
 
 

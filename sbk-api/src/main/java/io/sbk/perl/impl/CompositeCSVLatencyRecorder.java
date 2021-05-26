@@ -103,7 +103,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
                     .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
             hashMapBytesCount = 0;
             for (CSVRecord csvEntry : csvParser) {
-                copyLatency(Long.parseLong(csvEntry.get(0)), Long.parseLong(csvEntry.get(1)));
+                reportLatency(Long.parseLong(csvEntry.get(0)), Long.parseLong(csvEntry.get(1)));
             }
             csvParser.close();
         } catch (IOException ex) {

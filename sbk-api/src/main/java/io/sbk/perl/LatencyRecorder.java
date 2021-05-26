@@ -7,6 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
+
 package io.sbk.perl;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -15,44 +16,20 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  Base class for Performance statistics.
  */
 @NotThreadSafe
-public class LatencyRecorder {
+public class LatencyRecorder extends LatencyRecord {
     final public long lowLatency;
     final public long highLatency;
     final public long totalLatencyMax;
     final public long totalRecordsMax;
     final public long totalBytesMax;
-    public long totalRecords;
-    public long validLatencyRecords;
-    public long lowerLatencyDiscardRecords;
-    public long higherLatencyDiscardRecords;
-    public long invalidLatencyRecords;
-    public long totalBytes;
-    public long totalLatency;
-    public long maxLatency;
-
 
     public LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long totalBytesMax) {
+        super();
         this.lowLatency = baseLatency;
         this.highLatency = latencyThreshold;
         this.totalLatencyMax = totalLatencyMax;
         this.totalRecordsMax = totalRecordsMax;
         this.totalBytesMax = totalBytesMax;
-        reset();
-    }
-
-
-    /**
-     * Reset all recording variables.
-     */
-    public void reset() {
-        this.totalRecords = 0;
-        this.validLatencyRecords = 0;
-        this.lowerLatencyDiscardRecords = 0;
-        this.higherLatencyDiscardRecords = 0;
-        this.invalidLatencyRecords = 0;
-        this.totalBytes = 0;
-        this.maxLatency = 0;
-        this.totalLatency = 0;
     }
 
     /**

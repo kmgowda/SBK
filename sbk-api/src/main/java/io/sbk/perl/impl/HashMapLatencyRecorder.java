@@ -10,7 +10,7 @@
 
 package io.sbk.perl.impl;
 
-import io.sbk.perl.CloneLatencies;
+import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 
@@ -46,14 +46,14 @@ public class HashMapLatencyRecorder extends LatencyWindow {
     }
 
     @Override
-    public long[] getPercentiles(CloneLatencies copyLatencies) {
+    public long[] getPercentiles(ReportLatencies copyLatencies) {
         final long[] values = new long[percentileFractions.length];
         final long[] percentileIds = new long[percentileFractions.length];
         long cur = 0;
         int index = 0;
 
         if (copyLatencies != null) {
-            copyLatencies.updateLatencyRecords(this);
+            copyLatencies.reportLatencyRecord(this);
         }
 
         for (int i = 0; i < percentileIds.length; i++) {
@@ -67,7 +67,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
             final long next =  cur + val;
 
             if (copyLatencies != null) {
-                copyLatencies.copyLatency(key, val);
+                copyLatencies.reportLatency(key, val);
             }
 
             while (index < values.length) {

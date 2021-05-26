@@ -10,9 +10,9 @@
 
 package io.sbk.perl;
 
-public interface CloneLatencies {
+public interface ReportLatencies {
 
-    void updateLatencyRecords(LatencyRecorder latencies);
+    void reportLatencyRecord(LatencyRecord record);
 
-    void copyLatency(long latency, long events);
+    void reportLatency(long latency, long count);
 }
