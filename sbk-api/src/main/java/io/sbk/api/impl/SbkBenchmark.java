@@ -46,7 +46,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Class for performing the benchmark.
@@ -290,7 +289,13 @@ public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor);
+            }, executor).thenAccept( d -> {
+                try {
+                    CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0])).get();
+                } catch (InterruptedException  | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            });
             Printer.log.info("SBK Benchmark initiated Writers");
 
         } else {
@@ -344,28 +349,26 @@ public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor);
+            }, executor).thenAccept( d -> {
+                        try {
+                            CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0])).get();
+                        } catch (InterruptedException  | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+            );
             Printer.log.info("SBK Benchmark initiated Readers");
         } else {
             readersCB = null;
             readFutures = null;
         }
 
-        if (writersCB != null) {
-            writersCB.get();
-        }
-
-        if (readersCB != null) {
-            readersCB.get();
-        }
-
-        if (writeFutures != null && readFutures != null) {
-            chainFuture = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
-                    collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
+        if (writersCB != null && readersCB != null) {
+            chainFuture = CompletableFuture.allOf(writersCB, readersCB);
         } else if (readFutures != null) {
-            chainFuture = CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0]));
+            chainFuture = readersCB;
         } else if (writeFutures != null) {
-            chainFuture = CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0]));
+            chainFuture = writersCB;
         } else {
             throw new IllegalStateException("No Writers and/or Readers\n");
         }
