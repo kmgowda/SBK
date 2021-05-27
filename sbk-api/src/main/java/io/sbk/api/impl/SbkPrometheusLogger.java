@@ -15,32 +15,23 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Action;
 import io.sbk.api.Config;
 import io.sbk.api.InputOptions;
-import io.sbk.perl.PerlConfig;
-import io.sbk.perl.LoggerConfig;
 import io.sbk.perl.MetricsConfig;
 import io.sbk.perl.Print;
 import io.sbk.perl.Time;
-import io.sbk.perl.TimeUnit;
 import io.sbk.system.Printer;
-
 import java.io.IOException;
-import java.util.Arrays;
 
 
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class SbkPrometheusLogger extends SystemLogger {
-    final static String LOGGER_FILE = "logger.properties";
     final static String CONFIG_FILE = "metrics.properties";
-    private LoggerConfig loggerConfig;
     private MetricsConfig config;
     private boolean disabled;
-    private double[] percentilesIndices;
     private RWMetricsPrometheusServer prometheusServer;
     private Print printer;
-    private long minLatency;
-    private long maxLatency;
+
 
     public SbkPrometheusLogger() {
         super();
@@ -52,8 +43,6 @@ public class SbkPrometheusLogger extends SystemLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            loggerConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(LOGGER_FILE),
-                    LoggerConfig.class);
             config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     MetricsConfig.class);
         } catch (Exception ex) {
@@ -61,36 +50,14 @@ public class SbkPrometheusLogger extends SystemLogger {
             throw new IllegalArgumentException(ex);
         }
 
-        String[] percentilesList = loggerConfig.percentiles.split(",");
-        percentilesIndices = new double[percentilesList.length];
-        for (int i = 0; i < percentilesList.length; i++) {
-            percentilesIndices[i] = Double.parseDouble(percentilesList[i].trim());
-        }
-        Arrays.sort(percentilesIndices);
-
-        params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
-                "; default: " + loggerConfig.timeUnit.name());
         params.addOption("context", true, "Prometheus Metric context" +
                 "; default context: " + config.port + config.context + "; 'no' disables the metrics");
     }
-
-    private String getTimeUnitNames() {
-        String ret = "[";
-
-        for (TimeUnit value : TimeUnit.values()) {
-            ret += value.name() +":" +value.toString() + ", ";
-        }
-        ret += "]";
-
-        return ret.replace(", ]", "]");
-    }
-
 
 
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        loggerConfig.timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
         final String fullContext =  params.getOptionValue("context", config.port + config.context);
         if (fullContext.equalsIgnoreCase("no")) {
             disabled = true;
@@ -102,40 +69,6 @@ public class SbkPrometheusLogger extends SystemLogger {
                 config.context = "/" + str[1];
             }
         }
-
-        int val = 1;
-        if (loggerConfig.timeUnit == TimeUnit.ns) {
-            val = PerlConfig.NS_PER_MS;
-        } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
-            val = PerlConfig.MICROS_PER_MS;
-        }
-        minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
-        maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
-    }
-
-    @Override
-    public int getReportingIntervalSeconds() {
-        return loggerConfig.reportingSeconds;
-    }
-
-    @Override
-    public TimeUnit getTimeUnit() {
-        return loggerConfig.timeUnit;
-    }
-
-    @Override
-    public long getMinLatency() {
-        return minLatency;
-    }
-
-    @Override
-    public long getMaxLatency() {
-        return maxLatency;
-    }
-
-    @Override
-    public double[] getPercentiles() {
-        return percentilesIndices;
     }
 
 

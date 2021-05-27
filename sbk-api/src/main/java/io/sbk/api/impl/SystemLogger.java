@@ -10,11 +10,16 @@
 
 package io.sbk.api.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Action;
 import io.sbk.api.InputOptions;
 import io.sbk.api.Logger;
+import io.sbk.perl.LoggerConfig;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
+import io.sbk.perl.TimeUnit;
 import io.sbk.system.Printer;
 
 import java.io.IOException;
@@ -26,15 +31,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for recoding/printing results on System.out.
  */
 public class SystemLogger implements Logger {
+    final static String LOGGER_FILE = "logger.properties";
     final public DecimalFormat format;
     public String prefix;
     public String timeUnit;
-    public double[] percentiles;
     public InputOptions params;
     public AtomicInteger writers;
     public AtomicInteger readers;
     public AtomicInteger maxWriters;
     public AtomicInteger maxReaders;
+    public double[] percentiles;
+    private LoggerConfig loggerConfig;
+    private String[] percentileNames;
+    private long minLatency;
+    private long maxLatency;
 
     public SystemLogger() {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
@@ -43,10 +53,54 @@ public class SystemLogger implements Logger {
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        try {
+            loggerConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(LOGGER_FILE),
+                    LoggerConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+        String[] percentilesList = loggerConfig.percentiles.split(",");
+        percentiles = new double[percentilesList.length];
+        for (int i = 0; i < percentilesList.length; i++) {
+            percentiles[i] = Double.parseDouble(percentilesList[i].trim());
+        }
+        Arrays.sort(percentiles);
+        percentileNames = new String[percentiles.length];
+        for (int i = 0; i < percentiles.length; i++) {
+            percentileNames[i] = format.format(percentiles[i]);
+        }
+
+        params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
+                "; default: " + loggerConfig.timeUnit.name());
     }
+
+
+    private String getTimeUnitNames() {
+        String ret = "[";
+
+        for (io.sbk.perl.TimeUnit value : TimeUnit.values()) {
+            ret += value.name() +":" +value.toString() + ", ";
+        }
+        ret += "]";
+
+        return ret.replace(", ]", "]");
+    }
+
 
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
+        loggerConfig.timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
+        int val = 1;
+        if (loggerConfig.timeUnit == TimeUnit.ns) {
+            val = PerlConfig.NS_PER_MS;
+        } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
+            val = PerlConfig.MICROS_PER_MS;
+        }
+        minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
+        maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
     }
 
     @Override
@@ -54,7 +108,6 @@ public class SystemLogger implements Logger {
         this.params = params;
         this.prefix = storageName+" "+action.name();
         this.timeUnit = getTimeUnit().name();
-        this.percentiles = getPercentiles();
         for (double p: this.percentiles) {
             if (p < 0 || p > 100) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(percentiles));
@@ -71,6 +124,32 @@ public class SystemLogger implements Logger {
     @Override
     public void close(final InputOptions params) throws IOException  {
     }
+
+    @Override
+    public int getReportingIntervalSeconds() {
+        return loggerConfig.reportingSeconds;
+    }
+
+    @Override
+    public TimeUnit getTimeUnit() {
+        return loggerConfig.timeUnit;
+    }
+
+    @Override
+    public long getMinLatency() {
+        return minLatency;
+    }
+
+    @Override
+    public long getMaxLatency() {
+        return maxLatency;
+    }
+
+    @Override
+    public double[] getPercentiles() {
+        return percentiles;
+    }
+
 
     private void incrementAtomic(AtomicInteger counter,   int val) {
         counter.set(counter.get()+val);
@@ -114,9 +193,9 @@ public class SystemLogger implements Logger {
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
             if (i == 0) {
-                out.append(String.format("%7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
+                out.append(String.format("%7d %s %sth", percentileValues[i], timeUnit, percentileNames[i]));
             } else {
-                out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, format.format(percentiles[i])));
+                out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, percentileNames[i]));
             }
         }
         out.append(".\n");
