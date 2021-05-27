@@ -48,7 +48,7 @@ public class LatencyRecorder extends LatencyRecord {
      *
      * @param record Latency record
      */
-    public void updateRecord(LatencyRecord record) {
+    final public void updateRecord(LatencyRecord record) {
         this.totalRecords += record.totalRecords;
         this.totalLatency += record.totalLatency;
         this.totalBytes += record.totalBytes;
@@ -67,7 +67,7 @@ public class LatencyRecorder extends LatencyRecord {
      * @param latency latency value in milliseconds.
      * @return is valid latency record or not
      */
-    public boolean record(int bytes, int events, long latency) {
+    final public boolean record(int bytes, int events, long latency) {
         this.totalBytes += bytes;
         this.totalRecords += events;
         this.maxLatency = Math.max(this.maxLatency, latency);
