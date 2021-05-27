@@ -94,14 +94,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
 
     @Override
     public void reportLatencyRecord(LatencyRecord record) {
-        this.totalRecords += record.totalRecords;
-        this.totalLatency += record.totalLatency;
-        this.totalBytes += record.totalBytes;
-        this.invalidLatencyRecords += record.invalidLatencyRecords;
-        this.lowerLatencyDiscardRecords += record.lowerLatencyDiscardRecords;
-        this.higherLatencyDiscardRecords += record.higherLatencyDiscardRecords;
-        this.validLatencyRecords += record.validLatencyRecords;
-        this.maxLatency = Math.max(this.maxLatency, record.maxLatency);
+        super.updateRecord(record);
         latencyReportWindow.reportLatencyRecord(record);
     }
 
