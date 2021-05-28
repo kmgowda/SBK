@@ -180,16 +180,14 @@ public class SystemLogger implements Logger {
     public void decrementReaders(int val) {
         decrementAtomic(readers, val);
     }
-    
-    public String buildResultString(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                               long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        StringBuilder out = new StringBuilder();
-        out.append(prefix);
-        out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
-        out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
-        out.append(String.format("%11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;" +
-                        " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;", records, recsPerSec, mbPerSec, avgLatency,
-                timeUnit, maxLatency, timeUnit, invalid, lowerDiscard, higherDiscard));
+
+    public void appendPercentiles(StringBuilder out, long bytes, long records, double recsPerSec, double mbPerSec,
+                                       double avgLatency, long maxLatency, long invalid, long lowerDiscard,
+                                       long higherDiscard, long[] percentileValues) {
+
+        out.append(String.format("%11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;"
+                        + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;", records, recsPerSec,
+                        mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit, invalid, lowerDiscard, higherDiscard));
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
             if (i == 0) {
@@ -198,22 +196,35 @@ public class SystemLogger implements Logger {
                 out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, percentileNames[i]));
             }
         }
+    }
+
+    public void appendWritesAndReaders(StringBuilder out) {
+        out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
+        out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
+    }
+
+    public String buildResultString(StringBuilder out, long bytes, long records, double recsPerSec, double mbPerSec,
+                                    double avgLatency, long maxLatency, long invalid, long lowerDiscard,
+                                    long higherDiscard, long[] percentileValues) {
+        appendWritesAndReaders(out);
+        appendPercentiles(out, bytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
+                invalid, lowerDiscard, higherDiscard, percentileValues);
         out.append(".\n");
         return out.toString();
     }
 
-
-    private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        System.out.print(buildResultString(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues));
+    private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+                       double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                       long[] percentileValues) {
+        System.out.print(buildResultString(new StringBuilder(prefix), bytes, records, recsPerSec, mbPerSec, avgLatency,
+                maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
     @Override
     public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, percentileValues);
     }
 
     @Override

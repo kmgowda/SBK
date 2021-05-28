@@ -26,8 +26,8 @@ public class Sl4jResultLogger extends SystemLogger {
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        log.info(buildResultString(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues));
+        log.info(buildResultString(new StringBuilder(prefix), bytes, records, recsPerSec, mbPerSec, avgLatency,
+                maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
     @Override
