@@ -17,10 +17,13 @@ option java_outer_classname = "SbkGrpc";
 import "google/protobuf/empty.proto";
 
 service SBKService {
-  rpc SayHello (google.protobuf.Empty) returns (Config) {}
-  rpc register (Config) returns (ClientID) {}
-  rpc record (LatenciesRecord) returns (google.protobuf.Empty) {}
-  rpc done (ClientID) returns (google.protobuf.Empty) {}
+  rpc getConfig (google.protobuf.Empty) returns (Config) {}
+  rpc registerClient (Config) returns (ClientID) {}
+  rpc startTransaction (Transaction) returns (google.protobuf.Empty) {}
+  rpc addLatenciesRecord (LatenciesRecord) returns (google.protobuf.Empty) {}
+  rpc addLatenciesList (LatenciesList) returns (google.protobuf.Empty) {}
+  rpc endTransaction (Transaction) returns (google.protobuf.Empty) {}
+  rpc closeClient (ClientID) returns (google.protobuf.Empty) {}
 }
 
 enum TimeUnit {
@@ -45,8 +48,14 @@ message ClientID {
   int32 id = 1;
 }
 
-message LatenciesRecord {
+message Transaction {
   int32 clientID = 1;
+  int64 transID = 2;
+  int64 seqNum = 3;
+}
+
+message LatenciesRecord {
+  Transaction transaction = 1;
   int32 writers = 2;
   int32 readers = 3;
   int32 maxWriters = 4;
@@ -59,5 +68,9 @@ message LatenciesRecord {
   int64 totalBytes = 11;
   int64 totalLatency = 12;
   int64 maxLatency = 13;
-  map<int64, int64 > latencies = 14;
+}
+
+message LatenciesList {
+  Transaction transaction = 1;
+  map<int64, int64 > latencies = 2;
 }
