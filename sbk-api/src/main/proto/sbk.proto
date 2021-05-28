@@ -40,8 +40,10 @@ enum Action {
 
 message Config {
   string storageName = 1;
-  TimeUnit timeUnit = 2;
-  Action action = 3;
+  Action action = 2;
+  TimeUnit timeUnit = 3;
+  int64 minLatency = 4;
+  int32 maxLatency = 5;
 }
 
 message ClientID {

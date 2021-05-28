@@ -27,7 +27,7 @@ import java.io.IOException;
  */
 public class SbkPrometheusLogger extends SystemLogger {
     final static String CONFIG_FILE = "metrics.properties";
-    public MetricsConfig config;
+    public MetricsConfig metricsConfig;
     private boolean disabled;
     private RWMetricsPrometheusServer prometheusServer;
     private Print printer;
@@ -45,7 +45,7 @@ public class SbkPrometheusLogger extends SystemLogger {
 
     public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
         return new RWMetricsPrometheusServer(Config.NAME+" "+storageName, action.name(),
-                percentiles, time, config);
+                percentiles, time, metricsConfig);
     }
 
 
@@ -55,7 +55,7 @@ public class SbkPrometheusLogger extends SystemLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(getConfigFile()),
+            metricsConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(getConfigFile()),
                     MetricsConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -63,22 +63,22 @@ public class SbkPrometheusLogger extends SystemLogger {
         }
 
         params.addOption("context", true, "Prometheus Metric context" +
-                "; default context: " + config.port + config.context + "; 'no' disables the metrics");
+                "; default context: " + metricsConfig.port + metricsConfig.context + "; 'no' disables the metrics");
     }
 
 
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        final String fullContext =  params.getOptionValue("context", config.port + config.context);
+        final String fullContext =  params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
         if (fullContext.equalsIgnoreCase("no")) {
             disabled = true;
         } else {
             disabled = false;
             String[] str = fullContext.split("/", 2);
-            config.port = Integer.parseInt(str[0]);
+            metricsConfig.port = Integer.parseInt(str[0]);
             if (str.length == 2 && str[1] != null) {
-                config.context = "/" + str[1];
+                metricsConfig.context = "/" + str[1];
             }
         }
     }

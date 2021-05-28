@@ -39,7 +39,7 @@ public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements Se
     public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
         if (prometheusServer == null) {
             prometheusServer = new ConnectionsRWMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
-                    percentiles, time, config);
+                    percentiles, time, metricsConfig);
         }
         return prometheusServer;
     }
