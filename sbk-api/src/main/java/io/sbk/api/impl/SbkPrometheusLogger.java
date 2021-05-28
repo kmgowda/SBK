@@ -43,7 +43,7 @@ public class SbkPrometheusLogger extends SystemLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+            config = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(getConfigFile()),
                     MetricsConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -130,8 +130,12 @@ public class SbkPrometheusLogger extends SystemLogger {
 
     }
 
+    public static String getConfigFile() {
+        return CONFIG_FILE;
+    }
+
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
-                      long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+                              long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
         prometheusServer.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
