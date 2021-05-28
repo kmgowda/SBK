@@ -27,7 +27,7 @@ import java.io.IOException;
  */
 public class SbkPrometheusLogger extends SystemLogger {
     final static String CONFIG_FILE = "metrics.properties";
-    private MetricsConfig config;
+    public MetricsConfig config;
     private boolean disabled;
     private RWMetricsPrometheusServer prometheusServer;
     private Print printer;
@@ -35,7 +35,19 @@ public class SbkPrometheusLogger extends SystemLogger {
 
     public SbkPrometheusLogger() {
         super();
+        prometheusServer = null;
     }
+
+    public String getConfigFile() {
+        return CONFIG_FILE;
+    }
+
+
+    public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
+        return new RWMetricsPrometheusServer(Config.NAME+" "+storageName, action.name(),
+                percentiles, time, config);
+    }
+
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
@@ -79,7 +91,7 @@ public class SbkPrometheusLogger extends SystemLogger {
             printer = super::print;
             prometheusServer = null;
         } else {
-            prometheusServer = new RWMetricsPrometheusServer(Config.NAME+" "+storageName, action.name(), percentiles, time, config);
+            prometheusServer = getMetricsPrometheusServer();
             prometheusServer.start();
             printer = this::printMetrics;
         }
@@ -128,10 +140,6 @@ public class SbkPrometheusLogger extends SystemLogger {
             prometheusServer.decrementReaders(val);
         }
 
-    }
-
-    public static String getConfigFile() {
-        return CONFIG_FILE;
     }
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,

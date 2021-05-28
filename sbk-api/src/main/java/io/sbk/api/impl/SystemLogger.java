@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SystemLogger implements Logger {
     final static String LOGGER_FILE = "logger.properties";
     final public DecimalFormat format;
+    public String storageName;
     public String prefix;
     public String timeUnit;
     public InputOptions params;
@@ -41,6 +42,8 @@ public class SystemLogger implements Logger {
     public AtomicInteger maxWriters;
     public AtomicInteger maxReaders;
     public double[] percentiles;
+    public Action action;
+    public Time time;
     private LoggerConfig loggerConfig;
     private String[] percentileNames;
     private long minLatency;
@@ -106,6 +109,9 @@ public class SystemLogger implements Logger {
     @Override
     public void open(final InputOptions params, final String storageName, Action action, Time time) throws  IOException {
         this.params = params;
+        this.storageName = storageName;
+        this.action = action;
+        this.time = time;
         this.prefix = storageName+" "+action.name();
         this.timeUnit = getTimeUnit().name();
         for (double p: this.percentiles) {

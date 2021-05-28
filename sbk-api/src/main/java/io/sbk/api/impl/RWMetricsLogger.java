@@ -41,25 +41,22 @@ public class RWMetricsLogger extends MetricsLogger implements RWCount {
        this.maxReaders = this.registry.gauge(maxReadersName, new AtomicInteger());
     }
 
-    @Override
     public void incrementWriters(int val) {
-        this.writers.set(writers.get() + val);
-        this.maxWriters.set(maxWriters.get() + val);
+        writers.set(writers.get() + val);
+        maxWriters.set(maxWriters.get() + val);
     }
 
-    @Override
     public void decrementWriters(int val) {
-        this.writers.set(Math.max(writers.get()-val, 0));
+        writers.set(writers.get()-val);
     }
 
-    @Override
     public void incrementReaders(int val) {
-        this.readers.set(readers.get() + val);
-        this.maxReaders.set(maxReaders.get() + val);
+        readers.set(readers.get() + val);
+        maxReaders.set(maxReaders.get() + val);
     }
 
-    @Override
     public void decrementReaders(int val) {
-        this.readers.set(Math.max(readers.get() - val, 0));
+        readers.set(readers.get() - val);
     }
+
 }

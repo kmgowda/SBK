@@ -35,6 +35,7 @@ public class RWMetricsPrometheusServer extends RWMetricsLogger  {
     }
 
     public void stop() throws  IOException {
+        super.close();
         server.stop();
     }
 
