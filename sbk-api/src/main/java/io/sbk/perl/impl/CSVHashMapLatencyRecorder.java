@@ -52,7 +52,7 @@ public class CSVHashMapLatencyRecorder extends HashMapLatencyRecorder {
     }
 
     @Override
-    public void record(long startTime, int bytes, int events, long latency) {
+    public void record(long startTime, long bytes, long events, long latency) {
         try {
             if (record(bytes, events, latency)) {
                 csvPrinter.printRecord(startTime, bytes, events, latency);

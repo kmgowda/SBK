@@ -16,7 +16,7 @@ option java_outer_classname = "SbkGrpc";
 
 import "google/protobuf/empty.proto";
 
-service SBKService {
+service Service {
   rpc getConfig (google.protobuf.Empty) returns (Config) {}
   rpc registerClient (Config) returns (ClientID) {}
   rpc startTransaction (Transaction) returns (google.protobuf.Empty) {}
@@ -26,13 +26,13 @@ service SBKService {
   rpc closeClient (ClientID) returns (google.protobuf.Empty) {}
 }
 
-enum TimeUnit {
+enum TimeUnitEnum {
   ms = 0;
   mcs = 1;
   ns = 2;
 }
 
-enum Action {
+enum ActionEnum {
   Writing = 0;
   Reading = 1;
   Write_Reading = 2;
@@ -40,10 +40,10 @@ enum Action {
 
 message Config {
   string storageName = 1;
-  Action action = 2;
-  TimeUnit timeUnit = 3;
+  ActionEnum action = 2;
+  TimeUnitEnum timeUnit = 3;
   int64 minLatency = 4;
-  int32 maxLatency = 5;
+  int64 maxLatency = 5;
 }
 
 message ClientID {

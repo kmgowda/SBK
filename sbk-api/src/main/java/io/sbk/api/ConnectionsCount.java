@@ -16,12 +16,24 @@ public interface ConnectionsCount {
      * Increment.
      * @param val increment value.
      */
-    void increment(int val);
+    void incrementConnections(int val);
 
     /**
      * Decrement.
      * @param val decrement value.
      */
-    void decrement(int val);
+    void decrementConnections(int val);
+
+    /**
+     * set the value.
+     * @param val  new value.
+     */
+    void setConnections(int val);
+
+    /**
+     * set the Max value.
+     * @param val  new value.
+     */
+    void setMaxConnections(int val);
 
 }

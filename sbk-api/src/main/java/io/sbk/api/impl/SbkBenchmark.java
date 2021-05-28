@@ -108,7 +108,7 @@ public class SbkBenchmark implements Benchmark {
             this.maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
         }
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 10;
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 20;
         if (Config.USE_FORK) {
             executor = new ForkJoinPool(threadCount);
         } else {

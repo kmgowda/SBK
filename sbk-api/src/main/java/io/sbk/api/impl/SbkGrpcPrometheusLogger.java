@@ -43,7 +43,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     private long seqNum;
     private int  latenciesCount;
     private ManagedChannel channel;
-    private SBKServiceGrpc.SBKServiceStub stub;
+    private ServiceGrpc.ServiceStub stub;
     private LatenciesList.Builder listBuilder;
 
     public SbkGrpcPrometheusLogger() {
@@ -87,7 +87,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             return;
         }
         channel = ManagedChannelBuilder.forTarget(serverConfig.host+":"+serverConfig.port).usePlaintext().build();
-        final SBKServiceGrpc.SBKServiceBlockingStub blockingStub = SBKServiceGrpc.newBlockingStub(channel);
+        final ServiceGrpc.ServiceBlockingStub blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
         try {
             config = blockingStub.getConfig(Empty.newBuilder().build());
@@ -127,7 +127,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
-        stub = SBKServiceGrpc.newStub(channel);
+        stub = ServiceGrpc.newStub(channel);
         transID = 0;
         seqNum = 0;
         listBuilder = LatenciesList.newBuilder();

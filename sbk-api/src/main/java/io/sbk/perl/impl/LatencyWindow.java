@@ -79,7 +79,7 @@ public abstract class LatencyWindow extends LatencyRecorder {
      * @param events number of events(records).
      * @param latency latency value in milliseconds.
      */
-    abstract void record(long startTime, int bytes, int events, long latency);
+    abstract public void record(long startTime, long bytes, long events, long latency);
 
     /**
      * get the Percentiles.

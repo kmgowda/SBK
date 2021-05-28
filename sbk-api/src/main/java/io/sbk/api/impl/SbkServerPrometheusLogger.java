@@ -53,12 +53,23 @@ public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements Se
 
 
     @Override
-    public void increment(int val) {
-        prometheusServer.increment(val);
+    public void incrementConnections(int val) {
+        prometheusServer.incrementConnections(val);
     }
 
     @Override
-    public void decrement(int val) {
-        prometheusServer.decrement(val);
+    public void decrementConnections(int val) {
+        prometheusServer.decrementConnections(val);
     }
+
+    @Override
+    public void setConnections(int val) {
+        prometheusServer.decrementConnections(val);
+    }
+
+    @Override
+    public void setMaxConnections(int val) {
+        prometheusServer.setMaxConnections(val);
+    }
+
 }

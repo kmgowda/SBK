@@ -10,13 +10,14 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.ConnectionsCount;
 import io.sbk.perl.MetricsConfig;
 import io.sbk.perl.Time;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ConnectionsRWMetricsPrometheusServer extends RWMetricsPrometheusServer {
+public class ConnectionsRWMetricsPrometheusServer extends RWMetricsPrometheusServer implements ConnectionsCount  {
     final private AtomicInteger connections;
     final private AtomicInteger maxConnections;
 
@@ -29,12 +30,22 @@ public class ConnectionsRWMetricsPrometheusServer extends RWMetricsPrometheusSer
         this.maxConnections = this.registry.gauge(maxName, new AtomicInteger());
     }
 
-    public void increment(int val) {
+    public void incrementConnections(int val) {
         connections.set(connections.get() + val);
         maxConnections.set(maxConnections.get() + val);
     }
 
-    public void decrement(int val) {
+    public void decrementConnections(int val) {
         connections.set(connections.get()-val);
+    }
+
+    @Override
+    public void setConnections(int val) {
+        connections.set(val);
+    }
+
+    @Override
+    public void setMaxConnections(int val) {
+        maxConnections.set(val);
     }
 }

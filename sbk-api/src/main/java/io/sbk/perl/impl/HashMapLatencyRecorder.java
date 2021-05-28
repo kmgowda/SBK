@@ -94,7 +94,7 @@ public class HashMapLatencyRecorder extends LatencyWindow {
      * @param latency latency value in milliseconds.
      */
     @Override
-    public void record(long startTime, int bytes, int events, long latency) {
+    public void record(long startTime, long bytes, long events, long latency) {
         if (record(bytes, events, latency)) {
             Long val = latencies.get(latency);
             if (val == null) {

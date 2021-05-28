@@ -177,6 +177,16 @@ public class SystemLogger implements Logger {
     }
 
     @Override
+    public void setWriters(int val) {
+        writers.set(val);
+    }
+
+    @Override
+    public void setMaxWriters(int val) {
+        maxWriters.set(val);
+    }
+
+    @Override
     public void incrementReaders(int val) {
         incrementAtomic(readers, val);
         incrementAtomic(maxReaders, val);
@@ -185,6 +195,16 @@ public class SystemLogger implements Logger {
     @Override
     public void decrementReaders(int val) {
         decrementAtomic(readers, val);
+    }
+
+    @Override
+    public void setReaders(int val) {
+        readers.set(val);
+    }
+
+    @Override
+    public void setMaxReaders(int val) {
+        maxReaders.set(val);
     }
 
     public void appendPercentiles(StringBuilder out, long bytes, long records, double recsPerSec, double mbPerSec,
