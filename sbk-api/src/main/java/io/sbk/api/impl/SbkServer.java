@@ -18,7 +18,6 @@ import io.sbk.api.Config;
 import io.sbk.api.ServerConfig;
 import io.sbk.api.ServerLogger;
 import io.sbk.api.ServerParameterOptions;
-import io.sbk.api.Storage;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 import io.sbk.perl.impl.MicroSeconds;
@@ -46,9 +45,6 @@ public class SbkServer {
     /**
      * Run the Performance Benchmarking .
      * @param args command line arguments.
-     * @param storage storage object on which performance benchmarking will be conducted.
-     *                if you pass 'null', then name of the storage should be in args '-class' arguments
-     *                and storage object should be available in the package 'io.sbk.storage'.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , SbkServer is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
@@ -59,11 +55,11 @@ public class SbkServer {
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
-    public static void run(final String[] args, final Storage<Object> storage,
-                           final String applicationName, ServerLogger outLogger) throws ParseException, IllegalArgumentException,
+    public static void run(final String[] args, final String applicationName,
+                           ServerLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
 
-        final CompletableFuture<Void> ret = runAsync(args, storage, applicationName, outLogger);
+        final CompletableFuture<Void> ret = runAsync(args, applicationName, outLogger);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
@@ -75,9 +71,6 @@ public class SbkServer {
     /**
      * Asynchronously Run the Performance Benchmarking .
      * @param args command line arguments.
-     * @param storage storage object on which performance benchmarking will be conducted.
-     *                if you pass 'null', then name of the storage should be in args '-class' arguments
-     *                and storage object should be available in the package 'io.sbk.storage'.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null', SbkServer
      *                       is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
@@ -89,12 +82,12 @@ public class SbkServer {
      * @throws InterruptedException If an exception occurred due to writers or readers interrupted.
      * @throws ExecutionException If an exception occurred due to writers or readers exceptions.
      */
-    public static CompletableFuture<Void> runAsync(final String[] args, final Storage<Object> storage,
-                                                   final String applicationName, ServerLogger outLogger) throws ParseException,
+    public static CompletableFuture<Void> runAsync(final String[] args, final String applicationName,
+                                                   ServerLogger outLogger) throws ParseException,
             IllegalArgumentException, IOException, InterruptedException, ExecutionException {
         CompletableFuture<Void> ret;
         try {
-            ret = new SbkServerCompletableFutureAsync(args, storage, applicationName, outLogger);
+            ret = new SbkServerCompletableFutureAsync(args, applicationName, outLogger);
         } catch (InstantiationException ex) {
             ret = new CompletableFuture<>();
             ret.complete(null);
@@ -107,8 +100,8 @@ public class SbkServer {
         private final Benchmark benchmark;
         private final CompletableFuture<Void> ret;
 
-        public SbkServerCompletableFutureAsync(final String[] args, final Storage<Object> storage,
-                                         final String applicationName, ServerLogger outLogger) throws ParseException,
+        public SbkServerCompletableFutureAsync(final String[] args, final String applicationName,
+                                               ServerLogger outLogger) throws ParseException,
                 IllegalArgumentException, IOException, InterruptedException, ExecutionException,
                 InstantiationException {
             super();
@@ -142,24 +135,24 @@ public class SbkServer {
     }
 
 
-    private static Benchmark createBenchmark(final String[] args, String applicationName,
+    private static Benchmark createBenchmark(final String[] args, final String applicationName,
                                              ServerLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InstantiationException  {
-        final String className;
         final ServerParameterOptions params;
         final ServerLogger logger;
         final ServerConfig serverConfig;
         final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkServerName = System.getProperty(Config.SBK_APP_NAME);
+        String appName = applicationName;
 
-        if (applicationName == null) {
-            applicationName = Objects.requireNonNullElse(sbkServerName, APP_NAME);
+        if (appName == null) {
+            appName = Objects.requireNonNullElse(sbkServerName, APP_NAME);
         }
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
-        Printer.log.info(applicationName +" Version: "+version);
+        Printer.log.info(appName +" Version: "+version);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -169,7 +162,7 @@ public class SbkServer {
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkServerPrometheusLogger::new);
 
-        params = new SbkServerParameters(applicationName);
+        params = new SbkServerParameters(appName);
         logger.addArgs(params);
         params.parseArgs(args);
         if (params.hasOption("help")) {
