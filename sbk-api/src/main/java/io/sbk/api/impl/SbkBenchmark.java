@@ -262,9 +262,7 @@ public class SbkBenchmark implements Benchmark {
                             CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
                                     i + j + 1 == params.getWritersCount() ?
                                     recordsPerWriter + delta : recordsPerWriter);
-                            writeFutures.add(ret.whenComplete((d, ex)-> {
-                                logger.decrementWriters(1);
-                            }));
+                            writeFutures.add(ret.whenComplete((d, ex) -> logger.decrementWriters(1)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -317,9 +315,7 @@ public class SbkBenchmark implements Benchmark {
                         try {
                             CompletableFuture<Void> ret = sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
                                     recordsPerReader + delta : recordsPerReader);
-                            readFutures.add(ret.whenComplete((d, ex) -> {
-                                logger.decrementReaders(1);
-                            }));
+                            readFutures.add(ret.whenComplete((d, ex) -> logger.decrementReaders(1)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
