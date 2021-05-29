@@ -43,7 +43,7 @@ final public class SbkServerParameters extends SbkOptions implements ServerParam
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
         super.parseArgs(args);
         if (hasOption("help")) {
-            printHelp();
+            return;
         }
 
         storageName = getOptionValue("class", null);
