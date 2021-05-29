@@ -19,10 +19,7 @@ import "google/protobuf/empty.proto";
 service Service {
   rpc getConfig (google.protobuf.Empty) returns (Config) {}
   rpc registerClient (Config) returns (ClientID) {}
-  rpc startTransaction (Transaction) returns (google.protobuf.Empty) {}
   rpc addLatenciesRecord (LatenciesRecord) returns (google.protobuf.Empty) {}
-  rpc addLatenciesList (LatenciesList) returns (google.protobuf.Empty) {}
-  rpc endTransaction (Transaction) returns (google.protobuf.Empty) {}
   rpc closeClient (ClientID) returns (google.protobuf.Empty) {}
 }
 
@@ -50,29 +47,22 @@ message ClientID {
   int32 id = 1;
 }
 
-message Transaction {
-  int32 clientID = 1;
-  int64 transID = 2;
-  int64 seqNum = 3;
-}
 
 message LatenciesRecord {
-  Transaction transaction = 1;
-  int32 writers = 2;
-  int32 readers = 3;
-  int32 maxWriters = 4;
-  int32 maxReaders = 5;
-  int64 totalRecords = 6;
-  int64 validLatencyRecords = 7;
-  int64 lowerLatencyDiscardRecords = 8;
-  int64 higherLatencyDiscardRecords = 9;
-  int64 invalidLatencyRecords = 10;
-  int64 totalBytes = 11;
-  int64 totalLatency = 12;
-  int64 maxLatency = 13;
+  int32 clientID = 1;
+  int64 sequenceNumber = 2;
+  int32 writers = 3;
+  int32 readers = 4;
+  int32 maxWriters = 5;
+  int32 maxReaders = 6;
+  int64 totalRecords = 7;
+  int64 validLatencyRecords = 8;
+  int64 lowerLatencyDiscardRecords = 9;
+  int64 higherLatencyDiscardRecords = 10;
+  int64 invalidLatencyRecords = 11;
+  int64 totalBytes = 12;
+  int64 totalLatency = 13;
+  int64 maxLatency = 14;
+  map<int64, int64 > latency = 15;
 }
 
-message LatenciesList {
-  Transaction transaction = 1;
-  map<int64, int64 > latencies = 2;
-}

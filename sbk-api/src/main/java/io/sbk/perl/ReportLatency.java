@@ -9,15 +9,16 @@
  */
 package io.sbk.perl;
 
-public interface ReportLatenciesWindow extends ReportLatencies {
+public interface ReportLatency {
+
 
     /**
-     * open the reporting window.
+     * Record the latency.
+     *
+     * @param startTime start time.
+     * @param bytes number of bytes.
+     * @param events number of events(records).
+     * @param latency latency value in milliseconds.
      */
-    void openWindow();
-
-    /**
-     * close the reporting window.
-     */
-    void closeWindow();
+    void recordLatency(long startTime, long bytes, long events, long latency);
 }

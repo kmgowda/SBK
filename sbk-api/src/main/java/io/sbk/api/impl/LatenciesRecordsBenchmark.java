@@ -11,10 +11,8 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.api.TransactionRecord;
 import io.sbk.api.RWCount;
 import io.sbk.perl.Print;
-import io.sbk.perl.ReportLatenciesWindow;
 import io.sbk.perl.Time;
 import io.sbk.perl.impl.LatencyWindow;
 import io.sbk.system.Printer;
@@ -28,14 +26,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 
-public class TransactionsBenchmark implements Benchmark {
+public class LatenciesRecordsBenchmark implements Benchmark {
     private final Time time;
     private final int reportingIntervalMS;
     private final LatencyWindow window;
     private final RWCount rwCount;
     private final Print logger;
-    private final ReportLatenciesWindow reportLatencies;
-    private final LinkedBlockingQueue<TransactionRecord> queue;
+    private final LinkedBlockingQueue<LatenciesRecord> queue;
 
     @GuardedBy("this")
     private CompletableFuture<Void> retFuture;
@@ -43,55 +40,55 @@ public class TransactionsBenchmark implements Benchmark {
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
 
-    public TransactionsBenchmark(LatencyWindow window, Time time, int reportingIntervalMS, RWCount rwCount,
-                                 Print logger, ReportLatenciesWindow reportLatencies,
-                                 LinkedBlockingQueue<TransactionRecord> queue) {
+    public LatenciesRecordsBenchmark(LatencyWindow window, Time time, int reportingIntervalMS, RWCount rwCount,
+                                     Print logger, LinkedBlockingQueue<LatenciesRecord> queue) {
         this.window = window;
         this.time = time;
         this.reportingIntervalMS = reportingIntervalMS;
         this.rwCount = rwCount;
         this.logger = logger;
-        this.reportLatencies = reportLatencies;
         this.queue = queue;
         this.retFuture = null;
         this.qFuture = null;
     }
 
     void run() throws InterruptedException {
-        TransactionRecord trans;
-        long startTime = time.getCurrentTime();
-        long endTime;
+        LatenciesRecord record;
         boolean doWork = true;
         int writers = 0;
         int maxWriters = 0;
         int readers = 0;
         int maxReaders = 0;
         Printer.log.info("Transactions Benchmark Started" );
-        window.reset(startTime);
+        long currentTime = time.getCurrentTime();
+        window.reset(currentTime);
         while (doWork) {
-            trans = queue.poll(reportingIntervalMS, TimeUnit.MILLISECONDS);
-            if (trans != null) {
-                if (trans.transID > 0) {
-                    writers += trans.writers;
-                    readers += trans.readers;
-                    maxWriters += trans.maxWriters;
-                    maxReaders += trans.maxReaders;
-                    window.updateRecord(trans.record);
-                    trans.list.forEach(lt -> {
-                        lt.forEach((k, v) -> {
-                            window.record(startTime, 0, v, k);
-                        });
+            record = queue.poll(reportingIntervalMS, TimeUnit.MILLISECONDS);
+            if (record != null) {
+                if (record.getSequenceNumber() > 0) {
+                    writers += record.getWriters();
+                    readers += record.getReaders();
+                    maxWriters += record.getMaxWriters();
+                    maxReaders += record.getMaxReaders();
+                    window.maxLatency = Math.max(window.maxLatency, record.getMaxLatency());
+                    window.totalRecords += record.getTotalRecords();
+                    window.totalBytes += record.getTotalBytes();
+                    window.totalLatency += record.getTotalLatency();
+                    window.higherLatencyDiscardRecords += record.getHigherLatencyDiscardRecords();
+                    window.lowerLatencyDiscardRecords += record.getLowerLatencyDiscardRecords();
+                    window.validLatencyRecords += record.getValidLatencyRecords();
+                    window.invalidLatencyRecords += record.getInvalidLatencyRecords();
+                    record.getLatencyMap().forEach((k, v) -> {
+                        window.record(0, 0, v, k);
                     });
                 } else {
                     doWork = false;
                 }
             }
-            endTime = time.getCurrentTime();
-            if (window.elapsedMilliSeconds(endTime) > reportingIntervalMS) {
-                reportLatencies.openWindow();
-                window.print(endTime, logger, reportLatencies);
-                reportLatencies.closeWindow();
-                window.reset(endTime);
+            currentTime = time.getCurrentTime();
+            if (window.elapsedMilliSeconds(currentTime) > reportingIntervalMS) {
+                window.print(currentTime, logger, null);
+                window.reset(currentTime);
                 rwCount.setWriters(writers);
                 rwCount.setMaxWriters(maxWriters);
                 rwCount.setReaders(readers);
@@ -101,11 +98,12 @@ public class TransactionsBenchmark implements Benchmark {
         }
 
         if (window.totalRecords > 0) {
-            reportLatencies.openWindow();
-            window.print(time.getCurrentTime(), logger, reportLatencies);
-            reportLatencies.closeWindow();
+            window.print(time.getCurrentTime(), logger, null);
         }
     }
+
+
+
 
     @Synchronized
     private void shutdown(Throwable ex) {
@@ -121,7 +119,7 @@ public class TransactionsBenchmark implements Benchmark {
         if (qFuture != null) {
             if (!qFuture.isDone()) {
                 try {
-                    queue.put(new TransactionRecord(-1));
+                    queue.put(LatenciesRecord.newBuilder().setSequenceNumber(-1).build());
                     qFuture.get();
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();

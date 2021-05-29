@@ -16,13 +16,16 @@ import com.google.protobuf.Empty;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import io.sbk.api.Action;
 import io.sbk.api.InputOptions;
 import io.sbk.api.ServerConfig;
-import io.sbk.perl.LatencyRecord;
+import io.sbk.perl.LatencyRecorder;
+import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -35,19 +38,38 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static String DISABLE_STRING = "no";
     final static int MAX_LATENCY_BYTES = 1024 * 1024 * 4;
     final static int LATENCY_BYTES = 16;
-    final static int MAX_LATENCY_ITERATIONS = MAX_LATENCY_BYTES / LATENCY_BYTES;
     public ServerConfig serverConfig;
     private boolean enable;
     private int clientID;
-    private long transID;
     private long seqNum;
-    private int  latenciesCount;
+    private int  latencyBytes;
+    private LatencyRecorder recorder;
     private ManagedChannel channel;
     private ServiceGrpc.ServiceStub stub;
-    private LatenciesList.Builder listBuilder;
+    private LatenciesRecord.Builder builder;
+    private StreamObserver<com.google.protobuf.Empty> observer;
 
     public SbkGrpcPrometheusLogger() {
         super();
+    }
+
+
+    private class ResponseObserver<T> implements StreamObserver<T> {
+
+        @Override
+        public void onNext(Object value) {
+
+        }
+
+        @Override
+        public void onError(Throwable t) {
+
+        }
+
+        @Override
+        public void onCompleted() {
+
+        }
     }
 
 
@@ -103,7 +125,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             throw new IllegalArgumentException("SBK Server action: "+config.getAction().name()
                     + " ,Supplied action : "+action.name() +" are not same!");
         }
-        if (config.getTimeUnit().name().equalsIgnoreCase(time.getTimeUnit().name())) {
+        if (!config.getTimeUnit().name().equalsIgnoreCase(time.getTimeUnit().name())) {
             throw new IllegalArgumentException("SBK Server Time Unit: "+config.getTimeUnit().name()
                     + " ,Supplied Time Unit : "+time.getTimeUnit().name() +" are not same!");
         }
@@ -128,9 +150,12 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             throw new IllegalArgumentException(errMsg);
         }
         stub = ServiceGrpc.newStub(channel);
-        transID = 0;
         seqNum = 0;
-        listBuilder = LatenciesList.newBuilder();
+        latencyBytes = 0;
+        recorder = new LatencyRecorder(getMinLatency(), getMaxLatency(), PerlConfig.LONG_MAX,
+                PerlConfig.LONG_MAX, PerlConfig.LONG_MAX);
+        builder = LatenciesRecord.newBuilder();
+        observer = new ResponseObserver<>();
         Printer.log.info("SBK GRPC Logger Started");
     }
 
@@ -138,8 +163,8 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     public void close(final InputOptions params) throws IllegalArgumentException, IOException  {
         super.close(params);
         try {
-            listBuilder.clear();
-            stub.closeClient(ClientID.newBuilder().setId(clientID).build(), null);
+            builder.clear();
+            stub.closeClient(ClientID.newBuilder().setId(clientID).build(), observer);
             channel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
@@ -147,83 +172,54 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         Printer.log.info("SBK GRPC Logger Shutdown");
     }
 
-    /**
-     * open the reporting window.
-     */
-    public void openWindow() {
-        seqNum = 0;
-        latenciesCount = 0;
-        Transaction.Builder builder = Transaction.newBuilder();
+    public void addLatenciesRecord() {
         builder.setClientID(clientID);
-        builder.setTransID(++transID);
-        builder.setSeqNum(seqNum++);
-        stub.startTransaction(builder.build(), null);
-    }
-
-    /**
-     * close the reporting window.
-     */
-    public void closeWindow() {
-        if (latenciesCount > 0) {
-            stub.addLatenciesList(listBuilder.build(), null);
-        }
-        listBuilder.clear();
-        latenciesCount = 0;
-        Transaction.Builder builder = Transaction.newBuilder();
-        builder.setClientID(clientID);
-        builder.setTransID(transID);
-        builder.setSeqNum(seqNum++);
-        stub.endTransaction(builder.build(), null);
-    }
-
-    /**
-     * Report a latency Record.
-     *
-     * @param record Latency Record
-     */
-    public void reportLatencyRecord(LatencyRecord record) {
-        LatenciesRecord.Builder builder = LatenciesRecord.newBuilder();
-        Transaction.Builder transBuilder = Transaction.newBuilder();
-        transBuilder.setClientID(clientID);
-        transBuilder.setTransID(transID);
-        transBuilder.setSeqNum(seqNum++);
-        builder.setTransaction(transBuilder.build());
-        builder.setTotalBytes(record.totalBytes);
-        builder.setTotalRecords(record.totalRecords);
-        builder.setTotalLatency(record.totalLatency);
-        builder.setMaxLatency(record.maxLatency);
-        builder.setHigherLatencyDiscardRecords(record.higherLatencyDiscardRecords);
-        builder.setLowerLatencyDiscardRecords(record.lowerLatencyDiscardRecords);
-        builder.setInvalidLatencyRecords(record.invalidLatencyRecords);
-        builder.setValidLatencyRecords(record.validLatencyRecords);
-        builder.setWriters(writers.get());
-        builder.setMaxLatency(maxWriters.get());
-        builder.setReaders(readers.get());
+        builder.setSequenceNumber(++seqNum);
         builder.setMaxReaders(maxReaders.get());
-        stub.addLatenciesRecord(builder.build(), null);
+        builder.setReaders(readers.get());
+        builder.setWriters(writers.get());
+        builder.setMaxWriters(maxWriters.get());
+        builder.setMaxLatency(recorder.maxLatency);
+        builder.setTotalLatency(recorder.totalLatency);
+        builder.setInvalidLatencyRecords(recorder.invalidLatencyRecords);
+        builder.setTotalBytes(recorder.totalBytes);
+        builder.setTotalRecords(recorder.totalRecords);
+        builder.setHigherLatencyDiscardRecords(recorder.higherLatencyDiscardRecords);
+        builder.setLowerLatencyDiscardRecords(recorder.lowerLatencyDiscardRecords);
+        builder.setValidLatencyRecords(recorder.validLatencyRecords);
+        final ServiceGrpc.ServiceBlockingStub blockingStub = ServiceGrpc.newBlockingStub(channel);
+        blockingStub.addLatenciesRecord(builder.build());
+        recorder.reset();
+        builder.clear();
+        latencyBytes = 0;
     }
 
+
     /**
-     * Report one latency .
-     *
-     * @param latency Latency value
-     * @param count  Number of times the latency value is observed
+     *  record every latency.
      */
-    public void reportLatency(long latency, long count) {
-        if (latenciesCount >= MAX_LATENCY_ITERATIONS) {
-            stub.addLatenciesList(listBuilder.build(), null);
-            listBuilder.clear();
-            latenciesCount = 0;
+    @Override
+    public void recordLatency(long startTime, long bytes, long events, long latency) {
+        if (latencyBytes >= MAX_LATENCY_BYTES) {
+            addLatenciesRecord();
         }
-        if (latenciesCount == 0) {
-            Transaction.Builder transBuilder = Transaction.newBuilder();
-            transBuilder.setClientID(clientID);
-            transBuilder.setTransID(transID);
-            transBuilder.setSeqNum(seqNum++);
-            listBuilder.setTransaction(transBuilder.build());
+        if (recorder.record(bytes, events, latency)) {
+            final Long cnt = builder.getLatencyMap().getOrDefault(latency, 0L);
+            builder.putLatency(latency, cnt + events);
+            if (cnt == 0) {
+                latencyBytes += LATENCY_BYTES;
+            }
         }
-        listBuilder.putLatencies(latency, count);
-        latenciesCount++;
+    }
+
+    @Override
+    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+        super.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, percentileValues);
+        if (latencyBytes > 0) {
+            addLatenciesRecord();
+        }
     }
 
 }

@@ -13,27 +13,23 @@ package io.sbk.api.impl;
 import com.google.protobuf.Empty;
 import io.sbk.api.Action;
 import io.sbk.api.ConnectionsCount;
-import io.sbk.api.TransactionRecord;
 import io.sbk.perl.Time;
 
 import java.security.InvalidKeyException;
-import java.util.Hashtable;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger clientID;
-    private final Hashtable<Integer, TransactionRecord> table;
     private final Config config;
     private final ConnectionsCount connectionsCount;
-    private final Queue<TransactionRecord> outQueue;
+    private final Queue<LatenciesRecord> outQueue;
 
 
     public SbkGrpcService(String storageName, Action action, Time time, long minLatency, long maxLatency,
-                          ConnectionsCount connectionsCount, Queue<TransactionRecord> outQueue) {
+                          ConnectionsCount connectionsCount, Queue<LatenciesRecord> outQueue) {
         super();
         clientID = new AtomicInteger(0);
-        table = new Hashtable<>();
         Config.Builder builder = Config.newBuilder();
         builder.setStorageName(storageName);
         builder.setActionValue(action.ordinal());
@@ -61,92 +57,28 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
         connectionsCount.incrementConnections(1);
     }
 
-    @Override
-    public void startTransaction(io.sbk.api.impl.Transaction request,
-                                 io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        TransactionRecord trans = table.get(request.getClientID());
-        if (trans != null) {
-            trans.list.clear();
-            table.remove(request.getClientID());
-        }
-
-        table.put(request.getClientID(), new TransactionRecord(request.getTransID()));
-        if (responseObserver != null) {
-            responseObserver.onNext(Empty.newBuilder().build());
-            responseObserver.onCompleted();
-        }
-    }
 
     @Override
     public void addLatenciesRecord(io.sbk.api.impl.LatenciesRecord request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        TransactionRecord trans = table.getOrDefault(request.getTransaction().getClientID(), null);
-        if (trans != null && trans.transID != request.getTransaction().getTransID()) {
-            trans.record.totalBytes += request.getTotalBytes();
-            trans.record.totalRecords += request.getTotalRecords();
-            trans.record.totalLatency += request.getTotalLatency();
-            trans.record.maxLatency = Math.max(trans.record.maxLatency, request.getMaxLatency());
-            trans.record.higherLatencyDiscardRecords += request.getHigherLatencyDiscardRecords();
-            trans.record.lowerLatencyDiscardRecords += request.getLowerLatencyDiscardRecords();
-            trans.record.invalidLatencyRecords += request.getInvalidLatencyRecords();
-            trans.record.validLatencyRecords += request.getValidLatencyRecords();
-            trans.writers = request.getWriters();
-            trans.readers = request.getReaders();
-            trans.maxReaders = Math.max(trans.maxReaders, request.getMaxReaders());
-            trans.maxWriters = Math.max(trans.maxWriters, request.getMaxWriters());
-
-            if (responseObserver != null) {
-                responseObserver.onNext(Empty.newBuilder().build());
-                responseObserver.onCompleted();
-            }
-        } else {
-            if (responseObserver != null) {
-                responseObserver.onError(new InvalidKeyException());
-            }
-        }
-    }
-
-    @Override
-    public void addLatenciesList(io.sbk.api.impl.LatenciesList request,
-                                 io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        TransactionRecord trans = table.getOrDefault(request.getTransaction().getClientID(), null);
-        if (trans != null && trans.transID != request.getTransaction().getTransID()) {
-            trans.list.add(request.getLatenciesMap());
-            if (responseObserver != null) {
-                responseObserver.onNext(Empty.newBuilder().build());
-                responseObserver.onCompleted();
-            }
-        } else {
-            if (responseObserver != null) {
-                responseObserver.onError(new InvalidKeyException());
-            }
-        }
-    }
-
-    @Override
-    public void endTransaction(io.sbk.api.impl.Transaction request,
-                               io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        TransactionRecord trans = table.get(request.getClientID());
         try {
-            outQueue.add(trans);
+            outQueue.add(request);
+            if (responseObserver != null) {
+                responseObserver.onNext(Empty.newBuilder().build());
+                responseObserver.onCompleted();
+            }
+
         } catch (IllegalStateException ex) {
             ex.printStackTrace();
             if (responseObserver != null) {
-                responseObserver.onError(ex);
+                responseObserver.onError(new InvalidKeyException());
             }
-        }
-        if (responseObserver != null) {
-            responseObserver.onNext(Empty.newBuilder().build());
-            responseObserver.onCompleted();
         }
     }
 
     @Override
     public void closeClient(io.sbk.api.impl.ClientID request,
                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        TransactionRecord trans = table.get(request.getId());
-        trans.list.clear();
-        table.remove(request.getId());
         connectionsCount.decrementConnections(1);
         if (responseObserver != null) {
             responseObserver.onNext(Empty.newBuilder().build());

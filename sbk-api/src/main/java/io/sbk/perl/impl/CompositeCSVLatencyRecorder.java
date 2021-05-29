@@ -11,7 +11,7 @@
 package io.sbk.perl.impl;
 
 import io.sbk.perl.Print;
-import io.sbk.perl.ReportLatenciesWindow;
+import io.sbk.perl.ReportLatency;
 import io.sbk.system.Printer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -31,8 +31,8 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
     private CSVPrinter csvPrinter;
 
     public CompositeCSVLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger,
-                                       Print loggerTotal, ReportLatenciesWindow latencyReportWindow, String fileName) {
-        super(window, maxHashMapSizeMB, logger, loggerTotal, latencyReportWindow);
+                                       Print loggerTotal, ReportLatency reportLatency, String fileName) {
+        super(window, maxHashMapSizeMB, logger, loggerTotal, reportLatency);
         csvFile = fileName;
         csvPrinter = null;
     }

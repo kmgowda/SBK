@@ -16,7 +16,6 @@ import io.sbk.api.Benchmark;
 import io.sbk.api.ServerConfig;
 import io.sbk.api.ServerLogger;
 import io.sbk.api.ServerParameterOptions;
-import io.sbk.api.TransactionRecord;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
@@ -40,11 +39,11 @@ public class SbkServerBenchmark implements Benchmark {
     final private Time time;
     final private ServerLogger logger;
     final private ServerParameterOptions params;
-    final private LinkedBlockingQueue<TransactionRecord> queue;
+    final private LinkedBlockingQueue<LatenciesRecord> queue;
     final private LatencyWindow window;
     final private Server server;
     final private SbkGrpcService service;
-    final private TransactionsBenchmark benchmark;
+    final private LatenciesRecordsBenchmark benchmark;
     final private double[] percentileFractions;
 
 
@@ -75,9 +74,9 @@ public class SbkServerBenchmark implements Benchmark {
 
         queue = new LinkedBlockingQueue<>();
         window = createLatencyWindow();
-        benchmark = new TransactionsBenchmark(window, time,
+        benchmark = new LatenciesRecordsBenchmark(window, time,
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
-                logger, logger, logger, queue);
+                logger, logger,  queue);
         service = new SbkGrpcService(params.getStorageName(), params.getAction(), time, logger.getMinLatency(),
                 logger.getMaxLatency(), logger, queue);
         server = ServerBuilder.forPort(serverConfig.port).addService(service).build();

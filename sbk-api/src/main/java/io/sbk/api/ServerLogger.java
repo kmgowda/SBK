@@ -10,5 +10,5 @@
 
 package io.sbk.api;
 
-public interface ServerLogger extends Logger, ConnectionsCount {
+public interface ServerLogger extends PerformanceLogger, ConnectionsCount {
 }
