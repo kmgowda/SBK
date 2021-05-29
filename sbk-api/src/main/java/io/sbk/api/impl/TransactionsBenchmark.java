@@ -14,6 +14,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.api.TransactionRecord;
 import io.sbk.api.RWCount;
 import io.sbk.perl.Print;
+import io.sbk.perl.ReportLatenciesWindow;
 import io.sbk.perl.Time;
 import io.sbk.perl.impl.LatencyWindow;
 import io.sbk.system.Printer;
@@ -33,6 +34,7 @@ public class TransactionsBenchmark implements Benchmark {
     private final LatencyWindow window;
     private final RWCount rwCount;
     private final Print logger;
+    private final ReportLatenciesWindow reportLatencies;
     private final LinkedBlockingQueue<TransactionRecord> queue;
 
     @GuardedBy("this")
@@ -41,13 +43,15 @@ public class TransactionsBenchmark implements Benchmark {
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
 
-    public TransactionsBenchmark(LatencyWindow window, Time time, int reportingIntervalMS,
-                                 RWCount rwCount, Print logger, LinkedBlockingQueue<TransactionRecord> queue) {
+    public TransactionsBenchmark(LatencyWindow window, Time time, int reportingIntervalMS, RWCount rwCount,
+                                 Print logger, ReportLatenciesWindow reportLatencies,
+                                 LinkedBlockingQueue<TransactionRecord> queue) {
         this.window = window;
         this.time = time;
         this.reportingIntervalMS = reportingIntervalMS;
         this.rwCount = rwCount;
         this.logger = logger;
+        this.reportLatencies = reportLatencies;
         this.queue = queue;
         this.retFuture = null;
         this.qFuture = null;
@@ -84,7 +88,9 @@ public class TransactionsBenchmark implements Benchmark {
             }
             endTime = time.getCurrentTime();
             if (window.elapsedMilliSeconds(endTime) > reportingIntervalMS) {
-                window.print(endTime, logger, null);
+                reportLatencies.openWindow();
+                window.print(endTime, logger, reportLatencies);
+                reportLatencies.closeWindow();
                 window.reset(endTime);
                 rwCount.setWriters(writers);
                 rwCount.setMaxWriters(maxWriters);
@@ -95,7 +101,9 @@ public class TransactionsBenchmark implements Benchmark {
         }
 
         if (window.totalRecords > 0) {
-            window.print(time.getCurrentTime(), logger, null);
+            reportLatencies.openWindow();
+            window.print(time.getCurrentTime(), logger, reportLatencies);
+            reportLatencies.closeWindow();
         }
     }
 

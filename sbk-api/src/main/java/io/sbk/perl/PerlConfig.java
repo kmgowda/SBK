@@ -39,6 +39,7 @@ public class PerlConfig {
     final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
     public TimeUnit timeUnit;
+    public boolean fork;
     public int qPerWorker;
     public int idleNS;
     public int maxQs;

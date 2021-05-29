@@ -76,7 +76,7 @@ public class SbkBenchmark implements Benchmark {
      *
      * @param  storageName          Storage Name
      * @param  action               Action
-     * @param  perlConfig               Configuration parameters
+     * @param  perlConfig           Configuration parameters
      * @param  params               Benchmarking input Parameters
      * @param  storage              Storage device/client/driver for benchmarking
      * @param  dType                Data Type.
@@ -109,7 +109,7 @@ public class SbkBenchmark implements Benchmark {
         }
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 20;
-        if (Config.USE_FORK) {
+        if (perlConfig.fork) {
             executor = new ForkJoinPool(threadCount);
         } else {
             executor = Executors.newFixedThreadPool(threadCount);
@@ -262,14 +262,9 @@ public class SbkBenchmark implements Benchmark {
                             CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
                                     i + j + 1 == params.getWritersCount() ?
                                     recordsPerWriter + delta : recordsPerWriter);
-                            ret.exceptionally(ex -> {
+                            writeFutures.add(ret.whenComplete((d, ex)-> {
                                 logger.decrementWriters(1);
-                                return null;
-                            });
-                            ret.thenAccept(d -> {
-                                logger.decrementWriters(1);
-                            });
-                            writeFutures.add(ret);
+                            }));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -322,14 +317,9 @@ public class SbkBenchmark implements Benchmark {
                         try {
                             CompletableFuture<Void> ret = sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
                                     recordsPerReader + delta : recordsPerReader);
-                            ret.exceptionally(ex -> {
+                            readFutures.add(ret.whenComplete((d, ex) -> {
                                 logger.decrementReaders(1);
-                                return null;
-                            });
-                            ret.thenAccept(d -> {
-                                logger.decrementReaders(1);
-                            });
-                            readFutures.add(ret);
+                            }));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
