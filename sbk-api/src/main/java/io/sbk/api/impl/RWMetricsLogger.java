@@ -52,6 +52,7 @@ public class RWMetricsLogger extends MetricsLogger implements RWCount {
 
     public void setWriters(int val) {
         writers.set(val);
+        maxWriters.set(Math.max(writers.get(), maxWriters.get()));
     }
 
     public void setMaxWriters(int val) {
@@ -69,6 +70,7 @@ public class RWMetricsLogger extends MetricsLogger implements RWCount {
 
     public void setReaders(int val) {
         readers.set(val);
+        maxReaders.set(Math.max(readers.get(), maxReaders.get()));
     }
 
     public void setMaxReaders(int val) {

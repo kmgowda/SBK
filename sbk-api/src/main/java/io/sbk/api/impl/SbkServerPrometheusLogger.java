@@ -16,6 +16,7 @@ import io.sbk.api.InputOptions;
 import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -23,7 +24,11 @@ import java.io.IOException;
  */
 public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements ServerLogger {
     final static String CONFIG_FILE = "server-metrics.properties";
+    final static String SERVER_PREFIX = "SbkServer";
+    private AtomicInteger connections;
+    private AtomicInteger maxConnections;
     private ConnectionsRWMetricsPrometheusServer prometheusServer;
+
 
     public SbkServerPrometheusLogger() {
         super();
@@ -48,6 +53,8 @@ public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements Se
     @Override
     public void open(final InputOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
+        this.connections = new AtomicInteger(0);
+        this.maxConnections = new AtomicInteger(0);
         Printer.log.info("SBK Connections PrometheusLogger Started");
     }
 
@@ -55,21 +62,54 @@ public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements Se
     @Override
     public void incrementConnections(int val) {
         prometheusServer.incrementConnections(val);
+        connections.set(connections.get() + val);
+        maxConnections.set(maxConnections.get() + val);
     }
 
     @Override
     public void decrementConnections(int val) {
         prometheusServer.decrementConnections(val);
+        connections.set(connections.get()-val);
     }
 
     @Override
     public void setConnections(int val) {
         prometheusServer.decrementConnections(val);
+        connections.set(val);
+        maxConnections.set(Math.max(connections.get(), maxConnections.get()));
     }
 
     @Override
     public void setMaxConnections(int val) {
         prometheusServer.setMaxConnections(val);
+        maxConnections.set(val);
     }
+
+
+    private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+                       double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                       long[] percentileValues) {
+        StringBuilder out = new StringBuilder(SERVER_PREFIX);
+        out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
+        out.append(prefix);
+        System.out.print(buildResultString(out, bytes, records, recsPerSec, mbPerSec, avgLatency,
+                maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
+    }
+
+
+    @Override
+    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, percentileValues);
+    }
+
+    @Override
+    public void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                           long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentilesValues) {
+        print("Total : " + prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, percentilesValues);
+    }
+
 
 }

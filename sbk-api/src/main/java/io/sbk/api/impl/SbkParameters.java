@@ -13,11 +13,6 @@ import io.sbk.perl.PerlConfig;
 import io.sbk.api.ParameterOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
 import java.util.List;
@@ -26,11 +21,7 @@ import java.util.List;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-final public class SbkParameters implements ParameterOptions {
-    final private String benchmarkName;
-    final private Options options;
-    final private HelpFormatter formatter;
-    final private CommandLineParser parser;
+final public class SbkParameters extends SbkOptions implements ParameterOptions {
     final private List<String> driversList;
 
     @Getter
@@ -73,130 +64,83 @@ final public class SbkParameters implements ParameterOptions {
     private boolean writeAndRead;
 
     private double throughput;
-    private CommandLine commandline;
 
     public SbkParameters(String name, List<String> driversList) {
-        this.options = new Options();
-        this.formatter = new HelpFormatter();
-        this.parser = new DefaultParser();
-        this.benchmarkName = name;
+        super(name);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
         this.driversList = driversList;
-        this.commandline = null;
 
         if (this.driversList != null) {
-            options.addOption("class", true, "Storage Driver Class,\n Available Drivers "
+            addOption("class", true, "Storage Driver Class,\n Available Drivers "
                     + this.driversList.toString());
         }
-        options.addOption("writers", true, "Number of writers");
-        options.addOption("readers", true, "Number of readers");
-        options.addOption("size", true, "Size of each message (event or record)");
-        options.addOption("records", true,
+        addOption("writers", true, "Number of writers");
+        addOption("readers", true, "Number of readers");
+        addOption("size", true, "Size of each message (event or record)");
+        addOption("records", true,
                 "Number of records(events) if 'seconds' not specified;\n" +
                         "otherwise, Maximum records per second by writer(s) " +
                         "and/or Number of records per reader");
-        options.addOption("sync", true,
+        addOption("sync", true,
                 "Each Writer calls flush/sync after writing <arg> number of of events(records)" +
                         " ; <arg> number of events(records) per Write or Read Transaction");
-        options.addOption("seconds", true, "Number of seconds to run; if not specified, runs forever");
-        options.addOption("throughput", true,
+        addOption("seconds", true, "Number of seconds to run; if not specified, runs forever");
+        addOption("throughput", true,
                 "if > 0 , throughput in MB/s\n" +
                         "if 0 , writes/reads 'records'\n" +
                         "if -1, get the maximum throughput (default: -1)");
-        options.addOption("wstep", true,
+        addOption("wstep", true,
                 "Number of writers/step, default: 1");
-        options.addOption("wsec", true,
+        addOption("wsec", true,
                 "Number of seconds/step for writers, default: 0");
-        options.addOption("rstep", true,
+        addOption("rstep", true,
                 "Number of readers/step, default: 1");
-        options.addOption("rsec", true,
+        addOption("rsec", true,
                 "Number of seconds/step for readers, default: 0");
-        options.addOption("help", false, "Help message");
+        addOption("help", false, "Help message");
     }
 
-    @Override
-    public Options addOption(String name, boolean hasArg, String description) {
-        return options.addOption(name, hasArg, description);
-    }
-
-    @Override
-    public Options addOption(String name, String description) {
-        return options.addOption(name, description);
-    }
-
-    @Override
-    public void printHelp() {
-        formatter.printHelp(benchmarkName, options);
-    }
-
-    @Override
-    public boolean hasOption(String name) {
-        if (commandline != null) {
-            return commandline.hasOption(name);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public String getOptionValue(String name) {
-        if (commandline != null) {
-            return commandline.getOptionValue(name);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getOptionValue(String name, String defaultValue) {
-        if (commandline != null) {
-            return commandline.getOptionValue(name, defaultValue);
-        } else {
-            return defaultValue;
-        }
-    }
 
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
-        commandline = parser.parse(options, args);
-        if (commandline.hasOption("help")) {
-            printHelp();
+        super.parseArgs(args);
+        if (hasOption("help")) {
             return;
         }
-        writersCount = Integer.parseInt(commandline.getOptionValue("writers", "0"));
-        readersCount = Integer.parseInt(commandline.getOptionValue("readers", "0"));
+        writersCount = Integer.parseInt(getOptionValue("writers", "0"));
+        readersCount = Integer.parseInt(getOptionValue("readers", "0"));
 
         if (writersCount == 0 && readersCount == 0) {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");
         }
 
-        totalRecords = Long.parseLong(commandline.getOptionValue("records", "0"));
-        recordSize = Integer.parseInt(commandline.getOptionValue("size", "0"));
-        int syncRecords = Integer.parseInt(commandline.getOptionValue("sync", "0"));
+        totalRecords = Long.parseLong(getOptionValue("records", "0"));
+        recordSize = Integer.parseInt(getOptionValue("size", "0"));
+        int syncRecords = Integer.parseInt(getOptionValue("sync", "0"));
         if (syncRecords > 0) {
             recordsPerSync = syncRecords;
         } else {
             recordsPerSync = Integer.MAX_VALUE;
         }
 
-        if (commandline.hasOption("seconds")) {
-            totalSecondsToRun = Long.parseLong(commandline.getOptionValue("seconds"));
+        if (hasOption("seconds")) {
+            totalSecondsToRun = Long.parseLong(getOptionValue("seconds"));
         } else if (totalRecords > 0) {
             totalSecondsToRun = 0;
         } else {
             totalSecondsToRun = PerlConfig.DEFAULT_RUNTIME_SECONDS;
         }
 
-        if (commandline.hasOption("throughput")) {
-            throughput = Double.parseDouble(commandline.getOptionValue("throughput"));
+        if (hasOption("throughput")) {
+            throughput = Double.parseDouble(getOptionValue("throughput"));
         } else {
             throughput = -1;
         }
 
-        writersStep = Integer.parseInt(commandline.getOptionValue("wstep", "1"));
-        writersStepSeconds = Integer.parseInt(commandline.getOptionValue("wsec", "0"));
-        readersStep = Integer.parseInt(commandline.getOptionValue("rstep", "1"));
-        readersStepSeconds = Integer.parseInt(commandline.getOptionValue("rsec", "0"));
+        writersStep = Integer.parseInt(getOptionValue("wstep", "1"));
+        writersStepSeconds = Integer.parseInt(getOptionValue("wsec", "0"));
+        readersStep = Integer.parseInt(getOptionValue("rstep", "1"));
+        readersStepSeconds = Integer.parseInt(getOptionValue("rsec", "0"));
 
         int workersCnt = writersCount;
         if (workersCnt == 0) {

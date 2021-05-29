@@ -42,6 +42,7 @@ public class ConnectionsRWMetricsPrometheusServer extends RWMetricsPrometheusSer
     @Override
     public void setConnections(int val) {
         connections.set(val);
+        maxConnections.set(Math.max(connections.get(), maxConnections.get()));
     }
 
     @Override
