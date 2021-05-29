@@ -297,3 +297,17 @@ task buildJar(type: Jar) {
 }
 
 
+task SbkServer(type: CreateStartScripts) {
+	mainClassName = 'io.sbk.main.SbkServerMain'
+	applicationName = 'sbkserver'
+	outputDir = startScripts.outputDir
+	classpath = startScripts.classpath
+}
+
+applicationDistribution.into("bin") {
+	duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+	from(SbkServer)
+	fileMode = 0755
+}
+
+

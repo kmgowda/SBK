@@ -39,7 +39,7 @@ import java.util.concurrent.TimeoutException;
 public class SbkServer {
     final static String CONFIG_FILE = "server.properties";
     final static String BANNER_FILE = "server-banner.txt";
-    final static String APP_NAME = "SbkServer";
+    final static String APP_NAME = "sbkserver";
 
 
     /**
