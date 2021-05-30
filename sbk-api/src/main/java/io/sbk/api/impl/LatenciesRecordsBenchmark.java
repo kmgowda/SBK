@@ -131,7 +131,7 @@ public class LatenciesRecordsBenchmark implements Benchmark {
         table.forEach((k, data) -> {
             ret.readers += data.readers;
             ret.writers += data.writers;
-            ret.maxReaders += data.maxWriters;
+            ret.maxReaders += data.maxReaders;
             ret.maxWriters += data.maxWriters;
         });
         table.clear();
