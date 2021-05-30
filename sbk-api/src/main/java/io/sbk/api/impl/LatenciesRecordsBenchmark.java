@@ -11,7 +11,6 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.api.RW;
 import io.sbk.api.RWCount;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Print;
@@ -75,49 +74,72 @@ public class LatenciesRecordsBenchmark implements Benchmark {
                 if (record.getSequenceNumber() > 0) {
                     addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                             record.getMaxReaders(), record.getMaxWriters());
-                    latencyRecord.maxLatency = record.getMaxLatency();
-                    latencyRecord.totalRecords = record.getTotalRecords();
-                    latencyRecord.totalBytes = record.getTotalBytes();
-                    latencyRecord.totalLatency = record.getTotalLatency();
-                    latencyRecord.higherLatencyDiscardRecords = record.getHigherLatencyDiscardRecords();
-                    latencyRecord.lowerLatencyDiscardRecords = record.getLowerLatencyDiscardRecords();
-                    latencyRecord.validLatencyRecords = record.getValidLatencyRecords();
-                    latencyRecord.invalidLatencyRecords = record.getInvalidLatencyRecords();
-                    window.reportLatencyRecord(latencyRecord);
-                    reportLatencies.reportLatencyRecord(latencyRecord);
-                    record.getLatencyMap().forEach((k, v) -> {
-                        window.reportLatency(k, v);
-                        reportLatencies.reportLatency(k, v);
-                    });
+                    window.maxLatency = Math.max(record.getMaxLatency(), window.maxLatency);
+                    window.totalRecords += record.getTotalRecords();
+                    window.totalBytes += record.getTotalBytes();
+                    window.totalLatency += record.getTotalLatency();
+                    window.higherLatencyDiscardRecords += record.getHigherLatencyDiscardRecords();
+                    window.lowerLatencyDiscardRecords += record.getLowerLatencyDiscardRecords();
+                    window.validLatencyRecords += record.getValidLatencyRecords();
+                    window.invalidLatencyRecords += record.getInvalidLatencyRecords();
+                    record.getLatencyMap().forEach(window::reportLatency);
                 } else {
                     doWork = false;
                 }
             }
             currentTime = time.getCurrentTime();
             if (window.elapsedMilliSeconds(currentTime) > reportingIntervalMS) {
-                window.print(currentTime, logger, null);
-                rwStore.update(sumRW());
+                sumRW(rwStore);
                 rwCount.setReaders(rwStore.readers);
                 rwCount.setWriters(rwStore.writers);
                 rwCount.setMaxReaders(rwStore.maxReaders);
                 rwCount.setMaxWriters(rwStore.maxWriters);
+                window.print(currentTime, logger, reportLatencies);
                 window.reset(currentTime);
-                rwStore.resetRW();
             }
         }
 
         if (window.totalRecords > 0) {
-            window.print(time.getCurrentTime(), logger, null);
-            rwStore.update(sumRW());
+            sumRW(rwStore);
             rwCount.setReaders(rwStore.readers);
             rwCount.setWriters(rwStore.writers);
             rwCount.setMaxReaders(rwStore.maxReaders);
             rwCount.setMaxWriters(rwStore.maxWriters);
+            window.print(time.getCurrentTime(), logger, reportLatencies);
         }
     }
 
 
-    public void addRW(long key, int readers, int writers, int maxReaders, int maxWriters) {
+    private static class RW {
+        public int readers;
+        public int writers;
+        public int maxReaders;
+        public int maxWriters;
+
+        public RW() {
+            reset();
+        }
+
+        public void reset() {
+            readers = writers = maxWriters = maxReaders = 0;
+        }
+
+
+        public void update(int readers, int writers, int maxReaders, int maxWriters) {
+            this.readers = Math.max(this.readers, readers);
+            this.writers = Math.max(this.writers, writers);
+            this.maxReaders = Math.max(this.maxReaders, maxReaders);
+            this.maxWriters = Math.max(this.maxWriters, maxWriters);
+        }
+
+        public void update(RW rw) {
+            update(rw.readers, rw.writers, rw.maxReaders, rw.maxWriters);
+        }
+    }
+
+
+
+    private void addRW(long key, int readers, int writers, int maxReaders, int maxWriters) {
         RW cur = table.get(key);
         if (cur == null) {
             cur = new RW();
@@ -126,8 +148,8 @@ public class LatenciesRecordsBenchmark implements Benchmark {
         cur.update(readers, writers, maxReaders, maxWriters);
     }
 
-    public RW sumRW() {
-        final RW ret = new RW();
+    private void sumRW(RW ret) {
+        ret.reset();
         table.forEach((k, data) -> {
             ret.readers += data.readers;
             ret.writers += data.writers;
@@ -135,7 +157,6 @@ public class LatenciesRecordsBenchmark implements Benchmark {
             ret.maxWriters += data.maxWriters;
         });
         table.clear();
-        return ret;
     }
 
 
