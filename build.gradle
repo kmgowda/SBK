@@ -297,6 +297,7 @@ task buildJar(type: Jar) {
 }
 
 
+/*
 task SbkServer(type: CreateStartScripts) {
 	mainClassName = 'io.sbk.main.SbkServerMain'
 	applicationName = 'sbkserver'
@@ -309,5 +310,5 @@ applicationDistribution.into("bin") {
 	from(SbkServer)
 	fileMode = 0755
 }
-
+*/
 
