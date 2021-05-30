@@ -42,9 +42,11 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     private int clientID;
     private long seqNum;
     private int  latencyBytes;
+    private boolean blocking;
     private LatencyRecorder recorder;
     private ManagedChannel channel;
     private ServiceGrpc.ServiceStub stub;
+    private ServiceGrpc.ServiceBlockingStub blockingStub;
     private LatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
 
@@ -89,6 +91,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
                 "; default host: " + serverConfig.host +" ; disable if this parameter is set to: " +DISABLE_STRING);
         params.addOption("sbkport", true, "SBK Server Port" +
                 "; default port: " + serverConfig.port );
+        params.addOption("blocking", true, "blocking calls to SBK Server; default: false");
     }
 
 
@@ -96,8 +99,12 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         serverConfig.host = params.getOptionValue("sbkserver", serverConfig.host );
-        serverConfig.port = Integer.parseInt(params.getOptionValue("sbkport", Integer.toString(serverConfig.port)));
         enable = !serverConfig.host.equalsIgnoreCase("no");
+        if (!enable) {
+            return;
+        }
+        serverConfig.port = Integer.parseInt(params.getOptionValue("sbkport", Integer.toString(serverConfig.port)));
+        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
     }
 
 
@@ -108,7 +115,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             return;
         }
         channel = ManagedChannelBuilder.forTarget(serverConfig.host+":"+serverConfig.port).usePlaintext().build();
-        final ServiceGrpc.ServiceBlockingStub blockingStub = ServiceGrpc.newBlockingStub(channel);
+        blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
         try {
             config = blockingStub.getConfig(Empty.newBuilder().build());
@@ -148,13 +155,19 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
-        stub = ServiceGrpc.newStub(channel);
+
         seqNum = 0;
         latencyBytes = 0;
         recorder = new LatencyRecorder(getMinLatency(), getMaxLatency(), PerlConfig.LONG_MAX,
                 PerlConfig.LONG_MAX, PerlConfig.LONG_MAX);
         builder = LatenciesRecord.newBuilder();
-        observer = new ResponseObserver<>();
+        if (blocking) {
+          stub = null;
+          observer = null;
+        } else {
+            stub = ServiceGrpc.newStub(channel);
+            observer = new ResponseObserver<>();
+        }
         Printer.log.info("SBK GRPC Logger Started");
     }
 
@@ -166,7 +179,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         }
         try {
             builder.clear();
-            stub.closeClient(ClientID.newBuilder().setId(clientID).build(), observer);
+            blockingStub.closeClient(ClientID.newBuilder().setId(clientID).build());
             channel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
@@ -189,7 +202,13 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         builder.setHigherLatencyDiscardRecords(recorder.higherLatencyDiscardRecords);
         builder.setLowerLatencyDiscardRecords(recorder.lowerLatencyDiscardRecords);
         builder.setValidLatencyRecords(recorder.validLatencyRecords);
-        stub.addLatenciesRecord(builder.build(), observer);
+
+        if (stub != null) {
+            stub.addLatenciesRecord(builder.build(), observer);
+        } else {
+            blockingStub.addLatenciesRecord(builder.build());
+        }
+
         recorder.reset();
         builder.clear();
         latencyBytes = 0;
