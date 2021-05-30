@@ -20,7 +20,7 @@ public interface Logger extends PerformanceLogger, ReportLatency {
      * Default record every latency.
      */
     @Override
-    default void recordLatency(long startTime, long bytes, long events, long latency) {
+    default void recordLatency(long startTime, int bytes, int events, long latency) {
 
     }
 

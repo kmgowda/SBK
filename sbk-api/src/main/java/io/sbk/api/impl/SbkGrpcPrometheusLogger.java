@@ -200,7 +200,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
      *  record every latency.
      */
     @Override
-    public void recordLatency(long startTime, long bytes, long events, long latency) {
+    public void recordLatency(long startTime, int bytes, int events, long latency) {
         if (!enable) {
             return;
         }
