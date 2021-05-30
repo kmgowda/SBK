@@ -11,6 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
+import io.sbk.api.RW;
 import io.sbk.api.RWCount;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Print;
@@ -22,6 +23,7 @@ import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,6 +38,7 @@ public class LatenciesRecordsBenchmark implements Benchmark {
     private final RWCount rwCount;
     private final Print logger;
     private final LinkedBlockingQueue<LatenciesRecord> queue;
+    private final HashMap<Long, RW> table;
 
     @GuardedBy("this")
     private CompletableFuture<Void> retFuture;
@@ -53,6 +56,7 @@ public class LatenciesRecordsBenchmark implements Benchmark {
         this.rwCount = rwCount;
         this.logger = logger;
         this.queue = queue;
+        this.table = new HashMap<>();
         this.retFuture = null;
         this.qFuture = null;
     }
@@ -60,22 +64,17 @@ public class LatenciesRecordsBenchmark implements Benchmark {
     void run() throws InterruptedException {
         LatenciesRecord record;
         boolean doWork = true;
-        int writers = 0;
-        int maxWriters = 0;
-        int readers = 0;
-        int maxReaders = 0;
         Printer.log.info("LatenciesRecord Benchmark Started" );
         long currentTime = time.getCurrentTime();
         window.reset(currentTime);
         final LatencyRecord latencyRecord = new LatencyRecord();
+        final RW rwStore = new RW();
         while (doWork) {
             record = queue.poll(reportingIntervalMS, TimeUnit.MILLISECONDS);
             if (record != null) {
                 if (record.getSequenceNumber() > 0) {
-                    writers += record.getWriters();
-                    readers += record.getReaders();
-                    maxWriters += record.getMaxWriters();
-                    maxReaders += record.getMaxReaders();
+                    addRW(record.getClientID(), record.getReaders(), record.getWriters(),
+                            record.getMaxReaders(), record.getMaxWriters());
                     latencyRecord.maxLatency = record.getMaxLatency();
                     latencyRecord.totalRecords = record.getTotalRecords();
                     latencyRecord.totalBytes = record.getTotalBytes();
@@ -97,21 +96,47 @@ public class LatenciesRecordsBenchmark implements Benchmark {
             currentTime = time.getCurrentTime();
             if (window.elapsedMilliSeconds(currentTime) > reportingIntervalMS) {
                 window.print(currentTime, logger, null);
+                rwStore.update(sumRW());
+                rwCount.setReaders(rwStore.readers);
+                rwCount.setWriters(rwStore.writers);
+                rwCount.setMaxReaders(rwStore.maxReaders);
+                rwCount.setMaxWriters(rwStore.maxWriters);
                 window.reset(currentTime);
-                rwCount.setWriters(writers);
-                rwCount.setMaxWriters(maxWriters);
-                rwCount.setReaders(readers);
-                rwCount.setMaxReaders(maxReaders);
-                writers = maxWriters = readers = maxReaders = 0;
+                rwStore.resetRW();
             }
         }
 
         if (window.totalRecords > 0) {
             window.print(time.getCurrentTime(), logger, null);
+            rwStore.update(sumRW());
+            rwCount.setReaders(rwStore.readers);
+            rwCount.setWriters(rwStore.writers);
+            rwCount.setMaxReaders(rwStore.maxReaders);
+            rwCount.setMaxWriters(rwStore.maxWriters);
         }
     }
 
 
+    public void addRW(long key, int readers, int writers, int maxReaders, int maxWriters) {
+        RW cur = table.get(key);
+        if (cur == null) {
+            cur = new RW();
+            table.put(key, cur);
+        }
+        cur.update(readers, writers, maxReaders, maxWriters);
+    }
+
+    public RW sumRW() {
+        final RW ret = new RW();
+        table.forEach((k, data) -> {
+            ret.readers += data.readers;
+            ret.writers += data.writers;
+            ret.maxReaders += data.maxWriters;
+            ret.maxWriters += data.maxWriters;
+        });
+        table.clear();
+        return ret;
+    }
 
 
     @Synchronized
