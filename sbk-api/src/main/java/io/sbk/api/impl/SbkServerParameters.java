@@ -31,11 +31,12 @@ final public class SbkServerParameters extends SbkOptions implements ServerParam
     @Getter
     private int maxConnections;
 
-    public SbkServerParameters(String name) {
+    public SbkServerParameters(String name, int maxConnections) {
         super(name);
-        addOption("class", true, "Storage class name; run sbk -help to see the list");
-        addOption("action", true, "action [r: read, w: write, wr: write and read]; Default: r");
-        addOption("max", true, "Maximum number of connections");
+        this.maxConnections = maxConnections;
+        addOption("class", true, "storage class name; run 'sbk -help' to see the list");
+        addOption("action", true, "action [r: read, w: write, wr: write and read]; default: r");
+        addOption("max", true, "Maximum number of connections; default: "+maxConnections);
     }
 
 
@@ -62,7 +63,7 @@ final public class SbkServerParameters extends SbkOptions implements ServerParam
             action = Action.Reading;
         }
 
-        maxConnections = Integer.parseInt(getOptionValue("max", "1000"));
+        maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
 
     }
 

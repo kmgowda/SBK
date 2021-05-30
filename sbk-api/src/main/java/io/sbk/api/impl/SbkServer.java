@@ -162,7 +162,7 @@ public class SbkServer {
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkServerPrometheusLogger::new);
 
-        params = new SbkServerParameters(appName);
+        params = new SbkServerParameters(appName, serverConfig.maxConnections);
         logger.addArgs(params);
         params.parseArgs(args);
         if (params.hasOption("help")) {

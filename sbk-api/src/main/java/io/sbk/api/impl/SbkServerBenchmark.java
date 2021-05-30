@@ -77,8 +77,7 @@ public class SbkServerBenchmark implements Benchmark {
         benchmark = new LatenciesRecordsBenchmark(window, time,
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
                 logger, logger, logger, queue);
-        service = new SbkGrpcService(params.getStorageName(), params.getAction(), time, logger.getMinLatency(),
-                logger.getMaxLatency(), logger, queue);
+        service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, queue);
         server = ServerBuilder.forPort(serverConfig.port).addService(service).build();
         retFuture = null;
     }

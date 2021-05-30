@@ -11,8 +11,9 @@
 package io.sbk.api.impl;
 
 import com.google.protobuf.Empty;
-import io.sbk.api.Action;
+import io.grpc.Status;
 import io.sbk.api.ConnectionsCount;
+import io.sbk.api.ServerParameters;
 import io.sbk.perl.Time;
 
 import java.security.InvalidKeyException;
@@ -21,32 +22,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger clientID;
+    private final AtomicInteger connections;
     private final Config config;
     private final ConnectionsCount connectionsCount;
     private final Queue<LatenciesRecord> outQueue;
+    private final ServerParameters params;
 
 
-    public SbkGrpcService(String storageName, Action action, Time time, long minLatency, long maxLatency,
+    public SbkGrpcService(ServerParameters params, Time time, long minLatency, long maxLatency,
                           ConnectionsCount connectionsCount, Queue<LatenciesRecord> outQueue) {
         super();
         clientID = new AtomicInteger(0);
+        connections = new AtomicInteger(0);
         Config.Builder builder = Config.newBuilder();
-        builder.setStorageName(storageName);
-        builder.setActionValue(action.ordinal());
+        builder.setStorageName(params.getStorageName());
+        builder.setActionValue(params.getAction().ordinal());
         builder.setTimeUnitValue(time.getTimeUnit().ordinal());
         builder.setMaxLatency(maxLatency);
         builder.setMinLatency(minLatency);
         config = builder.build();
+        this.params = params;
         this.connectionsCount = connectionsCount;
         this.outQueue = outQueue;
-
     }
 
     @Override
     public void getConfig(com.google.protobuf.Empty request,
                           io.grpc.stub.StreamObserver<io.sbk.api.impl.Config> responseObserver) {
-        responseObserver.onNext(config);
-        responseObserver.onCompleted();
+        if (connections.get() < params.getMaxConnections()) {
+            responseObserver.onNext(config);
+            responseObserver.onCompleted();
+        } else {
+            Status retError = Status.RESOURCE_EXHAUSTED.withDescription("SBK GRPC Server, Maximum clients Exceeded");
+            responseObserver.onError(retError.asRuntimeException());
+        }
     }
 
     @Override
@@ -55,6 +64,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
         responseObserver.onNext(ClientID.newBuilder().setId(clientID.incrementAndGet()).build());
         responseObserver.onCompleted();
         connectionsCount.incrementConnections(1);
+        connections.incrementAndGet();
     }
 
 
@@ -80,6 +90,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     public void closeClient(io.sbk.api.impl.ClientID request,
                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         connectionsCount.decrementConnections(1);
+        connections.decrementAndGet();
         if (responseObserver != null) {
             responseObserver.onNext(Empty.newBuilder().build());
             responseObserver.onCompleted();

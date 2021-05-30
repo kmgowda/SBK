@@ -13,7 +13,7 @@ package io.sbk.api;
 public class ServerConfig {
     public String host;
     public int port;
-    public boolean fork;
+    public int maxConnections;
     public int maxArraySizeMB;
     public int maxHashMapSizeMB;
     public boolean csv;
