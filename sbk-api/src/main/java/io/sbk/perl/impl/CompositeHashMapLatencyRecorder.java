@@ -10,7 +10,7 @@
 
 package io.sbk.perl.impl;
 
-import io.sbk.perl.LatencyRecord;
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatency;
 import io.sbk.system.Printer;
 import io.sbk.perl.ReportLatencies;
@@ -26,12 +26,12 @@ import javax.annotation.concurrent.NotThreadSafe;
  */
 @NotThreadSafe
 public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements ReportLatencies, PeriodicRecorder {
-    final public LatencyWindow window;
+    final public LatencyRecordWindow window;
     final public Print windowLogger;
     final public Print loggerTotal;
     final public ReportLatency reportLatency;
 
-    public CompositeHashMapLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger,
+    public CompositeHashMapLatencyRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
                                            Print loggerTotal, ReportLatency reportLatency) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
                 window.totalRecordsMax, window.totalBytesMax, window.percentileFractions, window.time, maxHashMapSizeMB);
@@ -82,7 +82,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
     public void record(long startTime, long endTime, int bytes, int events) {
         final long latency = time.elapsed(endTime, startTime);
         reportLatency.recordLatency(startTime, bytes, events, latency);
-        window.record(startTime, bytes, events, latency);
+        window.recordLatency(startTime, bytes, events, latency);
         if (window.isOverflow()) {
             window.print(startTime, windowLogger, this);
             window.reset(startTime);
@@ -92,22 +92,6 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
             }
         }
     }
-
-    @Override
-    public void reportLatencyRecord(LatencyRecord record) {
-        super.updateRecord(record);
-    }
-
-    @Override
-    public void reportLatency(long latency, long count) {
-        Long val = latencies.get(latency);
-        if (val == null) {
-            val = 0L;
-            hashMapBytesCount += incBytes;
-        }
-        latencies.put(latency, val + count);
-    }
-
 
     /**
      * print the periodic Latency Results.

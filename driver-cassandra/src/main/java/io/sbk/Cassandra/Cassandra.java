@@ -19,7 +19,6 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.impl.StringHandler;
-import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -39,7 +38,6 @@ public class Cassandra implements Storage<String>  {
             config = mapper.readValue(
                     Objects.requireNonNull(Cassandra.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     CassandraConfig.class);
-            Printer.log.info("KMG.. read the config value");
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);

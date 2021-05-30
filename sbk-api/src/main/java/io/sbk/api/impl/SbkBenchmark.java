@@ -26,7 +26,7 @@ import io.sbk.perl.impl.ArrayLatencyRecorder;
 import io.sbk.perl.impl.CompositeCSVLatencyRecorder;
 import io.sbk.perl.impl.CompositeHashMapLatencyRecorder;
 import io.sbk.perl.impl.HashMapLatencyRecorder;
-import io.sbk.perl.impl.LatencyWindow;
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.impl.CQueuePerformance;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
@@ -135,7 +135,7 @@ public class SbkBenchmark implements Benchmark {
     private PeriodicRecorder createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
-        final LatencyWindow window;
+        final LatencyRecordWindow window;
         final PeriodicRecorder latencyRecorder;
 
         if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {

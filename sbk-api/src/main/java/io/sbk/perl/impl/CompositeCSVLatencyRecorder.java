@@ -10,6 +10,7 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatency;
 import io.sbk.system.Printer;
@@ -30,7 +31,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
     final private String csvFile;
     private CSVPrinter csvPrinter;
 
-    public CompositeCSVLatencyRecorder(LatencyWindow window, int maxHashMapSizeMB, Print logger,
+    public CompositeCSVLatencyRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
                                        Print loggerTotal, ReportLatency reportLatency, String fileName) {
         super(window, maxHashMapSizeMB, logger, loggerTotal, reportLatency);
         csvFile = fileName;
@@ -46,7 +47,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      * @param events number of events (records)
      */
     public void record(long startTime, long endTime, int bytes, int events) {
-        window.record(startTime, bytes, events, time.elapsed(endTime, startTime));
+        window.recordLatency(startTime, bytes, events, time.elapsed(endTime, startTime));
         if (window.isOverflow()) {
             window.print(startTime, windowLogger, this);
             window.reset(startTime);

@@ -7,24 +7,16 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl.impl;
 
-import io.sbk.perl.ReportLatencies;
-import io.sbk.perl.PerlConfig;
-import io.sbk.perl.LatencyRecorder;
-import io.sbk.perl.Print;
-import io.sbk.perl.Time;
-import javax.annotation.concurrent.NotThreadSafe;
+package io.sbk.perl;
 
-
-@NotThreadSafe
-public abstract class LatencyWindow extends LatencyRecorder {
+abstract public class LatencyWindow extends LatencyRecorder {
     final public double[] percentileFractions;
     final public Time time;
     public long startTime;
 
-    LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
-                  double[] percentilesFractions, Time time) {
+    public LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
+                        double[] percentilesFractions, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
         this.percentileFractions = percentilesFractions;
         this.time = time;
@@ -71,15 +63,6 @@ public abstract class LatencyWindow extends LatencyRecorder {
                 pecs);
     }
 
-    /**
-     * Record the latency.
-     *
-     * @param startTime start time.
-     * @param bytes number of bytes.
-     * @param events number of events(records).
-     * @param latency latency value in milliseconds.
-     */
-    abstract public void record(long startTime, long bytes, long events, long latency);
 
     /**
      * get the Percentiles.

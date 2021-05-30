@@ -12,9 +12,11 @@ package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
 import io.sbk.api.RWCount;
+import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Print;
+import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.Time;
-import io.sbk.perl.impl.LatencyWindow;
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 
@@ -29,7 +31,8 @@ import java.util.concurrent.TimeUnit;
 public class LatenciesRecordsBenchmark implements Benchmark {
     private final Time time;
     private final int reportingIntervalMS;
-    private final LatencyWindow window;
+    private final LatencyRecordWindow window;
+    private final ReportLatencies reportLatencies;
     private final RWCount rwCount;
     private final Print logger;
     private final LinkedBlockingQueue<LatenciesRecord> queue;
@@ -40,11 +43,13 @@ public class LatenciesRecordsBenchmark implements Benchmark {
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
 
-    public LatenciesRecordsBenchmark(LatencyWindow window, Time time, int reportingIntervalMS, RWCount rwCount,
-                                     Print logger, LinkedBlockingQueue<LatenciesRecord> queue) {
+    public LatenciesRecordsBenchmark(LatencyRecordWindow window, Time time, int reportingIntervalMS,
+                                     ReportLatencies reportLatencies,  RWCount rwCount, Print logger,
+                                     LinkedBlockingQueue<LatenciesRecord> queue) {
         this.window = window;
         this.time = time;
         this.reportingIntervalMS = reportingIntervalMS;
+        this.reportLatencies = reportLatencies;
         this.rwCount = rwCount;
         this.logger = logger;
         this.queue = queue;
@@ -59,9 +64,10 @@ public class LatenciesRecordsBenchmark implements Benchmark {
         int maxWriters = 0;
         int readers = 0;
         int maxReaders = 0;
-        Printer.log.info("Transactions Benchmark Started" );
+        Printer.log.info("LatenciesRecord Benchmark Started" );
         long currentTime = time.getCurrentTime();
         window.reset(currentTime);
+        final LatencyRecord latencyRecord = new LatencyRecord();
         while (doWork) {
             record = queue.poll(reportingIntervalMS, TimeUnit.MILLISECONDS);
             if (record != null) {
@@ -70,16 +76,19 @@ public class LatenciesRecordsBenchmark implements Benchmark {
                     readers += record.getReaders();
                     maxWriters += record.getMaxWriters();
                     maxReaders += record.getMaxReaders();
-                    window.maxLatency = Math.max(window.maxLatency, record.getMaxLatency());
-                    window.totalRecords += record.getTotalRecords();
-                    window.totalBytes += record.getTotalBytes();
-                    window.totalLatency += record.getTotalLatency();
-                    window.higherLatencyDiscardRecords += record.getHigherLatencyDiscardRecords();
-                    window.lowerLatencyDiscardRecords += record.getLowerLatencyDiscardRecords();
-                    window.validLatencyRecords += record.getValidLatencyRecords();
-                    window.invalidLatencyRecords += record.getInvalidLatencyRecords();
+                    latencyRecord.maxLatency = record.getMaxLatency();
+                    latencyRecord.totalRecords = record.getTotalRecords();
+                    latencyRecord.totalBytes = record.getTotalBytes();
+                    latencyRecord.totalLatency = record.getTotalLatency();
+                    latencyRecord.higherLatencyDiscardRecords = record.getHigherLatencyDiscardRecords();
+                    latencyRecord.lowerLatencyDiscardRecords = record.getLowerLatencyDiscardRecords();
+                    latencyRecord.validLatencyRecords = record.getValidLatencyRecords();
+                    latencyRecord.invalidLatencyRecords = record.getInvalidLatencyRecords();
+                    window.reportLatencyRecord(latencyRecord);
+                    reportLatencies.reportLatencyRecord(latencyRecord);
                     record.getLatencyMap().forEach((k, v) -> {
-                        window.record(0, 0, v, k);
+                        window.reportLatency(k, v);
+                        reportLatencies.reportLatency(k, v);
                     });
                 } else {
                     doWork = false;
@@ -128,10 +137,10 @@ public class LatenciesRecordsBenchmark implements Benchmark {
             qFuture = null;
         }
         if (ex != null) {
-            Printer.log.warn("Transactions Benchmark with Exception:" + ex.toString());
+            Printer.log.warn("LatenciesRecord Benchmark with Exception:" + ex.toString());
             retFuture.completeExceptionally(ex);
         } else  {
-            Printer.log.info("Transactions Benchmark Shutdown" );
+            Printer.log.info("LatenciesRecord Benchmark Shutdown" );
             retFuture.complete(null);
         }
         retFuture = null;
@@ -144,7 +153,7 @@ public class LatenciesRecordsBenchmark implements Benchmark {
     public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException,
             IllegalStateException {
         if (retFuture != null) {
-            throw  new IllegalStateException("Transactions Benchmark is already started\n");
+            throw  new IllegalStateException("LatenciesRecord Benchmark is already started\n");
         }
         retFuture = new CompletableFuture<>();
         qFuture =  CompletableFuture.runAsync(() -> {

@@ -10,6 +10,8 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.perl.LatencyRecord;
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.Time;
 
@@ -19,12 +21,13 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class ArrayLatencyRecorder extends LatencyWindow {
+public class ArrayLatencyRecorder extends LatencyRecordWindow {
     final private long[] latencies;
     private int minIndex;
     private int maxIndex;
 
-    public ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax, double[] percentiles, Time time) {
+    public ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
+                                long bytesMax, double[] percentiles, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
@@ -78,6 +81,24 @@ public class ArrayLatencyRecorder extends LatencyWindow {
         return values;
     }
 
+    @Override
+    public void reportLatencyRecord(LatencyRecord record) {
+        super.updateRecord(record);
+    }
+
+
+    @Override
+    public void reportLatency(long latency, long count) {
+        final int index = (int) (latency - this.lowLatency);
+        if (index < this.latencies.length) {
+            this.minIndex = Math.min(this.minIndex, index);
+            this.maxIndex = Math.max(this.maxIndex, index);
+            this.latencies[index] += count;
+        }
+    }
+
+
+
     /**
      * Record the latency.
      *
@@ -87,12 +108,10 @@ public class ArrayLatencyRecorder extends LatencyWindow {
      * @param latency latency value in milliseconds.
      */
     @Override
-    public void record(long startTime, long bytes, long events, long latency) {
+    public void recordLatency(long startTime, long bytes, long events, long latency) {
         if (record(bytes, events, latency)) {
-            final int index = (int) (latency - this.lowLatency);
-            this.minIndex = Math.min(this.minIndex, index);
-            this.maxIndex = Math.max(this.maxIndex, index);
-            this.latencies[index] += events;
+            reportLatency(latency, events);
         }
     }
+
 }

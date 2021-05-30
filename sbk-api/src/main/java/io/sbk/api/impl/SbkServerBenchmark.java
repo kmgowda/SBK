@@ -20,7 +20,7 @@ import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
 import io.sbk.perl.impl.HashMapLatencyRecorder;
-import io.sbk.perl.impl.LatencyWindow;
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 
@@ -40,7 +40,7 @@ public class SbkServerBenchmark implements Benchmark {
     final private ServerLogger logger;
     final private ServerParameterOptions params;
     final private LinkedBlockingQueue<LatenciesRecord> queue;
-    final private LatencyWindow window;
+    final private LatencyRecordWindow window;
     final private Server server;
     final private SbkGrpcService service;
     final private LatenciesRecordsBenchmark benchmark;
@@ -76,7 +76,7 @@ public class SbkServerBenchmark implements Benchmark {
         window = createLatencyWindow();
         benchmark = new LatenciesRecordsBenchmark(window, time,
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
-                logger, logger,  queue);
+                logger, logger, logger, queue);
         service = new SbkGrpcService(params.getStorageName(), params.getAction(), time, logger.getMinLatency(),
                 logger.getMaxLatency(), logger, queue);
         server = ServerBuilder.forPort(serverConfig.port).addService(service).build();
@@ -84,10 +84,10 @@ public class SbkServerBenchmark implements Benchmark {
     }
 
 
-    private LatencyWindow createLatencyWindow() {
+    private LatencyRecordWindow createLatencyWindow() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
-        final LatencyWindow window;
+        final LatencyRecordWindow window;
 
         if (memSizeMB < serverConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),

@@ -10,5 +10,7 @@
 
 package io.sbk.api;
 
-public interface ServerLogger extends PerformanceLogger, ConnectionsCount {
+import io.sbk.perl.ReportLatencies;
+
+public interface ServerLogger extends PerformanceLogger, ReportLatencies, ConnectionsCount {
 }

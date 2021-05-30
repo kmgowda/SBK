@@ -13,6 +13,7 @@ import io.sbk.api.Action;
 import io.sbk.api.Config;
 import io.sbk.api.ServerLogger;
 import io.sbk.api.InputOptions;
+import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
@@ -112,4 +113,13 @@ public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements Se
     }
 
 
+    @Override
+    public void reportLatencyRecord(LatencyRecord record) {
+
+    }
+
+    @Override
+    public void reportLatency(long latency, long count) {
+
+    }
 }
