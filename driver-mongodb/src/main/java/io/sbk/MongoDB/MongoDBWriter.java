@@ -10,7 +10,7 @@
 package io.sbk.MongoDB;
 
 import com.mongodb.client.MongoCollection;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import org.bson.Document;
 
@@ -22,10 +22,10 @@ import java.util.concurrent.CompletableFuture;
  */
 public class MongoDBWriter implements Writer<byte[]> {
     final private MongoCollection<Document> databaseCollection;
-    final private Parameters params;
+    final private ParameterOptions params;
     private long key;
 
-    public MongoDBWriter(int id, Parameters params, MongoDBConfig config, MongoCollection<Document> databaseCollection) throws IOException {
+    public MongoDBWriter(int id, ParameterOptions params, MongoDBConfig config, MongoCollection<Document> databaseCollection) throws IOException {
         this.key = MongoDB.generateStartKey(id);
         this.params = params;
         this.databaseCollection = databaseCollection;

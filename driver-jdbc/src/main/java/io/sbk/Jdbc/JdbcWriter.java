@@ -10,7 +10,7 @@
 package io.sbk.Jdbc;
 
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -36,7 +36,7 @@ public class JdbcWriter implements Writer<String> {
     final private DataType<String> dType;
     final private String  defaultInsertQuery;
 
-    public JdbcWriter(int writerID, Parameters params,
+    public JdbcWriter(int writerID, ParameterOptions params,
                        JdbcConfig config, DataType<String> dType) throws IOException {
         final Properties props = new Properties();
         this.dType = dType;

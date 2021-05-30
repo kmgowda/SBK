@@ -11,7 +11,7 @@ package io.sbk.RabbitMQ;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class RabbitMQ implements Storage<byte[]> {
     private boolean async;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("topic", true, "Topic name");
         params.addOption("broker", true, "Broker URI");
         params.addOption("persist", true, "keep messages persistent");
@@ -46,7 +46,7 @@ public class RabbitMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         topicName =  params.getOptionValue("topic", null);
         brokerUri = params.getOptionValue("broker", null);
         if (brokerUri == null) {
@@ -63,7 +63,7 @@ public class RabbitMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setAutomaticRecoveryEnabled(true);
         connectionFactory.setHost(brokerUri);
@@ -80,12 +80,12 @@ public class RabbitMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         connection.close();
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             return new RabbitMQWriter(id, params, connection, topicName, isPersist);
         } catch (IOException ex) {
@@ -95,7 +95,7 @@ public class RabbitMQ implements Storage<byte[]> {
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             if (async) {
                 Printer.log.info("Starting RabbitMQ CallbackReader");

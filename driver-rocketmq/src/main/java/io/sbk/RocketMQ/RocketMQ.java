@@ -15,7 +15,7 @@ import com.google.common.io.BaseEncoding;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Random;
@@ -50,7 +50,7 @@ public class RocketMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("cluster", true, "Cluster name default: "+DEFAULT_CLUSTER);
         params.addOption("topic", true, "Topic name");
         params.addOption("nameserver", true, "Name Server URI");
@@ -59,7 +59,7 @@ public class RocketMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         topicName =  params.getOptionValue("topic", null);
         namesAdr = params.getOptionValue("nameserver", null);
         if (namesAdr == null) {
@@ -85,7 +85,7 @@ public class RocketMQ implements Storage<byte[]> {
      }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         this.rmqAdmin = new DefaultMQAdminExt();
         this.rmqAdmin.setNamesrvAddr(namesAdr);
         this.rmqAdmin.setInstanceName("AdminInstance-" + getRandomString());
@@ -118,12 +118,12 @@ public class RocketMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         this.rmqAdmin.shutdown();
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             return new RocketMQWriter(id, params, namesAdr, topicName, rmqClientConfig);
         } catch (IOException ex) {
@@ -133,7 +133,7 @@ public class RocketMQ implements Storage<byte[]> {
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             if (async) {
                 return new RocketMQCallbackReader(id, params, namesAdr, topicName, rmqClientConfig, subscriptionName);

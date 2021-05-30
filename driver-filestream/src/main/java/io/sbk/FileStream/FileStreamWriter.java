@@ -9,7 +9,7 @@
  */
 package io.sbk.FileStream;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 public class FileStreamWriter implements Writer<byte[]> {
     final private FileOutputStream out;
 
-    public FileStreamWriter(int id, Parameters params, FileStreamConfig config) throws IOException {
+    public FileStreamWriter(int id, ParameterOptions params, FileStreamConfig config) throws IOException {
         this.out = new FileOutputStream(config.fileName, config.isAppend);
     }
 

@@ -10,7 +10,7 @@
 package io.sbk.File;
 
 import io.sbk.api.Config;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Writer;
 import io.sbk.system.Printer;
@@ -37,7 +37,7 @@ public class FileTest {
     final String benchmarkName = Config.NAME + " -class file";
     final List<String> driversList = Arrays.asList( drivers );
     private File file;
-    private Parameters params;
+    private ParameterOptions params;
 
     @Test
     public void testParseArgs() {

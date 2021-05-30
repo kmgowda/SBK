@@ -9,7 +9,7 @@
  */
 package io.sbk.RabbitMQ;
 import io.sbk.api.Writer;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -40,7 +40,7 @@ public class RabbitMQWriter implements Writer<byte[]> {
     final private boolean isPersist;
     private  volatile SortedSet<Long> ackSet;
 
-    public RabbitMQWriter(int writerID, Parameters params,
+    public RabbitMQWriter(int writerID, ParameterOptions params,
                           Connection connection, String topicName, boolean isPersist ) throws IOException {
         this.key = String.valueOf(writerID);
         this.isPersist = isPersist;

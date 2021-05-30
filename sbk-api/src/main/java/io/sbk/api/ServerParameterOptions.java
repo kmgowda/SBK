@@ -7,17 +7,8 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl;
 
-public interface ReportLatenciesWindow extends ReportLatencies {
+package io.sbk.api;
 
-    /**
-     * open the reporting window.
-     */
-    void openWindow();
-
-    /**
-     * close the reporting window.
-     */
-    void closeWindow();
+public interface ServerParameterOptions extends InputOptions, ServerParameters {
 }

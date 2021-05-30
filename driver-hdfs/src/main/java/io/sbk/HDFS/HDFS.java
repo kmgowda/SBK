@@ -12,7 +12,7 @@ package io.sbk.HDFS;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -32,7 +32,7 @@ public class HDFS implements Storage<byte[]> {
     private boolean recreate;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("fs", true, "File System Type, default: "+ FSTYPE);
         params.addOption("file", true, "File name");
         params.addOption("uri", true, "URI");
@@ -41,7 +41,7 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         fsType =  params.getOptionValue("fs", FSTYPE);
         fileName =  params.getOptionValue("file", null);
         uri =  params.getOptionValue("uri", null);
@@ -60,7 +60,7 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         Configuration configuration = new Configuration();
         configuration.set(fsType, uri);
         fileSystem = FileSystem.get(configuration);
@@ -75,12 +75,12 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         fileSystem.close();
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             return new HDFSWriter(id, params, fileSystem, filePath, recreate);
         } catch (IOException ex) {
@@ -90,7 +90,7 @@ public class HDFS implements Storage<byte[]> {
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             return new HDFSReader(id, params, fileSystem, filePath);
         } catch (IOException ex) {

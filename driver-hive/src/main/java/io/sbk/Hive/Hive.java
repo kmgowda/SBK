@@ -11,7 +11,7 @@ package io.sbk.Hive;
 
 import io.sbk.Jdbc.Jdbc;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 
@@ -22,13 +22,13 @@ public class Hive extends Jdbc {
     private final static String CONFIGFILE = "hive.properties";
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         super.addArgs(params, CONFIGFILE);
 
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         if (params.getWritersCount() > 1) {
             throw new IllegalArgumentException("Error: Hive: Multiple Writers are not allowed");
@@ -36,7 +36,7 @@ public class Hive extends Jdbc {
     }
 
     @Override
-    public DataWriter<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         try {
             return new HiveWriter(id, params, config, dType);
         } catch (IOException ex) {
@@ -51,7 +51,7 @@ public class Hive extends Jdbc {
     }
 
     @Override
-    public String createTableQuery(final Parameters params) throws IllegalArgumentException {
+    public String createTableQuery(final ParameterOptions params) throws IllegalArgumentException {
         return  "CREATE TABLE " + config.table +
                 "(ID BIGINT" +
                 ", DATA VARCHAR(" + params.getRecordSize() + "))";
@@ -59,7 +59,7 @@ public class Hive extends Jdbc {
     }
 
     @Override
-    public String dropTableQuery(final Parameters parameters) throws IllegalArgumentException {
+    public String dropTableQuery(final ParameterOptions parameters) throws IllegalArgumentException {
         return "DROP TABLE " + config.table;
     }
 }

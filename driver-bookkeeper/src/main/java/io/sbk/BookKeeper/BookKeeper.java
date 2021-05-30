@@ -12,7 +12,7 @@ package io.sbk.BookKeeper;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import java.io.IOException;
 import java.net.URI;
 
@@ -40,7 +40,7 @@ public class BookKeeper implements Storage<byte[]> {
     private int ackQuorum;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
         params.addOption("ensembleSize", true, "EnsembleSize (default value is in "+CONFIGFILE+" )");
@@ -51,7 +51,7 @@ public class BookKeeper implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         recreate = false;
         logName =  params.getOptionValue("log", null);
         uriName = params.getOptionValue("uri", null);
@@ -83,7 +83,7 @@ public class BookKeeper implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         namespace = NamespaceBuilder.newBuilder()
                 .conf(conf)
                 .uri(dlogUri)
@@ -96,7 +96,7 @@ public class BookKeeper implements Storage<byte[]> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         if (null != namespace) {
             dlm.close();
             namespace.close();
@@ -104,7 +104,7 @@ public class BookKeeper implements Storage<byte[]> {
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             return new BookKeeperWriter(dlm);
         } catch (IOException ex) {
@@ -114,7 +114,7 @@ public class BookKeeper implements Storage<byte[]> {
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             return new BookKeeperReader(dlm);
         } catch (IOException ex) {

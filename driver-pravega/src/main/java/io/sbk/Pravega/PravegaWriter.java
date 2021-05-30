@@ -10,7 +10,7 @@
 package io.sbk.Pravega;
 
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -30,7 +30,7 @@ import io.pravega.client.EventStreamClientFactory;
 public class PravegaWriter implements Writer<byte[]> {
     final EventStreamWriter<byte[]> producer;
 
-    public PravegaWriter(int id, Parameters params, String streamName, EventStreamClientFactory factory) throws IOException {
+    public PravegaWriter(int id, ParameterOptions params, String streamName, EventStreamClientFactory factory) throws IOException {
         this.producer = factory.createEventWriter(streamName,
                 new ByteArraySerializer(),
                 EventWriterConfig.builder().build());

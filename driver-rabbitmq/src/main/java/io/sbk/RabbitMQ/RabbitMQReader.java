@@ -10,7 +10,7 @@
 package io.sbk.RabbitMQ;
 
 import io.sbk.api.Reader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -33,9 +33,9 @@ import com.rabbitmq.client.Envelope;
 public class RabbitMQReader extends DefaultConsumer implements Reader<byte[]> {
     final private Channel channel;
     final private BlockingQueue<byte[]> queue;
-    final private Parameters params;
+    final private ParameterOptions params;
 
-    public RabbitMQReader(int readerId, Parameters params, Connection connection, String topicName,
+    public RabbitMQReader(int readerId, ParameterOptions params, Connection connection, String topicName,
                           String queueName) throws IOException {
         super(connection.createChannel());
         this.params = params;

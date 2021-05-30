@@ -10,10 +10,11 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.perl.LatencyRecord;
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
-
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import java.util.Iterator;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class HashMapLatencyRecorder extends LatencyWindow {
+public class HashMapLatencyRecorder extends LatencyRecordWindow {
     final public HashMap<Long, Long> latencies;
     final public int maxHashMapSizeMB;
     final public long maxHashMapSizeBytes;
@@ -85,23 +86,37 @@ public class HashMapLatencyRecorder extends LatencyWindow {
         return values;
     }
 
+
+
+    @Override
+    public void reportLatencyRecord(LatencyRecord record) {
+        super.updateRecord(record);
+    }
+
+
+    @Override
+    public void reportLatency(long latency, long count) {
+        Long val = latencies.get(latency);
+        if (val == null) {
+            val = 0L;
+            hashMapBytesCount += incBytes;
+        }
+        latencies.put(latency, val + count);
+    }
+
     /**
      * Record the latency.
-     *
-     * @param startTime start time.
+     *  @param startTime start time.
      * @param bytes number of bytes.
      * @param events number of events(records).
      * @param latency latency value in milliseconds.
      */
     @Override
-    public void record(long startTime, int bytes, int events, long latency) {
+    public void recordLatency(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
-            Long val = latencies.get(latency);
-            if (val == null) {
-                val = 0L;
-                hashMapBytesCount += incBytes;
-            }
-            latencies.put(latency, val + events);
+            reportLatency(latency, events);
         }
     }
+
+
 }

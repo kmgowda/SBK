@@ -10,7 +10,7 @@
 package io.sbk.Nats;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class NatsCallbackReader  extends AbstractCallbackReader<byte[]> {
     final private Connection cn;
     private Dispatcher consumer;
 
-    public NatsCallbackReader(int readerId, Parameters params, String topicName,
+    public NatsCallbackReader(int readerId, ParameterOptions params, String topicName,
                               String subscriptionName, Options option) throws IOException {
         this.topic = topicName;
         this.subscriptionName = subscriptionName;

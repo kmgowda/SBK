@@ -11,7 +11,7 @@ package io.sbk.Null;
 
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 
 
@@ -28,30 +28,30 @@ public class Null implements Storage<byte[]> {
     }
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("n", true, "iteration loop max value for writers, default value: " + n);
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
        n =  Long.parseLong(params.getOptionValue("n", "0"));
     }
 
     @Override
-    public void openStorage(final Parameters params) throws IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         return new NullWriter(n);
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         return new NullReader();
     }
 }

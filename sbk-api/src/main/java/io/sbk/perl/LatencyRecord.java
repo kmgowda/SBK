@@ -28,7 +28,7 @@ public class LatencyRecord {
     /**
      * Reset all recording variables.
      */
-    public void reset() {
+    final public void reset() {
         this.totalRecords = 0;
         this.validLatencyRecords = 0;
         this.lowerLatencyDiscardRecords = 0;

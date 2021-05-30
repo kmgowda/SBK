@@ -13,7 +13,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.system.Printer;
 import io.sbk.api.impl.StringHandler;
 
@@ -71,7 +71,7 @@ public class Jdbc implements Storage<String> {
      * @throws IllegalArgumentException If an exception occurred.
      * @return Query String.
      */
-    public String createTableQuery(final Parameters params) throws IllegalArgumentException {
+    public String createTableQuery(final ParameterOptions params) throws IllegalArgumentException {
         String query;
         if (driverType.equalsIgnoreCase(DERBY_NAME) ) {
             query = "CREATE TABLE " + config.table +
@@ -104,7 +104,7 @@ public class Jdbc implements Storage<String> {
      * @throws IllegalArgumentException If an exception occurred.
      * @return Query String.
      */
-    public String dropTableQuery(final Parameters params) throws IllegalArgumentException {
+    public String dropTableQuery(final ParameterOptions params) throws IllegalArgumentException {
         return "DROP TABLE " + config.table;
     }
 
@@ -114,7 +114,7 @@ public class Jdbc implements Storage<String> {
      * @param jdbcConfig JDBC Configuration.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    public void addArgs(final Parameters params, JdbcConfig jdbcConfig) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params, JdbcConfig jdbcConfig) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         this.config = jdbcConfig;
@@ -138,7 +138,7 @@ public class Jdbc implements Storage<String> {
      * @param configFile Configuration file to read.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    public void addArgs(final Parameters params, String configFile) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params, String configFile) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -154,13 +154,13 @@ public class Jdbc implements Storage<String> {
 
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         addArgs(params, getConfigFile());
     }
 
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         if (params.getWritersCount() > 0 && params.getReadersCount() > 0) {
             throw new IllegalArgumentException("Error: JDBC: Specify either writers or readers, both are not allowed");
         }
@@ -176,7 +176,7 @@ public class Jdbc implements Storage<String> {
 
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         try {
             Class.forName(config.driver);
         } catch (ClassNotFoundException ex) {
@@ -284,7 +284,7 @@ public class Jdbc implements Storage<String> {
 
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         final Properties props = new Properties();
         props.put("shutdown", "true");
         if (config.user != null) {
@@ -302,7 +302,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public DataWriter<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         try {
            return new JdbcWriter(id, params, config, dType);
         } catch (IOException ex) {
@@ -312,7 +312,7 @@ public class Jdbc implements Storage<String> {
     }
 
     @Override
-    public DataReader<String> createReader(final int id, final Parameters params) {
+    public DataReader<String> createReader(final int id, final ParameterOptions params) {
         try {
             return  new JdbcReader(id, params, config);
         } catch (IOException ex) {

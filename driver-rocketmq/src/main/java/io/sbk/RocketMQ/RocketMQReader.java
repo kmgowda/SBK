@@ -10,7 +10,7 @@
 package io.sbk.RocketMQ;
 
 import io.sbk.api.Reader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
@@ -28,9 +28,9 @@ import java.util.concurrent.TimeUnit;
 public class RocketMQReader implements Reader<byte[]> {
     final private BlockingQueue<byte[]> queue;
     final private DefaultMQPushConsumer rmqConsumer;
-    final private Parameters params;
+    final private ParameterOptions params;
 
-    public RocketMQReader(int readerId, Parameters params, String namesAdr, String topicName,
+    public RocketMQReader(int readerId, ParameterOptions params, String namesAdr, String topicName,
                           RocketMQClientConfig config, String subscriptionName ) throws IOException {
         this.params = params;
         queue = new LinkedBlockingQueue();

@@ -9,7 +9,7 @@
  */
 package io.sbk.File;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -30,7 +30,7 @@ public class FileWriter implements Writer<ByteBuffer> {
     final private FileChannel out;
     final private FileConfig config;
 
-    public FileWriter(int id, Parameters params, FileConfig config) throws IOException {
+    public FileWriter(int id, ParameterOptions params, FileConfig config) throws IOException {
         this.config = config;
         if (config.isAppend) {
             this.out = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.WRITE,

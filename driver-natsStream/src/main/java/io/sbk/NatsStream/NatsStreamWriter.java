@@ -13,7 +13,7 @@ import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
 import io.sbk.api.Writer;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -31,7 +31,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
     final private StreamingConnection producer;
     final private String topic;
 
-    public NatsStreamWriter(int writerID, Parameters params,
+    public NatsStreamWriter(int writerID, ParameterOptions params,
                       String topicName, NatsStreamClientConfig config, Builder builder) throws IOException {
         this.topic = topicName;
         try {

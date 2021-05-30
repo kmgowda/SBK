@@ -10,7 +10,7 @@
 package io.sbk.NatsStream;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
 import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
@@ -34,8 +34,8 @@ public class NatsStreamReader extends AbstractCallbackReader<byte[]> {
     final private SubscriptionOptions.Builder subBuilder;
     private Subscription sub;
 
-    public NatsStreamReader(int readerId, Parameters params, String topicName,
-                                    String subscriptionName, NatsStreamClientConfig config, Builder builder) throws IOException {
+    public NatsStreamReader(int readerId, ParameterOptions params, String topicName,
+                            String subscriptionName, NatsStreamClientConfig config, Builder builder) throws IOException {
         this.topic = topicName;
         this.subscriptionName = subscriptionName;
         this.subBuilder = new SubscriptionOptions.Builder();

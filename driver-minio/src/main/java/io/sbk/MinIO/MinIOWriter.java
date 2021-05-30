@@ -17,7 +17,7 @@ import io.minio.errors.InternalException;
 import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.perl.Time;
@@ -41,7 +41,7 @@ public class MinIOWriter implements Writer<byte[]> {
     final private MinioClient client;
     final private InputStream dataStream;
 
-    public MinIOWriter(int id, Parameters params, MinIOConfig config, MinioClient client, DataType<byte[]> dType) {
+    public MinIOWriter(int id, ParameterOptions params, MinIOConfig config, MinioClient client, DataType<byte[]> dType) {
         this.config = config;
         this.client = client;
         dataStream = new ByteArrayInputStream(dType.create(params.getRecordSize()), 0, params.getRecordSize());

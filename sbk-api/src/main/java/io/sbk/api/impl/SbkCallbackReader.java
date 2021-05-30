@@ -12,7 +12,7 @@ package io.sbk.api.impl;
 import io.sbk.api.Benchmark;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Callback;
 import io.sbk.perl.Time;
@@ -36,7 +36,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
     final private long totalRecords;
     private long beginTime;
 
-    public SbkCallbackReader(int readerId, int idMax, Parameters params, SendChannel sendChannel,
+    public SbkCallbackReader(int readerId, int idMax, ParameterOptions params, SendChannel sendChannel,
                              DataType dataType, Time time) {
         super(readerId, idMax,  params, sendChannel);
         this.dataType = dataType;

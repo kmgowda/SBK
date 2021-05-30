@@ -10,7 +10,7 @@
 package io.sbk.Db2;
 
 import io.sbk.Jdbc.Jdbc;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 /**
  * Class for Db2.
@@ -19,13 +19,13 @@ public class Db2 extends Jdbc {
     private final static String CONFIGFILE = "db2.properties";
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         super.addArgs(params, CONFIGFILE);
 
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         if (params.getWritersCount() > 1) {
             throw new IllegalArgumentException("Error: Db2: Multiple Writers are not allowed");
@@ -38,7 +38,7 @@ public class Db2 extends Jdbc {
     }
 
     @Override
-    public String createTableQuery(final Parameters params) throws IllegalArgumentException {
+    public String createTableQuery(final ParameterOptions params) throws IllegalArgumentException {
         return  "CREATE TABLE " + config.table +
                 "(ID BIGINT" +
                 ", DATA VARCHAR(" + params.getRecordSize() + "))";

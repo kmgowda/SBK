@@ -13,7 +13,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.impl.NioByteBuffer;
 
 import java.io.IOException;
@@ -26,12 +26,12 @@ public class AsyncFile implements Storage<ByteBuffer> {
     private String fileName;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("file", true, "File name");
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         fileName =  params.getOptionValue("file", null);
 
         if (fileName == null) {
@@ -46,17 +46,17 @@ public class AsyncFile implements Storage<ByteBuffer> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
 
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
 
     }
 
     @Override
-    public DataWriter<ByteBuffer> createWriter(final int id, final Parameters params) {
+    public DataWriter<ByteBuffer> createWriter(final int id, final ParameterOptions params) {
         try {
             return new AsyncFileWriter(id, params, fileName);
         } catch (IOException ex) {
@@ -66,7 +66,7 @@ public class AsyncFile implements Storage<ByteBuffer> {
     }
 
     @Override
-    public DataReader<ByteBuffer> createReader(final int id, final Parameters params) {
+    public DataReader<ByteBuffer> createReader(final int id, final ParameterOptions params) {
         try {
             return new AsyncFileReader(id, params, fileName);
         } catch (IOException ex) {

@@ -15,7 +15,7 @@ import io.sbk.api.Config;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Logger;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PerlConfig;
@@ -26,7 +26,7 @@ import io.sbk.perl.impl.ArrayLatencyRecorder;
 import io.sbk.perl.impl.CompositeCSVLatencyRecorder;
 import io.sbk.perl.impl.CompositeHashMapLatencyRecorder;
 import io.sbk.perl.impl.HashMapLatencyRecorder;
-import io.sbk.perl.impl.LatencyWindow;
+import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.impl.CQueuePerformance;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
@@ -46,7 +46,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Class for performing the benchmark.
@@ -60,7 +59,7 @@ public class SbkBenchmark implements Benchmark {
     final private Time time;
     final private Logger logger;
     final private ExecutorService executor;
-    final private Parameters params;
+    final private ParameterOptions params;
     final private Performance writeStats;
     final private Performance readStats;
     final private int maxQs;
@@ -77,7 +76,7 @@ public class SbkBenchmark implements Benchmark {
      *
      * @param  storageName          Storage Name
      * @param  action               Action
-     * @param  perlConfig               Configuration parameters
+     * @param  perlConfig           Configuration parameters
      * @param  params               Benchmarking input Parameters
      * @param  storage              Storage device/client/driver for benchmarking
      * @param  dType                Data Type.
@@ -86,7 +85,7 @@ public class SbkBenchmark implements Benchmark {
      * @throws IOException          If Exception occurs.
      */
     public SbkBenchmark(String storageName, Action action, PerlConfig perlConfig,
-                        Parameters params, Storage<Object> storage,
+                        ParameterOptions params, Storage<Object> storage,
                         DataType<Object> dType, Logger logger, Time time) throws IOException {
         this.storageName = storageName;
         this.dType = dType;
@@ -109,8 +108,8 @@ public class SbkBenchmark implements Benchmark {
             this.maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
         }
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 10;
-        if (Config.USE_FORK) {
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 20;
+        if (perlConfig.fork) {
             executor = new ForkJoinPool(threadCount);
         } else {
             executor = Executors.newFixedThreadPool(threadCount);
@@ -136,7 +135,7 @@ public class SbkBenchmark implements Benchmark {
     private PeriodicRecorder createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
-        final LatencyWindow window;
+        final LatencyRecordWindow window;
         final PeriodicRecorder latencyRecorder;
 
         if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
@@ -263,14 +262,7 @@ public class SbkBenchmark implements Benchmark {
                             CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
                                     i + j + 1 == params.getWritersCount() ?
                                     recordsPerWriter + delta : recordsPerWriter);
-                            ret.exceptionally(ex -> {
-                                logger.decrementWriters(1);
-                                return null;
-                            });
-                            ret.thenAccept(d -> {
-                                logger.decrementWriters(1);
-                            });
-                            writeFutures.add(ret);
+                            writeFutures.add(ret.whenComplete((d, ex) -> logger.decrementWriters(1)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -290,7 +282,13 @@ public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor);
+            }, executor).thenAccept( d -> {
+                try {
+                    CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0])).get();
+                } catch (InterruptedException  | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            });
             Printer.log.info("SBK Benchmark initiated Writers");
 
         } else {
@@ -317,14 +315,7 @@ public class SbkBenchmark implements Benchmark {
                         try {
                             CompletableFuture<Void> ret = sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
                                     recordsPerReader + delta : recordsPerReader);
-                            ret.exceptionally(ex -> {
-                                logger.decrementReaders(1);
-                                return null;
-                            });
-                            ret.thenAccept(d -> {
-                                logger.decrementReaders(1);
-                            });
-                            readFutures.add(ret);
+                            readFutures.add(ret.whenComplete((d, ex) -> logger.decrementReaders(1)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -344,28 +335,26 @@ public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor);
+            }, executor).thenAccept( d -> {
+                        try {
+                            CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0])).get();
+                        } catch (InterruptedException  | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+            );
             Printer.log.info("SBK Benchmark initiated Readers");
         } else {
             readersCB = null;
             readFutures = null;
         }
 
-        if (writersCB != null) {
-            writersCB.get();
-        }
-
-        if (readersCB != null) {
-            readersCB.get();
-        }
-
-        if (writeFutures != null && readFutures != null) {
-            chainFuture = CompletableFuture.allOf(Stream.concat(writeFutures.stream(), readFutures.stream()).
-                    collect(Collectors.toList()).toArray(new CompletableFuture[writeFutures.size() + readFutures.size()]));
+        if (writersCB != null && readersCB != null) {
+            chainFuture = CompletableFuture.allOf(writersCB, readersCB);
         } else if (readFutures != null) {
-            chainFuture = CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0]));
+            chainFuture = readersCB;
         } else if (writeFutures != null) {
-            chainFuture = CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0]));
+            chainFuture = writersCB;
         } else {
             throw new IllegalStateException("No Writers and/or Readers\n");
         }

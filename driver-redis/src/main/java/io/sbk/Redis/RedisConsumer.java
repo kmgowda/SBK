@@ -12,7 +12,7 @@ package io.sbk.Redis;
 
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.system.Printer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
@@ -27,7 +27,7 @@ public class RedisConsumer extends AbstractCallbackReader<String> {
     final private Jedis jedis;
     final private String channelName;
 
-    public RedisConsumer(int id, Parameters params, Jedis jedis, String channelName) throws IOException {
+    public RedisConsumer(int id, ParameterOptions params, Jedis jedis, String channelName) throws IOException {
         this.jedis = jedis;
         this.channelName = channelName;
     }

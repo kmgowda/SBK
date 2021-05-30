@@ -9,141 +9,18 @@
  */
 package io.sbk.api;
 
-import io.sbk.perl.LatencyRecord;
-import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Print;
-import io.sbk.perl.ReportLatenciesWindow;
-import io.sbk.perl.Time;
-import io.sbk.perl.TimeUnit;
-
-import java.io.IOException;
+import io.sbk.perl.ReportLatency;
 
 /**
  * Interface for recoding/printing results.
  */
-public interface Logger extends Print, RWCount, ReportLatenciesWindow {
+public interface Logger extends PerformanceLogger, ReportLatency {
 
     /**
-     * Add the Metric type specific command line arguments.
-     * @param params Parameters object to be extended.
-     * @throws IllegalArgumentException If an exception occurred.
+     * Default record every latency.
      */
-    void addArgs(final Parameters params) throws IllegalArgumentException;
-
-    /**
-     * Parse the Metric specific command line arguments.
-     * @param params Parameters object to be parsed for driver specific parameters/arguments.
-     * @throws IllegalArgumentException If an exception occurred.
-     */
-    void parseArgs(final Parameters params) throws IllegalArgumentException;
-
-
-    /**
-     * Open the Logger.
-     * @param params Parameters object to be parsed for driver specific parameters/arguments.
-     * @param storageName The Name of the storage.
-     * @param action  action to print
-     * @param time  time interface
-     * @throws IOException If an exception occurred.
-     */
-    void open(final Parameters params, final String storageName, final Action action, Time time) throws IOException;
-
-    /**
-     * Close the Logger.
-     * @param params Parameters object to be parsed for driver specific parameters/arguments.
-     * @throws IOException If an exception occurred.
-     */
-    void close(final Parameters params) throws IOException;
-
-
-    /**
-     * Print the Total Periodic performance results.
-     * @param bytes number of bytes read/write
-     * @param records data to write.
-     * @param recsPerSec  records per second.
-     * @param mbPerSec Throughput value in terms of MB (Mega Bytes) per Second.
-     * @param avgLatency Average Latency.
-     * @param maxLatency Maximum Latency.
-     * @param invalid   Number of invalid/negative latencies
-     * @param lowerDiscard number of discarded latencies which are less than minimum latency.
-     * @param higherDiscard number of discarded latencies which are higher than maximum latency.
-     * @param percentiles Array of percentiles.
-     */
-    void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                    long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentiles);
-
-    /**
-     * Default implementation of Reporting interval.
-     * @return reporting time interval in seconds.
-     */
-    default int getReportingIntervalSeconds() {
-        return PerlConfig.DEFAULT_REPORTING_INTERVAL_SECONDS;
-    }
-
-    /**
-     * Default implementation of time Unit.
-     * Default time unit is Milliseconds.
-     * @return time unit.
-     */
-    default TimeUnit getTimeUnit() {
-        return TimeUnit.ms;
-    }
-
-    /**
-     * Default implementation of minimum latency.
-     * @return minimum latency value.
-     */
-    default long getMinLatency() {
-        return PerlConfig.DEFAULT_MIN_LATENCY;
-    }
-
-    /**
-     * Default implementation of Maximum latency.
-     * @return Maximum latency value.
-     */
-    default long getMaxLatency() {
-        return PerlConfig.DEFAULT_MAX_LATENCY;
-    }
-
-    /**
-     * Default implementation of percentile Indices.
-     * @return array of percentile Indices.
-     */
-    default double[] getPercentiles() {
-        return PerlConfig.PERCENTILES;
-    }
-
-    /**
-     * open the reporting window.
-     */
-    default void openWindow() {
-
-    }
-
-    /**
-     * close the reporting window.
-     */
-    default void closeWindow() {
-
-    }
-
-    /**
-     * Report a latency Record.
-     *
-     * @param record Latency Record
-     */
-    default void reportLatencyRecord(LatencyRecord record) {
-
-    }
-
-
-    /**
-     * Report one latency .
-     *
-     * @param latency Latency value
-     * @param count  Number of times the latency value is observed
-     */
-    default void reportLatency(long latency, long count) {
+    @Override
+    default void recordLatency(long startTime, int bytes, int events, long latency) {
 
     }
 

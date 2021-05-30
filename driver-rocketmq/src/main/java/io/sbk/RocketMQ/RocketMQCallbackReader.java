@@ -10,7 +10,7 @@
 package io.sbk.RocketMQ;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -25,9 +25,9 @@ import java.io.IOException;
  */
 public class RocketMQCallbackReader extends AbstractCallbackReader<byte[]> {
     final private DefaultMQPushConsumer rmqConsumer;
-    final private Parameters params;
+    final private ParameterOptions params;
 
-    public RocketMQCallbackReader(int readerId, Parameters params, String namesAdr, String topicName,
+    public RocketMQCallbackReader(int readerId, ParameterOptions params, String namesAdr, String topicName,
                                   RocketMQClientConfig config, String subscriptionName ) throws IOException {
         this.params = params;
         rmqConsumer = new DefaultMQPushConsumer(subscriptionName);

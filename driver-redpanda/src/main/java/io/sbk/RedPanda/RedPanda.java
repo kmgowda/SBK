@@ -11,7 +11,7 @@
 package io.sbk.RedPanda;
 
 import io.sbk.Kafka.Kafka;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 /**
  * Class for RedPanda Benchmarking.
@@ -20,7 +20,7 @@ public class RedPanda extends Kafka {
     private final static String CONFIGFILE = "redpanda.properties";
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         addArgs(params, CONFIGFILE);
     }
 

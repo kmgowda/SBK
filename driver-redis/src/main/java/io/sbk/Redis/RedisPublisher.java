@@ -11,7 +11,7 @@
 package io.sbk.Redis;
 
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import redis.clients.jedis.Jedis;
 
@@ -25,7 +25,7 @@ public class RedisPublisher implements Writer<String> {
     final private Jedis jedis;
     final private String channelName;
 
-    public RedisPublisher(int id, Parameters params, Jedis jedis, String channelName) throws IOException {
+    public RedisPublisher(int id, ParameterOptions params, Jedis jedis, String channelName) throws IOException {
         this.jedis = jedis;
         this.channelName = channelName;
     }

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDBException;
 
@@ -32,7 +32,7 @@ public class RocksDB implements Storage<byte[]> {
     private org.rocksdb.RocksDB db;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -47,12 +47,12 @@ public class RocksDB implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.rFile =  params.getOptionValue("rfile", config.rFile);
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         try {
             // a static method that loads the RocksDB C++ library.
             org.rocksdb.RocksDB.loadLibrary();
@@ -66,14 +66,14 @@ public class RocksDB implements Storage<byte[]> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         if (db != null) {
             db.close();
         }
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             return new RocksDBWriter(id, params, db);
         } catch (IOException ex) {
@@ -83,7 +83,7 @@ public class RocksDB implements Storage<byte[]> {
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             return new RocksDBReader(id, params, db);
         } catch (IOException ex) {

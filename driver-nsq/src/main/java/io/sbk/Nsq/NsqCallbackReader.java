@@ -13,7 +13,7 @@ import com.github.brainlag.nsq.NSQConsumer;
 import com.github.brainlag.nsq.lookup.DefaultNSQLookup;
 import com.github.brainlag.nsq.lookup.NSQLookup;
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
 
 import java.io.IOException;
@@ -27,8 +27,8 @@ public class NsqCallbackReader extends AbstractCallbackReader<byte[]> {
     final private  NSQLookup lookup;
     private  NSQConsumer consumer;
 
-    public NsqCallbackReader(int readerId, Parameters params, String topicName,
-                                 String subscriptionName, NsqClientConfig config) throws IOException {
+    public NsqCallbackReader(int readerId, ParameterOptions params, String topicName,
+                             String subscriptionName, NsqClientConfig config) throws IOException {
         final String[] lookupUri = config.lookupUri.split(":", 2);
         this.topicName = topicName;
         this.subscriptionName = subscriptionName;

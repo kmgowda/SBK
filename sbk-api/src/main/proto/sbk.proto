@@ -1,0 +1,68 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.sbk.api.impl";
+option java_outer_classname = "SbkGrpc";
+
+import "google/protobuf/empty.proto";
+
+service Service {
+  rpc getConfig (google.protobuf.Empty) returns (Config) {}
+  rpc registerClient (Config) returns (ClientID) {}
+  rpc addLatenciesRecord (LatenciesRecord) returns (google.protobuf.Empty) {}
+  rpc closeClient (ClientID) returns (google.protobuf.Empty) {}
+}
+
+enum TimeUnitEnum {
+  ms = 0;
+  mcs = 1;
+  ns = 2;
+}
+
+enum ActionEnum {
+  Writing = 0;
+  Reading = 1;
+  Write_Reading = 2;
+}
+
+message Config {
+  string storageName = 1;
+  ActionEnum action = 2;
+  TimeUnitEnum timeUnit = 3;
+  int64 minLatency = 4;
+  int64 maxLatency = 5;
+}
+
+message ClientID {
+  int32 id = 1;
+}
+
+
+message LatenciesRecord {
+  int32 clientID = 1;
+  int64 sequenceNumber = 2;
+  int32 writers = 3;
+  int32 readers = 4;
+  int32 maxWriters = 5;
+  int32 maxReaders = 6;
+  int64 totalRecords = 7;
+  int64 validLatencyRecords = 8;
+  int64 lowerLatencyDiscardRecords = 9;
+  int64 higherLatencyDiscardRecords = 10;
+  int64 invalidLatencyRecords = 11;
+  int64 totalBytes = 12;
+  int64 totalLatency = 13;
+  int64 maxLatency = 14;
+  map<int64, int64 > latency = 15;
+}
+

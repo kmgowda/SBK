@@ -12,7 +12,7 @@ package io.sbk.Cassandra;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import java.io.EOFException;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class CassandraReader implements Reader<String> {
     final private  CqlSession session;
     private Iterator<Row> resIterator;
 
-    public CassandraReader(int id, Parameters params, CassandraConfig config, CqlSession session) throws IOException {
+    public CassandraReader(int id, ParameterOptions params, CassandraConfig config, CqlSession session) throws IOException {
         this.config = config;
         this.session = session;
         this.resIterator = null;

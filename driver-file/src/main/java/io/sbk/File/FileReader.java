@@ -10,7 +10,7 @@
 package io.sbk.File;
 
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 
@@ -28,7 +28,7 @@ public class FileReader implements Reader<ByteBuffer> {
     final private FileChannel in;
     final private ByteBuffer readBuffer;
 
-    public FileReader(int id, Parameters params, DataType<ByteBuffer> dType, FileConfig config) throws IOException {
+    public FileReader(int id, ParameterOptions params, DataType<ByteBuffer> dType, FileConfig config) throws IOException {
         this.in = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.READ);
         this.readBuffer = dType.create(params.getRecordSize());
     }

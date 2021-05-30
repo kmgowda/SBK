@@ -9,7 +9,7 @@
  */
 package io.sbk.Template;
 import io.sbk.api.Writer;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class TemplateWriter implements Writer<byte[]> {
 
-    public TemplateWriter(int writerID, Parameters params) {
+    public TemplateWriter(int writerID, ParameterOptions params) {
     }
 
     @Override

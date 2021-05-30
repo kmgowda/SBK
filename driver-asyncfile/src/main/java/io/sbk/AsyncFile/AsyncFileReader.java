@@ -10,7 +10,7 @@
 package io.sbk.AsyncFile;
 
 import io.sbk.api.DataType;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
@@ -30,12 +30,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class AsyncFileReader implements Reader<ByteBuffer> {
     final private String fileName;
-    final private Parameters params;
+    final private ParameterOptions params;
     final private AsynchronousFileChannel in;
     final private AtomicBoolean isEOF;
     private long pos;
 
-    public AsyncFileReader(int id, Parameters params, String fileName) throws IOException {
+    public AsyncFileReader(int id, ParameterOptions params, String fileName) throws IOException {
         this.fileName = fileName;
         this.params = params;
         this.in = AsynchronousFileChannel.open(Paths.get(fileName), StandardOpenOption.READ);

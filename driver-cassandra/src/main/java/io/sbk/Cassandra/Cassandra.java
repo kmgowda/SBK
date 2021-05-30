@@ -16,10 +16,9 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.impl.StringHandler;
-import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -32,14 +31,13 @@ public class Cassandra implements Storage<String>  {
     private CqlSession session;
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             config = mapper.readValue(
                     Objects.requireNonNull(Cassandra.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     CassandraConfig.class);
-            Printer.log.info("KMG.. read the config value");
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
@@ -54,7 +52,7 @@ public class Cassandra implements Storage<String>  {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.node =  params.getOptionValue("node", config.node);
         config.port =  Integer.parseInt(params.getOptionValue("port", String.valueOf(config.port)));
         config.keyspace =  params.getOptionValue("keyspace", config.keyspace);
@@ -66,7 +64,7 @@ public class Cassandra implements Storage<String>  {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         session = CqlSession.builder().addContactPoint(new InetSocketAddress(config.node, config.port))
                         .withLocalDatacenter("datacenter1").build();
         if (config.reCreate && params.getWritersCount() > 0) {
@@ -80,12 +78,12 @@ public class Cassandra implements Storage<String>  {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         session.close();
     }
 
     @Override
-    public DataWriter<String> createWriter(final int id, final Parameters params) {
+    public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         try {
             return new CassandraWriter(id, params, config, session);
         } catch (IOException ex) {
@@ -95,7 +93,7 @@ public class Cassandra implements Storage<String>  {
     }
 
     @Override
-    public DataReader<String> createReader(final int id, final Parameters params) {
+    public DataReader<String> createReader(final int id, final ParameterOptions params) {
         try {
             return new CassandraReader(id, params, config, session);
         } catch (IOException ex) {

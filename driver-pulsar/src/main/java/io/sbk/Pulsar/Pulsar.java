@@ -14,7 +14,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -37,7 +37,7 @@ public class Pulsar implements Storage<byte[]> {
 
 
     @Override
-    public void addArgs(final Parameters params) throws IllegalArgumentException {
+    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -64,7 +64,7 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public void parseArgs(final Parameters params) throws IllegalArgumentException {
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.topicName =  params.getOptionValue("topic", config.topicName);
         config.brokerUri = params.getOptionValue("broker", config.brokerUri);
 
@@ -93,7 +93,7 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final Parameters params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws  IOException {
         try {
             client = PulsarClient.builder().ioThreads(config.ioThreads).serviceUrl(config.brokerUri).build();
         } catch (PulsarClientException ex) {
@@ -110,14 +110,14 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public void closeStorage(final Parameters params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         if (topicHandler != null) {
             topicHandler.close();
         }
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final Parameters params) {
+    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
             return new PulsarWriter(id, params, config.topicName, client);
         } catch (IOException ex) {
@@ -127,7 +127,7 @@ public class Pulsar implements Storage<byte[]> {
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final Parameters params) {
+    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
             return new PulsarReader(id, params, config.topicName, config.topicName+"rdGrp", client);
         } catch (IOException ex) {

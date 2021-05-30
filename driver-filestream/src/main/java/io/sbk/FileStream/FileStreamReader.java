@@ -9,7 +9,7 @@
  */
 package io.sbk.FileStream;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import java.io.EOFException;
@@ -24,7 +24,7 @@ public class FileStreamReader implements Reader<byte[]> {
     private final FileInputStream in;
     private final byte[] readBuffer;
 
-    public FileStreamReader(int id, Parameters params, FileStreamConfig config) throws IOException {
+    public FileStreamReader(int id, ParameterOptions params, FileStreamConfig config) throws IOException {
         this.in = new FileInputStream(config.fileName);
         this.readBuffer = new byte[params.getRecordSize()];
     }

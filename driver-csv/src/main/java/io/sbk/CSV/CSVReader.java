@@ -9,7 +9,7 @@
  */
 package io.sbk.CSV;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -28,7 +28,7 @@ public class CSVReader implements Reader<String> {
     final private CSVParser csvParser;
     final private Iterator<CSVRecord> csvIterator;
 
-    public CSVReader(int id, Parameters params, CSVConfig config) throws IOException {
+    public CSVReader(int id, ParameterOptions params, CSVConfig config) throws IOException {
         csvParser = new CSVParser(Files.newBufferedReader(Paths.get(config.fileName)), CSVFormat.DEFAULT
                 .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
         csvIterator = csvParser.iterator();

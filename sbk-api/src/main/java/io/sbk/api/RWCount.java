@@ -25,6 +25,20 @@ public interface RWCount {
     void decrementWriters(int val);
 
     /**
+     * Set Writers.
+     * @param val new value.
+     */
+    void setWriters(int val);
+
+
+    /**
+     * Set Max Writers.
+     * @param val new value.
+     */
+    void setMaxWriters(int val);
+
+
+    /**
      * Increment Readers.
      * @param val increment value.
      */
@@ -35,4 +49,17 @@ public interface RWCount {
      * @param val decrement value.
      */
     void decrementReaders(int val);
+
+    /**
+     * Set Readers.
+     * @param val new value.
+     */
+    void setReaders(int val);
+
+    /**
+     * Set Max Readers.
+     * @param val new value.
+     */
+    void setMaxReaders(int val);
+
 }

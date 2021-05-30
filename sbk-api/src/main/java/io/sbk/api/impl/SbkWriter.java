@@ -13,7 +13,7 @@ package io.sbk.api.impl;
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
 import io.sbk.perl.RunBenchmark;
 
@@ -38,7 +38,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private Object payload;
     final private int dataSize;
 
-    public SbkWriter(int writerID, int idMax, Parameters params, SendChannel sendChannel,
+    public SbkWriter(int writerID, int idMax, ParameterOptions params, SendChannel sendChannel,
                      DataType<Object> dType, Time time, DataWriter<Object> writer) {
         super(writerID, idMax, params, sendChannel);
         this.dType = dType;
