@@ -161,6 +161,9 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     @Override
     public void close(final InputOptions params) throws IllegalArgumentException, IOException  {
         super.close(params);
+        if (!enable) {
+            return;
+        }
         try {
             builder.clear();
             stub.closeClient(ClientID.newBuilder().setId(clientID).build(), observer);
@@ -186,8 +189,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         builder.setHigherLatencyDiscardRecords(recorder.higherLatencyDiscardRecords);
         builder.setLowerLatencyDiscardRecords(recorder.lowerLatencyDiscardRecords);
         builder.setValidLatencyRecords(recorder.validLatencyRecords);
-        final ServiceGrpc.ServiceBlockingStub blockingStub = ServiceGrpc.newBlockingStub(channel);
-        blockingStub.addLatenciesRecord(builder.build());
+        stub.addLatenciesRecord(builder.build(), observer);
         recorder.reset();
         builder.clear();
         latencyBytes = 0;
@@ -199,6 +201,10 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
      */
     @Override
     public void recordLatency(long startTime, long bytes, long events, long latency) {
+        if (!enable) {
+            return;
+        }
+
         if (latencyBytes >= MAX_LATENCY_BYTES) {
             addLatenciesRecord();
         }
