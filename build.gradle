@@ -238,6 +238,28 @@ task printDependencies {
 	}
 }
 
+
+task printDrivers {
+	String readmePrefix= "https://github.com/kmgowda/SBK/tree/master/"
+
+	doLast {
+		int i = 1;
+		println();
+		project.subprojects.findAll().each {
+			if (it.name.startsWith("driver-") && !it.name.equals("driver-template")) {
+				String out = it.name
+				if (project.hasProperty("readme")) {
+					String name = it.name.replace("driver-", "")
+					out = "[" + name.capitalize()  +"]("+readmePrefix+it.name+")"
+				}
+				printf("%4d. %s\n", i, out)
+				i++;
+			}
+		}
+	}
+}
+
+
 /* Include your driver below */
 dependencies {
 	compile project(":sbk-api")
