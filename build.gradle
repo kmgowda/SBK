@@ -244,11 +244,13 @@ task printDrivers {
 
 	doLast {
 		int i = 1;
+		println();
 		project.subprojects.findAll().each {
 			if (it.name.startsWith("driver-")) {
 				String out = it.name
 				if (project.hasProperty("readme")) {
-						out = "[" + it.name.replace("driver-", "") +"]("+readmePrefix+it.name+")"
+					String name = it.name.replace("driver-", "")
+					out = "[" + name.capitalize()  +"]("+readmePrefix+it.name+")"
 				}
 				printf("%4d. %s\n", i, out)
 				i++;
