@@ -278,6 +278,7 @@ dependencies {
 	compile project(':driver-seaweeds3')
 	compile project(':driver-cassandra')
 	compile project(':driver-db2')
+	compile project(':driver-cephs3')
 }
 
 //create a single Jar with all dependencies
