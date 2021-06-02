@@ -61,7 +61,8 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      *
      * @param currentTime current time.
      */
-    public void print(long currentTime) {
+    @Override
+    public void stopWindow(long currentTime) {
         window.print(currentTime, windowLogger, this);
 
         if (hashMapBytesCount > maxHashMapSizeBytes) {
@@ -120,6 +121,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      *
      * @param endTime current time.
      */
+    @Override
     public void stop(long endTime) {
         if (window.totalRecords > 0) {
             window.print(endTime, windowLogger, this);
