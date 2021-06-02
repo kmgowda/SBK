@@ -49,7 +49,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
      * @param logger printer interface.
      * @param copyLatencies  Copy Latency values
      */
-    public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
+    final public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
         final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
