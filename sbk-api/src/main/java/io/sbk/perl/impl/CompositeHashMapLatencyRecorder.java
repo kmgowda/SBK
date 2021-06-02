@@ -66,7 +66,7 @@ public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder impl
      * @param currentTime current time.
      * @return elapsed Time in Milliseconds from the startTime.
      */
-    public long elapsedMilliSeconds(long currentTime) {
+    public long elapsedMilliSecondsWindow(long currentTime) {
         return window.elapsedMilliSeconds(currentTime);
     }
 

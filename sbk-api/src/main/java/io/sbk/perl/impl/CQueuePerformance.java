@@ -116,7 +116,7 @@ final public class CQueuePerformance implements Performance {
                                 doWork = false;
                             }
                         }
-                        if (periodicLogger.elapsedMilliSeconds(ctime) > windowIntervalMS) {
+                        if (periodicLogger.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
                             periodicLogger.stopWindow(ctime);
                             periodicLogger.startWindow(ctime);
                             idleCounter.reset();
@@ -127,7 +127,7 @@ final public class CQueuePerformance implements Performance {
                     if (notFound) {
                         if (idleCounter.waitAndCheck()) {
                             ctime = time.getCurrentTime();
-                            final long diffTime = periodicLogger.elapsedMilliSeconds(ctime);
+                            final long diffTime = periodicLogger.elapsedMilliSecondsWindow(ctime);
                             if (diffTime > windowIntervalMS) {
                                 periodicLogger.stopWindow(ctime);
                                 periodicLogger.startWindow(ctime);

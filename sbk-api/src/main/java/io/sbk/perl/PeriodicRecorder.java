@@ -35,7 +35,7 @@ public interface PeriodicRecorder {
      * @param currentTime current time.
      * @return elapsed Time in Milliseconds from the startTime.
      */
-    long elapsedMilliSeconds(long currentTime);
+    long elapsedMilliSecondsWindow(long currentTime);
 
 
     /**

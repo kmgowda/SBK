@@ -34,12 +34,12 @@ abstract public class LatencyWindow extends LatencyRecorder {
 
 
     /**
-     * Get the current time duration of this window.
+     * Get the current time duration of this window since reset() method invoked.
      *
      * @param currentTime current time.
      * @return elapsed Time in Milliseconds
      */
-    public long elapsedMilliSeconds(long currentTime) {
+    final public long elapsedMilliSeconds(long currentTime) {
         return (long) time.elapsedMilliSeconds(currentTime, startTime);
     }
 
