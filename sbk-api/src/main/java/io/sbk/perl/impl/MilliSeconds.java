@@ -13,7 +13,7 @@ import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 
-public class MilliSeconds implements Time {
+final public class MilliSeconds implements Time {
 
     /**
      * get the Time Unit.

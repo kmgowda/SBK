@@ -31,8 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for recoding/printing results on System.out.
  */
 public class SystemLogger implements Logger {
-    final static String LOGGER_FILE = "logger.properties";
-    final public DecimalFormat format;
+    final private static String LOGGER_FILE = "logger.properties";
     public String storageName;
     public String prefix;
     public String timeUnit;
@@ -48,6 +47,7 @@ public class SystemLogger implements Logger {
     private String[] percentileNames;
     private long minLatency;
     private long maxLatency;
+    final private DecimalFormat format;
 
     public SystemLogger() {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);

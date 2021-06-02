@@ -14,7 +14,7 @@ import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 
 
-public class MicroSeconds implements Time {
+final public class MicroSeconds implements Time {
 
     /**
      * get the Time Unit.

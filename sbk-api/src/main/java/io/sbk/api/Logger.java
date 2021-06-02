@@ -17,7 +17,7 @@ import io.sbk.perl.ReportLatency;
 public interface Logger extends PerformanceLogger, ReportLatency {
 
     /**
-     * Default record every latency.
+     * Default method to record every event.
      */
     @Override
     default void recordLatency(long startTime, int bytes, int events, long latency) {
