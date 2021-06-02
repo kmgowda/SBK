@@ -34,12 +34,12 @@ abstract public class LatencyWindow extends LatencyRecorder {
 
 
     /**
-     * Get the current time duration of this window.
+     * Get the current time duration of this window since reset() method invoked.
      *
      * @param currentTime current time.
      * @return elapsed Time in Milliseconds
      */
-    public long elapsedMilliSeconds(long currentTime) {
+    final public long elapsedMilliSeconds(long currentTime) {
         return (long) time.elapsedMilliSeconds(currentTime, startTime);
     }
 
@@ -49,7 +49,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
      * @param logger printer interface.
      * @param copyLatencies  Copy Latency values
      */
-    public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
+    final public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
         final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;

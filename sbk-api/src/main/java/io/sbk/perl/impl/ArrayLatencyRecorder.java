@@ -36,7 +36,7 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    public void reset(long startTime) {
+    final public void reset(long startTime) {
         super.reset(startTime);
         this.maxIndex = 0;
         this.minIndex = Integer.MAX_VALUE;
@@ -82,13 +82,13 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    public void reportLatencyRecord(LatencyRecord record) {
+    final public void reportLatencyRecord(LatencyRecord record) {
         super.updateRecord(record);
     }
 
 
     @Override
-    public void reportLatency(long latency, long count) {
+    final public void reportLatency(long latency, long count) {
         final int index = (int) (latency - this.lowLatency);
         if (index < this.latencies.length) {
             this.minIndex = Math.min(this.minIndex, index);
@@ -107,7 +107,7 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
      * @param latency latency value in milliseconds.
      */
     @Override
-    public void recordLatency(long startTime, int bytes, int events, long latency) {
+    final public void recordLatency(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
             reportLatency(latency, events);
         }

@@ -47,7 +47,9 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      * @param events number of events (records)
      */
     public void record(long startTime, long endTime, int bytes, int events) {
-        window.recordLatency(startTime, bytes, events, time.elapsed(endTime, startTime));
+        final long latency = time.elapsed(endTime, startTime);
+        reportLatency.recordLatency(startTime, bytes, events, latency);
+        window.recordLatency(startTime, bytes, events, latency);
         if (window.isOverflow()) {
             window.print(startTime, windowLogger, this);
             window.reset(startTime);
@@ -59,7 +61,8 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      *
      * @param currentTime current time.
      */
-    public void print(long currentTime) {
+    @Override
+    public void stopWindow(long currentTime) {
         window.print(currentTime, windowLogger, this);
 
         if (hashMapBytesCount > maxHashMapSizeBytes) {
@@ -118,6 +121,7 @@ public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder
      *
      * @param endTime current time.
      */
+    @Override
     public void stop(long endTime) {
         if (window.totalRecords > 0) {
             window.print(endTime, windowLogger, this);

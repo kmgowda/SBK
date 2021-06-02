@@ -14,7 +14,7 @@ import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 
 
-public class NanoSeconds implements Time {
+final public class NanoSeconds implements Time {
 
     /**
      * get the Time Unit.

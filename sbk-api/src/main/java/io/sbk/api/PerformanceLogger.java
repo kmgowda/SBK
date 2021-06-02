@@ -17,6 +17,9 @@ import io.sbk.perl.TimeUnit;
 
 import java.io.IOException;
 
+/**
+ * Interface for recoding/printing results.
+ */
 public interface PerformanceLogger extends Print, RWCount {
 
     /**
