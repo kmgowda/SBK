@@ -41,8 +41,16 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
         this.hashMapBytesCount = 0;
     }
 
+
     @Override
-    public  boolean isOverflow() {
+    final public void reset(long startTime) {
+        super.reset(startTime);
+        this.latencies.clear();
+        this.hashMapBytesCount = 0;
+    }
+
+    @Override
+    final public boolean isOverflow() {
         return (this.hashMapBytesCount > this.maxHashMapSizeBytes ) || super.isOverflow();
     }
 
@@ -89,13 +97,13 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
 
 
     @Override
-    public void reportLatencyRecord(LatencyRecord record) {
+    final public void reportLatencyRecord(LatencyRecord record) {
         super.updateRecord(record);
     }
 
 
     @Override
-    public void reportLatency(long latency, long count) {
+    final public void reportLatency(long latency, long count) {
         Long val = latencies.get(latency);
         if (val == null) {
             val = 0L;
@@ -112,7 +120,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
      * @param latency latency value in milliseconds.
      */
     @Override
-    public void recordLatency(long startTime, int bytes, int events, long latency) {
+    final public void recordLatency(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
             reportLatency(latency, events);
         }
