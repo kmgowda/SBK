@@ -47,7 +47,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    public long[] getPercentiles(ReportLatencies copyLatencies) {
+    final public long[] getPercentiles(ReportLatencies copyLatencies) {
         final long[] values = new long[percentileFractions.length];
         final long[] percentileIds = new long[percentileFractions.length];
         long cur = 0;
