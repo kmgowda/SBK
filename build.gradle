@@ -64,6 +64,13 @@ allprojects {
 	apply from: "$rootDir/gradle/java.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
+	startScripts {
+		doLast {
+			unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
+			windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
+		}
+	}
+
 	mainClassName = SbkMainClass
 
 	def sbkProjectName = rootProject.name + project.path.replace(":", "-")
@@ -94,18 +101,9 @@ allprojects {
 	}
 
 	application {
-		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, "-Dsbk.className="+sbkClass]
+		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, '-Dsbk.className='+sbkClass,
+									 '-Dsbk.appHome=SBK_APP_HOME']
 	}
-/*
- * Use the build startup script which is available in gradle/application.gradle
-	startScripts {
-		doLast {
-			unixScript.text = unixScript.text.replace('SERVER_APP_HOME', '\$APP_HOME')
-			windowsScript.text = windowsScript.text.replace('SERVER_APP_HOME', '%~dp0..')
-		}
-	}
-
- */
 
 	task generateDashboards(type: Copy) {
 		if (project.path.startsWith(":driver-")) {

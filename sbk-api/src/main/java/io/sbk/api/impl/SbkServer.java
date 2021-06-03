@@ -144,6 +144,7 @@ public class SbkServer {
         final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkServerName = System.getProperty(Config.SBK_APP_NAME);
+        final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         String appName = applicationName;
 
         if (appName == null) {
@@ -153,6 +154,7 @@ public class SbkServer {
         Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info(appName +" Version: "+version);
+        Printer.log.info(Config.SBK_APP_HOME+": "+sbkAppHome);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

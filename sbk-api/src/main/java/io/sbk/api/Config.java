@@ -13,6 +13,7 @@ package io.sbk.api;
 public class Config {
     final public static String NAME = "sbk";
     final public static String DESC = "Storage Benchmark Kit";
+    final public static String SBK_APP_HOME = "sbk.appHome";
     final public static String SBK_APP_NAME = "sbk.applicationName";
     final public static String SBK_CLASS_NAME = "sbk.className";
     final public static String PACKAGE_NAME = "io.sbk";

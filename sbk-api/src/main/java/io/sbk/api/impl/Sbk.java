@@ -165,6 +165,7 @@ public class Sbk {
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
+        final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         String driverName;
         String usageLine;
 
@@ -174,6 +175,7 @@ public class Sbk {
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ sbkClassName);
+        Printer.log.info(Config.SBK_APP_HOME+": "+sbkAppHome);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
