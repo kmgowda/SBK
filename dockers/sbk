@@ -56,6 +56,7 @@ COPY --chown=root:root driver-db2 ${APP_HOME}/driver-db2
 COPY --chown=root:root driver-jdbc ${APP_HOME}/driver-jdbc
 COPY --chown=root:root driver-seaweeds3 ${APP_HOME}/driver-seaweeds3
 COPY --chown=root:root driver-cephs3 ${APP_HOME}/driver-cephs3
+COPY --chown=root:root driver-openio ${APP_HOME}/driver-openio
 COPY --chown=root:root driver-minio ${APP_HOME}/driver-minio
 COPY --chown=root:root driver-foundationdb ${APP_HOME}/driver-foundationdb
 COPY --chown=root:root driver-fdbrecord ${APP_HOME}/driver-fdbrecord

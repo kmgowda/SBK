@@ -51,4 +51,5 @@ include 'driver-seaweeds3'
 include 'driver-cassandra'
 include 'driver-db2'
 include 'driver-cephs3'
+include 'driver-openio'
 
