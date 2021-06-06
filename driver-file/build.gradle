@@ -2,10 +2,7 @@ plugins {
     id 'java'
 }
 
-
-repositories {
-    mavenCentral()
-}
+description = "Local File Systems Benchmarking"
 
 dependencies {
     compile project(":sbk-api")
