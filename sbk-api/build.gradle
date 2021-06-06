@@ -5,13 +5,18 @@ apply plugin: "maven-publish"
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-gradle-plugin
         classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
+        classpath "org.nosphere.apache:creadur-rat-gradle:0.7.0"
     }
 }
 
+apply from: "$rootDir/gradle/rat.gradle"
 
 repositories {
     mavenCentral()
