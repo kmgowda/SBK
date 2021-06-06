@@ -246,9 +246,14 @@ task printDrivers {
 		project.subprojects.findAll().each {
 			if (it.name.startsWith("driver-") && !it.name.equals("driver-template")) {
 				String out = it.name
+				String dec = it.getDescription()
 				if (project.hasProperty("readme")) {
 					String name = it.name.replace("driver-", "")
-					out = "[" + name.capitalize()  +"]("+readmePrefix+it.name+")"
+					if (dec != null) {
+						out = "[" + name.capitalize() + "](" + readmePrefix + it.name + " \""+ dec +"\"" +")"
+					} else {
+						out = "[" + name.capitalize() + "](" + readmePrefix + it.name + ")"
+					}
 				}
 				printf("%4d. %s\n", i, out)
 				i++;
