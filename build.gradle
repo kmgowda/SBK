@@ -56,6 +56,7 @@ allprojects {
 		testCompile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
 	}
 
+	apply from: "$rootDir/gradle/application.gradle"
 	apply from: "$rootDir/gradle/checkstyle.gradle"
 	apply from: "$rootDir/gradle/eclipse.gradle"
 	apply from: "$rootDir/gradle/spotbugs.gradle"
@@ -63,13 +64,6 @@ allprojects {
 	apply from: "$rootDir/gradle/jacoco.gradle"
 	apply from: "$rootDir/gradle/java.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
-
-	startScripts {
-		doLast {
-			unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-			windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-		}
-	}
 
 	mainClassName = SbkMainClass
 
