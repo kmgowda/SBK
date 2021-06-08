@@ -231,6 +231,10 @@ task printDependencies {
 }
 
 
+/*
+   Example command : ./gradlew printdrivers -Preadme
+   another command : ./gradlew printdrivers -Preadme -Pdec   (add the project decription)
+ */
 task printDrivers {
 	String readmePrefix= "https://github.com/kmgowda/SBK/tree/master/"
 
@@ -243,7 +247,7 @@ task printDrivers {
 				String dec = it.getDescription()
 				if (project.hasProperty("readme")) {
 					String name = it.name.replace("driver-", "")
-					if (dec != null) {
+					if (dec != null && project.hasProperty("dec")) {
 						out = "[" + name.capitalize() + "](" + readmePrefix + it.name + " \""+ dec +"\"" +")"
 					} else {
 						out = "[" + name.capitalize() + "](" + readmePrefix + it.name + ")"
