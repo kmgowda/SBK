@@ -94,4 +94,12 @@ kubectl delete --all pods
 kubectl delete --all deployments
 kubectl delete --all namespaces 
 ```
-   
+ 
+# Grafana and Prometheus with Node metrics
+while running the grafana docker compose, if you are interested in profiling the system along with SBK metrics, you can use this dashboard :
+https://github.com/kmgowda/SBK/blob/master/grafana/dashboards/node-metrics.json.
+
+But, you should run the node exporter to get the system metrics ; you can find the prometheus node exporter here : 
+https://prometheus.io/docs/guides/node-exporter/
+
+just run the node exporter, the prometheus settings are already configured with this docker compose: https://github.com/kmgowda/SBK/blob/master/grafana/docker-compose.yml
