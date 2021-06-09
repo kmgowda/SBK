@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
 apply plugin: 'java'
 apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
@@ -17,10 +28,7 @@ buildscript {
 }
 
 apply from: "$rootDir/gradle/rat.gradle"
-
-repositories {
-    mavenCentral()
-}
+apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
     compile	"commons-cli:commons-cli:1.3.1"
@@ -46,90 +54,5 @@ generateJavadoc {
     exclude 'io/sbk/api/impl/ServiceGrpc.java'
     exclude 'io/sbk/api/impl/LatenciesRecordOrBuilder.java'
     exclude 'io/sbk/api/impl/LatenciesRecord.java'
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/kmgowda/SBK")
-            credentials {
-                username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
-                password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
-    publications {
-        gpr(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.groupId = "io.github.kmgowda"
-
-            if (!project.property("signing.keyId")) {
-                project.setProperty("signing.keyId", System.getenv("SIGNING_KEYID"))
-            }
-
-            if (!project.property("signing.password")) {
-                project.setProperty("signing.password", System.getenv("SIGNING_PASSWORD"))
-            }
-
-            if (!project.property("signing.secretKeyRingFile")) {
-                def secretKeyPath = project.file("${System.getProperty("user.home")}/.gnupg/secring.gpg").absolutePath
-                project.setProperty("signing.secretKeyRingFile", secretKeyPath)
-            }
-
-            if (project.property("signing.keyId") && project.property("signing.password") && project.property("signing.secretKeyRingFile")) {
-                signing {
-                    sign configurations.archives
-                }
-            }
-
-            beforeDeployment {
-                MavenDeployment deployment -> signing.signPom(deployment)
-            }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
-                def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
-                authentication(userName: username, password: password)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
-                def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
-                authentication(userName: username, password: password)
-            }
-
-            pom.project {
-                name "SBK"
-                url "https://github.com/kmgowda/sbk"
-                description "Storage Benchmark Kit"
-                scm {
-                    url 'https://github.com/kmgowda/sbk/tree/master'
-                    connection 'scm:git:git://github.com/kmgowda/sbk.git'
-                    developerConnection 'scm:git:https://github.com/kmgowda/sbk.git'
-                }
-                licenses {
-                    license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'kmgowda'
-                        name = 'Keshava Munegowda'
-                        email = 'keshava.gowda@gmail.com'
-                    }
-                }
-            }
-        }
-    }
 }
 
