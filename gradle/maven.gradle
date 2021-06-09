@@ -12,36 +12,45 @@ plugins.withId('maven') {
     uploadArchives {
         repositories {
             mavenDeployer {
-                // Only configure publishing if a URL was provided
-                if (project.hasProperty("publishUrl")) {
-                    if (publishUrl == "mavenCentral") {
-                        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                            authentication(userName: publishUsername, password: publishPassword)
-                        }
-                        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                            authentication(userName: publishUsername, password: publishPassword)
-                        }
-                    }
-                    else if (publishUrl == "jcenterSnapshot") {
-                        repository(url: "https://oss.jfrog.org/artifactory/oss-snapshot-local/") {
-                            if (project.hasProperty("publishUsername") && project.hasProperty("publishPassword")) {
-                                authentication(userName: publishUsername, password: publishPassword)
-                            }
-                        }
-                    }
-                    else {
-                        repository(url: publishUrl) {
-                            // Only configure credentials if they are provided (allows publishing to the filesystem)
-                            if (project.hasProperty("publishUsername") && project.hasProperty("publishPassword")) {
-                                authentication(userName: publishUsername, password: publishPassword)
-                            }
-                        }
+                pom.groupId = "io.github.kmgowda"
+
+                if (!project.property("signing.keyId")) {
+                    project.setProperty("signing.keyId", System.getenv("SIGNING_KEYID"))
+                }
+
+                if (!project.property("signing.password")) {
+                    project.setProperty("signing.password", System.getenv("SIGNING_PASSWORD"))
+                }
+
+                if (!project.property("signing.secretKeyRingFile")) {
+                    def secretKeyPath = project.file("${System.getProperty("user.home")}/.gnupg/secring.gpg").absolutePath
+                    project.setProperty("signing.secretKeyRingFile", secretKeyPath)
+                }
+
+                if (project.property("signing.keyId") && project.property("signing.password") && project.property("signing.secretKeyRingFile")) {
+                    signing {
+                        sign configurations.archives
                     }
                 }
 
-               // pom.artifactId = "sbk" + project.path.replace(':', '-')
+                beforeDeployment {
+                    MavenDeployment deployment -> signing.signPom(deployment)
+                }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
+                    def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                    authentication(userName: username, password: password)
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
+                    def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                    authentication(userName: username, password: password)
+                }
+
                 pom.project {
-                    name "sbk"
+                    name "SBK"
                     url "https://github.com/kmgowda/sbk"
                     description "Storage Benchmark Kit"
                     scm {
@@ -57,32 +66,33 @@ plugins.withId('maven') {
                     }
                     developers {
                         developer {
-                            id 'KMG'
-                            name 'Keshava Munegowda'
+                            id = 'kmgowda'
+                            name = 'Keshava Munegowda'
+                            email = 'keshava.gowda@gmail.com'
                         }
                     }
                 }
+            }
+        }
+    }
 
-                // Sign the POM when the signing plugin is present
-                plugins.withId('signing') {
-                    if (project.hasProperty('doSigning')) {
-                        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-                    }
+
+    publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+                credentials {
+                    username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
                 }
             }
         }
-    }
-
-    /*
-    install {
-        repositories {
-            mavenInstaller {
-                pom.artifactId = "sbk" + project.path.replace(':', '-')
+        publications {
+            gpr(MavenPublication) {
+                from(components.java)
             }
         }
     }
-    */
 
-    task publish(dependsOn:'uploadArchives') {
-    }
 }
