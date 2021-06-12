@@ -183,7 +183,7 @@ public class Sbk {
         perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 PerlConfig.class);
 
-        logger = Objects.requireNonNullElseGet(outLogger, SbkPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
 
         if (storage == null) {
             List<String> driversList;
