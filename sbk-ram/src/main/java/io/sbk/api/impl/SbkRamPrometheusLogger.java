@@ -103,6 +103,8 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
+        prometheusServer.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 
     @Override
