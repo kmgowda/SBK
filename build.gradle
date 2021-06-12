@@ -65,8 +65,6 @@ allprojects {
 	apply from: "$rootDir/gradle/java.gradle"
 	apply from: "$rootDir/gradle/protobuf.gradle"
 
-	mainClassName = SbkMainClass
-
 	def sbkProjectName = rootProject.name + project.path.replace(":", "-")
 	sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-" , rootProject.name+"-")
 	sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
@@ -95,6 +93,7 @@ allprojects {
 	}
 
 	application {
+		mainClassName = SbkMainClass
 		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, '-Dsbk.className='+sbkClass,
 									 '-Dsbk.appHome=SBK_APP_HOME']
 	}
@@ -264,6 +263,7 @@ task printDrivers {
 /* Include your driver below */
 dependencies {
 	compile project(":sbk-api")
+	compile project(":sbk-ram")
 	compile project(":driver-concurrentq")
 	compile project(":driver-file")
 	compile project(":driver-filestream")
@@ -321,7 +321,7 @@ task buildJar(type: Jar) {
 	with jar
 }
 
-
+/*
 task SbkRam(type: CreateStartScripts) {
 	mainClassName = 'io.sbk.main.SbkRamMain'
 	applicationName = 'sbk-ram'
@@ -334,3 +334,4 @@ applicationDistribution.into("bin") {
 	from(SbkRam)
 	fileMode = 0755
 }
+ */

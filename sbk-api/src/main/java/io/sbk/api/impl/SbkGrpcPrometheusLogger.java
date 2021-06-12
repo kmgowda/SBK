@@ -19,7 +19,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.sbk.api.Action;
 import io.sbk.api.InputOptions;
-import io.sbk.api.RamConfig;
+import io.sbk.api.RamHostConfig;
 import io.sbk.api.grpc.ClientID;
 import io.sbk.api.grpc.Config;
 import io.sbk.api.grpc.LatenciesRecord;
@@ -37,11 +37,11 @@ import java.util.concurrent.TimeUnit;
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
-    final static String CONFIG_FILE = "ram.properties";
+    final static String CONFIG_FILE = "ramhost.properties";
     final static String DISABLE_STRING = "no";
     final static int MAX_LATENCY_BYTES = 1024 * 1024 * 4;
     final static int LATENCY_BYTES = 16;
-    public RamConfig ramConfig;
+    public RamHostConfig ramHostConfig;
     private boolean enable;
     private int clientID;
     private long seqNum;
@@ -84,17 +84,17 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            ramConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                    RamConfig.class);
+            ramHostConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+                    RamHostConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
-        ramConfig.host = DISABLE_STRING;
+        ramHostConfig.host = DISABLE_STRING;
         params.addOption("ram", true, "SBK RAM host" +
-                "; default host: " + ramConfig.host +" ; disable if this parameter is set to: " +DISABLE_STRING);
+                "; default host: " + ramHostConfig.host +" ; disable if this parameter is set to: " +DISABLE_STRING);
         params.addOption("rport", true, "SBK RAM Port" +
-                "; default port: " + ramConfig.port );
+                "; default port: " + ramHostConfig.port );
         params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
     }
 
@@ -102,12 +102,12 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        ramConfig.host = params.getOptionValue("ram", ramConfig.host );
-        enable = !ramConfig.host.equalsIgnoreCase("no");
+        ramHostConfig.host = params.getOptionValue("ram", ramHostConfig.host );
+        enable = !ramHostConfig.host.equalsIgnoreCase("no");
         if (!enable) {
             return;
         }
-        ramConfig.port = Integer.parseInt(params.getOptionValue("rport", Integer.toString(ramConfig.port)));
+        ramHostConfig.port = Integer.parseInt(params.getOptionValue("rport", Integer.toString(ramHostConfig.port)));
         blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
     }
 
@@ -118,7 +118,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         if (!enable) {
             return;
         }
-        channel = ManagedChannelBuilder.forTarget(ramConfig.host+":"+ ramConfig.port).usePlaintext().build();
+        channel = ManagedChannelBuilder.forTarget(ramHostConfig.host+":"+ ramHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
         try {
