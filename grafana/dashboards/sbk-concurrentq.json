@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1621428066647,
+  "iteration": 1623501201627,
   "links": [],
   "panels": [
     {
@@ -26,6 +26,261 @@
         "w": 24,
         "x": 0,
         "y": 0
+      },
+      "id": 65,
+      "panels": [
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": 0,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 10
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 1
+          },
+          "id": 67,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_CONCURRENTQ_Writing_Connections",
+              "interval": "",
+              "legendFormat": "Active",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_CONCURRENTQ_Writing_Max_Connections",
+              "interval": "",
+              "legendFormat": "Max",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Writers Connections",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": 0,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 10
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 1
+          },
+          "id": 68,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_CONCURRENTQ_Reading_Connections",
+              "interval": "",
+              "legendFormat": "Active",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_CONCURRENTQ_Reading_Max_Connections",
+              "interval": "",
+              "legendFormat": "Max",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Readers Connections",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": 0,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 10
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 1
+          },
+          "id": 69,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_CONCURRENTQ_Write_Reading_Connections",
+              "interval": "",
+              "legendFormat": "Active",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_CONCURRENTQ_Write_Reading_Max_Connections",
+              "interval": "",
+              "legendFormat": "Max",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Write-Readers Connections",
+          "type": "stat"
+        }
+      ],
+      "title": "SBK Connections",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
       },
       "id": 60,
       "panels": [
@@ -108,7 +363,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 1
+            "y": 10
           },
           "hiddenSeries": false,
           "id": 62,
@@ -204,7 +459,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 1
+            "y": 10
           },
           "hiddenSeries": false,
           "id": 6,
@@ -336,7 +591,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 1
+            "y": 10
           },
           "id": 48,
           "options": {
@@ -392,7 +647,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 10
+            "y": 19
           },
           "hiddenSeries": false,
           "id": 50,
@@ -560,7 +815,7 @@
             "h": 4,
             "w": 3,
             "x": 8,
-            "y": 10
+            "y": 19
           },
           "id": 2,
           "options": {
@@ -671,7 +926,7 @@
             "h": 6,
             "w": 5,
             "x": 11,
-            "y": 10
+            "y": 19
           },
           "id": 4,
           "options": {
@@ -716,7 +971,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 10
+            "y": 19
           },
           "hiddenSeries": false,
           "id": 10,
@@ -882,7 +1137,7 @@
             "h": 7,
             "w": 3,
             "x": 8,
-            "y": 14
+            "y": 23
           },
           "id": 8,
           "options": {
@@ -938,7 +1193,7 @@
             "h": 5,
             "w": 5,
             "x": 11,
-            "y": 16
+            "y": 25
           },
           "id": 28,
           "options": {
@@ -1040,7 +1295,7 @@
             "h": 10,
             "w": 8,
             "x": 0,
-            "y": 21
+            "y": 30
           },
           "id": 47,
           "options": {
@@ -1096,7 +1351,7 @@
             "h": 10,
             "w": 8,
             "x": 8,
-            "y": 21
+            "y": 30
           },
           "hiddenSeries": false,
           "id": 49,
@@ -1306,7 +1561,7 @@
             "h": 10,
             "w": 8,
             "x": 16,
-            "y": 21
+            "y": 30
           },
           "id": 12,
           "options": {
@@ -1354,7 +1609,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 2
       },
       "id": 58,
       "panels": [
@@ -1437,7 +1692,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 2
+            "y": 11
           },
           "hiddenSeries": false,
           "id": 63,
@@ -1533,7 +1788,7 @@
             "h": 11,
             "w": 8,
             "x": 8,
-            "y": 2
+            "y": 11
           },
           "hiddenSeries": false,
           "id": 20,
@@ -1665,7 +1920,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 2
+            "y": 11
           },
           "id": 44,
           "options": {
@@ -1721,7 +1976,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 13
+            "y": 22
           },
           "hiddenSeries": false,
           "id": 46,
@@ -1887,7 +2142,7 @@
             "h": 5,
             "w": 3,
             "x": 8,
-            "y": 13
+            "y": 22
           },
           "id": 14,
           "options": {
@@ -1998,7 +2253,7 @@
             "h": 6,
             "w": 5,
             "x": 11,
-            "y": 13
+            "y": 22
           },
           "id": 18,
           "options": {
@@ -2043,7 +2298,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 13
+            "y": 22
           },
           "hiddenSeries": false,
           "id": 22,
@@ -2209,7 +2464,7 @@
             "h": 6,
             "w": 3,
             "x": 8,
-            "y": 18
+            "y": 27
           },
           "id": 16,
           "options": {
@@ -2266,7 +2521,7 @@
             "h": 5,
             "w": 5,
             "x": 11,
-            "y": 19
+            "y": 28
           },
           "id": 26,
           "options": {
@@ -2367,7 +2622,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 24
+            "y": 33
           },
           "id": 43,
           "options": {
@@ -2423,7 +2678,7 @@
             "h": 11,
             "w": 8,
             "x": 8,
-            "y": 24
+            "y": 33
           },
           "hiddenSeries": false,
           "id": 45,
@@ -2629,7 +2884,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 24
+            "y": 33
           },
           "id": 24,
           "options": {
@@ -2677,7 +2932,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 3
       },
       "id": 56,
       "panels": [
@@ -2761,7 +3016,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 3
+            "y": 4
           },
           "hiddenSeries": false,
           "id": 61,
@@ -2858,7 +3113,7 @@
             "h": 11,
             "w": 8,
             "x": 8,
-            "y": 3
+            "y": 4
           },
           "hiddenSeries": false,
           "id": 36,
@@ -2991,7 +3246,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 3
+            "y": 4
           },
           "id": 52,
           "options": {
@@ -3046,7 +3301,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 14
+            "y": 15
           },
           "hiddenSeries": false,
           "id": 54,
@@ -3212,7 +3467,7 @@
             "h": 5,
             "w": 3,
             "x": 8,
-            "y": 14
+            "y": 15
           },
           "id": 30,
           "options": {
@@ -3317,7 +3572,7 @@
             "h": 6,
             "w": 5,
             "x": 11,
-            "y": 14
+            "y": 15
           },
           "id": 32,
           "options": {
@@ -3363,7 +3618,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 14
+            "y": 15
           },
           "hiddenSeries": false,
           "id": 34,
@@ -3531,7 +3786,7 @@
             "h": 6,
             "w": 3,
             "x": 8,
-            "y": 19
+            "y": 20
           },
           "id": 40,
           "options": {
@@ -3608,7 +3863,7 @@
             "h": 5,
             "w": 5,
             "x": 11,
-            "y": 20
+            "y": 21
           },
           "id": 42,
           "options": {
@@ -3711,7 +3966,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 25
+            "y": 26
           },
           "id": 51,
           "options": {
@@ -3766,7 +4021,7 @@
             "h": 11,
             "w": 8,
             "x": 8,
-            "y": 25
+            "y": 26
           },
           "hiddenSeries": false,
           "id": 53,
@@ -3975,7 +4230,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 25
+            "y": 26
           },
           "id": 38,
           "options": {
@@ -4027,7 +4282,7 @@
     "list": [
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "Prometheus",
           "value": "Prometheus"
         },
