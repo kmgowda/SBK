@@ -44,7 +44,6 @@ RUN tar -xvf /opt/${RAM_APP_NAME}.tar -C /opt/.
 
 RUN mv /opt/${RAM_APP_NAME}-* /opt/${RAM_APP_NAME}
 
-EXPOSE 9719
-EXPOSE 9716
+EXPOSE 9719 9716
 
 ENTRYPOINT ["/opt/sbk-ram/bin/sbk-ram"]
