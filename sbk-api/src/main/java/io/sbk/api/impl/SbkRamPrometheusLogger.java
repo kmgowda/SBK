@@ -11,7 +11,7 @@ package io.sbk.api.impl;
 
 import io.sbk.api.Action;
 import io.sbk.api.Config;
-import io.sbk.api.ServerLogger;
+import io.sbk.api.RamLogger;
 import io.sbk.api.InputOptions;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Time;
@@ -23,15 +23,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements ServerLogger {
-    final static String CONFIG_FILE = "server-metrics.properties";
-    final static String SERVER_PREFIX = "SbkServer";
+public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLogger {
+    final static String CONFIG_FILE = "ram-metrics.properties";
+    final static String SBK_RAM_PREFIX = "Sbk-Ram";
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
     private ConnectionsRWMetricsPrometheusServer prometheusServer;
 
 
-    public SbkServerPrometheusLogger() {
+    public SbkRamPrometheusLogger() {
         super();
         prometheusServer = null;
     }
@@ -90,7 +90,7 @@ public class SbkServerPrometheusLogger extends SbkPrometheusLogger implements Se
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
-        StringBuilder out = new StringBuilder(SERVER_PREFIX);
+        StringBuilder out = new StringBuilder(SBK_RAM_PREFIX);
         out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
         System.out.print(buildResultString(out, bytes, records, recsPerSec, mbPerSec, avgLatency,

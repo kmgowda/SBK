@@ -10,5 +10,7 @@
 
 package io.sbk.api;
 
-public interface ServerParameterOptions extends InputOptions, ServerParameters {
+import io.sbk.perl.ReportLatencies;
+
+public interface RamLogger extends PerformanceLogger, ReportLatencies, ConnectionsCount {
 }

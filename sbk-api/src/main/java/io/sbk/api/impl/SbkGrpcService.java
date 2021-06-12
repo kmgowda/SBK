@@ -13,7 +13,7 @@ package io.sbk.api.impl;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.sbk.api.ConnectionsCount;
-import io.sbk.api.ServerParameters;
+import io.sbk.api.RamParameters;
 import io.sbk.perl.Time;
 
 import java.security.InvalidKeyException;
@@ -26,10 +26,10 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     private final Config config;
     private final ConnectionsCount connectionsCount;
     private final Queue<LatenciesRecord> outQueue;
-    private final ServerParameters params;
+    private final RamParameters params;
 
 
-    public SbkGrpcService(ServerParameters params, Time time, long minLatency, long maxLatency,
+    public SbkGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
                           ConnectionsCount connectionsCount, Queue<LatenciesRecord> outQueue) {
         super();
         clientID = new AtomicInteger(0);

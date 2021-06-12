@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Action;
-import io.sbk.api.ServerParameterOptions;
+import io.sbk.api.RamParameterOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -20,7 +20,7 @@ import org.apache.commons.cli.ParseException;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-final public class SbkServerParameters extends SbkOptions implements ServerParameterOptions {
+final public class SbkRamParameters extends SbkOptions implements RamParameterOptions {
 
     @Getter
     private String storageName;
@@ -31,7 +31,7 @@ final public class SbkServerParameters extends SbkOptions implements ServerParam
     @Getter
     private int maxConnections;
 
-    public SbkServerParameters(String name, int maxConnections) {
+    public SbkRamParameters(String name, int maxConnections) {
         super(name);
         this.maxConnections = maxConnections;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");

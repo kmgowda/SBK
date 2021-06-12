@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
-import io.sbk.api.ServerConfig;
-import io.sbk.api.ServerLogger;
-import io.sbk.api.ServerParameterOptions;
+import io.sbk.api.RamConfig;
+import io.sbk.api.RamLogger;
+import io.sbk.api.RamParameterOptions;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 import io.sbk.perl.impl.MicroSeconds;
@@ -36,11 +36,10 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK Server.
  */
-public class SbkServer {
-    final static String CONFIG_FILE = "server.properties";
-    final static String BANNER_FILE = "server-banner.txt";
-    final static String APP_NAME = "sbkserver";
-
+public class SbkRam {
+    final static String CONFIG_FILE = "ram.properties";
+    final static String BANNER_FILE = "ram-banner.txt";
+    final static String APP_NAME = "sbk-ram";
 
     /**
      * Run the Performance Benchmarking .
@@ -56,7 +55,7 @@ public class SbkServer {
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
     public static void run(final String[] args, final String applicationName,
-                           ServerLogger outLogger) throws ParseException, IllegalArgumentException,
+                           RamLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
 
         final CompletableFuture<Void> ret = runAsync(args, applicationName, outLogger);
@@ -83,7 +82,7 @@ public class SbkServer {
      * @throws ExecutionException If an exception occurred due to writers or readers exceptions.
      */
     public static CompletableFuture<Void> runAsync(final String[] args, final String applicationName,
-                                                   ServerLogger outLogger) throws ParseException,
+                                                   RamLogger outLogger) throws ParseException,
             IllegalArgumentException, IOException, InterruptedException, ExecutionException {
         CompletableFuture<Void> ret;
         try {
@@ -101,7 +100,7 @@ public class SbkServer {
         private final CompletableFuture<Void> ret;
 
         public SbkServerCompletableFutureAsync(final String[] args, final String applicationName,
-                                               ServerLogger outLogger) throws ParseException,
+                                               RamLogger outLogger) throws ParseException,
                 IllegalArgumentException, IOException, InterruptedException, ExecutionException,
                 InstantiationException {
             super();
@@ -136,11 +135,11 @@ public class SbkServer {
 
 
     private static Benchmark createBenchmark(final String[] args, final String applicationName,
-                                             ServerLogger outLogger) throws ParseException, IllegalArgumentException,
+                                             RamLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InstantiationException  {
-        final ServerParameterOptions params;
-        final ServerLogger logger;
-        final ServerConfig serverConfig;
+        final RamParameterOptions params;
+        final RamLogger logger;
+        final RamConfig ramConfig;
         final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkServerName = System.getProperty(Config.SBK_APP_NAME);
@@ -151,7 +150,7 @@ public class SbkServer {
             appName = Objects.requireNonNullElse(sbkServerName, APP_NAME);
         }
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
-        Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info(appName +" Version: "+version);
         Printer.log.info(Config.SBK_APP_HOME+": "+sbkAppHome);
@@ -159,12 +158,12 @@ public class SbkServer {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        serverConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                ServerConfig.class);
+        ramConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+                RamConfig.class);
 
-        logger = Objects.requireNonNullElseGet(outLogger, SbkServerPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, SbkRamPrometheusLogger::new);
 
-        params = new SbkServerParameters(appName, serverConfig.maxConnections);
+        params = new SbkRamParameters(appName, ramConfig.maxConnections);
         logger.addArgs(params);
         params.parseArgs(args);
         if (params.hasOption("help")) {
@@ -183,7 +182,7 @@ public class SbkServer {
         Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
         Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
 
-        return new SbkServerBenchmark(serverConfig, params, logger, time);
+        return new SbkRamBenchmark(ramConfig, params, logger, time);
     }
 
 

@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-public interface ServerParameters {
+public interface RamParameters {
 
     /**
      * Get Storage Name.

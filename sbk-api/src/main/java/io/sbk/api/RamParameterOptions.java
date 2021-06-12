@@ -10,11 +10,5 @@
 
 package io.sbk.api;
 
-public class ServerConfig {
-    public String host;
-    public int port;
-    public int maxConnections;
-    public int maxArraySizeMB;
-    public int maxHashMapSizeMB;
-    public boolean csv;
+public interface RamParameterOptions extends InputOptions, RamParameters {
 }
