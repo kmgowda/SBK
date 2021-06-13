@@ -10,8 +10,11 @@
  */
 
 rootProject.name = 'sbk'
-/* Include your driver below */
+
 include 'sbk-api'
+include 'sbk-ram'
+
+/* Include your driver below */
 include 'driver-pulsar'
 include 'driver-kafka'
 include 'driver-pravega'
@@ -52,4 +55,5 @@ include 'driver-cassandra'
 include 'driver-db2'
 include 'driver-cephs3'
 include 'driver-openio'
+
 

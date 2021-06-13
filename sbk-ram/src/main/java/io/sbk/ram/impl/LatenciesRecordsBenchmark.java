@@ -8,10 +8,11 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 import io.sbk.api.Benchmark;
 import io.sbk.api.RWCount;
+import io.sbk.api.grpc.LatenciesRecord;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatencies;

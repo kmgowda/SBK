@@ -37,3 +37,8 @@ scrape_configs:
     file_sd_configs:
       - files:
         - 'targets.json'
+
+  - job_name: 'sbk-ram'
+    file_sd_configs:
+      - files:
+          - 'ram-targets.json'

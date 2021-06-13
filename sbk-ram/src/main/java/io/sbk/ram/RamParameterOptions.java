@@ -8,13 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.ram;
 
-public class ServerConfig {
-    public String host;
-    public int port;
-    public int maxConnections;
-    public int maxArraySizeMB;
-    public int maxHashMapSizeMB;
-    public boolean csv;
+import io.sbk.api.InputOptions;
+
+public interface RamParameterOptions extends InputOptions, RamParameters {
 }

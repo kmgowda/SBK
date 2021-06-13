@@ -10,7 +10,7 @@
 
 package io.sbk.main;
 
-import io.sbk.api.impl.SbkServer;
+import io.sbk.ram.impl.SbkRam;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
@@ -20,11 +20,11 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK Server.
  */
-public class SbkServerMain {
+public class SbkRamMain {
 
     public static void main(final String[] args) {
         try {
-            SbkServer.run(args, null, null);
+            SbkRam.run(args, null, null);
         } catch (ParseException | IllegalArgumentException | IOException |
                 TimeoutException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

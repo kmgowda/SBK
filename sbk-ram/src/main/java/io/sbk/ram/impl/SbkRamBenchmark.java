@@ -7,15 +7,16 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
-import io.sbk.api.ServerConfig;
-import io.sbk.api.ServerLogger;
-import io.sbk.api.ServerParameterOptions;
+import io.sbk.ram.RamConfig;
+import io.sbk.ram.RamLogger;
+import io.sbk.ram.RamParameterOptions;
+import io.sbk.api.grpc.LatenciesRecord;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
@@ -34,11 +35,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Class for performing the benchmark.
  */
-public class SbkServerBenchmark implements Benchmark {
-    final ServerConfig serverConfig;
+public class SbkRamBenchmark implements Benchmark {
+    final RamConfig ramConfig;
     final private Time time;
-    final private ServerLogger logger;
-    final private ServerParameterOptions params;
+    final private RamLogger logger;
+    final private RamParameterOptions params;
     final private LinkedBlockingQueue<LatenciesRecord> queue;
     final private LatencyRecordWindow window;
     final private Server server;
@@ -53,15 +54,15 @@ public class SbkServerBenchmark implements Benchmark {
     /**
      * Create SBK Server Benchmark.
      *
-     * @param  serverConfig         Configuration parameters
+     * @param  ramConfig         Configuration parameters
      * @param  params               Benchmarking input Parameters
      * @param  logger               output logger
      * @param  time                 time interface
      * @throws IOException          If Exception occurs.
      */
-    public SbkServerBenchmark(ServerConfig serverConfig, ServerParameterOptions params,
-                              ServerLogger logger, Time time) throws IOException {
-        this.serverConfig = serverConfig;
+    public SbkRamBenchmark(RamConfig ramConfig, RamParameterOptions params,
+                           RamLogger logger, Time time) throws IOException {
+        this.ramConfig = ramConfig;
         this.params = params;
         this.logger = logger;
         this.time = time;
@@ -78,7 +79,7 @@ public class SbkServerBenchmark implements Benchmark {
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
                 logger, logger, logger, queue);
         service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, queue);
-        server = ServerBuilder.forPort(serverConfig.port).addService(service).build();
+        server = ServerBuilder.forPort(ramConfig.port).addService(service).build();
         retFuture = null;
     }
 
@@ -88,14 +89,14 @@ public class SbkServerBenchmark implements Benchmark {
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
         final LatencyRecordWindow window;
 
-        if (memSizeMB < serverConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
+        if (memSizeMB < ramConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
             Printer.log.info("Window Latency Store: Array");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time,
-                    serverConfig.maxHashMapSizeMB);
+                    ramConfig.maxHashMapSizeMB);
             Printer.log.info("Window Latency Store: HashMap");
 
         }

@@ -7,10 +7,11 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 import io.sbk.api.Action;
-import io.sbk.api.ServerParameterOptions;
+import io.sbk.ram.RamParameterOptions;
+import io.sbk.api.impl.SbkOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -20,7 +21,7 @@ import org.apache.commons.cli.ParseException;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-final public class SbkServerParameters extends SbkOptions implements ServerParameterOptions {
+final public class SbkRamParameters extends SbkOptions implements RamParameterOptions {
 
     @Getter
     private String storageName;
@@ -31,7 +32,7 @@ final public class SbkServerParameters extends SbkOptions implements ServerParam
     @Getter
     private int maxConnections;
 
-    public SbkServerParameters(String name, int maxConnections) {
+    public SbkRamParameters(String name, int maxConnections) {
         super(name);
         this.maxConnections = maxConnections;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");
@@ -66,7 +67,5 @@ final public class SbkServerParameters extends SbkOptions implements ServerParam
         maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
 
     }
-
-
 
 }

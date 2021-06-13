@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-import io.sbk.perl.ReportLatencies;
-
-public interface ServerLogger extends PerformanceLogger, ReportLatencies, ConnectionsCount {
+public class RamHostConfig {
+    public String host;
+    public int port;
 }

@@ -8,9 +8,11 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.ram;
 
-public interface ServerParameters {
+import io.sbk.api.Action;
+
+public interface RamParameters {
 
     /**
      * Get Storage Name.
