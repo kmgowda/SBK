@@ -23,9 +23,10 @@ import io.sbk.perl.Time;
 import java.security.InvalidKeyException;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
-    private final AtomicInteger clientID;
+    private final AtomicLong clientID;
     private final AtomicInteger connections;
     private final Config config;
     private final ConnectionsCount connectionsCount;
@@ -36,7 +37,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     public SbkGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
                           ConnectionsCount connectionsCount, Queue<LatenciesRecord> outQueue) {
         super();
-        clientID = new AtomicInteger(0);
+        clientID = new AtomicLong(0);
         connections = new AtomicInteger(0);
         Config.Builder builder = Config.newBuilder();
         builder.setStorageName(params.getStorageName());

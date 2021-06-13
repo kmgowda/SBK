@@ -43,7 +43,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static int LATENCY_BYTES = 16;
     public RamHostConfig ramHostConfig;
     private boolean enable;
-    private int clientID;
+    private long clientID;
     private long seqNum;
     private int  latencyBytes;
     private boolean blocking;
