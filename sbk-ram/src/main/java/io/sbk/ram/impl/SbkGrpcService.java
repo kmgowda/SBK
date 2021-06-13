@@ -14,10 +14,10 @@ import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.sbk.ram.ConnectionsCount;
 import io.sbk.ram.RamParameters;
-import io.sbk.api.grpc.ClientID;
-import io.sbk.api.grpc.Config;
-import io.sbk.api.grpc.LatenciesRecord;
-import io.sbk.api.grpc.ServiceGrpc;
+import io.sbk.grpc.ClientID;
+import io.sbk.grpc.Config;
+import io.sbk.grpc.LatenciesRecord;
+import io.sbk.grpc.ServiceGrpc;
 import io.sbk.perl.Time;
 
 import java.security.InvalidKeyException;
@@ -52,7 +52,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
 
     @Override
     public void getConfig(com.google.protobuf.Empty request,
-                          io.grpc.stub.StreamObserver<io.sbk.api.grpc.Config> responseObserver) {
+                          io.grpc.stub.StreamObserver<io.sbk.grpc.Config> responseObserver) {
         if (connections.get() < params.getMaxConnections()) {
             responseObserver.onNext(config);
             responseObserver.onCompleted();
@@ -63,8 +63,8 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public void registerClient(io.sbk.api.grpc.Config request,
-                               io.grpc.stub.StreamObserver<io.sbk.api.grpc.ClientID> responseObserver) {
+    public void registerClient(io.sbk.grpc.Config request,
+                               io.grpc.stub.StreamObserver<io.sbk.grpc.ClientID> responseObserver) {
         responseObserver.onNext(ClientID.newBuilder().setId(clientID.incrementAndGet()).build());
         responseObserver.onCompleted();
         connectionsCount.incrementConnections(1);
@@ -73,7 +73,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
 
 
     @Override
-    public void addLatenciesRecord(io.sbk.api.grpc.LatenciesRecord request,
+    public void addLatenciesRecord(io.sbk.grpc.LatenciesRecord request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         try {
             outQueue.add(request);
@@ -91,7 +91,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public void closeClient(io.sbk.api.grpc.ClientID request,
+    public void closeClient(io.sbk.grpc.ClientID request,
                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         connectionsCount.decrementConnections(1);
         connections.decrementAndGet();
