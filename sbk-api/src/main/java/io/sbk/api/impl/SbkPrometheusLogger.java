@@ -44,7 +44,7 @@ public class SbkPrometheusLogger extends SystemLogger {
                 percentiles, time, metricsConfig);
     }
 
-    public InputStream getConfigFile() {
+    public InputStream getMetricsConfigStream() {
         return  io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
@@ -54,7 +54,7 @@ public class SbkPrometheusLogger extends SystemLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            metricsConfig = mapper.readValue(getConfigFile(), MetricsConfig.class);
+            metricsConfig = mapper.readValue(getMetricsConfigStream(), MetricsConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);

@@ -40,7 +40,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
     }
 
 
-    public InputStream getConfigFile() {
+    public InputStream getMetricsConfigStream() {
         return  io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
