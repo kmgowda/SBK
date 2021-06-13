@@ -10,7 +10,7 @@
 
 package io.sbk.main;
 
-import io.sbk.api.impl.SbkRam;
+import io.sbk.ram.impl.SbkRam;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;

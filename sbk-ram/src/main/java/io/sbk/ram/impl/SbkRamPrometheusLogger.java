@@ -7,16 +7,19 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 import io.sbk.api.Action;
 import io.sbk.api.Config;
-import io.sbk.api.RamLogger;
+import io.sbk.ram.RamLogger;
 import io.sbk.api.InputOptions;
+import io.sbk.api.impl.RWMetricsPrometheusServer;
+import io.sbk.api.impl.SbkPrometheusLogger;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -36,9 +39,9 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
         prometheusServer = null;
     }
 
-    @Override
-    public String getConfigFile() {
-        return CONFIG_FILE;
+
+    public InputStream getConfigFile() {
+        return  io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
     @Override

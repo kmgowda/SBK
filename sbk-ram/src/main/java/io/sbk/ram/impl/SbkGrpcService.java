@@ -8,12 +8,12 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
-import io.sbk.api.ConnectionsCount;
-import io.sbk.api.RamParameters;
+import io.sbk.ram.ConnectionsCount;
+import io.sbk.ram.RamParameters;
 import io.sbk.api.grpc.ClientID;
 import io.sbk.api.grpc.Config;
 import io.sbk.api.grpc.LatenciesRecord;

@@ -7,10 +7,11 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 import io.sbk.api.Action;
-import io.sbk.api.RamParameterOptions;
+import io.sbk.ram.RamParameterOptions;
+import io.sbk.api.impl.SbkOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;

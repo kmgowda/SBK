@@ -7,15 +7,15 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
-import io.sbk.api.RamConfig;
-import io.sbk.api.RamLogger;
-import io.sbk.api.RamParameterOptions;
+import io.sbk.ram.RamConfig;
+import io.sbk.ram.RamLogger;
+import io.sbk.ram.RamParameterOptions;
 import io.sbk.api.grpc.LatenciesRecord;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;

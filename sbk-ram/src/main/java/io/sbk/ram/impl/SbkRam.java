@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
-import io.sbk.api.RamConfig;
-import io.sbk.api.RamLogger;
-import io.sbk.api.RamParameterOptions;
+import io.sbk.ram.RamConfig;
+import io.sbk.ram.RamLogger;
+import io.sbk.ram.RamParameterOptions;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 import io.sbk.perl.impl.MicroSeconds;
@@ -141,7 +141,7 @@ public class SbkRam {
         final RamLogger logger;
         final RamConfig ramConfig;
         final Time time;
-        final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
+        final String version = io.sbk.ram.impl.SbkRam.class.getPackage().getImplementationVersion();
         final String sbkServerName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         String appName = applicationName;
@@ -149,7 +149,7 @@ public class SbkRam {
         if (appName == null) {
             appName = Objects.requireNonNullElse(sbkServerName, APP_NAME);
         }
-        Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
+        Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info(appName +" Version: "+version);

@@ -8,9 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.ram.impl;
 
-import io.sbk.api.ConnectionsCount;
+import io.sbk.ram.ConnectionsCount;
+import io.sbk.api.impl.RWMetricsPrometheusServer;
 import io.sbk.perl.MetricsConfig;
 import io.sbk.perl.Time;
 

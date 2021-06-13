@@ -20,6 +20,7 @@ import io.sbk.perl.Print;
 import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
+import java.io.InputStream;
 
 
 /**
@@ -38,16 +39,14 @@ public class SbkPrometheusLogger extends SystemLogger {
         prometheusServer = null;
     }
 
-    public String getConfigFile() {
-        return CONFIG_FILE;
-    }
-
-
     public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
         return new RWMetricsPrometheusServer(Config.NAME+" "+storageName, action.name(),
                 percentiles, time, metricsConfig);
     }
 
+    public InputStream getConfigFile() {
+        return  io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+    }
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
@@ -55,8 +54,7 @@ public class SbkPrometheusLogger extends SystemLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            metricsConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(getConfigFile()),
-                    MetricsConfig.class);
+            metricsConfig = mapper.readValue(getConfigFile(), MetricsConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);

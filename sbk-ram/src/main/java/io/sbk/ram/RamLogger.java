@@ -8,7 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.ram;
 
-public interface RamParameterOptions extends InputOptions, RamParameters {
+import io.sbk.api.PerformanceLogger;
+import io.sbk.perl.ReportLatencies;
+
+public interface RamLogger extends PerformanceLogger, ReportLatencies, ConnectionsCount {
 }
