@@ -16,27 +16,23 @@ import io.sbk.ram.ConnectionsCount;
 import io.sbk.ram.RamParameters;
 import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;
-import io.sbk.grpc.LatenciesRecord;
 import io.sbk.grpc.ServiceGrpc;
 import io.sbk.perl.Time;
-
+import io.sbk.ram.RamRegistry;
 import java.security.InvalidKeyException;
-import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
-    private final AtomicInteger clientID;
     private final AtomicInteger connections;
     private final Config config;
     private final ConnectionsCount connectionsCount;
-    private final Queue<LatenciesRecord> outQueue;
+    private final RamRegistry registry;
     private final RamParameters params;
 
 
     public SbkGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
-                          ConnectionsCount connectionsCount, Queue<LatenciesRecord> outQueue) {
+                          ConnectionsCount connectionsCount, RamRegistry registry) {
         super();
-        clientID = new AtomicInteger(0);
         connections = new AtomicInteger(0);
         Config.Builder builder = Config.newBuilder();
         builder.setStorageName(params.getStorageName());
@@ -47,7 +43,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
         config = builder.build();
         this.params = params;
         this.connectionsCount = connectionsCount;
-        this.outQueue = outQueue;
+        this.registry = registry;
     }
 
     @Override
@@ -65,7 +61,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void registerClient(io.sbk.grpc.Config request,
                                io.grpc.stub.StreamObserver<io.sbk.grpc.ClientID> responseObserver) {
-        responseObserver.onNext(ClientID.newBuilder().setId(clientID.incrementAndGet()).build());
+        responseObserver.onNext(ClientID.newBuilder().setId(registry.getID()).build());
         responseObserver.onCompleted();
         connectionsCount.incrementConnections(1);
         connections.incrementAndGet();
@@ -76,7 +72,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     public void addLatenciesRecord(io.sbk.grpc.LatenciesRecord request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         try {
-            outQueue.add(request);
+            registry.enQueue(request);
             if (responseObserver != null) {
                 responseObserver.onNext(Empty.newBuilder().build());
                 responseObserver.onCompleted();

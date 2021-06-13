@@ -51,7 +51,8 @@ final public class SbkRamParameters extends SbkOptions implements RamParameterOp
         storageName = getOptionValue("class", null);
 
         if (storageName == null) {
-            throw new IllegalArgumentException("Storage class name should be supplied");
+            throw new IllegalArgumentException("storage class name is NOT supplied! " +
+                    ", run with '-help' to see the options.");
         }
 
         String actionString = getOptionValue("action", "r");

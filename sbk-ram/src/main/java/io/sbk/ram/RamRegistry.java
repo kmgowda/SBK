@@ -8,10 +8,14 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.ram;
 
-public class RamHostConfig {
-    public String host;
-    public int port;
-    public int maxRecordSizeMB;
+import io.sbk.grpc.LatenciesRecord;
+
+public interface RamRegistry {
+
+    long getID();
+
+    void enQueue(LatenciesRecord record);
+
 }

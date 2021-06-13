@@ -31,7 +31,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
     final static String SBK_RAM_PREFIX = "Sbk-Ram";
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
-    private ConnectionsRWMetricsPrometheusServer prometheusServer;
+    private RamMetricsPrometheusServer prometheusServer;
 
 
     public SbkRamPrometheusLogger() {
@@ -47,7 +47,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
     @Override
     public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
         if (prometheusServer == null) {
-            prometheusServer = new ConnectionsRWMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
+            prometheusServer = new RamMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
                     percentiles, time, metricsConfig);
         }
         return prometheusServer;

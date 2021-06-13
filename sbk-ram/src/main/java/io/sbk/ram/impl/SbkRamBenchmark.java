@@ -44,7 +44,7 @@ public class SbkRamBenchmark implements Benchmark {
     final private LatencyRecordWindow window;
     final private Server server;
     final private SbkGrpcService service;
-    final private LatenciesRecordsBenchmark benchmark;
+    final private RamBenchmark benchmark;
     final private double[] percentileFractions;
 
 
@@ -75,10 +75,10 @@ public class SbkRamBenchmark implements Benchmark {
 
         queue = new LinkedBlockingQueue<>();
         window = createLatencyWindow();
-        benchmark = new LatenciesRecordsBenchmark(window, time,
+        benchmark = new RamBenchmark(ramConfig.maxQueues, ramConfig.idleMS, window, time,
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
-                logger, logger, logger, queue);
-        service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, queue);
+                logger, logger, logger);
+        service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
         server = ServerBuilder.forPort(ramConfig.port).addService(service).build();
         retFuture = null;
     }
@@ -86,7 +86,7 @@ public class SbkRamBenchmark implements Benchmark {
 
     private LatencyRecordWindow createLatencyWindow() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
-        final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / (1024 * 1024);
+        final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
         final LatencyRecordWindow window;
 
         if (memSizeMB < ramConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {

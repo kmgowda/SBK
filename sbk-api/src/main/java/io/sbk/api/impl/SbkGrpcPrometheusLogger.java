@@ -39,13 +39,14 @@ import java.util.concurrent.TimeUnit;
 public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static String CONFIG_FILE = "ramhost.properties";
     final static String DISABLE_STRING = "no";
-    final static int MAX_LATENCY_BYTES = 1024 * 1024 * 4;
-    final static int LATENCY_BYTES = 16;
+    final static int LATENCY_MAP_BYTES = 16;
+
     public RamHostConfig ramHostConfig;
     private boolean enable;
-    private int clientID;
+    private long clientID;
     private long seqNum;
-    private int  latencyBytes;
+    private int latencyBytes;
+    private int maxLatencyBytes;
     private boolean blocking;
     private LatencyRecorder recorder;
     private ManagedChannel channel;
@@ -90,12 +91,13 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
+        maxLatencyBytes = ramHostConfig.maxRecordSizeMB * PerlConfig.BYTES_PER_MB;
         ramHostConfig.host = DISABLE_STRING;
         params.addOption("ram", true, "SBK RAM host" +
                 "; default host: " + ramHostConfig.host +" ; disable if this parameter is set to: " +DISABLE_STRING);
         params.addOption("rport", true, "SBK RAM Port" +
                 "; default port: " + ramHostConfig.port );
-        params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
+        //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
     }
 
 
@@ -108,7 +110,8 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             return;
         }
         ramHostConfig.port = Integer.parseInt(params.getOptionValue("rport", Integer.toString(ramHostConfig.port)));
-        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
+        //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
+        blocking = false;
     }
 
 
@@ -191,7 +194,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         Printer.log.info("SBK GRPC Logger Shutdown");
     }
 
-    public void addLatenciesRecord() {
+    public void sendLatenciesRecord() {
         builder.setClientID(clientID);
         builder.setSequenceNumber(++seqNum);
         builder.setMaxReaders(maxReaders.get());
@@ -228,14 +231,14 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
             return;
         }
 
-        if (latencyBytes >= MAX_LATENCY_BYTES) {
-            addLatenciesRecord();
+        if (latencyBytes >= maxLatencyBytes) {
+            sendLatenciesRecord();
         }
         if (recorder.record(bytes, events, latency)) {
             final Long cnt = builder.getLatencyMap().getOrDefault(latency, 0L);
             builder.putLatency(latency, cnt + events);
             if (cnt == 0) {
-                latencyBytes += LATENCY_BYTES;
+                latencyBytes += LATENCY_MAP_BYTES;
             }
         }
     }
@@ -246,7 +249,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         super.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
         if (latencyBytes > 0) {
-            addLatenciesRecord();
+            sendLatenciesRecord();
         }
     }
 
