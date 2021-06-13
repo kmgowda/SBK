@@ -13,7 +13,6 @@ package io.sbk.ram.impl;
 import io.sbk.api.Benchmark;
 import io.sbk.api.RWCount;
 import io.sbk.grpc.LatenciesRecord;
-import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.Time;
@@ -67,7 +66,6 @@ public class LatenciesRecordsBenchmark implements Benchmark {
         Printer.log.info("LatenciesRecord Benchmark Started" );
         long currentTime = time.getCurrentTime();
         window.reset(currentTime);
-        final LatencyRecord latencyRecord = new LatencyRecord();
         final RW rwStore = new RW();
         while (doWork) {
             record = queue.poll(reportingIntervalMS, TimeUnit.MILLISECONDS);
