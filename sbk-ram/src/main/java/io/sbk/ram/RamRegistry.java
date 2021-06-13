@@ -10,11 +10,12 @@
 
 package io.sbk.ram;
 
-public class RamConfig {
-    public int port;
-    public int maxConnections;
-    public int maxArraySizeMB;
-    public int maxHashMapSizeMB;
-    public int maxQueues;
-    public int idleMS;
+import io.sbk.grpc.LatenciesRecord;
+
+public interface RamRegistry {
+
+    long getID();
+
+    void enQueue(LatenciesRecord record);
+
 }

@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static String CONFIG_FILE = "ramhost.properties";
     final static String DISABLE_STRING = "no";
-    final static int MAX_LATENCY_BYTES = 1024 * 1024 * 4;
+    final static int MAX_LATENCY_BYTES = 4 * PerlConfig.BYTES_PER_MB;
     final static int LATENCY_BYTES = 16;
     public RamHostConfig ramHostConfig;
     private boolean enable;

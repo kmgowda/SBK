@@ -18,11 +18,11 @@ import io.sbk.perl.Time;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ConnectionsRWMetricsPrometheusServer extends RWMetricsPrometheusServer implements ConnectionsCount  {
+public class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implements ConnectionsCount  {
     final private AtomicInteger connections;
     final private AtomicInteger maxConnections;
 
-    public ConnectionsRWMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,
+    public RamMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,
                                       MetricsConfig config)  throws IOException {
         super(header, action, percentiles, time, config);
         final String name = metricPrefix + "_Connections";
