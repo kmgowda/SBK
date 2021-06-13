@@ -13,4 +13,5 @@ package io.sbk.api;
 public class RamHostConfig {
     public String host;
     public int port;
+    public int maxRecordSizeMB;
 }
