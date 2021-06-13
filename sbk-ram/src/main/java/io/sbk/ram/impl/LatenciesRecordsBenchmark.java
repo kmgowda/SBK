@@ -12,7 +12,7 @@ package io.sbk.ram.impl;
 
 import io.sbk.api.Benchmark;
 import io.sbk.api.RWCount;
-import io.sbk.api.grpc.LatenciesRecord;
+import io.sbk.grpc.LatenciesRecord;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatencies;
