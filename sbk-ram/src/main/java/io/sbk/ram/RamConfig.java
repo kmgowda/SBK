@@ -11,10 +11,8 @@
 package io.sbk.ram;
 
 public class RamConfig {
-    public String host;
     public int port;
     public int maxConnections;
     public int maxArraySizeMB;
     public int maxHashMapSizeMB;
-    public boolean csv;
 }
