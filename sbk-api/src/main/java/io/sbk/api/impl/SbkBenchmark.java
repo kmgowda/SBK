@@ -108,7 +108,7 @@ public class SbkBenchmark implements Benchmark {
             this.maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
         }
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 20;
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 18;
         if (perlConfig.fork) {
             executor = new ForkJoinPool(threadCount);
         } else {
@@ -209,13 +209,13 @@ public class SbkBenchmark implements Benchmark {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, maxQs, params, writeStats.getSendChannel(),
-                                dType, time, writers.get(i)))
+                                dType, time, writers.get(i), executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, maxQs,  params, null,
-                                dType, time, writers.get(i)))
+                                dType, time, writers.get(i), executor))
                         .collect(Collectors.toList());
             }
         } else {
@@ -226,7 +226,7 @@ public class SbkBenchmark implements Benchmark {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,
-                            readStats.getSendChannel(), dType, time, readers.get(i)))
+                            readStats.getSendChannel(), dType, time, readers.get(i), executor))
                     .collect(Collectors.toList());
         }  else {
             sbkReaders = null;

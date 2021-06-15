@@ -25,6 +25,7 @@ import io.sbk.system.Printer;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Writer Benchmarking Implementation.
@@ -37,13 +38,15 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private RateController rCnt;
     final private Object payload;
     final private int dataSize;
+    final private ExecutorService executor;
 
     public SbkWriter(int writerID, int idMax, ParameterOptions params, SendChannel sendChannel,
-                     DataType<Object> dType, Time time, DataWriter<Object> writer) {
+                     DataType<Object> dType, Time time, DataWriter<Object> writer, ExecutorService executor) {
         super(writerID, idMax, params, sendChannel);
         this.dType = dType;
-        this.writer = writer;
         this.time = time;
+        this.writer = writer;
+        this.executor = executor;
         this.perf = createBenchmark();
         this.rCnt = new SbkRateController();
         this.payload = dType.create(params.getRecordSize());
@@ -65,7 +68,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-        });
+        }, executor);
     }
 
     private BiConsumer createBenchmark() {

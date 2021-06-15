@@ -24,6 +24,7 @@ import io.sbk.system.Printer;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Reader Benchmarking Implementation.
@@ -34,13 +35,15 @@ public class SbkReader extends Worker implements RunBenchmark {
     final private Time time;
     final private RateController rCnt;
     final private BiConsumer perf;
+    final private ExecutorService executor;
 
     public SbkReader(int readerId, int idMax, ParameterOptions params, SendChannel sendChannel,
-                     DataType<Object> dType, Time time, DataReader<Object> reader) {
+                     DataType<Object> dType, Time time, DataReader<Object> reader, ExecutorService executor) {
         super(readerId, idMax, params, sendChannel);
         this.dType = dType;
-        this.reader = reader;
         this.time = time;
+        this.reader = reader;
+        this.executor = executor;
         this.rCnt = new SbkRateController();
         this.perf = createBenchmark();
     }
@@ -62,7 +65,7 @@ public class SbkReader extends Worker implements RunBenchmark {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-        });
+        }, executor);
     }
 
     private BiConsumer createBenchmark() {
