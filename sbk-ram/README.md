@@ -143,6 +143,24 @@ Total : File Reading     0 Writers,     0 Readers,      0 Max Writers,     1 Max
 Note that option  **-ram** is used to supply the SBK-RAM host ; In the above example, its localhost and default port 
 is 9716.
 
+## SBK-RAM Docker Containers
+The SBK-RAM Docker images are available at [SBK Docker](https://hub.docker.com/repository/docker/kmgowda/sbk-ram)
+
+The SBK docker image pull command is
+```
+docker pull kmgowda/sbk-ram
+```
+
+you can straightaway run the docker image too, For example
+```
+docker run  -p 127.0.0.1:9716:9716/tcp -p 127.0.0.1:9719:9719/tcp  kmgowda/sbk-ram:latest -class file -time ns
+```
+* Note that the option **-p 127.0.0.1:9719:9719/tcp** redirects the 9719 port to local port to send the performance
+  metric data for Prometheus.
+* Another option **-p 127.0.0.1:9716:9716/tcp** redirect the port 9716 port to local port to receive the performance 
+  results from SBK instances.
+* Avoid using the **--network host** option , because this option overrides the port redirection.
+
 
 ## Running SBK-RAM Docker Compose
 The SBK-RAM docker compose consists of SBK-RAM docker image, Grafana and prometheus docker images.
@@ -150,15 +168,23 @@ The [grafana image](https://github.com/kmgowda/SBK/blob/master/grafana/Dockerfil
 
 As an example, just follow the below steps to see the performance graphs
 
-1. In the sbk-ram directory run the 'sbk-ram' service of the [docker compose](https://github.
-   com/kmgowda/SBK/blob/master/docker-compose.yml) file as follows.
+1. In the sbk-ram directory build the 'sbk-ram' service of the [docker compose](https://github.com/kmgowda/SBK/blob/master/sbk-ram/docker-compose.yml) file as follows.
+
+   ```
+   <SBK dir>% docker-compose build
+
+   ```
+   
+1.  Run the 'sbk-ram' service as follows.
 
    ```
    <SBK dir>% docker-compose run  -p 127.0.0.1:9716:9716/tcp  sbk-ram  -class file -time ns
 
    ```
-    Note that , 9716 is the exposed port from sbk-ram container to received the benchmark results from remote SBK 
+   Note that , 9716 is the exposed port from sbk-ram container to received the benchmark results from remote SBK 
    instances via localhost.
+   The option **-class** is same as in SBK command/application. you should use same storage class and time unit in 
+   SBK instances too. 
 
 1. login to [grafana local host port 3000](http://localhost:3000) with username **admin** and password **sbk**
 1. go to dashboard menu and pick the dashboard of the storage device on which you are running the performance benchmarking.

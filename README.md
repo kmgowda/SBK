@@ -233,7 +233,14 @@ The [grafana image](https://github.com/kmgowda/SBK/blob/master/grafana/Dockerfil
 
 As an example, just follow the below steps to see the performance graphs
 
-1. In the SBK directory run the 'SBK' service of the [docker compose](https://github.com/kmgowda/SBK/blob/master/docker-compose.yml) file as follows.
+1. In the SBK directory build the 'SBK' service of the [docker compose](https://github.com/kmgowda/SBK/blob/master/docker-compose.yml) file as follows.
+
+   ```
+   <SBK dir>% docker-compose build 
+
+   ```
+
+1. Run the 'SBK' service as follows.
 
    ```
    <SBK dir>% docker-compose run sbk  -class concurrentq -writers 1  -readers 5 -size 1000 -seconds 120 
