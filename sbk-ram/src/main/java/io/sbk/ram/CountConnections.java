@@ -14,13 +14,11 @@ public interface CountConnections {
 
     /**
      * Increment.
-     * @param val increment value.
      */
-    void incrementConnections(int val);
+    void incrementConnections();
 
     /**
      * Decrement.
-     * @param val decrement value.
      */
-    void decrementConnections(int val);
+    void decrementConnections();
 }

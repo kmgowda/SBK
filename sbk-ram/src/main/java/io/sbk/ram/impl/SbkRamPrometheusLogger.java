@@ -65,16 +65,20 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
 
 
     @Override
-    public void incrementConnections(int val) {
-        prometheusServer.incrementConnections(val);
-        connections.set(connections.get() + val);
-        maxConnections.set(maxConnections.get() + val);
+    public void incrementConnections() {
+        connections.incrementAndGet();
+        maxConnections.incrementAndGet();
+        if (prometheusServer != null) {
+            prometheusServer.incrementConnections();
+        }
     }
 
     @Override
-    public void decrementConnections(int val) {
-        prometheusServer.decrementConnections(val);
-        connections.set(connections.get()-val);
+    public void decrementConnections() {
+        connections.decrementAndGet();
+        if (prometheusServer != null) {
+            prometheusServer.decrementConnections();
+        }
     }
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
@@ -93,8 +97,10 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
-        prometheusServer.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+        if (prometheusServer != null) {
+            prometheusServer.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                    invalid, lowerDiscard, higherDiscard, percentileValues);
+        }
     }
 
     @Override

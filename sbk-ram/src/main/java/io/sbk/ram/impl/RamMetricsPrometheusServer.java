@@ -31,12 +31,14 @@ public class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implem
         this.maxConnections = this.registry.gauge(maxName, new AtomicInteger());
     }
 
-    public void incrementConnections(int val) {
-        connections.set(connections.get() + val);
-        maxConnections.set(maxConnections.get() + val);
+    @Override
+    public void incrementConnections() {
+        connections.incrementAndGet();
+        maxConnections.incrementAndGet();
     }
 
-    public void decrementConnections(int val) {
-        connections.set(connections.get()-val);
+    @Override
+    public void decrementConnections() {
+        connections.decrementAndGet();
     }
 }
