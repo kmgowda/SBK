@@ -57,7 +57,7 @@ public class SbkReader extends Worker implements RunBenchmark {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
         return  CompletableFuture.runAsync( () -> {
-            rCount.incrementReaders(1);
+            rCount.incrementReaders();
             try {
                 if (secondsToRun > 0) {
                     Printer.log.info("Reader " + id +" started , run seconds: "+secondsToRun);
@@ -71,7 +71,7 @@ public class SbkReader extends Worker implements RunBenchmark {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            rCount.decrementReaders(1);
+            rCount.decrementReaders();
         }, executor);
     }
 

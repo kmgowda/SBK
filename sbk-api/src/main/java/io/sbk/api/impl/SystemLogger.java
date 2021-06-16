@@ -32,14 +32,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SystemLogger implements Logger {
     final private static String LOGGER_FILE = "logger.properties";
+    final public AtomicInteger writers;
+    final public AtomicInteger readers;
+    final public AtomicInteger maxWriters;
+    final public AtomicInteger maxReaders;
     public String storageName;
     public String prefix;
     public String timeUnit;
     public InputOptions params;
-    public AtomicInteger writers;
-    public AtomicInteger readers;
-    public AtomicInteger maxWriters;
-    public AtomicInteger maxReaders;
     public double[] percentiles;
     public Action action;
     public Time time;
@@ -51,6 +51,10 @@ public class SystemLogger implements Logger {
 
     public SystemLogger() {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
+        this.writers = new AtomicInteger(0);
+        this.readers = new AtomicInteger(0);
+        this.maxWriters = new AtomicInteger(0);
+        this.maxReaders = new AtomicInteger(0);
     }
 
 
@@ -121,10 +125,6 @@ public class SystemLogger implements Logger {
                 throw new IllegalArgumentException();
             }
         }
-        this.writers = new AtomicInteger(0);
-        this.readers = new AtomicInteger(0);
-        this.maxWriters = new AtomicInteger(0);
-        this.maxReaders = new AtomicInteger(0);
     }
 
     @Override
@@ -157,23 +157,16 @@ public class SystemLogger implements Logger {
     }
 
 
-    private void incrementAtomic(AtomicInteger counter,   int val) {
-        counter.set(counter.get()+val);
-    }
 
-    private void decrementAtomic(AtomicInteger counter, int val) {
-        counter.set(counter.get()-val);
+    @Override
+    public void incrementWriters() {
+        writers.incrementAndGet();
+        maxWriters.incrementAndGet();
     }
 
     @Override
-    public void incrementWriters(int val) {
-        incrementAtomic(writers,  val);
-        incrementAtomic(maxWriters,  val);
-    }
-
-    @Override
-    public void decrementWriters(int val) {
-        decrementAtomic(writers, val);
+    public void decrementWriters() {
+        writers.decrementAndGet();
     }
 
     @Override
@@ -187,14 +180,14 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public void incrementReaders(int val) {
-        incrementAtomic(readers, val);
-        incrementAtomic(maxReaders, val);
+    public void incrementReaders() {
+        readers.incrementAndGet();
+        maxReaders.incrementAndGet();
     }
 
     @Override
-    public void decrementReaders(int val) {
-        decrementAtomic(readers, val);
+    public void decrementReaders() {
+        readers.decrementAndGet();
     }
 
     @Override

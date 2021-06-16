@@ -61,7 +61,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
         return  CompletableFuture.runAsync( () -> {
-            wCount.incrementWriters(1);
+            wCount.incrementWriters();
             try {
                 if (secondsToRun > 0) {
                     Printer.log.info("Writer " + id +" started , run seconds: "+secondsToRun);
@@ -73,7 +73,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            wCount.decrementWriters(1);
+            wCount.decrementWriters();
         }, executor);
     }
 

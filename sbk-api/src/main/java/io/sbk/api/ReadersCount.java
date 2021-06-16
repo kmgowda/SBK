@@ -14,13 +14,11 @@ public interface ReadersCount {
 
     /**
      * Increment Readers.
-     * @param val increment value.
      */
-    void incrementReaders(int val);
+    void incrementReaders();
 
     /**
      * Decrement Readers.
-     * @param val decrement value.
      */
-    void decrementReaders(int val);
+    void decrementReaders();
 }

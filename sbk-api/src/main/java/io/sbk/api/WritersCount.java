@@ -14,14 +14,12 @@ public interface WritersCount {
 
     /**
      * Increment Writers.
-     * @param val increment value.
      */
-    void incrementWriters(int val);
+    void incrementWriters();
 
     /**
      * Decrement Writers.
-     * @param val decrement value.
      */
-    void decrementWriters(int val);
+    void decrementWriters();
 
 }
