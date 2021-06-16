@@ -15,6 +15,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
+import io.sbk.api.WritersCount;
 import io.sbk.perl.RunBenchmark;
 
 import io.sbk.perl.SendChannel;
@@ -34,18 +35,21 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataWriter<Object> writer;
     final private Time time;
+    final private WritersCount wCount;
+    final private ExecutorService executor;
     final private BiConsumer perf;
     final private RateController rCnt;
     final private Object payload;
     final private int dataSize;
-    final private ExecutorService executor;
 
     public SbkWriter(int writerID, int idMax, ParameterOptions params, SendChannel sendChannel,
-                     DataType<Object> dType, Time time, DataWriter<Object> writer, ExecutorService executor) {
+                     DataType<Object> dType, Time time, DataWriter<Object> writer,
+                     WritersCount wCount, ExecutorService executor) {
         super(writerID, idMax, params, sendChannel);
         this.dType = dType;
         this.time = time;
         this.writer = writer;
+        this.wCount = wCount;
         this.executor = executor;
         this.perf = createBenchmark();
         this.rCnt = new SbkRateController();
@@ -57,6 +61,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
         return  CompletableFuture.runAsync( () -> {
+            wCount.incrementWriters(1);
             try {
                 if (secondsToRun > 0) {
                     Printer.log.info("Writer " + id +" started , run seconds: "+secondsToRun);
@@ -68,6 +73,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+            wCount.decrementWriters(1);
         }, executor);
     }
 

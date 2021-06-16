@@ -15,6 +15,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
+import io.sbk.api.ReadersCount;
 import io.sbk.perl.RunBenchmark;
 import io.sbk.perl.SendChannel;
 import io.sbk.perl.Time;
@@ -33,16 +34,20 @@ public class SbkReader extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataReader<Object> reader;
     final private Time time;
+    final private ReadersCount rCount;
+    final private ExecutorService executor;
     final private RateController rCnt;
     final private BiConsumer perf;
-    final private ExecutorService executor;
+
 
     public SbkReader(int readerId, int idMax, ParameterOptions params, SendChannel sendChannel,
-                     DataType<Object> dType, Time time, DataReader<Object> reader, ExecutorService executor) {
+                     DataType<Object> dType, Time time, DataReader<Object> reader,
+                     ReadersCount rCount, ExecutorService executor) {
         super(readerId, idMax, params, sendChannel);
         this.dType = dType;
         this.time = time;
         this.reader = reader;
+        this.rCount = rCount;
         this.executor = executor;
         this.rCnt = new SbkRateController();
         this.perf = createBenchmark();
@@ -52,6 +57,7 @@ public class SbkReader extends Worker implements RunBenchmark {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
         return  CompletableFuture.runAsync( () -> {
+            rCount.incrementReaders(1);
             try {
                 if (secondsToRun > 0) {
                     Printer.log.info("Reader " + id +" started , run seconds: "+secondsToRun);
@@ -65,6 +71,7 @@ public class SbkReader extends Worker implements RunBenchmark {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+            rCount.decrementReaders(1);
         }, executor);
     }
 
