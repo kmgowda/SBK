@@ -12,7 +12,7 @@ package io.sbk.ram.impl;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
-import io.sbk.ram.ConnectionsCount;
+import io.sbk.ram.CountConnections;
 import io.sbk.ram.RamParameters;
 import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;
@@ -25,13 +25,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger connections;
     private final Config config;
-    private final ConnectionsCount connectionsCount;
+    private final CountConnections countConnections;
     private final RamRegistry registry;
     private final RamParameters params;
 
 
     public SbkGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
-                          ConnectionsCount connectionsCount, RamRegistry registry) {
+                          CountConnections countConnections, RamRegistry registry) {
         super();
         connections = new AtomicInteger(0);
         Config.Builder builder = Config.newBuilder();
@@ -42,7 +42,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
         builder.setMinLatency(minLatency);
         config = builder.build();
         this.params = params;
-        this.connectionsCount = connectionsCount;
+        this.countConnections = countConnections;
         this.registry = registry;
     }
 
@@ -63,7 +63,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
                                io.grpc.stub.StreamObserver<io.sbk.grpc.ClientID> responseObserver) {
         responseObserver.onNext(ClientID.newBuilder().setId(registry.getID()).build());
         responseObserver.onCompleted();
-        connectionsCount.incrementConnections(1);
+        countConnections.incrementConnections(1);
         connections.incrementAndGet();
     }
 
@@ -89,7 +89,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void closeClient(io.sbk.grpc.ClientID request,
                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        connectionsCount.decrementConnections(1);
+        countConnections.decrementConnections(1);
         connections.decrementAndGet();
         if (responseObserver != null) {
             responseObserver.onNext(Empty.newBuilder().build());

@@ -13,5 +13,5 @@ package io.sbk.ram;
 import io.sbk.api.PerformanceLogger;
 import io.sbk.perl.ReportLatencies;
 
-public interface RamLogger extends PerformanceLogger, ReportLatencies, SetRW, ConnectionsCount  {
+public interface RamLogger extends PerformanceLogger, ReportLatencies, SetRW, CountConnections {
 }

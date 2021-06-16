@@ -10,7 +10,7 @@
 
 package io.sbk.ram;
 
-public interface ConnectionsCount {
+public interface CountConnections {
 
     /**
      * Increment.
@@ -23,17 +23,4 @@ public interface ConnectionsCount {
      * @param val decrement value.
      */
     void decrementConnections(int val);
-
-    /**
-     * set the value.
-     * @param val  new value.
-     */
-    void setConnections(int val);
-
-    /**
-     * set the Max value.
-     * @param val  new value.
-     */
-    void setMaxConnections(int val);
-
 }

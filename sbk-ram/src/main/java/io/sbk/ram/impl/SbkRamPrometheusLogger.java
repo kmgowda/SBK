@@ -77,20 +77,6 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
         connections.set(connections.get()-val);
     }
 
-    @Override
-    public void setConnections(int val) {
-        prometheusServer.decrementConnections(val);
-        connections.set(val);
-        maxConnections.set(Math.max(connections.get(), maxConnections.get()));
-    }
-
-    @Override
-    public void setMaxConnections(int val) {
-        prometheusServer.setMaxConnections(val);
-        maxConnections.set(val);
-    }
-
-
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
