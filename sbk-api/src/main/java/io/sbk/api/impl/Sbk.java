@@ -28,6 +28,7 @@ import io.sbk.perl.impl.MilliSeconds;
 import io.sbk.perl.impl.NanoSeconds;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
@@ -211,13 +212,21 @@ public class Sbk {
             throw new InstantiationException("Insufficient command line arguments");
         }
         Printer.log.info("Arguments to Driver '"+driverName + "' : "+Arrays.toString(nextArgs));
-        params.parseArgs(nextArgs);
-        if (params.hasOption("help")) {
+        try {
+            params.parseArgs(nextArgs);
+            logger.parseArgs(params);
+            storageDevice.parseArgs(params);
+        } catch (UnrecognizedOptionException ex) {
+            Printer.log.error(ex.toString());
+            params.printHelp();
             throw new InstantiationException("print help !");
         }
 
-        logger.parseArgs(params);
-        storageDevice.parseArgs(params);
+        if (params.hasOption("help")) {
+            params.printHelp();
+            throw new InstantiationException("print help !");
+        }
+
         final DataType dType = storageDevice.getDataType();
         if (dType == null) {
             String errMsg = "No storage Data type";
@@ -280,7 +289,8 @@ public class Sbk {
                 final ParameterOptions paramsHelp = new SbkParameters(appName, driversList);
                 logger.addArgs(paramsHelp);
                 paramsHelp.printHelp();
-                throw new InstantiationException("SBK Benchmark class driver not found!");
+                final String errMsg = "SBK Benchmark class driver not found! check the option '"+ CLASS_OPTION +"'";
+                throw new InstantiationException(errMsg);
             }
         } else {
             className = argsClassName;

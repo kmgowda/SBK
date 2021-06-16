@@ -81,8 +81,5 @@ public class SbkOptions implements InputOptions {
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
         commandline = parser.parse(options, args);
-        if (commandline.hasOption("help")) {
-            printHelp();
-        }
     }
 }
