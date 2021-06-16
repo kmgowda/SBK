@@ -10,7 +10,7 @@
 
 package io.sbk.ram.impl;
 
-import io.sbk.ram.ConnectionsCount;
+import io.sbk.ram.CountConnections;
 import io.sbk.api.impl.RWMetricsPrometheusServer;
 import io.sbk.perl.MetricsConfig;
 import io.sbk.perl.Time;
@@ -18,7 +18,7 @@ import io.sbk.perl.Time;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implements ConnectionsCount  {
+public class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implements CountConnections {
     final private AtomicInteger connections;
     final private AtomicInteger maxConnections;
 
@@ -31,23 +31,14 @@ public class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implem
         this.maxConnections = this.registry.gauge(maxName, new AtomicInteger());
     }
 
-    public void incrementConnections(int val) {
-        connections.set(connections.get() + val);
-        maxConnections.set(maxConnections.get() + val);
-    }
-
-    public void decrementConnections(int val) {
-        connections.set(connections.get()-val);
+    @Override
+    public void incrementConnections() {
+        connections.incrementAndGet();
+        maxConnections.incrementAndGet();
     }
 
     @Override
-    public void setConnections(int val) {
-        connections.set(val);
-        maxConnections.set(Math.max(connections.get(), maxConnections.get()));
-    }
-
-    @Override
-    public void setMaxConnections(int val) {
-        maxConnections.set(val);
+    public void decrementConnections() {
+        connections.decrementAndGet();
     }
 }

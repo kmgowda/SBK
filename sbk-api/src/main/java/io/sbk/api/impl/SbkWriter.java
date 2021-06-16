@@ -15,6 +15,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
+import io.sbk.api.CountWriters;
 import io.sbk.perl.RunBenchmark;
 
 import io.sbk.perl.SendChannel;
@@ -25,6 +26,7 @@ import io.sbk.system.Printer;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Writer Benchmarking Implementation.
@@ -33,17 +35,22 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataWriter<Object> writer;
     final private Time time;
+    final private CountWriters wCount;
+    final private ExecutorService executor;
     final private BiConsumer perf;
     final private RateController rCnt;
     final private Object payload;
     final private int dataSize;
 
     public SbkWriter(int writerID, int idMax, ParameterOptions params, SendChannel sendChannel,
-                     DataType<Object> dType, Time time, DataWriter<Object> writer) {
+                     DataType<Object> dType, Time time, DataWriter<Object> writer,
+                     CountWriters wCount, ExecutorService executor) {
         super(writerID, idMax, params, sendChannel);
         this.dType = dType;
-        this.writer = writer;
         this.time = time;
+        this.writer = writer;
+        this.wCount = wCount;
+        this.executor = executor;
         this.perf = createBenchmark();
         this.rCnt = new SbkRateController();
         this.payload = dType.create(params.getRecordSize());
@@ -54,6 +61,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
         return  CompletableFuture.runAsync( () -> {
+            wCount.incrementWriters();
             try {
                 if (secondsToRun > 0) {
                     Printer.log.info("Writer " + id +" started , run seconds: "+secondsToRun);
@@ -65,7 +73,8 @@ public class SbkWriter extends Worker implements RunBenchmark {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-        });
+            wCount.decrementWriters();
+        }, executor);
     }
 
     private BiConsumer createBenchmark() {

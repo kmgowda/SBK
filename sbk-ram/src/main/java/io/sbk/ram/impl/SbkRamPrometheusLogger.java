@@ -17,6 +17,7 @@ import io.sbk.api.impl.RWMetricsPrometheusServer;
 import io.sbk.api.impl.SbkPrometheusLogger;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Time;
+import io.sbk.ram.SetRW;
 import io.sbk.system.Printer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLogger {
+public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW, RamLogger {
     final static String CONFIG_FILE = "ram-metrics.properties";
     final static String SBK_RAM_PREFIX = "Sbk-Ram";
     private AtomicInteger connections;
@@ -64,31 +65,21 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
 
 
     @Override
-    public void incrementConnections(int val) {
-        prometheusServer.incrementConnections(val);
-        connections.set(connections.get() + val);
-        maxConnections.set(maxConnections.get() + val);
+    public void incrementConnections() {
+        connections.incrementAndGet();
+        maxConnections.incrementAndGet();
+        if (prometheusServer != null) {
+            prometheusServer.incrementConnections();
+        }
     }
 
     @Override
-    public void decrementConnections(int val) {
-        prometheusServer.decrementConnections(val);
-        connections.set(connections.get()-val);
+    public void decrementConnections() {
+        connections.decrementAndGet();
+        if (prometheusServer != null) {
+            prometheusServer.decrementConnections();
+        }
     }
-
-    @Override
-    public void setConnections(int val) {
-        prometheusServer.decrementConnections(val);
-        connections.set(val);
-        maxConnections.set(Math.max(connections.get(), maxConnections.get()));
-    }
-
-    @Override
-    public void setMaxConnections(int val) {
-        prometheusServer.setMaxConnections(val);
-        maxConnections.set(val);
-    }
-
 
     private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
@@ -106,8 +97,10 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
-        prometheusServer.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+        if (prometheusServer != null) {
+            prometheusServer.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                    invalid, lowerDiscard, higherDiscard, percentileValues);
+        }
     }
 
     @Override
@@ -126,5 +119,25 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
     @Override
     public void reportLatency(long latency, long count) {
 
+    }
+
+    @Override
+    public void setWriters(int val) {
+        writers.set(val);
+    }
+
+    @Override
+    public void setMaxWriters(int val) {
+        maxWriters.set(val);
+    }
+
+    @Override
+    public void setReaders(int val) {
+        readers.set(val);
+    }
+
+    @Override
+    public void setMaxReaders(int val) {
+        maxReaders.set(val);
     }
 }

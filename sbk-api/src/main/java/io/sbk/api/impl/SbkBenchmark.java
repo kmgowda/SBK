@@ -108,7 +108,7 @@ public class SbkBenchmark implements Benchmark {
             this.maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
         }
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 20;
+        final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         if (perlConfig.fork) {
             executor = new ForkJoinPool(threadCount);
         } else {
@@ -209,13 +209,13 @@ public class SbkBenchmark implements Benchmark {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, maxQs, params, writeStats.getSendChannel(),
-                                dType, time, writers.get(i)))
+                                dType, time, writers.get(i), logger,  executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, maxQs,  params, null,
-                                dType, time, writers.get(i)))
+                                dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             }
         } else {
@@ -226,7 +226,8 @@ public class SbkBenchmark implements Benchmark {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,
-                            readStats.getSendChannel(), dType, time, readers.get(i)))
+                            readStats.getSendChannel(), dType, time, readers.get(i),
+                            logger, executor))
                     .collect(Collectors.toList());
         }  else {
             sbkReaders = null;
@@ -256,13 +257,12 @@ public class SbkBenchmark implements Benchmark {
                 int i = 0;
                 while (i < params.getWritersCount() && doWork) {
                     final int stepCnt = Math.min(params.getWritersStep(), params.getWritersCount() - i);
-                    logger.incrementWriters(stepCnt);
                     for (int j = 0; j < stepCnt; j++) {
                         try {
                             CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
                                     i + j + 1 == params.getWritersCount() ?
                                     recordsPerWriter + delta : recordsPerWriter);
-                            writeFutures.add(ret.whenComplete((d, ex) -> logger.decrementWriters(1)));
+                            writeFutures.add(ret);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -310,12 +310,11 @@ public class SbkBenchmark implements Benchmark {
                 int i = 0;
                 while (i < params.getReadersCount() && doWork)  {
                     int stepCnt = Math.min(params.getReadersStep(), params.getReadersCount()-i);
-                    logger.incrementReaders(stepCnt);
-                    for (int j = 0; j < Math.min(params.getReadersStep(), params.getReadersCount()-i); j++) {
+                    for (int j = 0; j < stepCnt; j++) {
                         try {
                             CompletableFuture<Void> ret = sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
                                     recordsPerReader + delta : recordsPerReader);
-                            readFutures.add(ret.whenComplete((d, ex) -> logger.decrementReaders(1)));
+                            readFutures.add(ret);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

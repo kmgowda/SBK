@@ -8,10 +8,17 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram;
+package io.sbk.api;
 
-import io.sbk.api.PerformanceLogger;
-import io.sbk.perl.ReportLatencies;
+public interface CountReaders {
 
-public interface RamLogger extends PerformanceLogger, ReportLatencies, SetRW, CountConnections {
+    /**
+     * Increment Readers.
+     */
+    void incrementReaders();
+
+    /**
+     * Decrement Readers.
+     */
+    void decrementReaders();
 }

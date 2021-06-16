@@ -28,6 +28,8 @@ import io.sbk.perl.impl.MilliSeconds;
 import io.sbk.perl.impl.NanoSeconds;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.lang.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
 
@@ -155,7 +157,6 @@ public class Sbk {
                            final String applicationName, Logger outLogger) throws ParseException,
             IllegalArgumentException,
             IOException, InstantiationException  {
-        final String className;
         final Storage storageDevice;
         final Action action;
         final ParameterOptions params;
@@ -166,7 +167,8 @@ public class Sbk {
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
-        String driverName;
+        final String argsClassName = getClassName(args);
+        final String driverName;
         String usageLine;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
@@ -179,74 +181,27 @@ public class Sbk {
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 PerlConfig.class);
-
         logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
 
-        if (storage == null) {
-            List<String> driversList;
-            try {
-                driversList = getAvailableClassNames(Config.PACKAGE_NAME);
-                Printer.log.info("Available Drivers : "+ driversList.size());
-            } catch (ReflectionsException ex) {
-                Printer.log.warn(ex.toString());
-                driversList = new LinkedList<>();
-            }
-            if (sbkApplicationName != null && sbkApplicationName.length() > 0) {
-                usageLine = sbkApplicationName;
-            } else {
+        if (StringUtils.isEmpty(applicationName)) {
+            if (StringUtils.isEmpty(sbkApplicationName)) {
                 usageLine = Config.NAME;
-            }
-            String name  = getClassName(args);
-            if (name == null) {
-                if (sbkClassName != null && sbkClassName.length() > 0) {
-                    className = sbkClassName;
-                } else {
-                    final ParameterOptions paramsHelp = new SbkParameters(usageLine, driversList);
-                    logger.addArgs(paramsHelp);
-                    paramsHelp.printHelp();
-                    throw new InstantiationException("SBK Benchmark class driver not found!");
-                }
             } else {
-                className = name;
-                usageLine += " "+CLASS_OPTION+" " + className;
+                usageLine = sbkApplicationName;
             }
-            driverName = null;
-            if (driversList.size() > 0) {
-                driverName = searchDriver(driversList, className);
-                if (driverName == null) {
-                    String msg = "storage driver: " + className+ " not found in the SBK";
-                    Printer.log.warn(msg);
-                }
-            }
-            if (driverName == null) {
-                driverName = className;
-            }
-            if (driverName.length() == 0) {
-                String errMsg = "No storage driver name supplied/found";
-                Printer.log.error(errMsg);
-                throw new InstantiationException(errMsg);
-            }
-
-            try {
-                storageDevice =
-                        (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + driverName + "." + driverName).getConstructor().newInstance();
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                    NoSuchMethodException | InvocationTargetException ex) {
-                final ParameterOptions paramsHelp = new SbkParameters(usageLine, driversList);
-                logger.addArgs(paramsHelp);
-                paramsHelp.printHelp();
-                String errMsg = "storage driver: " + driverName+ " Instantiation failed";
-                throw new InstantiationException(errMsg);
-            }
-
         } else {
-            storageDevice = storage;
-            usageLine = Objects.requireNonNullElseGet(applicationName, () -> storageDevice.getClass().getSimpleName());
-            driverName = usageLine;
+            usageLine = applicationName;
         }
+
+        storageDevice = storage == null ? getStorageDevice( argsClassName, usageLine, logger) : storage;
+        driverName =  storageDevice.getClass().getSimpleName();
+
+        if (argsClassName != null) {
+            usageLine += " " + CLASS_OPTION + " " + driverName;
+        }
+
         params = new SbkParameters(usageLine, null);
         logger.addArgs(params);
         storageDevice.addArgs(params);
@@ -257,13 +212,21 @@ public class Sbk {
             throw new InstantiationException("Insufficient command line arguments");
         }
         Printer.log.info("Arguments to Driver '"+driverName + "' : "+Arrays.toString(nextArgs));
-        params.parseArgs(nextArgs);
-        if (params.hasOption("help")) {
+        try {
+            params.parseArgs(nextArgs);
+            logger.parseArgs(params);
+            storageDevice.parseArgs(params);
+        } catch (UnrecognizedOptionException ex) {
+            Printer.log.error(ex.toString());
+            params.printHelp();
             throw new InstantiationException("print help !");
         }
 
-        logger.parseArgs(params);
-        storageDevice.parseArgs(params);
+        if (params.hasOption("help")) {
+            params.printHelp();
+            throw new InstantiationException("print help !");
+        }
+
         final DataType dType = storageDevice.getDataType();
         if (dType == null) {
             String errMsg = "No storage Data type";
@@ -302,6 +265,67 @@ public class Sbk {
         }
         return new SbkBenchmark(driverName, action, perlConfig, params, storageDevice, dType, logger, time);
     }
+
+
+    private static Storage<?> getStorageDevice(final String argsClassName, final String appName,
+                                               final Logger logger) throws  InstantiationException {
+        final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
+        final Storage<?> storageDevice;
+        final String className;
+        List<String> driversList;
+        String driverName;
+
+        try {
+            driversList = getAvailableClassNames(Config.PACKAGE_NAME);
+            Printer.log.info("Available Drivers : "+ driversList.size());
+        } catch (ReflectionsException ex) {
+            Printer.log.warn(ex.toString());
+            driversList = new LinkedList<>();
+        }
+        if (argsClassName == null) {
+            if (StringUtils.isNotEmpty(sbkClassName)) {
+                className = sbkClassName;
+            } else {
+                final ParameterOptions paramsHelp = new SbkParameters(appName, driversList);
+                logger.addArgs(paramsHelp);
+                paramsHelp.printHelp();
+                final String errMsg = "SBK Benchmark class driver not found! check the option '"+ CLASS_OPTION +"'";
+                throw new InstantiationException(errMsg);
+            }
+        } else {
+            className = argsClassName;
+        }
+        driverName = null;
+        if (driversList.size() > 0) {
+            driverName = searchDriver(driversList, className);
+            if (driverName == null) {
+                String msg = "storage driver: " + className+ " not found in the SBK";
+                Printer.log.warn(msg);
+            }
+        }
+        if (driverName == null) {
+            driverName = className;
+        }
+        if (driverName.length() == 0) {
+            String errMsg = "No storage driver name supplied/found";
+            Printer.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
+
+        try {
+            storageDevice = (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + driverName + "." + driverName)
+                    .getConstructor().newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                NoSuchMethodException | InvocationTargetException ex) {
+            final ParameterOptions paramsHelp = new SbkParameters(appName, driversList);
+            logger.addArgs(paramsHelp);
+            paramsHelp.printHelp();
+            String errMsg = "storage driver: " + driverName+ " Instantiation failed";
+            throw new InstantiationException(errMsg);
+        }
+        return storageDevice;
+    }
+
 
     private static String[] removeClassName(String[] args) {
         if (args.length < 3) {

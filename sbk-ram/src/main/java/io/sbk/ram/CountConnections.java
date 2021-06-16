@@ -10,8 +10,15 @@
 
 package io.sbk.ram;
 
-import io.sbk.api.PerformanceLogger;
-import io.sbk.perl.ReportLatencies;
+public interface CountConnections {
 
-public interface RamLogger extends PerformanceLogger, ReportLatencies, SetRW, CountConnections {
+    /**
+     * Increment.
+     */
+    void incrementConnections();
+
+    /**
+     * Decrement.
+     */
+    void decrementConnections();
 }

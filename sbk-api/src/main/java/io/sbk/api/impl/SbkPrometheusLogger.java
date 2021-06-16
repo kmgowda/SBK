@@ -106,54 +106,38 @@ public class SbkPrometheusLogger extends SystemLogger {
     }
 
     @Override
-    public void incrementWriters(int val) {
-        super.incrementWriters(val);
+    public void incrementWriters() {
+        super.incrementWriters();
         if (prometheusServer != null) {
-            prometheusServer.incrementWriters(val);
+            prometheusServer.incrementWriters();
         }
     }
 
     @Override
-    public void decrementWriters(int val) {
-        super.decrementWriters(val);
+    public void decrementWriters() {
+        super.decrementWriters();
         if (prometheusServer != null) {
-            prometheusServer.decrementWriters(val);
+            prometheusServer.decrementWriters();
         }
     }
 
-    @Override
-    public  void setWriters(int val) {
-        super.setWriters(val);
-        if (prometheusServer != null) {
-            prometheusServer.setWriters(val);
-        }
-    }
 
     @Override
-    public void incrementReaders(int val) {
-        super.incrementReaders(val);
+    public void incrementReaders() {
+        super.incrementReaders();
         if (prometheusServer != null) {
-            prometheusServer.incrementReaders(val);
+            prometheusServer.incrementReaders();
         }
 
     }
 
     @Override
-    public void decrementReaders(int val) {
-       super.decrementReaders(val);
+    public void decrementReaders() {
+       super.decrementReaders();
         if (prometheusServer != null) {
-            prometheusServer.decrementReaders(val);
+            prometheusServer.decrementReaders();
         }
     }
-
-    @Override
-    public void setReaders(int val) {
-        super.setReaders(val);
-        if (prometheusServer != null) {
-            prometheusServer.setReaders(val);
-        }
-    }
-
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
                               long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {

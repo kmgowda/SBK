@@ -75,7 +75,7 @@ allprojects {
 	archivesBaseName = sbkProjectName
 	version = sbkVersion
 	applicationName = archivesBaseName
-	def sbkClass = rootProject.name
+	def sbkClass = ""
 	if (project.path.startsWith(":driver-")) {
 		sbkClass = project.path.replace(":driver-","")
 	}
