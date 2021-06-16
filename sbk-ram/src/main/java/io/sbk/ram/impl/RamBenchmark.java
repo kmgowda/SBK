@@ -11,13 +11,13 @@
 package io.sbk.ram.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.api.RWCount;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.Time;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.ram.RamRegistry;
+import io.sbk.ram.SetRW;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 
@@ -36,7 +36,7 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
     private final int reportingIntervalMS;
     private final LatencyRecordWindow window;
     private final ReportLatencies reportLatencies;
-    private final RWCount rwCount;
+    private final SetRW setRW;
     private final Print logger;
     private final ConcurrentLinkedQueue<LatenciesRecord>[] cQueues;
     private final HashMap<Long, RW> table;
@@ -50,13 +50,13 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
 
     public RamBenchmark(int maxQueue, int idleMS, LatencyRecordWindow window, Time time,
                         int reportingIntervalMS, ReportLatencies reportLatencies,
-                        RWCount rwCount, Print logger) {
+                        SetRW setRW, Print logger) {
         this.idleMS = idleMS;
         this.window = window;
         this.time = time;
         this.reportingIntervalMS = reportingIntervalMS;
         this.reportLatencies = reportLatencies;
-        this.rwCount = rwCount;
+        this.setRW = setRW;
         this.logger = logger;
         this.table = new HashMap<>();
         this.cQueues = new ConcurrentLinkedQueue[maxQueue];
@@ -121,10 +121,10 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
     void flush(long currentTime) {
         final RW rwStore = new RW();
         sumRW(rwStore);
-        rwCount.setReaders(rwStore.readers);
-        rwCount.setWriters(rwStore.writers);
-        rwCount.setMaxReaders(rwStore.maxReaders);
-        rwCount.setMaxWriters(rwStore.maxWriters);
+        setRW.setReaders(rwStore.readers);
+        setRW.setWriters(rwStore.writers);
+        setRW.setMaxReaders(rwStore.maxReaders);
+        setRW.setMaxWriters(rwStore.maxWriters);
         window.print(currentTime, logger, reportLatencies);
         window.reset(currentTime);
     }

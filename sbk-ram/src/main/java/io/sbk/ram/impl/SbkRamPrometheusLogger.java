@@ -17,6 +17,7 @@ import io.sbk.api.impl.RWMetricsPrometheusServer;
 import io.sbk.api.impl.SbkPrometheusLogger;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.Time;
+import io.sbk.ram.SetRW;
 import io.sbk.system.Printer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLogger {
+public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW, RamLogger {
     final static String CONFIG_FILE = "ram-metrics.properties";
     final static String SBK_RAM_PREFIX = "Sbk-Ram";
     private AtomicInteger connections;
@@ -126,5 +127,25 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements RamLo
     @Override
     public void reportLatency(long latency, long count) {
 
+    }
+
+    @Override
+    public void setWriters(int val) {
+        writers.set(val);
+    }
+
+    @Override
+    public void setMaxWriters(int val) {
+        maxWriters.set(val);
+    }
+
+    @Override
+    public void setReaders(int val) {
+        readers.set(val);
+    }
+
+    @Override
+    public void setMaxReaders(int val) {
+        maxReaders.set(val);
     }
 }

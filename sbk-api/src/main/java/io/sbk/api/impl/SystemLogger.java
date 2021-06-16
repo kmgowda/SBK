@@ -170,16 +170,6 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public void setWriters(int val) {
-        writers.set(val);
-    }
-
-    @Override
-    public void setMaxWriters(int val) {
-        maxWriters.set(val);
-    }
-
-    @Override
     public void incrementReaders() {
         readers.incrementAndGet();
         maxReaders.incrementAndGet();
@@ -188,16 +178,6 @@ public class SystemLogger implements Logger {
     @Override
     public void decrementReaders() {
         readers.decrementAndGet();
-    }
-
-    @Override
-    public void setReaders(int val) {
-        readers.set(val);
-    }
-
-    @Override
-    public void setMaxReaders(int val) {
-        maxReaders.set(val);
     }
 
     public void appendPercentiles(StringBuilder out, long bytes, long records, double recsPerSec, double mbPerSec,

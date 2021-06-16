@@ -8,15 +8,17 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.ram;
 
-public interface RWCount extends ReadersCount, WritersCount {
+public interface SetRW {
+
 
     /**
      * Set Writers.
      * @param val new value.
      */
     void setWriters(int val);
+
 
     /**
      * Set Max Writers.

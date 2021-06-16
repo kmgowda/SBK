@@ -11,7 +11,7 @@ package io.sbk.api.impl;
 
 
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.sbk.api.RWCount;
+import io.sbk.api.CountRW;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 import io.sbk.perl.impl.MetricsLogger;
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for recoding/printing benchmark results of Readers and Writers
  * on micrometer Composite Meter Registry.
  */
-public class RWMetricsLogger extends MetricsLogger implements RWCount {
+public class RWMetricsLogger extends MetricsLogger implements CountRW {
     final private AtomicInteger writers;
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;

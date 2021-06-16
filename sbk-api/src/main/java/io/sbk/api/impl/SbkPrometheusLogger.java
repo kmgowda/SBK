@@ -121,13 +121,6 @@ public class SbkPrometheusLogger extends SystemLogger {
         }
     }
 
-    @Override
-    public  void setWriters(int val) {
-        super.setWriters(val);
-        if (prometheusServer != null) {
-            prometheusServer.setWriters(val);
-        }
-    }
 
     @Override
     public void incrementReaders() {
@@ -145,15 +138,6 @@ public class SbkPrometheusLogger extends SystemLogger {
             prometheusServer.decrementReaders();
         }
     }
-
-    @Override
-    public void setReaders(int val) {
-        super.setReaders(val);
-        if (prometheusServer != null) {
-            prometheusServer.setReaders(val);
-        }
-    }
-
 
     private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
                               long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {

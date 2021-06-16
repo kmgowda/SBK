@@ -20,7 +20,7 @@ import java.io.IOException;
 /**
  * Interface for recoding/printing results.
  */
-public interface PerformanceLogger extends Print, RWCount {
+public interface PerformanceLogger extends Print {
 
     /**
      * Add the Metric type specific command line arguments.

@@ -15,7 +15,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
-import io.sbk.api.WritersCount;
+import io.sbk.api.CountWriters;
 import io.sbk.perl.RunBenchmark;
 
 import io.sbk.perl.SendChannel;
@@ -35,7 +35,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataWriter<Object> writer;
     final private Time time;
-    final private WritersCount wCount;
+    final private CountWriters wCount;
     final private ExecutorService executor;
     final private BiConsumer perf;
     final private RateController rCnt;
@@ -44,7 +44,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
 
     public SbkWriter(int writerID, int idMax, ParameterOptions params, SendChannel sendChannel,
                      DataType<Object> dType, Time time, DataWriter<Object> writer,
-                     WritersCount wCount, ExecutorService executor) {
+                     CountWriters wCount, ExecutorService executor) {
         super(writerID, idMax, params, sendChannel);
         this.dType = dType;
         this.time = time;

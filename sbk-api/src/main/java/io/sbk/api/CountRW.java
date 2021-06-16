@@ -10,16 +10,6 @@
 
 package io.sbk.api;
 
-public interface WritersCount {
-
-    /**
-     * Increment Writers.
-     */
-    void incrementWriters();
-
-    /**
-     * Decrement Writers.
-     */
-    void decrementWriters();
+public interface CountRW extends CountReaders, CountWriters {
 
 }
