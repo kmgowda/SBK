@@ -25,6 +25,7 @@ import io.sbk.perl.impl.MilliSeconds;
 import io.sbk.perl.impl.NanoSeconds;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -165,11 +166,19 @@ public class SbkRam {
 
         params = new SbkRamParameters(appName, ramConfig.maxConnections);
         logger.addArgs(params);
-        params.parseArgs(args);
-        if (params.hasOption("help")) {
+        try {
+            params.parseArgs(args);
+            logger.parseArgs(params);
+        } catch (UnrecognizedOptionException ex) {
+            Printer.log.error(ex.toString());
+            params.printHelp();
             throw new InstantiationException("print help !");
         }
-        logger.parseArgs(params);
+        if (params.hasOption("help")) {
+            params.printHelp();
+            throw new InstantiationException("print help !");
+        }
+
         TimeUnit timeUnit = logger.getTimeUnit();
         if (timeUnit == TimeUnit.mcs) {
             time = new MicroSeconds();

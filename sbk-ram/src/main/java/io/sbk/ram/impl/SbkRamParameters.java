@@ -15,6 +15,7 @@ import io.sbk.api.impl.SbkOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 
 /**
@@ -51,8 +52,7 @@ final public class SbkRamParameters extends SbkOptions implements RamParameterOp
         storageName = getOptionValue("class", null);
 
         if (storageName == null) {
-            throw new IllegalArgumentException("storage class name is NOT supplied! " +
-                    ", run with '-help' to see the options.");
+            throw new UnrecognizedOptionException("storage 'class' name is NOT supplied! ");
         }
 
         String actionString = getOptionValue("action", "r");
