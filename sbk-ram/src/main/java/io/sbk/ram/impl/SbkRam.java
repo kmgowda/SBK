@@ -145,16 +145,14 @@ public class SbkRam {
         final String version = io.sbk.ram.impl.SbkRam.class.getPackage().getImplementationVersion();
         final String sbkServerName = System.getProperty(Config.SBK_APP_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
-        String appName = applicationName;
+        String appName = Objects.requireNonNullElse(applicationName, sbkServerName);
 
-        if (appName == null) {
-            appName = Objects.requireNonNullElse(sbkServerName, APP_NAME);
-        }
+        appName = Objects.requireNonNullElse(appName, APP_NAME);
         Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
-        Printer.log.info("Arguments List: "+Arrays.toString(args));
-        Printer.log.info(appName +" Version: "+version);
-        Printer.log.info(Config.SBK_APP_HOME+": "+sbkAppHome);
+        Printer.log.info("Arguments List: " + Arrays.toString(args));
+        Printer.log.info(appName +" Version: " + version);
+        Printer.log.info(Config.SBK_APP_HOME+": " + Objects.requireNonNullElse(sbkAppHome, ""));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

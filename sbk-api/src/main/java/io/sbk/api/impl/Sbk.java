@@ -175,9 +175,9 @@ public class Sbk {
         Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info(Config.NAME.toUpperCase() +" Version: "+version);
         Printer.log.info("Arguments List: "+Arrays.toString(args));
-        Printer.log.info(Config.SBK_APP_NAME + ": "+ sbkApplicationName);
-        Printer.log.info(Config.SBK_CLASS_NAME + ": "+ sbkClassName);
-        Printer.log.info(Config.SBK_APP_HOME+": "+sbkAppHome);
+        Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
+        Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
+        Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -195,7 +195,7 @@ public class Sbk {
             usageLine = applicationName;
         }
 
-        storageDevice = storage == null ? getStorageDevice( argsClassName, usageLine, logger) : storage;
+        storageDevice = Objects.requireNonNullElse(storage, getStorageDevice( argsClassName, usageLine, logger));
         driverName =  storageDevice.getClass().getSimpleName();
 
         if (argsClassName != null) {
