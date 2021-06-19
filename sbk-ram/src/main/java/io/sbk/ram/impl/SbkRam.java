@@ -87,7 +87,7 @@ public class SbkRam {
             IllegalArgumentException, IOException, InterruptedException, ExecutionException {
         CompletableFuture<Void> ret;
         try {
-            ret = new SbkServerCompletableFutureAsync(args, applicationName, outLogger);
+            ret = new SbkRamCompletableFutureAsync(args, applicationName, outLogger);
         } catch (InstantiationException ex) {
             ret = new CompletableFuture<>();
             ret.complete(null);
@@ -96,12 +96,12 @@ public class SbkRam {
         return ret;
     }
 
-    private static class SbkServerCompletableFutureAsync extends CompletableFuture<Void> {
+    private static class SbkRamCompletableFutureAsync extends CompletableFuture<Void> {
         private final Benchmark benchmark;
         private final CompletableFuture<Void> ret;
 
-        public SbkServerCompletableFutureAsync(final String[] args, final String applicationName,
-                                               RamLogger outLogger) throws ParseException,
+        public SbkRamCompletableFutureAsync(final String[] args, final String applicationName,
+                                            RamLogger outLogger) throws ParseException,
                 IllegalArgumentException, IOException, InterruptedException, ExecutionException,
                 InstantiationException {
             super();
