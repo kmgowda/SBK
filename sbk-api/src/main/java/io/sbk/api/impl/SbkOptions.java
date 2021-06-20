@@ -53,29 +53,17 @@ public class SbkOptions implements InputOptions {
 
     @Override
     public boolean hasOption(String name) {
-        if (commandline != null) {
-            return commandline.hasOption(name);
-        } else {
-            return false;
-        }
+        return commandline != null && commandline.hasOption(name);
     }
 
     @Override
     public String getOptionValue(String name) {
-        if (commandline != null) {
-            return commandline.getOptionValue(name);
-        } else {
-            return null;
-        }
+        return commandline != null ? commandline.getOptionValue(name) : null;
     }
 
     @Override
     public String getOptionValue(String name, String defaultValue) {
-        if (commandline != null) {
-            return commandline.getOptionValue(name, defaultValue);
-        } else {
-            return defaultValue;
-        }
+        return commandline != null ? commandline.getOptionValue(name, defaultValue) : defaultValue;
     }
 
     @Override
