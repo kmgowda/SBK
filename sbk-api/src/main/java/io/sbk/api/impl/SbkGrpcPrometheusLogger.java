@@ -95,7 +95,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         ramHostConfig.host = DISABLE_STRING;
         params.addOption("ram", true, "SBK RAM host" +
                 "; default host: " + ramHostConfig.host +" ; disable if this parameter is set to: " +DISABLE_STRING);
-        params.addOption("rport", true, "SBK RAM Port" +
+        params.addOption("ram-port", true, "SBK RAM Port" +
                 "; default port: " + ramHostConfig.port );
         //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
     }
@@ -109,7 +109,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         if (!enable) {
             return;
         }
-        ramHostConfig.port = Integer.parseInt(params.getOptionValue("rport", Integer.toString(ramHostConfig.port)));
+        ramHostConfig.port = Integer.parseInt(params.getOptionValue("ram-port", Integer.toString(ramHostConfig.port)));
         //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
         blocking = false;
     }
