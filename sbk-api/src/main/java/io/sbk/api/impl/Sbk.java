@@ -19,6 +19,7 @@ import io.sbk.api.Config;
 import io.sbk.api.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Logger;
+import io.sbk.api.PerformanceLogger;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.Storage;
 import io.sbk.perl.Time;
@@ -243,17 +244,7 @@ public class Sbk {
             Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
-        TimeUnit timeUnit = logger.getTimeUnit();
-        if (timeUnit == TimeUnit.mcs) {
-            time = new MicroSeconds();
-        } else if (timeUnit == TimeUnit.ns) {
-            time = new NanoSeconds();
-        } else {
-            time = new MilliSeconds();
-        }
-        Printer.log.info("Time Unit: "+ timeUnit.toString());
-        Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
-        Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
+        time = getTime(logger);
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = Action.Write_Reading;
@@ -326,6 +317,22 @@ public class Sbk {
         return storageDevice;
     }
 
+
+    public static Time getTime(PerformanceLogger logger ) {
+        final TimeUnit timeUnit = logger.getTimeUnit();
+        final Time ret;
+        if (timeUnit == TimeUnit.mcs) {
+            ret = new MicroSeconds();
+        } else if (timeUnit == TimeUnit.ns) {
+            ret = new NanoSeconds();
+        } else {
+            ret = new MilliSeconds();
+        }
+        Printer.log.info("Time Unit: "+ ret.getTimeUnit().toString());
+        Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+ret.getTimeUnit().name());
+        Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+ret.getTimeUnit().name());
+        return ret;
+    }
 
     private static String[] removeClassName(String[] args) {
         if (args.length < 3) {

@@ -15,14 +15,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
+import io.sbk.api.impl.Sbk;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamLogger;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.perl.Time;
-import io.sbk.perl.TimeUnit;
-import io.sbk.perl.impl.MicroSeconds;
-import io.sbk.perl.impl.MilliSeconds;
-import io.sbk.perl.impl.NanoSeconds;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -177,18 +174,7 @@ public class SbkRam {
             throw new InstantiationException("print help !");
         }
 
-        TimeUnit timeUnit = logger.getTimeUnit();
-        if (timeUnit == TimeUnit.mcs) {
-            time = new MicroSeconds();
-        } else if (timeUnit == TimeUnit.ns) {
-            time = new NanoSeconds();
-        } else {
-            time = new MilliSeconds();
-        }
-        Printer.log.info("Time Unit: "+ timeUnit.toString());
-        Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
-        Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
-
+        time = Sbk.getTime(logger);
         return new SbkRamBenchmark(ramConfig, params, logger, time);
     }
 
