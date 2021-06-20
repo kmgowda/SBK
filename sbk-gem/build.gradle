@@ -1,0 +1,20 @@
+
+
+
+dependencies {
+    implementation 'org.projectlombok:lombok:1.18.18'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    compile project(":sbk-ram")
+
+    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
+    implementation group: 'org.apache.sshd', name: 'sshd-common', version: '2.7.0'
+
+    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
+    implementation group: 'org.apache.sshd', name: 'sshd-core', version: '2.7.0'
+
+    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-scp
+    implementation group: 'org.apache.sshd', name: 'sshd-scp', version: '2.7.0'
+
+    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
+    implementation group: 'org.apache.sshd', name: 'sshd-mina', version: '2.7.0'
+}

@@ -264,6 +264,7 @@ task printDrivers {
 dependencies {
 	compile project(":sbk-api")
 	compile project(":sbk-ram")
+	compile project(":sbk-gem")
 	compile project(":driver-concurrentq")
 	compile project(":driver-file")
 	compile project(":driver-filestream")
