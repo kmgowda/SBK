@@ -14,7 +14,7 @@ import io.sbk.api.Parameters;
 
 public interface GemParameters extends Parameters {
 
-    String[] getNodes();
+    SshConnection[] getConnections();
 
     String getUser();
 

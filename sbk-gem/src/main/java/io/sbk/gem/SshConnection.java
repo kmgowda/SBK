@@ -28,15 +28,11 @@ public final class SshConnection {
     @Getter
     private final int port;
 
-    @Getter
-    private final int timeoutSeconds;
-
-    SshConnection(String host, String userName, String password, int port, int timeoutSeconds) {
+    public SshConnection(String host, String userName, String password, int port) {
         this.host = host;
         this.userName = userName;
         this.password = password;
         this.port = port;
-        this.timeoutSeconds = timeoutSeconds;
     }
 
 }

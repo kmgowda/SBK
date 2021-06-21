@@ -20,7 +20,7 @@ public final class SshResponse {
     public final OutputStream stdOutput;
 
 
-    SshResponse(boolean stdout) {
+    public SshResponse(boolean stdout) {
         this.returnCode = 0;
         this.errOutput = new ByteArrayOutputStream();
         if (stdout) {
