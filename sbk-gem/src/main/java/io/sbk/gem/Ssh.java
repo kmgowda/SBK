@@ -45,8 +45,8 @@ public final class Ssh {
     }
 
 
-    private static SshResponse runCommand(SshClient client, SshConnection conn, long timeoutSeconds, String cmd)
-            throws TimeoutException, IOException {
+    private static void runCommand(SshClient client, SshConnection conn, long timeoutSeconds, String cmd,
+                                          SshResponse response) throws TimeoutException, IOException {
 
         final ClientSession session = createSession(client, conn);
 
@@ -54,13 +54,15 @@ public final class Ssh {
         final ChannelExec execChannel = session.createExecChannel(cmd);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final ByteArrayOutputStream err = new ByteArrayOutputStream();
-        execChannel.setOut(out);
-        execChannel.setErr(err);
+        execChannel.setErr(response.errOutput);
+        execChannel.setOut(response.stdOutput);
 
         // Execute and wait
         execChannel.open();
         final Set<?> events = execChannel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED),
                 TimeUnit.SECONDS.toMillis(timeoutSeconds));
+
+        response.returnCode =  execChannel.getExitStatus();
         execChannel.close(false);
         session.close(false);
 
@@ -68,10 +70,6 @@ public final class Ssh {
         if (events.contains(ClientChannelEvent.TIMEOUT)) {
             throw new TimeoutException();
         }
-
-        // Respond
-        return new SshResponse(out.toString(), err.toString(), execChannel.getExitStatus());
-
     }
 
 
@@ -81,20 +79,19 @@ public final class Ssh {
      * @param conn  ssh connection
      * @param cmd The command to run.
      * @param timeoutSeconds The amount of time to wait for the command to run before timing out. This is in seconds.
-     * @return The SshResponse contains the output of a successful command.
+     * @param response ssh response
      * @throws TimeoutException Raised if the command times out.
      * @throws IOException Raised in the event of a general failure (wrong authentication or something
      *         of that nature).
      */
-    public static SshResponse runCommand(SshConnection conn, long timeoutSeconds, String cmd)
+    public static void runCommand(SshConnection conn, long timeoutSeconds, String cmd, SshResponse response)
             throws TimeoutException, IOException {
         final SshClient client = SshClient.setUpDefaultClient();
         client.start();
 
         try {
-            final SshResponse ret = runCommand(client, conn, timeoutSeconds, cmd);
+            runCommand(client, conn, timeoutSeconds, cmd, response);
             client.stop();
-            return  ret;
         } catch (Exception ex) {
             client.stop();
             throw  ex;
@@ -106,14 +103,13 @@ public final class Ssh {
      *
      * @param conn ssh connection
      * @param cmd The command to run.
-     * @param timeoutSeconds The amount of time to wait for the command to run before timing out. This is in
-     *        seconds. This is used as two separate timeouts, one for login another for command
-     *        execution.
+     * @param timeoutSeconds The amount of time to wait for the command to run before timing out. This is in seconds.
+     * @param response ssh response
      * @param executor Executor service
      * @return Completable Future with SshResponse.
      */
     public static CompletableFuture<SshResponse> runCommandAsync(SshConnection conn, long timeoutSeconds, String cmd,
-                                                                 ExecutorService executor)  {
+                                                                 SshResponse response, ExecutorService executor)  {
         final CompletableFuture<SshResponse> retFuture = new CompletableFuture<>();
         final SshClient client = SshClient.setUpDefaultClient();
         client.start();
@@ -121,7 +117,8 @@ public final class Ssh {
         if (executor != null) {
             CompletableFuture.runAsync(() -> {
                 try {
-                    retFuture.complete(runCommand(client, conn, timeoutSeconds, cmd));
+                    runCommand(client, conn, timeoutSeconds, cmd, response);
+                    retFuture.complete(null);
                 } catch (Throwable ex) {
                     retFuture.completeExceptionally(ex);
                 }
@@ -129,7 +126,8 @@ public final class Ssh {
         } else {
             CompletableFuture.runAsync(() -> {
                 try {
-                    retFuture.complete(runCommand(client, conn, timeoutSeconds, cmd));
+                    runCommand(client, conn, timeoutSeconds, cmd, response);
+                    retFuture.complete(null);
                 } catch (Throwable ex) {
                     retFuture.completeExceptionally(ex);
                 }

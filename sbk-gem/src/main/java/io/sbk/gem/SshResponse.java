@@ -10,25 +10,24 @@
 
 package io.sbk.gem;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+
 public final class SshResponse {
+    public int returnCode;
+    public final OutputStream errOutput;
+    public final OutputStream stdOutput;
 
-    @Getter
-    private final String stdOutput;
 
-    @Getter
-    private final String errOutput;
-
-    @Getter
-    private final int returnCode;
-
-    SshResponse(String stdOutput, String errOutput, int returnCode) {
-        this.stdOutput = stdOutput;
-        this.errOutput = errOutput;
-        this.returnCode = returnCode;
+    SshResponse(boolean stdout) {
+        this.returnCode = 0;
+        this.errOutput = new ByteArrayOutputStream();
+        if (stdout) {
+            this.stdOutput = new ByteArrayOutputStream();
+        } else {
+            this.stdOutput = OutputStream.nullOutputStream();
+        }
     }
 
 }
