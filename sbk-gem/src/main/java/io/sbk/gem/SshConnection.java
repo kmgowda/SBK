@@ -28,11 +28,15 @@ public final class SshConnection {
     @Getter
     private final int port;
 
-    public SshConnection(String host, String userName, String password, int port) {
+    @Getter
+    private final String dir;
+
+    public SshConnection(String host, String userName, String password, int port, String dir) {
         this.host = host;
         this.userName = userName;
         this.password = password;
         this.port = port;
+        this.dir = dir;
     }
 
 }

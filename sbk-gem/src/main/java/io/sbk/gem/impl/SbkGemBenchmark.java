@@ -17,6 +17,7 @@ import io.sbk.gem.Ssh;
 import io.sbk.gem.SshConnection;
 import io.sbk.gem.SshResponse;
 import io.sbk.system.Printer;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -31,20 +32,14 @@ public class SbkGemBenchmark implements Benchmark {
     private final Benchmark ramBenchmark;
     private final GemConfig config;
     private final GemParameters params;
-    private final String srcDir;
-    private final String dstDir;
-    private final String sbkCommand;
     private final ExecutorService executor;
 
 
-    public SbkGemBenchmark(Benchmark ramBenchmark, GemConfig config, GemParameters params, String srcDir, String dstDir,
-                           String sbkCommand) {
+    public SbkGemBenchmark(Benchmark ramBenchmark, GemConfig config, GemParameters params) {
         this.ramBenchmark = ramBenchmark;
         this.config = config;
+        this.config.remoteTimeoutSeconds = Long.MAX_VALUE;
         this.params = params;
-        this.srcDir = srcDir;
-        this.dstDir = dstDir;
-        this.sbkCommand = sbkCommand;
         if (config.fork) {
             executor = new ForkJoinPool(params.getConnections().length + 10);
         } else {
@@ -56,8 +51,7 @@ public class SbkGemBenchmark implements Benchmark {
     @Override
     public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException, IllegalStateException {
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
-                split(".", 2)[0]);
-        Printer.log.info("Java Major version: "+javaMajorVersion);
+                split("\\.")[0]);
         final SshConnection[] conns = params.getConnections();
 
         final SshResponse[] sshResults = new SshResponse[conns.length];
@@ -67,7 +61,7 @@ public class SbkGemBenchmark implements Benchmark {
         final CompletableFuture[] cfArray = new CompletableFuture[conns.length];
         final String cmd = "java -version";
         for (int i = 0; i < conns.length; i++) {
-            cfArray[i] = Ssh.runCommandAsync(conns[i], config.timeoutSeconds, cmd,
+            cfArray[i] = Ssh.runCommandAsync(conns[i], config.remoteTimeoutSeconds, cmd,
                     sshResults[i], executor);
         }
         final CompletableFuture<Void> ret = CompletableFuture.allOf(cfArray);
@@ -76,23 +70,46 @@ public class SbkGemBenchmark implements Benchmark {
             try {
                 ret.get(config.timeoutSeconds, TimeUnit.SECONDS);
             } catch (TimeoutException ex) {
-                Printer.log.info("SBK-GEM [" + "i" + "]: Waiting for command: " + cmd + " complete");
+                Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
             }
         }
+        boolean stop = false;
         if (!ret.isDone()) {
             final String errMsg = "SBK-GEM, command: " + cmd +" time out after " + config.maxIterations + " iterations";
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         } else {
             for (int i = 0; i < sshResults.length; i++) {
-                Printer.log.info("[" + i+ "] , stdout : "+sshResults[i].stdOutput.toString());
-                Printer.log.info("[" + i+ "] , stderr : "+sshResults[i].errOutput.toString());
+                String stdOut = sshResults[i].stdOutput.toString();
+                String stdErr = sshResults[i].errOutput.toString();
+                //   Printer.log.info("[" + i+ "] , stdout : "+sshResults[i].stdOutput.toString());
+                //   Printer.log.info("[" + i+ "] , stderr : "+sshResults[i].errOutput.toString());
+                if (javaMajorVersion > parseJavaVersion(stdOut) && javaMajorVersion > parseJavaVersion(stdErr)) {
+                    Printer.log.info("Java version :" + javaMajorVersion+" , mismatch at : "+conns[i].getHost());
+                    stop = true;
+                }
             }
         }
+
+        if (stop) {
+            throw new InterruptedException();
+        }
+        Printer.log.info("Java version match Success..");
 
         return null;
 
     }
+
+
+    private static int parseJavaVersion( String text) {
+        if (StringUtils.isEmpty(text)) {
+            return Integer.MAX_VALUE;
+        }
+        final String[] tmp = text.split("\"", 2);
+        return  Integer.parseInt(tmp[1].split("\\.")[0]);
+    }
+
+
 
     @Override
     public void stop() {

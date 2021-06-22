@@ -18,6 +18,7 @@ public class GemConfig {
     public String user;
     public String password;
     public int port;
+    public long remoteTimeoutSeconds;
     public int timeoutSeconds;
     public int maxIterations;
     public boolean fork;

@@ -31,7 +31,7 @@ import java.util.concurrent.TimeoutException;
 public final class Ssh {
 
 
-    private static ClientSession createSession(SshClient client, SshConnection conn, int timeoutSeconds)
+    private static ClientSession createSession(SshClient client, SshConnection conn, long timeoutSeconds)
             throws IOException {
         // Connect to the server
         final ConnectFuture cf = client.connect(conn.getUserName(), conn.getHost(), conn.getPort());
@@ -45,7 +45,7 @@ public final class Ssh {
     }
 
 
-    private static void runCommand(SshClient client, SshConnection conn, int timeoutSeconds, String cmd,
+    private static void runCommand(SshClient client, SshConnection conn, long timeoutSeconds, String cmd,
                                           SshResponse response) throws TimeoutException, IOException {
 
         final ClientSession session = createSession(client, conn, timeoutSeconds);
@@ -84,7 +84,7 @@ public final class Ssh {
      * @throws IOException Raised in the event of a general failure (wrong authentication or something
      *         of that nature).
      */
-    public static void runCommand(SshConnection conn, int timeoutSeconds, String cmd, SshResponse response)
+    public static void runCommand(SshConnection conn, long timeoutSeconds, String cmd, SshResponse response)
             throws TimeoutException, IOException {
         final SshClient client = SshClient.setUpDefaultClient();
         client.start();
@@ -108,7 +108,7 @@ public final class Ssh {
      * @param executor Executor service
      * @return Completable Future with SshResponse.
      */
-    public static CompletableFuture<Void> runCommandAsync(SshConnection conn, int timeoutSeconds, String cmd,
+    public static CompletableFuture<Void> runCommandAsync(SshConnection conn, long timeoutSeconds, String cmd,
                                                                  SshResponse response, ExecutorService executor)  {
         final CompletableFuture<Void> retFuture = new CompletableFuture<>();
         final SshClient client = SshClient.setUpDefaultClient();
@@ -147,7 +147,7 @@ public final class Ssh {
     }
 
 
-    private static void copyDirectory(SshClient client, SshConnection conn, int timeoutSeconds, String srcPath,
+    private static void copyDirectory(SshClient client, SshConnection conn, long timeoutSeconds, String srcPath,
                                       String dstPath)  throws IOException {
         final ClientSession session = createSession(client, conn, timeoutSeconds);
 
@@ -160,7 +160,7 @@ public final class Ssh {
         session.close(false);
     }
 
-    public static void copyDirectory(SshConnection conn,  int timeoutSeconds, String srcPath, String dstPath)
+    public static void copyDirectory(SshConnection conn,  long timeoutSeconds, String srcPath, String dstPath)
             throws IOException {
         final SshClient client = SshClient.setUpDefaultClient();
         client.start();
@@ -174,7 +174,7 @@ public final class Ssh {
     }
 
 
-    public static CompletableFuture<Void> copyDirectoryAsync(SshConnection conn, int timeoutSeconds,
+    public static CompletableFuture<Void> copyDirectoryAsync(SshConnection conn, long timeoutSeconds,
                                                              String srcPath, String dstPath, ExecutorService executor) {
         final CompletableFuture<Void> retFuture = new CompletableFuture<>();
         final SshClient client = SshClient.setUpDefaultClient();

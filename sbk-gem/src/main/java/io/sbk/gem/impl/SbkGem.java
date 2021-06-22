@@ -26,7 +26,7 @@ import io.sbk.gem.GemParameterOptions;
 import io.sbk.perl.Time;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamParameterOptions;
-import io.sbk.ram.RamParameters;
+import io.sbk.ram.impl.SbkRamBenchmark;
 import io.sbk.ram.impl.SbkRamParameters;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
@@ -319,10 +319,7 @@ public class SbkGem {
             ramParams.printHelp();
             throw new InstantiationException("print help !");
         }
-        return null;
+        return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params);
     }
-
-
-
 
 }

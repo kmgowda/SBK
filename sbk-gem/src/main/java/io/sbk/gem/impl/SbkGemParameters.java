@@ -32,6 +32,7 @@ import java.util.List;
 public class SbkGemParameters extends SbkParameters implements GemParameterOptions {
     final static String BIN_EXT_PATH = "bin";
     final static String LOCAL_HOST = "localhost";
+    final static String DST_DIR = "./";
 
     final private GemConfig config;
 
@@ -115,7 +116,7 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
 
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            connections[i] = new SshConnection(nodes[i], user, password, port);
+            connections[i] = new SshConnection(nodes[i], user, password, port, DST_DIR);
         }
 
         if (StringUtils.isEmpty(sbkDir)) {
