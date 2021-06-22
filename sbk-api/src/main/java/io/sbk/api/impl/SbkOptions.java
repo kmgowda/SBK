@@ -18,7 +18,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-
 public class SbkOptions implements InputOptions {
     final private String benchmarkName;
     final private Options options;

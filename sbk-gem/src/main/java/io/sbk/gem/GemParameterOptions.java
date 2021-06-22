@@ -10,10 +10,7 @@
 
 package io.sbk.gem;
 
-import io.sbk.api.Parameters;
+import io.sbk.api.ParameterOptions;
 
-public interface GemParameters extends Parameters {
-
-    SshConnection[] getConnections();
-
+public interface GemParameterOptions extends ParameterOptions, GemParameters {
 }

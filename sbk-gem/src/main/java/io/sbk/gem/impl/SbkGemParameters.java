@@ -12,7 +12,7 @@ package io.sbk.gem.impl;
 
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.gem.GemConfig;
-import io.sbk.gem.GemParameters;
+import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.SshConnection;
 import io.sbk.perl.PerlConfig;
 import lombok.Getter;
@@ -22,7 +22,7 @@ import org.apache.commons.cli.ParseException;
 import java.util.List;
 
 @Slf4j
-public class SbkGemParameters extends SbkParameters implements GemParameters {
+public class SbkGemParameters extends SbkParameters implements GemParameterOptions {
     final private GemConfig config;
 
     @Getter
@@ -45,9 +45,9 @@ public class SbkGemParameters extends SbkParameters implements GemParameters {
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * PerlConfig.MS_PER_SEC;
         addOption("nodes", true, "remote hostnames separated by `,` ; default: "+config.nodes);
-        addOption("gem-user", true, "ssh user name of the remote hosts" + config.user);
-        addOption("gem-pass", true, "ssh user password of the remote hosts" + config.password);
-        addOption("gem-port", true, "ssh port of the remote hosts" + config.port);
+        addOption("gemuser", true, "ssh user name of the remote hosts" + config.user);
+        addOption("gempass", true, "ssh user password of the remote hosts" + config.password);
+        addOption("gemport", true, "ssh port of the remote hosts" + config.port);
 
     }
 

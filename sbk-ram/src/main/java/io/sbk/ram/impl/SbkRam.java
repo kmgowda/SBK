@@ -14,8 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
-import io.sbk.api.Config;
-import io.sbk.api.impl.Sbk;
+import io.sbk.api.impl.SbkUtils;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamLogger;
 import io.sbk.ram.RamParameterOptions;
@@ -37,7 +36,6 @@ import java.util.concurrent.TimeoutException;
 public class SbkRam {
     final static String CONFIG_FILE = "ram.properties";
     final static String BANNER_FILE = "ram-banner.txt";
-    final static String APP_NAME = "sbk-ram";
 
     /**
      * Run the Performance Benchmarking .
@@ -140,16 +138,12 @@ public class SbkRam {
         final RamConfig ramConfig;
         final Time time;
         final String version = io.sbk.ram.impl.SbkRam.class.getPackage().getImplementationVersion();
-        final String sbkServerName = System.getProperty(Config.SBK_APP_NAME);
-        final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
-        String appName = Objects.requireNonNullElse(applicationName, sbkServerName);
+        final String appName = Objects.requireNonNullElse(applicationName, RamConfig.NAME);
 
-        appName = Objects.requireNonNullElse(appName, APP_NAME);
         Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Arguments List: " + Arrays.toString(args));
-        Printer.log.info(appName +" Version: " + version);
-        Printer.log.info(Config.SBK_APP_HOME+": " + Objects.requireNonNullElse(sbkAppHome, ""));
+        Printer.log.info(RamConfig.NAME +" Version: " + version);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -174,7 +168,7 @@ public class SbkRam {
             throw new InstantiationException("print help !");
         }
 
-        time = Sbk.getTime(logger);
+        time = SbkUtils.getTime(logger);
         return new SbkRamBenchmark(ramConfig, params, logger, time);
     }
 
