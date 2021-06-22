@@ -19,6 +19,7 @@ import io.sbk.system.Printer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -94,6 +95,12 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             connections[i] = new SshConnection(nodes[i], user, password, port);
+        }
+
+        if (StringUtils.isEmpty(sbkDir)) {
+            String errMsg = "The SBK application directory not supplied!";
+            Printer.log.error(errMsg);
+            throw new IllegalArgumentException(errMsg);
         }
 
         if (!Files.isDirectory(Paths.get(sbkDir))) {

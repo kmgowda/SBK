@@ -74,7 +74,7 @@ allprojects {
 	}
 	archivesBaseName = sbkProjectName
 	version = sbkVersion
-	applicationName = archivesBaseName
+
 	def sbkClass = ""
 	if (project.path.startsWith(":driver-")) {
 		sbkClass = project.path.replace(":driver-","")
@@ -94,21 +94,9 @@ allprojects {
 
 	application {
 		mainClassName = SbkMainClass
+		applicationName = archivesBaseName
 		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, '-Dsbk.className='+sbkClass,
 									 '-Dsbk.appHome=SBK_APP_HOME']
-	}
-
-	task SbkGem(type: CreateStartScripts) {
-		mainClassName = 'io.sbk.main.SbkGemMain'
-		applicationName = 'sbk-gem'
-		outputDir = startScripts.outputDir
-		classpath = startScripts.classpath
-	}
-
-	applicationDistribution.into("bin") {
-		duplicatesStrategy= DuplicatesStrategy.EXCLUDE
-		from(SbkGem)
-		fileMode = 0755
 	}
 
 	task generateDashboards(type: Copy) {
@@ -335,3 +323,15 @@ task buildJar(type: Jar) {
 	with jar
 }
 
+task SbkGem(type: CreateStartScripts) {
+	mainClassName = 'io.sbk.main.SbkGemMain'
+	applicationName = 'sbk-gem'
+	outputDir = startScripts.outputDir
+	classpath = startScripts.classpath
+}
+
+applicationDistribution.into("bin") {
+	duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+	from(SbkGem)
+	fileMode = 0755
+}
