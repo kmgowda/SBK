@@ -25,6 +25,9 @@ import io.sbk.gem.GemLogger;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.perl.Time;
 import io.sbk.ram.RamConfig;
+import io.sbk.ram.RamParameterOptions;
+import io.sbk.ram.RamParameters;
+import io.sbk.ram.impl.SbkRamParameters;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -33,6 +36,7 @@ import org.reflections.ReflectionsException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -143,6 +147,7 @@ public class SbkGem {
                                              GemLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InstantiationException  {
         final GemParameterOptions params;
+        final RamParameterOptions ramParams;
         final GemConfig gemConfig;
         final GemLogger logger;
         final RamConfig ramConfig;
@@ -196,11 +201,11 @@ public class SbkGem {
             driversList = new LinkedList<>();
         }
         if (StringUtils.isEmpty(className)) {
-            final ParameterOptions paramsHelp = new SbkGemParameters(appName, driversList, gemConfig);
+            final ParameterOptions paramsHelp = new SbkGemParameters(appName, driversList, gemConfig, ramConfig.port);
             logger.addArgs(paramsHelp);
             paramsHelp.printHelp();
             final String errMsg = "SBK Benchmark class driver not found! check the option '"+ SbkUtils.CLASS_OPTION +"'";
-            Printer.log.error(errMsg);
+            //Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
         if (driversList.size() > 0) {
@@ -221,7 +226,7 @@ public class SbkGem {
             String errMsg = "storage driver: " + driverName+ " Instantiation failed";
             Printer.log.error(errMsg);
             ex.printStackTrace();
-            final ParameterOptions paramsHelp = new SbkGemParameters(appName, driversList, gemConfig);
+            final ParameterOptions paramsHelp = new SbkGemParameters(appName, driversList, gemConfig, ramConfig.port);
             logger.addArgs(paramsHelp);
             paramsHelp.printHelp();
             throw new InstantiationException(errMsg);
@@ -229,7 +234,7 @@ public class SbkGem {
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
                 appName + " " + SbkUtils.CLASS_OPTION + " " + driverName : appName;
 
-        params = new SbkGemParameters(usageLine, null, gemConfig);
+        params = new SbkGemParameters(usageLine, null, gemConfig, ramConfig.port);
         logger.addArgs(params);
         storageDevice.addArgs(params);
         final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
@@ -285,20 +290,35 @@ public class SbkGem {
             sbkArgsBuilder.append(" ");
             sbkArgsBuilder.append(arg);
         }
+        time = SbkUtils.getTime(logger);
+        sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
+        sbkArgsBuilder.append(" -context no");
+        sbkArgsBuilder.append(" -ram " + params.getHostName());
+        sbkArgsBuilder.append(" -ramport " + params.getRamPort());
 
         Printer.log.info("SBK dir : "+params.getSbkDir());
         Printer.log.info("SBK command: "+params.getSbkCommand());
         Printer.log.info("Arguments to remote SBK command : "+ sbkArgsBuilder);
 
-        final StringBuilder ramArgsBuilder = new StringBuilder(SbkUtils.CLASS_OPTION + " " + driverName);
-        ramArgsBuilder.append("-action "+actionString);
-        ramArgsBuilder.append("-max "+params.getConnections().length);
-        for (String arg: logger.getParsedArgs()) {
-            ramArgsBuilder.append(" ");
-            ramArgsBuilder.append(arg);
-        }
-        Printer.log.info("Arguments to  SBK-RAM  : "+ ramArgsBuilder);
+        final List<String> ramArgsList = new ArrayList<>();
+        ramArgsList.add(SbkUtils.CLASS_OPTION);
+        ramArgsList.add(driverName);
+        ramArgsList.add("-action");
+        ramArgsList.add(actionString);
+        ramArgsList.add("-max");
+        ramArgsList.add(Integer.toString(params.getConnections().length));
 
+        final String[] ramArgs = ramArgsList.toArray(new String[0]);
+        Printer.log.info("Arguments to  SBK-RAM  : "+ Arrays.toString(ramArgs));
+
+        ramParams = new SbkRamParameters(appName, params.getRamPort(), ramConfig.maxConnections);
+        try {
+            ramParams.parseArgs(ramArgs);
+        } catch (UnrecognizedOptionException ex) {
+            Printer.log.error(ex.toString());
+            ramParams.printHelp();
+            throw new InstantiationException("print help !");
+        }
         return null;
     }
 

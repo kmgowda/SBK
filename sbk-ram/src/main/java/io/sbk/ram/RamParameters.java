@@ -28,8 +28,18 @@ public interface RamParameters {
     Action getAction();
 
     /**
+     * Get the Port number to user.
+     * @return   port number.
+     */
+    int getRamPort();
+
+    /**
      * get Max Connections.
      * @return   Maximum allowed connections.
      */
     int getMaxConnections();
+
+
+
+
 }

@@ -153,7 +153,7 @@ public class SbkRam {
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkRamPrometheusLogger::new);
 
-        params = new SbkRamParameters(appName, ramConfig.maxConnections);
+        params = new SbkRamParameters(appName, ramConfig.port, ramConfig.maxConnections);
         logger.addArgs(params);
         try {
             params.parseArgs(args);

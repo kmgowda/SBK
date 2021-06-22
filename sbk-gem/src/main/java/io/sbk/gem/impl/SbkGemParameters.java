@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +31,7 @@ import java.util.List;
 @Slf4j
 public class SbkGemParameters extends SbkParameters implements GemParameterOptions {
     final static String BIN_EXT_PATH = "bin";
+    final static String LOCAL_HOST = "localhost";
 
     final private GemConfig config;
 
@@ -59,18 +62,34 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
     @Getter
     private String sbkCommand;
 
+    @Getter
+    private String hostName;
 
-    public SbkGemParameters(String name, List<String> driversList, GemConfig config) {
+    @Getter
+    private int ramPort;
+
+
+    public SbkGemParameters(String name, List<String> driversList, GemConfig config, int ramport) {
         super(name, driversList);
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * PerlConfig.MS_PER_SEC;
+        this.ramPort = ramport;
+        try {
+            this.hostName = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException ex) {
+            Printer.log.error(ex.toString());
+            this.hostName = LOCAL_HOST;
+        }
         addOption("nodes", true, "remote hostnames separated by `,` , default: "+config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.user);
         addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.password);
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.port);
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkPath);
         addOption("sbkcommand", true, "sbk command for remote run, default: " + config.sbkCommand);
-        this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand"};
+        addOption("hostname", true, "this RAM host name, default: " + hostName);
+        addOption("ramport", true, "RAM port number; default: "+ramPort);
+        this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
+                "-hostname", "ramport"};
         this.parsedArgs = null;
     }
 
@@ -88,9 +107,11 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
         port = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.port)));
         sbkDir = getOptionValue("sbkdir", config.sbkPath);
         sbkCommand = getOptionValue("sbkcommand", config.sbkCommand);
+        ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", user, "-gempass", password, "-gemport",
-                Integer.toString(port), "-sbkdir", sbkDir, "-sbkcommand", sbkCommand};
+                Integer.toString(port), "-sbkdir", sbkDir, "-sbkcommand", sbkCommand, "-hostname", hostName,
+                "-ramport", Integer.toString(ramPort)};
 
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
