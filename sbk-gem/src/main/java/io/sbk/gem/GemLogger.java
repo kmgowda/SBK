@@ -10,9 +10,7 @@
 
 package io.sbk.gem;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.ram.RamLogger;
 
-public interface GemParameterOptions extends ParameterOptions, GemParameters, GetArguments {
-
+public interface GemLogger extends RamLogger, GetArguments {
 }
-

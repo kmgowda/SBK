@@ -21,12 +21,10 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.impl.SbkUtils;
 import io.sbk.gem.GemConfig;
+import io.sbk.gem.GemLogger;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.perl.Time;
 import io.sbk.ram.RamConfig;
-import io.sbk.ram.RamLogger;
-
-import io.sbk.ram.impl.SbkRamPrometheusLogger;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -62,7 +60,7 @@ public class SbkGem {
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
     public static void run(final String[] args, final String applicationName,
-                           RamLogger outLogger) throws ParseException, IllegalArgumentException,
+                           GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
 
         final CompletableFuture<Void> ret = runAsync(args, applicationName, outLogger);
@@ -89,7 +87,7 @@ public class SbkGem {
      * @throws ExecutionException If an exception occurred due to writers or readers exceptions.
      */
     public static CompletableFuture<Void> runAsync(final String[] args, final String applicationName,
-                                                   RamLogger outLogger) throws ParseException,
+                                                   GemLogger outLogger) throws ParseException,
             IllegalArgumentException, IOException, InterruptedException, ExecutionException {
         CompletableFuture<Void> ret;
         try {
@@ -107,7 +105,7 @@ public class SbkGem {
         private final CompletableFuture<Void> ret;
 
         public SbkGemCompletableFutureAsync(final String[] args, final String applicationName,
-                                            RamLogger outLogger) throws ParseException,
+                                            GemLogger outLogger) throws ParseException,
                 IllegalArgumentException, IOException, InterruptedException, ExecutionException,
                 InstantiationException {
             super();
@@ -142,11 +140,11 @@ public class SbkGem {
 
 
     private static Benchmark createBenchmark(final String[] args, final String applicationName,
-                                             RamLogger outLogger)
+                                             GemLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InstantiationException  {
         final GemParameterOptions params;
         final GemConfig gemConfig;
-        final RamLogger logger;
+        final GemLogger logger;
         final RamConfig ramConfig;
         final Time time;
         final String version = io.sbk.ram.impl.SbkRam.class.getPackage().getImplementationVersion();
@@ -188,7 +186,7 @@ public class SbkGem {
             gemConfig.sbkPath = sbkAppHome;
         }
 
-        logger = Objects.requireNonNullElseGet(outLogger, SbkRamPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, SbkGemRamPrometheusLogger::new);
 
         try {
             driversList = SbkUtils.getAvailableClassNames(Config.PACKAGE_NAME);

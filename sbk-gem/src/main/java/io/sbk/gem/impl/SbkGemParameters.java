@@ -35,6 +35,12 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
     final private int timeoutMS;
 
     @Getter
+    final private String[] optionsArgs;
+
+    @Getter
+    private String[] parsedArgs;
+
+    @Getter
     private String user;
 
     @Getter
@@ -62,8 +68,9 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
         addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.password);
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.port);
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkPath);
-        addOption("sbkcommand", true, "sbk command, default: " + config.sbkCommand);
-
+        addOption("sbkcommand", true, "sbk command for remote run, default: " + config.sbkCommand);
+        this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand"};
+        this.parsedArgs = null;
     }
 
     @Override
@@ -75,11 +82,15 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
 
         final String nodeString = getOptionValue("nodes", config.nodes);
         String[] nodes = nodeString.split(",");
-        user = getOptionValue("gem-user", config.user);
-        password = getOptionValue("gem-pass", config.password);
-        port = Integer.parseInt(getOptionValue("gem-port", Integer.toString(config.port)));
+        user = getOptionValue("gemuser", config.user);
+        password = getOptionValue("gempass", config.password);
+        port = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.port)));
         sbkDir = getOptionValue("sbkdir", config.sbkPath);
-        final String command = getOptionValue("sbkcommand", config.sbkCommand);
+        sbkCommand = getOptionValue("sbkcommand", config.sbkCommand);
+
+        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", user, "-gempass", password, "-gemport",
+                Integer.toString(port), "-sbkdir", sbkDir, "-sbkcommand", sbkCommand};
+
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             connections[i] = new SshConnection(nodes[i], user, password, port);
@@ -91,21 +102,20 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
             throw new IllegalArgumentException(errMsg);
         }
 
-        sbkCommand = sbkDir +"/"+BIN_EXT_PATH+"/"+command;
-        Path sbkCommandPath = Paths.get(sbkCommand);
+        final String sbkFullCommand = sbkDir +"/"+BIN_EXT_PATH+"/"+sbkCommand;
+        Path sbkCommandPath = Paths.get(sbkFullCommand);
 
         if (!Files.exists(sbkCommandPath)) {
-            String errMsg = "The sbk executable command: "+sbkCommand+" not found!";
+            String errMsg = "The sbk executable command: "+sbkFullCommand+" not found!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
 
         if (!Files.isExecutable(sbkCommandPath)) {
-            String errMsg = "The executable permissions are not found for command: "+sbkCommand;
+            String errMsg = "The executable permissions are not found for command: "+sbkFullCommand;
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
 
     }
-
 }

@@ -29,7 +29,7 @@ import java.io.InputStream;
 public class SbkPrometheusLogger extends SystemLogger {
     final static String CONFIG_FILE = "metrics.properties";
     public MetricsConfig metricsConfig;
-    private boolean disabled;
+    private boolean contextDisabled;
     private RWMetricsPrometheusServer prometheusServer;
     private Print printer;
 
@@ -68,12 +68,12 @@ public class SbkPrometheusLogger extends SystemLogger {
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        final String fullContext =  params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
-        if (fullContext.equalsIgnoreCase("no")) {
-            disabled = true;
+        final String parsedContext =  params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
+        if (parsedContext.equalsIgnoreCase("no")) {
+            contextDisabled = true;
         } else {
-            disabled = false;
-            String[] str = fullContext.split("/", 2);
+            contextDisabled = false;
+            String[] str = parsedContext.split("/", 2);
             metricsConfig.port = Integer.parseInt(str[0]);
             if (str.length == 2 && str[1] != null) {
                 metricsConfig.context = "/" + str[1];
@@ -85,7 +85,7 @@ public class SbkPrometheusLogger extends SystemLogger {
     @Override
     public void open(final InputOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
-        if (disabled) {
+        if (contextDisabled) {
             printer = super::print;
             prometheusServer = null;
         } else {

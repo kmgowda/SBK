@@ -10,9 +10,9 @@
 
 package io.sbk.gem;
 
-import io.sbk.api.ParameterOptions;
+public interface GetArguments {
 
-public interface GemParameterOptions extends ParameterOptions, GemParameters, GetArguments {
+    String[] getOptionsArgs();
 
+    String[] getParsedArgs();
 }
-
