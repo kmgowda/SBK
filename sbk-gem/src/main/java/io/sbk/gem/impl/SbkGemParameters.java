@@ -30,9 +30,6 @@ import java.util.List;
 
 @Slf4j
 public class SbkGemParameters extends SbkParameters implements GemParameterOptions {
-    final static String BIN_EXT_PATH = "bin";
-    final static String LOCAL_HOST = "localhost";
-    final static String DST_DIR = "./";
 
     final private GemConfig config;
 
@@ -79,7 +76,7 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
             this.hostName = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException ex) {
             Printer.log.error(ex.toString());
-            this.hostName = LOCAL_HOST;
+            this.hostName = GemConfig.LOCAL_HOST;
         }
         addOption("nodes", true, "remote hostnames separated by `,` , default: "+config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.user);
@@ -116,7 +113,7 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
 
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            connections[i] = new SshConnection(nodes[i], user, password, port, DST_DIR);
+            connections[i] = new SshConnection(nodes[i], user, password, port, config.remoteDir);
         }
 
         if (StringUtils.isEmpty(sbkDir)) {
@@ -131,7 +128,7 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
             throw new IllegalArgumentException(errMsg);
         }
 
-        final String sbkFullCommand = sbkDir +"/"+BIN_EXT_PATH+"/"+sbkCommand;
+        final String sbkFullCommand = sbkDir +"/"+GemConfig.BIN_EXT_PATH+"/"+sbkCommand;
         Path sbkCommandPath = Paths.get(sbkFullCommand);
 
         if (!Files.exists(sbkCommandPath)) {

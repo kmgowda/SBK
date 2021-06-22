@@ -169,7 +169,7 @@ public class SbkGem {
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
-        Printer.log.info(GemConfig.NAME.toUpperCase() +" Version: "+version);
+        Printer.log.info(GemConfig.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
@@ -189,6 +189,10 @@ public class SbkGem {
 
         if (StringUtils.isNotEmpty(sbkAppHome)) {
             gemConfig.sbkPath = sbkAppHome;
+        }
+        gemConfig.remoteDir = GemConfig.DIR_PREFIX + appName;
+        if (StringUtils.isNotEmpty(version)) {
+            gemConfig.remoteDir += "-"+version;
         }
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkGemRamPrometheusLogger::new);
