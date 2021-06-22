@@ -98,6 +98,19 @@ allprojects {
 									 '-Dsbk.appHome=SBK_APP_HOME']
 	}
 
+	task SbkGem(type: CreateStartScripts) {
+		mainClassName = 'io.sbk.main.SbkGemMain'
+		applicationName = 'sbk-gem'
+		outputDir = startScripts.outputDir
+		classpath = startScripts.classpath
+	}
+
+	applicationDistribution.into("bin") {
+		duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+		from(SbkGem)
+		fileMode = 0755
+	}
+
 	task generateDashboards(type: Copy) {
 		if (project.path.startsWith(":driver-")) {
 			def outDir = 'build/dashboard'
@@ -262,7 +275,7 @@ task printDrivers {
 
 /* Include your driver below */
 dependencies {
-	compile project(":sbk-api")
+	compile project(":sbk-gem")
 	compile project(":sbk-ram")
 	compile project(":sbk-gem")
 	compile project(":driver-concurrentq")
@@ -322,17 +335,3 @@ task buildJar(type: Jar) {
 	with jar
 }
 
-/*
-task SbkRam(type: CreateStartScripts) {
-	mainClassName = 'io.sbk.main.SbkRamMain'
-	applicationName = 'sbk-ram'
-	outputDir = startScripts.outputDir
-	classpath = startScripts.classpath
-}
-
-applicationDistribution.into("bin") {
-	duplicatesStrategy= DuplicatesStrategy.EXCLUDE
-	from(SbkRam)
-	fileMode = 0755
-}
- */

@@ -200,6 +200,7 @@ public class SbkGem {
             logger.addArgs(paramsHelp);
             paramsHelp.printHelp();
             final String errMsg = "SBK Benchmark class driver not found! check the option '"+ SbkUtils.CLASS_OPTION +"'";
+            Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
         if (driversList.size() > 0) {
@@ -207,7 +208,6 @@ public class SbkGem {
             if (driverName == null) {
                 String msg = "storage driver: " + className+ " not found in the SBK";
                 Printer.log.warn(msg);
-            } else {
                 driverName = className;
             }
         } else {
@@ -218,10 +218,12 @@ public class SbkGem {
                     .getConstructor().newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                 NoSuchMethodException | InvocationTargetException ex) {
+            String errMsg = "storage driver: " + driverName+ " Instantiation failed";
+            Printer.log.error(errMsg);
+            ex.printStackTrace();
             final ParameterOptions paramsHelp = new SbkGemParameters(appName, driversList, gemConfig);
             logger.addArgs(paramsHelp);
             paramsHelp.printHelp();
-            String errMsg = "storage driver: " + driverName+ " Instantiation failed";
             throw new InstantiationException(errMsg);
         }
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
@@ -267,6 +269,35 @@ public class SbkGem {
             Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
+        String actionString = "r";
+
+        if (params.isWriteAndRead()) {
+            actionString = "wr";
+        } else if (params.getWritersCount() > 0) {
+            actionString = "w";
+        }
+
+        // remove GEM and logger parameter options
+        final String[] sbkArgsList = SbkUtils.removeOptionsAndValues(
+                SbkUtils.removeOptionsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
+        final StringBuilder sbkArgsBuilder = new StringBuilder(SbkUtils.CLASS_OPTION + " " + driverName);
+        for (String arg: sbkArgsList) {
+            sbkArgsBuilder.append(" ");
+            sbkArgsBuilder.append(arg);
+        }
+
+        Printer.log.info("SBK dir : "+params.getSbkDir());
+        Printer.log.info("SBK command: "+params.getSbkCommand());
+        Printer.log.info("Arguments to remote SBK command : "+ sbkArgsBuilder);
+
+        final StringBuilder ramArgsBuilder = new StringBuilder(SbkUtils.CLASS_OPTION + " " + driverName);
+        ramArgsBuilder.append("-action "+actionString);
+        ramArgsBuilder.append("-max "+params.getConnections().length);
+        for (String arg: logger.getParsedArgs()) {
+            ramArgsBuilder.append(" ");
+            ramArgsBuilder.append(arg);
+        }
+        Printer.log.info("Arguments to  SBK-RAM  : "+ ramArgsBuilder);
 
         return null;
     }
