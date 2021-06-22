@@ -16,4 +16,8 @@ public interface GemParameters extends Parameters {
 
     SshConnection[] getConnections();
 
+    String getSbkDir();
+
+    String getSbkCommand();
+
 }

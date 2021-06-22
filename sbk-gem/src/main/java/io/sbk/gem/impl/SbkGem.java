@@ -35,9 +35,6 @@ import org.reflections.ReflectionsException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,8 +47,6 @@ public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
     final static String RAM_CONFIG_FILE = "ram.properties";
     final static String BANNER_FILE = "gem-banner.txt";
-    final static String BIN_EXT_PATH = "bin";
-    final static String LIB_EXT_PATH = "lib";
 
     /**
      * Run the Performance Benchmarking .
@@ -59,8 +54,6 @@ public class SbkGem {
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , SbkServer is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
-     * @param sbkCommand sbk command name , if null, then env variable sbk.applicationName is used.
-     * @param sbkDir    directory where sbk command exists; if null, env variable sbk.appHome is used.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
@@ -69,12 +62,10 @@ public class SbkGem {
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
     public static void run(final String[] args, final String applicationName,
-                           RamLogger outLogger,  String sbkCommand,
-                           String sbkDir) throws ParseException, IllegalArgumentException,
+                           RamLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
 
-        final CompletableFuture<Void> ret = runAsync(args, applicationName, outLogger,
-                sbkCommand, sbkDir);
+        final CompletableFuture<Void> ret = runAsync(args, applicationName, outLogger);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
@@ -90,9 +81,6 @@ public class SbkGem {
      *                       is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
-     * @param sbkCommand sbk command name , if null, then env variable sbk.applicationName is used.
-     * @param sbkDir    directory where sbk command exists; if null, env variable sbk.appHome is used.
-     *
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @return CompletableFuture instance.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
@@ -101,13 +89,11 @@ public class SbkGem {
      * @throws ExecutionException If an exception occurred due to writers or readers exceptions.
      */
     public static CompletableFuture<Void> runAsync(final String[] args, final String applicationName,
-                                                   RamLogger outLogger, String sbkCommand,
-                                                   String sbkDir) throws ParseException,
+                                                   RamLogger outLogger) throws ParseException,
             IllegalArgumentException, IOException, InterruptedException, ExecutionException {
         CompletableFuture<Void> ret;
         try {
-            ret = new SbkGem.SbkGemCompletableFutureAsync(args, applicationName, outLogger,
-                    sbkCommand, sbkDir);
+            ret = new SbkGem.SbkGemCompletableFutureAsync(args, applicationName, outLogger);
         } catch (InstantiationException ex) {
             ret = new CompletableFuture<>();
             ret.complete(null);
@@ -121,12 +107,11 @@ public class SbkGem {
         private final CompletableFuture<Void> ret;
 
         public SbkGemCompletableFutureAsync(final String[] args, final String applicationName,
-                                            RamLogger outLogger, String sbkCommand,
-                                            String sbkDir) throws ParseException,
+                                            RamLogger outLogger) throws ParseException,
                 IllegalArgumentException, IOException, InterruptedException, ExecutionException,
                 InstantiationException {
             super();
-            benchmark = createBenchmark(args, applicationName, outLogger, sbkCommand, sbkDir);
+            benchmark = createBenchmark(args, applicationName, outLogger);
             ret = benchmark.start();
         }
 
@@ -157,8 +142,7 @@ public class SbkGem {
 
 
     private static Benchmark createBenchmark(final String[] args, final String applicationName,
-                                             RamLogger outLogger, final String sbkCommand,
-                                             final String sbkDir)
+                                             RamLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InstantiationException  {
         final GemParameterOptions params;
         final GemConfig gemConfig;
@@ -170,14 +154,11 @@ public class SbkGem {
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
                 StringUtils.isNotEmpty(sbkGemAppName) ? sbkGemAppName : GemConfig.NAME;
         final String sbkAppName = System.getProperty(Config.SBK_APP_NAME);
-        final String sbkAppCommand = StringUtils.isNotEmpty(sbkCommand) ? sbkCommand :
-                StringUtils.isNotEmpty(sbkAppName) ? sbkAppName : Config.NAME;
+        final String sbkCommand = StringUtils.isNotEmpty(sbkAppName) ? sbkAppName : Config.NAME;
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
-        final String sbkAppDir = StringUtils.isNotEmpty(sbkDir) ? sbkDir : sbkAppHome;
         final String argsClassName = SbkUtils.getClassName(args);
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
-        final String sbkFullCommand = sbkAppDir+"/"+BIN_EXT_PATH+"/"+sbkCommand;
         final Storage storageDevice;
         final String usageLine;
         String driverName = null;
@@ -191,26 +172,6 @@ public class SbkGem {
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
 
-        if (!Files.isDirectory(Paths.get(sbkAppDir))) {
-            String errMsg = "The SBK application directory: "+sbkAppDir +" not found!";
-            Printer.log.error(errMsg);
-            throw new IllegalArgumentException(errMsg);
-        }
-
-        Path sbkCommandPath = Paths.get(sbkFullCommand);
-
-        if (!Files.exists(sbkCommandPath)) {
-            String errMsg = "The sbk executable command: "+sbkFullCommand+" not found!";
-            Printer.log.error(errMsg);
-            throw new IllegalArgumentException(errMsg);
-        }
-
-        if (!Files.isExecutable(sbkCommandPath)) {
-            String errMsg = "The executable permissions are not found for command: "+sbkFullCommand;
-            Printer.log.error(errMsg);
-            throw new IllegalArgumentException(errMsg);
-        }
-
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -218,6 +179,14 @@ public class SbkGem {
                 RamConfig.class);
         gemConfig = mapper.readValue(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);
+
+        if (StringUtils.isNotEmpty(sbkCommand)) {
+            gemConfig.sbkCommand = sbkCommand;
+        }
+
+        if (StringUtils.isNotEmpty(sbkAppHome)) {
+            gemConfig.sbkPath = sbkAppHome;
+        }
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkRamPrometheusLogger::new);
 
