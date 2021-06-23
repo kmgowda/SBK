@@ -79,7 +79,7 @@ public class SbkRamBenchmark implements Benchmark {
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
                 logger, logger, logger);
         service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
-        server = ServerBuilder.forPort(ramConfig.port).addService(service).build();
+        server = ServerBuilder.forPort(params.getRamPort()).addService(service).build();
         retFuture = null;
     }
 
@@ -119,13 +119,13 @@ public class SbkRamBenchmark implements Benchmark {
     public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException,
             IllegalStateException {
         if (retFuture != null) {
-            throw  new IllegalStateException("SBK Server Benchmark is already started\n");
+            throw  new IllegalStateException("SBK RAM Benchmark is already started\n");
         }
         logger.open(params, params.getStorageName(), params.getAction(), time);
         benchmark.start();
         server.start();
         retFuture = new CompletableFuture<>();
-        Printer.log.info("SBK Server Benchmark Started");
+        Printer.log.info("SBK RAM Benchmark Started");
         return retFuture;
     }
 

@@ -33,11 +33,16 @@ final public class SbkRamParameters extends SbkOptions implements RamParameterOp
     @Getter
     private int maxConnections;
 
-    public SbkRamParameters(String name, int maxConnections) {
+    @Getter
+    private  int ramPort;
+
+    public SbkRamParameters(String name, int port, int maxConnections) {
         super(name);
         this.maxConnections = maxConnections;
+        this.ramPort = port;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");
         addOption("action", true, "action [r: read, w: write, wr: write and read]; default: r");
+        addOption("ramport", true, "RAM port number; default: "+ramPort);
         addOption("max", true, "Maximum number of connections; default: "+maxConnections);
     }
 
@@ -66,7 +71,7 @@ final public class SbkRamParameters extends SbkOptions implements RamParameterOp
         }
 
         maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
-
+        ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
     }
 
 }

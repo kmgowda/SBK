@@ -11,6 +11,8 @@
 package io.sbk.ram;
 
 public class RamConfig {
+    public final static String NAME = "sbk-ram";
+
     public int port;
     public int maxConnections;
     public int maxArraySizeMB;

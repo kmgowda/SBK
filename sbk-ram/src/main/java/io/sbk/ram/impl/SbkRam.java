@@ -14,15 +14,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
-import io.sbk.api.Config;
+import io.sbk.api.impl.SbkUtils;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamLogger;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.perl.Time;
-import io.sbk.perl.TimeUnit;
-import io.sbk.perl.impl.MicroSeconds;
-import io.sbk.perl.impl.MilliSeconds;
-import io.sbk.perl.impl.NanoSeconds;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -40,7 +36,6 @@ import java.util.concurrent.TimeoutException;
 public class SbkRam {
     final static String CONFIG_FILE = "ram.properties";
     final static String BANNER_FILE = "ram-banner.txt";
-    final static String APP_NAME = "sbk-ram";
 
     /**
      * Run the Performance Benchmarking .
@@ -143,26 +138,22 @@ public class SbkRam {
         final RamConfig ramConfig;
         final Time time;
         final String version = io.sbk.ram.impl.SbkRam.class.getPackage().getImplementationVersion();
-        final String sbkServerName = System.getProperty(Config.SBK_APP_NAME);
-        final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
-        String appName = Objects.requireNonNullElse(applicationName, sbkServerName);
+        final String appName = Objects.requireNonNullElse(applicationName, RamConfig.NAME);
 
-        appName = Objects.requireNonNullElse(appName, APP_NAME);
         Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Arguments List: " + Arrays.toString(args));
-        Printer.log.info(appName +" Version: " + version);
-        Printer.log.info(Config.SBK_APP_HOME+": " + Objects.requireNonNullElse(sbkAppHome, ""));
+        Printer.log.info(RamConfig.NAME +" Version: " + version);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        ramConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+        ramConfig = mapper.readValue(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 RamConfig.class);
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkRamPrometheusLogger::new);
 
-        params = new SbkRamParameters(appName, ramConfig.maxConnections);
+        params = new SbkRamParameters(appName, ramConfig.port, ramConfig.maxConnections);
         logger.addArgs(params);
         try {
             params.parseArgs(args);
@@ -177,18 +168,7 @@ public class SbkRam {
             throw new InstantiationException("print help !");
         }
 
-        TimeUnit timeUnit = logger.getTimeUnit();
-        if (timeUnit == TimeUnit.mcs) {
-            time = new MicroSeconds();
-        } else if (timeUnit == TimeUnit.ns) {
-            time = new NanoSeconds();
-        } else {
-            time = new MilliSeconds();
-        }
-        Printer.log.info("Time Unit: "+ timeUnit.toString());
-        Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+timeUnit.name());
-        Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+timeUnit.name());
-
+        time = SbkUtils.getTime(logger);
         return new SbkRamBenchmark(ramConfig, params, logger, time);
     }
 

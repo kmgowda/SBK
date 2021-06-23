@@ -21,7 +21,7 @@ import java.util.List;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-final public class SbkParameters extends SbkOptions implements ParameterOptions {
+public class SbkParameters extends SbkOptions implements ParameterOptions {
     final private List<String> driversList;
 
     @Getter

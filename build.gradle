@@ -11,6 +11,8 @@
 
 import org.gradle.internal.jvm.Jvm
 
+import java.util.regex.Matcher
+
 buildscript {
 	repositories {
 		mavenLocal()
@@ -74,7 +76,7 @@ allprojects {
 	}
 	archivesBaseName = sbkProjectName
 	version = sbkVersion
-	applicationName = archivesBaseName
+
 	def sbkClass = ""
 	if (project.path.startsWith(":driver-")) {
 		sbkClass = project.path.replace(":driver-","")
@@ -94,6 +96,7 @@ allprojects {
 
 	application {
 		mainClassName = SbkMainClass
+		applicationName = archivesBaseName
 		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, '-Dsbk.className='+sbkClass,
 									 '-Dsbk.appHome=SBK_APP_HOME']
 	}
@@ -262,8 +265,9 @@ task printDrivers {
 
 /* Include your driver below */
 dependencies {
-	compile project(":sbk-api")
+	compile project(":sbk-gem")
 	compile project(":sbk-ram")
+	compile project(":sbk-gem")
 	compile project(":driver-concurrentq")
 	compile project(":driver-file")
 	compile project(":driver-filestream")
@@ -321,17 +325,26 @@ task buildJar(type: Jar) {
 	with jar
 }
 
-/*
-task SbkRam(type: CreateStartScripts) {
-	mainClassName = 'io.sbk.main.SbkRamMain'
-	applicationName = 'sbk-ram'
+task SbkGem(type: CreateStartScripts) {
+	mainClassName = 'io.sbk.main.SbkGemMain'
+	applicationName = 'sbk-gem'
+	defaultJvmOpts = ['-Dsbk.applicationName='+rootProject.name, '-Dsbk.appHome=SBK_APP_HOME']
 	outputDir = startScripts.outputDir
 	classpath = startScripts.classpath
+
+	SbkGem {
+		doLast {
+			unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
+			windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
+			// Replace the classpath on windows with the pathing JAR and the main archive
+			windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
+					"set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
+		}
+	}
 }
 
 applicationDistribution.into("bin") {
 	duplicatesStrategy= DuplicatesStrategy.EXCLUDE
-	from(SbkRam)
+	from(SbkGem)
 	fileMode = 0755
 }
- */
