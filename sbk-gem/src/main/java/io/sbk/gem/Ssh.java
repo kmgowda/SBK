@@ -19,14 +19,12 @@ import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.scp.client.ScpClient;
 import org.apache.sshd.scp.client.ScpClientCreator;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public final class Ssh {
 
@@ -46,14 +44,12 @@ public final class Ssh {
 
 
     private static void runCommand(SshClient client, SshConnection conn, long timeoutSeconds, String cmd,
-                                          SshResponse response) throws TimeoutException, IOException {
+                                          SshResponse response) throws IOException {
 
         final ClientSession session = createSession(client, conn, timeoutSeconds);
 
         // Create the exec and channel its output/error streams
         final ChannelExec execChannel = session.createExecChannel(cmd);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ByteArrayOutputStream err = new ByteArrayOutputStream();
         execChannel.setErr(response.errOutput);
         execChannel.setOut(response.stdOutput);
 
@@ -68,7 +64,7 @@ public final class Ssh {
 
         // Check if timed out
         if (events.contains(ClientChannelEvent.TIMEOUT)) {
-            throw new TimeoutException();
+            throw new IOException("The cmd: "+cmd+" timeout !");
         }
     }
 
@@ -80,12 +76,11 @@ public final class Ssh {
      * @param cmd The command to run.
      * @param timeoutSeconds The amount of time to wait for the command to run before timing out. This is in seconds.
      * @param response ssh response
-     * @throws TimeoutException Raised if the command times out.
      * @throws IOException Raised in the event of a general failure (wrong authentication or something
      *         of that nature).
      */
     public static void runCommand(SshConnection conn, long timeoutSeconds, String cmd, SshResponse response)
-            throws TimeoutException, IOException {
+            throws  IOException {
         final SshClient client = SshClient.setUpDefaultClient();
         client.start();
 

@@ -323,7 +323,8 @@ public class SbkGem {
             ramParams.printHelp();
             throw new InstantiationException("print help !");
         }
-        return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params);
+        return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params,
+                sbkArgsBuilder.toString());
     }
 
 }

@@ -119,13 +119,13 @@ public class SbkRamBenchmark implements Benchmark {
     public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException,
             IllegalStateException {
         if (retFuture != null) {
-            throw  new IllegalStateException("SBK Server Benchmark is already started\n");
+            throw  new IllegalStateException("SBK RAM Benchmark is already started\n");
         }
         logger.open(params, params.getStorageName(), params.getAction(), time);
         benchmark.start();
         server.start();
         retFuture = new CompletableFuture<>();
-        Printer.log.info("SBK Server Benchmark Started");
+        Printer.log.info("SBK RAM Benchmark Started");
         return retFuture;
     }
 
