@@ -56,8 +56,10 @@ public final class SshUtils {
             throw new IOException("The cmd: "+cmd+" timeout !");
         }
 
-        response.returnCode =  execChannel.getExitStatus();
-        execChannel.close(true);
+        if (session.isOpen()) {
+            response.returnCode = execChannel.getExitStatus();
+            execChannel.close(true);
+        }
     }
 
     public static void copyDirectory(final ClientSession session,  String srcPath,
