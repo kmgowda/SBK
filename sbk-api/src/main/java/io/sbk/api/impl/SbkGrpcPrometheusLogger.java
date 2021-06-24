@@ -68,8 +68,8 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         }
 
         @Override
-        public void onError(Throwable t) {
-
+        public void onError(Throwable ex) {
+            Runtime.getRuntime().exit(1);
         }
 
         @Override
