@@ -16,6 +16,7 @@ import io.sbk.gem.GemParameters;
 import io.sbk.gem.Ssh;
 import io.sbk.gem.SshConnection;
 import io.sbk.gem.SshResponse;
+import io.sbk.perl.State;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 import org.apache.commons.lang.StringUtils;
@@ -37,9 +38,10 @@ public class SbkGemBenchmark implements Benchmark {
     private final GemParameters params;
     private final String sbkArgs;
     private final ExecutorService executor;
+    private final CompletableFuture<Void> retFuture;
 
     @GuardedBy("this")
-    private CompletableFuture<Void> retFuture;
+    private State state;
 
     public SbkGemBenchmark(Benchmark ramBenchmark, GemConfig config, GemParameters params, String sbkArgs) {
         this.ramBenchmark = ramBenchmark;
@@ -47,6 +49,8 @@ public class SbkGemBenchmark implements Benchmark {
         this.config.remoteTimeoutSeconds = Long.MAX_VALUE;
         this.params = params;
         this.sbkArgs = sbkArgs;
+        this.retFuture =  new CompletableFuture<>();
+        this.state = State.BEGIN;
         if (config.fork) {
             executor = new ForkJoinPool(params.getConnections().length + 10);
         } else {
@@ -56,7 +60,18 @@ public class SbkGemBenchmark implements Benchmark {
 
 
     @Override
+    @Synchronized
     public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException, IllegalStateException {
+        if (state != State.BEGIN) {
+            if (state == State.RUN) {
+                Printer.log.warn("SBK GEM Benchmark is already running..");
+            } else {
+                Printer.log.warn("SBK GEM Benchmark is already shutdown..");
+            }
+            return retFuture;
+        }
+        state = State.RUN;
+        Printer.log.info("SBK GEM Benchmark Started");
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
         final SshConnection[] conns = params.getConnections();
@@ -186,7 +201,6 @@ public class SbkGemBenchmark implements Benchmark {
             shutdown(null);
         });
 
-        retFuture  = new CompletableFuture<>();
         return retFuture;
     }
 
@@ -218,24 +232,17 @@ public class SbkGemBenchmark implements Benchmark {
      */
     @Synchronized
     private void shutdown(Throwable ex) {
-        if (retFuture == null) {
-            return;
+        if (state != State.END) {
+            state = State.END;
+            ramBenchmark.stop();
+            if (ex != null) {
+                Printer.log.warn("SBK GEM Benchmark Shutdown with Exception " + ex);
+                retFuture.completeExceptionally(ex);
+            } else {
+                Printer.log.info("SBK GEM Benchmark Shutdown");
+                retFuture.complete(null);
+            }
         }
-
-        if (retFuture.isDone()) {
-            retFuture = null;
-            return;
-        }
-        ramBenchmark.stop();
-
-        if (ex != null) {
-            Printer.log.warn("SBK GEM Shutdown with Exception "+ ex);
-            retFuture.completeExceptionally(ex);
-        } else {
-            Printer.log.info("SBK GEM Shutdown");
-            retFuture.complete(null);
-        }
-        retFuture = null;
     }
 
 
