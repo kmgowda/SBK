@@ -13,6 +13,7 @@ package io.sbk.ram.impl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
+import io.sbk.perl.State;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamLogger;
 import io.sbk.ram.RamParameterOptions;
@@ -46,10 +47,11 @@ public class SbkRamBenchmark implements Benchmark {
     final private SbkGrpcService service;
     final private RamBenchmark benchmark;
     final private double[] percentileFractions;
+    final private CompletableFuture<Void> retFuture;
 
 
     @GuardedBy("this")
-    private CompletableFuture<Void> retFuture;
+    private State state;
 
     /**
      * Create SBK Server Benchmark.
@@ -80,7 +82,8 @@ public class SbkRamBenchmark implements Benchmark {
                 logger, logger, logger);
         service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
         server = ServerBuilder.forPort(params.getRamPort()).addService(service).build();
-        retFuture = null;
+        retFuture = new CompletableFuture<>();
+        state = State.BEGIN;
     }
 
 
@@ -118,14 +121,19 @@ public class SbkRamBenchmark implements Benchmark {
     @Synchronized
     public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException,
             IllegalStateException {
-        if (retFuture != null) {
-            throw  new IllegalStateException("SBK RAM Benchmark is already started\n");
+        if (state != State.BEGIN) {
+            if (state == State.RUN) {
+                Printer.log.warn("SBK Benchmark is already running..");
+            } else {
+                Printer.log.warn("SBK Benchmark is already shutdown..");
+            }
+            return retFuture;
         }
+        state = State.RUN;
+        Printer.log.info("SBK RAM Benchmark Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
         benchmark.start();
         server.start();
-        retFuture = new CompletableFuture<>();
-        Printer.log.info("SBK RAM Benchmark Started");
         return retFuture;
     }
 
@@ -137,32 +145,19 @@ public class SbkRamBenchmark implements Benchmark {
      *
      */
     @Synchronized
-    private void shutdown(Throwable ex) {
-        if (retFuture == null) {
-            return;
-        }
-
-        if (retFuture.isDone()) {
-            retFuture = null;
-            return;
-        }
-
-        try {
-            server.shutdown();
-            benchmark.stop();
-            logger.close(params);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (ex != null) {
-            Printer.log.warn("SBK Benchmark Shutdown with Exception "+ex.toString());
-            retFuture.completeExceptionally(ex);
-        } else {
-            Printer.log.info("SBK Benchmark Shutdown");
+    private void shutdown() {
+        if (state != State.END) {
+            state = State.END;
+            try {
+                server.shutdown();
+                benchmark.stop();
+                logger.close(params);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Printer.log.info("SBK RAM Benchmark Shutdown");
             retFuture.complete(null);
         }
-        retFuture = null;
     }
 
 
@@ -171,10 +166,9 @@ public class SbkRamBenchmark implements Benchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
-     *
      */
     @Override
     public void stop() {
-        shutdown(null);
+        shutdown();
     }
 }

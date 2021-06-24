@@ -14,6 +14,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatencies;
+import io.sbk.perl.State;
 import io.sbk.perl.Time;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.ram.RamRegistry;
@@ -22,7 +23,6 @@ import io.sbk.system.Printer;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,9 +41,10 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
     private final ConcurrentLinkedQueue<LatenciesRecord>[] cQueues;
     private final HashMap<Long, RW> table;
     private final AtomicLong counter;
+    private final CompletableFuture<Void> retFuture;
 
     @GuardedBy("this")
-    private CompletableFuture<Void> retFuture;
+    private State state;
 
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
@@ -64,7 +65,8 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
             cQueues[i] = new ConcurrentLinkedQueue<>();
         }
         this.counter = new AtomicLong(0);
-        this.retFuture = null;
+        this.retFuture = new CompletableFuture<>();
+        this.state = State.BEGIN;
         this.qFuture = null;
     }
 
@@ -188,59 +190,50 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
 
     @Synchronized
     private void shutdown(Throwable ex) {
-        if (retFuture == null) {
-            return;
-        }
-
-        if (retFuture.isDone()) {
-            retFuture = null;
-            return;
-        }
-
-        if (qFuture != null) {
-            if (!qFuture.isDone()) {
-                try {
-                    cQueues[0].add(LatenciesRecord.newBuilder().setSequenceNumber(-1).build());
-                    qFuture.get();
-                    for (ConcurrentLinkedQueue<LatenciesRecord> queue : cQueues) {
-                        queue.clear();
+        if (state != State.END) {
+            state = State.END;
+            if (qFuture != null) {
+                if (!qFuture.isDone()) {
+                    try {
+                        cQueues[0].add(LatenciesRecord.newBuilder().setSequenceNumber(-1).build());
+                        qFuture.get();
+                        for (ConcurrentLinkedQueue<LatenciesRecord> queue : cQueues) {
+                            queue.clear();
+                        }
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
                     }
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
                 }
+                qFuture = null;
             }
-            qFuture = null;
+            if (ex != null) {
+                Printer.log.warn("LatenciesRecord Benchmark with Exception:" + ex);
+                retFuture.completeExceptionally(ex);
+            } else {
+                Printer.log.info("LatenciesRecord Benchmark Shutdown");
+                retFuture.complete(null);
+            }
         }
-        if (ex != null) {
-            Printer.log.warn("LatenciesRecord Benchmark with Exception:" + ex.toString());
-            retFuture.completeExceptionally(ex);
-        } else  {
-            Printer.log.info("LatenciesRecord Benchmark Shutdown" );
-            retFuture.complete(null);
-        }
-        retFuture = null;
     }
 
 
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException,
-            IllegalStateException {
-        if (retFuture != null) {
-            throw  new IllegalStateException("LatenciesRecord Benchmark is already started\n");
+    public CompletableFuture<Void> start() throws IllegalStateException {
+        if (state == State.BEGIN) {
+            state = State.RUN;
+            qFuture = CompletableFuture.runAsync(() -> {
+                try {
+                    run();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            qFuture.whenComplete((ret, ex) -> {
+                shutdown(ex);
+            });
         }
-        retFuture = new CompletableFuture<>();
-        qFuture =  CompletableFuture.runAsync(() -> {
-            try {
-                run();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-        qFuture.whenComplete((ret, ex) -> {
-            shutdown(ex);
-        });
         return retFuture;
     }
 
