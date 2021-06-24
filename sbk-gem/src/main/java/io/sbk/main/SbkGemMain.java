@@ -22,8 +22,8 @@ public class SbkGemMain {
     public static void main(final String[] args) {
         try {
             SbkGem.run(args, null, null);
-        } catch (ParseException | IllegalArgumentException | IOException |
-                TimeoutException | InterruptedException | ExecutionException ex) {
+        } catch (ParseException | IllegalArgumentException | IOException | TimeoutException |
+                InterruptedException | ExecutionException | InstantiationException ex) {
             ex.printStackTrace();
             System.exit(1);
         }

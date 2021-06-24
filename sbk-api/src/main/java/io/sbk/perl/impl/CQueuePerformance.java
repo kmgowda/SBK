@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 
 import io.sbk.perl.PerlConfig;
+import io.sbk.perl.State;
 import io.sbk.system.Printer;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PeriodicRecorder;
@@ -39,12 +40,13 @@ final public class CQueuePerformance implements Performance {
     final private PeriodicRecorder periodicLogger;
     final private ExecutorService executor;
     final private Channel[] channels;
+    final private CompletableFuture<Void> retFuture;
 
     @GuardedBy("this")
     private int index;
 
     @GuardedBy("this")
-    private CompletableFuture<Void> retFuture;
+    private State state;
 
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
@@ -57,7 +59,8 @@ final public class CQueuePerformance implements Performance {
         this.time = time;
         this.periodicLogger = periodicLogger;
         this.executor = executor;
-        this.retFuture = null;
+        this.retFuture = new CompletableFuture<>();
+        this.state = State.BEGIN;
         int maxQs;
         if (perlConfig.maxQs > 0) {
             maxQs = perlConfig.maxQs;
@@ -73,78 +76,67 @@ final public class CQueuePerformance implements Performance {
         }
     }
 
-    /**
-     * Private class for start and end time.
-     */
-    final private class QueueProcessor implements Runnable {
-        final private long msToRun;
-        final private long totalRecords;
 
-        private QueueProcessor(long secondsToRun, long recordsCount) {
-            this.msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
-            this.totalRecords = recordsCount;
-        }
-
-        public void run() {
-            final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, idleNS);
-            final long startTime = time.getCurrentTime();
-            boolean doWork = true;
-            long ctime = startTime;
-            long recordsCnt = 0;
-            boolean notFound;
-            TimeStamp t;
-            Printer.log.info("Performance Logger Started" );
-            periodicLogger.start(startTime);
-            periodicLogger.startWindow(startTime);
-            while (doWork) {
-                notFound = true;
-                for (int i = 0; doWork && (i < channels.length); i++) {
-                    t = channels[i].receive(windowIntervalMS);
-                    if (t != null) {
-                        notFound = false;
-                        ctime = t.endTime;
-                        if (t.isEnd()) {
-                            doWork = false;
-                        } else {
-                            recordsCnt += t.records;
-                            periodicLogger.record(t.startTime, t.endTime, t.bytes, t.records);
-                            if (msToRun > 0) {
-                                if (time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
-                                    doWork = false;
-                                }
-                            } else if (totalRecords > 0  && recordsCnt >= totalRecords) {
+    private void runPerformance(final long secondsToRun, final long totalRecords) {
+        final long msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
+        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, idleNS);
+        final long startTime = time.getCurrentTime();
+        boolean doWork = true;
+        long ctime = startTime;
+        long recordsCnt = 0;
+        boolean notFound;
+        TimeStamp t;
+        Printer.log.info("Performance Logger Started" );
+        periodicLogger.start(startTime);
+        periodicLogger.startWindow(startTime);
+        while (doWork) {
+            notFound = true;
+            for (int i = 0; doWork && (i < channels.length); i++) {
+                t = channels[i].receive(windowIntervalMS);
+                if (t != null) {
+                    notFound = false;
+                    ctime = t.endTime;
+                    if (t.isEnd()) {
+                        doWork = false;
+                    } else {
+                        recordsCnt += t.records;
+                        periodicLogger.record(t.startTime, t.endTime, t.bytes, t.records);
+                        if (msToRun > 0) {
+                            if (time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
                                 doWork = false;
                             }
-                        }
-                        if (periodicLogger.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
-                            periodicLogger.stopWindow(ctime);
-                            periodicLogger.startWindow(ctime);
-                            idleCounter.reset();
+                        } else if (totalRecords > 0  && recordsCnt >= totalRecords) {
+                            doWork = false;
                         }
                     }
-                }
-                if (doWork) {
-                    if (notFound) {
-                        if (idleCounter.waitAndCheck()) {
-                            ctime = time.getCurrentTime();
-                            final long diffTime = periodicLogger.elapsedMilliSecondsWindow(ctime);
-                            if (diffTime > windowIntervalMS) {
-                                periodicLogger.stopWindow(ctime);
-                                periodicLogger.startWindow(ctime);
-                                idleCounter.reset();
-                                idleCounter.setElastic(diffTime);
-                            } else {
-                                idleCounter.updateElastic(diffTime);
-                            }
-                        }
-                    }
-                    if (msToRun > 0 && time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
-                        doWork = false;
+                    if (periodicLogger.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
+                        periodicLogger.stopWindow(ctime);
+                        periodicLogger.startWindow(ctime);
+                        idleCounter.reset();
                     }
                 }
             }
-            periodicLogger.stop(ctime);
+            if (doWork) {
+                if (notFound) {
+                    if (idleCounter.waitAndCheck()) {
+                        ctime = time.getCurrentTime();
+                        final long diffTime = periodicLogger.elapsedMilliSecondsWindow(ctime);
+                        if (diffTime > windowIntervalMS) {
+                            periodicLogger.stopWindow(ctime);
+                            periodicLogger.startWindow(ctime);
+                            idleCounter.reset();
+                            idleCounter.setElastic(diffTime);
+                        } else {
+                            idleCounter.updateElastic(diffTime);
+                        }
+                    }
+                }
+                if (msToRun > 0 && time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
+                    doWork = false;
+                }
+            }
         }
+        periodicLogger.stop(ctime);
     }
 
     /**
@@ -196,8 +188,6 @@ final public class CQueuePerformance implements Performance {
     interface Throw {
         void onException(Throwable ex);
     }
-
-
 
 
     @NotThreadSafe
@@ -264,51 +254,42 @@ final public class CQueuePerformance implements Performance {
 
     @Synchronized
     private void shutdown(Throwable ex) {
-        if (retFuture == null) {
-            return;
-        }
-
-        if (retFuture.isDone()) {
-            retFuture = null;
-            return;
-        }
-
-        if (qFuture != null) {
-            if (!qFuture.isDone()) {
-                long endTime = time.getCurrentTime();
-                for (Channel ch : channels) {
-                    ch.sendEndTime(endTime);
+        if (state != State.END ) {
+            state = State.END;
+            if (qFuture != null) {
+                if (!qFuture.isDone()) {
+                    long endTime = time.getCurrentTime();
+                    for (Channel ch : channels) {
+                        ch.sendEndTime(endTime);
+                    }
+                    try {
+                        qFuture.get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    for (Channel ch : channels) {
+                        ch.clear();
+                    }
                 }
-                try {
-                    qFuture.get();
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-                for (Channel ch : channels) {
-                    ch.clear();
-                }
+                qFuture = null;
             }
-            qFuture = null;
+            if (ex != null) {
+                Printer.log.warn("Performance Logger Shutdown with Exception:" + ex);
+                retFuture.completeExceptionally(ex);
+            } else {
+                Printer.log.info("Performance Logger Shutdown");
+                retFuture.complete(null);
+            }
         }
-        if (ex != null) {
-            Printer.log.warn("Performance Logger Shutdown with Exception:" + ex.toString());
-            retFuture.completeExceptionally(ex);
-        } else  {
-            Printer.log.info("Performance Logger Shutdown" );
-            retFuture.complete(null);
-        }
-        retFuture = null;
     }
 
 
     @Override
     @Synchronized
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
-        if (retFuture == null) {
-            retFuture = new CompletableFuture<>();
-            qFuture =  CompletableFuture.runAsync(new QueueProcessor(secondsToRun,
-                            recordsCount),
-                    executor);
+        if (state == State.BEGIN) {
+            state = State.RUN;
+            qFuture =  CompletableFuture.runAsync(() -> runPerformance(secondsToRun, recordsCount), executor);
             qFuture.whenComplete((ret, ex) -> {
                 shutdown(ex);
             });

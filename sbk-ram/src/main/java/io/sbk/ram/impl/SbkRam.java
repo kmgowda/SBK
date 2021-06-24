@@ -46,91 +46,38 @@ public class SbkRam {
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
+     * @throws InstantiationException if the exception occurred due to initiation failures.
      * @throws InterruptedException If an exception occurred if the writers and readers are interrupted.
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
     public static void run(final String[] args, final String applicationName,
                            RamLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InterruptedException, ExecutionException, TimeoutException {
-
-        final CompletableFuture<Void> ret = runAsync(args, applicationName, outLogger);
+            IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException {
+        final Benchmark benchmark = buildBenchmark(args, applicationName, outLogger);
+        final CompletableFuture<Void> ret = benchmark.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
-            ret.complete(null);
+            benchmark.stop();
         }));
         ret.get();
     }
 
+
     /**
-     * Asynchronously Run the Performance Benchmarking .
+     * Build the Benchmark Object.
+     *
      * @param args command line arguments.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null', SbkServer
-     *                       is used by default.
+     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
      * @throws ParseException If an exception occurred while parsing command line arguments.
-     * @return CompletableFuture instance.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
-     * @throws InterruptedException If an exception occurred due to writers or readers interrupted.
-     * @throws ExecutionException If an exception occurred due to writers or readers exceptions.
+     * @throws InstantiationException if the exception occurred due to initiation failures.
      */
-    public static CompletableFuture<Void> runAsync(final String[] args, final String applicationName,
-                                                   RamLogger outLogger) throws ParseException,
-            IllegalArgumentException, IOException, InterruptedException, ExecutionException {
-        CompletableFuture<Void> ret;
-        try {
-            ret = new SbkRamCompletableFutureAsync(args, applicationName, outLogger);
-        } catch (InstantiationException ex) {
-            ret = new CompletableFuture<>();
-            ret.complete(null);
-            return ret;
-        }
-        return ret;
-    }
-
-    private static class SbkRamCompletableFutureAsync extends CompletableFuture<Void> {
-        private final Benchmark benchmark;
-        private final CompletableFuture<Void> ret;
-
-        public SbkRamCompletableFutureAsync(final String[] args, final String applicationName,
-                                            RamLogger outLogger) throws ParseException,
-                IllegalArgumentException, IOException, InterruptedException, ExecutionException,
-                InstantiationException {
-            super();
-            benchmark = createBenchmark(args, applicationName, outLogger);
-            ret = benchmark.start();
-        }
-
-        @Override
-        public Void get() throws InterruptedException,
-                ExecutionException {
-            return ret.get();
-        }
-
-
-        @Override
-        public Void get(long timeout, java.util.concurrent.TimeUnit  unit) throws InterruptedException,
-                ExecutionException, TimeoutException {
-            return ret.get(timeout, unit);
-        }
-
-        @Override
-        public Void join() {
-            return ret.join();
-        }
-
-        @Override
-        public boolean complete(Void val) {
-            benchmark.stop();
-            return super.complete(val);
-        }
-    }
-
-
-    private static Benchmark createBenchmark(final String[] args, final String applicationName,
+    public static Benchmark buildBenchmark(final String[] args, final String applicationName,
                                              RamLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InstantiationException  {
         final RamParameterOptions params;

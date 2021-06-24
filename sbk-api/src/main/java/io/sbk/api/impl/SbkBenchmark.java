@@ -21,6 +21,7 @@ import io.sbk.perl.Performance;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.api.Storage;
+import io.sbk.perl.State;
 import io.sbk.perl.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
 import io.sbk.perl.impl.CompositeCSVLatencyRecorder;
@@ -65,11 +66,16 @@ public class SbkBenchmark implements Benchmark {
     final private int maxQs;
     final private double[] percentileFractions;
     final private ScheduledExecutorService timeoutExecutor;
+    final private CompletableFuture<Void> retFuture;
+
+    @GuardedBy("this")
     private List<DataWriter<Object>> writers;
+
+    @GuardedBy("this")
     private List<DataReader<Object>> readers;
 
     @GuardedBy("this")
-    private CompletableFuture<Void> retFuture;
+    private State state;
 
     /**
      * Create SBK Benchmark.
@@ -128,7 +134,8 @@ public class SbkBenchmark implements Benchmark {
             readStats = null;
         }
         timeoutExecutor = Executors.newScheduledThreadPool(1);
-        retFuture = null;
+        retFuture = new CompletableFuture<>();
+        state = State.BEGIN;
     }
 
 
@@ -176,9 +183,15 @@ public class SbkBenchmark implements Benchmark {
     @Synchronized
     public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException,
             IllegalStateException {
-        if (retFuture != null) {
-            throw  new IllegalStateException("SbkBenchmark is already started\n");
+        if (state != State.BEGIN) {
+            if (state == State.RUN) {
+                Printer.log.warn("SBK Benchmark is already running..");
+            } else {
+                Printer.log.warn("SBK Benchmark is already shutdown..");
+            }
+            return retFuture;
         }
+        state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
         logger.open(params, storageName, action, time);
         storage.openStorage(params);
@@ -376,7 +389,7 @@ public class SbkBenchmark implements Benchmark {
             });
         }
 
-        retFuture = chainFuture.thenRunAsync(this::stop, executor);
+        chainFuture.thenRunAsync(this::stop, executor);
 
         return retFuture;
     }
@@ -390,16 +403,11 @@ public class SbkBenchmark implements Benchmark {
      */
     @Synchronized
     private void shutdown(Throwable ex) {
-        if (retFuture == null) {
+        if (state == State.END) {
             return;
         }
-
-        if (retFuture.isDone()) {
-            retFuture = null;
-            return;
-        }
-
-        if (writeStats != null ) {
+        state = State.END;
+        if (writeStats != null) {
             writeStats.stop();
         }
         if (readStats != null) {
@@ -437,13 +445,13 @@ public class SbkBenchmark implements Benchmark {
         }
 
         if (ex != null) {
-            Printer.log.warn("SBK Benchmark Shutdown with Exception "+ex.toString());
+            Printer.log.warn("SBK Benchmark Shutdown with Exception " + ex);
             retFuture.completeExceptionally(ex);
         } else {
             Printer.log.info("SBK Benchmark Shutdown");
             retFuture.complete(null);
         }
-        retFuture = null;
+
     }
 
 
@@ -452,7 +460,6 @@ public class SbkBenchmark implements Benchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
-     *
      */
     @Override
     public void stop() {

@@ -26,7 +26,7 @@ public class SbkRamMain {
         try {
             SbkRam.run(args, null, null);
         } catch (ParseException | IllegalArgumentException | IOException |
-                TimeoutException | InterruptedException | ExecutionException ex) {
+                TimeoutException | InterruptedException | ExecutionException | InstantiationException ex) {
             ex.printStackTrace();
             System.exit(1);
         }

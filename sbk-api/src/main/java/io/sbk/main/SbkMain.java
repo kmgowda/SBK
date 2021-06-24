@@ -26,7 +26,7 @@ public class SbkMain {
         try {
             Sbk.run(args, null, null, null);
         } catch (ParseException | IllegalArgumentException | IOException |
-                TimeoutException | InterruptedException | ExecutionException ex) {
+                TimeoutException | InterruptedException | ExecutionException | InstantiationException  ex) {
             ex.printStackTrace();
             System.exit(1);
         }
