@@ -13,7 +13,6 @@ package io.sbk.gem.impl;
 import io.sbk.api.Benchmark;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemParameters;
-import io.sbk.gem.Ssh;
 import io.sbk.gem.SshConnection;
 import io.sbk.gem.SshResponse;
 import io.sbk.perl.State;
@@ -37,8 +36,9 @@ public class SbkGemBenchmark implements Benchmark {
     private final GemConfig config;
     private final GemParameters params;
     private final String sbkArgs;
-    private final ExecutorService executor;
     private final CompletableFuture<Void> retFuture;
+    private final ExecutorService executor;
+    private final SbkSsh[] nodes;
 
     @GuardedBy("this")
     private State state;
@@ -51,10 +51,15 @@ public class SbkGemBenchmark implements Benchmark {
         this.sbkArgs = sbkArgs;
         this.retFuture =  new CompletableFuture<>();
         this.state = State.BEGIN;
+        final SshConnection[] conns = params.getConnections();
         if (config.fork) {
-            executor = new ForkJoinPool(params.getConnections().length + 10);
+            executor = new ForkJoinPool(conns.length + 10);
         } else {
-            executor = Executors.newFixedThreadPool(params.getConnections().length + 10);
+            executor = Executors.newFixedThreadPool(conns.length + 10);
+        }
+        this.nodes = new SbkSsh[conns.length];
+        for (int i = 0; i < conns.length; i++) {
+            nodes[i] =  new SbkSsh(conns[i],  executor);
         }
     }
 
@@ -72,17 +77,35 @@ public class SbkGemBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK GEM Benchmark Started");
+        final CompletableFuture[] cfArray = new CompletableFuture[nodes.length];
+
+        for (int i = 0; i < nodes.length; i++) {
+            cfArray[i] = nodes[i].createSessionAsync(config.remoteTimeoutSeconds);
+        }
+        final CompletableFuture<Void> connsFuture = CompletableFuture.allOf(cfArray);
+
+        for (int i = 0; i < config.maxIterations && !connsFuture.isDone(); i++) {
+            try {
+                connsFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
+            } catch (TimeoutException ex) {
+                Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for ssh session to remote hosts timeout");
+            }
+        }
+        if (!connsFuture.isDone() || connsFuture.isCompletedExceptionally()) {
+            final String errMsg = "SBK-GEM, remote session failed after " + config.maxIterations + " iterations";
+            Printer.log.error(errMsg);
+            throw new InterruptedException(errMsg);
+        }
+        Printer.log.info("SBK-GEM , ssh session establishment complete..");
+
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
-        final SshConnection[] conns = params.getConnections();
-        final CompletableFuture[] cfArray = new CompletableFuture[conns.length];
         boolean stop = false;
 
-        final SshResponse[] sshResults = createMultiSshResponse(conns.length, true);
+        final SshResponse[] sshResults = createMultiSshResponse(nodes.length, true);
         final String cmd = "java -version";
-        for (int i = 0; i < conns.length; i++) {
-            cfArray[i] = Ssh.runCommandAsync(conns[i], config.remoteTimeoutSeconds, cmd,
-                    sshResults[i], executor);
+        for (int i = 0; i < nodes.length; i++) {
+            cfArray[i] = nodes[i].runCommandAsync(cmd, config.remoteTimeoutSeconds, sshResults[i]);
         }
         final CompletableFuture<Void> ret = CompletableFuture.allOf(cfArray);
 
@@ -103,7 +126,7 @@ public class SbkGemBenchmark implements Benchmark {
                 String stdOut = sshResults[i].stdOutput.toString();
                 String stdErr = sshResults[i].errOutput.toString();
                 if (javaMajorVersion > parseJavaVersion(stdOut) && javaMajorVersion > parseJavaVersion(stdErr)) {
-                    Printer.log.info("Java version :" + javaMajorVersion+" , mismatch at : "+conns[i].getHost());
+                    Printer.log.info("Java version :" + javaMajorVersion+" , mismatch at : "+ nodes[i].connection.getHost());
                     stop = true;
                 }
             }
@@ -114,10 +137,10 @@ public class SbkGemBenchmark implements Benchmark {
         }
         Printer.log.info("Java version match Success..");
 
-        final SshResponse[] results = createMultiSshResponse(conns.length, false);
-        for (int i = 0; i < conns.length; i++) {
-            cfArray[i] = Ssh.runCommandAsync(conns[i], config.remoteTimeoutSeconds, "rm -rf " + conns[i].getDir(),
-                    results[i], executor);
+        final SshResponse[] results = createMultiSshResponse(nodes.length, false);
+        for (int i = 0; i < nodes.length; i++) {
+            cfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
+                    config.remoteTimeoutSeconds, results[i]);
         }
         final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(cfArray);
 
@@ -135,11 +158,11 @@ public class SbkGemBenchmark implements Benchmark {
             throw new InterruptedException(errMsg);
         }
 
-        final SshResponse[] mkDirResults = createMultiSshResponse(conns.length, false);
+        final SshResponse[] mkDirResults = createMultiSshResponse(nodes.length, false);
 
-        for (int i = 0; i < conns.length; i++) {
-            cfArray[i] = Ssh.runCommandAsync(conns[i], config.remoteTimeoutSeconds, "mkdir -p " + conns[i].getDir(),
-                    mkDirResults[i], executor);
+        for (int i = 0; i < nodes.length; i++) {
+            cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
+                    config.remoteTimeoutSeconds, mkDirResults[i]);
         }
 
         final CompletableFuture<Void> mkDirFuture = CompletableFuture.allOf(cfArray);
@@ -158,9 +181,8 @@ public class SbkGemBenchmark implements Benchmark {
             throw new InterruptedException(errMsg);
         }
 
-        for (int i = 0; i < conns.length; i++) {
-            cfArray[i] = Ssh.copyDirectoryAsync(conns[i], config.remoteTimeoutSeconds, params.getSbkDir(),
-                    conns[i].getDir(), executor);
+        for (int i = 0; i < nodes.length; i++) {
+            cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
         }
         final CompletableFuture<Void> copyCB = CompletableFuture.allOf(cfArray);
 
@@ -182,14 +204,14 @@ public class SbkGemBenchmark implements Benchmark {
 
         ramBenchmark.start();
 
-        final SshResponse[] sbkResults = createMultiSshResponse(conns.length, true);
+        final SshResponse[] sbkResults = createMultiSshResponse(nodes.length, true);
 
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final String sbkCommand = sbkDir + "/" + GemConfig.BIN_EXT_PATH + "/" + params.getSbkCommand()+" "+sbkArgs;
         Printer.log.info("sbk command : " +sbkCommand);
-        for (int i = 0; i < conns.length; i++) {
-            cfArray[i] = Ssh.runCommandAsync(conns[i], config.remoteTimeoutSeconds,
-                    conns[i].getDir()+"/"+sbkCommand, sbkResults[i], executor);
+        for (int i = 0; i < nodes.length; i++) {
+            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+"/"+sbkCommand,
+                    config.remoteTimeoutSeconds, sbkResults[i]);
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfArray);
         sbkFuture.exceptionally(ex -> {
@@ -248,6 +270,9 @@ public class SbkGemBenchmark implements Benchmark {
 
     @Override
     public void stop() {
+        for (SbkSsh node: nodes) {
+            node.stop();
+        }
         shutdown(null);
     }
 }

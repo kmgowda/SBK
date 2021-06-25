@@ -18,6 +18,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.sbk.api.Action;
+import io.sbk.api.ExceptionHandler;
 import io.sbk.api.InputOptions;
 import io.sbk.api.RamHostConfig;
 import io.sbk.grpc.ClientID;
@@ -30,8 +31,6 @@ import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
-
 
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
@@ -54,6 +53,8 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     private ServiceGrpc.ServiceBlockingStub blockingStub;
     private LatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
+    private ExceptionHandler exceptionHandler;
+
 
     public SbkGrpcPrometheusLogger() {
         super();
@@ -68,14 +69,21 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         }
 
         @Override
-        public void onError(Throwable t) {
-
+        public void onError(Throwable ex) {
+                // graceful exit may not work GRPC
+                Runtime.getRuntime().exit(1);
         }
 
         @Override
         public void onCompleted() {
 
         }
+    }
+
+
+    @Override
+    public void setExceptionHandler(ExceptionHandler handler) {
+        this.exceptionHandler = handler;
     }
 
 
@@ -112,6 +120,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         ramHostConfig.port = Integer.parseInt(params.getOptionValue("ramport", Integer.toString(ramHostConfig.port)));
         //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
         blocking = false;
+        exceptionHandler = null;
     }
 
 
@@ -209,13 +218,11 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         builder.setHigherLatencyDiscardRecords(recorder.higherLatencyDiscardRecords);
         builder.setLowerLatencyDiscardRecords(recorder.lowerLatencyDiscardRecords);
         builder.setValidLatencyRecords(recorder.validLatencyRecords);
-
         if (stub != null) {
             stub.addLatenciesRecord(builder.build(), observer);
         } else {
             blockingStub.addLatenciesRecord(builder.build());
         }
-
         recorder.reset();
         builder.clear();
         latencyBytes = 0;
@@ -248,7 +255,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         super.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
-        if (latencyBytes > 0) {
+        if (latencyBytes > 0 ) {
             sendLatenciesRecord();
         }
     }
