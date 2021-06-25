@@ -74,7 +74,7 @@ public class SbkGem {
             System.out.println();
             benchmark.stop();
         }));
-        ret.get();
+        ret.join();
     }
 
 

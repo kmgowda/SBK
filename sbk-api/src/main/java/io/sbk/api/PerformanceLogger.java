@@ -113,4 +113,14 @@ public interface PerformanceLogger extends Print {
         return PerlConfig.PERCENTILES;
     }
 
+    /**
+     * Default implementation for setting exception handler.
+     * if the logger encounters any exception, it can report to SBK.
+     *
+     * @param handler Exception handler
+     */
+    default void setExceptionHandler(ExceptionHandler handler) {
+
+    }
+
 }

@@ -18,6 +18,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.sbk.api.Action;
+import io.sbk.api.ExceptionHandler;
 import io.sbk.api.InputOptions;
 import io.sbk.api.RamHostConfig;
 import io.sbk.grpc.ClientID;
@@ -30,7 +31,7 @@ import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -42,6 +43,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static int LATENCY_MAP_BYTES = 16;
 
     public RamHostConfig ramHostConfig;
+    private final AtomicBoolean isExceptionOccured;
     private boolean enable;
     private long clientID;
     private long seqNum;
@@ -54,9 +56,12 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     private ServiceGrpc.ServiceBlockingStub blockingStub;
     private LatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
+    private ExceptionHandler exceptionHandler;
+
 
     public SbkGrpcPrometheusLogger() {
         super();
+        isExceptionOccured = new AtomicBoolean(false);
     }
 
 
@@ -69,13 +74,22 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
 
         @Override
         public void onError(Throwable ex) {
-            Runtime.getRuntime().exit(1);
+            isExceptionOccured.set(true);
+            if (exceptionHandler != null) {
+               exceptionHandler.throwException(ex);
+            }
         }
 
         @Override
         public void onCompleted() {
 
         }
+    }
+
+
+    @Override
+    public void setExceptionHandler(ExceptionHandler handler) {
+        this.exceptionHandler = handler;
     }
 
 
@@ -112,6 +126,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         ramHostConfig.port = Integer.parseInt(params.getOptionValue("ramport", Integer.toString(ramHostConfig.port)));
         //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
         blocking = false;
+        exceptionHandler = null;
     }
 
 
@@ -186,8 +201,10 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         }
         try {
             builder.clear();
-            blockingStub.closeClient(ClientID.newBuilder().setId(clientID).build());
-            channel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS);
+            if (!isExceptionOccured.get()) {
+                blockingStub.closeClient(ClientID.newBuilder().setId(clientID).build());
+                channel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS);
+            }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
@@ -195,6 +212,9 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     }
 
     public void sendLatenciesRecord() {
+        if (isExceptionOccured.get()) {
+            return;
+        }
         builder.setClientID(clientID);
         builder.setSequenceNumber(++seqNum);
         builder.setMaxReaders(maxReaders.get());
@@ -209,13 +229,11 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         builder.setHigherLatencyDiscardRecords(recorder.higherLatencyDiscardRecords);
         builder.setLowerLatencyDiscardRecords(recorder.lowerLatencyDiscardRecords);
         builder.setValidLatencyRecords(recorder.validLatencyRecords);
-
         if (stub != null) {
             stub.addLatenciesRecord(builder.build(), observer);
         } else {
             blockingStub.addLatenciesRecord(builder.build());
         }
-
         recorder.reset();
         builder.clear();
         latencyBytes = 0;
@@ -248,7 +266,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         super.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
-        if (latencyBytes > 0) {
+        if (latencyBytes > 0 ) {
             sendLatenciesRecord();
         }
     }

@@ -388,7 +388,7 @@ public class SbkBenchmark implements Benchmark {
                 return null;
             });
         }
-
+        logger.setExceptionHandler(this::shutdown);
         chainFuture.thenRunAsync(this::stop, executor);
 
         return retFuture;
