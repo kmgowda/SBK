@@ -31,8 +31,6 @@ import io.sbk.perl.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
@@ -43,7 +41,6 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static int LATENCY_MAP_BYTES = 16;
 
     public RamHostConfig ramHostConfig;
-    private final AtomicBoolean isExceptionOccured;
     private boolean enable;
     private long clientID;
     private long seqNum;
@@ -61,7 +58,6 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
 
     public SbkGrpcPrometheusLogger() {
         super();
-        isExceptionOccured = new AtomicBoolean(false);
     }
 
 
@@ -74,10 +70,8 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
 
         @Override
         public void onError(Throwable ex) {
-            isExceptionOccured.set(true);
-            if (exceptionHandler != null) {
-               exceptionHandler.throwException(ex);
-            }
+                // graceful exit may not work GRPC
+                Runtime.getRuntime().exit(1);
         }
 
         @Override
@@ -201,10 +195,8 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         }
         try {
             builder.clear();
-            if (!isExceptionOccured.get()) {
-                blockingStub.closeClient(ClientID.newBuilder().setId(clientID).build());
-                channel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS);
-            }
+            blockingStub.closeClient(ClientID.newBuilder().setId(clientID).build());
+            channel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
@@ -212,9 +204,6 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     }
 
     public void sendLatenciesRecord() {
-        if (isExceptionOccured.get()) {
-            return;
-        }
         builder.setClientID(clientID);
         builder.setSequenceNumber(++seqNum);
         builder.setMaxReaders(maxReaders.get());
