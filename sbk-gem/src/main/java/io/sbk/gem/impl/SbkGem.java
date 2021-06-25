@@ -34,6 +34,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
 import org.reflections.ReflectionsException;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -137,7 +138,7 @@ public class SbkGem {
         if (StringUtils.isNotEmpty(sbkAppHome)) {
             gemConfig.sbkPath = sbkAppHome;
         }
-        gemConfig.remoteDir = GemConfig.DIR_PREFIX + appName;
+        gemConfig.remoteDir = GemConfig.REMOTE_PARENT_DIR + File.separator + appName;
         if (StringUtils.isNotEmpty(version)) {
             gemConfig.remoteDir += "-"+version;
         }

@@ -15,7 +15,7 @@ public class GemConfig {
     final public static String NAME = "sbk-gem";
     final public static String BIN_DIR = "bin";
     final public static String LOCAL_HOST = "localhost";
-    final public static  String DIR_PREFIX = "./";
+    final public static String REMOTE_PARENT_DIR = ".";
 
     public String nodes;
     public String user;
