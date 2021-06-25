@@ -21,6 +21,7 @@ import lombok.Synchronized;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.concurrent.GuardedBy;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
@@ -207,10 +208,10 @@ public class SbkGemBenchmark implements Benchmark {
         final SshResponse[] sbkResults = createMultiSshResponse(nodes.length, true);
 
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
-        final String sbkCommand = sbkDir + "/" + GemConfig.BIN_EXT_PATH + "/" + params.getSbkCommand()+" "+sbkArgs;
+        final String sbkCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + params.getSbkCommand()+" "+sbkArgs;
         Printer.log.info("sbk command : " +sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+"/"+sbkCommand,
+            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+ File.separator + sbkCommand,
                     config.remoteTimeoutSeconds, sbkResults[i]);
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfArray);

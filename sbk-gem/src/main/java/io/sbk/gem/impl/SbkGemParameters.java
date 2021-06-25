@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -128,7 +129,7 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
             throw new IllegalArgumentException(errMsg);
         }
 
-        final String sbkFullCommand = sbkDir +"/"+GemConfig.BIN_EXT_PATH+"/"+sbkCommand;
+        final String sbkFullCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + sbkCommand;
         Path sbkCommandPath = Paths.get(sbkFullCommand);
 
         if (!Files.exists(sbkCommandPath)) {
