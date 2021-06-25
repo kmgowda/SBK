@@ -74,7 +74,7 @@ public class Sbk {
             System.out.println();
             benchmark.stop();
         }));
-        ret.join();
+        ret.get();
     }
 
 

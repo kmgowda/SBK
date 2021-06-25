@@ -61,7 +61,7 @@ public class SbkRam {
             System.out.println();
             benchmark.stop();
         }));
-        ret.join();
+        ret.get();
     }
 
 
