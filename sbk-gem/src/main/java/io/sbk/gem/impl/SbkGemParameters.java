@@ -71,7 +71,7 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
 
 
     public SbkGemParameters(String name, List<String> driversList, GemConfig config, int ramport) {
-        super(name, driversList);
+        super(name, GemConfig.DESC, driversList);
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * PerlConfig.MS_PER_SEC;
         this.ramPort = ramport;

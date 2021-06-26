@@ -56,9 +56,17 @@ public interface InputOptions {
 
 
     /**
+     * Get the -help output.
+     */
+    String getHelpText();
+
+    /**
      * Print the -help output.
      */
-    void printHelp();
+    default void printHelp() {
+        System.out.println("\n"+getHelpText());
+    }
+
 
     /**
      * Parse the command line arguments.

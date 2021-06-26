@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.Config;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.ParameterOptions;
 import lombok.Getter;
@@ -65,8 +66,8 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
 
     private double throughput;
 
-    public SbkParameters(String name, List<String> driversList) {
-        super(name);
+    public SbkParameters(String name, String desc, List<String> driversList) {
+        super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
         this.driversList = driversList;
 
@@ -98,6 +99,10 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
         addOption("rsec", true,
                 "Number of seconds/step for readers, default: 0");
         addOption("help", false, "Help message");
+    }
+
+    public SbkParameters(String name, List<String> driversList) {
+        this(name, Config.DESC, driversList);
     }
 
 

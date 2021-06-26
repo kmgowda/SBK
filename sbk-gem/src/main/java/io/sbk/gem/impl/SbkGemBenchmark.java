@@ -102,7 +102,6 @@ public class SbkGemBenchmark implements Benchmark {
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
 
-
         final SshResponse[] sshResults = createMultiSshResponse(nodes.length, true);
         final String cmd = "java -version";
         for (int i = 0; i < nodes.length; i++) {

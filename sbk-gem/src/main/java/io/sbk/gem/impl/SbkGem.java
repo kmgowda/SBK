@@ -17,6 +17,7 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
+import io.sbk.api.HelpException;
 import io.sbk.api.Logger;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
@@ -70,7 +71,12 @@ public class SbkGem {
     public static void run(final String[] args, final String applicationName,
                            GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException {
-        final Benchmark benchmark = buildBenchmark(args, applicationName, outLogger);
+        final Benchmark benchmark;
+        try {
+            benchmark = buildBenchmark(args, applicationName, outLogger);
+        } catch (HelpException | UnrecognizedOptionException ex) {
+           return;
+        }
         final CompletableFuture<Void> ret = benchmark.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -88,6 +94,7 @@ public class SbkGem {
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
+     * @throws HelpException if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
@@ -95,7 +102,7 @@ public class SbkGem {
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
                                              GemLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InstantiationException  {
+            IOException, InstantiationException, HelpException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
@@ -118,9 +125,10 @@ public class SbkGem {
         List<String> driversList;
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
-        Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info(GemConfig.DESC);
         Printer.log.info(GemConfig.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
+        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
@@ -159,7 +167,6 @@ public class SbkGem {
             logger.addArgs(paramsHelp);
             paramsHelp.printHelp();
             final String errMsg = "SBK Benchmark class driver not found! check the option '"+ SbkUtils.CLASS_OPTION +"'";
-            //Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
         if (driversList.size() > 0) {
@@ -208,8 +215,9 @@ public class SbkGem {
         }
 
         if (params.hasOption("help")) {
-            params.printHelp();
-            throw new InstantiationException("print help !");
+            final String helpText = params.getHelpText();
+            System.out.println("\n"+helpText);
+            throw new HelpException(helpText);
         }
 
         String actionString = "r";

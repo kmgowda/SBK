@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
+import io.sbk.api.HelpException;
 import io.sbk.api.impl.SbkUtils;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamLogger;
@@ -54,7 +55,12 @@ public class SbkRam {
     public static void run(final String[] args, final String applicationName,
                            RamLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException {
-        final Benchmark benchmark = buildBenchmark(args, applicationName, outLogger);
+        final Benchmark benchmark;
+        try {
+            benchmark = buildBenchmark(args, applicationName, outLogger);
+        } catch (HelpException | UnrecognizedOptionException ex) {
+            return;
+        }
         final CompletableFuture<Void> ret = benchmark.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -72,14 +78,14 @@ public class SbkRam {
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
+     * @throws HelpException if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
-     * @throws InstantiationException if the exception occurred due to initiation failures.
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
                                              RamLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InstantiationException  {
+            IOException, HelpException {
         final RamParameterOptions params;
         final RamLogger logger;
         final RamConfig ramConfig;
@@ -88,9 +94,10 @@ public class SbkRam {
         final String appName = Objects.requireNonNullElse(applicationName, RamConfig.NAME);
 
         Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
-        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info(RamConfig.DESC);
+        Printer.log.info(RamConfig.NAME.toUpperCase() +" Version: " + version);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
-        Printer.log.info(RamConfig.NAME +" Version: " + version);
+        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -108,11 +115,12 @@ public class SbkRam {
         } catch (UnrecognizedOptionException ex) {
             Printer.log.error(ex.toString());
             params.printHelp();
-            throw new InstantiationException("print help !");
+            throw ex;
         }
         if (params.hasOption("help")) {
-            params.printHelp();
-            throw new InstantiationException("print help !");
+            final String helpText = params.getHelpText();
+            System.out.println("\n"+helpText);
+            throw new HelpException(helpText);
         }
 
         time = SbkUtils.getTime(logger);

@@ -10,7 +10,9 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.Config;
 import io.sbk.api.InputOptions;
+import io.sbk.system.Printer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -18,22 +20,35 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+
 public class SbkOptions implements InputOptions {
     final private String benchmarkName;
+    final private String header;
+    final private String footer;
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
     private CommandLine commandline;
 
-    public SbkOptions(String name) {
+    private SbkOptions(String name, String header, String footer) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
+        this.header = header+"\n\n";
+        this.footer = footer;
         this.commandline = null;
 
         options.addOption("help", false, "Help message");
     }
+
+    public SbkOptions(String name, String header) {
+        this(name, header, Config.SBK_FOOTER);
+    }
+
 
     @Override
     public Options addOption(String name, boolean hasArg, String description) {
@@ -46,9 +61,20 @@ public class SbkOptions implements InputOptions {
     }
 
     @Override
-    public void printHelp() {
-        formatter.printHelp(benchmarkName, options);
+    public String getHelpText() {
+        final OutputStream outStream = new ByteArrayOutputStream();
+        final PrintWriter helpPrinter = new PrintWriter(outStream);
+        formatter.printHelp(helpPrinter, HelpFormatter.DEFAULT_WIDTH, benchmarkName, header, options,
+                HelpFormatter.DEFAULT_LEFT_PAD, HelpFormatter.DEFAULT_DESC_PAD, footer);
+        helpPrinter.flush();
+        try {
+            outStream.close();
+        } catch (Exception ex) {
+            Printer.log.error(ex.toString());
+        }
+        return outStream.toString();
     }
+
 
     @Override
     public boolean hasOption(String name) {
