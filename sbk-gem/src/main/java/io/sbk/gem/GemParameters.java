@@ -23,4 +23,6 @@ public interface GemParameters extends Parameters {
     String getHostName();
 
     int getRamPort();
+
+    boolean isCopy();
 }

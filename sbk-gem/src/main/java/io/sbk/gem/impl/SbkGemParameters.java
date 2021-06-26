@@ -67,6 +67,8 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
     @Getter
     private int ramPort;
 
+    private boolean isCopy;
+
 
     public SbkGemParameters(String name, List<String> driversList, GemConfig config, int ramport) {
         super(name, driversList);
@@ -87,9 +89,11 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
         addOption("sbkcommand", true, "sbk command for remote run, default: " + config.sbkCommand);
         addOption("hostname", true, "this RAM host name, default: " + hostName);
         addOption("ramport", true, "RAM port number; default: "+ramPort);
+        addOption("copy", true, "Copy the SBK package to remote hosts; default: true");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-hostname", "ramport"};
+                "-hostname", "ramport", "-copy"};
         this.parsedArgs = null;
+        this.isCopy = true;
     }
 
     @Override
@@ -107,10 +111,11 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
         sbkDir = getOptionValue("sbkdir", config.sbkPath);
         sbkCommand = getOptionValue("sbkcommand", config.sbkCommand);
         ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
+        isCopy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(isCopy)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", user, "-gempass", password, "-gemport",
                 Integer.toString(port), "-sbkdir", sbkDir, "-sbkcommand", sbkCommand, "-hostname", hostName,
-                "-ramport", Integer.toString(ramPort)};
+                "-ramport", Integer.toString(ramPort), "-copy", Boolean.toString(isCopy)};
 
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
@@ -144,5 +149,10 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
             throw new IllegalArgumentException(errMsg);
         }
 
+    }
+
+    @Override
+    public boolean isCopy() {
+        return isCopy;
     }
 }
