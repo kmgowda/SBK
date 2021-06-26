@@ -21,6 +21,7 @@ import lombok.Synchronized;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.concurrent.GuardedBy;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
@@ -100,7 +101,6 @@ public class SbkGemBenchmark implements Benchmark {
 
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
-        boolean stop = false;
 
         final SshResponse[] sshResults = createMultiSshResponse(nodes.length, true);
         final String cmd = "java -version";
@@ -116,7 +116,7 @@ public class SbkGemBenchmark implements Benchmark {
                 Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
             }
         }
-
+        boolean stop = false;
         if (!ret.isDone()) {
             final String errMsg = "SBK-GEM, command: " + cmd +" time out after " + config.maxIterations + " iterations";
             Printer.log.error(errMsg);
@@ -135,82 +135,84 @@ public class SbkGemBenchmark implements Benchmark {
         if (stop) {
             throw new InterruptedException();
         }
-        Printer.log.info("Java version match Success..");
+        Printer.log.info("Matching Java Major Version: " +javaMajorVersion +" Success..");
+        if (params.isCopy()) {
 
-        final SshResponse[] results = createMultiSshResponse(nodes.length, false);
-        for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
-                    config.remoteTimeoutSeconds, results[i]);
-        }
-        final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(cfArray);
-
-        for (int i = 0; i < config.maxIterations && !rmFuture.isDone(); i++) {
-            try {
-                rmFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
-            } catch (TimeoutException ex) {
-                Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
+            final SshResponse[] results = createMultiSshResponse(nodes.length, false);
+            for (int i = 0; i < nodes.length; i++) {
+                cfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
+                        config.remoteTimeoutSeconds, results[i]);
             }
-        }
+            final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(cfArray);
 
-        if (!rmFuture.isDone()) {
-            final String errMsg = "SBK-GEM, command:  'rm -rf' time out after " + config.maxIterations + " iterations";
-            Printer.log.error(errMsg);
-            throw new InterruptedException(errMsg);
-        }
-
-        final SshResponse[] mkDirResults = createMultiSshResponse(nodes.length, false);
-
-        for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
-                    config.remoteTimeoutSeconds, mkDirResults[i]);
-        }
-
-        final CompletableFuture<Void> mkDirFuture = CompletableFuture.allOf(cfArray);
-
-        for (int i = 0; !mkDirFuture.isDone(); i++) {
-            try {
-                mkDirFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
-            } catch (TimeoutException ex) {
-                Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
+            for (int i = 0; i < config.maxIterations && !rmFuture.isDone(); i++) {
+                try {
+                    rmFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
+                } catch (TimeoutException ex) {
+                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
+                }
             }
-        }
 
-        if (!mkDirFuture.isDone()) {
-            final String errMsg = "SBK-GEM, command:  'mkdir' time out after " + config.maxIterations + " iterations";
-            Printer.log.error(errMsg);
-            throw new InterruptedException(errMsg);
-        }
-
-        for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
-        }
-        final CompletableFuture<Void> copyCB = CompletableFuture.allOf(cfArray);
-
-        for (int i = 0; !copyCB.isDone(); i++) {
-            try {
-                copyCB.get(config.timeoutSeconds, TimeUnit.SECONDS);
-            } catch (TimeoutException ex) {
-                Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for copy command to complete");
+            if (!rmFuture.isDone()) {
+                final String errMsg = "SBK-GEM, command:  'rm -rf' time out after " + config.maxIterations + " iterations";
+                Printer.log.error(errMsg);
+                throw new InterruptedException(errMsg);
             }
-        }
 
-        if (copyCB.isCompletedExceptionally()) {
-            final String errMsg = "SBK-GEM, command:  copy command failed!";
-            Printer.log.error(errMsg);
-            throw new InterruptedException(errMsg);
-        }
+            final SshResponse[] mkDirResults = createMultiSshResponse(nodes.length, false);
 
-        Printer.log.info("Copy command Success..");
+            for (int i = 0; i < nodes.length; i++) {
+                cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
+                        config.remoteTimeoutSeconds, mkDirResults[i]);
+            }
+
+            final CompletableFuture<Void> mkDirFuture = CompletableFuture.allOf(cfArray);
+
+            for (int i = 0; !mkDirFuture.isDone(); i++) {
+                try {
+                    mkDirFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
+                } catch (TimeoutException ex) {
+                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
+                }
+            }
+
+            if (!mkDirFuture.isDone()) {
+                final String errMsg = "SBK-GEM, command:  'mkdir' time out after " + config.maxIterations + " iterations";
+                Printer.log.error(errMsg);
+                throw new InterruptedException(errMsg);
+            }
+
+            for (int i = 0; i < nodes.length; i++) {
+                cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
+            }
+            final CompletableFuture<Void> copyCB = CompletableFuture.allOf(cfArray);
+
+            for (int i = 0; !copyCB.isDone(); i++) {
+                try {
+                    copyCB.get(config.timeoutSeconds, TimeUnit.SECONDS);
+                } catch (TimeoutException ex) {
+                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for copy command to complete");
+                }
+            }
+
+            if (copyCB.isCompletedExceptionally()) {
+                final String errMsg = "SBK-GEM, command:  copy command failed!";
+                Printer.log.error(errMsg);
+                throw new InterruptedException(errMsg);
+            }
+
+            Printer.log.info("Copy command Success..");
+        }
 
         ramBenchmark.start();
 
         final SshResponse[] sbkResults = createMultiSshResponse(nodes.length, true);
 
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
-        final String sbkCommand = sbkDir + "/" + GemConfig.BIN_EXT_PATH + "/" + params.getSbkCommand()+" "+sbkArgs;
-        Printer.log.info("sbk command : " +sbkCommand);
+        final String sbkCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + params.getSbkCommand()+" "+sbkArgs;
+        Printer.log.info("Remote SBK command : " +sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+"/"+sbkCommand,
+            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+ File.separator + sbkCommand,
                     config.remoteTimeoutSeconds, sbkResults[i]);
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfArray);

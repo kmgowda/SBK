@@ -10,6 +10,7 @@
 package io.sbk.ram.impl;
 
 import io.sbk.api.Action;
+import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.api.impl.SbkOptions;
 import lombok.Getter;
@@ -37,11 +38,11 @@ final public class SbkRamParameters extends SbkOptions implements RamParameterOp
     private  int ramPort;
 
     public SbkRamParameters(String name, int port, int maxConnections) {
-        super(name);
+        super(name, RamConfig.DESC);
         this.maxConnections = maxConnections;
         this.ramPort = port;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");
-        addOption("action", true, "action [r: read, w: write, wr: write and read]; default: r");
+        addOption("action", true, "action [r: read, w: write, wr: write and read], default: r");
         addOption("ramport", true, "RAM port number; default: "+ramPort);
         addOption("max", true, "Maximum number of connections; default: "+maxConnections);
     }

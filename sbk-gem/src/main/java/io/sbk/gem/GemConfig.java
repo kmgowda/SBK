@@ -13,9 +13,9 @@ package io.sbk.gem;
 public class GemConfig {
     final public static String SBK_GEM_APP_NAME = "sbk.gem.applicationName";
     final public static String NAME = "sbk-gem";
-    final public static String BIN_EXT_PATH = "bin";
+    final public static String DESC = "Storage Benchmark Kit - Group Execution Monitor";
+    final public static String BIN_DIR = "bin";
     final public static String LOCAL_HOST = "localhost";
-    final public static  String DIR_PREFIX = "./";
 
     public String nodes;
     public String user;

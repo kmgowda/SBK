@@ -12,6 +12,7 @@ package io.sbk.ram;
 
 public class RamConfig {
     public final static String NAME = "sbk-ram";
+    final public static String DESC = "Storage Benchmark Kit - Results Aggregation Monitor";
 
     public int port;
     public int maxConnections;

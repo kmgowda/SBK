@@ -17,6 +17,7 @@ import io.sbk.api.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
+import io.sbk.api.HelpException;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Logger;
 import io.sbk.api.PerformanceLogger;
@@ -67,9 +68,14 @@ public class Sbk {
     public static void run(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException {
-        final Benchmark benchmark = buildBenchmark(args, storage, applicationName, outLogger);
-        final CompletableFuture<Void> ret = benchmark.start();
+        final Benchmark benchmark;
+        try {
+            benchmark = buildBenchmark(args, storage, applicationName, outLogger);
+        } catch (HelpException | UnrecognizedOptionException ex) {
+            return;
+        }
 
+        final CompletableFuture<Void> ret = benchmark.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
             benchmark.stop();
@@ -88,6 +94,7 @@ public class Sbk {
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
+     * @throws HelpException if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
@@ -95,7 +102,7 @@ public class Sbk {
      */
     public static Benchmark buildBenchmark(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException,
-            IllegalArgumentException, IOException, InstantiationException  {
+            IllegalArgumentException, IOException, InstantiationException, HelpException {
         final Storage storageDevice;
         final Action action;
         final ParameterOptions params;
@@ -113,9 +120,10 @@ public class Sbk {
         final String usageLine;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
-        Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info(Config.DESC);
         Printer.log.info(Config.NAME.toUpperCase() +" Version: "+version);
         Printer.log.info("Arguments List: "+Arrays.toString(args));
+        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
@@ -148,12 +156,13 @@ public class Sbk {
         } catch (UnrecognizedOptionException ex) {
             Printer.log.error(ex.toString());
             params.printHelp();
-            throw new InstantiationException("print help !");
+            throw ex;
         }
 
         if (params.hasOption("help")) {
-            params.printHelp();
-            throw new InstantiationException("print help !");
+            final String helpText = params.getHelpText();
+            System.out.println("\n"+helpText);
+            throw new HelpException(helpText);
         }
 
         final DataType dType = storageDevice.getDataType();
@@ -196,7 +205,7 @@ public class Sbk {
 
         try {
             driversList = SbkUtils.getAvailableClassNames(Config.PACKAGE_NAME);
-            Printer.log.info("Available Drivers : "+ driversList.size());
+            Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
             driversList = new LinkedList<>();

@@ -17,4 +17,5 @@ public class Config {
     final public static String SBK_APP_NAME = "sbk.applicationName";
     final public static String SBK_CLASS_NAME = "sbk.className";
     final public static String PACKAGE_NAME = "io.sbk";
+    final public static String SBK_FOOTER = "\nPlease report issues at https://github.com/kmgowda/SBK";
 }

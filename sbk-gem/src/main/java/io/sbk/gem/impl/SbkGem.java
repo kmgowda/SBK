@@ -17,8 +17,12 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
+import io.sbk.api.HelpException;
+import io.sbk.api.Logger;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.api.impl.SbkGrpcPrometheusLogger;
+import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SbkUtils;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemLogger;
@@ -67,7 +71,12 @@ public class SbkGem {
     public static void run(final String[] args, final String applicationName,
                            GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException {
-        final Benchmark benchmark = buildBenchmark(args, applicationName, outLogger);
+        final Benchmark benchmark;
+        try {
+            benchmark = buildBenchmark(args, applicationName, outLogger);
+        } catch (HelpException | UnrecognizedOptionException ex) {
+           return;
+        }
         final CompletableFuture<Void> ret = benchmark.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -85,6 +94,7 @@ public class SbkGem {
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
+     * @throws HelpException if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
@@ -92,7 +102,7 @@ public class SbkGem {
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
                                              GemLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InstantiationException  {
+            IOException, InstantiationException, HelpException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
@@ -115,9 +125,10 @@ public class SbkGem {
         List<String> driversList;
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
-        Printer.log.info( "Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info(GemConfig.DESC);
         Printer.log.info(GemConfig.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
+        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
@@ -137,7 +148,7 @@ public class SbkGem {
         if (StringUtils.isNotEmpty(sbkAppHome)) {
             gemConfig.sbkPath = sbkAppHome;
         }
-        gemConfig.remoteDir = GemConfig.DIR_PREFIX + appName;
+        gemConfig.remoteDir = appName;
         if (StringUtils.isNotEmpty(version)) {
             gemConfig.remoteDir += "-"+version;
         }
@@ -146,7 +157,7 @@ public class SbkGem {
 
         try {
             driversList = SbkUtils.getAvailableClassNames(Config.PACKAGE_NAME);
-            Printer.log.info("Available Drivers : "+ driversList.size());
+            Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
             driversList = new LinkedList<>();
@@ -156,7 +167,6 @@ public class SbkGem {
             logger.addArgs(paramsHelp);
             paramsHelp.printHelp();
             final String errMsg = "SBK Benchmark class driver not found! check the option '"+ SbkUtils.CLASS_OPTION +"'";
-            //Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
         if (driversList.size() > 0) {
@@ -192,7 +202,7 @@ public class SbkGem {
 
         if (nextArgs == null) {
             params.printHelp();
-            throw new InstantiationException("Insufficient command line arguments");
+            throw new InstantiationException("SBK-GEM: Insufficient command line arguments");
         }
         try {
             params.parseArgs(nextArgs);
@@ -205,26 +215,11 @@ public class SbkGem {
         }
 
         if (params.hasOption("help")) {
-            params.printHelp();
-            throw new InstantiationException("print help !");
+            final String helpText = params.getHelpText();
+            System.out.println("\n"+helpText);
+            throw new HelpException(helpText);
         }
 
-        final DataType dType = storageDevice.getDataType();
-        if (dType == null) {
-            String errMsg = "No storage Data type";
-            Printer.log.error(errMsg);
-            throw new InstantiationException(errMsg);
-        }
-
-        int minSize = dType.getWriteReadMinSize();
-        if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
-            String errMsg =
-                    "Invalid record size: "+ params.getRecordSize() +
-                            ", For both Writers and Readers, minimum data size should be "+ minSize +
-                            " for data type: " +dType.getClass().getName();
-            Printer.log.error(errMsg);
-            throw new InstantiationException(errMsg);
-        }
         String actionString = "r";
 
         if (params.isWriteAndRead()) {
@@ -247,10 +242,20 @@ public class SbkGem {
         sbkArgsBuilder.append(" -ram " + params.getHostName());
         sbkArgsBuilder.append(" -ramport " + params.getRamPort());
 
-        Printer.log.info("SBK dir : "+params.getSbkDir());
+        Printer.log.info("SBK dir: "+params.getSbkDir());
         Printer.log.info("SBK command: "+params.getSbkCommand());
-        Printer.log.info("Arguments to remote SBK command : "+ sbkArgsBuilder);
+        Printer.log.info("Arguments to remote SBK command: "+ sbkArgsBuilder);
+        try {
+            checkRemoteSbkArgs(sbkAppName, driverName, driversList, sbkArgsBuilder.toString().split(" "));
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                | IllegalAccessException ex) {
+            ex.printStackTrace();
+            String errMsg = "SBK GEM : args to SBK command are invalid";
+            throw new InstantiationException(errMsg);
+        }
+        Printer.log.info("SBK-GEM: Arguments to remote SBK command verification successful..");
 
+        ramConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
         ramArgsList.add(SbkUtils.CLASS_OPTION);
         ramArgsList.add(driverName);
@@ -260,9 +265,9 @@ public class SbkGem {
         ramArgsList.add(Integer.toString(params.getConnections().length));
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
-        Printer.log.info("Arguments to  SBK-RAM  : "+ Arrays.toString(ramArgs));
+        Printer.log.info("Arguments to  SBK-RAM: "+ Arrays.toString(ramArgs));
 
-        ramParams = new SbkRamParameters(appName, params.getRamPort(), ramConfig.maxConnections);
+        ramParams = new SbkRamParameters(appName, params.getRamPort(), params.getConnections().length);
         try {
             ramParams.parseArgs(ramArgs);
         } catch (UnrecognizedOptionException ex) {
@@ -270,8 +275,49 @@ public class SbkGem {
             ramParams.printHelp();
             throw new InstantiationException("print help !");
         }
+        Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification successful..");
         return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }
+
+
+    private static void checkRemoteSbkArgs(String sbkAppName, String storageName, List<String> driversList,
+                                           String[] args)
+            throws InstantiationException, ParseException, ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException {
+
+        final String remoteUsageLine = sbkAppName + " " + SbkUtils.CLASS_OPTION + " " + storageName;
+        final Logger grpcLogger = new SbkGrpcPrometheusLogger();
+        final ParameterOptions sbkParams = new SbkParameters(remoteUsageLine, driversList);
+
+        final Storage remoteStorage =
+                (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + storageName + "." + storageName)
+                .getConstructor().newInstance();
+
+        grpcLogger.addArgs(sbkParams);
+        remoteStorage.addArgs(sbkParams);
+        sbkParams.parseArgs(args);
+        grpcLogger.parseArgs(sbkParams);
+        remoteStorage.parseArgs(sbkParams);
+
+        final DataType dType = remoteStorage.getDataType();
+        if (dType == null) {
+            String errMsg = "No storage Data type of Remote Storage device: "+ storageName;
+            Printer.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
+
+        int minSize = dType.getWriteReadMinSize();
+        if (sbkParams.isWriteAndRead() && sbkParams.getRecordSize() < minSize) {
+            String errMsg =
+                    "Invalid record size: "+ sbkParams.getRecordSize() +
+                            ", For both Writers and Readers, minimum data size should be "+ minSize +
+                            " for data type: " +dType.getClass().getName();
+            Printer.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
+    }
+
+
 
 }
