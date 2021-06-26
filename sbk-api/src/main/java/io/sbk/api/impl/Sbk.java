@@ -196,7 +196,7 @@ public class Sbk {
 
         try {
             driversList = SbkUtils.getAvailableClassNames(Config.PACKAGE_NAME);
-            Printer.log.info("Available Drivers : "+ driversList.size());
+            Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
             driversList = new LinkedList<>();

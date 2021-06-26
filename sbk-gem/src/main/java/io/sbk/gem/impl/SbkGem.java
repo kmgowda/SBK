@@ -17,8 +17,11 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
+import io.sbk.api.Logger;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.api.impl.SbkGrpcPrometheusLogger;
+import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SbkUtils;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemLogger;
@@ -146,7 +149,7 @@ public class SbkGem {
 
         try {
             driversList = SbkUtils.getAvailableClassNames(Config.PACKAGE_NAME);
-            Printer.log.info("Available Drivers : "+ driversList.size());
+            Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
             driversList = new LinkedList<>();
@@ -192,7 +195,7 @@ public class SbkGem {
 
         if (nextArgs == null) {
             params.printHelp();
-            throw new InstantiationException("Insufficient command line arguments");
+            throw new InstantiationException("SBK-GEM: Insufficient command line arguments");
         }
         try {
             params.parseArgs(nextArgs);
@@ -209,22 +212,6 @@ public class SbkGem {
             throw new InstantiationException("print help !");
         }
 
-        final DataType dType = storageDevice.getDataType();
-        if (dType == null) {
-            String errMsg = "No storage Data type";
-            Printer.log.error(errMsg);
-            throw new InstantiationException(errMsg);
-        }
-
-        int minSize = dType.getWriteReadMinSize();
-        if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
-            String errMsg =
-                    "Invalid record size: "+ params.getRecordSize() +
-                            ", For both Writers and Readers, minimum data size should be "+ minSize +
-                            " for data type: " +dType.getClass().getName();
-            Printer.log.error(errMsg);
-            throw new InstantiationException(errMsg);
-        }
         String actionString = "r";
 
         if (params.isWriteAndRead()) {
@@ -247,10 +234,20 @@ public class SbkGem {
         sbkArgsBuilder.append(" -ram " + params.getHostName());
         sbkArgsBuilder.append(" -ramport " + params.getRamPort());
 
-        Printer.log.info("SBK dir : "+params.getSbkDir());
+        Printer.log.info("SBK dir: "+params.getSbkDir());
         Printer.log.info("SBK command: "+params.getSbkCommand());
-        Printer.log.info("Arguments to remote SBK command : "+ sbkArgsBuilder);
+        Printer.log.info("Arguments to remote SBK command: "+ sbkArgsBuilder);
+        try {
+            checkRemoteSbkArgs(sbkAppName, driverName, driversList, sbkArgsBuilder.toString().split(" "));
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                | IllegalAccessException ex) {
+            ex.printStackTrace();
+            String errMsg = "SBK GEM : args to SBK command are invalid";
+            throw new InstantiationException(errMsg);
+        }
+        Printer.log.info("SBK-GEM: Arguments to remote SBK command verification successful..");
 
+        ramConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
         ramArgsList.add(SbkUtils.CLASS_OPTION);
         ramArgsList.add(driverName);
@@ -260,9 +257,9 @@ public class SbkGem {
         ramArgsList.add(Integer.toString(params.getConnections().length));
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
-        Printer.log.info("Arguments to  SBK-RAM  : "+ Arrays.toString(ramArgs));
+        Printer.log.info("Arguments to  SBK-RAM: "+ Arrays.toString(ramArgs));
 
-        ramParams = new SbkRamParameters(appName, params.getRamPort(), ramConfig.maxConnections);
+        ramParams = new SbkRamParameters(appName, params.getRamPort(), params.getConnections().length);
         try {
             ramParams.parseArgs(ramArgs);
         } catch (UnrecognizedOptionException ex) {
@@ -270,8 +267,49 @@ public class SbkGem {
             ramParams.printHelp();
             throw new InstantiationException("print help !");
         }
+        Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification successful..");
         return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }
+
+
+    private static void checkRemoteSbkArgs(String sbkAppName, String storageName, List<String> driversList,
+                                           String[] args)
+            throws InstantiationException, ParseException, ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException {
+
+        final String remoteUsageLine = sbkAppName + " " + SbkUtils.CLASS_OPTION + " " + storageName;
+        final Logger grpcLogger = new SbkGrpcPrometheusLogger();
+        final ParameterOptions sbkParams = new SbkParameters(remoteUsageLine, driversList);
+
+        final Storage remoteStorage =
+                (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + storageName + "." + storageName)
+                .getConstructor().newInstance();
+
+        grpcLogger.addArgs(sbkParams);
+        remoteStorage.addArgs(sbkParams);
+        sbkParams.parseArgs(args);
+        grpcLogger.parseArgs(sbkParams);
+        remoteStorage.parseArgs(sbkParams);
+
+        final DataType dType = remoteStorage.getDataType();
+        if (dType == null) {
+            String errMsg = "No storage Data type of Remote Storage device: "+ storageName;
+            Printer.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
+
+        int minSize = dType.getWriteReadMinSize();
+        if (sbkParams.isWriteAndRead() && sbkParams.getRecordSize() < minSize) {
+            String errMsg =
+                    "Invalid record size: "+ sbkParams.getRecordSize() +
+                            ", For both Writers and Readers, minimum data size should be "+ minSize +
+                            " for data type: " +dType.getClass().getName();
+            Printer.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
+    }
+
+
 
 }
