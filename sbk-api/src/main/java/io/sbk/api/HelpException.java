@@ -10,9 +10,16 @@
 
 package io.sbk.api;
 
+
+import lombok.Getter;
+
 public class HelpException extends Exception {
 
-    public HelpException(String errMsg) {
-        super(errMsg);
+    @Getter
+    private final String helpText;
+
+    public HelpException(String helpText) {
+        super(helpText);
+        this.helpText = helpText;
     }
 }
