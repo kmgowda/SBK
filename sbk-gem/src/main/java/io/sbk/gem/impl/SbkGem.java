@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
-import io.sbk.api.Benchmark;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
 import io.sbk.api.HelpException;
@@ -24,9 +23,11 @@ import io.sbk.api.Storage;
 import io.sbk.api.impl.SbkGrpcPrometheusLogger;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.api.impl.SbkUtils;
+import io.sbk.gem.GemBenchmark;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemLogger;
 import io.sbk.gem.GemParameterOptions;
+import io.sbk.gem.RemoteResponse;
 import io.sbk.perl.Time;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamParameterOptions;
@@ -67,22 +68,23 @@ public class SbkGem {
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
-    public static void run(final String[] args, final String applicationName,
+    public static RemoteResponse[] run(final String[] args, final String applicationName,
                            GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
-        final Benchmark benchmark;
+        final GemBenchmark benchmark;
         try {
             benchmark = buildBenchmark(args, applicationName, outLogger);
         } catch (HelpException | UnrecognizedOptionException ex) {
-           return;
+           return null;
         }
-        final CompletableFuture<Void> ret = benchmark.start();
+        final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
+        ret.thenAccept(results -> printRemoteResults(results, false));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
             benchmark.stop();
         }));
-        ret.get();
+        return ret.get();
     }
 
 
@@ -98,8 +100,8 @@ public class SbkGem {
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
      */
-    public static Benchmark buildBenchmark(final String[] args, final String applicationName,
-                                             GemLogger outLogger) throws ParseException, IllegalArgumentException,
+    public static GemBenchmark buildBenchmark(final String[] args, final String applicationName,
+                                              GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, HelpException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
@@ -338,5 +340,26 @@ public class SbkGem {
             }
         }
     }
+
+
+
+    public static void printRemoteResults(RemoteResponse[] results, boolean all) {
+        final String separatorText = "-".repeat(80);
+        System.out.println();
+        System.out.println("SBK-GEM Remote Results");
+        for (int i = 0; i < results.length; i++) {
+            System.out.println(separatorText);
+            System.out.println("Host ["+ (i+1) +"]: "+results[i].host +", return code: "+results[i].returnCode);
+            if (all || results[i].returnCode != 0) {
+                System.out.println();
+                System.out.println(" : stdout : \n");
+                System.out.println(results[i].stdOutput);
+                System.out.println(" : stderr : ");
+                System.out.println(results[i].errOutput);
+            }
+        }
+        System.out.println(separatorText);
+    }
+
 
 }

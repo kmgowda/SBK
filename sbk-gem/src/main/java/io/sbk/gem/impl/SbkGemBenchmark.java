@@ -11,6 +11,7 @@
 package io.sbk.gem.impl;
 
 import io.sbk.api.Benchmark;
+import io.sbk.gem.GemBenchmark;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemParameters;
 import io.sbk.gem.SshConnection;
@@ -32,12 +33,13 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SbkGemBenchmark implements Benchmark {
+public class SbkGemBenchmark implements GemBenchmark {
     private final Benchmark ramBenchmark;
     private final GemConfig config;
     private final GemParameters params;
     private final String sbkArgs;
-    private final CompletableFuture<Void> retFuture;
+    private final CompletableFuture<RemoteResponse[]> retFuture;
+    private final RemoteResponse[] remoteResults;
     private final ExecutorService executor;
     private final SbkSsh[] nodes;
 
@@ -52,22 +54,24 @@ public class SbkGemBenchmark implements Benchmark {
         this.sbkArgs = sbkArgs;
         this.retFuture =  new CompletableFuture<>();
         this.state = State.BEGIN;
-        final SshConnection[] conns = params.getConnections();
+        final SshConnection[] connections = params.getConnections();
         if (config.fork) {
-            executor = new ForkJoinPool(conns.length + 10);
+            executor = new ForkJoinPool(connections.length + 10);
         } else {
-            executor = Executors.newFixedThreadPool(conns.length + 10);
+            executor = Executors.newFixedThreadPool(connections.length + 10);
         }
-        this.nodes = new SbkSsh[conns.length];
-        for (int i = 0; i < conns.length; i++) {
-            nodes[i] =  new SbkSsh(conns[i],  executor);
+        this.remoteResults = new RemoteResponse[connections.length];
+        this.nodes = new SbkSsh[connections.length];
+        for (int i = 0; i < connections.length; i++) {
+            nodes[i] =  new SbkSsh(connections[i],  executor);
         }
     }
 
 
     @Override
     @Synchronized
-    public CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException, IllegalStateException {
+    public CompletableFuture<RemoteResponse[]> start() throws IOException, InterruptedException, ExecutionException,
+            IllegalStateException {
         if (state != State.BEGIN) {
             if (state == State.RUN) {
                 Printer.log.warn("SBK GEM Benchmark is already running..");
@@ -78,7 +82,7 @@ public class SbkGemBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK GEM Benchmark Started");
-        final CompletableFuture[] cfArray = new CompletableFuture[nodes.length];
+        final CompletableFuture<?>[] cfArray = new CompletableFuture[nodes.length];
 
         for (int i = 0; i < nodes.length; i++) {
             cfArray[i] = nodes[i].createSessionAsync(config.remoteTimeoutSeconds);
@@ -130,6 +134,7 @@ public class SbkGemBenchmark implements Benchmark {
                     stop = true;
                 }
             }
+            fillSshResults(sshResults);
         }
 
         if (stop) {
@@ -226,14 +231,7 @@ public class SbkGemBenchmark implements Benchmark {
         });
 
         sbkFuture.thenAccept(x -> {
-
-            for (int i = 0;  i < sbkResults.length; i++) {
-                Printer.log.info("Remote Host : "+ nodes[i].connection.getHost() +" Results!");
-                Printer.log.info("return code : "+ sbkResults[i].returnCode);
-                Printer.log.info("std out : "+ sbkResults[i].stdOutputStream);
-                Printer.log.info("std out : "+ sbkResults[i].errOutputStream);
-            }
-
+            fillSshResults(sbkResults);
             shutdown(null);
         });
 
@@ -258,14 +256,13 @@ public class SbkGemBenchmark implements Benchmark {
         return results;
     }
 
-
-    private static RemoteResponse[] convertSshStreamToResponse(SshConnection[] connections, SshResponseStream[] streams) {
-        final RemoteResponse[] results = new RemoteResponse[streams.length];
-        for (int i = 0; i < results.length; i++) {
-            results[i] = new RemoteResponse(streams[i].returnCode, streams[i].stdOutputStream.toString(),
-                    streams[i].errOutputStream.toString(), connections[i].getHost());
+    @Synchronized
+    private void fillSshResults(SshResponseStream[] responseStreams) {
+        final SshConnection[] connections = params.getConnections();
+        for (int i = 0; i < remoteResults.length; i++) {
+            remoteResults[i] = new RemoteResponse(responseStreams[i].returnCode, responseStreams[i].stdOutputStream.toString(),
+                    responseStreams[i].errOutputStream.toString(), connections[i].getHost());
         }
-        return results;
     }
 
 
@@ -286,7 +283,7 @@ public class SbkGemBenchmark implements Benchmark {
                 retFuture.completeExceptionally(ex);
             } else {
                 Printer.log.info("SBK GEM Benchmark Shutdown");
-                retFuture.complete(null);
+                retFuture.complete(remoteResults);
             }
         }
     }
