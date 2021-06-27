@@ -349,7 +349,7 @@ public class SbkGem {
         System.out.println("SBK-GEM Remote Results");
         for (int i = 0; i < results.length; i++) {
             System.out.println(separatorText);
-            System.out.println("Host ["+ (i+1) +"]: "+results[i].host +", return code: "+results[i].returnCode);
+            System.out.println("Host "+ (i+1) +": "+results[i].host +", return code: "+results[i].returnCode);
             if (all || results[i].returnCode != 0) {
                 System.out.println();
                 System.out.println(" : stdout : \n");
