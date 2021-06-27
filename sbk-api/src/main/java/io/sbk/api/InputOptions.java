@@ -73,6 +73,7 @@ public interface InputOptions {
      * @param args list of command line arguments.
      * @throws IllegalArgumentException If an exception occurred.
      * @throws ParseException If an exception occurred.
+     * @throws HelpException If the 'help' option is supplied.
      */
-    void parseArgs(String[] args) throws ParseException, IllegalArgumentException;
+    void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException;
 }

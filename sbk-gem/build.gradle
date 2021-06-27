@@ -11,6 +11,7 @@
 
 application {
     mainClassName = 'io.sbk.main.SbkGemMain'
+    applicationDefaultJvmArgs = ['-Dsbk.applicationName=', '-Dsbk.className=', '-Dsbk.appHome=SBK_APP_HOME']
 }
 
 dependencies {

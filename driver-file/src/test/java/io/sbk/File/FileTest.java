@@ -15,7 +15,6 @@ import io.sbk.api.Reader;
 import io.sbk.api.Writer;
 import io.sbk.system.Printer;
 import io.sbk.api.impl.SbkParameters;
-import org.apache.commons.cli.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,7 +46,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(args);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed!");
         }
@@ -62,7 +61,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(args);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed!");
         }
@@ -77,7 +76,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(args);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed!");
         }
@@ -92,7 +91,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(args);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed!");
         }
@@ -121,7 +120,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(args);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed!");
         }
@@ -138,7 +137,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(writeArgs);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail();
         }
@@ -149,7 +148,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(readArgs);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed!");
         }
@@ -166,7 +165,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(args);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed!");
         }
@@ -191,7 +190,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(writeArgs);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Arg failed");
         }
@@ -222,7 +221,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(readArgs);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed");
         }
@@ -274,7 +273,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(writeArgs);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Arg failed");
         }
@@ -305,7 +304,7 @@ public class FileTest {
         file.addArgs(params);
         try {
             params.parseArgs(readArgs);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Parse Args Failed");
         }

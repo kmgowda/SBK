@@ -196,32 +196,49 @@ public class SbkGem {
         if (storageDevice != null) {
             storageDevice.addArgs(params);
         }
+
         final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
 
         if (nextArgs == null) {
             params.printHelp();
             throw new ParseException("SBK-GEM: Insufficient command line arguments");
         }
-        try {
-            params.parseArgs(nextArgs);
-            logger.parseArgs(params);
-            if (storageDevice != null) {
-                storageDevice.parseArgs(params);
-            }
-        } catch (UnrecognizedOptionException ex) {
-            Printer.log.error(ex.toString());
-            params.printHelp();
-            throw new ParseException("print help !");
-        }
 
-        if (params.hasOption("help")) {
-            final String helpText = params.getHelpText();
-            System.out.println("\n"+helpText);
-            throw new HelpException(helpText);
+        String[] processArgs = nextArgs;
+        int i = 1;
+        boolean checkRemoteArgs = true;
+
+        while (true) {
+            Printer.log.info("SBK-GEM ["+i+ "]: Arguments to process : "+Arrays.toString(processArgs));
+            i++;
+            try {
+                params.parseArgs(processArgs);
+                logger.parseArgs(params);
+                if (storageDevice != null) {
+                    storageDevice.parseArgs(params);
+                }
+            } catch (UnrecognizedOptionException ex) {
+                if (storageDevice != null) {
+                    Printer.log.error(ex.toString());
+                    params.printHelp();
+                    throw ex;
+                }
+                Printer.log.warn(ex.toString());
+                processArgs = SbkUtils.removeOptionsAndValues(processArgs, new String[]{ex.getOption()});
+                if (processArgs == null) {
+                    params.printHelp();
+                    throw new ParseException("SBK-GEM: Insufficient command line arguments");
+                }
+                checkRemoteArgs = false;
+                continue;
+            } catch (HelpException ex) {
+                System.out.println("\n"+ex.getHelpText());
+                throw ex;
+            }
+            break;
         }
 
         String actionString = "r";
-
         if (params.isWriteAndRead()) {
             actionString = "wr";
         } else if (params.getWritersCount() > 0) {
@@ -245,7 +262,7 @@ public class SbkGem {
         Printer.log.info("SBK dir: "+params.getSbkDir());
         Printer.log.info("SBK command: "+params.getSbkCommand());
         Printer.log.info("Arguments to remote SBK command: "+ sbkArgsBuilder);
-        if (StringUtils.isNotEmpty(driverName)) {
+        if (checkRemoteArgs && StringUtils.isNotEmpty(driverName)) {
             checkRemoteSbkArgs(sbkAppName, driverName, driversList, sbkArgsBuilder.toString().split(" "));
         }
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification success..");
@@ -277,7 +294,7 @@ public class SbkGem {
 
 
     private static void checkRemoteSbkArgs(String sbkAppName, String storageName, List<String> driversList,
-                                           String[] args) throws  ParseException {
+                                           String[] args) throws  ParseException, HelpException {
         final String remoteUsageLine = sbkAppName + " " + SbkUtils.CLASS_OPTION + " " + storageName;
         final ParameterOptions sbkParams = new SbkParameters(remoteUsageLine, driversList);
         final Logger grpcLogger = new SbkGrpcPrometheusLogger();

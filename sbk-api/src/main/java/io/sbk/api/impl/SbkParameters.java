@@ -10,6 +10,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Config;
+import io.sbk.api.HelpException;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.ParameterOptions;
 import lombok.Getter;
@@ -107,11 +108,8 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
 
 
     @Override
-    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
+    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
-        if (hasOption("help")) {
-            return;
-        }
         writersCount = Integer.parseInt(getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(getOptionValue("readers", "0"));
 
