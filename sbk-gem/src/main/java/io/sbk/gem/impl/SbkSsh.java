@@ -44,9 +44,9 @@ public class SbkSsh {
         try {
             client.start();
             session = SshUtils.createSession(client, connection, timeoutSeconds);
-            Printer.log.info("Ssh Connection to host: "+ connection.getHost()+" complete..");
+            Printer.log.info("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' success..");
         } catch (IOException e) {
-            Printer.log.error("Ssh Connection to host: "+ connection.getHost()+" time out!");
+            Printer.log.error("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' time out!");
             session = null;
         }
     }

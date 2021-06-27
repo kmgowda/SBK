@@ -253,7 +253,7 @@ public class SbkGem {
             String errMsg = "SBK GEM : args to SBK command are invalid";
             throw new InstantiationException(errMsg);
         }
-        Printer.log.info("SBK-GEM: Arguments to remote SBK command verification successful..");
+        Printer.log.info("SBK-GEM: Arguments to remote SBK command verification success..");
 
         ramConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
@@ -275,7 +275,7 @@ public class SbkGem {
             ramParams.printHelp();
             throw new InstantiationException("print help !");
         }
-        Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification successful..");
+        Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification success..");
         return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }

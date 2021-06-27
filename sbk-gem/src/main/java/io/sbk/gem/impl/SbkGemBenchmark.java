@@ -97,7 +97,7 @@ public class SbkGemBenchmark implements Benchmark {
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         }
-        Printer.log.info("SBK-GEM , ssh session establishment complete..");
+        Printer.log.info("SBK-GEM: Ssh session establishment success..");
 
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
@@ -118,7 +118,7 @@ public class SbkGemBenchmark implements Benchmark {
         }
         boolean stop = false;
         if (!ret.isDone()) {
-            final String errMsg = "SBK-GEM, command: " + cmd +" time out after " + config.maxIterations + " iterations";
+            final String errMsg = "SBK-GEM: command: " + cmd +" time out after " + config.maxIterations + " iterations";
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         } else {
@@ -135,7 +135,7 @@ public class SbkGemBenchmark implements Benchmark {
         if (stop) {
             throw new InterruptedException();
         }
-        Printer.log.info("Matching Java Major Version: " +javaMajorVersion +" Success..");
+        Printer.log.info("SBK-GEM: Matching Java Major Version: " +javaMajorVersion +" Success..");
         if (params.isCopy()) {
 
             final SshResponse[] results = createMultiSshResponse(nodes.length, false);
@@ -154,10 +154,13 @@ public class SbkGemBenchmark implements Benchmark {
             }
 
             if (!rmFuture.isDone()) {
-                final String errMsg = "SBK-GEM, command:  'rm -rf' time out after " + config.maxIterations + " iterations";
+                final String errMsg = "SBK-GEM: command:  'rm -rf' time out after " + config.maxIterations +
+                        " iterations";
                 Printer.log.error(errMsg);
                 throw new InterruptedException(errMsg);
             }
+            final String remoteSBKdir = Paths.get(params.getSbkDir()).getFileName().toString();
+            Printer.log.info("SBK-GEM: Removing older version of remote directory: '" + remoteSBKdir + "'  success..");
 
             final SshResponse[] mkDirResults = createMultiSshResponse(nodes.length, false);
 
@@ -172,7 +175,7 @@ public class SbkGemBenchmark implements Benchmark {
                 try {
                     mkDirFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
                 } catch (TimeoutException ex) {
-                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
+                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command '" + cmd + "' timeout");
                 }
             }
 
@@ -181,6 +184,8 @@ public class SbkGemBenchmark implements Benchmark {
                 Printer.log.error(errMsg);
                 throw new InterruptedException(errMsg);
             }
+
+            Printer.log.info("SBK-GEM: Creating remote directory: '" + remoteSBKdir + "'  success..");
 
             for (int i = 0; i < nodes.length; i++) {
                 cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
@@ -201,7 +206,7 @@ public class SbkGemBenchmark implements Benchmark {
                 throw new InterruptedException(errMsg);
             }
 
-            Printer.log.info("Copy command Success..");
+            Printer.log.info("Copy SBK application: '"+ params.getSbkCommand() +"' to remote nodes Success..");
         }
 
         ramBenchmark.start();
@@ -210,7 +215,7 @@ public class SbkGemBenchmark implements Benchmark {
 
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final String sbkCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + params.getSbkCommand()+" "+sbkArgs;
-        Printer.log.info("Remote SBK command : " +sbkCommand);
+        Printer.log.info("SBK-GEM: Remote SBK command: " +sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
             cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+ File.separator + sbkCommand,
                     config.remoteTimeoutSeconds, sbkResults[i]);
