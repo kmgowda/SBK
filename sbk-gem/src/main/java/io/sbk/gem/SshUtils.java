@@ -10,6 +10,7 @@
 
 package io.sbk.gem;
 
+import io.sbk.gem.impl.SshResponseStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ChannelExec;
@@ -40,11 +41,11 @@ public final class SshUtils {
     }
 
     public static void runCommand(final ClientSession session, String cmd, long timeoutSeconds,
-                                          SshResponse response) throws IOException {
+                                          SshResponseStream response) throws IOException {
         // Create the exec and channel its output/error streams
         final ChannelExec execChannel = session.createExecChannel(cmd);
-        execChannel.setErr(response.errOutput);
-        execChannel.setOut(response.stdOutput);
+        execChannel.setErr(response.errOutputStream);
+        execChannel.setOut(response.stdOutputStream);
 
         // Execute and wait
         execChannel.open();

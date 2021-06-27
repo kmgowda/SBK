@@ -14,7 +14,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemParameters;
 import io.sbk.gem.SshConnection;
-import io.sbk.gem.SshResponse;
+import io.sbk.gem.RemoteResponse;
 import io.sbk.perl.State;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
@@ -102,7 +102,7 @@ public class SbkGemBenchmark implements Benchmark {
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
 
-        final SshResponse[] sshResults = createMultiSshResponse(nodes.length, true);
+        final SshResponseStream[] sshResults = createMultiSshResponseStream(nodes.length, true);
         final String cmd = "java -version";
         for (int i = 0; i < nodes.length; i++) {
             cfArray[i] = nodes[i].runCommandAsync(cmd, config.remoteTimeoutSeconds, sshResults[i]);
@@ -123,8 +123,8 @@ public class SbkGemBenchmark implements Benchmark {
             throw new InterruptedException(errMsg);
         } else {
             for (int i = 0; i < sshResults.length; i++) {
-                String stdOut = sshResults[i].stdOutput.toString();
-                String stdErr = sshResults[i].errOutput.toString();
+                String stdOut = sshResults[i].stdOutputStream.toString();
+                String stdErr = sshResults[i].errOutputStream.toString();
                 if (javaMajorVersion > parseJavaVersion(stdOut) && javaMajorVersion > parseJavaVersion(stdErr)) {
                     Printer.log.info("Java version :" + javaMajorVersion+" , mismatch at : "+ nodes[i].connection.getHost());
                     stop = true;
@@ -138,7 +138,7 @@ public class SbkGemBenchmark implements Benchmark {
         Printer.log.info("SBK-GEM: Matching Java Major Version: " +javaMajorVersion +" Success..");
         if (params.isCopy()) {
 
-            final SshResponse[] results = createMultiSshResponse(nodes.length, false);
+            final SshResponseStream[] results = createMultiSshResponseStream(nodes.length, false);
             for (int i = 0; i < nodes.length; i++) {
                 cfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
                         config.remoteTimeoutSeconds, results[i]);
@@ -162,7 +162,7 @@ public class SbkGemBenchmark implements Benchmark {
             final String remoteSBKdir = Paths.get(params.getSbkDir()).getFileName().toString();
             Printer.log.info("SBK-GEM: Removing older version of remote directory: '" + remoteSBKdir + "'  success..");
 
-            final SshResponse[] mkDirResults = createMultiSshResponse(nodes.length, false);
+            final SshResponseStream[] mkDirResults = createMultiSshResponseStream(nodes.length, false);
 
             for (int i = 0; i < nodes.length; i++) {
                 cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
@@ -211,7 +211,7 @@ public class SbkGemBenchmark implements Benchmark {
 
         ramBenchmark.start();
 
-        final SshResponse[] sbkResults = createMultiSshResponse(nodes.length, true);
+        final SshResponseStream[] sbkResults = createMultiSshResponseStream(nodes.length, true);
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final String sbkCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + params.getSbkCommand()+" "+sbkArgs;
         Printer.log.info("SBK-GEM: Remote SBK command: " +sbkCommand);
@@ -226,6 +226,14 @@ public class SbkGemBenchmark implements Benchmark {
         });
 
         sbkFuture.thenAccept(x -> {
+
+            for (int i = 0;  i < sbkResults.length; i++) {
+                Printer.log.info("Remote Host : "+ nodes[i].connection.getHost() +" Results!");
+                Printer.log.info("return code : "+ sbkResults[i].returnCode);
+                Printer.log.info("std out : "+ sbkResults[i].stdOutputStream);
+                Printer.log.info("std out : "+ sbkResults[i].errOutputStream);
+            }
+
             shutdown(null);
         });
 
@@ -242,10 +250,20 @@ public class SbkGemBenchmark implements Benchmark {
     }
 
 
-    private static SshResponse[] createMultiSshResponse(int length, boolean stdout) {
-        final SshResponse[] results = new SshResponse[length];
+    private static SshResponseStream[] createMultiSshResponseStream(int length, boolean stdout) {
+        final SshResponseStream[] results = new SshResponseStream[length];
         for (int i = 0; i < results.length; i++) {
-            results[i] = new SshResponse(stdout);
+            results[i] = new SshResponseStream(stdout);
+        }
+        return results;
+    }
+
+
+    private static RemoteResponse[] convertSshStreamToResponse(SshConnection[] connections, SshResponseStream[] streams) {
+        final RemoteResponse[] results = new RemoteResponse[streams.length];
+        for (int i = 0; i < results.length; i++) {
+            results[i] = new RemoteResponse(streams[i].returnCode, streams[i].stdOutputStream.toString(),
+                    streams[i].errOutputStream.toString(), connections[i].getHost());
         }
         return results;
     }
