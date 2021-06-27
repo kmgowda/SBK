@@ -10,6 +10,7 @@
 package io.sbk.ram.impl;
 
 import io.sbk.api.Action;
+import io.sbk.api.HelpException;
 import io.sbk.ram.RamConfig;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.api.impl.SbkOptions;
@@ -49,11 +50,8 @@ final public class SbkRamParameters extends SbkOptions implements RamParameterOp
 
 
     @Override
-    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
+    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
-        if (hasOption("help")) {
-            return;
-        }
 
         storageName = getOptionValue("class", null);
 

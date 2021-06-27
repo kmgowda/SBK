@@ -11,6 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Config;
+import io.sbk.api.HelpException;
 import io.sbk.api.InputOptions;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.CommandLine;
@@ -92,7 +93,10 @@ public class SbkOptions implements InputOptions {
     }
 
     @Override
-    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
-        commandline = parser.parse(options, args);
+    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
+        commandline = parser.parse(options, args, false);
+        if (commandline.hasOption("help")) {
+            throw  new HelpException(getHelpText());
+        }
     }
 }

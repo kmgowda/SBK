@@ -10,6 +10,7 @@
 
 package io.sbk.gem.impl;
 
+import io.sbk.api.HelpException;
 import io.sbk.api.impl.SbkParameters;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemParameterOptions;
@@ -97,12 +98,8 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
     }
 
     @Override
-    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException {
+    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
-        if (hasOption("help")) {
-            return;
-        }
-
         final String nodeString = getOptionValue("nodes", config.nodes);
         String[] nodes = nodeString.split(",");
         user = getOptionValue("gemuser", config.user);
@@ -130,6 +127,12 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
 
         if (!Files.isDirectory(Paths.get(sbkDir))) {
             String errMsg = "The SBK application directory: "+sbkDir +" not found!";
+            Printer.log.error(errMsg);
+            throw new IllegalArgumentException(errMsg);
+        }
+
+        if (StringUtils.isEmpty(sbkCommand)) {
+            String errMsg = "The SBK application/command not supplied!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }

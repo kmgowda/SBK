@@ -116,11 +116,9 @@ public class SbkRam {
             Printer.log.error(ex.toString());
             params.printHelp();
             throw ex;
-        }
-        if (params.hasOption("help")) {
-            final String helpText = params.getHelpText();
-            System.out.println("\n"+helpText);
-            throw new HelpException(helpText);
+        } catch (HelpException ex) {
+            System.out.println("\n"+ex.getHelpText());
+            throw  ex;
         }
 
         time = SbkUtils.getTime(logger);

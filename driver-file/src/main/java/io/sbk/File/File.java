@@ -74,28 +74,18 @@ public class File implements Storage<ByteBuffer> {
     }
 
     @Override
-    public DataWriter<ByteBuffer> createWriter(final int id, final ParameterOptions params) {
-        try {
-            return new FileWriter(id, params, config);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+    public DataWriter<ByteBuffer> createWriter(final int id, final ParameterOptions params) throws IOException {
+        return new FileWriter(id, params, config);
     }
 
     @Override
-    public DataReader<ByteBuffer> createReader(final int id, final ParameterOptions params) {
-        try {
-            if (config.asyncThreads > 0) {
-                Printer.log.warn("Asynchronous File Reader initiated !");
-                return new FileAsyncReader(id, params, dType, config);
-            } else {
-                Printer.log.info("Synchronous File Reader initiated !");
-                return new FileReader(id, params, dType, config);
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
+    public DataReader<ByteBuffer> createReader(final int id, final ParameterOptions params) throws IOException {
+        if (config.asyncThreads > 0) {
+            Printer.log.warn("Asynchronous File Reader initiated !");
+            return new FileAsyncReader(id, params, dType, config);
+        } else {
+            Printer.log.info("Synchronous File Reader initiated !");
+            return new FileReader(id, params, dType, config);
         }
     }
 

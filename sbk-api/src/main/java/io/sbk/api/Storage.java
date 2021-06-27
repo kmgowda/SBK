@@ -56,8 +56,9 @@ public interface Storage<T> {
      * @param params Parameters object enclosing all commandline arguments,
      *              see {@link ParameterOptions} to get the basic benchmarking parameters.
      * @return Writer return the Writer , null in case of failure
+     * @throws IOException If an exception occurred.
      */
-    DataWriter<T> createWriter(final int id, final ParameterOptions params);
+    DataWriter<T> createWriter(final int id, final ParameterOptions params) throws IOException;
 
     /**
      * Create a Single Reader / Consumer.
@@ -65,8 +66,9 @@ public interface Storage<T> {
      * @param params Parameters object enclosing all commandline arguments,
      *              see {@link ParameterOptions} to get the basic benchmarking parameters.
      * @return Reader return the Reader , null in case of failure
+     * @throws IOException If an exception occurred.
      */
-    DataReader<T> createReader(final int id, final ParameterOptions params);
+    DataReader<T> createReader(final int id, final ParameterOptions params) throws IOException;
 
 
     /**

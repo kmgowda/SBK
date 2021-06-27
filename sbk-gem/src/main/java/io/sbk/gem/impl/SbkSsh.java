@@ -12,7 +12,6 @@ package io.sbk.gem.impl;
 
 import io.sbk.gem.SshUtils;
 import io.sbk.gem.SshConnection;
-import io.sbk.gem.SshResponse;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 import org.apache.sshd.client.SshClient;
@@ -44,9 +43,9 @@ public class SbkSsh {
         try {
             client.start();
             session = SshUtils.createSession(client, connection, timeoutSeconds);
-            Printer.log.info("Ssh Connection to host: "+ connection.getHost()+" complete..");
+            Printer.log.info("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' success..");
         } catch (IOException e) {
-            Printer.log.error("Ssh Connection to host: "+ connection.getHost()+" time out!");
+            Printer.log.error("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' time out!");
             session = null;
         }
     }
@@ -66,7 +65,7 @@ public class SbkSsh {
     }
 
 
-    public CompletableFuture<Void> runCommandAsync(String cmd, long timeoutSeconds, SshResponse response)
+    public CompletableFuture<Void> runCommandAsync(String cmd, long timeoutSeconds, SshResponseStream response)
             throws ConnectException {
         final ClientSession sshSession = getSession();
         return CompletableFuture.runAsync(() -> {

@@ -36,7 +36,6 @@ import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -67,12 +66,8 @@ public class SbkBenchmark implements Benchmark {
     final private double[] percentileFractions;
     final private ScheduledExecutorService timeoutExecutor;
     final private CompletableFuture<Void> retFuture;
-
-    @GuardedBy("this")
-    private List<DataWriter<Object>> writers;
-
-    @GuardedBy("this")
-    private List<DataReader<Object>> readers;
+    final private List<DataWriter<Object>> writers;
+    final private List<DataReader<Object>> readers;
 
     @GuardedBy("this")
     private State state;
@@ -135,6 +130,8 @@ public class SbkBenchmark implements Benchmark {
         }
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();
+        writers = new ArrayList<>();
+        readers = new ArrayList<>();
         state = State.BEGIN;
     }
 
@@ -205,19 +202,25 @@ public class SbkBenchmark implements Benchmark {
         final CompletableFuture<Void> writersCB;
         final CompletableFuture<Void> readersCB;
 
-        writers = IntStream.range(0, params.getWritersCount())
-                .boxed()
-                .map(i -> storage.createWriter(i, params))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        for (int i = 0; i < params.getWritersCount(); i++) {
+            final DataWriter<Object> writer = storage.createWriter(i, params);
+            if (writer != null) {
+                writers.add(writer);
+            }
+        }
 
-        readers = IntStream.range(0, params.getReadersCount())
-                .boxed()
-                .map(i -> storage.createReader(i, params))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        for (int i = 0; i < params.getReadersCount(); i++) {
+            final DataReader<Object> reader = storage.createReader(i, params);
+            if (reader != null) {
+                readers.add(reader);
+            }
+        }
 
-        if (writers != null && writers.size() > 0) {
+        if (writers.size() <= 0 && readers.size() <= 0) {
+            throw new IllegalStateException("No Writers and/or Readers Created\n");
+        }
+
+        if (writers.size() > 0) {
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
@@ -235,7 +238,7 @@ public class SbkBenchmark implements Benchmark {
             sbkWriters = null;
         }
 
-        if (readers != null && readers.size() > 0) {
+        if (readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,
@@ -365,10 +368,8 @@ public class SbkBenchmark implements Benchmark {
             chainFuture = CompletableFuture.allOf(writersCB, readersCB);
         } else if (readFutures != null) {
             chainFuture = readersCB;
-        } else if (writeFutures != null) {
-            chainFuture = writersCB;
         } else {
-            throw new IllegalStateException("No Writers and/or Readers\n");
+            chainFuture = writersCB;
         }
 
         if (params.getTotalSecondsToRun() > 0) {
@@ -413,24 +414,20 @@ public class SbkBenchmark implements Benchmark {
         if (readStats != null) {
             readStats.stop();
         }
-        if (readers != null) {
-            readers.forEach(c -> {
-                try {
-                    c.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-        if (writers != null) {
-            writers.forEach(c -> {
-                try {
-                    c.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
+        readers.forEach(c -> {
+            try {
+                c.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        writers.forEach(c -> {
+            try {
+                c.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         try {
             storage.closeStorage(params);
             logger.close(params);
