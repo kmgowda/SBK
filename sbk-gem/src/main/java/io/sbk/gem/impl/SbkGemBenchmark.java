@@ -212,7 +212,6 @@ public class SbkGemBenchmark implements Benchmark {
         ramBenchmark.start();
 
         final SshResponse[] sbkResults = createMultiSshResponse(nodes.length, true);
-
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final String sbkCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + params.getSbkCommand()+" "+sbkArgs;
         Printer.log.info("SBK-GEM: Remote SBK command: " +sbkCommand);

@@ -23,7 +23,7 @@ public class SbkGemMain {
         try {
             SbkGem.run(args, null, null);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException |
-                InterruptedException | ExecutionException | InstantiationException ex) {
+                InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
             System.exit(1);
         }
