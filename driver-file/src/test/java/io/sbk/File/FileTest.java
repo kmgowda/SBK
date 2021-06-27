@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Class for File System Interface.
@@ -125,7 +125,12 @@ public class FileTest {
             Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
-        file.createWriter(0, params);
+        try {
+            file.createWriter(0, params);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.fail("create Writer Failed!");
+        }
     }
 
     @Test
@@ -142,7 +147,12 @@ public class FileTest {
             Assert.fail();
         }
         file.parseArgs(params);
-        file.createWriter(0, params);
+        try {
+            file.createWriter(0, params);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Assert.fail("CreateWriter failed!");
+        }
         file = new File();
         file.getDataType();
         file.addArgs(params);
@@ -153,12 +163,18 @@ public class FileTest {
             Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
-        file.createReader(0, params);
+        try {
+            file.createReader(0, params);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.fail("createReader failed!");
+        }
     }
 
     @Test
     public void testCreateReaderFileNotFound() {
         final String[] args = {"-class", "file", "-file", "NoFile.sbk", "-size", "100", "-readers", "1", "records", "1"};
+        Exception retEx = null;
         params = new SbkParameters(benchmarkName,  driversList);
         file = new File();
         file.getDataType();
@@ -170,7 +186,13 @@ public class FileTest {
             Assert.fail("Parse Args Failed!");
         }
         file.parseArgs(params);
-        assertNull(file.createReader(0, params));
+        try {
+            file.createReader(0, params);
+        } catch (IOException ex) {
+           Printer.log.info(ex.toString());
+           retEx = ex;
+        }
+        assertNotNull(retEx);
     }
 
     // This test case works only if the append mode is disabled
@@ -179,8 +201,8 @@ public class FileTest {
         final String data = "KMG-SBK";
         final String[] writeArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-writers", "1", "records", "1"};
         final String[] readArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-readers", "1", "records", "1"};
-        final Writer<ByteBuffer> writer;
-        final Reader<ByteBuffer> reader;
+        Writer<ByteBuffer> writer = null;
+        Reader<ByteBuffer> reader = null;
         ByteBuffer writeBuffer = null;
         ByteBuffer readBuffer = null;
         String readData = null;
@@ -201,7 +223,12 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        writer = (Writer<ByteBuffer>) file.createWriter(0, params);
+        try {
+            writer = (Writer<ByteBuffer>) file.createWriter(0, params);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.fail("createWriter Failed");
+        }
         byte[] byteData = data.getBytes();
         writeBuffer = file.getDataType().allocate(byteData.length);
         for (int i = 0; i < byteData.length; i++) {
@@ -232,8 +259,9 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        reader = (Reader<ByteBuffer>) file.createReader(0, params);
+
         try {
+            reader = (Reader<ByteBuffer>) file.createReader(0, params);
             readBuffer = reader.read();
             reader.close();
             file.closeStorage(params);
@@ -262,8 +290,8 @@ public class FileTest {
         final String data = "KMG-SBK";
         final String[] writeArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-writers", "1", "records", "1"};
         final String[] readArgs = {"-class", "file", "-file", "unit-1.test", "-size", Integer.toString(data.length()), "-readers", "1", "records", "1"};
-        final Writer<ByteBuffer> writer;
-        final Reader<ByteBuffer> reader;
+        Writer<ByteBuffer> writer = null;
+        Reader<ByteBuffer> reader = null;
         ByteBuffer writeBuffer = null;
         ByteBuffer readBuffer = null;
         String readData = null;
@@ -284,7 +312,12 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        writer = (Writer<ByteBuffer>) file.createWriter(0, params);
+        try {
+            writer = (Writer<ByteBuffer>) file.createWriter(0, params);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.fail("createWriter Failed");
+        }
         byte[] byteData = data.getBytes();
         writeBuffer = file.getDataType().allocate(byteData.length);
         for (int i = 0; i < byteData.length; i++) {
@@ -315,8 +348,9 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("open storage Failed");
         }
-        reader = (Reader<ByteBuffer>) file.createReader(0, params);
+
         try {
+            reader = (Reader<ByteBuffer>) file.createReader(0, params);
             readBuffer = reader.read();
         } catch (IOException ex) {
             ex.printStackTrace();
