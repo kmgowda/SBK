@@ -83,11 +83,21 @@ public  class SbkUtils {
         return null;
     }
 
-    public static List<String> getAvailableClassNames(String pkgName) throws ReflectionsException {
+    public static List<String> getAvailableStorageClassNames(String pkgName) throws ReflectionsException {
         Reflections reflections = new Reflections(pkgName);
         Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
-        return subTypes.stream().map(i -> i.toString().substring(i.toString().lastIndexOf(".") + 1))
-                .sorted().collect(Collectors.toList());
+        return subTypes.stream().map(Class::getSimpleName).sorted().collect(Collectors.toList());
+    }
+
+    public static String getStorageClassPath(String pkgName, String className) throws ReflectionsException {
+        Reflections reflections = new Reflections(pkgName);
+        Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
+        for (Class<?> name:subTypes) {
+            if (name.getSimpleName().equalsIgnoreCase(className)) {
+                return name.getName();
+            }
+        }
+        return null;
     }
 
     public static String searchDriver(List<String> list, String name) {

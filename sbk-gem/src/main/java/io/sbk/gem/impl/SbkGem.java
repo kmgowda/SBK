@@ -156,7 +156,7 @@ public class SbkGem {
         logger = Objects.requireNonNullElseGet(outLogger, SbkGemRamPrometheusLogger::new);
 
         try {
-            driversList = SbkUtils.getAvailableClassNames(Config.SBK_PACKAGE_NAME);
+            driversList = SbkUtils.getAvailableStorageClassNames(Config.SBK_PACKAGE_NAME);
             Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
@@ -179,14 +179,20 @@ public class SbkGem {
             }
 
             Storage<?> tmp = null;
-            try {
-                tmp = (Storage<?>) Class.forName(Config.SBK_PACKAGE_NAME + "." + driverName + "." + driverName)
-                        .getConstructor().newInstance();
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                    NoSuchMethodException | InvocationTargetException ex) {
-                String errMsg = "SBK-GEM: storage driver '" + driverName + "' Not available in the package: "
-                                + Config.SBK_PACKAGE_NAME;
-                Printer.log.warn(errMsg);
+
+            final String  packageClassPath =  SbkUtils.getStorageClassPath(Config.SBK_PACKAGE_NAME, driverName);
+            if (packageClassPath == null) {
+                String errMsg = "The Package class Path not found for the storage driver: "+driverName;
+                Printer.log.error(errMsg);
+            } else {
+                try {
+                    tmp = (Storage<?>) Class.forName(packageClassPath).getConstructor().newInstance();
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                        NoSuchMethodException | InvocationTargetException ex) {
+                    String errMsg = "SBK-GEM: storage driver '" + driverName + "' Not available in the package: "
+                            + Config.SBK_PACKAGE_NAME;
+                    Printer.log.warn(errMsg);
+                }
             }
             storageDevice = tmp;
         }
@@ -302,13 +308,19 @@ public class SbkGem {
         final Logger grpcLogger = new SbkGrpcPrometheusLogger();
         Storage<?> tmp = null;
 
-        try {
-            tmp = (Storage<?>) Class.forName(Config.SBK_PACKAGE_NAME + "." + storageName + "." + storageName)
-                    .getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
-                | ClassNotFoundException ex) {
-            Printer.log.warn("SBK-GEM: storage class '"+storageName+"' not found in the package "+Config.SBK_PACKAGE_NAME);
+        final String  packageClassPath =  SbkUtils.getStorageClassPath(Config.SBK_PACKAGE_NAME, storageName);
+        if (packageClassPath == null) {
+            String errMsg = "The Package class Path not found for the storage driver: "+storageName;
+            Printer.log.error(errMsg);
+        } else {
+            try {
+                tmp = (Storage<?>) Class.forName(packageClassPath).getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
+                    | ClassNotFoundException ex) {
+                Printer.log.warn("SBK-GEM: storage class '"+storageName+"' not found in the package "+Config.SBK_PACKAGE_NAME);
+            }
         }
+
         final Storage<?> remoteStorage = tmp;
 
         grpcLogger.addArgs(sbkParams);

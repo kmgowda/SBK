@@ -201,12 +201,13 @@ public class Sbk {
         String driverName;
 
         try {
-            driversList = SbkUtils.getAvailableClassNames(Config.SBK_PACKAGE_NAME);
+            driversList = SbkUtils.getAvailableStorageClassNames(Config.SBK_PACKAGE_NAME);
             Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
             driversList = new LinkedList<>();
         }
+
         if (argsClassName == null) {
             if (StringUtils.isNotEmpty(sbkClassName)) {
                 className = sbkClassName;
@@ -237,9 +238,15 @@ public class Sbk {
             throw new InstantiationException(errMsg);
         }
 
+        final String  packageClassPath =  SbkUtils.getStorageClassPath(Config.SBK_PACKAGE_NAME, driverName);
+        if (packageClassPath == null) {
+            String errMsg = "The Package class Path not found for the storage driver: "+driverName;
+            Printer.log.error(errMsg);
+            throw new InstantiationException(errMsg);
+        }
+
         try {
-            storageDevice = (Storage<?>) Class.forName(Config.SBK_PACKAGE_NAME + "." + driverName + "." + driverName)
-                    .getConstructor().newInstance();
+            storageDevice = (Storage<?>) Class.forName(packageClassPath).getConstructor().newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                 NoSuchMethodException | InvocationTargetException ex) {
             final ParameterOptions paramsHelp = new SbkParameters(appName, driversList);
