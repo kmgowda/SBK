@@ -223,7 +223,7 @@ public class Sbk {
         }
         driverName = null;
         if (driversList.size() > 0) {
-            driverName = SbkUtils.searchDriver(driversList, className);
+            driverName = SbkUtils.searchList(driversList, className);
             if (driverName == null) {
                 String msg = "storage driver: " + className+ " not found in the SBK";
                 Printer.log.warn(msg);

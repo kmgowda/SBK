@@ -100,7 +100,7 @@ public  class SbkUtils {
         return null;
     }
 
-    public static String searchDriver(List<String> list, String name) {
+    public static String searchList(List<String> list, String name) {
         for (String st: list) {
             if (st.equalsIgnoreCase(name)) {
                 return st;
