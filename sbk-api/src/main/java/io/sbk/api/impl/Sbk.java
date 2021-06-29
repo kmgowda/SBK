@@ -201,7 +201,7 @@ public class Sbk {
         String driverName;
 
         try {
-            driversList = SbkUtils.getAvailableClassNames(Config.PACKAGE_NAME);
+            driversList = SbkUtils.getAvailableClassNames(Config.SBK_PACKAGE_NAME);
             Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
@@ -238,7 +238,7 @@ public class Sbk {
         }
 
         try {
-            storageDevice = (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + driverName + "." + driverName)
+            storageDevice = (Storage<?>) Class.forName(Config.SBK_PACKAGE_NAME + "." + driverName + "." + driverName)
                     .getConstructor().newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                 NoSuchMethodException | InvocationTargetException ex) {

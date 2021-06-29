@@ -156,7 +156,7 @@ public class SbkGem {
         logger = Objects.requireNonNullElseGet(outLogger, SbkGemRamPrometheusLogger::new);
 
         try {
-            driversList = SbkUtils.getAvailableClassNames(Config.PACKAGE_NAME);
+            driversList = SbkUtils.getAvailableClassNames(Config.SBK_PACKAGE_NAME);
             Printer.log.info("Available Drivers: "+ driversList.size());
         } catch (ReflectionsException ex) {
             Printer.log.warn(ex.toString());
@@ -180,12 +180,12 @@ public class SbkGem {
 
             Storage<?> tmp = null;
             try {
-                tmp = (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + driverName + "." + driverName)
+                tmp = (Storage<?>) Class.forName(Config.SBK_PACKAGE_NAME + "." + driverName + "." + driverName)
                         .getConstructor().newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                     NoSuchMethodException | InvocationTargetException ex) {
                 String errMsg = "SBK-GEM: storage driver '" + driverName + "' Not available in the package: "
-                                + Config.PACKAGE_NAME;
+                                + Config.SBK_PACKAGE_NAME;
                 Printer.log.warn(errMsg);
             }
             storageDevice = tmp;
@@ -303,11 +303,11 @@ public class SbkGem {
         Storage<?> tmp = null;
 
         try {
-            tmp = (Storage<?>) Class.forName(Config.PACKAGE_NAME + "." + storageName + "." + storageName)
+            tmp = (Storage<?>) Class.forName(Config.SBK_PACKAGE_NAME + "." + storageName + "." + storageName)
                     .getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
                 | ClassNotFoundException ex) {
-            Printer.log.warn("SBK-GEM: storage class '"+storageName+"' not found in the package "+Config.PACKAGE_NAME);
+            Printer.log.warn("SBK-GEM: storage class '"+storageName+"' not found in the package "+Config.SBK_PACKAGE_NAME);
         }
         final Storage<?> remoteStorage = tmp;
 
