@@ -12,6 +12,7 @@ package io.sbk.main;
 
 import io.sbk.api.impl.Sbk;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -25,8 +26,11 @@ public class SbkMain {
     public static void main(final String[] args) {
         try {
             Sbk.run(args, null, null, null);
+        } catch (UnrecognizedOptionException ex) {
+          System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException |
-                TimeoutException | InterruptedException | ExecutionException | InstantiationException  ex) {
+                TimeoutException | InterruptedException | ExecutionException | InstantiationException |
+                ClassNotFoundException ex) {
             ex.printStackTrace();
             System.exit(1);
         }

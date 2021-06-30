@@ -17,11 +17,8 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Config;
 import io.sbk.api.DataType;
 import io.sbk.api.HelpException;
-import io.sbk.api.Logger;
-import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
-import io.sbk.api.impl.SbkGrpcPrometheusLogger;
-import io.sbk.api.impl.SbkParameters;
+import io.sbk.api.StoragePackage;
 import io.sbk.api.impl.SbkUtils;
 import io.sbk.gem.GemBenchmark;
 import io.sbk.gem.GemConfig;
@@ -37,13 +34,11 @@ import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
-import org.reflections.ReflectionsException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +69,7 @@ public class SbkGem {
         final GemBenchmark benchmark;
         try {
             benchmark = buildBenchmark(args, applicationName, outLogger);
-        } catch (HelpException | UnrecognizedOptionException ex) {
+        } catch (HelpException ex) {
            return null;
         }
         final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
@@ -119,10 +114,11 @@ public class SbkGem {
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
+        final String packageName = Config.SBK_PACKAGE_NAME;
+        final StoragePackage packageStore = new StoragePackage(packageName);
         final Storage storageDevice;
         final String usageLine;
-        String driverName = null;
-        List<String> driversList;
+        final String[] storageDrivers;
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(GemConfig.DESC);
@@ -132,6 +128,7 @@ public class SbkGem {
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
+        packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -155,51 +152,30 @@ public class SbkGem {
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkGemRamPrometheusLogger::new);
 
-        try {
-            driversList = SbkUtils.getAvailableStorageClassNames(Config.SBK_PACKAGE_NAME);
-            Printer.log.info("Available Drivers: "+ driversList.size());
-        } catch (ReflectionsException ex) {
-            Printer.log.warn(ex.toString());
-            driversList = new LinkedList<>();
-        }
-
-        if (StringUtils.isEmpty(className)) {
-            Printer.log.warn("SBK-GEM: Storage class not found!");
+        if (className == null) {
             storageDevice = null;
         } else {
-            if (driversList.size() > 0) {
-                driverName = SbkUtils.searchList(driversList, className);
-                if (driverName == null) {
-                    String msg = "storage driver: " + className + " not found in the SBK";
-                    Printer.log.warn(msg);
-                    driverName = className;
-                }
-            } else {
-                driverName = className;
-            }
-
-            Storage<?> tmp = null;
-
-            final String  packageClassPath =  SbkUtils.getStorageClassPath(Config.SBK_PACKAGE_NAME, driverName);
-            if (packageClassPath == null) {
-                String errMsg = "The Package class Path not found for the storage driver: "+driverName;
-                Printer.log.error(errMsg);
-            } else {
+            Storage<?> device = null;
+            try {
+                device = packageStore.getStorage(className);
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                    IllegalAccessException | InstantiationException ex) {
+                Printer.log.warn(ex.toString());
                 try {
-                    tmp = (Storage<?>) Class.forName(packageClassPath).getConstructor().newInstance();
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                        NoSuchMethodException | InvocationTargetException ex) {
-                    String errMsg = "SBK-GEM: storage driver '" + driverName + "' Not available in the package: "
-                            + Config.SBK_PACKAGE_NAME;
-                    Printer.log.warn(errMsg);
+                    device = StoragePackage.getStorageInstance(packageName+"."+className+"."+className);
+                } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                        IllegalAccessException | InstantiationException e) {
+                    Printer.log.warn(ex.toString());
                 }
             }
-            storageDevice = tmp;
+            storageDevice = device;
         }
 
-        usageLine = storageDevice != null ? appName + " " + SbkUtils.CLASS_OPTION + " " + driverName : appName;
+        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " "+SbkUtils.CLASS_OPTION +" "+argsClassName :
+                appName;
+        storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
 
-        params = new SbkGemParameters(usageLine, null, gemConfig, ramConfig.port);
+        params = new SbkGemParameters(usageLine, storageDrivers, gemConfig, ramConfig.port);
         logger.addArgs(params);
         if (storageDevice != null) {
             storageDevice.addArgs(params);
@@ -208,13 +184,13 @@ public class SbkGem {
         final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
 
         if (nextArgs == null) {
-            params.printHelp();
-            throw new ParseException("SBK-GEM: Insufficient command line arguments");
+            final String helpText = params.getHelpText();
+            System.out.println("\n" + helpText);
+            throw new HelpException(helpText);
         }
 
         String[] processArgs = nextArgs;
         int i = 1;
-        boolean checkRemoteArgs = true;
 
         while (true) {
             Printer.log.info("SBK-GEM ["+i+ "]: Arguments to process : "+Arrays.toString(processArgs));
@@ -237,13 +213,31 @@ public class SbkGem {
                     params.printHelp();
                     throw new ParseException("SBK-GEM: Insufficient command line arguments");
                 }
-                checkRemoteArgs = false;
                 continue;
             } catch (HelpException ex) {
                 System.out.println("\n"+ex.getHelpText());
                 throw ex;
             }
             break;
+        }
+
+        if (storageDevice != null) {
+            final DataType<?> dType = storageDevice.getDataType();
+            if (dType == null) {
+                String errMsg = "No storage Data type of Remote Storage device: "+ className;
+                Printer.log.error(errMsg);
+                throw new ParseException(errMsg);
+            }
+
+            int minSize = dType.getWriteReadMinSize();
+            if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
+                String errMsg =
+                        "Invalid record size: "+ params.getRecordSize() +
+                                ", For both Writers and Readers, minimum data size should be "+ minSize +
+                                " for data type: " +dType.getClass().getName();
+                Printer.log.error(errMsg);
+                throw new ParseException(errMsg);
+            }
         }
 
         String actionString = "r";
@@ -256,7 +250,7 @@ public class SbkGem {
         // remove GEM and logger parameter options
         final String[] sbkArgsList = SbkUtils.removeOptionsAndValues(
                 SbkUtils.removeOptionsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
-        final StringBuilder sbkArgsBuilder = new StringBuilder(SbkUtils.CLASS_OPTION + " " + driverName);
+        final StringBuilder sbkArgsBuilder = new StringBuilder(SbkUtils.CLASS_OPTION + " " + className);
         for (String arg: sbkArgsList) {
             sbkArgsBuilder.append(" ");
             sbkArgsBuilder.append(arg);
@@ -270,15 +264,12 @@ public class SbkGem {
         Printer.log.info("SBK dir: "+params.getSbkDir());
         Printer.log.info("SBK command: "+params.getSbkCommand());
         Printer.log.info("Arguments to remote SBK command: "+ sbkArgsBuilder);
-        if (checkRemoteArgs && StringUtils.isNotEmpty(driverName)) {
-            checkRemoteSbkArgs(sbkAppName, driverName, driversList, sbkArgsBuilder.toString().split(" "));
-        }
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification success..");
 
         ramConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
         ramArgsList.add(SbkUtils.CLASS_OPTION);
-        ramArgsList.add(driverName);
+        ramArgsList.add(className);
         ramArgsList.add("-action");
         ramArgsList.add(actionString);
         ramArgsList.add("-max");
@@ -299,60 +290,6 @@ public class SbkGem {
         return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }
-
-
-    private static void checkRemoteSbkArgs(String sbkAppName, String storageName, List<String> driversList,
-                                           String[] args) throws  ParseException, HelpException {
-        final String remoteUsageLine = sbkAppName + " " + SbkUtils.CLASS_OPTION + " " + storageName;
-        final ParameterOptions sbkParams = new SbkParameters(remoteUsageLine, driversList);
-        final Logger grpcLogger = new SbkGrpcPrometheusLogger();
-        Storage<?> tmp = null;
-
-        final String  packageClassPath =  SbkUtils.getStorageClassPath(Config.SBK_PACKAGE_NAME, storageName);
-        if (packageClassPath == null) {
-            String errMsg = "The Package class Path not found for the storage driver: "+storageName;
-            Printer.log.error(errMsg);
-        } else {
-            try {
-                tmp = (Storage<?>) Class.forName(packageClassPath).getConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
-                    | ClassNotFoundException ex) {
-                Printer.log.warn("SBK-GEM: storage class '"+storageName+"' not found in the package "+Config.SBK_PACKAGE_NAME);
-            }
-        }
-
-        final Storage<?> remoteStorage = tmp;
-
-        grpcLogger.addArgs(sbkParams);
-
-        if (remoteStorage != null) {
-            remoteStorage.addArgs(sbkParams);
-        }
-
-        sbkParams.parseArgs(args);
-        grpcLogger.parseArgs(sbkParams);
-
-        if (remoteStorage != null) {
-            remoteStorage.parseArgs(sbkParams);
-            final DataType<?> dType = remoteStorage.getDataType();
-            if (dType == null) {
-                String errMsg = "No storage Data type of Remote Storage device: "+ storageName;
-                Printer.log.error(errMsg);
-                throw new ParseException(errMsg);
-            }
-
-            int minSize = dType.getWriteReadMinSize();
-            if (sbkParams.isWriteAndRead() && sbkParams.getRecordSize() < minSize) {
-                String errMsg =
-                        "Invalid record size: "+ sbkParams.getRecordSize() +
-                                ", For both Writers and Readers, minimum data size should be "+ minSize +
-                                " for data type: " +dType.getClass().getName();
-                Printer.log.error(errMsg);
-                throw new ParseException(errMsg);
-            }
-        }
-    }
-
 
 
     public static void printRemoteResults(RemoteResponse[] results, boolean all) {

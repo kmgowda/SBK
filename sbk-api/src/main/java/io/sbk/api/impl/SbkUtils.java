@@ -11,23 +11,17 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.PerformanceLogger;
-import io.sbk.api.Storage;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
 import io.sbk.perl.impl.MicroSeconds;
 import io.sbk.perl.impl.MilliSeconds;
 import io.sbk.perl.impl.NanoSeconds;
 import io.sbk.system.Printer;
-import org.reflections.Reflections;
-import org.reflections.ReflectionsException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-public  class SbkUtils {
+public class SbkUtils {
     public final static String CLASS_OPTION = "-class";
 
     public static Time getTime(PerformanceLogger logger ) {
@@ -47,8 +41,8 @@ public  class SbkUtils {
     }
 
     public static String[] removeOptionsAndValues(String[] args, String[] opts) {
-        if (args == null || args.length < 3) {
-            return null;
+        if (args == null || args.length <  2) {
+            return args;
         }
         List<String> optsList = Arrays.asList(opts);
         List<String> ret = new ArrayList<>(args.length);
@@ -66,7 +60,6 @@ public  class SbkUtils {
     }
 
 
-
     public static String getClassName(String[] args) {
         if (args == null || args.length < 2) {
             return null;
@@ -78,32 +71,6 @@ public  class SbkUtils {
                 } else {
                     return null;
                 }
-            }
-        }
-        return null;
-    }
-
-    public static List<String> getAvailableStorageClassNames(String pkgName) throws ReflectionsException {
-        Reflections reflections = new Reflections(pkgName);
-        Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
-        return subTypes.stream().map(Class::getSimpleName).sorted().collect(Collectors.toList());
-    }
-
-    public static String getStorageClassPath(String pkgName, String className) throws ReflectionsException {
-        Reflections reflections = new Reflections(pkgName);
-        Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
-        for (Class<?> name:subTypes) {
-            if (name.getSimpleName().equalsIgnoreCase(className)) {
-                return name.getName();
-            }
-        }
-        return null;
-    }
-
-    public static String searchList(List<String> list, String name) {
-        for (String st: list) {
-            if (st.equalsIgnoreCase(name)) {
-                return st;
             }
         }
         return null;

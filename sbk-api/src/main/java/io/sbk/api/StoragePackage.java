@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @NotThreadSafe
 final public class StoragePackage {
+    final private static int MAX_PRINT_WIDTH = 80;
+    final private String packageName;
     final private String[] simpleNames;
     final private String[] names;
     final private StringCompareIgnoreCase stringComparator;
@@ -31,13 +33,14 @@ final public class StoragePackage {
         final Reflections reflections = new Reflections(packageName);
         final Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
         final int size = subTypes.size();
+        this.packageName = packageName;
         this.stringComparator = new StringCompareIgnoreCase();
         this.simpleNames = new String[size];
         this.names = new String[size];
         if (size > 0) {
             final AtomicInteger index = new AtomicInteger(0);
             final Map<String, String> classMap = new HashMap<>();
-            subTypes.stream().map(x -> classMap.put(x.getSimpleName(), x.getName()));
+            subTypes.forEach(x -> classMap.put(x.getSimpleName(), x.getName()));
             classMap.keySet().stream().sorted().forEach(x -> {
                 final int i = index.get();
                 simpleNames[i] = StringUtils.capitalize(x);
@@ -46,6 +49,16 @@ final public class StoragePackage {
             });
         }
     }
+
+
+    private static class StringCompareIgnoreCase implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            return o1.compareToIgnoreCase(o2);
+        }
+    }
+
 
     public boolean isEmpty() {
         return  simpleNames.length == 0;
@@ -64,13 +77,25 @@ final public class StoragePackage {
         return getStorageInstance(names[i]);
     }
 
-
-    private static class StringCompareIgnoreCase implements Comparator<String> {
-
-        @Override
-        public int compare(String o1, String o2) {
-            return o1.compareToIgnoreCase(o2);
+    public void printDrivers() {
+        final String printStr = "Available Drivers in package '"+ packageName+"': "+simpleNames.length;
+        final StringBuilder builder = new StringBuilder(printStr);
+        builder.append(" [");
+        int length = printStr.length() + 2;
+        for (int i = 0; i < simpleNames.length; i++) {
+            builder.append(simpleNames[i]);
+            length += simpleNames[i].length();
+            if (i+1 < simpleNames.length) {
+                builder.append(", ");
+                length += 2;
+            }
+            if (length > MAX_PRINT_WIDTH && i+1 < simpleNames.length) {
+                builder.append("\n");
+                length = 0;
+            }
         }
+        builder.append("]");
+        System.out.println(builder);
     }
 
 
@@ -78,6 +103,5 @@ final public class StoragePackage {
             NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return (Storage<?>) Class.forName(storageFullPath).getConstructor().newInstance();
     }
-
 
 }

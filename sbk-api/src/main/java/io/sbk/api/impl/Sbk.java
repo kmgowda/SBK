@@ -20,7 +20,7 @@ import io.sbk.api.DataType;
 import io.sbk.api.HelpException;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Logger;
-import io.sbk.api.PerformanceLogger;
+import io.sbk.api.StoragePackage;
 import io.sbk.perl.PerlConfig;
 import io.sbk.api.Storage;
 import io.sbk.perl.Time;
@@ -28,13 +28,10 @@ import io.sbk.system.Printer;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
-import org.reflections.ReflectionsException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -64,14 +61,16 @@ public class Sbk {
      * @throws InterruptedException If an exception occurred if the writers and readers are interrupted.
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
+     * @throws ClassNotFoundException if the supplied storage class is not found.
      */
     public static void run(final String[] args, final Storage<Object> storage,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException {
+            IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException,
+            ClassNotFoundException {
         final Benchmark benchmark;
         try {
             benchmark = buildBenchmark(args, storage, applicationName, outLogger);
-        } catch (HelpException | UnrecognizedOptionException ex) {
+        } catch (HelpException ex) {
             return;
         }
 
@@ -99,10 +98,11 @@ public class Sbk {
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
      * @throws InstantiationException if the exception occurred due to initiation failures.
+     * @throws ClassNotFoundException If the storage class driver is not found.
      */
     public static Benchmark buildBenchmark(final String[] args, final Storage<Object> storage,
-                           final String applicationName, Logger outLogger) throws ParseException,
-            IllegalArgumentException, IOException, InstantiationException, HelpException {
+                           final String applicationName, final Logger outLogger) throws ParseException,
+            IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException {
         final Storage storageDevice;
         final Action action;
         final ParameterOptions params;
@@ -113,11 +113,14 @@ public class Sbk {
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
                 StringUtils.isNotEmpty(sbkApplicationName) ? sbkApplicationName : Config.NAME;
+        final String packageName = Config.SBK_PACKAGE_NAME;
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
-        final String driverName;
+        final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
+        final StoragePackage packageStore = new StoragePackage(packageName);
         final String usageLine;
+        final String[] storageDrivers;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         Printer.log.info(Config.DESC);
@@ -127,6 +130,7 @@ public class Sbk {
         Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
+        packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -134,26 +138,62 @@ public class Sbk {
                 PerlConfig.class);
         logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
 
-        storageDevice = Objects.requireNonNullElse(storage, getStorageDevice( argsClassName, appName, logger));
-        driverName =  storageDevice.getClass().getSimpleName();
-        usageLine = StringUtils.isNotEmpty(argsClassName) ?
-                appName + " " + SbkUtils.CLASS_OPTION + " " + driverName : appName;
-
-        params = new SbkParameters(usageLine, null);
-        logger.addArgs(params);
-        storageDevice.addArgs(params);
-        final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
-
-        if (nextArgs == null) {
-            params.printHelp();
-            throw new InstantiationException("Insufficient command line arguments");
+        if (storage == null) {
+            if (StringUtils.isEmpty(className)) {
+                storageDevice = null;
+            } else {
+                Storage<?> device = null;
+                try {
+                    device = packageStore.getStorage(className);
+                } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
+                        | IllegalAccessException ex) {
+                    Printer.log.warn(ex.toString());
+                    try {
+                        device = StoragePackage.getStorageInstance(packageName+"."+className+"."+className);
+                    } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
+                            | IllegalAccessException e) {
+                        Printer.log.warn(ex.toString());
+                    }
+                }
+                storageDevice = device;
+            }
+        } else {
+            storageDevice = storage;
         }
-        Printer.log.info("Arguments to Driver '"+driverName + "' : "+Arrays.toString(nextArgs));
+
+        usageLine = StringUtils.isNotEmpty(argsClassName) ?
+                appName + " "+SbkUtils.CLASS_OPTION +" "+argsClassName : appName;
+        storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
+        params = new SbkParameters(usageLine, storageDrivers);
+        logger.addArgs(params);
+        if (storageDevice != null) {
+            storageDevice.addArgs(params);
+        }
+        final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
+        if (nextArgs == null || nextArgs.length == 0) {
+            final String helpText = params.getHelpText();
+            System.out.println("\n" + helpText);
+            throw new HelpException(helpText);
+        }
+
         try {
             params.parseArgs(nextArgs);
             logger.parseArgs(params);
-            storageDevice.parseArgs(params);
+            if (storageDevice != null) {
+                storageDevice.parseArgs(params);
+            }
         } catch (UnrecognizedOptionException ex) {
+            if (storageDevice == null) {
+                if (params.hasOption("help")) {
+                    final String helpText = params.getHelpText();
+                    System.out.println("\n"+helpText);
+                    throw new HelpException(helpText);
+                } else {
+                    params.printHelp();
+                    final String errStr = "The option '-class' is not supplied";
+                    throw new ParseException(errStr);
+                }
+            }
             Printer.log.error(ex.toString());
             params.printHelp();
             throw ex;
@@ -161,6 +201,19 @@ public class Sbk {
             System.out.println("\n"+ex.getHelpText());
             throw  ex;
         }
+        if (storageDevice == null) {
+            final String errStr;
+            params.printHelp();
+            if (StringUtils.isEmpty(className)) {
+                errStr = "The option '-class' is not supplied";
+                throw new ParseException(errStr);
+            } else {
+                errStr = "The storage class implementation for the driver: " + className + " not found!";
+                throw new ClassNotFoundException(errStr);
+            }
+        }
+
+        Printer.log.info("Arguments to Driver '"+ storageDevice.getClass().getSimpleName() + "' : "+Arrays.toString(nextArgs));
 
         final DataType dType = storageDevice.getDataType();
         if (dType == null) {
@@ -188,76 +241,8 @@ public class Sbk {
         } else {
             action = Action.Writing;
         }
-        return new SbkBenchmark(driverName, action, perlConfig, params, storageDevice, dType, logger, time);
+        return new SbkBenchmark(action, perlConfig, params, storageDevice, dType, logger, time);
     }
-
-
-    private static Storage<?> getStorageDevice(final String argsClassName, final String appName,
-                                               final PerformanceLogger logger) throws  InstantiationException {
-        final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
-        final Storage<?> storageDevice;
-        final String className;
-        List<String> driversList;
-        String driverName;
-
-        try {
-            driversList = SbkUtils.getAvailableStorageClassNames(Config.SBK_PACKAGE_NAME);
-            Printer.log.info("Available Drivers: "+ driversList.size());
-        } catch (ReflectionsException ex) {
-            Printer.log.warn(ex.toString());
-            driversList = new LinkedList<>();
-        }
-
-        if (argsClassName == null) {
-            if (StringUtils.isNotEmpty(sbkClassName)) {
-                className = sbkClassName;
-            } else {
-                final ParameterOptions paramsHelp = new SbkParameters(appName, driversList);
-                logger.addArgs(paramsHelp);
-                paramsHelp.printHelp();
-                final String errMsg = "SBK Benchmark class driver not found! check the option '"+ SbkUtils.CLASS_OPTION +"'";
-                throw new InstantiationException(errMsg);
-            }
-        } else {
-            className = argsClassName;
-        }
-        driverName = null;
-        if (driversList.size() > 0) {
-            driverName = SbkUtils.searchList(driversList, className);
-            if (driverName == null) {
-                String msg = "storage driver: " + className+ " not found in the SBK";
-                Printer.log.warn(msg);
-            }
-        }
-        if (driverName == null) {
-            driverName = className;
-        }
-        if (driverName.length() == 0) {
-            String errMsg = "No storage driver name supplied/found";
-            Printer.log.error(errMsg);
-            throw new InstantiationException(errMsg);
-        }
-
-        final String  packageClassPath =  SbkUtils.getStorageClassPath(Config.SBK_PACKAGE_NAME, driverName);
-        if (packageClassPath == null) {
-            String errMsg = "The Package class Path not found for the storage driver: "+driverName;
-            Printer.log.error(errMsg);
-            throw new InstantiationException(errMsg);
-        }
-
-        try {
-            storageDevice = (Storage<?>) Class.forName(packageClassPath).getConstructor().newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                NoSuchMethodException | InvocationTargetException ex) {
-            final ParameterOptions paramsHelp = new SbkParameters(appName, driversList);
-            logger.addArgs(paramsHelp);
-            paramsHelp.printHelp();
-            String errMsg = "storage driver: " + driverName+ " Instantiation failed";
-            throw new InstantiationException(errMsg);
-        }
-        return storageDevice;
-    }
-
 
 
 }

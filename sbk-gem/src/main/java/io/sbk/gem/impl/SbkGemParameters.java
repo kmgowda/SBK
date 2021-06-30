@@ -28,7 +28,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 @Slf4j
 public class SbkGemParameters extends SbkParameters implements GemParameterOptions {
@@ -71,8 +70,8 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
     private boolean isCopy;
 
 
-    public SbkGemParameters(String name, List<String> driversList, GemConfig config, int ramport) {
-        super(name, GemConfig.DESC, driversList);
+    public SbkGemParameters(String name, String[] drivers, GemConfig config, int ramport) {
+        super(name, GemConfig.DESC, drivers);
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * PerlConfig.MS_PER_SEC;
         this.ramPort = ramport;

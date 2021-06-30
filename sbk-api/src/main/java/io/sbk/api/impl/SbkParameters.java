@@ -17,14 +17,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
 public class SbkParameters extends SbkOptions implements ParameterOptions {
-    final private List<String> driversList;
+    final private String[] drivers;
 
     @Getter
     final private int timeoutMS;
@@ -67,14 +67,14 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
 
     private double throughput;
 
-    public SbkParameters(String name, String desc, List<String> driversList) {
+    public SbkParameters(String name, String desc, String[] drivers) {
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
-        this.driversList = driversList;
+        this.drivers = drivers;
 
-        if (this.driversList != null) {
+        if (this.drivers != null && this.drivers.length > 0) {
             addOption("class", true, "Storage Driver Class,\n Available Drivers "
-                    + this.driversList.toString());
+                    + Arrays.toString(this.drivers));
         }
         addOption("writers", true, "Number of writers");
         addOption("readers", true, "Number of readers");
@@ -102,8 +102,8 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
         addOption("help", false, "Help message");
     }
 
-    public SbkParameters(String name, List<String> driversList) {
-        this(name, Config.DESC, driversList);
+    public SbkParameters(String name, String[] drivers) {
+        this(name, Config.DESC, drivers);
     }
 
 
