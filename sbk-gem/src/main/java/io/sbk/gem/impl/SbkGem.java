@@ -92,12 +92,10 @@ public class SbkGem {
      *                  logger will be used.
      * @throws HelpException if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
-     * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
      */
     public static GemBenchmark buildBenchmark(final String[] args, final String applicationName,
-                                              GemLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, HelpException {
+                                              GemLogger outLogger) throws ParseException, IOException, HelpException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
@@ -160,13 +158,8 @@ public class SbkGem {
                 device = packageStore.getStorage(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                     IllegalAccessException | InstantiationException ex) {
-                Printer.log.warn(ex.toString());
-                try {
-                    device = StoragePackage.getStorageInstance(packageName+"."+className+"."+className);
-                } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                        IllegalAccessException | InstantiationException e) {
-                    Printer.log.warn(ex.toString());
-                }
+                Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
+                        packageName + "' failed!, " + "error: " + ex);
             }
             storageDevice = device;
         }

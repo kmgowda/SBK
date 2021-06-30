@@ -147,13 +147,8 @@ public class Sbk {
                     device = packageStore.getStorage(className);
                 } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
                         | IllegalAccessException ex) {
-                    Printer.log.warn(ex.toString());
-                    try {
-                        device = StoragePackage.getStorageInstance(packageName+"."+className+"."+className);
-                    } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
-                            | IllegalAccessException e) {
-                        Printer.log.warn(ex.toString());
-                    }
+                    Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
+                            packageName + "' failed!, " + "error: " + ex);
                 }
                 storageDevice = device;
             }
