@@ -184,15 +184,9 @@ public class Sbk {
             }
         } catch (UnrecognizedOptionException ex) {
             if (storageDevice == null) {
-                if (params.hasOption("help")) {
-                    final String helpText = params.getHelpText();
-                    System.out.println("\n"+helpText);
-                    throw new HelpException(helpText);
-                } else {
-                    params.printHelp();
-                    final String errStr = "The option '-class' is not supplied";
-                    throw new ParseException(errStr);
-                }
+                params.printHelp();
+                final String errStr = "The option '-class' is not supplied";
+                throw new ParseException(errStr);
             }
             Printer.log.error(ex.toString());
             params.printHelp();
