@@ -152,7 +152,7 @@ public class SbkGem {
 
         logger = Objects.requireNonNullElseGet(outLogger, SbkGemRamPrometheusLogger::new);
 
-        if (className == null) {
+        if (StringUtils.isEmpty(className)) {
             storageDevice = null;
         } else {
             Storage<?> device = null;
@@ -183,7 +183,7 @@ public class SbkGem {
 
         final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
 
-        if (nextArgs == null) {
+        if (nextArgs == null || nextArgs.length == 0) {
             final String helpText = params.getHelpText();
             System.out.println("\n" + helpText);
             throw new HelpException(helpText);

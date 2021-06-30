@@ -78,7 +78,7 @@ final public class StoragePackage {
     }
 
     public void printDrivers() {
-        final String printStr = "Available Drivers in package '"+ packageName+"': "+simpleNames.length;
+        final String printStr = "\nAvailable Storage Drivers in package '"+ packageName+"': "+simpleNames.length;
         final StringBuilder builder = new StringBuilder(printStr);
         builder.append(" [");
         int length = printStr.length() + 2;
