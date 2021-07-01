@@ -9,6 +9,7 @@
  */
 package io.sbk.api;
 
+import io.sbk.system.Printer;
 import org.apache.commons.lang.StringUtils;
 import org.reflections.Reflections;
 
@@ -81,7 +82,7 @@ final public class StoragePackage {
         final String printStr = "Available Storage Drivers in package '"+ packageName+"': "+simpleNames.length;
         final StringBuilder builder = new StringBuilder(printStr);
         builder.append(" [");
-        int length = printStr.length() + 2;
+        int length = printStr.length() + 30;
         for (int i = 0; i < simpleNames.length; i++) {
             builder.append(simpleNames[i]);
             length += simpleNames[i].length();
@@ -95,9 +96,7 @@ final public class StoragePackage {
             }
         }
         builder.append("]");
-        System.out.println();
-        System.out.println(builder);
-        System.out.println();
+        Printer.log.info(String.valueOf(builder));
     }
 
 

@@ -50,7 +50,11 @@ public class Sbk {
      * @param args command line arguments.
      * @param storage storage object on which performance benchmarking will be conducted.
      *                if you pass 'null', then name of the storage should be in args '-class' arguments
-     *                and storage object should be available in the package 'io.sbk.storage'.
+     *                and storage object should be available in the package 'packageName'.
+     * @param packageName  the name of the package where storage object is located. if you are passing null as
+     *                     'storage' parameter, then you can specify where the storage class/object is available using
+     *                     this parameter. If you pass null to this parameter, then default package name "io.sbk" is
+     *                     used.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
@@ -63,13 +67,13 @@ public class Sbk {
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      * @throws ClassNotFoundException if the supplied storage class is not found.
      */
-    public static void run(final String[] args, final Storage<Object> storage,
+    public static void run(final String[] args, final Storage<Object> storage, final String packageName,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException,
             ClassNotFoundException {
         final Benchmark benchmark;
         try {
-            benchmark = buildBenchmark(args, storage, applicationName, outLogger);
+            benchmark = buildBenchmark(args, storage, packageName, applicationName, outLogger);
         } catch (HelpException ex) {
             return;
         }
@@ -89,7 +93,11 @@ public class Sbk {
      * @param args command line arguments.
      * @param storage storage object on which performance benchmarking will be conducted.
      *                if you pass 'null', then name of the storage should be in args '-class' arguments
-     *                and storage object should be available in the package 'io.sbk.storage'.
+     *                and storage object should be available in the package 'packageName'.
+     * @param packageName  the name of the package where storage object is located. if you are passing null as
+     *                     'storage' parameter, then you can specify where the storage class/object is available using
+     *                     this parameter. If you pass null to this parameter, then default package name "io.sbk" is
+     *                     used.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
@@ -101,8 +109,9 @@ public class Sbk {
      * @throws ClassNotFoundException If the storage class driver is not found.
      */
     public static Benchmark buildBenchmark(final String[] args, final Storage<Object> storage,
-                           final String applicationName, final Logger outLogger) throws ParseException,
-            IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException {
+                           final String packageName, final String applicationName, final Logger outLogger)
+            throws ParseException, IllegalArgumentException, IOException, InstantiationException,
+            HelpException, ClassNotFoundException {
         final Storage storageDevice;
         final Action action;
         final ParameterOptions params;
@@ -113,12 +122,12 @@ public class Sbk {
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
                 StringUtils.isNotEmpty(sbkApplicationName) ? sbkApplicationName : Config.NAME;
-        final String packageName = Config.SBK_PACKAGE_NAME;
+        final String storagePackageName =  StringUtils.isNotEmpty(packageName) ? packageName : Config.SBK_PACKAGE_NAME;
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
-        final StoragePackage packageStore = new StoragePackage(packageName);
+        final StoragePackage packageStore = new StoragePackage(storagePackageName);
         final String usageLine;
         final String[] storageDrivers;
 
@@ -148,7 +157,7 @@ public class Sbk {
                 } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
                         | IllegalAccessException ex) {
                     Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
-                            packageName + "' failed!, " + "error: " + ex);
+                            storagePackageName + "' failed!, " + "error: " + ex);
                 }
                 storageDevice = device;
             }

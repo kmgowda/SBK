@@ -25,7 +25,7 @@ public class SbkMain {
 
     public static void main(final String[] args) {
         try {
-            Sbk.run(args, null, null, null);
+            Sbk.run(args, null, null, null, null);
         } catch (UnrecognizedOptionException ex) {
           System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException |
