@@ -29,5 +29,5 @@ public class SbkDriversParameters extends SbkParameters {
     public SbkDriversParameters(String name, String[] drivers) {
         this(name, Config.DESC, drivers);
     }
-    
+
 }

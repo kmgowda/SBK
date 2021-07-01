@@ -73,7 +73,7 @@ final public class StoragePackage {
             InvocationTargetException, InstantiationException, IllegalAccessException {
         final int i = Arrays.binarySearch(simpleNames, storageName, stringComparator);
         if (i < 0) {
-            throw new ClassNotFoundException();
+            throw new ClassNotFoundException("storage class '" + storageName + "' not found in package: " + packageName);
         }
         return getStorageInstance(names[i]);
     }

@@ -48,7 +48,7 @@ public class Sbk {
     /**
      * Run the Performance Benchmarking .
      * @param args command line arguments.
-     * @param packageName  the name of the package where storage object is located.
+     * @param packageName  the name of the package where storage class is available.
      *                     If you pass null to this parameter, then default package name "io.sbk" is used.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , name
      *                        'sbk' used as default.
@@ -62,11 +62,14 @@ public class Sbk {
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      * @throws ClassNotFoundException if the supplied storage class is not found.
+     * @throws InvocationTargetException if the exception occurs.
+     * @throws NoSuchMethodException if the exception occurs.
+     * @throws IllegalAccessException if the exception occurs.
      */
     public static void run(final String[] args, final String packageName,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException,
-            ClassNotFoundException {
+            ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final Benchmark benchmark;
         try {
             benchmark = buildBenchmark(args, packageName, applicationName, outLogger);
@@ -87,7 +90,7 @@ public class Sbk {
      * Build the Benchmark Object.
      *
      * @param args command line arguments.
-     * @param packageName  Name of the package where storage class can be created.
+     * @param packageName  Name of the package where storage class is available.
      *                     If you pass null to this parameter, then default package name "io.sbk" is used.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , name
      *                        'sbk' used as default.
@@ -99,10 +102,14 @@ public class Sbk {
      * @throws IOException If an exception occurred due to write or read failures.
      * @throws InstantiationException if the exception occurred due to initiation failures.
      * @throws ClassNotFoundException If the storage class driver is not found.
+     * @throws InvocationTargetException if the exception occurs.
+     * @throws NoSuchMethodException if the exception occurs.
+     * @throws IllegalAccessException if the exception occurs.
      */
     public static Benchmark buildBenchmark(final String[] args, final String packageName,
                                            final String applicationName, final Logger outLogger) throws ParseException,
-            IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException {
+            IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException,
+            InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final Storage storageDevice;
         final Action action;
         final ParameterOptions params;
@@ -120,7 +127,6 @@ public class Sbk {
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
         final StoragePackage packageStore = new StoragePackage(storagePackageName);
         final String usageLine;
-        final String[] storageDrivers;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         Printer.log.info(Config.DESC);
@@ -139,72 +145,60 @@ public class Sbk {
         perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 PerlConfig.class);
         logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
-
-        if (StringUtils.isEmpty(className)) {
-            storageDevice = null;
-        } else {
-            Storage<?> device = null;
-            try {
-                device = packageStore.getStorage(className);
-            } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
-                    | IllegalAccessException ex) {
-                Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
-                        storagePackageName + "' failed!, " + "error: " + ex);
-            }
-            storageDevice = device;
-        }
-
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
                 appName + " "+SbkUtils.CLASS_OPTION +" "+argsClassName : appName;
-        storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
-        params = new SbkDriversParameters(usageLine, storageDrivers);
-        logger.addArgs(params);
-        if (storageDevice != null) {
-            storageDevice.addArgs(params);
+
+        if (args == null || args.length == 0) {
+            final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
+            logger.addArgs(helpParams);
+            final String helpText = helpParams.getHelpText();
+            System.out.println("\n" + helpText);
+            throw new HelpException(helpText);
         }
+
+        if (StringUtils.isEmpty(className)) {
+            final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
+            logger.addArgs(helpParams);
+            helpParams.printHelp();
+            throw new ParseException("The option '-class' is not supplied");
+
+        } else {
+            try {
+                storageDevice = packageStore.getStorage(className);
+            } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
+                    | IllegalAccessException ex) {
+                Printer.log.error("Instantiation of storage class '"+className+ "' from the package '" +
+                        storagePackageName + "' failed!, " + "error: " + ex);
+                final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
+                logger.addArgs(helpParams);
+                helpParams.printHelp();
+                throw ex;
+            }
+        }
+
+        params = new SbkParameters(usageLine);
+        logger.addArgs(params);
+        storageDevice.addArgs(params);
         final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
         if (nextArgs == null || nextArgs.length == 0) {
             final String helpText = params.getHelpText();
             System.out.println("\n" + helpText);
             throw new HelpException(helpText);
         }
+        Printer.log.info("Arguments to Driver '"+ storageDevice.getClass().getSimpleName() + "' : "+Arrays.toString(nextArgs));
 
         try {
             params.parseArgs(nextArgs);
             logger.parseArgs(params);
-            if (storageDevice != null) {
-                storageDevice.parseArgs(params);
-            }
+            storageDevice.parseArgs(params);
         } catch (UnrecognizedOptionException ex) {
-            final String errStr;
             params.printHelp();
-            if (StringUtils.isEmpty(className)) {
-                errStr = "The option '-class' is not supplied";
-                throw new ParseException(errStr);
-            }
-            if (storageDevice == null) {
-                errStr = "The storage class implementation for the driver: " + className + " not found!";
-                throw new ClassNotFoundException(errStr);
-            }
             Printer.log.error(ex.toString());
             throw ex;
         } catch (HelpException ex) {
             System.out.println("\n"+ex.getHelpText());
             throw  ex;
         }
-        if (storageDevice == null) {
-            final String errStr;
-            params.printHelp();
-            if (StringUtils.isEmpty(className)) {
-                errStr = "The option '-class' is not supplied";
-                throw new ParseException(errStr);
-            } else {
-                errStr = "The storage class implementation for the driver: " + className + " not found!";
-                throw new ClassNotFoundException(errStr);
-            }
-        }
-
-        Printer.log.info("Arguments to Driver '"+ storageDevice.getClass().getSimpleName() + "' : "+Arrays.toString(nextArgs));
 
         final DataType dType = storageDevice.getDataType();
         if (dType == null) {
@@ -234,6 +228,5 @@ public class Sbk {
         }
         return new SbkBenchmark(action, perlConfig, params, storageDevice, dType, logger, time);
     }
-
 
 }
