@@ -1,5 +1,5 @@
 /**
- * Copyright (c) KMG. All Rights Reserved..
+ * Copyright (c) KMG. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 
-import java.util.Arrays;
-
 /**
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
 public class SbkParameters extends SbkOptions implements ParameterOptions {
-    final private String[] drivers;
 
     @Getter
     final private int timeoutMS;
@@ -65,15 +62,10 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
     @Getter
     private boolean writeAndRead;
 
-    public SbkParameters(String name, String desc, String[] drivers) {
+    public SbkParameters(String name, String desc) {
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
-        this.drivers = drivers;
 
-        if (this.drivers != null && this.drivers.length > 0) {
-            addOption("class", true, "Storage Driver Class,\n Available Drivers "
-                    + Arrays.toString(this.drivers));
-        }
         addOption("writers", true, "Number of writers");
         addOption("readers", true, "Number of readers");
         addOption("size", true, "Size of each message (event or record)");
@@ -100,8 +92,8 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
         addOption("help", false, "Help message");
     }
 
-    public SbkParameters(String name, String[] drivers) {
-        this(name, Config.DESC, drivers);
+    public SbkParameters(String name) {
+        this(name, Config.DESC);
     }
 
 

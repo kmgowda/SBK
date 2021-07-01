@@ -11,7 +11,7 @@ package io.sbk.BookKeeper;
 
 import io.sbk.api.Config;
 import io.sbk.api.ParameterOptions;
-import io.sbk.api.impl.SbkParameters;
+import io.sbk.api.impl.SbkDriversParameters;
 import org.junit.Assert;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
@@ -28,7 +28,7 @@ public class BookKeeperTest {
 
     @Test
     public void addArgsTest() {
-        params = new SbkParameters(benchmarkName, drivers);
+        params = new SbkDriversParameters(benchmarkName, drivers);
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
         params.addOption("ensembleSize", true,
@@ -49,7 +49,7 @@ public class BookKeeperTest {
      */
     @Test
     public void parseArgs() {
-        params = new SbkParameters(benchmarkName, drivers);
+        params = new SbkDriversParameters(benchmarkName, drivers);
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
         params.addOption("ensembleSize", true,
@@ -75,7 +75,7 @@ public class BookKeeperTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsNullLogName() {
         final String[] args = {"-class", "bookkeeper", "-uri", "distributedlog://localhost:2181/streams", "-writers", "1", "-size", "100"};
-        params = new SbkParameters(benchmarkName, drivers);
+        params = new SbkDriversParameters(benchmarkName, drivers);
         bk = new BookKeeper();
         bk.addArgs(params);
         try {
@@ -90,7 +90,7 @@ public class BookKeeperTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsNullUri() {
     final String[] args = {"-class", "bookkeeper", "-log", "logName", "writers", "1", "size", "100" };
-    params = new SbkParameters(benchmarkName, drivers);
+    params = new SbkDriversParameters(benchmarkName, drivers);
     bk = new BookKeeper();
     bk.addArgs(params);
     try {

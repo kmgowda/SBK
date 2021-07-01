@@ -11,7 +11,7 @@
 package io.sbk.gem.impl;
 
 import io.sbk.api.HelpException;
-import io.sbk.api.impl.SbkParameters;
+import io.sbk.api.impl.SbkDriversParameters;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.SshConnection;
@@ -30,7 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Slf4j
-public class SbkGemParameters extends SbkParameters implements GemParameterOptions {
+public class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
 
     final private GemConfig config;
 

@@ -14,7 +14,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Writer;
 import io.sbk.system.Printer;
-import io.sbk.api.impl.SbkParameters;
+import io.sbk.api.impl.SbkDriversParameters;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ public class FileTest {
     @Test
     public void testParseArgs() {
         final String[] args = {"-class", "file", "-size", "100", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {
@@ -53,7 +53,7 @@ public class FileTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsWritersCount() {
         final String[] args = {"-class", "file", "-size", "100", "-writers", "2", "records", "1"};
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {
@@ -68,7 +68,7 @@ public class FileTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsReadersWritersCount() {
         final String[] args = {"-class", "file", "-size", "100", "-readers", "1", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {
@@ -83,7 +83,7 @@ public class FileTest {
     @Test
     public void testOpenAndCloseStorage() {
         final String[] args = {"-class", "file", "-size", "100", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {
@@ -112,7 +112,7 @@ public class FileTest {
     @Test
     public void testCreateWriter() {
         final String[] args = {"-class", "file", "-file", "test.txt", "-size", "100", "-writers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {
@@ -134,7 +134,7 @@ public class FileTest {
     public void testCreateReader() {
         final String[] writeArgs = {"-class", "file", "-file", "test.txt", "-size", "100", "-writers", "1", "records", "1"};
         final String[] readArgs = {"-class", "file", "-file", "test.txt", "-size", "100", "-readers", "1", "records", "1"};
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {
@@ -172,7 +172,7 @@ public class FileTest {
     public void testCreateReaderFileNotFound() {
         final String[] args = {"-class", "file", "-file", "NoFile.sbk", "-size", "100", "-readers", "1", "records", "1"};
         Exception retEx = null;
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.getDataType();
         file.addArgs(params);
@@ -204,7 +204,7 @@ public class FileTest {
         ByteBuffer readBuffer = null;
         String readData = null;
 
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {
@@ -293,7 +293,7 @@ public class FileTest {
         ByteBuffer readBuffer = null;
         String readData = null;
 
-        params = new SbkParameters(benchmarkName,  drivers);
+        params = new SbkDriversParameters(benchmarkName,  drivers);
         file = new File();
         file.addArgs(params);
         try {

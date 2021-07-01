@@ -157,7 +157,7 @@ public class Sbk {
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
                 appName + " "+SbkUtils.CLASS_OPTION +" "+argsClassName : appName;
         storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
-        params = new SbkParameters(usageLine, storageDrivers);
+        params = new SbkDriversParameters(usageLine, storageDrivers);
         logger.addArgs(params);
         if (storageDevice != null) {
             storageDevice.addArgs(params);
