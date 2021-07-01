@@ -61,7 +61,7 @@ public class SbkPrometheusLogger extends SystemLogger {
         }
 
         params.addOption("context", true, "Prometheus Metric context" +
-                "; default context: " + metricsConfig.port + metricsConfig.context + "; 'no' disables the metrics");
+                "; default: " + metricsConfig.port + metricsConfig.context + "; 'no' disables the metrics");
     }
 
 

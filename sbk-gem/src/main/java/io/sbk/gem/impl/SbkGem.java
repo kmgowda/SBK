@@ -112,8 +112,8 @@ public class SbkGem {
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
-        final String packageName = Config.SBK_PACKAGE_NAME;
-        final StoragePackage packageStore = new StoragePackage(packageName);
+        final String storagePackageName = Config.SBK_PACKAGE_NAME;
+        final StoragePackage packageStore = new StoragePackage(storagePackageName);
         final Storage storageDevice;
         final String usageLine;
         final String[] storageDrivers;
@@ -123,6 +123,7 @@ public class SbkGem {
         Printer.log.info(GemConfig.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info("Storage Drivers Package: "+ storagePackageName);
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
@@ -159,7 +160,7 @@ public class SbkGem {
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                     IllegalAccessException | InstantiationException ex) {
                 Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
-                        packageName + "' failed!, " + "error: " + ex);
+                        storagePackageName + "' failed!, " + "error: " + ex);
             }
             storageDevice = device;
         }

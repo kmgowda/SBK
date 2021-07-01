@@ -136,6 +136,7 @@ public class Sbk {
         Printer.log.info(Config.NAME.toUpperCase() +" Version: "+version);
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info("Storage Drivers Package: "+ storagePackageName);
         Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
