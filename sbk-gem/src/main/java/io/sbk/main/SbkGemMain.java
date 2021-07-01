@@ -22,7 +22,7 @@ public class SbkGemMain {
 
     public static void main(final String[] args) {
         try {
-            SbkGem.run(args, null, null);
+            SbkGem.run(args, null, null, null);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException |

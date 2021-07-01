@@ -53,7 +53,10 @@ public class SbkGem {
     /**
      * Run the Performance Benchmarking .
      * @param args command line arguments.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , SbkServer is used by default.
+     * @param packageName  Name of the package where storage class is available.
+     *                     If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param applicationName Name of the application. will be used in the 'help' message. if it is 'null' ,
+     *                        SbkServer is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
      * @throws ParseException If an exception occurred while parsing command line arguments.
@@ -63,12 +66,12 @@ public class SbkGem {
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      */
-    public static RemoteResponse[] run(final String[] args, final String applicationName,
+    public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
                            GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
         final GemBenchmark benchmark;
         try {
-            benchmark = buildBenchmark(args, applicationName, outLogger);
+            benchmark = buildBenchmark(args, packageName, applicationName, outLogger);
         } catch (HelpException ex) {
            return null;
         }
@@ -87,15 +90,19 @@ public class SbkGem {
      * Build the Benchmark Object.
      *
      * @param args command line arguments.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
+     * @param packageName  Name of the package where storage class is available.
+     *                     If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param applicationName Name of the application. will be used in the 'help' message.
+     *                       if it is 'null' , storage name is used by default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
      * @throws HelpException if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IOException If an exception occurred due to write or read failures.
      */
-    public static GemBenchmark buildBenchmark(final String[] args, final String applicationName,
-                                              GemLogger outLogger) throws ParseException, IOException, HelpException {
+    public static GemBenchmark buildBenchmark(final String[] args, final String packageName,
+                                              final String applicationName, GemLogger outLogger)
+            throws ParseException, IOException, HelpException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
@@ -112,7 +119,7 @@ public class SbkGem {
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
-        final String storagePackageName = Config.SBK_PACKAGE_NAME;
+        final String storagePackageName = StringUtils.isNotEmpty(packageName) ? packageName : Config.SBK_PACKAGE_NAME;
         final StoragePackage packageStore = new StoragePackage(storagePackageName);
         final Storage storageDevice;
         final String usageLine;
@@ -127,6 +134,7 @@ public class SbkGem {
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
+        Printer.log.info("'"+SbkUtils.CLASS_OPTION+"': "+ Objects.requireNonNullElse(argsClassName, ""));
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -252,13 +260,13 @@ public class SbkGem {
         time = SbkUtils.getTime(logger);
         sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
         sbkArgsBuilder.append(" -context no");
-        sbkArgsBuilder.append(" -ram " + params.getHostName());
+        sbkArgsBuilder.append(" -ram " + params.getLocalHost());
         sbkArgsBuilder.append(" -ramport " + params.getRamPort());
 
         Printer.log.info("SBK dir: "+params.getSbkDir());
         Printer.log.info("SBK command: "+params.getSbkCommand());
         Printer.log.info("Arguments to remote SBK command: "+ sbkArgsBuilder);
-        Printer.log.info("SBK-GEM: Arguments to remote SBK command verification success..");
+        Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
         ramConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
@@ -280,7 +288,7 @@ public class SbkGem {
             ramParams.printHelp();
             throw ex;
         }
-        Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification success..");
+        Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification Success..");
         return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }

@@ -137,7 +137,7 @@ public class Sbk {
         Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
-        Printer.log.info("'-class': "+ Objects.requireNonNullElse(argsClassName, ""));
+        Printer.log.info("'"+SbkUtils.CLASS_OPTION+"': "+ Objects.requireNonNullElse(argsClassName, ""));
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
