@@ -134,7 +134,7 @@ public class SbkGem {
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
-        Printer.log.info("'"+SbkUtils.CLASS_OPTION+"': "+ Objects.requireNonNullElse(argsClassName, ""));
+        Printer.log.info("'"+Config.CLASS_OPTION+"': "+ Objects.requireNonNullElse(argsClassName, ""));
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -173,7 +173,7 @@ public class SbkGem {
             storageDevice = device;
         }
 
-        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " "+SbkUtils.CLASS_OPTION +" "+argsClassName :
+        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " "+Config.CLASS_OPTION +" "+argsClassName :
                 appName;
         storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
 
@@ -183,9 +183,9 @@ public class SbkGem {
             storageDevice.addArgs(params);
         }
 
-        final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
+        final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{Config.CLASS_OPTION});
 
-        if (nextArgs == null || nextArgs.length == 0) {
+        if (nextArgs.length == 0 || SbkUtils.hasHelp(args)) {
             final String helpText = params.getHelpText();
             System.out.println("\n" + helpText);
             throw new HelpException(helpText);
@@ -252,7 +252,7 @@ public class SbkGem {
         // remove GEM and logger parameter options
         final String[] sbkArgsList = SbkUtils.removeOptionsAndValues(
                 SbkUtils.removeOptionsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
-        final StringBuilder sbkArgsBuilder = new StringBuilder(SbkUtils.CLASS_OPTION + " " + className);
+        final StringBuilder sbkArgsBuilder = new StringBuilder(Config.CLASS_OPTION + " " + className);
         for (String arg: sbkArgsList) {
             sbkArgsBuilder.append(" ");
             sbkArgsBuilder.append(arg);
@@ -270,7 +270,7 @@ public class SbkGem {
 
         ramConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
-        ramArgsList.add(SbkUtils.CLASS_OPTION);
+        ramArgsList.add(Config.CLASS_OPTION);
         ramArgsList.add(className);
         ramArgsList.add("-action");
         ramArgsList.add(actionString);

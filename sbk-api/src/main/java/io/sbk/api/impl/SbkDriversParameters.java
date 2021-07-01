@@ -19,9 +19,10 @@ public class SbkDriversParameters extends SbkParameters {
     public SbkDriversParameters(String name, String desc, String[] drivers) {
         super(name, desc);
         this.drivers = drivers;
+        final String classOption = Config.CLASS_OPTION.substring(1);
 
         if (this.drivers != null && this.drivers.length > 0) {
-            addOption("class", true, "Storage Driver Class,\n Available Drivers "
+            addOption(classOption, true, "Storage Driver Class,\n Available Drivers "
                     + Arrays.toString(this.drivers));
         }
     }
