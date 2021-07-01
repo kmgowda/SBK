@@ -65,8 +65,6 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
     @Getter
     private boolean writeAndRead;
 
-    private double throughput;
-
     public SbkParameters(String name, String desc, String[] drivers) {
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
@@ -134,6 +132,7 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
             totalSecondsToRun = PerlConfig.DEFAULT_RUNTIME_SECONDS;
         }
 
+        final double throughput;
         if (hasOption("throughput")) {
             throughput = Double.parseDouble(getOptionValue("throughput"));
         } else {
