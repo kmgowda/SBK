@@ -113,8 +113,8 @@ public class SbkRam {
             params.parseArgs(args);
             logger.parseArgs(params);
         } catch (UnrecognizedOptionException ex) {
-            Printer.log.error(ex.toString());
             params.printHelp();
+            Printer.log.error(ex.toString());
             throw ex;
         } catch (HelpException ex) {
             System.out.println("\n"+ex.getHelpText());
