@@ -192,8 +192,8 @@ public class Sbk {
                 final String errStr = "The option '-class' is not supplied";
                 throw new ParseException(errStr);
             }
-            Printer.log.error(ex.toString());
             params.printHelp();
+            Printer.log.error(ex.toString());
             throw ex;
         } catch (HelpException ex) {
             System.out.println("\n"+ex.getHelpText());
