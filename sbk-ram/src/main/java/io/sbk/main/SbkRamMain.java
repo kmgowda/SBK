@@ -12,6 +12,7 @@ package io.sbk.main;
 
 import io.sbk.ram.impl.SbkRam;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -25,6 +26,8 @@ public class SbkRamMain {
     public static void main(final String[] args) {
         try {
             SbkRam.run(args, null, null);
+        } catch (UnrecognizedOptionException ex) {
+            System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException |
                 TimeoutException | InterruptedException | ExecutionException | InstantiationException ex) {
             ex.printStackTrace();

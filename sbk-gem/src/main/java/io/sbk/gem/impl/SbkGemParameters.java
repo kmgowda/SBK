@@ -11,7 +11,7 @@
 package io.sbk.gem.impl;
 
 import io.sbk.api.HelpException;
-import io.sbk.api.impl.SbkParameters;
+import io.sbk.api.impl.SbkDriversParameters;
 import io.sbk.gem.GemConfig;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.SshConnection;
@@ -28,10 +28,9 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 @Slf4j
-public class SbkGemParameters extends SbkParameters implements GemParameterOptions {
+public class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
 
     final private GemConfig config;
 
@@ -63,7 +62,7 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
     private String sbkCommand;
 
     @Getter
-    private String hostName;
+    private String localHost;
 
     @Getter
     private int ramPort;
@@ -71,16 +70,16 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
     private boolean isCopy;
 
 
-    public SbkGemParameters(String name, List<String> driversList, GemConfig config, int ramport) {
-        super(name, GemConfig.DESC, driversList);
+    public SbkGemParameters(String name, String[] drivers, GemConfig config, int ramport) {
+        super(name, GemConfig.DESC, drivers);
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * PerlConfig.MS_PER_SEC;
         this.ramPort = ramport;
         try {
-            this.hostName = InetAddress.getLocalHost().getHostName();
+            this.localHost = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException ex) {
             Printer.log.error(ex.toString());
-            this.hostName = GemConfig.LOCAL_HOST;
+            this.localHost = GemConfig.LOCAL_HOST;
         }
         addOption("nodes", true, "remote hostnames separated by `,` , default: "+config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.user);
@@ -88,11 +87,11 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.port);
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkPath);
         addOption("sbkcommand", true, "sbk command for remote run, default: " + config.sbkCommand);
-        addOption("hostname", true, "this RAM host name, default: " + hostName);
-        addOption("ramport", true, "RAM port number; default: "+ramPort);
+        addOption("localhost", true, "this local RAM host name, default: " + localHost);
+        addOption("ramport", true, "RAM port number; default: " + ramPort);
         addOption("copy", true, "Copy the SBK package to remote hosts; default: true");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-hostname", "ramport", "-copy"};
+                "-localhost", "ramport", "-copy"};
         this.parsedArgs = null;
         this.isCopy = true;
     }
@@ -107,11 +106,12 @@ public class SbkGemParameters extends SbkParameters implements GemParameterOptio
         port = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.port)));
         sbkDir = getOptionValue("sbkdir", config.sbkPath);
         sbkCommand = getOptionValue("sbkcommand", config.sbkCommand);
+        localHost = getOptionValue("localhost", localHost);
         ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
         isCopy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(isCopy)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", user, "-gempass", password, "-gemport",
-                Integer.toString(port), "-sbkdir", sbkDir, "-sbkcommand", sbkCommand, "-hostname", hostName,
+                Integer.toString(port), "-sbkdir", sbkDir, "-sbkcommand", sbkCommand, "-localhost", localHost,
                 "-ramport", Integer.toString(ramPort), "-copy", Boolean.toString(isCopy)};
 
         connections = new SshConnection[nodes.length];

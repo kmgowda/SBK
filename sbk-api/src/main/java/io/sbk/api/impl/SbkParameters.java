@@ -1,5 +1,5 @@
 /**
- * Copyright (c) KMG. All Rights Reserved..
+ * Copyright (c) KMG. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 
-import java.util.List;
-
 /**
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
 public class SbkParameters extends SbkOptions implements ParameterOptions {
-    final private List<String> driversList;
 
     @Getter
     final private int timeoutMS;
@@ -65,17 +62,10 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
     @Getter
     private boolean writeAndRead;
 
-    private double throughput;
-
-    public SbkParameters(String name, String desc, List<String> driversList) {
+    public SbkParameters(String name, String desc) {
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
-        this.driversList = driversList;
 
-        if (this.driversList != null) {
-            addOption("class", true, "Storage Driver Class,\n Available Drivers "
-                    + this.driversList.toString());
-        }
         addOption("writers", true, "Number of writers");
         addOption("readers", true, "Number of readers");
         addOption("size", true, "Size of each message (event or record)");
@@ -102,8 +92,8 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
         addOption("help", false, "Help message");
     }
 
-    public SbkParameters(String name, List<String> driversList) {
-        this(name, Config.DESC, driversList);
+    public SbkParameters(String name) {
+        this(name, Config.DESC);
     }
 
 
@@ -134,6 +124,7 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
             totalSecondsToRun = PerlConfig.DEFAULT_RUNTIME_SECONDS;
         }
 
+        final double throughput;
         if (hasOption("throughput")) {
             throughput = Double.parseDouble(getOptionValue("throughput"));
         } else {

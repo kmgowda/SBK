@@ -20,7 +20,7 @@ public interface GemParameters extends Parameters {
 
     String getSbkCommand();
 
-    String getHostName();
+    String getLocalHost();
 
     int getRamPort();
 

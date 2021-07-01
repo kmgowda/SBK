@@ -58,7 +58,7 @@ public class SbkRam {
         final Benchmark benchmark;
         try {
             benchmark = buildBenchmark(args, applicationName, outLogger);
-        } catch (HelpException | UnrecognizedOptionException ex) {
+        } catch (HelpException ex) {
             return;
         }
         final CompletableFuture<Void> ret = benchmark.start();

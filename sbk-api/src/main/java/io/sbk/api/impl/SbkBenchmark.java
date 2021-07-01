@@ -51,7 +51,6 @@ import java.util.stream.IntStream;
  * Class for performing the benchmark.
  */
 public class SbkBenchmark implements Benchmark {
-    final private String storageName;
     final private Action action;
     final private PerlConfig perlConfig;
     final private Storage<Object> storage;
@@ -75,7 +74,6 @@ public class SbkBenchmark implements Benchmark {
     /**
      * Create SBK Benchmark.
      *
-     * @param  storageName          Storage Name
      * @param  action               Action
      * @param  perlConfig           Configuration parameters
      * @param  params               Benchmarking input Parameters
@@ -85,10 +83,9 @@ public class SbkBenchmark implements Benchmark {
      * @param  time                 time interface
      * @throws IOException          If Exception occurs.
      */
-    public SbkBenchmark(String storageName, Action action, PerlConfig perlConfig,
+    public SbkBenchmark(Action action, PerlConfig perlConfig,
                         ParameterOptions params, Storage<Object> storage,
                         DataType<Object> dType, Logger logger, Time time) throws IOException {
-        this.storageName = storageName;
         this.dType = dType;
         this.action = action;
         this.perlConfig = perlConfig;
@@ -190,7 +187,7 @@ public class SbkBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
-        logger.open(params, storageName, action, time);
+        logger.open(params, storage.getClass().getSimpleName(), action, time);
         storage.openStorage(params);
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;

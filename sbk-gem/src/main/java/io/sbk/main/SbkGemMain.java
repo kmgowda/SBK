@@ -12,6 +12,7 @@ package io.sbk.main;
 
 import io.sbk.gem.impl.SbkGem;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -21,7 +22,9 @@ public class SbkGemMain {
 
     public static void main(final String[] args) {
         try {
-            SbkGem.run(args, null, null);
+            SbkGem.run(args, null, null, null);
+        } catch (UnrecognizedOptionException ex) {
+            System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException |
                 InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
