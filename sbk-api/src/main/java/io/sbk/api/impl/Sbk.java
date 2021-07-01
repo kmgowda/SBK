@@ -48,14 +48,10 @@ public class Sbk {
     /**
      * Run the Performance Benchmarking .
      * @param args command line arguments.
-     * @param storage storage object on which performance benchmarking will be conducted.
-     *                if you pass 'null', then name of the storage should be in args '-class' arguments
-     *                and storage object should be available in the package 'packageName'.
-     * @param packageName  the name of the package where storage object is located. if you are passing null as
-     *                     'storage' parameter, then you can specify where the storage class/object is available using
-     *                     this parameter. If you pass null to this parameter, then default package name "io.sbk" is
-     *                     used.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
+     * @param packageName  the name of the package where storage object is located.
+     *                     If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , name
+     *                        'sbk' used as default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
      * @throws ParseException If an exception occurred while parsing command line arguments.
@@ -67,13 +63,13 @@ public class Sbk {
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      * @throws ClassNotFoundException if the supplied storage class is not found.
      */
-    public static void run(final String[] args, final Storage<Object> storage, final String packageName,
+    public static void run(final String[] args, final String packageName,
                            final String applicationName, Logger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException,
             ClassNotFoundException {
         final Benchmark benchmark;
         try {
-            benchmark = buildBenchmark(args, storage, packageName, applicationName, outLogger);
+            benchmark = buildBenchmark(args, packageName, applicationName, outLogger);
         } catch (HelpException ex) {
             return;
         }
@@ -91,14 +87,10 @@ public class Sbk {
      * Build the Benchmark Object.
      *
      * @param args command line arguments.
-     * @param storage storage object on which performance benchmarking will be conducted.
-     *                if you pass 'null', then name of the storage should be in args '-class' arguments
-     *                and storage object should be available in the package 'packageName'.
-     * @param packageName  the name of the package where storage object is located. if you are passing null as
-     *                     'storage' parameter, then you can specify where the storage class/object is available using
-     *                     this parameter. If you pass null to this parameter, then default package name "io.sbk" is
-     *                     used.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
+     * @param packageName  Name of the package where storage class can be created.
+     *                     If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , name
+     *                        'sbk' used as default.
      * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                  logger will be used.
      * @throws HelpException if '-help' option is supplied.
@@ -108,10 +100,9 @@ public class Sbk {
      * @throws InstantiationException if the exception occurred due to initiation failures.
      * @throws ClassNotFoundException If the storage class driver is not found.
      */
-    public static Benchmark buildBenchmark(final String[] args, final Storage<Object> storage,
-                           final String packageName, final String applicationName, final Logger outLogger)
-            throws ParseException, IllegalArgumentException, IOException, InstantiationException,
-            HelpException, ClassNotFoundException {
+    public static Benchmark buildBenchmark(final String[] args, final String packageName,
+                                           final String applicationName, final Logger outLogger) throws ParseException,
+            IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException {
         final Storage storageDevice;
         final Action action;
         final ParameterOptions params;
@@ -138,8 +129,9 @@ public class Sbk {
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Storage Drivers Package: "+ storagePackageName);
         Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
-        Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
+        Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
+        Printer.log.info("'-class': "+ Objects.requireNonNullElse(argsClassName, ""));
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -148,22 +140,18 @@ public class Sbk {
                 PerlConfig.class);
         logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
 
-        if (storage == null) {
-            if (StringUtils.isEmpty(className)) {
-                storageDevice = null;
-            } else {
-                Storage<?> device = null;
-                try {
-                    device = packageStore.getStorage(className);
-                } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
-                        | IllegalAccessException ex) {
-                    Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
-                            storagePackageName + "' failed!, " + "error: " + ex);
-                }
-                storageDevice = device;
-            }
+        if (StringUtils.isEmpty(className)) {
+            storageDevice = null;
         } else {
-            storageDevice = storage;
+            Storage<?> device = null;
+            try {
+                device = packageStore.getStorage(className);
+            } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
+                    | IllegalAccessException ex) {
+                Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
+                        storagePackageName + "' failed!, " + "error: " + ex);
+            }
+            storageDevice = device;
         }
 
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
@@ -188,12 +176,16 @@ public class Sbk {
                 storageDevice.parseArgs(params);
             }
         } catch (UnrecognizedOptionException ex) {
-            if (storageDevice == null) {
-                params.printHelp();
-                final String errStr = "The option '-class' is not supplied";
+            final String errStr;
+            params.printHelp();
+            if (StringUtils.isEmpty(className)) {
+                errStr = "The option '-class' is not supplied";
                 throw new ParseException(errStr);
             }
-            params.printHelp();
+            if (storageDevice == null) {
+                errStr = "The storage class implementation for the driver: " + className + " not found!";
+                throw new ClassNotFoundException(errStr);
+            }
             Printer.log.error(ex.toString());
             throw ex;
         } catch (HelpException ex) {
