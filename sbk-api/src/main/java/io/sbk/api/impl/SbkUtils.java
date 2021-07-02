@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import io.sbk.api.Config;
 import io.sbk.api.PerformanceLogger;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
@@ -22,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SbkUtils {
-    public final static String CLASS_OPTION = "-class";
 
     public static Time getTime(PerformanceLogger logger ) {
         final TimeUnit timeUnit = logger.getTimeUnit();
@@ -40,12 +40,15 @@ public class SbkUtils {
         return ret;
     }
 
-    public static String[] removeOptionsAndValues(String[] args, String[] opts) {
-        if (args == null || args.length <  2) {
+    public static String[] removeOptionArgsAndValues(String[] args, String[] opts) {
+        if (args == null) {
+            return new String[0];
+        }
+        if (args.length <  2) {
             return args;
         }
-        List<String> optsList = Arrays.asList(opts);
-        List<String> ret = new ArrayList<>(args.length);
+        final List<String> optsList = Arrays.asList(opts);
+        final List<String> ret = new ArrayList<>(args.length);
         int i = 0;
         while (i < args.length) {
             if (optsList.contains(args[i])) {
@@ -62,18 +65,30 @@ public class SbkUtils {
 
     public static String getClassName(String[] args) {
         if (args == null || args.length < 2) {
-            return null;
+            return "";
         }
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals(CLASS_OPTION)) {
+            if (args[i].equals(Config.CLASS_OPTION_ARG)) {
                 if (i+1 < args.length) {
                     return args[i+1];
                 } else {
-                    return null;
+                    return "";
                 }
             }
         }
-        return null;
+        return "";
+    }
+
+    public static boolean hasHelp(String[] args) {
+        if (args == null) {
+            return false;
+        }
+        for (String arg : args) {
+            if (arg.equals(Config.HELP_OPTION_ARG)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

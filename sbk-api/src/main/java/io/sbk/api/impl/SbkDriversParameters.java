@@ -21,7 +21,7 @@ public class SbkDriversParameters extends SbkParameters {
         this.drivers = drivers;
 
         if (this.drivers != null && this.drivers.length > 0) {
-            addOption("class", true, "Storage Driver Class,\n Available Drivers "
+            addOption(Config.CLASS_OPTION, true, "Storage Driver Class,\n Available Drivers "
                     + Arrays.toString(this.drivers));
         }
     }

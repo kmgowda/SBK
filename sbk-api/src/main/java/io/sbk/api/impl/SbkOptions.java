@@ -43,7 +43,7 @@ public class SbkOptions implements InputOptions {
         this.footer = footer;
         this.commandline = null;
 
-        options.addOption("help", false, "Help message");
+        options.addOption(Config.HELP_OPTION, false, "Help message");
     }
 
     public SbkOptions(String name, String header) {

@@ -110,12 +110,6 @@ public class Sbk {
                                            final String applicationName, final Logger outLogger) throws ParseException,
             IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException,
             InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        final Storage storageDevice;
-        final Action action;
-        final ParameterOptions params;
-        final Logger logger;
-        final PerlConfig perlConfig;
-        final Time time;
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
@@ -124,8 +118,16 @@ public class Sbk {
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
-        final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
+        final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName :
+                Objects.requireNonNullElse(sbkClassName, "");
         final StoragePackage packageStore = new StoragePackage(storagePackageName);
+        final Storage storageDevice;
+        final Action action;
+        final ParameterOptions params;
+        final Logger logger;
+        final PerlConfig perlConfig;
+        final Time time;
+        final String[] nextArgs;
         final String usageLine;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
@@ -137,7 +139,7 @@ public class Sbk {
         Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
-        Printer.log.info("'"+SbkUtils.CLASS_OPTION+"': "+ Objects.requireNonNullElse(argsClassName, ""));
+        Printer.log.info("'"+Config.CLASS_OPTION_ARG +"': "+ argsClassName);
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -146,22 +148,18 @@ public class Sbk {
                 PerlConfig.class);
         logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
-                appName + " "+SbkUtils.CLASS_OPTION +" "+argsClassName : appName;
-
-        if (args == null || args.length == 0) {
-            final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
-            logger.addArgs(helpParams);
-            final String helpText = helpParams.getHelpText();
-            System.out.println("\n" + helpText);
-            throw new HelpException(helpText);
-        }
+                appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName : appName;
+        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isEmpty(className)) {
             final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
             logger.addArgs(helpParams);
-            helpParams.printHelp();
+            final String helpText = helpParams.getHelpText();
+            System.out.println("\n" + helpText);
+            if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
+                throw new HelpException(helpText);
+            }
             throw new ParseException("The option '-class' is not supplied");
-
         } else {
             try {
                 storageDevice = packageStore.getStorage(className);
@@ -176,16 +174,18 @@ public class Sbk {
             }
         }
 
+        Printer.log.info("Arguments to Driver '" + storageDevice.getClass().getSimpleName() + "' : " +
+                Arrays.toString(nextArgs));
+
         params = new SbkParameters(usageLine);
         logger.addArgs(params);
         storageDevice.addArgs(params);
-        final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
-        if (nextArgs == null || nextArgs.length == 0) {
+
+        if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
             final String helpText = params.getHelpText();
             System.out.println("\n" + helpText);
             throw new HelpException(helpText);
         }
-        Printer.log.info("Arguments to Driver '"+ storageDevice.getClass().getSimpleName() + "' : "+Arrays.toString(nextArgs));
 
         try {
             params.parseArgs(nextArgs);
@@ -197,7 +197,7 @@ public class Sbk {
             throw ex;
         } catch (HelpException ex) {
             System.out.println("\n"+ex.getHelpText());
-            throw  ex;
+            throw ex;
         }
 
         final DataType dType = storageDevice.getDataType();

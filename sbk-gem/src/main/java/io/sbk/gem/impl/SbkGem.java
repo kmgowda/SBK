@@ -124,6 +124,7 @@ public class SbkGem {
         final Storage storageDevice;
         final String usageLine;
         final String[] storageDrivers;
+        final String[] nextArgs;
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(GemConfig.DESC);
@@ -134,7 +135,7 @@ public class SbkGem {
         Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
-        Printer.log.info("'"+SbkUtils.CLASS_OPTION+"': "+ Objects.requireNonNullElse(argsClassName, ""));
+        Printer.log.info("'"+Config.CLASS_OPTION_ARG +"': "+ Objects.requireNonNullElse(argsClassName, ""));
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -144,6 +145,7 @@ public class SbkGem {
                 RamConfig.class);
         gemConfig = mapper.readValue(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);
+        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isNotEmpty(sbkCommand)) {
             gemConfig.sbkCommand = sbkCommand;
@@ -173,7 +175,7 @@ public class SbkGem {
             storageDevice = device;
         }
 
-        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " "+SbkUtils.CLASS_OPTION +" "+argsClassName :
+        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " "+Config.CLASS_OPTION_ARG +" "+argsClassName :
                 appName;
         storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
 
@@ -183,9 +185,7 @@ public class SbkGem {
             storageDevice.addArgs(params);
         }
 
-        final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{SbkUtils.CLASS_OPTION});
-
-        if (nextArgs == null || nextArgs.length == 0) {
+        if (nextArgs.length == 0 || SbkUtils.hasHelp(args)) {
             final String helpText = params.getHelpText();
             System.out.println("\n" + helpText);
             throw new HelpException(helpText);
@@ -210,7 +210,7 @@ public class SbkGem {
                     throw ex;
                 }
                 Printer.log.warn(ex.toString());
-                processArgs = SbkUtils.removeOptionsAndValues(processArgs, new String[]{ex.getOption()});
+                processArgs = SbkUtils.removeOptionArgsAndValues(processArgs, new String[]{ex.getOption()});
                 if (processArgs == null) {
                     params.printHelp();
                     throw new ParseException("SBK-GEM: Insufficient command line arguments");
@@ -250,9 +250,9 @@ public class SbkGem {
         }
 
         // remove GEM and logger parameter options
-        final String[] sbkArgsList = SbkUtils.removeOptionsAndValues(
-                SbkUtils.removeOptionsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
-        final StringBuilder sbkArgsBuilder = new StringBuilder(SbkUtils.CLASS_OPTION + " " + className);
+        final String[] sbkArgsList = SbkUtils.removeOptionArgsAndValues(
+                SbkUtils.removeOptionArgsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
+        final StringBuilder sbkArgsBuilder = new StringBuilder(Config.CLASS_OPTION_ARG + " " + className);
         for (String arg: sbkArgsList) {
             sbkArgsBuilder.append(" ");
             sbkArgsBuilder.append(arg);
@@ -270,7 +270,7 @@ public class SbkGem {
 
         ramConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
-        ramArgsList.add(SbkUtils.CLASS_OPTION);
+        ramArgsList.add(Config.CLASS_OPTION_ARG);
         ramArgsList.add(className);
         ramArgsList.add("-action");
         ramArgsList.add(actionString);
