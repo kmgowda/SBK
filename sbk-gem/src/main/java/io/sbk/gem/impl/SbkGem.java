@@ -124,6 +124,7 @@ public class SbkGem {
         final Storage storageDevice;
         final String usageLine;
         final String[] storageDrivers;
+        final String[] nextArgs;
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(GemConfig.DESC);
@@ -144,6 +145,7 @@ public class SbkGem {
                 RamConfig.class);
         gemConfig = mapper.readValue(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);
+        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isNotEmpty(sbkCommand)) {
             gemConfig.sbkCommand = sbkCommand;
@@ -182,8 +184,6 @@ public class SbkGem {
         if (storageDevice != null) {
             storageDevice.addArgs(params);
         }
-
-        final String[] nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (nextArgs.length == 0 || SbkUtils.hasHelp(args)) {
             final String helpText = params.getHelpText();

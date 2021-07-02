@@ -101,7 +101,7 @@ public class SbkGemBenchmark implements GemBenchmark {
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         }
-        Printer.log.info("SBK-GEM: Ssh session establishment success..");
+        Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
         final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
@@ -165,7 +165,7 @@ public class SbkGemBenchmark implements GemBenchmark {
                 throw new InterruptedException(errMsg);
             }
             final String remoteSBKdir = Paths.get(params.getSbkDir()).getFileName().toString();
-            Printer.log.info("SBK-GEM: Removing older version of remote directory: '" + remoteSBKdir + "'  success..");
+            Printer.log.info("SBK-GEM: Removing older version of remote directory: '" + remoteSBKdir + "'  Success..");
 
             final SshResponseStream[] mkDirResults = createMultiSshResponseStream(nodes.length, false);
 
@@ -190,7 +190,7 @@ public class SbkGemBenchmark implements GemBenchmark {
                 throw new InterruptedException(errMsg);
             }
 
-            Printer.log.info("SBK-GEM: Creating remote directory: '" + remoteSBKdir + "'  success..");
+            Printer.log.info("SBK-GEM: Creating remote directory: '" + remoteSBKdir + "'  Success..");
 
             for (int i = 0; i < nodes.length; i++) {
                 cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
