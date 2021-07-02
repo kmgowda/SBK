@@ -40,7 +40,7 @@ public class SbkUtils {
         return ret;
     }
 
-    public static String[] removeOptionsAndValues(String[] args, String[] opts) {
+    public static String[] removeOptionArgsAndValues(String[] args, String[] opts) {
         if (args == null) {
             return new String[0];
         }
@@ -68,7 +68,7 @@ public class SbkUtils {
             return "";
         }
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals(Config.CLASS_OPTION)) {
+            if (args[i].equals(Config.CLASS_OPTION_ARG)) {
                 if (i+1 < args.length) {
                     return args[i+1];
                 } else {
@@ -84,7 +84,7 @@ public class SbkUtils {
             return false;
         }
         for (String arg : args) {
-            if (arg.equals(Config.HELP_OPTION)) {
+            if (arg.equals(Config.HELP_OPTION_ARG)) {
                 return true;
             }
         }

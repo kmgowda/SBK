@@ -138,7 +138,7 @@ public class Sbk {
         Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
         Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
-        Printer.log.info("'"+Config.CLASS_OPTION+"': "+ argsClassName);
+        Printer.log.info("'"+Config.CLASS_OPTION_ARG +"': "+ argsClassName);
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -147,7 +147,7 @@ public class Sbk {
                 PerlConfig.class);
         logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
-                appName + " "+Config.CLASS_OPTION +" "+argsClassName : appName;
+                appName + " "+Config.CLASS_OPTION_ARG +" "+argsClassName : appName;
 
         if (args == null || args.length == 0) {
             final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
@@ -184,7 +184,7 @@ public class Sbk {
         logger.addArgs(params);
         storageDevice.addArgs(params);
 
-        final String[] nextArgs = SbkUtils.removeOptionsAndValues(args, new String[]{Config.CLASS_OPTION});
+        final String[] nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
         Printer.log.info("Arguments to Driver '"+ storageDevice.getClass().getSimpleName() + "' : "+Arrays.toString(nextArgs));
 
         if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
