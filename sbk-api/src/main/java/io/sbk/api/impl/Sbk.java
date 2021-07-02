@@ -127,6 +127,7 @@ public class Sbk {
         final Logger logger;
         final PerlConfig perlConfig;
         final Time time;
+        final String[] nextArgs;
         final String usageLine;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
@@ -147,22 +148,15 @@ public class Sbk {
                 PerlConfig.class);
         logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
-                appName + " "+Config.CLASS_OPTION_ARG +" "+argsClassName : appName;
-
-        if (args == null || args.length == 0) {
-            final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
-            logger.addArgs(helpParams);
-            final String helpText = helpParams.getHelpText();
-            System.out.println("\n" + helpText);
-            throw new HelpException(helpText);
-        }
+                appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName : appName;
+        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isEmpty(className)) {
             final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
             logger.addArgs(helpParams);
             final String helpText = helpParams.getHelpText();
             System.out.println("\n" + helpText);
-            if (SbkUtils.hasHelp(args)) {
+            if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
                 throw new HelpException(helpText);
             }
             throw new ParseException("The option '-class' is not supplied");
@@ -180,12 +174,12 @@ public class Sbk {
             }
         }
 
+        Printer.log.info("Arguments to Driver '" + storageDevice.getClass().getSimpleName() + "' : " +
+                Arrays.toString(nextArgs));
+
         params = new SbkParameters(usageLine);
         logger.addArgs(params);
         storageDevice.addArgs(params);
-
-        final String[] nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
-        Printer.log.info("Arguments to Driver '"+ storageDevice.getClass().getSimpleName() + "' : "+Arrays.toString(nextArgs));
 
         if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
             final String helpText = params.getHelpText();
