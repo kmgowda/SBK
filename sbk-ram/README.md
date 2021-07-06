@@ -9,7 +9,7 @@ You may obtain a copy of the License at
 -->
 # SBK-RAM : Results Aggregation Monitor
 
-[![Api](https://img.shields.io/badge/SBK--RAM-API-brightgreen)](https://htmlpreview.github.io/?https://github.com/kmgowda/SBK/blob/master/sbk-ram/javadoc/index.html)
+[![Api](https://img.shields.io/badge/SBK--RAM-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-ram/javadoc/index.html)
 
 The SBK (Storage Benchmark Kit) - RAM (Results Aggregation Monitor) combines the performance results supplied from 
 multiple SBK instances. The SBK-RAM is the GRPC Server. Multiple SBK instances can log the performance results to a 
