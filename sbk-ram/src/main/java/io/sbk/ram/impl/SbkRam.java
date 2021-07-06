@@ -82,6 +82,7 @@ public class SbkRam {
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException If an exception occurred due to write or read failures.
+     * @return Benchmark Interface
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
                                              RamLogger outLogger) throws ParseException, IllegalArgumentException,

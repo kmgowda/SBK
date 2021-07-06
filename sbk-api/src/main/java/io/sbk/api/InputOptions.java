@@ -57,6 +57,7 @@ public interface InputOptions {
 
     /**
      * Get the -help output.
+     * @return   formatted Help text
      */
     String getHelpText();
 
