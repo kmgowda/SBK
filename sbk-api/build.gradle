@@ -51,8 +51,7 @@ dependencies {
 generateJavadoc {
     // follow the package path , it should not be folder path.
     // but dont use . (dot) in the path
-    exclude 'io/sbk/api/impl/ServiceGrpc.java'
-    exclude 'io/sbk/api/impl/LatenciesRecordOrBuilder.java'
-    exclude 'io/sbk/api/impl/LatenciesRecord.java'
+    exclude 'io/sbk/grpc/ServiceGrpc.java'
+    exclude 'io/sbk/grpc/LatenciesRecordOrBuilder.java'
+    exclude 'io/sbk/grpc/LatenciesRecord.java'
 }
-

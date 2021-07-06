@@ -105,6 +105,7 @@ public class Sbk {
      * @throws InvocationTargetException if the exception occurs.
      * @throws NoSuchMethodException if the exception occurs.
      * @throws IllegalAccessException if the exception occurs.
+     * @return Benchmark interface
      */
     public static Benchmark buildBenchmark(final String[] args, final String packageName,
                                            final String applicationName, final Logger outLogger) throws ParseException,

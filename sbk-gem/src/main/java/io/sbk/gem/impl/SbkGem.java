@@ -65,6 +65,7 @@ public class SbkGem {
      * @throws InterruptedException If an exception occurred if the writers and readers are interrupted.
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
+     * @return Array of remote responses
      */
     public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
                            GemLogger outLogger) throws ParseException, IllegalArgumentException,
@@ -99,6 +100,7 @@ public class SbkGem {
      * @throws HelpException if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IOException If an exception occurred due to write or read failures.
+     * @return Benchmark Interface
      */
     public static GemBenchmark buildBenchmark(final String[] args, final String packageName,
                                               final String applicationName, GemLogger outLogger)

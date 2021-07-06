@@ -29,6 +29,7 @@ rat {
             '**/*.json',
             '**/config/*jks*',
             '**/*.txt',
-            'CODE_OF_CONDUCT.md'
+            'CODE_OF_CONDUCT.md',
+            'javadoc'
     ]
 }
