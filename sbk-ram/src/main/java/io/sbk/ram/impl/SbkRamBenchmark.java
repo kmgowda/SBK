@@ -81,7 +81,7 @@ public class SbkRamBenchmark implements Benchmark {
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
                 logger, logger, logger);
         service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
-        server = ServerBuilder.forPort(params.getRamPort()).directExecutor().addService(service).build();
+        server = ServerBuilder.forPort(params.getRamPort()).addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
         state = State.BEGIN;
     }
