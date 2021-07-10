@@ -110,17 +110,23 @@ Running SBK locally:
 <SBK directory>/./build/distributions/sbk/bin/sbk -help
 ...
 usage: sbk
+Storage Benchmark Kit
+
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     CSV, Cassandra, ConcurrentQ, CouchDB, Db2, Derby,
-                     FdbRecord, File, FileStream, FoundationDB, HDFS,
-                     Hive, Ignite, Jdbc, Kafka, MariaDB, MinIO, MongoDB,
-                     MsSql, MySQL, Nats, NatsStream, Nsq, Null,
-                     PostgreSQL, Pravega, Pulsar, RabbitMQ, RedPanda,
-                     Redis, RocketMQ, RocksDB, SQLite, SeaweedS3]
- -context <arg>      Prometheus Metric context; default context:
-                     9718/metrics; 'no' disables the metrics
+                     CSV, Cassandra, CephS3, ConcurrentQ, CouchDB, Db2,
+                     Derby, FdbRecord, File, FileStream, FoundationDB,
+                     HDFS, Hive, Ignite, Jdbc, Kafka, MariaDB, MinIO,
+                     MongoDB, MsSql, MySQL, Nats, NatsStream, Nsq, Null,
+                     OpenIO, PostgreSQL, Pravega, Pulsar, RabbitMQ,
+                     RedPanda, Redis, RocketMQ, RocksDB, SQLite,
+                     SeaweedS3]
+ -context <arg>      Prometheus Metric context; default: 9718/metrics;
+                     'no' disables the metrics
  -help               Help message
+ -ram <arg>          SBK RAM host; default: no; disable if this parameter
+                     is set to 'no'
+ -ramport <arg>      SBK RAM Port; default: 9716
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'seconds' not specified;
                      otherwise, Maximum records per second by writer(s)
@@ -142,6 +148,7 @@ usage: sbk
  -wsec <arg>         Number of seconds/step for writers, default: 0
  -wstep <arg>        Number of writers/step, default: 1
 
+Please report issues at https://github.com/kmgowda/SBK
 
 ```
 
@@ -504,22 +511,29 @@ Example: For pulsar driver
 <SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
 
 usage: sbk -class pulsar
+Storage Benchmark Kit
+
  -ackQuorum <arg>       AckQuorum default: 1
  -admin <arg>           Admin URI, required to create the partitioned
                         topic, default: null
  -broker <arg>          Broker URI, default: tcp://localhost:6650
  -cluster <arg>         Cluster name (optional parameter)
- -context <arg>         Prometheus Metric context; default context:
-                        9718/metrics; 'no' disables the metrics
+ -context <arg>         Prometheus Metric context; default: 9718/metrics;
+                        'no' disables the metrics
  -deduplication <arg>   Enable or Disable Deduplication; default: false
  -ensembleSize <arg>    EnsembleSize default: 1
  -help                  Help message
  -partitions <arg>      Number of partitions of the topic, default: 1
+ -ram <arg>             SBK RAM host; default: no; disable if this
+                        parameter is set to 'no'
+ -ramport <arg>         SBK RAM Port; default: 9716
  -readers <arg>         Number of readers
  -records <arg>         Number of records(events) if 'seconds' not
                         specified;
                         otherwise, Maximum records per second by writer(s)
                         and/or Number of records per reader
+ -rsec <arg>            Number of seconds/step for readers, default: 0
+ -rstep <arg>           Number of readers/step, default: 1
  -seconds <arg>         Number of seconds to run; if not specified, runs
                         forever
  -size <arg>            Size of each message (event or record)
@@ -535,6 +549,10 @@ usage: sbk -class pulsar
  -topic <arg>           Topic name, default : test
  -writeQuorum <arg>     WriteQuorum default: 1
  -writers <arg>         Number of writers
+ -wsec <arg>            Number of seconds/step for writers, default: 0
+ -wstep <arg>           Number of writers/step, default: 1
+
+Please report issues at https://github.com/kmgowda/SBK
 
 ```
 
