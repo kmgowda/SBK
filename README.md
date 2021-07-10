@@ -11,9 +11,9 @@ You may obtain a copy of the License at
 
 [![Build Status](https://travis-ci.org/kmgowda/SBK.svg?branch=master)](https://travis-ci.org/kmgowda/SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)  [![Api](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/javadoc/index.html) [![Version](https://img.shields.io/github/v/release/kmgowda/sbk)](https://github.com/kmgowda/SBK/releases) [![](https://jitpack.io/v/kmgowda/SBK.svg)](https://jitpack.io/#kmgowda/SBK) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4606/badge)](https://bestpractices.coreinfrastructure.org/projects/4606)
 
-[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-blue)](https://github.com/kmgowda/SBK/tree/master/sbk-ram)
-
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
+
+[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-blue)](https://github.com/kmgowda/SBK/tree/master/sbk-ram)
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system.
 If you are curious to measure the maximum throughput performance of your storage device/system, then SBK is the right software for you.
@@ -213,6 +213,10 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
   (https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json) too
 
 
+## Distributed SBK
+SBK can be deployed in a distributed clusters using [**SBK-RAM**](https://github.com/kmgowda/SBK/tree/master/sbk-ram)
+
+
 ## SBK Docker Containers
 The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
 
@@ -264,9 +268,6 @@ on SBK as kubernetes pod.
 If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment]
 (https://github.com/kmgowda/SBK/tree/master/grafana#grafana-with-kubernetes)
 
-
-## Distributed SBK
-SBK can be deployed in a distributed clusters using [**SBK-RAM**](https://github.com/kmgowda/SBK/tree/master/sbk-ram)
 
 ## SBK Execution Modes
 
