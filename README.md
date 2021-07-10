@@ -75,8 +75,6 @@ We welcome open source developers to contribute to this project by adding a driv
 * [Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk) for the Contributing guidelines.
 * [Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk) to know how to add your driver (storage device driver or client) for performance benchmarking.
 
-> **_SBK can be deployed in a distributed clusters too using [SBK-RAM](https://github.com/kmgowda/SBK/tree/master/sbk-ram)_**
-
 
 ## Build SBK
 
@@ -261,12 +259,14 @@ As an example, just follow the below steps to see the performance graphs
    
    
 ## SBK Kubernetes
-
 check these [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/kubernetes) for details 
 on SBK as kubernetes pod.
 If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment]
 (https://github.com/kmgowda/SBK/tree/master/grafana#grafana-with-kubernetes)
 
+
+## Distributed SBK
+SBK can be deployed in a distributed clusters using [**SBK-RAM**](https://github.com/kmgowda/SBK/tree/master/sbk-ram)
 
 ## SBK Execution Modes
 
