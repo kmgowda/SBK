@@ -83,8 +83,13 @@ allprojects {
 	}
 	jar {
 		manifest {
-			attributes	'Implementation-Title': archivesBaseName,
-					'Implementation-Version': sbkVersion
+			attributes 'Name': sbkProjectName,
+					'Specification-Title': "Storage Benchmark Kit",
+					'Specification-Version': sbkVersion,
+					'Specification-Vendor': "KMG",
+					'Implementation-Title': sbkProjectName,
+					'Implementation-Version': sbkVersion,
+					'Implementation-Vendor': "KMG"
 		}
 	}
 
