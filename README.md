@@ -11,6 +11,8 @@ You may obtain a copy of the License at
 
 [![Build Status](https://travis-ci.org/kmgowda/SBK.svg?branch=master)](https://travis-ci.org/kmgowda/SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)  [![Api](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/javadoc/index.html) [![Version](https://img.shields.io/github/v/release/kmgowda/sbk)](https://github.com/kmgowda/SBK/releases) [![](https://jitpack.io/v/kmgowda/SBK.svg)](https://jitpack.io/#kmgowda/SBK) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4606/badge)](https://bestpractices.coreinfrastructure.org/projects/4606)
 
+[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-blue)](https://github.com/kmgowda/SBK/tree/master/sbk-ram)
+
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
 The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system.
@@ -70,8 +72,11 @@ The Latency values can be measured either in milliseconds, microseconds or nanos
 *In the future, many more storage systems drivers will be plugged in* 
 
 We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to : 
-* [[Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk)] for the Contributing guidelines.
-* [[Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk)] to know how to add your driver (storage device driver or client) for performance benchmarking.  
+* [Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk) for the Contributing guidelines.
+* [Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk) to know how to add your driver (storage device driver or client) for performance benchmarking.
+
+> **_SBK can be deployed in a distributed clusters too using [SBK-RAM](https://github.com/kmgowda/SBK/tree/master/sbk-ram)_**
+
 
 ## Build SBK
 
