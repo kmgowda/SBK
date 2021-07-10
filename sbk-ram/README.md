@@ -189,7 +189,7 @@ docker run -p 127.0.0.1:9716:9716/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
 ## SBK-RAM Grafana Dashboards
-The SBK-RAM (Server side) and SBK (client side) can use the same dashboard for a selected storage driver/device. when you run the SBK-RAM, by default it starts the http server and all the output benchmark data is directed to the default port number: **9719** and **metrics** context.
+when you run the SBK-RAM, by default it starts the http server and all the output benchmark data is directed to the default port number: **9719** and **metrics** context.
 If you want to change the port number and context, you can use the command line argument **-context** to change the same.
 you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
 If you want to include additional SBK-RAM nodes/instances to fetch the performance data or from port number other than **9719**, you need to extend or update [ram-targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/ram-targets.json)
@@ -199,6 +199,11 @@ For example, if you are running a local grafana server then by default it fetche
 You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default username / password.
 You can import the grafana dashboards to fetch the SBK and SBK-RAM benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
 
+
+The SBK-RAM (Server side) and SBK (client side) can use the same dashboard for a selected storage driver/device. for SBK-RAM , these grafana dashboards shows the number of active and maximum connections.
+The sample output of 2 SBK instances of file system benchmark data with grafana is below
+
+[![SBK-RAM file system Dashboard](images/sbk-ram-file-grafana.png)](https://github.com/kmgowda/SBK/tree/master/sbk-ram/images/sbk-ram-file-grafana.png)
 
 ## Running SBK-RAM Docker Compose
 The SBK-RAM docker compose consists of SBK-RAM docker image, Grafana and prometheus docker images.
