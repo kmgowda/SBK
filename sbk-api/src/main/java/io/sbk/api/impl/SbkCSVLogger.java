@@ -14,7 +14,7 @@ import java.io.PrintWriter;
 import java.io.FileWriter;
 
 /**
- * Class for recoding/printing results on System.out.
+ * Class for recoding/printing results to a CSV file called `out.csv`.
  */
 public class SbkCSVLogger extends SystemLogger {
     public String fileName = "out.csv";
