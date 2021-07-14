@@ -89,7 +89,7 @@ public class SystemLogger implements Logger {
         String ret = "[";
 
         for (io.sbk.perl.TimeUnit value : TimeUnit.values()) {
-            ret += value.name() +":" +value.toString() + ", ";
+            ret += value.name() +":" + value + ", ";
         }
         ret += "]";
 
@@ -99,7 +99,13 @@ public class SystemLogger implements Logger {
 
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
-        loggerConfig.timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
+        try {
+            loggerConfig.timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
+        } catch (IllegalArgumentException ex) {
+            Printer.log.error("Invalid value for option '-time', valid values "+
+                    Arrays.toString(Arrays.stream(TimeUnit.values()).map(Enum::name).toArray()));
+            throw  ex;
+        }
         int val = 1;
         if (loggerConfig.timeUnit == TimeUnit.ns) {
             val = PerlConfig.NS_PER_MS;
