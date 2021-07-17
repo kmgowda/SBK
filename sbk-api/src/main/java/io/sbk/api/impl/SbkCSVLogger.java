@@ -46,7 +46,7 @@ public class SbkCSVLogger extends SystemLogger {
         }
 
         // Writing the header to the csv file.
-        String header = "Prefix, Writers, Readers, maxWriters, maxReaders, Bytes, Records, RecsPerSec, mbPerSec, AvgLatency, maxLatency, InvalidLatencies, lowerDiscard, higherDiscard, 10thPercentile, 25thPercentile, 50thPercentile, 75thPercentile, 90thPercentile, 95thPercentile, 99thPercentile, 99.9thPercentile, 99.99thPercentile\n";
+        String header = "_Prefix,_Writers,_Readers,_maxWriters,_maxReaders,_Bytes,_Records,_RecsPerSec,_mbPerSec,_AvgLatency,_maxLatency,_InvalidLatencies,_lowerDiscard,_higherDiscard,_10thPercentile,_25thPercentile,_50thPercentile,_75thPercentile,_90thPercentile,_95thPercentile,_99thPercentile,_99.9thPercentile,_99.99thPercentile\n";
         try {
             printWriter = new PrintWriter(new FileWriter(fileName, true));
             printWriter.print(header);
@@ -58,7 +58,7 @@ public class SbkCSVLogger extends SystemLogger {
     private void writeToCSV(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
-        String data = String.format("%s, %5d, %5d, %5d, %5d, %d, %11d, %9.1f, %8.2f, %8.1f, %7d, %8d, %8d, %8d", prefix, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(), bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard);
+        String data = String.format("%s,%5d,%5d,%5d,%5d,%d,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(), bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard);
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {
             data += String.format(", %7d", percentileValues[i]);
         }
