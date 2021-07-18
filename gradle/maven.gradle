@@ -20,11 +20,19 @@ plugins.withId('maven') {
     publishing {
         repositories {
             maven {
-                name = "MavenCentral"
+                name = "SBK-Maven"
                 url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
                 credentials {
                     username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
                     password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                }
+            }
+            maven {
+                name = "SBK-GitHub"
+                url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+                credentials {
+                    username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
                 }
             }
         }
@@ -32,6 +40,26 @@ plugins.withId('maven') {
         publications {
             mavenJava(MavenPublication) {
                 from(components.java)
+
+                if (!project.property("signing.keyId")) {
+                    project.setProperty("signing.keyId", System.getenv("SIGNING_KEYID"))
+                }
+
+                if (!project.property("signing.password")) {
+                    project.setProperty("signing.password", System.getenv("SIGNING_PASSWORD"))
+                }
+
+                if (!project.property("signing.secretKeyRingFile")) {
+                    def secretKeyPath = project.file("${System.getProperty("user.home")}/.gnupg/secring.gpg").absolutePath
+                    project.setProperty("signing.secretKeyRingFile", secretKeyPath)
+                }
+
+                if (project.property("signing.keyId") && project.property("signing.password") && project.property("signing.secretKeyRingFile")) {
+                    signing {
+                        sign configurations.archives
+                    }
+                }
+
                 pom {
                     groupId = "io.github.kmgowda"
                     name = "SBK"
