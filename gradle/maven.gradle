@@ -9,10 +9,37 @@
  *
  */
 plugins.withId('maven') {
-    uploadArchives {
+    group = 'io.github.kmgowda'
+    setVersion(sbkVersion)
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    publishing {
         repositories {
-            mavenDeployer {
-                pom.groupId = "io.github.kmgowda"
+            maven {
+                name = "SBK-Maven"
+                url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                credentials {
+                    username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
+                    password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                }
+            }
+            maven {
+                name = "SBK-GitHub"
+                url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+                credentials {
+                    username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+
+        publications {
+            mavenJava(MavenPublication) {
+                from(components.java)
 
                 if (!project.property("signing.keyId")) {
                     project.setProperty("signing.keyId", System.getenv("SIGNING_KEYID"))
@@ -33,35 +60,20 @@ plugins.withId('maven') {
                     }
                 }
 
-                beforeDeployment {
-                    MavenDeployment deployment -> signing.signPom(deployment)
-                }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
-                    def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
-                    authentication(userName: username, password: password)
-                }
-
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    def username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
-                    def password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
-                    authentication(userName: username, password: password)
-                }
-
-                pom.project {
-                    name "SBK"
-                    url "https://github.com/kmgowda/sbk"
-                    description "Storage Benchmark Kit"
+                pom {
+                    groupId = "io.github.kmgowda"
+                    name = "SBK"
+                    url = "https://github.com/kmgowda/sbk"
+                    description = "Storage Benchmark Kit"
                     scm {
-                        url 'https://github.com/kmgowda/sbk/tree/master'
-                        connection 'scm:git:git://github.com/kmgowda/sbk.git'
-                        developerConnection 'scm:git:https://github.com/kmgowda/sbk.git'
+                        url = 'https://github.com/kmgowda/sbk/tree/master'
+                        connection = 'scm:git:git://github.com/kmgowda/sbk.git'
+                        developerConnection = 'scm:git:https://github.com/kmgowda/sbk.git'
                     }
                     licenses {
                         license {
-                            name 'The Apache License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
                     developers {
@@ -76,23 +88,7 @@ plugins.withId('maven') {
         }
     }
 
-
-    publishing {
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/kmgowda/SBK")
-                credentials {
-                    username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
-                    password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
-                }
-            }
-        }
-        publications {
-            gpr(MavenPublication) {
-                from(components.java)
-            }
-        }
+    signing {
+        sign publishing.publications.mavenJava
     }
-
 }
