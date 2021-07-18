@@ -578,7 +578,7 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
     }
 
     dependencies {
-        implementation 'sbk:sbk-api:0.86'
+        implementation 'sbk:sbk-api:0.90'
     }
 
    ```
@@ -590,7 +590,7 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
   
 2. Extend the storage interface [Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html) by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
 
-    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java)
+    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/File.java)
 
 3. Create a Main method to supply your storage class object to SBK to run/conduct the performance benchmarking
 
@@ -601,8 +601,8 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
         
             //Start the File system benchmarking here
             
-            Sbk.run(args  /* Command line Arguments */ , 
-                  device /* your storage device object */ , 
+            Sbk.run(args  /* Command line Arguments, use '-class ' option specify the you storage class name  */ , 
+                  packageNmae /* the name of the package where your storage device object exists */ , 
                   null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
                   null /* Logger, if you don't have your own logger, then prometheus logger will be used by default */ );
             
@@ -616,7 +616,7 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
     }
 
    ```
-   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
+   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/Main.java#L25)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
 
@@ -636,7 +636,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
     }
 
     dependencies {
-        implementation 'com.github.kmgowda.SBK:sbk-api:0.86'
+        implementation 'com.github.kmgowda.SBK:sbk-api:0.90'
     }
    
    ```
@@ -645,7 +645,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
     *  check this example: [File system benchmarking jit pack build](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/jitpack-build.gradle)
 
 2. Extend the storage interface [Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html) by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
-    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java)
+    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/File.java)
 
 3. Create a Main method to supply your storage class object to SBK to run/conduct the performance benchmarking
 
@@ -656,8 +656,8 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
         
             //Start the File system benchmarking here
             
-            Sbk.run(args  /* Command line Arguments */ , 
-                  device /* your storage device object */ , 
+            Sbk.run(args  /* Command line Arguments, use '-class ' option specify the you storage class name  */ , 
+                  packageNmae /* the name of the package where your storage device object exists */ , 
                   null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
                   null /* Logger, if you don't have your own logger, then prometheus logger will be used by default */ );
             
@@ -671,7 +671,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
     }
 
    ```
-   * check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java#L101)
+   * check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/Main.java#L25)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.   
 
@@ -689,7 +689,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     }
 
     dependencies {
-        implementation 'io.github.kmgowda:sbk-api:0.86'
+        implementation 'io.github.kmgowda:sbk-api:0.90'
     }
    ```
    few points to remember here  
@@ -697,19 +697,19 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     *  check this example: [File system benchmarking maven build](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/mavencentral-build.gradle)
 
 2. Extend the storage interface [Storage](https://kmgowda.github.io/SBK/javadoc/io/sbk/api/Storage.html) by following steps 1 to 5 described in [Add your storage driver](https://github.com/kmgowda/SBK#add-your-driver-to-sbk)
-    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/File.java)
+    *  check this example: [File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/File.java)
 
 3. Create a Main method to supply your storage class object to SBK to run/conduct the performance benchmarking
 
    ```
-    public static void main(final String[] args) {
+     public static void main(final String[] args) {
         Storage device = new <your storage class, extending the Storage interface>;
         try {
         
             //Start the File system benchmarking here
             
-            Sbk.run(args  /* Command line Arguments */ , 
-                  device /* your storage device object */ , 
+            Sbk.run(args  /* Command line Arguments, use '-class ' option specify the you storage class name  */ , 
+                  packageNmae /* the name of the package where your storage device object exists */ , 
                   null /* Name of the your performance benchmarking application, by default , storage class name will be used */ ,
                   null /* Logger, if you don't have your own logger, then prometheus logger will be used by default */ );
             
@@ -723,6 +723,6 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     }
       
    ```   
-   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/Main.java#L20)
+   *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/Main.java#L25)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
