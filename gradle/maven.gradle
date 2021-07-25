@@ -9,7 +9,7 @@
  *
  */
 plugins.withId('maven') {
-    group = 'io.github.kmgowda'
+    group = 'io.github.kmgowda.sbk'
     setVersion(sbkVersion)
 
     java {
@@ -61,7 +61,7 @@ plugins.withId('maven') {
                 }
 
                 pom {
-                    groupId = "io.github.kmgowda"
+                    groupId = group
                     name = "SBK"
                     url = "https://github.com/kmgowda/sbk"
                     description = "Storage Benchmark Kit"
