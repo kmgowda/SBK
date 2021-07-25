@@ -274,7 +274,7 @@ public class SbkGemBenchmark implements GemBenchmark {
         // Start remote SBK instances
         final SshResponseStream[] sbkResults = createMultiSshResponseStream(nodes.length, true);
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
-        final String sbkCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + params.getSbkCommand()+" "+sbkArgs;
+        final String sbkCommand = sbkDir + File.separator + params.getSbkCommand()+" "+sbkArgs;
         Printer.log.info("SBK-GEM: Remote SBK command: " +sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
             cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+ File.separator + sbkCommand,

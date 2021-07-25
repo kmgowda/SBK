@@ -81,12 +81,13 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
             Printer.log.error(ex.toString());
             this.localHost = GemConfig.LOCAL_HOST;
         }
-        addOption("nodes", true, "remote hostnames separated by `,` , default: "+config.nodes);
+        addOption("nodes", true, "remote hostnames separated by ',' , default: "+config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.user);
         addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.password);
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.port);
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkPath);
-        addOption("sbkcommand", true, "sbk command for remote run, default: " + config.sbkCommand);
+        addOption("sbkcommand", true,
+                "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkCommand);
         addOption("localhost", true, "this local RAM host name, default: " + localHost);
         addOption("ramport", true, "RAM port number; default: " + ramPort);
         addOption("copy", true, "Copy the SBK package to remote hosts; default: true");
@@ -137,7 +138,7 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
             throw new IllegalArgumentException(errMsg);
         }
 
-        final String sbkFullCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + sbkCommand;
+        final String sbkFullCommand = sbkDir + File.separator + sbkCommand;
         Path sbkCommandPath = Paths.get(sbkFullCommand);
 
         if (!Files.exists(sbkCommandPath)) {
