@@ -25,6 +25,8 @@ import javax.annotation.concurrent.GuardedBy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +44,7 @@ public class SbkGemBenchmark implements GemBenchmark {
     private final RemoteResponse[] remoteResults;
     private final ExecutorService executor;
     private final SbkSsh[] nodes;
+    private final ConnectionsMap consMap;
 
     @GuardedBy("this")
     private State state;
@@ -65,8 +68,31 @@ public class SbkGemBenchmark implements GemBenchmark {
         for (int i = 0; i < connections.length; i++) {
             nodes[i] =  new SbkSsh(connections[i],  executor);
         }
+        this.consMap = new ConnectionsMap(connections);
     }
 
+    private final static class ConnectionsMap {
+        private final Map<Map.Entry<String, String>, Boolean>  kMap;
+
+        public ConnectionsMap(SshConnection[] conn) {
+            this.kMap = new HashMap<>();
+            for (SshConnection sshConnection : conn) {
+                this.kMap.put(Map.entry(sshConnection.getHost().toLowerCase(), sshConnection.getDir().toLowerCase()), false);
+            }
+        }
+
+        void reset() {
+            this.kMap.keySet().forEach(k -> this.kMap.put(k, false));
+        }
+
+        void visit(SshConnection conn) {
+            this.kMap.put(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()), true);
+        }
+
+        boolean isVisited(SshConnection conn) {
+            return this.kMap.get(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()));
+        }
+    }
 
     @Override
     @Synchronized
@@ -108,8 +134,15 @@ public class SbkGemBenchmark implements GemBenchmark {
 
         final SshResponseStream[] sshResults = createMultiSshResponseStream(nodes.length, true);
         final String cmd = "java -version";
+        consMap.reset();
         for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync(cmd, config.remoteTimeoutSeconds, sshResults[i]);
+            if (consMap.isVisited(nodes[i].connection)) {
+                cfArray[i] = new CompletableFuture<>();
+                cfArray[i].complete(null);
+            } else {
+                consMap.visit(nodes[i].connection);
+                cfArray[i] = nodes[i].runCommandAsync(cmd, config.remoteTimeoutSeconds, sshResults[i]);
+            }
         }
         final CompletableFuture<Void> ret = CompletableFuture.allOf(cfArray);
 
@@ -141,12 +174,20 @@ public class SbkGemBenchmark implements GemBenchmark {
             throw new InterruptedException();
         }
         Printer.log.info("SBK-GEM: Matching Java Major Version: " +javaMajorVersion +" Success..");
+
         if (params.isCopy()) {
 
             final SshResponseStream[] results = createMultiSshResponseStream(nodes.length, false);
+            consMap.reset();
             for (int i = 0; i < nodes.length; i++) {
-                cfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
-                        config.remoteTimeoutSeconds, results[i]);
+                if (consMap.isVisited(nodes[i].connection)) {
+                    cfArray[i] = new CompletableFuture<>();
+                    cfArray[i].complete(null);
+                } else {
+                    consMap.visit(nodes[i].connection);
+                    cfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
+                            config.remoteTimeoutSeconds, results[i]);
+                }
             }
             final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(cfArray);
 
@@ -168,10 +209,16 @@ public class SbkGemBenchmark implements GemBenchmark {
             Printer.log.info("SBK-GEM: Removing older version of remote directory: '" + remoteSBKdir + "'  Success..");
 
             final SshResponseStream[] mkDirResults = createMultiSshResponseStream(nodes.length, false);
-
+            consMap.reset();
             for (int i = 0; i < nodes.length; i++) {
-                cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
-                        config.remoteTimeoutSeconds, mkDirResults[i]);
+                if (consMap.isVisited(nodes[i].connection)) {
+                    cfArray[i] = new CompletableFuture<>();
+                    cfArray[i].complete(null);
+                } else {
+                    consMap.visit(nodes[i].connection);
+                    cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
+                            config.remoteTimeoutSeconds, mkDirResults[i]);
+                }
             }
 
             final CompletableFuture<Void> mkDirFuture = CompletableFuture.allOf(cfArray);
@@ -191,9 +238,15 @@ public class SbkGemBenchmark implements GemBenchmark {
             }
 
             Printer.log.info("SBK-GEM: Creating remote directory: '" + remoteSBKdir + "'  Success..");
-
+            consMap.reset();
             for (int i = 0; i < nodes.length; i++) {
-                cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
+                if (consMap.isVisited(nodes[i].connection)) {
+                    cfArray[i] = new CompletableFuture<>();
+                    cfArray[i].complete(null);
+                } else {
+                    consMap.visit(nodes[i].connection);
+                    cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
+                }
             }
             final CompletableFuture<Void> copyCB = CompletableFuture.allOf(cfArray);
 
@@ -212,10 +265,13 @@ public class SbkGemBenchmark implements GemBenchmark {
             }
 
             Printer.log.info("Copy SBK application: '"+ params.getSbkCommand() +"' to remote nodes Success..");
-        }
 
+        } //end of copy
+
+        // start SBK RAM
         ramBenchmark.start();
 
+        // Start remote SBK instances
         final SshResponseStream[] sbkResults = createMultiSshResponseStream(nodes.length, true);
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final String sbkCommand = sbkDir + File.separator + GemConfig.BIN_DIR + File.separator + params.getSbkCommand()+" "+sbkArgs;
