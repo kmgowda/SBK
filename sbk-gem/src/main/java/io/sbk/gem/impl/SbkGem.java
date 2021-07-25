@@ -35,6 +35,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public class SbkGem {
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isNotEmpty(sbkCommand)) {
-            gemConfig.sbkCommand = sbkCommand;
+            gemConfig.sbkCommand = GemConfig.BIN_DIR + File.separator + sbkCommand;
         }
 
         if (StringUtils.isNotEmpty(sbkAppHome)) {
