@@ -9,6 +9,24 @@
  *
  */
 
+apply plugin: 'java'
+apply plugin: "maven-publish"
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.nosphere.apache:creadur-rat-gradle:0.7.0"
+    }
+}
+
+apply from: "$rootDir/gradle/rat.gradle"
+apply from: "$rootDir/gradle/maven.gradle"
+
 application {
     mainClassName = 'io.sbk.main.SbkGemMain'
     applicationDefaultJvmArgs = ['-Dsbk.applicationName=', '-Dsbk.className=', '-Dsbk.appHome=SBK_APP_HOME']
