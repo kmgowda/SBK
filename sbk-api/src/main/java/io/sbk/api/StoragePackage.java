@@ -42,7 +42,7 @@ final public class StoragePackage {
             final AtomicInteger index = new AtomicInteger(0);
             final Map<String, String> classMap = new HashMap<>();
             subTypes.forEach(x -> classMap.put(x.getSimpleName(), x.getName()));
-            classMap.keySet().stream().sorted().forEach(x -> {
+            classMap.keySet().stream().sorted(String::compareToIgnoreCase).forEach(x -> {
                 final int i = index.get();
                 simpleNames[i] = StringUtils.capitalize(x);
                 names[i] = classMap.get(x);
