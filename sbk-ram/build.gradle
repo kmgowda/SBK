@@ -24,7 +24,7 @@ buildscript {
     dependencies {
         // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-gradle-plugin
         classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
-        classpath "org.nosphere.apache:creadur-rat-gradle:0.7.0"
+        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
     }
 }
 
@@ -37,6 +37,6 @@ application {
 
 
 dependencies {
-    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor group: 'org.projectlombok' , name:'lombok', version: lombokVersion
     compile project(":sbk-api")
 }
