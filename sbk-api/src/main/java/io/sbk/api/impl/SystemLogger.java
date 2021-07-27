@@ -193,6 +193,7 @@ public class SystemLogger implements Logger {
         out.append(String.format("%11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;"
                         + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;", records, recsPerSec,
                         mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit, invalid, lowerDiscard, higherDiscard));
+        out.append(" Latency Percentiles: ");
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
             if (i == 0) {
