@@ -22,8 +22,8 @@ public class GemConfig {
     public String gemuser;
     public String gempass;
     public int gemport;
-    public String sbkDir;
-    public String sbkCommand;
+    public String sbkdir;
+    public String sbkcommand;
     public boolean copy;
 
     //override by props file
