@@ -11,7 +11,7 @@ As an example, just follow the below steps to see the performance graphs
 1. Run the [grafana docker compose](https://github.com/kmgowda/SBK/blob/master/grafana/docker-compose.yml)
 
    ```
-   <SBK dir/grafana>% ./docker-compose up 
+   <SBK dir/grafana>% docker-compose up 
    ```
 
 1. login to [grafana local host port 3000](http://localhost:3000) with username **admin** and password **admin**
