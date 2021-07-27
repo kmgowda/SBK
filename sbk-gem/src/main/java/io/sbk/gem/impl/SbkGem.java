@@ -155,7 +155,7 @@ public class SbkGem {
         }
 
         if (StringUtils.isNotEmpty(sbkAppHome)) {
-            gemConfig.sbkPath = sbkAppHome;
+            gemConfig.sbkDir = sbkAppHome;
         }
         gemConfig.remoteDir = appName;
         if (StringUtils.isNotEmpty(version)) {

@@ -17,15 +17,19 @@ public class GemConfig {
     final public static String BIN_DIR = "bin";
     final public static String LOCAL_HOST = "localhost";
 
+    //override by props file or command line parameters
     public String nodes;
-    public String user;
-    public String password;
-    public int port;
+    public String gemuser;
+    public String gempass;
+    public int gemport;
+    public String sbkDir;
+    public String sbkCommand;
+    public boolean copy;
+
+    //override by props file
     public long remoteTimeoutSeconds;
     public int timeoutSeconds;
     public int maxIterations;
-    public boolean fork;
-    public String sbkCommand;
-    public String sbkPath;
     public String remoteDir;
+    public boolean fork;
 }

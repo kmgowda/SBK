@@ -44,30 +44,13 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
     private String[] parsedArgs;
 
     @Getter
-    private String user;
-
-    @Getter
-    private String password;
-
-    @Getter
-    private int port;
-
-    @Getter
     private SshConnection[] connections;
-
-    @Getter
-    private String sbkDir;
-
-    @Getter
-    private String sbkCommand;
 
     @Getter
     private String localHost;
 
     @Getter
     private int ramPort;
-
-    private boolean isCopy;
 
 
     public SbkGemParameters(String name, String[] drivers, GemConfig config, int ramport) {
@@ -82,19 +65,18 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
             this.localHost = GemConfig.LOCAL_HOST;
         }
         addOption("nodes", true, "remote hostnames separated by ',' , default: "+config.nodes);
-        addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.user);
-        addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.password);
-        addOption("gemport", true, "ssh port of the remote hosts, default: " + config.port);
-        addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkPath);
+        addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
+        addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.gempass);
+        addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
+        addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkDir);
         addOption("sbkcommand", true,
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkCommand);
+        addOption("copy", true, "Copy the SBK package to remote hosts; default: "+ config.copy);
         addOption("localhost", true, "this local RAM host name, default: " + localHost);
         addOption("ramport", true, "RAM port number; default: " + ramPort);
-        addOption("copy", true, "Copy the SBK package to remote hosts; default: true");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-localhost", "ramport", "-copy"};
+                "-copy", "-localhost", "ramport"};
         this.parsedArgs = null;
-        this.isCopy = true;
     }
 
     @Override
@@ -102,43 +84,44 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
         super.parseArgs(args);
         final String nodeString = getOptionValue("nodes", config.nodes);
         String[] nodes = nodeString.split(",");
-        user = getOptionValue("gemuser", config.user);
-        password = getOptionValue("gempass", config.password);
-        port = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.port)));
-        sbkDir = getOptionValue("sbkdir", config.sbkPath);
-        sbkCommand = getOptionValue("sbkcommand", config.sbkCommand);
+        config.gemuser = getOptionValue("gemuser", config.gemuser);
+        config.gempass = getOptionValue("gempass", config.gempass);
+        config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
+        config.sbkDir = getOptionValue("sbkdir", config.sbkDir);
+        config.sbkCommand = getOptionValue("sbkcommand", config.sbkCommand);
         localHost = getOptionValue("localhost", localHost);
         ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
-        isCopy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(isCopy)));
+        config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
 
-        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", user, "-gempass", password, "-gemport",
-                Integer.toString(port), "-sbkdir", sbkDir, "-sbkcommand", sbkCommand, "-localhost", localHost,
-                "-ramport", Integer.toString(ramPort), "-copy", Boolean.toString(isCopy)};
+        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.sbkCommand, "-gempass", config.gempass, "-gemport",
+                Integer.toString(config.gemport), "-sbkdir", config.sbkDir, "-sbkcommand", config.sbkCommand,
+                "-copy", Boolean.toString(config.copy), "-localhost", localHost, "-ramport", Integer.toString(ramPort) };
 
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            connections[i] = new SshConnection(nodes[i], user, password, port, config.remoteDir);
+            connections[i] = new SshConnection(nodes[i], config.gemuser, config.gempass, config.gemport,
+                    config.remoteDir);
         }
 
-        if (StringUtils.isEmpty(sbkDir)) {
+        if (StringUtils.isEmpty(config.sbkDir)) {
             String errMsg = "The SBK application directory not supplied!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
 
-        if (!Files.isDirectory(Paths.get(sbkDir))) {
-            String errMsg = "The SBK application directory: "+sbkDir +" not found!";
+        if (!Files.isDirectory(Paths.get(config.sbkDir))) {
+            String errMsg = "The SBK application directory: "+config.sbkDir +" not found!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
 
-        if (StringUtils.isEmpty(sbkCommand)) {
+        if (StringUtils.isEmpty(config.sbkCommand)) {
             String errMsg = "The SBK application/command not supplied!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
 
-        final String sbkFullCommand = sbkDir + File.separator + sbkCommand;
+        final String sbkFullCommand = config.sbkDir + File.separator + config.sbkCommand;
         Path sbkCommandPath = Paths.get(sbkFullCommand);
 
         if (!Files.exists(sbkCommandPath)) {
@@ -156,7 +139,17 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
     }
 
     @Override
+    public String getSbkDir() {
+        return config.sbkDir;
+    }
+
+    @Override
+    public String getSbkCommand() {
+        return config.sbkCommand;
+    }
+
+    @Override
     public boolean isCopy() {
-        return isCopy;
+        return config.copy;
     }
 }
