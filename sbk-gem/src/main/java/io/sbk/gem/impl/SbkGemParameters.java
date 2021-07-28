@@ -85,7 +85,7 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
         addOption("localhost", true, "this local RAM host name, default: " + localHost);
         addOption("ramport", true, "RAM port number; default: " + ramPort);
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-gemfile", "-copy", "-localhost", "ramport"};
+                "-gemfile", "-copy", "-localhost", "-ramport"};
         this.parsedArgs = null;
     }
 
@@ -141,14 +141,15 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
         config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
 
         if (gemFile != null) {
-           parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.sbkcommand, "-gempass", config.gempass, "-gemport",
-                   Integer.toString(config.gemport), "-sbkdir", config.sbkdir, "-sbkcommand", config.sbkcommand,
-                   "-gemfile", gemFile, "-copy", Boolean.toString(config.copy), "-localhost", localHost,
+            parsedArgs = new String[]{"-gemfile", gemFile, "-nodes", nodeString, "-gemuser", config.sbkcommand,
+                   "-gempass", config.gempass, "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
+                   "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy), "-localhost", localHost,
                    "-ramport", Integer.toString(ramPort) };
         } else {
-            parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.sbkcommand, "-gempass", config.gempass, "-gemport",
-                    Integer.toString(config.gemport), "-sbkdir", config.sbkdir, "-sbkcommand", config.sbkcommand,
-                    "-copy", Boolean.toString(config.copy), "-localhost", localHost, "-ramport", Integer.toString(ramPort) };
+            parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.sbkcommand, "-gempass",
+                    config.gempass, "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
+                    "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy), "-localhost", localHost,
+                    "-ramport", Integer.toString(ramPort) };
         }
 
         connections = new SshConnection[nodes.length];
