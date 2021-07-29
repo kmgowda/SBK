@@ -23,6 +23,7 @@ import java.io.FileWriter;
  * Class for recoding/printing results to a CSV file called `out.csv`.
  */
 public class SbkCSVLogger extends SystemLogger {
+    final static public String DISABLE_STRING = "no";
     public String csvFile;
     public boolean csvEnable;
     private PrintWriter csvWriter;
@@ -35,17 +36,17 @@ public class SbkCSVLogger extends SystemLogger {
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
-        params.addOption("csvfile", true, "CSV file to record results;" +
-                " 'no' disables this option, default: no");
+        params.addOption("csvfile", true, "CSV file to record results" +
+                "; 'no' disables this option, default: no");
         csvEnable = false;
-        csvFile = "no";
+        csvFile = DISABLE_STRING;
     }
 
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        csvFile = params.getOptionValue("csvfile", "no");
-        if (csvFile.compareToIgnoreCase("no") == 0) {
+        csvFile = params.getOptionValue("csvfile", DISABLE_STRING);
+        if (csvFile.compareToIgnoreCase(DISABLE_STRING) == 0) {
             csvEnable = false;
         } else {
             csvEnable = true;

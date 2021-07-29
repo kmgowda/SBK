@@ -61,7 +61,7 @@ public class SbkPrometheusLogger extends SbkCSVLogger {
         }
 
         params.addOption("context", true, "Prometheus Metric context" +
-                "'no' disables this option; default: " + metricsConfig.port + metricsConfig.context);
+                "; '"+DISABLE_STRING+"' disables this option; default: " + metricsConfig.port + metricsConfig.context);
     }
 
 
@@ -69,7 +69,7 @@ public class SbkPrometheusLogger extends SbkCSVLogger {
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         final String parsedContext =  params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
-        if (parsedContext.equalsIgnoreCase("no")) {
+        if (parsedContext.equalsIgnoreCase(DISABLE_STRING)) {
             contextDisabled = true;
         } else {
             contextDisabled = false;

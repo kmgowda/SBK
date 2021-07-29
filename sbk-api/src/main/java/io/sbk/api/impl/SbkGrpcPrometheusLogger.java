@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static String CONFIG_FILE = "ramhost.properties";
-    final static String DISABLE_STRING = "no";
     final static int LATENCY_MAP_BYTES = 16;
 
     public RamHostConfig ramHostConfig;
@@ -54,7 +53,6 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     private LatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
     private ExceptionHandler exceptionHandler;
-
 
     public SbkGrpcPrometheusLogger() {
         super();
