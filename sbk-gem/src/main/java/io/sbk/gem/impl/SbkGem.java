@@ -262,6 +262,8 @@ public class SbkGem {
         }
         time = SbkUtils.getTime(logger);
         sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
+        sbkArgsBuilder.append(" -minlatency " + logger.getMinLatency());
+        sbkArgsBuilder.append(" -maxlatency " + logger.getMaxLatency());
         sbkArgsBuilder.append(" -context no");
         sbkArgsBuilder.append(" -ram " + params.getLocalHost());
         sbkArgsBuilder.append(" -ramport " + params.getRamPort());

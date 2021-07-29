@@ -20,6 +20,9 @@ import io.sbk.perl.LoggerConfig;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 import io.sbk.perl.TimeUnit;
+import io.sbk.perl.impl.MicroSeconds;
+import io.sbk.perl.impl.MilliSeconds;
+import io.sbk.perl.impl.NanoSeconds;
 import io.sbk.system.Printer;
 
 import java.io.IOException;
@@ -38,13 +41,14 @@ public class SystemLogger implements Logger {
     final public AtomicInteger maxReaders;
     public String storageName;
     public String prefix;
-    public String timeUnit;
+    public String timeUnitText;
     public InputOptions params;
     public double[] percentiles;
     public Action action;
     public Time time;
     private LoggerConfig loggerConfig;
     private String[] percentileNames;
+    private TimeUnit timeUnit;
     private long minLatency;
     private long maxLatency;
     final private DecimalFormat format;
@@ -79,22 +83,14 @@ public class SystemLogger implements Logger {
         for (int i = 0; i < percentiles.length; i++) {
             percentileNames[i] = format.format(percentiles[i]);
         }
-        int val = 1;
-        if (loggerConfig.timeUnit == TimeUnit.ns) {
-            val = PerlConfig.NS_PER_MS;
-        } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
-            val = PerlConfig.MICROS_PER_MS;
-        }
-        minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
-        maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
 
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
                 "; default: " + loggerConfig.timeUnit.name());
         params.addOption("minlatency", true,
-                "Minimum latency; use '-time' for time unit; default: "+ minLatency
+                "Minimum latency; use '-time' for time unit; default: "+ loggerConfig.minLatency
                         +" "+loggerConfig.timeUnit.name());
         params.addOption("maxlatency", true,
-                "Maximum latency; use '-time' for time unit; default: "+ maxLatency
+                "Maximum latency; use '-time' for time unit; default: "+ loggerConfig.maxLatency
                         +" "+loggerConfig.timeUnit.name());
     }
 
@@ -114,11 +110,44 @@ public class SystemLogger implements Logger {
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         try {
-            loggerConfig.timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
+            timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
         } catch (IllegalArgumentException ex) {
             Printer.log.error("Invalid value for option '-time', valid values "+
                     Arrays.toString(Arrays.stream(TimeUnit.values()).map(Enum::name).toArray()));
             throw  ex;
+        }
+
+        Time convertTime = null;
+        if (timeUnit == TimeUnit.ms) {
+            if (loggerConfig.timeUnit == TimeUnit.ns) {
+                convertTime = new NanoSeconds();
+            } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
+                convertTime = new MicroSeconds();
+            }
+            if (convertTime != null) {
+                minLatency = (long) convertTime.convertToMilliSeconds(loggerConfig.minLatency);
+                maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+            }
+        } else if (timeUnit == TimeUnit.ns) {
+            if (loggerConfig.timeUnit == TimeUnit.ms) {
+                convertTime = new MilliSeconds();
+            } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
+                convertTime = new MicroSeconds();
+            }
+            if (convertTime != null) {
+                minLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.minLatency);
+                maxLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.maxLatency);
+            }
+        } else if (timeUnit == TimeUnit.mcs) {
+            if (loggerConfig.timeUnit == TimeUnit.ms) {
+                convertTime = new MilliSeconds();
+            } else if (loggerConfig.timeUnit == TimeUnit.ns) {
+                convertTime = new NanoSeconds();
+            }
+            if (convertTime != null) {
+                minLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.minLatency);
+                maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+            }
         }
         minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));
         maxLatency = Long.parseLong(params.getOptionValue("maxlatency", Long.toString(maxLatency)));
@@ -131,7 +160,7 @@ public class SystemLogger implements Logger {
         this.action = action;
         this.time = time;
         this.prefix = storageName+" "+action.name();
-        this.timeUnit = getTimeUnit().name();
+        this.timeUnitText = getTimeUnit().name();
         for (double p: this.percentiles) {
             if (p < 0 || p > 100) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(percentiles));
@@ -152,7 +181,7 @@ public class SystemLogger implements Logger {
 
     @Override
     public TimeUnit getTimeUnit() {
-        return loggerConfig.timeUnit;
+        return timeUnit;
     }
 
     @Override
@@ -198,14 +227,14 @@ public class SystemLogger implements Logger {
 
         out.append(String.format("%11d records, %9.1f records/sec, %8.2f MB/sec, %8.1f %s avg latency, %7d %s max latency;"
                         + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;", records, recsPerSec,
-                        mbPerSec, avgLatency, timeUnit, maxLatency, timeUnit, invalid, lowerDiscard, higherDiscard));
+                        mbPerSec, avgLatency, timeUnitText, maxLatency, timeUnitText, invalid, lowerDiscard, higherDiscard));
         out.append(" Latency Percentiles: ");
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
             if (i == 0) {
-                out.append(String.format("%7d %s %sth", percentileValues[i], timeUnit, percentileNames[i]));
+                out.append(String.format("%7d %s %sth", percentileValues[i], timeUnitText, percentileNames[i]));
             } else {
-                out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnit, percentileNames[i]));
+                out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnitText, percentileNames[i]));
             }
         }
     }
