@@ -72,15 +72,15 @@ public class SbkParameters extends SbkOptions implements ParameterOptions {
         addOption("records", true,
                 "Number of records(events) if 'seconds' not specified;\n" +
                         "otherwise, Maximum records per second by writer(s) " +
-                        "and/or Number of records per reader");
+                        "and/or Number of records per second by reader(s)");
         addOption("sync", true,
                 "Each Writer calls flush/sync after writing <arg> number of of events(records)" +
                         " ; <arg> number of events(records) per Write or Read Transaction");
         addOption("seconds", true, "Number of seconds to run; if not specified, runs forever");
         addOption("throughput", true,
-                "if > 0 , throughput in MB/s\n" +
-                        "if 0 , writes/reads 'records'\n" +
-                        "if -1, get the maximum throughput (default: -1)");
+                "If > 0, throughput in MB/s\n" +
+                        "If 0, writes/reads 'records'\n" +
+                        "If -1, get the maximum throughput (default: -1)");
         addOption("wstep", true,
                 "Number of writers/step, default: 1");
         addOption("wsec", true,
