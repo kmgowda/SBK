@@ -151,11 +151,11 @@ public class SbkGem {
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isNotEmpty(sbkCommand)) {
-            gemConfig.sbkCommand = GemConfig.BIN_DIR + File.separator + sbkCommand;
+            gemConfig.sbkcommand = GemConfig.BIN_DIR + File.separator + sbkCommand;
         }
 
         if (StringUtils.isNotEmpty(sbkAppHome)) {
-            gemConfig.sbkPath = sbkAppHome;
+            gemConfig.sbkdir = sbkAppHome;
         }
         gemConfig.remoteDir = appName;
         if (StringUtils.isNotEmpty(version)) {

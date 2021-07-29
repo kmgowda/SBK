@@ -21,9 +21,8 @@ buildscript {
         }
     }
     dependencies {
-        // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-gradle-plugin
         classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
-        classpath "org.nosphere.apache:creadur-rat-gradle:0.7.0"
+        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
     }
 }
 
@@ -31,20 +30,20 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
-    compile	"commons-cli:commons-cli:1.3.1"
-    compile	"org.apache.commons:commons-csv:1.5"
-    compile "org.slf4j:slf4j-api:1.7.14"
-    compile "org.slf4j:slf4j-simple:1.7.14"
-    compile 'org.projectlombok:lombok:1.18.10'
-    compile 'org.reflections:reflections:0.9.12'
-    compile 'javax.annotation:javax.annotation-api:1.3.2'
-    annotationProcessor 'org.projectlombok:lombok:1.18.10'
-    compile 'io.micrometer:micrometer-registry-jmx:latest.release'
-    compile 'io.micrometer:micrometer-registry-prometheus:latest.release'
-    compile group: 'commons-configuration', name: 'commons-configuration', version: '1.10'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: '2.12.1'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.1'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    annotationProcessor group: 'org.projectlombok' , name:'lombok', version: lombokVersion
+    compile group:'org.projectlombok', name:'lombok', version: lombokVersion
+    compile group:'commons-cli', name:'commons-cli', version: commonsCliVersion
+    compile	group:'org.apache.commons', name:'commons-csv', version: apacheCommonsVersion
+    compile group:'org.slf4j', name:'slf4j-api', version: slf4jVersion
+    compile group:'org.slf4j', name:'slf4j-simple', version: slf4jVersion
+    compile group:'org.reflections', name:'reflections', version: reflectionsVersion
+    compile group:'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
+    compile group:'io.micrometer', name:'micrometer-registry-jmx' , version: micrometerVersion
+    compile group:'io.micrometer', name:'micrometer-registry-prometheus', version: micrometerVersion
+    compile group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
+    testCompile group: 'junit', name: 'junit', version: junitVersion
 }
 
 
