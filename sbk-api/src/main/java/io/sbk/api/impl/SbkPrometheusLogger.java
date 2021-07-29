@@ -61,7 +61,7 @@ public class SbkPrometheusLogger extends SbkCSVLogger {
         }
 
         params.addOption("context", true, "Prometheus Metric context" +
-                "'no' disables the metrics; default: " + metricsConfig.port + metricsConfig.context);
+                "'no' disables this option; default: " + metricsConfig.port + metricsConfig.context);
     }
 
 

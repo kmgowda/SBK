@@ -36,7 +36,7 @@ public class SbkCSVLogger extends SystemLogger {
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
         params.addOption("csvfile", true, "CSV file to record results;" +
-                " 'no' disables csv writing, default: 'no'");
+                " 'no' disables this option, default: no");
         csvEnable = false;
         csvFile = "no";
     }

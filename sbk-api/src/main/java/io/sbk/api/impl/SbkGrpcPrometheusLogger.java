@@ -102,7 +102,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         maxLatencyBytes = ramHostConfig.maxRecordSizeMB * PerlConfig.BYTES_PER_MB;
         ramHostConfig.host = DISABLE_STRING;
         params.addOption("ram", true, "SBK RAM host" +
-                "; default: " + ramHostConfig.host +"; use '" +DISABLE_STRING+"' to disable");
+                "; '" +DISABLE_STRING+"' disables this option, default: " + ramHostConfig.host);
         params.addOption("ramport", true, "SBK RAM Port" +
                 "; default: " + ramHostConfig.port );
         //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
