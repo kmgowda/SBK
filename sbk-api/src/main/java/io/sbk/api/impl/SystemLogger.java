@@ -79,9 +79,23 @@ public class SystemLogger implements Logger {
         for (int i = 0; i < percentiles.length; i++) {
             percentileNames[i] = format.format(percentiles[i]);
         }
+        int val = 1;
+        if (loggerConfig.timeUnit == TimeUnit.ns) {
+            val = PerlConfig.NS_PER_MS;
+        } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
+            val = PerlConfig.MICROS_PER_MS;
+        }
+        minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
+        maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
 
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
                 "; default: " + loggerConfig.timeUnit.name());
+        params.addOption("minlatency", true,
+                "Minimum latency; use '-time' for time unit; default: "+ minLatency
+                        +" "+loggerConfig.timeUnit.name());
+        params.addOption("maxlatency", true,
+                "Maximum latency; use '-time' for time unit; default: "+ maxLatency
+                        +" "+loggerConfig.timeUnit.name());
     }
 
 
@@ -106,14 +120,8 @@ public class SystemLogger implements Logger {
                     Arrays.toString(Arrays.stream(TimeUnit.values()).map(Enum::name).toArray()));
             throw  ex;
         }
-        int val = 1;
-        if (loggerConfig.timeUnit == TimeUnit.ns) {
-            val = PerlConfig.NS_PER_MS;
-        } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
-            val = PerlConfig.MICROS_PER_MS;
-        }
-        minLatency = (long) (((double) loggerConfig.minLatencyMS) * val);
-        maxLatency = (long) (((double) loggerConfig.maxLatencyMS) * val);
+        minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));
+        maxLatency = Long.parseLong(params.getOptionValue("maxlatency", Long.toString(maxLatency)));
     }
 
     @Override
@@ -161,8 +169,6 @@ public class SystemLogger implements Logger {
     public double[] getPercentiles() {
         return percentiles;
     }
-
-
 
     @Override
     public void incrementWriters() {
