@@ -12,7 +12,7 @@ package io.sbk.perl;
 public class LoggerConfig {
     public int reportingSeconds;
     public TimeUnit timeUnit;
-    public float minLatencyMS;
-    public float maxLatencyMS;
+    public long minLatency;
+    public long maxLatency;
     public String percentiles;
 }
