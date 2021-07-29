@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     final static String CONFIG_FILE = "ramhost.properties";
-    final static String DISABLE_STRING = "no";
     final static int LATENCY_MAP_BYTES = 16;
 
     public RamHostConfig ramHostConfig;
@@ -54,7 +53,6 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     private LatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
     private ExceptionHandler exceptionHandler;
-
 
     public SbkGrpcPrometheusLogger() {
         super();
@@ -102,7 +100,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         maxLatencyBytes = ramHostConfig.maxRecordSizeMB * PerlConfig.BYTES_PER_MB;
         ramHostConfig.host = DISABLE_STRING;
         params.addOption("ram", true, "SBK RAM host" +
-                "; default: " + ramHostConfig.host +"; use '" +DISABLE_STRING+"' to disable");
+                "; '" +DISABLE_STRING+"' disables this option, default: " + ramHostConfig.host);
         params.addOption("ramport", true, "SBK RAM Port" +
                 "; default: " + ramHostConfig.port );
         //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");

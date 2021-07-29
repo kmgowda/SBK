@@ -26,7 +26,7 @@ import java.io.InputStream;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbkPrometheusLogger extends SystemLogger {
+public class SbkPrometheusLogger extends SbkCSVLogger {
     final static String CONFIG_FILE = "metrics.properties";
     public MetricsConfig metricsConfig;
     private boolean contextDisabled;
@@ -61,7 +61,7 @@ public class SbkPrometheusLogger extends SystemLogger {
         }
 
         params.addOption("context", true, "Prometheus Metric context" +
-                "; default: " + metricsConfig.port + metricsConfig.context + "; 'no' disables the metrics");
+                "; '"+DISABLE_STRING+"' disables this option; default: " + metricsConfig.port + metricsConfig.context);
     }
 
 
@@ -69,7 +69,7 @@ public class SbkPrometheusLogger extends SystemLogger {
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         final String parsedContext =  params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
-        if (parsedContext.equalsIgnoreCase("no")) {
+        if (parsedContext.equalsIgnoreCase(DISABLE_STRING)) {
             contextDisabled = true;
         } else {
             contextDisabled = false;
