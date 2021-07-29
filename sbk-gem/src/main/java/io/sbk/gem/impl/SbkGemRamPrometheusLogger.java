@@ -17,11 +17,19 @@ public class SbkGemRamPrometheusLogger extends SbkRamPrometheusLogger implements
 
     @Override
     public String[] getOptionsArgs() {
-        return new String[]{"-time", "-minlatency", "-maxlatency", "-context"};
+        return new String[]{"-time", "-minlatency", "-maxlatency", "-csvfile", "-context"};
     }
 
     @Override
     public String[] getParsedArgs() {
+        if (csvEnable) {
+            return new String[]{ "-csvfile", csvFile,
+                    "-time", getTimeUnit().name(),
+                    "-minlatency", String.valueOf(getMinLatency()),
+                    "-maxlatency", String.valueOf(getMaxLatency()),
+                    "-context", metricsConfig.port +metricsConfig.context};
+
+        }
         return new String[]{"-time", getTimeUnit().name(),
                 "-minlatency", String.valueOf(getMinLatency()),
                 "-maxlatency", String.valueOf(getMaxLatency()),

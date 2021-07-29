@@ -44,10 +44,10 @@ public class SystemLogger implements Logger {
     public String timeUnitText;
     public InputOptions params;
     public double[] percentiles;
+    public String[] percentileNames;
     public Action action;
     public Time time;
     private LoggerConfig loggerConfig;
-    private String[] percentileNames;
     private TimeUnit timeUnit;
     private long minLatency;
     private long maxLatency;
