@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 
 import io.sbk.api.Action;
 import io.sbk.api.InputOptions;
+import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
 
 import java.io.FileWriter;
@@ -56,7 +57,7 @@ public class SbkCSVLogger extends SystemLogger {
     public void openCSV() throws IOException {
         final StringBuilder headerBuilder =
                 new StringBuilder("Action,LatencyTimeUnit,Writers,Readers,MaxWriters,MaxReaders");
-        headerBuilder.append(",Bytes,Records,Records/Sec,MB/Sec");
+        headerBuilder.append(",MB,Records,Records/Sec,MB/Sec");
         headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard");
         for (String percentileName : percentileNames) {
             headerBuilder.append(",Percentile_");
@@ -78,10 +79,12 @@ public class SbkCSVLogger extends SystemLogger {
     public void writeToCSV(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
+        final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
-                String.format("%s,%s,%5d,%5d,%5d,%5d,%21d,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix, timeUnitText,
-                writers.get(), readers.get(), maxWriters.get(), maxReaders.get(), bytes, records, recsPerSec,
-                mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard)
+                String.format("%s,%s,%5d,%5d,%5d,%5d,%11.1f,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix,
+                        timeUnitText, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
+                        mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                        invalid, lowerDiscard, higherDiscard)
         );
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {

@@ -11,6 +11,7 @@ package io.sbk.ram.impl;
 
 import io.sbk.api.Action;
 import io.sbk.api.Config;
+import io.sbk.perl.PerlConfig;
 import io.sbk.ram.RamLogger;
 import io.sbk.api.InputOptions;
 import io.sbk.api.impl.RWMetricsPrometheusServer;
@@ -88,7 +89,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     public void openCSV() throws IOException {
         final StringBuilder headerBuilder = new StringBuilder("Header,Connections,MaxConnections");
         headerBuilder.append(",Action,LatencyTimeUnit,Writers,Readers,MaxWriters,MaxReaders");
-        headerBuilder.append(",Bytes,Records,Records/Sec,MB/Sec");
+        headerBuilder.append(",MB,Records,Records/Sec,MB/Sec");
         headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard");
         for (String percentileName : percentileNames) {
             headerBuilder.append(",Percentile_");
@@ -102,11 +103,12 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     public void writeToCSV(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long[] percentileValues) {
+        final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
-                String.format("%s,%5d,%5d,%s,%s,%5d,%5d,%5d,%5d,%21d,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d",
+                String.format("%s,%5d,%5d,%s,%s,%5d,%5d,%5d,%5d,%11.1f,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d",
                         SBK_RAM_PREFIX, connections.get(), maxConnections.get(),
                         prefix, timeUnitText, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
-                        bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                        mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                         invalid, lowerDiscard, higherDiscard)
         );
 
