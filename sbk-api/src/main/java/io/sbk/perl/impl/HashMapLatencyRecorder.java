@@ -66,7 +66,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
         }
 
         for (int i = 0; i < percentileIds.length; i++) {
-            percentileIds[i] = (long) ((validLatencyRecords-1) * percentileFractions[i]);
+            percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
             values[i] = 0;
         }
 
