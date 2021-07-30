@@ -26,7 +26,7 @@ public class SbkCSVLogger extends SystemLogger {
     final static public String DISABLE_STRING = "no";
     public String csvFile;
     public boolean csvEnable;
-    private PrintWriter csvWriter;
+    public PrintWriter csvWriter;
 
 
     public SbkCSVLogger() {
@@ -53,25 +53,29 @@ public class SbkCSVLogger extends SystemLogger {
         }
     }
 
+    public void openCSV() throws IOException {
+        final StringBuilder headerBuilder =
+                new StringBuilder("Action,LatencyTimeUnit,Writers,Readers,MaxWriters,MaxReaders");
+        headerBuilder.append(",Bytes,Records,Records/Sec,MB/Sec");
+        headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard");
+        for (String percentileName : percentileNames) {
+            headerBuilder.append(",Percentile_");
+            headerBuilder.append(percentileName);
+        }
+        csvWriter = new PrintWriter(new FileWriter(csvFile, false));
+        csvWriter.println(headerBuilder);
+    }
+
 
     @Override
     public void open(final InputOptions params, final String storageName, Action action, Time time) throws  IOException {
         super.open(params, storageName, action, time);
         if (csvEnable) {
-            final StringBuilder headerBuilder =
-                    new StringBuilder("Action,LatencyTimeUnit,Writers,Readers,MaxWriters,MaxReaders");
-                    headerBuilder.append(",Bytes,Records,Records/Sec,MB/Sec");
-                    headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard");
-            for (String percentileName : percentileNames) {
-                headerBuilder.append(",Percentile_");
-                headerBuilder.append(percentileName);
-            }
-            csvWriter = new PrintWriter(new FileWriter(csvFile, false));
-            csvWriter.println(headerBuilder);
+            openCSV();
         }
     }
 
-    private void writeToCSV(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+    public void writeToCSV(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
         StringBuilder data = new StringBuilder(
