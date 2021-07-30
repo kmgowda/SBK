@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1627375770794,
+  "iteration": 1627650252932,
   "links": [],
   "panels": [
     {
@@ -1676,7 +1676,7 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
@@ -1685,1405 +1685,8 @@
         "y": 7
       },
       "id": 58,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 200
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 300
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 400
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 600
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 700
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 800
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 900
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "MBs"
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 8
-          },
-          "hiddenSeries": false,
-          "id": 63,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.7",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_MBPerSec",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "KAFKA Read Throughput MB/s",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:323",
-              "format": "MBs",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:324",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 8,
-            "y": 8
-          },
-          "hiddenSeries": false,
-          "id": 20,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.7",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_RecordsPerSec",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "KAFKA Read Records/Sec",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "rps",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 10000000
-                  }
-                ]
-              },
-              "unit": "ns"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 8
-          },
-          "id": 44,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_ns_AvgLatency",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_MaxLatency",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "KAFKA Read Avg and Max Latencies (Nanoseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 19
-          },
-          "hiddenSeries": false,
-          "id": 46,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.7",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_ns_10",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_20",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_30",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_40",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_60",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_70",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_80",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "J"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "K"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_92_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "L"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "M"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_97_5",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "N"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "O"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_99_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "P"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_99_5",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "Q"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_99_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "R"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "S"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_99_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "T"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ns_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "U"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "KAFKA Read Percentiles (Nanoseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:152",
-              "format": "ns",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:153",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 3,
-            "x": 8,
-            "y": 19
-          },
-          "id": 14,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_Readers",
-              "interval": "",
-              "legendFormat": "Active",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_Max_Readers",
-              "interval": "",
-              "legendFormat": "Max",
-              "refId": "B"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "KAFKA Readers",
-          "type": "stat"
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": [],
-              "mappings": [],
-              "max": 500,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 200
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 300
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 400
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 600
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 700
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 800
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 900
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "MBs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 11,
-            "y": 19
-          },
-          "id": 18,
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": true,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_MBPerSec",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "KAFKA Read Throughput MB/s",
-          "type": "gauge"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 19
-          },
-          "hiddenSeries": false,
-          "id": 22,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.7",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_ms_10",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "KAFKA Read Percentiles (Milli Seconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "ms",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 1073741824
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 10737418240
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 107374182400
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1099511627776
-                  }
-                ]
-              },
-              "unit": "decbytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 8,
-            "y": 24
-          },
-          "id": 16,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_Bytes_total",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "KAFKA Read Bytes Total",
-          "type": "stat"
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 11,
-            "y": 25
-          },
-          "id": 26,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_LowerDiscardedLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Lower",
-              "queryType": "randomWalk",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_HigherDiscardLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Higher",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_InvalidLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Invalid/Negative",
-              "refId": "C"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "KAFKA Read Discarded Latencies",
-          "type": "stat"
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 10000000
-                  }
-                ]
-              },
-              "unit": "µs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 30
-          },
-          "id": 43,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_AvgLatency",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_MaxLatency",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "KAFKA Read Avg and Max Latencies (Microseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 8,
-            "y": 30
-          },
-          "hiddenSeries": false,
-          "id": 45,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.7",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_10",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_mcs_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "KAFKA Read Percentiles (Microseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "µs",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 1
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 5
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 10
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 20
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 30
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 40
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 60
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 70
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 80
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 90
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 100
-                  },
-                  {
-                    "color": "#0A437C",
-                    "value": 500
-                  },
-                  {
-                    "color": "#6D1F62",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 30
-          },
-          "id": 24,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_KAFKA_Reading_ms_AvgLatency",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_KAFKA_Reading_ms_MaxLatency",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "KAFKA Read Avg and Max Latencies (Milliseconds)",
-          "type": "stat"
-        }
-      ],
-      "title": "Read Performance Benchmarking",
-      "type": "row"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 8
-      },
-      "id": 56,
       "panels": [],
-      "title": "Write-Read Performance Benchmarking (End to End Latencies)",
+      "title": "Read Performance Benchmarking",
       "type": "row"
     },
     {
@@ -3095,9 +1698,8 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
+          "links": [],
           "mappings": [],
-          "max": 500,
-          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -3166,10 +1768,10 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 9
+        "y": 8
       },
       "hiddenSeries": false,
-      "id": 61,
+      "id": 63,
       "legend": {
         "avg": false,
         "current": false,
@@ -3196,9 +1798,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_MBPerSec",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "SBK_KAFKA_Reading_MBPerSec",
           "refId": "A"
         }
       ],
@@ -3206,7 +1806,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "KAFKA Write-Read Throughput MB/s ",
+      "title": "KAFKA Read Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3222,7 +1822,7 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:175",
+          "$$hashKey": "object:323",
           "format": "MBs",
           "label": null,
           "logBase": 1,
@@ -3231,7 +1831,7 @@
           "show": true
         },
         {
-          "$$hashKey": "object:176",
+          "$$hashKey": "object:324",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -3253,7 +1853,8 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -3263,10 +1864,10 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 9
+        "y": 8
       },
       "hiddenSeries": false,
-      "id": 36,
+      "id": 20,
       "legend": {
         "avg": false,
         "current": false,
@@ -3293,9 +1894,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_RecordsPerSec",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "SBK_KAFKA_Reading_RecordsPerSec",
           "refId": "A"
         }
       ],
@@ -3303,7 +1902,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "KAFKA Write-Read Records/Sec",
+      "title": "KAFKA Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3319,7 +1918,7 @@
       },
       "yaxes": [
         {
-          "format": "iops",
+          "format": "rps",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -3345,6 +1944,7 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
+          "links": [],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -3396,9 +1996,9 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 9
+        "y": 8
       },
-      "id": 52,
+      "id": 44,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -3416,13 +2016,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_AvgLatency",
+          "expr": "SBK_KAFKA_Reading_ns_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_MaxLatency",
+          "expr": "SBK_KAFKA_Reading_ns_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -3430,7 +2030,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "KAFKA Write-Read Avg and Max Latencies (Nanoseconds)",
+      "title": "KAFKA Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -3441,7 +2041,8 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -3451,10 +2052,10 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "hiddenSeries": false,
-      "id": 54,
+      "id": 46,
       "legend": {
         "avg": false,
         "current": false,
@@ -3481,127 +2082,127 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_10",
+          "expr": "SBK_KAFKA_Reading_ns_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_20",
+          "expr": "SBK_KAFKA_Reading_ns_20",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_25",
+          "expr": "SBK_KAFKA_Reading_ns_25",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_30",
+          "expr": "SBK_KAFKA_Reading_ns_30",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_40",
+          "expr": "SBK_KAFKA_Reading_ns_40",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_50",
+          "expr": "SBK_KAFKA_Reading_ns_50",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_60",
+          "expr": "SBK_KAFKA_Reading_ns_60",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_70",
+          "expr": "SBK_KAFKA_Reading_ns_70",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_75",
+          "expr": "SBK_KAFKA_Reading_ns_75",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_80",
+          "expr": "SBK_KAFKA_Reading_ns_80",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_90",
+          "expr": "SBK_KAFKA_Reading_ns_90",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_92_5",
+          "expr": "SBK_KAFKA_Reading_ns_92_25",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_95",
+          "expr": "SBK_KAFKA_Reading_ns_95",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_97_5",
+          "expr": "SBK_KAFKA_Reading_ns_97_5",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_99",
+          "expr": "SBK_KAFKA_Reading_ns_99",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_99_25",
+          "expr": "SBK_KAFKA_Reading_ns_99_25",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_99_5",
+          "expr": "SBK_KAFKA_Reading_ns_99_5",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_99_75",
+          "expr": "SBK_KAFKA_Reading_ns_99_75",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_99_9",
+          "expr": "SBK_KAFKA_Reading_ns_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_99_95",
+          "expr": "SBK_KAFKA_Reading_ns_99_95",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ns_99_99",
+          "expr": "SBK_KAFKA_Reading_ns_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
@@ -3611,7 +2212,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "KAFKA Write-Read Percentiles (Nanoseconds)",
+      "title": "KAFKA Read Percentiles (Nanoseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3627,7 +2228,7 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:240",
+          "$$hashKey": "object:152",
           "format": "ns",
           "label": null,
           "logBase": 1,
@@ -3636,7 +2237,7 @@
           "show": true
         },
         {
-          "$$hashKey": "object:241",
+          "$$hashKey": "object:153",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -3652,10 +2253,10 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "",
       "fieldConfig": {
         "defaults": {
           "custom": {},
+          "links": [],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -3667,23 +2268,23 @@
               },
               {
                 "color": "#EAB839",
-                "value": 1073741824
-              },
-              {
-                "color": "#EF843C",
-                "value": 10737418240
+                "value": 10
               },
               {
                 "color": "#6ED0E0",
-                "value": 10737418240
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
               },
               {
                 "color": "#E24D42",
-                "value": 1099511627776
+                "value": 500
               }
             ]
           },
-          "unit": "decbytes"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -3691,9 +2292,9 @@
         "h": 5,
         "w": 3,
         "x": 8,
-        "y": 20
+        "y": 19
       },
-      "id": 30,
+      "id": 14,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -3706,20 +2307,26 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value_and_name"
       },
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_Bytes_total",
+          "expr": "SBK_KAFKA_Reading_Readers",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "Active",
           "refId": "A"
+        },
+        {
+          "expr": "SBK_KAFKA_Reading_Max_Readers",
+          "interval": "",
+          "legendFormat": "Max",
+          "refId": "B"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "KAFKA Write-Read Bytes Total",
+      "title": "KAFKA Readers",
       "type": "stat"
     },
     {
@@ -3727,9 +2334,9 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
+          "links": [],
           "mappings": [],
           "max": 500,
-          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -3796,9 +2403,9 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 20
+        "y": 19
       },
-      "id": 32,
+      "id": 18,
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -3813,15 +2420,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_MBPerSec",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "SBK_KAFKA_Reading_MBPerSec",
           "refId": "A"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "KAFKA Write-Read Throughput MB/s",
+      "title": "KAFKA Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -3832,7 +2437,8 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -3842,10 +2448,10 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 20
+        "y": 19
       },
       "hiddenSeries": false,
-      "id": 34,
+      "id": 22,
       "legend": {
         "avg": false,
         "current": false,
@@ -3872,55 +2478,55 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_10",
+          "expr": "SBK_KAFKA_Reading_ms_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_25",
+          "expr": "SBK_KAFKA_Reading_ms_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_50",
+          "expr": "SBK_KAFKA_Reading_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_75",
+          "expr": "SBK_KAFKA_Reading_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_90",
+          "expr": "SBK_KAFKA_Reading_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_95",
+          "expr": "SBK_KAFKA_Reading_ms_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_99",
+          "expr": "SBK_KAFKA_Reading_ms_99",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_99_9",
+          "expr": "SBK_KAFKA_Reading_ms_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_99_99",
+          "expr": "SBK_KAFKA_Reading_ms_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -3930,7 +2536,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "KAFKA Write-Read Percentiles (Milliseconds)",
+      "title": "KAFKA Read Percentiles (Milli Seconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3971,10 +2577,8 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": null,
-            "filterable": false
-          },
+          "custom": {},
+          "links": [],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -3986,23 +2590,23 @@
               },
               {
                 "color": "#EAB839",
-                "value": 10
+                "value": 1073741824
               },
               {
                 "color": "#6ED0E0",
-                "value": 50
+                "value": 10737418240
               },
               {
                 "color": "#EF843C",
-                "value": 100
+                "value": 107374182400
               },
               {
                 "color": "#E24D42",
-                "value": 500
+                "value": 1099511627776
               }
             ]
           },
-          "unit": "none"
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -4010,14 +2614,14 @@
         "h": 6,
         "w": 3,
         "x": 8,
-        "y": 25
+        "y": 24
       },
-      "id": 40,
+      "id": 16,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -4025,38 +2629,18 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_Readers",
-          "interval": "",
-          "legendFormat": "Active Readers",
+          "expr": "SBK_KAFKA_Reading_Bytes_total",
           "refId": "A"
-        },
-        {
-          "expr": "SBK_KAFKA_Write_Reading_Max_Readers",
-          "interval": "",
-          "legendFormat": "Max Readers",
-          "refId": "B"
-        },
-        {
-          "expr": "SBK_KAFKA_Write_Reading_Writers",
-          "interval": "",
-          "legendFormat": "Active Writers",
-          "refId": "C"
-        },
-        {
-          "expr": "SBK_KAFKA_Write_Reading_Max_Writers",
-          "interval": "",
-          "legendFormat": "Max Writers",
-          "refId": "D"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "KAFKA Write-Read  Writers and Readers",
+      "title": "KAFKA Read Bytes Total",
       "type": "stat"
     },
     {
@@ -4087,9 +2671,9 @@
         "h": 5,
         "w": 5,
         "x": 11,
-        "y": 26
+        "y": 25
       },
-      "id": 42,
+      "id": 26,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -4107,19 +2691,20 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_LowerDiscardedLatencyRecords_total",
+          "expr": "SBK_KAFKA_Reading_LowerDiscardedLatencyRecords_total",
           "interval": "",
           "legendFormat": "Lower",
+          "queryType": "randomWalk",
           "refId": "A"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_HigherDiscardLatencyRecords_total",
+          "expr": "SBK_KAFKA_Reading_HigherDiscardLatencyRecords_total",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_InvalidLatencyRecords_total",
+          "expr": "SBK_KAFKA_Reading_InvalidLatencyRecords_total",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
@@ -4127,7 +2712,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "KAFKA Write-Read  Discarded Latencies",
+      "title": "KAFKA Read Discarded Latencies",
       "type": "stat"
     },
     {
@@ -4135,6 +2720,7 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
+          "links": [],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -4175,10 +2761,6 @@
               {
                 "color": "#508642",
                 "value": 10000000
-              },
-              {
-                "color": "#CCA300",
-                "value": 100000000
               }
             ]
           },
@@ -4190,9 +2772,9 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 31
+        "y": 30
       },
-      "id": 51,
+      "id": 43,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -4210,13 +2792,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_AvgLatency",
+          "expr": "SBK_KAFKA_Reading_mcs_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_MaxLatency",
+          "expr": "SBK_KAFKA_Reading_mcs_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -4224,7 +2806,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "KAFKA Write-Read Avg and Max Latencies (Microseconds)",
+      "title": "KAFKA Read Avg and Max Latencies (Microseconds)",
       "type": "stat"
     },
     {
@@ -4235,7 +2817,8 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -4245,10 +2828,10 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 31
+        "y": 30
       },
       "hiddenSeries": false,
-      "id": 53,
+      "id": 45,
       "legend": {
         "avg": false,
         "current": false,
@@ -4275,55 +2858,55 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_10",
+          "expr": "SBK_KAFKA_Reading_mcs_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_25",
+          "expr": "SBK_KAFKA_Reading_mcs_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_50",
+          "expr": "SBK_KAFKA_Reading_mcs_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_75",
+          "expr": "SBK_KAFKA_Reading_mcs_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_90",
+          "expr": "SBK_KAFKA_Reading_mcs_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_95",
+          "expr": "SBK_KAFKA_Reading_mcs_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_99",
+          "expr": "SBK_KAFKA_Reading_mcs_99",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_99_9",
+          "expr": "SBK_KAFKA_Reading_mcs_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_mcs_99_99",
+          "expr": "SBK_KAFKA_Reading_mcs_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -4333,7 +2916,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "KAFKA Write-Read Percentiles (Microseconds)",
+      "title": "KAFKA Read Percentiles (Microseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -4375,6 +2958,7 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
+          "links": [],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -4434,14 +3018,10 @@
               },
               {
                 "color": "#0A437C",
-                "value": 200
-              },
-              {
-                "color": "#6D1F62",
                 "value": 500
               },
               {
-                "color": "#584477",
+                "color": "#6D1F62",
                 "value": 1000
               }
             ]
@@ -4454,9 +3034,9 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 31
+        "y": 30
       },
-      "id": 38,
+      "id": 24,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -4474,13 +3054,13 @@
       "pluginVersion": "7.3.7",
       "targets": [
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_AvgLatency",
+          "expr": "SBK_KAFKA_Reading_ms_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
         },
         {
-          "expr": "SBK_KAFKA_Write_Reading_ms_MaxLatency",
+          "expr": "SBK_KAFKA_Reading_ms_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -4488,8 +3068,1428 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "KAFKA Write-Read Avg and Max Latencies (Milliseconds)",
+      "title": "KAFKA Read Avg and Max Latencies (Milliseconds)",
       "type": "stat"
+    },
+    {
+      "collapsed": true,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 56,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "max": 500,
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 200
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 300
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 400
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 600
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 700
+                  },
+                  {
+                    "color": "#447EBC",
+                    "value": 800
+                  },
+                  {
+                    "color": "#C15C17",
+                    "value": 900
+                  },
+                  {
+                    "color": "#890F02",
+                    "value": 1000
+                  }
+                ]
+              },
+              "unit": "MBs"
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 61,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.3.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_MBPerSec",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "KAFKA Write-Read Throughput MB/s ",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:175",
+              "format": "MBs",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:176",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 8,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 36,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.3.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_RecordsPerSec",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "KAFKA Write-Read Records/Sec",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "iops",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 10000000
+                  }
+                ]
+              },
+              "unit": "ns"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 9
+          },
+          "id": 52,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_AvgLatency",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_MaxLatency",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "KAFKA Write-Read Avg and Max Latencies (Nanoseconds)",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 20
+          },
+          "hiddenSeries": false,
+          "id": 54,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.3.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_10",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_20",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_25",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_30",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_40",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_50",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_60",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_70",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_75",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_80",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "J"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_90",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "K"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_92_5",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "L"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_95",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "M"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_97_5",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "N"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "O"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_99_25",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "P"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_99_5",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "Q"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_99_75",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "R"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_99_9",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "S"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_99_95",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "T"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ns_99_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "U"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "KAFKA Write-Read Percentiles (Nanoseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:240",
+              "format": "ns",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:241",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "Prometheus",
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 1073741824
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 10737418240
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 10737418240
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1099511627776
+                  }
+                ]
+              },
+              "unit": "decbytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 3,
+            "x": 8,
+            "y": 20
+          },
+          "id": 30,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_Bytes_total",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "KAFKA Write-Read Bytes Total",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "max": 500,
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 200
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 300
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 400
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 600
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 700
+                  },
+                  {
+                    "color": "#447EBC",
+                    "value": 800
+                  },
+                  {
+                    "color": "#C15C17",
+                    "value": 900
+                  },
+                  {
+                    "color": "#890F02",
+                    "value": 1000
+                  }
+                ]
+              },
+              "unit": "MBs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 5,
+            "x": 11,
+            "y": 20
+          },
+          "id": 32,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": true,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_MBPerSec",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "KAFKA Write-Read Throughput MB/s",
+          "type": "gauge"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 20
+          },
+          "hiddenSeries": false,
+          "id": 34,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.3.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_10",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_25",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_50",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_75",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_90",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_95",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_99_9",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_99_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "KAFKA Write-Read Percentiles (Milliseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 8,
+            "y": 25
+          },
+          "id": 40,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_Readers",
+              "interval": "",
+              "legendFormat": "Active Readers",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_Max_Readers",
+              "interval": "",
+              "legendFormat": "Max Readers",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_Writers",
+              "interval": "",
+              "legendFormat": "Active Writers",
+              "refId": "C"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_Max_Writers",
+              "interval": "",
+              "legendFormat": "Max Writers",
+              "refId": "D"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "KAFKA Write-Read  Writers and Readers",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 11,
+            "y": 26
+          },
+          "id": 42,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_LowerDiscardedLatencyRecords_total",
+              "interval": "",
+              "legendFormat": "Lower",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_HigherDiscardLatencyRecords_total",
+              "interval": "",
+              "legendFormat": "Higher",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_InvalidLatencyRecords_total",
+              "interval": "",
+              "legendFormat": "Invalid/Negative",
+              "refId": "C"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "KAFKA Write-Read  Discarded Latencies",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 10000000
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 100000000
+                  }
+                ]
+              },
+              "unit": "µs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 31
+          },
+          "id": 51,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_AvgLatency",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_MaxLatency",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "KAFKA Write-Read Avg and Max Latencies (Microseconds)",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 8,
+            "y": 31
+          },
+          "hiddenSeries": false,
+          "id": 53,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.3.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_10",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_25",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_50",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_75",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_90",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_95",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_99_9",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_mcs_99_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "KAFKA Write-Read Percentiles (Microseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "µs",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 1
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 5
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 10
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 20
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 30
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 40
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 60
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 70
+                  },
+                  {
+                    "color": "#447EBC",
+                    "value": 80
+                  },
+                  {
+                    "color": "#C15C17",
+                    "value": 90
+                  },
+                  {
+                    "color": "#890F02",
+                    "value": 100
+                  },
+                  {
+                    "color": "#0A437C",
+                    "value": 200
+                  },
+                  {
+                    "color": "#6D1F62",
+                    "value": 500
+                  },
+                  {
+                    "color": "#584477",
+                    "value": 1000
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 31
+          },
+          "id": 38,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_AvgLatency",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_KAFKA_Write_Reading_ms_MaxLatency",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "KAFKA Write-Read Avg and Max Latencies (Milliseconds)",
+          "type": "stat"
+        }
+      ],
+      "title": "Write-Read Performance Benchmarking (End to End Latencies)",
+      "type": "row"
     }
   ],
   "refresh": "5s",
