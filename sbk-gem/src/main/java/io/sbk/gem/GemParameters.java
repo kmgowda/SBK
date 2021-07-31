@@ -25,4 +25,6 @@ public interface GemParameters extends Parameters {
     int getRamPort();
 
     boolean isCopy();
+
+    boolean isDelete();
 }

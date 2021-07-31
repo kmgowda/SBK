@@ -25,6 +25,7 @@ public class GemConfig {
     public String sbkdir;
     public String sbkcommand;
     public boolean copy;
+    public boolean delete;
 
     //override by props file
     public long remoteTimeoutSeconds;

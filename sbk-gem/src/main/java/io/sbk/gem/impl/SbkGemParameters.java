@@ -71,10 +71,11 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
         addOption("sbkcommand", true,
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
         addOption("copy", true, "Copy the SBK package to remote hosts; default: "+ config.copy);
+        addOption("delete", true, "Delete SBK package after benchmark; default: "+ config.delete);
         addOption("localhost", true, "this local RAM host name, default: " + localHost);
         addOption("ramport", true, "RAM port number; default: " + ramPort);
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                            "-copy", "-localhost", "-ramport"};
+                            "-copy", "-delete", "-localhost", "-ramport"};
         this.parsedArgs = null;
     }
 
@@ -92,11 +93,13 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
         localHost = getOptionValue("localhost", localHost);
         ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
         config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
+        config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.sbkcommand, "-gempass",
                 config.gempass, "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
-                "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy), "-localhost", localHost,
-                "-ramport", Integer.toString(ramPort) };
+                "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
+                "-delete", Boolean.toString(config.delete), "-localhost", localHost, "-ramport",
+                Integer.toString(ramPort) };
 
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
@@ -152,5 +155,10 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
     @Override
     public boolean isCopy() {
         return config.copy;
+    }
+
+    @Override
+    public boolean isDelete() {
+        return config.delete;
     }
 }
