@@ -24,23 +24,25 @@ public class Sl4jResultLogger extends SystemLogger {
         log = LoggerFactory.getLogger("SBK");
     }
 
-    private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                       double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        log.info(buildResultString(new StringBuilder(prefix), bytes, records, recsPerSec, mbPerSec, avgLatency,
+        log.info(buildResultString(new StringBuilder(prefix), seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
                 maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 
     @Override
-    public void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                           long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        print(prefix + "(Total) ", bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                           long[] percentileValues) {
+        print(prefix + "(Total) ", seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 }

@@ -57,7 +57,7 @@ public class SbkCSVLogger extends SystemLogger {
     public void openCSV() throws IOException {
         final StringBuilder headerBuilder =
                 new StringBuilder("Action,LatencyTimeUnit,Writers,Readers,MaxWriters,MaxReaders");
-        headerBuilder.append(",MB,Records,Records/Sec,MB/Sec");
+        headerBuilder.append(",ReportSeconds,MB,Records,Records/Sec,MB/Sec");
         headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard");
         for (String percentileName : percentileNames) {
             headerBuilder.append(",Percentile_");
@@ -76,31 +76,31 @@ public class SbkCSVLogger extends SystemLogger {
         }
     }
 
-    public void writeToCSV(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+    public void writeToCSV(String prefix, long seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
-                String.format("%s,%s,%5d,%5d,%5d,%5d,%11.1f,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix,
+                String.format("%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix,
                         timeUnitText, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
-                        mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                        seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                         invalid, lowerDiscard, higherDiscard)
         );
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {
-            data.append(String.format(", %7d", percentileValues[i]));
+            data.append(String.format(",%7d", percentileValues[i]));
         }
         csvWriter.println(data);
     }
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        super.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, percentileValues);
         if (csvEnable) {
-            writeToCSV(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
-                    higherDiscard, percentileValues);
+            writeToCSV(prefix, (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
+                    lowerDiscard, higherDiscard, percentileValues);
         }
     }
 

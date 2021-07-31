@@ -12,6 +12,8 @@ package io.sbk.perl;
 public interface Print {
     /**
      * Print the Periodic performance results.
+     *
+     * @param seconds reporting seconds
      * @param bytes number of bytes read/write
      * @param records data to write.
      * @param recsPerSec  records per second.
@@ -23,6 +25,6 @@ public interface Print {
      * @param higherDiscard number of discarded latencies which are higher than maximum latency.
      * @param percentiles Array of percentiles.
      */
-    void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentiles);
 }

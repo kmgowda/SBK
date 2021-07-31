@@ -139,18 +139,19 @@ public class SbkPrometheusLogger extends SbkCSVLogger {
         }
     }
 
-    private void printMetrics(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
-                              long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        super.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+    private void printMetrics(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                              double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                              long[] percentileValues) {
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
-        prometheusServer.print( bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
-               long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        printer.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+        printer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
     }
 }

@@ -89,7 +89,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     public void openCSV() throws IOException {
         final StringBuilder headerBuilder = new StringBuilder("Header,Connections,MaxConnections");
         headerBuilder.append(",Action,LatencyTimeUnit,Writers,Readers,MaxWriters,MaxReaders");
-        headerBuilder.append(",MB,Records,Records/Sec,MB/Sec");
+        headerBuilder.append(",ReportSeconds,MB,Records,Records/Sec,MB/Sec");
         headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard");
         for (String percentileName : percentileNames) {
             headerBuilder.append(",Percentile_");
@@ -100,54 +100,55 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     }
 
     @Override
-    public void writeToCSV(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+    public void writeToCSV(String prefix, long seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
-                String.format("%s,%5d,%5d,%s,%s,%5d,%5d,%5d,%5d,%11.1f,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d",
+                String.format("%s,%5d,%5d,%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d",
                         SBK_RAM_PREFIX, connections.get(), maxConnections.get(),
                         prefix, timeUnitText, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
-                        mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                        seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                         invalid, lowerDiscard, higherDiscard)
         );
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {
-            data.append(String.format(", %7d", percentileValues[i]));
+            data.append(String.format(",%7d", percentileValues[i]));
         }
         csvWriter.println(data);
     }
 
-    private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+    private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
         StringBuilder out = new StringBuilder(SBK_RAM_PREFIX);
         out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
-        System.out.print(buildResultString(out, bytes, records, recsPerSec, mbPerSec, avgLatency,
+        System.out.print(buildResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
                 maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
         if (prometheusServer != null) {
-            prometheusServer.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+            prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, percentileValues);
         }
         if (csvEnable) {
-            writeToCSV(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
-                    higherDiscard, percentileValues);
+            writeToCSV(prefix, (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
+                    lowerDiscard, higherDiscard, percentileValues);
         }
     }
 
     @Override
-    public void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                           long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentilesValues) {
-        print("Total : " + prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                           long[] percentilesValues) {
+        print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentilesValues);
     }
 
