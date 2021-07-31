@@ -221,13 +221,13 @@ public class SystemLogger implements Logger {
         readers.decrementAndGet();
     }
 
-    public void appendPercentiles(StringBuilder out, double mBytes, long records, double recsPerSec, double mbPerSec,
-                                       double avgLatency, long maxLatency, long invalid, long lowerDiscard,
+    public void appendPercentiles(StringBuilder out, long seconds, double mBytes, long records, double recsPerSec,
+                                  double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                        long higherDiscard, long[] percentileValues) {
-        out.append(String.format("%11.1f MB, %11d records, %9.1f records/sec, %8.2f MB/sec"
+        out.append(String.format("%8d seconds, %11.1f MB, %11d records, %9.1f records/sec, %8.2f MB/sec"
                             +", %8.1f %s avg latency, %7d %s max latency;"
                             + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;",
-                mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,
+                seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,
                 timeUnitText, invalid, lowerDiscard, higherDiscard));
         out.append(" Latency Percentiles: ");
 
@@ -245,29 +245,29 @@ public class SystemLogger implements Logger {
         out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
     }
 
-    public String buildResultString(StringBuilder out, long bytes, long records, double recsPerSec, double mbPerSec,
-                                    double avgLatency, long maxLatency, long invalid, long lowerDiscard,
+    public String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
+                                    double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                     long higherDiscard, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         appendWritesAndReaders(out);
-        appendPercentiles(out, mBytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
+        appendPercentiles(out, (long) seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentileValues);
         out.append(".\n");
         return out.toString();
     }
 
-    private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+    private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
 
-        System.out.print(buildResultString(new StringBuilder(prefix), bytes, records, recsPerSec, mbPerSec, avgLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
+        System.out.print(buildResultString(new StringBuilder(prefix), seconds, bytes, records, recsPerSec, mbPerSec,
+                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
     }
 
@@ -275,7 +275,7 @@ public class SystemLogger implements Logger {
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long[] percentilesValues) {
-        print("Total : " + prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentilesValues);
     }
 }

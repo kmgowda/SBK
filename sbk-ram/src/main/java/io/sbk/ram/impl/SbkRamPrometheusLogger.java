@@ -118,13 +118,13 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
         csvWriter.println(data);
     }
 
-    private void print(String prefix, long bytes, long records, double recsPerSec, double mbPerSec,
+    private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long[] percentileValues) {
         StringBuilder out = new StringBuilder(SBK_RAM_PREFIX);
         out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
-        System.out.print(buildResultString(out, bytes, records, recsPerSec, mbPerSec, avgLatency,
+        System.out.print(buildResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
                 maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
     }
 
@@ -132,7 +132,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
         if (prometheusServer != null) {
             prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
@@ -148,7 +148,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long[] percentilesValues) {
-        print("Total : " + prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentilesValues);
     }
 
