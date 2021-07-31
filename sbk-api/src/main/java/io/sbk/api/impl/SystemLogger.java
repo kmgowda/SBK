@@ -224,7 +224,7 @@ public class SystemLogger implements Logger {
     public void appendPercentiles(StringBuilder out, long seconds, double mBytes, long records, double recsPerSec,
                                   double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                        long higherDiscard, long[] percentileValues) {
-        out.append(String.format("%8d seconds, %11.1f MB, %11d records, %9.1f records/sec, %8.2f MB/sec"
+        out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
                             +", %8.1f %s avg latency, %7d %s max latency;"
                             + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;",
                 seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,

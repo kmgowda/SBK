@@ -81,7 +81,7 @@ public class SbkCSVLogger extends SystemLogger {
                        long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
-                String.format("%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%11d,%9.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix,
+                String.format("%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix,
                         timeUnitText, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
                         seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                         invalid, lowerDiscard, higherDiscard)
