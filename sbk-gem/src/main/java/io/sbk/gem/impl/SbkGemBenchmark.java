@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -174,39 +175,17 @@ public class SbkGemBenchmark implements GemBenchmark {
             throw new InterruptedException();
         }
         Printer.log.info("SBK-GEM: Matching Java Major Version: " +javaMajorVersion +" Success..");
+        final String remoteDir = Paths.get(params.getSbkDir()).getFileName().toString();
 
         if (params.isCopy()) {
 
-            final SshResponseStream[] results = createMultiSshResponseStream(nodes.length, false);
-            consMap.reset();
-            for (int i = 0; i < nodes.length; i++) {
-                if (consMap.isVisited(nodes[i].connection)) {
-                    cfArray[i] = new CompletableFuture<>();
-                    cfArray[i].complete(null);
-                } else {
-                    consMap.visit(nodes[i].connection);
-                    cfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
-                            config.remoteTimeoutSeconds, results[i]);
-                }
+            if (remoteDirectoryDelete()) {
+                Printer.log.info("SBK-GEM: Removing the remote directory: '" + remoteDir + "'  Success..");
+            } else {
+                String errStr = "SBK-GEM: Removing the remote directory: '" + remoteDir + "'  failed..";
+                Printer.log.info(errStr);
+                throw new InterruptedException(errStr);
             }
-            final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(cfArray);
-
-            for (int i = 0; i < config.maxIterations && !rmFuture.isDone(); i++) {
-                try {
-                    rmFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
-                } catch (TimeoutException ex) {
-                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command: " + cmd + " timeout");
-                }
-            }
-
-            if (!rmFuture.isDone()) {
-                final String errMsg = "SBK-GEM: command:  'rm -rf' time out after " + config.maxIterations +
-                        " iterations";
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-            final String remoteSBKdir = Paths.get(params.getSbkDir()).getFileName().toString();
-            Printer.log.info("SBK-GEM: Removing older version of remote directory: '" + remoteSBKdir + "'  Success..");
 
             final SshResponseStream[] mkDirResults = createMultiSshResponseStream(nodes.length, false);
             consMap.reset();
@@ -222,12 +201,11 @@ public class SbkGemBenchmark implements GemBenchmark {
             }
 
             final CompletableFuture<Void> mkDirFuture = CompletableFuture.allOf(cfArray);
-
             for (int i = 0; !mkDirFuture.isDone(); i++) {
                 try {
                     mkDirFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
                 } catch (TimeoutException ex) {
-                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command '" + cmd + "' timeout");
+                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command 'mkdir -p' timeout");
                 }
             }
 
@@ -237,7 +215,7 @@ public class SbkGemBenchmark implements GemBenchmark {
                 throw new InterruptedException(errMsg);
             }
 
-            Printer.log.info("SBK-GEM: Creating remote directory: '" + remoteSBKdir + "'  Success..");
+            Printer.log.info("SBK-GEM: Creating remote directory: '" + remoteDir + "'  Success..");
             consMap.reset();
             for (int i = 0; i < nodes.length; i++) {
                 if (consMap.isVisited(nodes[i].connection)) {
@@ -295,6 +273,40 @@ public class SbkGemBenchmark implements GemBenchmark {
     }
 
 
+    private boolean remoteDirectoryDelete() throws InterruptedException, ConnectException {
+        final CompletableFuture<?>[] rmCfArray = new CompletableFuture[nodes.length];
+        final SshResponseStream[] results = createMultiSshResponseStream(nodes.length, false);
+        consMap.reset();
+        for (int i = 0; i < nodes.length; i++) {
+            if (consMap.isVisited(nodes[i].connection)) {
+                rmCfArray[i] = new CompletableFuture<>();
+                rmCfArray[i].complete(null);
+            } else {
+                consMap.visit(nodes[i].connection);
+                rmCfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
+                        config.remoteTimeoutSeconds, results[i]);
+            }
+        }
+        final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(rmCfArray);
+
+        for (int i = 0; i < config.maxIterations && !rmFuture.isDone(); i++) {
+            try {
+                rmFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
+            } catch (TimeoutException | ExecutionException ex) {
+                Printer.log.info("SBK-GEM [" + (i + 1) + "]: remote directory delete timeout");
+            }
+        }
+
+        if (!rmFuture.isDone()) {
+            final String errMsg = "SBK-GEM: command:  'rm -rf' time out after " + config.maxIterations +
+                    " iterations";
+            Printer.log.error(errMsg);
+            throw new InterruptedException(errMsg);
+        }
+        return true;
+    }
+
+
     private static int parseJavaVersion( String text) {
         if (StringUtils.isEmpty(text)) {
             return Integer.MAX_VALUE;
@@ -333,6 +345,16 @@ public class SbkGemBenchmark implements GemBenchmark {
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
+            if (params.isDelete()) {
+                try {
+                    remoteDirectoryDelete();
+                } catch (InterruptedException | ConnectException rmEx) {
+                    rmEx.printStackTrace();
+                }
+            }
+            for (SbkSsh node: nodes) {
+                node.stop();
+            }
             ramBenchmark.stop();
             if (ex != null) {
                 Printer.log.warn("SBK GEM Benchmark Shutdown with Exception " + ex);
@@ -347,9 +369,6 @@ public class SbkGemBenchmark implements GemBenchmark {
 
     @Override
     public void stop() {
-        for (SbkSsh node: nodes) {
-            node.stop();
-        }
         shutdown(null);
     }
 }
