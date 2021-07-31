@@ -130,12 +130,12 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
 
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
         print(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, percentileValues);
         if (prometheusServer != null) {
-            prometheusServer.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+            prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, percentileValues);
         }
         if (csvEnable) {
@@ -145,8 +145,9 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     }
 
     @Override
-    public void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                           long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentilesValues) {
+    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                           long[] percentilesValues) {
         print("Total : " + prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, percentilesValues);
     }

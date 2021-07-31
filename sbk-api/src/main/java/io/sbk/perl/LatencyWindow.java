@@ -57,7 +57,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         final double mbPerSec = (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0d)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
         long[] pecs = getPercentiles(copyLatencies);
-        logger.print(this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
+        logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                 pecs);

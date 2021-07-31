@@ -58,6 +58,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Print the Total Periodic performance results.
+     * @param seconds reporting seconds
      * @param bytes number of bytes read/write
      * @param records data to write.
      * @param recsPerSec  records per second.
@@ -69,7 +70,7 @@ public interface PerformanceLogger extends Print {
      * @param higherDiscard number of discarded latencies which are higher than maximum latency.
      * @param percentiles Array of percentiles.
      */
-    void printTotal(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                     long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentiles);
 
     /**

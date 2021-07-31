@@ -94,9 +94,9 @@ public class SbkCSVLogger extends SystemLogger {
     }
 
     @Override
-    public void print(long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
-        super.print(bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, percentileValues);
         if (csvEnable) {
             writeToCSV(prefix, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
