@@ -58,7 +58,7 @@ public class SbkCSVLogger extends SystemLogger {
         final StringBuilder headerBuilder =
                 new StringBuilder("Action,LatencyTimeUnit,Writers,Readers,MaxWriters,MaxReaders");
         headerBuilder.append(",ReportSeconds,MB,Records,Records/Sec,MB/Sec");
-        headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard");
+        headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard, SLC%");
         for (String percentileName : percentileNames) {
             headerBuilder.append(",Percentile_");
             headerBuilder.append(percentileName);
@@ -78,13 +78,13 @@ public class SbkCSVLogger extends SystemLogger {
 
     public void writeToCSV(String prefix, long seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                       long[] percentileValues) {
+                       double slc, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
-                String.format("%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d", prefix,
+                String.format("%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d,%2.1f", prefix,
                         timeUnitText, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
                         seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                        invalid, lowerDiscard, higherDiscard)
+                        invalid, lowerDiscard, higherDiscard, slc)
         );
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {
@@ -101,7 +101,7 @@ public class SbkCSVLogger extends SystemLogger {
                 lowerDiscard, higherDiscard, slc, percentileValues);
         if (csvEnable) {
             writeToCSV(prefix, (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
-                    lowerDiscard, higherDiscard, percentileValues);
+                    lowerDiscard, higherDiscard, slc, percentileValues);
         }
     }
 

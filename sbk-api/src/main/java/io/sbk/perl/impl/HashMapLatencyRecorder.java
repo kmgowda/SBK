@@ -16,6 +16,8 @@ import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
+import io.sbk.system.Printer;
+
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.HashMap;
 import java.util.Iterator;
