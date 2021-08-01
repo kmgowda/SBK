@@ -55,14 +55,13 @@ abstract public class LatencyWindow extends LatencyRecorder {
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
         final double recsPerSec = this.totalRecords / elapsedSec;
-        final double mbPerSec = (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0d)) / elapsedSec;
+        final double mbPerSec = (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
         copyPercentiles(percentiles, copyLatencies);
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                getSLC(this.percentiles.minLatency, this.percentiles.maxLatency, this.percentiles.latencies),
-                this.percentiles.latencies);
+                getSLC(this.percentiles.latencies), this.percentiles.latencies);
     }
 
     final public double getSLC(long minLatency, long maxLatency, long[] latencies) {
@@ -74,7 +73,14 @@ abstract public class LatencyWindow extends LatencyRecorder {
         for (long latency : latencies) {
             slcFactor += latency / maxBase;
         }
-        return (1 - slcFactor / (latencies.length +1)) * 100;
+        return (1.0 - slcFactor / (latencies.length +1)) * 100;
+    }
+
+    final public double getSLC(long[] latencies) {
+        if (latencies.length == 0) {
+            return 0;
+        }
+        return ((latencies[latencies.length-1] - latencies[0]) * 100.0) / latencies[latencies.length-1];
     }
 
     /**
