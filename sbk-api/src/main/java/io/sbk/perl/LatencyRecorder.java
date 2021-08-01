@@ -57,6 +57,8 @@ public class LatencyRecorder extends LatencyRecord {
         this.higherLatencyDiscardRecords += record.higherLatencyDiscardRecords;
         this.validLatencyRecords += record.validLatencyRecords;
         this.maxLatency = Math.max(this.maxLatency, record.maxLatency);
+        this.minValidLatency = Math.min(this.minValidLatency, record.minValidLatency);
+        this.maxValidLatency = Math.max(this.maxValidLatency, record.maxValidLatency);
     }
 
     /**
@@ -81,6 +83,8 @@ public class LatencyRecorder extends LatencyRecord {
                 this.higherLatencyDiscardRecords += events;
             } else {
                 this.validLatencyRecords += events;
+                this.minValidLatency = Math.min(this.minValidLatency, latency);
+                this.maxValidLatency = Math.max(this.maxValidLatency, latency);
                 return true;
             }
         }

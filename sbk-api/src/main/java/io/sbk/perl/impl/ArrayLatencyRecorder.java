@@ -57,6 +57,9 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
             percentiles.indexes[i] = (long) (validLatencyRecords * percentiles.fractions[i]);
             percentiles.latencies[i] = 0;
         }
+        final double maxBase = maxValidLatency * 1.0;
+        double slcFactor = minValidLatency  / maxBase;
+        int cnt = 1;
 
         for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
 
@@ -69,7 +72,9 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                 while (index < percentiles.indexes.length) {
                     if (percentiles.indexes[index] >= cur && percentiles.indexes[index] < (cur + latencies[i])) {
                         percentiles.latencies[index] = i + lowLatency;
+                        slcFactor += percentiles.latencies[index] / maxBase;
                         index += 1;
+                        cnt += 1;
                     } else {
                         break;
                     }
@@ -78,6 +83,7 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                 latencies[i] = 0;
             }
         }
+        percentiles.slc = (1 - (slcFactor / cnt)) * 100.0;
     }
 
     @Override

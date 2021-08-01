@@ -69,6 +69,10 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             percentiles.latencies[i] = 0;
         }
 
+        final double maxBase = maxValidLatency * 1.0;
+        double slcFactor = minValidLatency / maxBase;
+        int cnt = 1;
+
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
         while (keys.hasNext()) {
             final long key  = keys.next();
@@ -83,6 +87,9 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
                 if (percentiles.indexes[index] >= cur && percentiles.indexes[index] <  next) {
                     percentiles.latencies[index] = key;
                     index += 1;
+                    slcFactor += percentiles.latencies[index] / maxBase;
+                    index += 1;
+                    cnt += 1;
                 } else {
                     break;
                 }
@@ -91,6 +98,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             latencies.remove(key);
         }
         hashMapBytesCount = 0;
+        percentiles.slc = (1 - (slcFactor / cnt)) * 100.0;
     }
 
 
