@@ -141,17 +141,18 @@ public class SbkPrometheusLogger extends SbkCSVLogger {
 
     private void printMetrics(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                               double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                              long[] percentileValues) {
+                              double slc, long[] percentileValues) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc, percentileValues);
         prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc, percentileValues);
     }
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                      double slc, long[] percentileValues) {
         printer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc,  percentileValues);
     }
 }

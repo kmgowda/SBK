@@ -20,7 +20,6 @@ public class LatencyRecord {
     public long totalLatency;
     public long maxLatency;
 
-
     public LatencyRecord() {
         reset();
     }

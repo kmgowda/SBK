@@ -25,24 +25,25 @@ public class Sl4jResultLogger extends SystemLogger {
     }
 
     private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                       double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+                       double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                       double slc, long[] percentileValues) {
         log.info(buildResultString(new StringBuilder(prefix), seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc, percentileValues));
     }
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                      double slc, long[] percentileValues) {
         print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc, percentileValues);
     }
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long[] percentileValues) {
+                           double slc, long[] percentileValues) {
         print(prefix + "(Total) ", seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc, percentileValues);
     }
 }
