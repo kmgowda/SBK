@@ -11,14 +11,15 @@
 package io.sbk.perl;
 
 abstract public class LatencyWindow extends LatencyRecorder {
-    final public double[] percentileFractions;
+    final public LatencyPercentiles percentiles;
     final public Time time;
     public long startTime;
+
 
     public LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                         double[] percentilesFractions, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
-        this.percentileFractions = percentilesFractions;
+        this.percentiles = new LatencyPercentiles(percentilesFractions);
         this.time = time;
     }
 
@@ -56,18 +57,18 @@ abstract public class LatencyWindow extends LatencyRecorder {
         final double recsPerSec = this.totalRecords / elapsedSec;
         final double mbPerSec = (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0d)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
-        long[] pecs = getPercentiles(copyLatencies);
+        copyPercentiles(percentiles, copyLatencies);
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                pecs);
+                this.percentiles.latencies);
     }
 
 
     /**
      * get the Percentiles.
+     * @param percentiles Copy Percentiles
      * @param reportLatencies  Copy Latency records.
-     * @return Array of percentiles.
      */
-    abstract public long[] getPercentiles(ReportLatencies reportLatencies);
+    abstract public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies reportLatencies);
 }

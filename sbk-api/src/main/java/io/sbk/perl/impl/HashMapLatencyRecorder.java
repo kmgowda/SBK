@@ -10,6 +10,7 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.perl.LatencyPercentiles;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
@@ -55,9 +56,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    final public long[] getPercentiles(ReportLatencies copyLatencies) {
-        final long[] values = new long[percentileFractions.length];
-        final long[] percentileIds = new long[percentileFractions.length];
+    final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
         long cur = 0;
         int index = 0;
 
@@ -65,9 +64,9 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             copyLatencies.reportLatencyRecord(this);
         }
 
-        for (int i = 0; i < percentileIds.length; i++) {
-            percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
-            values[i] = 0;
+        for (int i = 0; i < percentiles.fractions.length; i++) {
+            percentiles.indexes[i] = (long) (validLatencyRecords * percentiles.fractions[i]);
+            percentiles.latencies[i] = 0;
         }
 
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
@@ -80,9 +79,9 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
                 copyLatencies.reportLatency(key, val);
             }
 
-            while (index < values.length) {
-                if (percentileIds[index] >= cur && percentileIds[index] <  next) {
-                    values[index] = key;
+            while (index < percentiles.indexes.length) {
+                if (percentiles.indexes[index] >= cur && percentiles.indexes[index] <  next) {
+                    percentiles.latencies[index] = key;
                     index += 1;
                 } else {
                     break;
@@ -92,7 +91,6 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             latencies.remove(key);
         }
         hashMapBytesCount = 0;
-        return values;
     }
 
 
