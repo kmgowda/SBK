@@ -71,9 +71,6 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
         }
 
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
-        percentiles.minLatency = 0;
-        percentiles.maxLatency = 0;
-        boolean first = true;
         while (keys.hasNext()) {
             final long latency  = keys.next();
             final long count = latencies.get(latency);
@@ -82,11 +79,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             if (copyLatencies != null) {
                 copyLatencies.reportLatency(latency, count);
             }
-            if (first) {
-                first = false;
-                percentiles.minLatency = latency;
-            }
-            percentiles.maxLatency = latency;
+
             while (index < percentiles.indexes.length) {
                 if (percentiles.indexes[index] >= cur && percentiles.indexes[index] <  next) {
                     percentiles.latencies[index] = latency;
