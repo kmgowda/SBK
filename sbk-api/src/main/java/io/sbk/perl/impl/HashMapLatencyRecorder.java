@@ -86,7 +86,6 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             while (index < percentiles.indexes.length) {
                 if (percentiles.indexes[index] >= cur && percentiles.indexes[index] <  next) {
                     percentiles.latencies[index] = key;
-                    index += 1;
                     slcFactor += percentiles.latencies[index] / maxBase;
                     index += 1;
                     cnt += 1;

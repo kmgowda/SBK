@@ -61,7 +61,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                this.percentiles.latencies);
+                this.percentiles.slc, this.percentiles.latencies);
     }
 
 

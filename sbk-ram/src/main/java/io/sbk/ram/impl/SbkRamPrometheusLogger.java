@@ -120,23 +120,24 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
 
     private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                       long[] percentileValues) {
+                       double slc, long[] percentileValues) {
         StringBuilder out = new StringBuilder(SBK_RAM_PREFIX);
         out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
         System.out.print(buildResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, percentileValues));
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc, percentileValues));
     }
 
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long[] percentileValues) {
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                      double slc, long[] percentileValues) {
         print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, percentileValues);
+                higherDiscard, slc, percentileValues);
         if (prometheusServer != null) {
             prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                    invalid, lowerDiscard, higherDiscard, percentileValues);
+                    invalid, lowerDiscard, higherDiscard, slc, percentileValues);
         }
         if (csvEnable) {
             writeToCSV(prefix, (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
@@ -147,9 +148,9 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long[] percentilesValues) {
+                           double slc, long[] percentilesValues) {
         print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, percentilesValues);
+                invalid, lowerDiscard, higherDiscard, slc, percentilesValues);
     }
 
 
