@@ -71,6 +71,8 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
         }
 
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
+        percentiles.minLatency = 0;
+        percentiles.maxLatency = 0;
         boolean first = true;
         while (keys.hasNext()) {
             final long latency  = keys.next();

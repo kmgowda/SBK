@@ -66,6 +66,9 @@ abstract public class LatencyWindow extends LatencyRecorder {
     }
 
     final public double getSLC(long minLatency, long maxLatency, long[] latencies) {
+        if (maxLatency <= 0) {
+            return 0;
+        }
         final double maxBase = maxLatency * 1.0;
         double slcFactor = minLatency / maxBase;
         for (long latency : latencies) {

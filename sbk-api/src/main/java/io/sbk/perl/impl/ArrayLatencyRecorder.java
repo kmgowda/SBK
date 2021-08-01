@@ -58,6 +58,8 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
             percentiles.latencies[i] = 0;
         }
 
+        percentiles.minLatency = 0;
+        percentiles.maxLatency = 0;
         boolean first = true;
         for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
             if (latencies[i] > 0) {
