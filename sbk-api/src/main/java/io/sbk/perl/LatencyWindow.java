@@ -64,12 +64,12 @@ abstract public class LatencyWindow extends LatencyRecorder {
                 getSLC(this.percentiles.latencies), this.percentiles.latencies);
     }
 
-    final public double getSLC(long minLatency, long maxLatency, long[] latencies) {
-        if (maxLatency <= 0) {
+    final public double getSLC(long l, long h, long[] latencies) {
+        if (h <= 0) {
             return 0;
         }
-        final double maxBase = maxLatency * 1.0;
-        double slcFactor = minLatency / maxBase;
+        final double maxBase = h * 1.0;
+        double slcFactor = l / maxBase;
         for (long latency : latencies) {
             slcFactor += latency / maxBase;
         }
@@ -77,11 +77,18 @@ abstract public class LatencyWindow extends LatencyRecorder {
     }
 
     final public double getSLC(long[] latencies) {
-        if (latencies.length == 0) {
+        if (latencies.length == 0 || latencies[latencies.length-1] <= 0) {
             return 0;
         }
-        return ((latencies[latencies.length-1] - latencies[0]) * 100.0) / latencies[latencies.length-1];
+        final int size = latencies.length;
+        final double maxVal = latencies[size-1] * 1.0;
+        double slcFactor = 0;
+        for (long val : latencies) {
+            slcFactor += val / maxVal;
+        }
+        return (1.0 - slcFactor / size) * 100;
     }
+
 
     /**
      * get the Percentiles.
