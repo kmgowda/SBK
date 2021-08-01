@@ -117,6 +117,9 @@ public class SystemLogger implements Logger {
             throw  ex;
         }
 
+        //copy the default values
+        minLatency = loggerConfig.minLatency;
+        maxLatency = loggerConfig.maxLatency;
         Time convertTime = null;
         if (timeUnit == TimeUnit.ms) {
             if (loggerConfig.timeUnit == TimeUnit.ns) {

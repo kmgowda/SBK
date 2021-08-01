@@ -10,6 +10,7 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.perl.LatencyPercentiles;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
@@ -44,9 +45,7 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
 
 
     @Override
-    final public long[] getPercentiles(ReportLatencies copyLatencies) {
-        final long[] values = new long[percentileFractions.length];
-        final long[] percentileIds = new long[percentileFractions.length];
+    final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
         long cur = 0;
         int index = 0;
 
@@ -54,9 +53,9 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
             copyLatencies.reportLatencyRecord(this);
         }
 
-        for (int i = 0; i < percentileIds.length; i++) {
-            percentileIds[i] = (long) (validLatencyRecords * percentileFractions[i]);
-            values[i] = 0;
+        for (int i = 0; i < percentiles.fractions.length; i++) {
+            percentiles.indexes[i] = (long) (validLatencyRecords * percentiles.fractions[i]);
+            percentiles.latencies[i] = 0;
         }
 
         for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
@@ -67,9 +66,9 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                     copyLatencies.reportLatency(i, latencies[i]);
                 }
 
-                while (index < values.length) {
-                    if (percentileIds[index] >= cur && percentileIds[index] < (cur + latencies[i])) {
-                        values[index] = i + lowLatency;
+                while (index < percentiles.indexes.length) {
+                    if (percentiles.indexes[index] >= cur && percentiles.indexes[index] < (cur + latencies[i])) {
+                        percentiles.latencies[index] = i + lowLatency;
                         index += 1;
                     } else {
                         break;
@@ -79,7 +78,6 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                 latencies[i] = 0;
             }
         }
-        return values;
     }
 
     @Override
