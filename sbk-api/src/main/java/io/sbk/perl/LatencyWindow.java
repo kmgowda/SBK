@@ -61,9 +61,18 @@ abstract public class LatencyWindow extends LatencyRecorder {
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                this.percentiles.slc, this.percentiles.latencies);
+                getSLC(this.percentiles.minLatency, this.percentiles.maxLatency, this.percentiles.latencies),
+                this.percentiles.latencies);
     }
 
+    final public double getSLC(long minLatency, long maxLatency, long[] latencies) {
+        final double maxBase = maxLatency * 1.0;
+        double slcFactor = minLatency / maxBase;
+        for (long latency : latencies) {
+            slcFactor += latency / maxBase;
+        }
+        return (1 - slcFactor / (latencies.length +1)) * 100;
+    }
 
     /**
      * get the Percentiles.

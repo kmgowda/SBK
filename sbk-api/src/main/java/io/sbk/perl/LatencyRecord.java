@@ -19,9 +19,6 @@ public class LatencyRecord {
     public long totalBytes;
     public long totalLatency;
     public long maxLatency;
-    public long minValidLatency;
-    public long maxValidLatency;
-
 
     public LatencyRecord() {
         reset();
@@ -39,8 +36,6 @@ public class LatencyRecord {
         this.totalBytes = 0;
         this.maxLatency = 0;
         this.totalLatency = 0;
-        this.minValidLatency = 0;
-        this.maxValidLatency = 0;
     }
 
 }

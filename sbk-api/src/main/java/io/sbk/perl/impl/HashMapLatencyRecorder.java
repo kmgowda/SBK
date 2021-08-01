@@ -16,7 +16,6 @@ import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.PerlConfig;
 import io.sbk.perl.Time;
-import io.sbk.system.Printer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.HashMap;
@@ -71,35 +70,33 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             percentiles.latencies[i] = 0;
         }
 
-        final double maxBase = maxValidLatency * 1.0;
-        double slcFactor = minValidLatency / maxBase;
-        int cnt = 1;
-
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
+        boolean first = true;
         while (keys.hasNext()) {
-            final long key  = keys.next();
-            final long val = latencies.get(key);
-            final long next =  cur + val;
+            final long latency  = keys.next();
+            final long count = latencies.get(latency);
+            final long next =  cur + count;
 
             if (copyLatencies != null) {
-                copyLatencies.reportLatency(key, val);
+                copyLatencies.reportLatency(latency, count);
             }
-
+            if (first) {
+                first = false;
+                percentiles.minLatency = latency;
+            }
+            percentiles.maxLatency = latency;
             while (index < percentiles.indexes.length) {
                 if (percentiles.indexes[index] >= cur && percentiles.indexes[index] <  next) {
-                    percentiles.latencies[index] = key;
-                    slcFactor += percentiles.latencies[index] / maxBase;
+                    percentiles.latencies[index] = latency;
                     index += 1;
-                    cnt += 1;
                 } else {
                     break;
                 }
             }
             cur = next;
-            latencies.remove(key);
+            latencies.remove(latency);
         }
         hashMapBytesCount = 0;
-        percentiles.slc = (1 - (slcFactor / cnt)) * 100.0;
     }
 
 
