@@ -65,16 +65,16 @@ abstract public class LatencyWindow extends LatencyRecorder {
     }
     
     final public double getSLC(long[] latencies) {
-        final int size = latencies.length;
-        if (size == 0 || latencies[size-1] <= 0) {
+        final int h = latencies.length-1;
+        if (h <= 0 || latencies[h] <= 0) {
             return 0;
         }
-        final double maxVal = latencies[size-1] * 1.0;
+        final double maxVal = latencies[h] * 1.0;
         double slcFactor = 0;
-        for (long val : latencies) {
-            slcFactor += val / maxVal;
+        for (int i = 0; i < h; i++) {
+            slcFactor += latencies[i] / maxVal;
         }
-        return (1.0 - slcFactor / size) * 100;
+        return (1.0 - slcFactor / h) * 100;
     }
 
 
