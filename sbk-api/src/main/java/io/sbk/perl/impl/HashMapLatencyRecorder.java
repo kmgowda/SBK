@@ -68,6 +68,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
         for (int i = 0; i < percentiles.fractions.length; i++) {
             percentiles.indexes[i] = (long) (validLatencyRecords * percentiles.fractions[i]);
             percentiles.latencies[i] = 0;
+            percentiles.latencyCount[index] = 0;
         }
 
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
@@ -83,6 +84,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
             while (index < percentiles.indexes.length) {
                 if (percentiles.indexes[index] >= cur && percentiles.indexes[index] <  next) {
                     percentiles.latencies[index] = latency;
+                    percentiles.latencyCount[index] = count;
                     index += 1;
                 } else {
                     break;
