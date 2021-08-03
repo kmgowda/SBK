@@ -13,11 +13,13 @@ final public class LatencyPercentiles {
     final public double[] fractions;
     final public long[] latencies;
     final public long[] indexes;
+    final public long[] latencyCount;
 
     public LatencyPercentiles(double[] percentileFractions) {
         this.fractions = percentileFractions;
         this.latencies = new long[this.fractions.length];
         this.indexes = new long[this.fractions.length];
+        this.latencyCount = new long[this.fractions.length];
     }
 
 }
