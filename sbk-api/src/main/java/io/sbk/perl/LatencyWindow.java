@@ -14,6 +14,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
     final public LatencyPercentiles percentiles;
     final public Time time;
     public long startTime;
+    final private double[] slc;
 
 
     public LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
@@ -21,6 +22,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
         this.percentiles = new LatencyPercentiles(percentilesFractions);
         this.time = time;
+        this.slc = new double[2];
     }
 
     /**
@@ -58,23 +60,39 @@ abstract public class LatencyWindow extends LatencyRecorder {
         final double mbPerSec = (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0)) / elapsedSec;
         final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
         copyPercentiles(percentiles, copyLatencies);
+        getSLC(percentiles, slc);
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                getSLC(this.percentiles.latencies), this.percentiles.latencies);
+                slc[1], this.percentiles.latencies);
     }
     
-    final public double getSLC(long[] latencies) {
-        final int h = latencies.length-1;
-        if (h <= 0 || latencies[h] <= 0) {
-            return 0;
+    final public void getSLC(LatencyPercentiles percentiles, double[] slc) {
+        slc[0] = 0;
+        slc[1] = 0;
+        final int h = percentiles.latencies.length-1;
+        if (h <= 0 || percentiles.latencies[h] <= 0) {
+            return;
         }
-        final double maxVal = latencies[h] * 1.0;
-        double slcFactor = 0;
+        final double maxVal = percentiles.latencies[h] * 1.0;
+        final double midVal = percentiles.medianLatency * 1.0;
+        int cnt1 = 0;
+        int cnt2 = 0;
         for (int i = 0; i < h; i++) {
-            slcFactor += latencies[i] / maxVal;
+            if (percentiles.latencies[i] < midVal) {
+                slc[0] += percentiles.latencies[i] / midVal;
+                cnt1++;
+            } else {
+                slc[1] += percentiles.latencies[i] / maxVal;
+                cnt2++;
+            }
         }
-        return (1.0 - slcFactor / h) * 100;
+        if (cnt1 > 0) {
+            slc[0] = (1 - slc[0] / cnt1) * 100;
+        }
+        if (cnt2 > 0) {
+            slc[1] = (1 - slc[1] / cnt2) * 100;
+        }
     }
 
 
