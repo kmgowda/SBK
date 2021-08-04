@@ -229,9 +229,9 @@ public class SystemLogger implements Logger {
                                        long higherDiscard, double slc, long[] percentileValues) {
         out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
                             +", %8.1f %s avg latency, %7d %s max latency;"
-                            + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher; SLC: %2.1f%%;",
+                            + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher; SLC: %s%%;",
                 seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,
-                timeUnitText, invalid, lowerDiscard, higherDiscard, slc));
+                timeUnitText, invalid, lowerDiscard, higherDiscard, format.format(slc)));
         out.append(" Latency Percentiles: ");
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
