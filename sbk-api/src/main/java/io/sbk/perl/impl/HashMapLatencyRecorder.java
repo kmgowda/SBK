@@ -58,8 +58,9 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
 
     @Override
     final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
-        long cur = 0;
-        int index = 0;
+        long curIndex;
+        int index;
+        long medianIndex;
 
         if (copyLatencies != null) {
             copyLatencies.reportLatencyRecord(this);
@@ -68,21 +69,37 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
         for (int i = 0; i < percentiles.fractions.length; i++) {
             percentiles.indexes[i] = (long) (validLatencyRecords * percentiles.fractions[i]);
             percentiles.latencies[i] = 0;
-            percentiles.latencyCount[index] = 0;
+            percentiles.latencyCount[i] = 0;
         }
+
+        percentiles.minLatency = -1;
+        percentiles.maxLatency = 0;
+        percentiles.medianLatency = 0;
+        medianIndex = (long) (validLatencyRecords * 0.5);
+        curIndex = 0;
+        index = 0;
 
         Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
         while (keys.hasNext()) {
+
             final long latency  = keys.next();
             final long count = latencies.get(latency);
-            final long next =  cur + count;
+            final long nextIndex =  curIndex + count;
 
             if (copyLatencies != null) {
                 copyLatencies.reportLatency(latency, count);
             }
 
+            if (percentiles.minLatency == -1 ) {
+                percentiles.minLatency = latency;
+            }
+            percentiles.maxLatency = latency;
+            if (medianIndex >= curIndex && medianIndex < nextIndex) {
+                percentiles.medianLatency = latency;
+            }
+
             while (index < percentiles.indexes.length) {
-                if (percentiles.indexes[index] >= cur && percentiles.indexes[index] <  next) {
+                if (percentiles.indexes[index] >= curIndex && percentiles.indexes[index] <  nextIndex) {
                     percentiles.latencies[index] = latency;
                     percentiles.latencyCount[index] = count;
                     index += 1;
@@ -90,7 +107,7 @@ public class HashMapLatencyRecorder extends LatencyRecordWindow {
                     break;
                 }
             }
-            cur = next;
+            curIndex = nextIndex;
             latencies.remove(latency);
         }
         hashMapBytesCount = 0;
