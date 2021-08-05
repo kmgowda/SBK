@@ -251,9 +251,9 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      double slc, long[] percentileValues) {
+                      int slc1, int slc2, long[] percentileValues) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc, percentileValues);
+                higherDiscard, slc1, slc2, percentileValues);
         if (latencyBytes > 0 ) {
             sendLatenciesRecord();
         }

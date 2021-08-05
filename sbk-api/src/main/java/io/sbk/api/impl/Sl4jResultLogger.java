@@ -26,24 +26,24 @@ public class Sl4jResultLogger extends SystemLogger {
 
     private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                       double slc, long[] percentileValues) {
+                       int slc1, int slc2, long[] percentileValues) {
         log.info(buildResultString(new StringBuilder(prefix), seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, slc, percentileValues));
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
     }
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      double slc, long[] percentileValues) {
+                      int slc1, int slc2, long[] percentileValues) {
         print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           double slc, long[] percentileValues) {
+                           int slc1, int slc2, long[] percentileValues) {
         print(prefix + "(Total) ", seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 }
