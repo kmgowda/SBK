@@ -54,16 +54,7 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
         if (copyLatencies != null) {
             copyLatencies.reportLatencyRecord(this);
         }
-
-        for (int i = 0; i < percentiles.fractions.length; i++) {
-            percentiles.indexes[i] = (long) (validLatencyRecords * percentiles.fractions[i]);
-            percentiles.latencies[i] = 0;
-            percentiles.latencyCount[i] = 0;
-        }
-        percentiles.minLatency = -1;
-        percentiles.maxLatency = 0;
-        percentiles.medianLatency = 0;
-        medianIndex = (long) (validLatencyRecords * 0.5);
+        percentiles.reset(validLatencyRecords);
         curIndex = 0;
         index = 0;
         for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
@@ -77,11 +68,7 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                     copyLatencies.reportLatency(latency, count);
                 }
 
-                if (percentiles.minLatency == -1 ) {
-                    percentiles.minLatency = latency;
-                }
-                percentiles.maxLatency = latency;
-                if (medianIndex >= curIndex && medianIndex < nextIndex) {
+                if (percentiles.medianIndex >= curIndex && percentiles.medianIndex < nextIndex) {
                     percentiles.medianLatency = latency;
                 }
 
