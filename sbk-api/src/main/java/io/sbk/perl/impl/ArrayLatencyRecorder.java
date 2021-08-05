@@ -47,19 +47,13 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
     @SuppressWarnings("DuplicatedCode")
     @Override
     final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
-        long curIndex;
-        int index;
-        long medianIndex;
-
         if (copyLatencies != null) {
             copyLatencies.reportLatencyRecord(this);
         }
         percentiles.reset(validLatencyRecords);
-        curIndex = 0;
-        index = 0;
+        long curIndex = 0;
         for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
             if (latencies[i] > 0) {
-
                 final long latency = i + lowLatency;
                 final long count = latencies[i];
                 final long nextIndex =  curIndex + count;
@@ -67,22 +61,8 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                 if (copyLatencies != null) {
                     copyLatencies.reportLatency(latency, count);
                 }
-
-                if (percentiles.medianIndex >= curIndex && percentiles.medianIndex < nextIndex) {
-                    percentiles.medianLatency = latency;
-                }
-
-                while (index < percentiles.indexes.length) {
-                    if (percentiles.indexes[index] >= curIndex &&
-                            percentiles.indexes[index] < nextIndex) {
-                        percentiles.latencies[index] = latency;
-                        percentiles.latencyCount[index] = count;
-                        index += 1;
-                    } else {
-                        break;
-                    }
-                }
-
+                percentiles.copyMedianLatency(latency, count, curIndex, nextIndex);
+                percentiles.copyLatency(latency, count, curIndex, nextIndex);
                 curIndex = nextIndex;
                 latencies[i] = 0;
             }
