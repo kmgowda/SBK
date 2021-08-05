@@ -230,7 +230,7 @@ public class SystemLogger implements Logger {
         out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
                             +", %8.1f %s avg latency, %7d %s max latency;"
                             + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"
-                            + "SLC-1: %2d%%, SLC-2: %2d%%;",
+                            + " SLC-1: %2d%%, SLC-2: %2d%%;",
                 seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,
                 timeUnitText, invalid, lowerDiscard, higherDiscard, slc1, slc2));
         out.append(" Latency Percentiles: ");
@@ -279,8 +279,8 @@ public class SystemLogger implements Logger {
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           int slc1, int slc2, long[] percentilesValues) {
+                           int slc1, int slc2, long[] percentileValues) {
         print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentilesValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 }

@@ -53,12 +53,12 @@ abstract public class LatencyWindow extends LatencyRecorder {
      * @param copyLatencies  Copy Latency values
      */
     final public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
-        final double elapsedSec = Math.max(time.elapsedSeconds(endTime, startTime), 1.0);
+        final double elapsedSec = time.elapsedSeconds(endTime, startTime);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
-        final double recsPerSec = this.totalRecords / elapsedSec;
-        final double mbPerSec = (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0)) / elapsedSec;
-        final double avgLatency = this.totalLatency / (double) totalLatencyRecords;
+        final double recsPerSec =  elapsedSec > 0 ? this.totalRecords / elapsedSec : 0;
+        final double mbPerSec = elapsedSec > 0 ? (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0)) / elapsedSec : 0;
+        final double avgLatency = totalLatencyRecords > 0 ? this.totalLatency / (double) totalLatencyRecords : 0;
         copyPercentiles(percentiles, copyLatencies);
         getSLC(percentiles, slc);
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
