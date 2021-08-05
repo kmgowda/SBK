@@ -78,13 +78,13 @@ public class SbkCSVLogger extends SystemLogger {
 
     public void writeToCSV(String prefix, long seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                       double slc, long[] percentileValues) {
+                       int slc1, int slc2, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
-                String.format("%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d,%2.1f", prefix,
+                String.format("%s,%s,%5d,%5d,%5d,%5d,%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%8d,%8d,%8d,%2d", prefix,
                         timeUnitText, writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
                         seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                        invalid, lowerDiscard, higherDiscard, slc)
+                        invalid, lowerDiscard, higherDiscard, slc2)
         );
 
         for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {
@@ -96,12 +96,12 @@ public class SbkCSVLogger extends SystemLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      double slc, long[] percentileValues) {
+                      int slc1, int slc2, long[] percentileValues) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc, percentileValues);
+                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
             writeToCSV(prefix, (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
-                    lowerDiscard, higherDiscard, slc, percentileValues);
+                    lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
     }
 

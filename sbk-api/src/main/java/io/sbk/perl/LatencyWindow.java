@@ -64,7 +64,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                slc[1], this.percentiles.latencies);
+                slc[0], slc[1], this.percentiles.latencies);
     }
     
     final public void getSLC(LatencyPercentiles percentiles, int[] slc) {

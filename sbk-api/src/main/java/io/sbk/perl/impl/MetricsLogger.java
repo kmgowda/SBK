@@ -90,7 +90,7 @@ public class MetricsLogger implements Print {
     @Override
     final public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                            double slc, long[] percentileValues) {
+                            int slc1, int slc2, long[] percentileValues) {
         this.bytes.increment(bytes);
         this.records.increment(records);
         this.invalidLatencyRecords.increment(invalid);
