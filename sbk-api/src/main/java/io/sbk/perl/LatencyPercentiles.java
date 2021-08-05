@@ -12,20 +12,52 @@ package io.sbk.perl;
 final public class LatencyPercentiles {
     final public double[] fractions;
     final public long[] latencies;
-    final public long[] indexes;
+    final public long[] latencyIndexes;
     final public long[] latencyCount;
-    public long minLatency;
-    public long maxLatency;
     public long medianLatency;
+    public long medianIndex;
+    private int index;
 
     public LatencyPercentiles(double[] percentileFractions) {
         this.fractions = percentileFractions;
         this.latencies = new long[this.fractions.length];
-        this.indexes = new long[this.fractions.length];
+        this.latencyIndexes = new long[this.fractions.length];
         this.latencyCount = new long[this.fractions.length];
-        this.maxLatency = 0;
-        this.minLatency = 0;
         this.medianLatency = 0;
+        this.medianIndex = 0;
+        this.index = 0;
+    }
+
+    public void reset(long totalRecords) {
+        for (int i = 0; i < fractions.length; i++) {
+            latencyIndexes[i] = (long) (totalRecords * fractions[i]);
+            latencies[i] = 0;
+            latencyCount[i] = 0;
+        }
+        medianIndex = totalRecords >> 1;
+        medianLatency = 0;
+        index = 0;
+    }
+
+    public  int copyLatency(long latency, long count, long startIndex, long endIndex) {
+        int ret = 0;
+
+        if (medianIndex >= startIndex && medianIndex < endIndex) {
+            medianLatency = latency;
+            ret++;
+        }
+  
+        while (index < latencyIndexes.length) {
+            if (latencyIndexes[index] >= startIndex && latencyIndexes[index] < endIndex) {
+                latencies[index] = latency;
+                latencyCount[index] = count;
+                index++;
+                ret++;
+            } else {
+                break;
+            }
+        }
+        return ret;
     }
 
 }

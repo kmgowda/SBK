@@ -44,31 +44,15 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
     }
 
 
-    @SuppressWarnings("DuplicatedCode")
     @Override
     final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
-        long curIndex;
-        int index;
-        long medianIndex;
-
         if (copyLatencies != null) {
             copyLatencies.reportLatencyRecord(this);
         }
-
-        for (int i = 0; i < percentiles.fractions.length; i++) {
-            percentiles.indexes[i] = (long) (validLatencyRecords * percentiles.fractions[i]);
-            percentiles.latencies[i] = 0;
-            percentiles.latencyCount[i] = 0;
-        }
-        percentiles.minLatency = -1;
-        percentiles.maxLatency = 0;
-        percentiles.medianLatency = 0;
-        medianIndex = (long) (validLatencyRecords * 0.5);
-        curIndex = 0;
-        index = 0;
+        percentiles.reset(validLatencyRecords);
+        long curIndex = 0;
         for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
             if (latencies[i] > 0) {
-
                 final long latency = i + lowLatency;
                 final long count = latencies[i];
                 final long nextIndex =  curIndex + count;
@@ -76,26 +60,7 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                 if (copyLatencies != null) {
                     copyLatencies.reportLatency(latency, count);
                 }
-
-                if (percentiles.minLatency == -1 ) {
-                    percentiles.minLatency = latency;
-                }
-                percentiles.maxLatency = latency;
-                if (medianIndex >= curIndex && medianIndex < nextIndex) {
-                    percentiles.medianLatency = latency;
-                }
-
-                while (index < percentiles.indexes.length) {
-                    if (percentiles.indexes[index] >= curIndex &&
-                            percentiles.indexes[index] < nextIndex) {
-                        percentiles.latencies[index] = latency;
-                        percentiles.latencyCount[index] = count;
-                        index += 1;
-                    } else {
-                        break;
-                    }
-                }
-
+                percentiles.copyLatency(latency, count, curIndex, nextIndex);
                 curIndex = nextIndex;
                 latencies[i] = 0;
             }
