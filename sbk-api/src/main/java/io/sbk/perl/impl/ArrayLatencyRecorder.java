@@ -44,7 +44,6 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
     }
 
 
-    @SuppressWarnings("DuplicatedCode")
     @Override
     final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
         if (copyLatencies != null) {
