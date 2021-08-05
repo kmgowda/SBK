@@ -40,7 +40,7 @@ final public class LatencyPercentiles {
     }
 
     public  boolean copyLatency(long latency, long count, long startIndex, long endIndex) {
-        if (index >= this.latencies.length) {
+        if (index >= latencyIndexes.length) {
             return false;
         }
 
