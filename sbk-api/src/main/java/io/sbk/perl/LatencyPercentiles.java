@@ -40,28 +40,24 @@ final public class LatencyPercentiles {
     }
 
     public  boolean copyLatency(long latency, long count, long startIndex, long endIndex) {
-        if (index >= latencyIndexes.length) {
-            return false;
-        }
+        boolean ret = false;
 
+        if (medianIndex >= startIndex && medianIndex < endIndex) {
+            medianLatency = latency;
+            ret = true;
+        }
+  
         while (index < latencyIndexes.length) {
             if (latencyIndexes[index] >= startIndex && latencyIndexes[index] < endIndex) {
                 latencies[index] = latency;
                 latencyCount[index] = count;
                 index += 1;
+                ret = true;
             } else {
                 break;
             }
         }
-        return true;
-    }
-
-    public boolean copyMedianLatency(long latency, long count, long startIndex, long endIndex) {
-        if (medianIndex >= startIndex && medianIndex < endIndex) {
-            medianLatency = latency;
-            return true;
-        }
-        return false;
+        return ret;
     }
 
 }

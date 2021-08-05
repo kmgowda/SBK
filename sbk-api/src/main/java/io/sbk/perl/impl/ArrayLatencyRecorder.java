@@ -61,7 +61,6 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                 if (copyLatencies != null) {
                     copyLatencies.reportLatency(latency, count);
                 }
-                percentiles.copyMedianLatency(latency, count, curIndex, nextIndex);
                 percentiles.copyLatency(latency, count, curIndex, nextIndex);
                 curIndex = nextIndex;
                 latencies[i] = 0;
