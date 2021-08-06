@@ -68,8 +68,8 @@ public interface PerformanceLogger extends Print {
      * @param invalid   Number of invalid/negative latencies
      * @param lowerDiscard number of discarded latencies which are less than minimum latency.
      * @param higherDiscard number of discarded latencies which are higher than maximum latency.
-     * @param slc1 Sliding latency Change percentage
-     * @param slc2 Sliding latency Change percentage
+     * @param slc1 Sliding Latency Coverage percentage
+     * @param slc2 Sliding Latency Coverage percentage
      * @param percentiles Array of percentiles.
      */
     void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
