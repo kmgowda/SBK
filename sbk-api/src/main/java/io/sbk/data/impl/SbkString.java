@@ -15,7 +15,7 @@ import java.util.Random;
 /**
  * Class for processing byte[] data.
  */
-public class StringHandler implements DataType<String> {
+public class SbkString implements DataType<String> {
     final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
     final static String FORMAT_STRING = "%0"+ TIME_HEADER_SIZE + "d";
 
@@ -69,7 +69,7 @@ public class StringHandler implements DataType<String> {
     /**
      * Get the time of data.
      * @param  data data
-     * @return long return the time set by last {@link StringHandler#setTime(String, long)}} )}}.
+     * @return long return the time set by last {@link SbkString#setTime(String, long)}} )}}.
      */
     @Override
     public long getTime(String data) {

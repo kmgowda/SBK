@@ -19,7 +19,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 
 import io.sbk.api.Storage;
-import io.sbk.data.impl.JavaString;
+import io.sbk.data.impl.SbkString;
 import io.sbk.system.Printer;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -115,7 +115,7 @@ public class CouchDB implements Storage<String> {
 
     @Override
     public DataType<String> getDataType() {
-        return new JavaString();
+        return new SbkString();
     }
 
     public static long generateStartKey(int id) {

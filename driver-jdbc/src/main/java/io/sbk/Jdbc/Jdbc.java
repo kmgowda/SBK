@@ -15,7 +15,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
 import io.sbk.system.Printer;
-import io.sbk.data.impl.StringHandler;
+import io.sbk.data.impl.SbkString;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -43,7 +43,7 @@ public class Jdbc implements Storage<String> {
     private final static String CONFIGFILE = "jdbc.properties";
     public String driverType;
     public JdbcConfig config;
-    final public DataType<String> dType =  new StringHandler();
+    final public DataType<String> dType =  new SbkString();
 
     /**
      * Get the JDBC config file.
