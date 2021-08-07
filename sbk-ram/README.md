@@ -57,7 +57,7 @@ Storage Benchmark Kit - Results Aggregation Monitor
 Please report issues at https://github.com/kmgowda/SBK
 
 ```
-An Example output of SBK-RAM with 2 SBK file system benchmakring instances are as follows:
+An Example output of SBK-RAM with 2 SBK file system benchmarking instances are as follows:
 
 ```
 kmg@kmgs-MBP SBK % ./sbk-ram/build/install/sbk-ram/bin/sbk-ram -class file -time ns
