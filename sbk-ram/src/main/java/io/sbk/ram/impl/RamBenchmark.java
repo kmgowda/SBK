@@ -12,13 +12,13 @@ package io.sbk.ram.impl;
 
 import io.sbk.api.Benchmark;
 import io.sbk.grpc.LatenciesRecord;
-import io.sbk.perl.Print;
+import io.sbk.logger.Print;
 import io.sbk.perl.ReportLatencies;
-import io.sbk.perl.State;
-import io.sbk.perl.Time;
+import io.sbk.state.State;
+import io.sbk.time.Time;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.ram.RamRegistry;
-import io.sbk.ram.SetRW;
+import io.sbk.logger.SetRW;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 

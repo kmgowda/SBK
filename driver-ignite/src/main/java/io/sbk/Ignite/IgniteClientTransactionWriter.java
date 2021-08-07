@@ -10,11 +10,11 @@
 
 package io.sbk.Ignite;
 
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.api.Writer;
 import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientTransaction;

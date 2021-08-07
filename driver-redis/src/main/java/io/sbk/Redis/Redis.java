@@ -9,7 +9,7 @@
  */
 package io.sbk.Redis;
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
@@ -17,7 +17,7 @@ import io.sbk.api.ParameterOptions;
 import java.io.IOException;
 
 import io.sbk.system.Printer;
-import io.sbk.api.impl.StringHandler;
+import io.sbk.data.impl.SbkString;
 import redis.clients.jedis.Jedis;
 
 
@@ -92,6 +92,6 @@ public class Redis implements Storage<String> {
 
     @Override
     public DataType<String> getDataType() {
-        return new StringHandler();
+        return new SbkString();
     }
 }

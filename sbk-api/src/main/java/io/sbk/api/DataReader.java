@@ -10,7 +10,8 @@
 
 package io.sbk.api;
 
-import io.sbk.perl.Time;
+import io.sbk.data.DataType;
+import io.sbk.time.Time;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -135,6 +136,6 @@ public interface DataReader<T> {
      * @throws IOException If an exception occurred.
      */
     void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
-                                         RateController rController) throws EOFException, IOException;
+                                        RateController rController) throws EOFException, IOException;
 }
 

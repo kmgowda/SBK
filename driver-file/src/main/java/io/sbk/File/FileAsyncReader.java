@@ -10,7 +10,7 @@
 package io.sbk.File;
 
 import io.sbk.api.AsyncReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 
 

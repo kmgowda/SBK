@@ -14,12 +14,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 
 import io.sbk.api.Storage;
-import io.sbk.api.impl.JavaString;
+import io.sbk.data.impl.SbkString;
 import io.sbk.system.Printer;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -115,7 +115,7 @@ public class CouchDB implements Storage<String> {
 
     @Override
     public DataType<String> getDataType() {
-        return new JavaString();
+        return new SbkString();
     }
 
     public static long generateStartKey(int id) {

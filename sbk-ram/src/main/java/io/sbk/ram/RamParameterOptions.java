@@ -10,7 +10,7 @@
 
 package io.sbk.ram;
 
-import io.sbk.api.InputOptions;
+import io.sbk.options.InputOptions;
 
 public interface RamParameterOptions extends InputOptions, RamParameters {
 }

@@ -12,13 +12,13 @@ package io.sbk.api.impl;
 
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
-import io.sbk.api.CountReaders;
+import io.sbk.logger.CountReaders;
 import io.sbk.perl.RunBenchmark;
 import io.sbk.perl.SendChannel;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.api.Worker;
 import io.sbk.system.Printer;
 

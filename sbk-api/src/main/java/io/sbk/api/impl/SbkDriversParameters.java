@@ -9,7 +9,7 @@
  */
 package io.sbk.api.impl;
 
-import io.sbk.api.Config;
+import io.sbk.config.Config;
 
 import java.util.Arrays;
 

@@ -159,7 +159,7 @@ extends <a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRec
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>default void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#recordWrite(io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">recordWrite</a></span>&#8203;(<a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;&nbsp;dType,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#recordWrite(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">recordWrite</a></span>&#8203;(<a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;&nbsp;dType,
            <a href="Writer.html" title="type parameter in Writer">T</a>&nbsp;data,
            int&nbsp;size,
            <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
@@ -187,7 +187,7 @@ extends <a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRec
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>default void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#writeSetTime(io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.Status)">writeSetTime</a></span>&#8203;(<a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;&nbsp;dType,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#writeSetTime(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status)">writeSetTime</a></span>&#8203;(<a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;&nbsp;dType,
             <a href="Writer.html" title="type parameter in Writer">T</a>&nbsp;data,
             int&nbsp;size,
             <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
@@ -204,7 +204,7 @@ extends <a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRec
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.api.<a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a></h3>
-<code><a href="DataRecordsWriter.html#RecordsWriter(io.sbk.api.Worker,long,io.sbk.api.DataType,T,int,io.sbk.perl.Time)">RecordsWriter</a>, <a href="DataRecordsWriter.html#RecordsWriterRW(io.sbk.api.Worker,long,io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.RateController)">RecordsWriterRW</a>, <a href="DataRecordsWriter.html#RecordsWriterSync(io.sbk.api.Worker,long,io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.RateController)">RecordsWriterSync</a>, <a href="DataRecordsWriter.html#RecordsWriterTime(io.sbk.api.Worker,long,io.sbk.api.DataType,T,int,io.sbk.perl.Time)">RecordsWriterTime</a>, <a href="DataRecordsWriter.html#RecordsWriterTimeRW(io.sbk.api.Worker,long,io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.RateController)">RecordsWriterTimeRW</a>, <a href="DataRecordsWriter.html#RecordsWriterTimeSync(io.sbk.api.Worker,long,io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.RateController)">RecordsWriterTimeSync</a></code></li>
+<code><a href="DataRecordsWriter.html#RecordsWriter(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.sbk.time.Time)">RecordsWriter</a>, <a href="DataRecordsWriter.html#RecordsWriterRW(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.RateController)">RecordsWriterRW</a>, <a href="DataRecordsWriter.html#RecordsWriterSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.RateController)">RecordsWriterSync</a>, <a href="DataRecordsWriter.html#RecordsWriterTime(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.sbk.time.Time)">RecordsWriterTime</a>, <a href="DataRecordsWriter.html#RecordsWriterTimeRW(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.RateController)">RecordsWriterTimeRW</a>, <a href="DataRecordsWriter.html#RecordsWriterTimeSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.RateController)">RecordsWriterTimeSync</a></code></li>
 </ul>
 </li>
 </ul>
@@ -277,9 +277,9 @@ extends <a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRec
 </dl>
 </li>
 </ul>
-<a id="writeSetTime(io.sbk.api.DataType,java.lang.Object,int,io.sbk.perl.Time,io.sbk.api.Status)">
+<a id="writeSetTime(io.sbk.data.DataType,java.lang.Object,int,io.sbk.time.Time,io.sbk.api.Status)">
 <!--   -->
-</a><a id="writeSetTime(io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.Status)">
+</a><a id="writeSetTime(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -298,7 +298,7 @@ extends <a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRec
  you can write multiple records with this method.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="DataRecordsWriter.html#writeSetTime(io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.Status)">writeSetTime</a></code>&nbsp;in interface&nbsp;<code><a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;</code></dd>
+<dd><code><a href="DataRecordsWriter.html#writeSetTime(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status)">writeSetTime</a></code>&nbsp;in interface&nbsp;<code><a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;</code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>dType</code> - Data Type interface</dd>
 <dd><code>data</code> - data to writer</dd>
@@ -310,9 +310,9 @@ extends <a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRec
 </dl>
 </li>
 </ul>
-<a id="recordWrite(io.sbk.api.DataType,java.lang.Object,int,io.sbk.perl.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">
+<a id="recordWrite(io.sbk.data.DataType,java.lang.Object,int,io.sbk.time.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">
 <!--   -->
-</a><a id="recordWrite(io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">
+</a><a id="recordWrite(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -334,7 +334,7 @@ extends <a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRec
  you can write multiple records with this method.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="DataRecordsWriter.html#recordWrite(io.sbk.api.DataType,T,int,io.sbk.perl.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">recordWrite</a></code>&nbsp;in interface&nbsp;<code><a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;</code></dd>
+<dd><code><a href="DataRecordsWriter.html#recordWrite(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int)">recordWrite</a></code>&nbsp;in interface&nbsp;<code><a href="DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a>&lt;<a href="Writer.html" title="type parameter in Writer">T</a>&gt;</code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>dType</code> - Data Type interface</dd>
 <dd><code>data</code> - data to write</dd>

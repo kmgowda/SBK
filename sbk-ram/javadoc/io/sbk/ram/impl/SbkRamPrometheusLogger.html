@@ -123,16 +123,16 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.api.impl.SystemLogger</li>
+<li>io.sbk.logger.impl.SystemLogger</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.api.impl.SbkCSVLogger</li>
+<li>io.sbk.logger.impl.SbkCSVLogger</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.api.impl.SbkPrometheusLogger</li>
+<li>io.sbk.logger.impl.SbkPrometheusLogger</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.ram.impl.SbkRamPrometheusLogger</li>
+<li>io.sbk.logger.impl.SbkRamPrometheusLogger</li>
 </ul>
 </li>
 </ul>
@@ -147,11 +147,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.sbk.api.CountReaders</code>, <code>io.sbk.api.CountRW</code>, <code>io.sbk.api.CountWriters</code>, <code>io.sbk.api.Logger</code>, <code>io.sbk.api.PerformanceLogger</code>, <code>io.sbk.perl.Print</code>, <code>io.sbk.perl.ReportLatencies</code>, <code>io.sbk.perl.ReportLatency</code>, <code><a href="../CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></code>, <code><a href="../RamLogger.html" title="interface in io.sbk.ram">RamLogger</a></code>, <code><a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a></code></dd>
+<dd><code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code>io.sbk.logger.Logger</code>, <code>io.sbk.logger.PerformanceLogger</code>, <code>io.sbk.logger.Print</code>, <code>io.sbk.perl.ReportLatencies</code>, <code>io.sbk.perl.ReportLatency</code>, <code><a href="../CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></code>, <code><a href="../RamLogger.html" title="interface in io.sbk.ram">RamLogger</a></code>, <code><a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a></code></dd>
 </dl>
 <hr>
 <pre>public class <span class="typeNameLabel">SbkRamPrometheusLogger</span>
-extends io.sbk.api.impl.SbkPrometheusLogger
+extends io.sbk.logger.impl.SbkPrometheusLogger
 implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a href="../RamLogger.html" title="interface in io.sbk.ram">RamLogger</a></pre>
 <div class="block">Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.</div>
 </li>
@@ -168,24 +168,24 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
 </a>
 <h3>Field Summary</h3>
 <ul class="blockList">
-<li class="blockList"><a id="fields.inherited.from.class.io.sbk.api.impl.SbkPrometheusLogger">
+<li class="blockList"><a id="fields.inherited.from.class.io.sbk.logger.impl.SbkPrometheusLogger">
 <!--   -->
 </a>
-<h3>Fields inherited from class&nbsp;io.sbk.api.impl.SbkPrometheusLogger</h3>
+<h3>Fields inherited from class&nbsp;io.sbk.logger.impl.SbkPrometheusLogger</h3>
 <code>metricsConfig</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="fields.inherited.from.class.io.sbk.api.impl.SbkCSVLogger">
+<li class="blockList"><a id="fields.inherited.from.class.io.sbk.logger.impl.SbkCSVLogger">
 <!--   -->
 </a>
-<h3>Fields inherited from class&nbsp;io.sbk.api.impl.SbkCSVLogger</h3>
+<h3>Fields inherited from class&nbsp;io.sbk.logger.impl.SbkCSVLogger</h3>
 <code>csvEnable, csvFile, csvWriter, DISABLE_STRING, REGULAR_PRINT, TOTAL_PRINT</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="fields.inherited.from.class.io.sbk.api.impl.SystemLogger">
+<li class="blockList"><a id="fields.inherited.from.class.io.sbk.logger.impl.SystemLogger">
 <!--   -->
 </a>
-<h3>Fields inherited from class&nbsp;io.sbk.api.impl.SystemLogger</h3>
+<h3>Fields inherited from class&nbsp;io.sbk.logger.impl.SystemLogger</h3>
 <code>action, maxReaders, maxWriters, params, percentileNames, percentiles, prefix, readers, storageName, time, timeUnitText, writers</code></li>
 </ul>
 </li>
@@ -239,7 +239,7 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>io.sbk.api.impl.RWMetricsPrometheusServer</code></td>
+<td class="colFirst"><code>io.sbk.logger.impl.RWMetricsPrometheusServer</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMetricsPrometheusServer()">getMetricsPrometheusServer</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -252,10 +252,10 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.perl.Time)">open</a></span>&#8203;(io.sbk.api.InputOptions&nbsp;params,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">open</a></span>&#8203;(io.sbk.options.InputOptions&nbsp;params,
     java.lang.String&nbsp;storageName,
-    io.sbk.api.Action&nbsp;action,
-    io.sbk.perl.Time&nbsp;time)</code></th>
+    io.sbk.action.Action&nbsp;action,
+    io.sbk.time.Time&nbsp;time)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
@@ -333,24 +333,24 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.SbkPrometheusLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.SbkPrometheusLogger">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.api.impl.SbkPrometheusLogger</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.logger.impl.SbkPrometheusLogger</h3>
 <code>addArgs, close, decrementReaders, decrementWriters, incrementReaders, incrementWriters, parseArgs</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.SbkCSVLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.SbkCSVLogger">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.api.impl.SbkCSVLogger</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.logger.impl.SbkCSVLogger</h3>
 <code>openCSV, writeToCSV</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.SystemLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.SystemLogger">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.api.impl.SystemLogger</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.logger.impl.SystemLogger</h3>
 <code>appendPercentiles, appendWritesAndReaders, buildResultString, getMaxLatency, getMinLatency, getPercentiles, getReportingIntervalSeconds, getTimeUnit</code></li>
 </ul>
 <ul class="blockList">
@@ -361,17 +361,17 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.Logger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.Logger">
 <!--   -->
 </a>
-<h3>Methods inherited from interface&nbsp;io.sbk.api.Logger</h3>
+<h3>Methods inherited from interface&nbsp;io.sbk.logger.Logger</h3>
 <code>recordLatency</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.PerformanceLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.PerformanceLogger">
 <!--   -->
 </a>
-<h3>Methods inherited from interface&nbsp;io.sbk.api.PerformanceLogger</h3>
+<h3>Methods inherited from interface&nbsp;io.sbk.logger.PerformanceLogger</h3>
 <code>addArgs, close, getMaxLatency, getMinLatency, getPercentiles, getReportingIntervalSeconds, getTimeUnit, parseArgs, setExceptionHandler</code></li>
 </ul>
 </li>
@@ -418,7 +418,7 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
 <pre class="methodSignature">public&nbsp;java.io.InputStream&nbsp;getMetricsConfigStream()</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>getMetricsConfigStream</code>&nbsp;in class&nbsp;<code>io.sbk.api.impl.SbkPrometheusLogger</code></dd>
+<dd><code>getMetricsConfigStream</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.SbkPrometheusLogger</code></dd>
 </dl>
 </li>
 </ul>
@@ -428,33 +428,33 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
 <ul class="blockList">
 <li class="blockList">
 <h4>getMetricsPrometheusServer</h4>
-<pre class="methodSignature">public&nbsp;io.sbk.api.impl.RWMetricsPrometheusServer&nbsp;getMetricsPrometheusServer()
+<pre class="methodSignature">public&nbsp;io.sbk.logger.impl.RWMetricsPrometheusServer&nbsp;getMetricsPrometheusServer()
                                                                      throws java.io.IOException</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>getMetricsPrometheusServer</code>&nbsp;in class&nbsp;<code>io.sbk.api.impl.SbkPrometheusLogger</code></dd>
+<dd><code>getMetricsPrometheusServer</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.SbkPrometheusLogger</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
-<a id="open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.perl.Time)">
+<a id="open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>open</h4>
-<pre class="methodSignature">public&nbsp;void&nbsp;open&#8203;(io.sbk.api.InputOptions&nbsp;params,
+<pre class="methodSignature">public&nbsp;void&nbsp;open&#8203;(io.sbk.options.InputOptions&nbsp;params,
                  java.lang.String&nbsp;storageName,
-                 io.sbk.api.Action&nbsp;action,
-                 io.sbk.perl.Time&nbsp;time)
+                 io.sbk.action.Action&nbsp;action,
+                 io.sbk.time.Time&nbsp;time)
           throws java.lang.IllegalArgumentException,
                  java.io.IOException</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>open</code>&nbsp;in interface&nbsp;<code>io.sbk.api.PerformanceLogger</code></dd>
+<dd><code>open</code>&nbsp;in interface&nbsp;<code>io.sbk.logger.PerformanceLogger</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>open</code>&nbsp;in class&nbsp;<code>io.sbk.api.impl.SbkPrometheusLogger</code></dd>
+<dd><code>open</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.SbkPrometheusLogger</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.IllegalArgumentException</code></dd>
 <dd><code>java.io.IOException</code></dd>
@@ -512,9 +512,9 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
                   long[]&nbsp;percentileValues)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>print</code>&nbsp;in interface&nbsp;<code>io.sbk.perl.Print</code></dd>
+<dd><code>print</code>&nbsp;in interface&nbsp;<code>io.sbk.logger.Print</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>print</code>&nbsp;in class&nbsp;<code>io.sbk.api.impl.SbkPrometheusLogger</code></dd>
+<dd><code>print</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.SbkPrometheusLogger</code></dd>
 </dl>
 </li>
 </ul>
@@ -539,9 +539,9 @@ implements <a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a
                        long[]&nbsp;percentileValues)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>printTotal</code>&nbsp;in interface&nbsp;<code>io.sbk.api.PerformanceLogger</code></dd>
+<dd><code>printTotal</code>&nbsp;in interface&nbsp;<code>io.sbk.logger.PerformanceLogger</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>printTotal</code>&nbsp;in class&nbsp;<code>io.sbk.api.impl.SbkCSVLogger</code></dd>
+<dd><code>printTotal</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.SbkCSVLogger</code></dd>
 </dl>
 </li>
 </ul>

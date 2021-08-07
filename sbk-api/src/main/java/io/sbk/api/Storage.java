@@ -9,9 +9,10 @@
  */
 
 package io.sbk.api;
-import io.sbk.api.impl.ByteArray;
+import io.sbk.data.impl.ByteArray;
 import java.io.IOException;
 import com.google.common.reflect.TypeToken;
+import io.sbk.data.DataType;
 
 import java.lang.reflect.Type;
 

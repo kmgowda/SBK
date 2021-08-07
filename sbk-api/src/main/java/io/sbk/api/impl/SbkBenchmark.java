@@ -9,20 +9,20 @@
  */
 package io.sbk.api.impl;
 
-import io.sbk.api.Action;
+import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
-import io.sbk.api.Config;
+import io.sbk.config.Config;
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
-import io.sbk.api.Logger;
+import io.sbk.logger.Logger;
 import io.sbk.perl.Performance;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.api.Storage;
-import io.sbk.perl.State;
-import io.sbk.perl.Time;
+import io.sbk.state.State;
+import io.sbk.time.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
 import io.sbk.perl.impl.CompositeCSVLatencyRecorder;
 import io.sbk.perl.impl.CompositeHashMapLatencyRecorder;

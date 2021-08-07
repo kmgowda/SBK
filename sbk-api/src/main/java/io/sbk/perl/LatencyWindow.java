@@ -10,6 +10,10 @@
 
 package io.sbk.perl;
 
+import io.sbk.config.PerlConfig;
+import io.sbk.logger.Print;
+import io.sbk.time.Time;
+
 abstract public class LatencyWindow extends LatencyRecorder {
     final public LatencyPercentiles percentiles;
     final public Time time;

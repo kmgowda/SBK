@@ -24,11 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.google.protobuf.ByteString;
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
-import io.sbk.api.impl.ProtoBufByteString;
+import io.sbk.data.impl.ProtoBufByteString;
 
 import java.io.IOException;
 import java.util.Objects;

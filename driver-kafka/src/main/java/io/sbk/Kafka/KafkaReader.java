@@ -9,7 +9,7 @@
  */
 package io.sbk.Kafka;
 
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;

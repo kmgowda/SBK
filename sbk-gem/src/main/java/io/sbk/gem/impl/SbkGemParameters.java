@@ -10,12 +10,12 @@
 
 package io.sbk.gem.impl;
 
-import io.sbk.api.HelpException;
 import io.sbk.api.impl.SbkDriversParameters;
-import io.sbk.gem.GemConfig;
+import io.sbk.exception.HelpException;
+import io.sbk.config.GemConfig;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.SshConnection;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.system.Printer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

@@ -10,7 +10,7 @@
 
 package io.sbk.ram;
 
-import io.sbk.api.Action;
+import io.sbk.action.Action;
 
 public interface RamParameters {
 

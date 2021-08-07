@@ -10,7 +10,8 @@
 
 package io.sbk.api;
 
-import io.sbk.perl.Time;
+import io.sbk.data.DataType;
+import io.sbk.time.Time;
 
 import java.io.IOException;
 
@@ -37,7 +38,7 @@ public interface DataWriter<T> {
      * @param time  time interface
      * @throws IOException If an exception occurred.
      */
-    void RecordsWriter(Worker writer,  long recordsCount, DataType<T> dType, T data, int size, Time time) throws IOException;
+    void RecordsWriter(Worker writer, long recordsCount, DataType<T> dType, T data, int size, Time time) throws IOException;
 
     /**
      * Writer benchmarking by writing given number of records and data should synced is invoked after writing given set of records.

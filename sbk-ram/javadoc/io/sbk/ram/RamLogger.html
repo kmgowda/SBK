@@ -118,7 +118,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="blockList">
 <dl>
 <dt>All Superinterfaces:</dt>
-<dd><code><a href="CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></code>, <code>io.sbk.api.PerformanceLogger</code>, <code>io.sbk.perl.Print</code>, <code>io.sbk.perl.ReportLatencies</code>, <code><a href="SetRW.html" title="interface in io.sbk.ram">SetRW</a></code></dd>
+<dd><code><a href="CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></code>, <code>io.sbk.logger.PerformanceLogger</code>, <code>io.sbk.logger.Print</code>, <code>io.sbk.perl.ReportLatencies</code>, <code><a href="SetRW.html" title="interface in io.sbk.ram">SetRW</a></code></dd>
 </dl>
 <dl>
 <dt>All Known Implementing Classes:</dt>
@@ -126,7 +126,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dl>
 <hr>
 <pre>public interface <span class="typeNameLabel">RamLogger</span>
-extends io.sbk.api.PerformanceLogger, io.sbk.perl.ReportLatencies, <a href="SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a href="CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></pre>
+extends io.sbk.logger.PerformanceLogger, io.sbk.perl.ReportLatencies, <a href="SetRW.html" title="interface in io.sbk.ram">SetRW</a>, <a href="CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></pre>
 </li>
 </ul>
 </div>
@@ -141,24 +141,24 @@ extends io.sbk.api.PerformanceLogger, io.sbk.perl.ReportLatencies, <a href="SetR
 </a>
 <h3>Method Summary</h3>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.ram.CountConnections">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.CountConnections">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.ram.<a href="CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></h3>
 <code><a href="CountConnections.html#decrementConnections()">decrementConnections</a>, <a href="CountConnections.html#incrementConnections()">incrementConnections</a></code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.PerformanceLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.PerformanceLogger">
 <!--   -->
 </a>
-<h3>Methods inherited from interface&nbsp;io.sbk.api.PerformanceLogger</h3>
+<h3>Methods inherited from interface&nbsp;io.sbk.logger.PerformanceLogger</h3>
 <code>addArgs, close, getMaxLatency, getMinLatency, getPercentiles, getReportingIntervalSeconds, getTimeUnit, open, parseArgs, printTotal, setExceptionHandler</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.Print">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.Print">
 <!--   -->
 </a>
-<h3>Methods inherited from interface&nbsp;io.sbk.perl.Print</h3>
+<h3>Methods inherited from interface&nbsp;io.sbk.logger.Print</h3>
 <code>print</code></li>
 </ul>
 <ul class="blockList">
@@ -169,7 +169,7 @@ extends io.sbk.api.PerformanceLogger, io.sbk.perl.ReportLatencies, <a href="SetR
 <code>reportLatency, reportLatencyRecord</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.ram.SetRW">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.SetRW">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.ram.<a href="SetRW.html" title="interface in io.sbk.ram">SetRW</a></h3>

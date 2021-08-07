@@ -13,11 +13,11 @@ import io.minio.Result;
 import io.minio.errors.InvalidArgumentException;
 import io.minio.messages.Item;
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-import io.sbk.api.impl.ByteArray;
+import io.sbk.data.impl.ByteArray;
 
 import java.io.IOException;
 

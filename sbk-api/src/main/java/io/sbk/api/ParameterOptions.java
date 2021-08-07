@@ -9,6 +9,8 @@
  */
 package io.sbk.api;
 
+import io.sbk.options.InputOptions;
+
 /**
  * class for Command Line Parameters.
  */

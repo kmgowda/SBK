@@ -20,9 +20,9 @@ import io.minio.errors.NoResponseException;
 import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.api.Writer;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;

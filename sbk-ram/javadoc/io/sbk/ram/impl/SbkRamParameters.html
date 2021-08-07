@@ -123,7 +123,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.api.impl.SbkOptions</li>
+<li>io.sbk.options.impl.SbkOptions</li>
 <li>
 <ul class="inheritance">
 <li>io.sbk.ram.impl.SbkRamParameters</li>
@@ -137,11 +137,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.sbk.api.InputOptions</code>, <code><a href="../RamParameterOptions.html" title="interface in io.sbk.ram">RamParameterOptions</a></code>, <code><a href="../RamParameters.html" title="interface in io.sbk.ram">RamParameters</a></code></dd>
+<dd><code>io.sbk.options.InputOptions</code>, <code><a href="../RamParameterOptions.html" title="interface in io.sbk.ram">RamParameterOptions</a></code>, <code><a href="../RamParameters.html" title="interface in io.sbk.ram">RamParameters</a></code></dd>
 </dl>
 <hr>
 <pre>public final class <span class="typeNameLabel">SbkRamParameters</span>
-extends io.sbk.api.impl.SbkOptions
+extends io.sbk.options.impl.SbkOptions
 implements <a href="../RamParameterOptions.html" title="interface in io.sbk.ram">RamParameterOptions</a></pre>
 <div class="block">Class for processing command Line arguments/parameters.</div>
 </li>
@@ -194,10 +194,10 @@ implements <a href="../RamParameterOptions.html" title="interface in io.sbk.ram"
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.SbkOptions">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.options.impl.SbkOptions">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.api.impl.SbkOptions</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.options.impl.SbkOptions</h3>
 <code>addOption, addOption, getHelpText, getOptionValue, getOptionValue, hasOption</code></li>
 </ul>
 <ul class="blockList">
@@ -208,10 +208,10 @@ implements <a href="../RamParameterOptions.html" title="interface in io.sbk.ram"
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.InputOptions">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.options.InputOptions">
 <!--   -->
 </a>
-<h3>Methods inherited from interface&nbsp;io.sbk.api.InputOptions</h3>
+<h3>Methods inherited from interface&nbsp;io.sbk.options.InputOptions</h3>
 <code>addOption, addOption, getHelpText, getOptionValue, getOptionValue, hasOption, printHelp</code></li>
 </ul>
 <ul class="blockList">
@@ -267,16 +267,16 @@ implements <a href="../RamParameterOptions.html" title="interface in io.sbk.ram"
 <pre class="methodSignature">public&nbsp;void&nbsp;parseArgs&#8203;(java.lang.String[]&nbsp;args)
                throws org.apache.commons.cli.ParseException,
                       java.lang.IllegalArgumentException,
-                      io.sbk.api.HelpException</pre>
+                      io.sbk.exception.HelpException</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>parseArgs</code>&nbsp;in interface&nbsp;<code>io.sbk.api.InputOptions</code></dd>
+<dd><code>parseArgs</code>&nbsp;in interface&nbsp;<code>io.sbk.options.InputOptions</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>parseArgs</code>&nbsp;in class&nbsp;<code>io.sbk.api.impl.SbkOptions</code></dd>
+<dd><code>parseArgs</code>&nbsp;in class&nbsp;<code>io.sbk.options.impl.SbkOptions</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>org.apache.commons.cli.ParseException</code></dd>
 <dd><code>java.lang.IllegalArgumentException</code></dd>
-<dd><code>io.sbk.api.HelpException</code></dd>
+<dd><code>io.sbk.exception.HelpException</code></dd>
 </dl>
 </li>
 </ul>

@@ -10,12 +10,12 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.perl.PerlConfig;
-import io.sbk.api.DataType;
+import io.sbk.config.PerlConfig;
+import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Callback;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.api.Worker;
 
 import java.util.concurrent.CompletableFuture;
