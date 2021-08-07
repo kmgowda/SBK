@@ -10,11 +10,11 @@
 package io.sbk.AsyncFile;
 
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-import io.sbk.api.impl.NioByteBuffer;
+import io.sbk.data.impl.NioByteBuffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

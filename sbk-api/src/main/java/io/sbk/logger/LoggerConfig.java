@@ -7,18 +7,14 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
+package io.sbk.logger;
 
-package io.sbk.api;
+import io.sbk.perl.TimeUnit;
 
-public interface CountReaders {
-
-    /**
-     * Increment Readers.
-     */
-    void incrementReaders();
-
-    /**
-     * Decrement Readers.
-     */
-    void decrementReaders();
+public class LoggerConfig {
+    public int reportingSeconds;
+    public TimeUnit timeUnit;
+    public long minLatency;
+    public long maxLatency;
+    public String percentiles;
 }

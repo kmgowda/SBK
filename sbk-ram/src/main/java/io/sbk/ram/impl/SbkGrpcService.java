@@ -17,7 +17,7 @@ import io.sbk.ram.RamParameters;
 import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;
 import io.sbk.grpc.ServiceGrpc;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.ram.RamRegistry;
 import java.security.InvalidKeyException;
 import java.util.concurrent.atomic.AtomicInteger;

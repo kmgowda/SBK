@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.logger.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import io.sbk.grpc.LatenciesRecord;
 import io.sbk.grpc.ServiceGrpc;
 import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -91,7 +91,8 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            ramHostConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+            ramHostConfig = mapper.readValue(
+                    io.sbk.logger.impl.SbkGrpcPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     RamHostConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();

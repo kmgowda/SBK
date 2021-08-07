@@ -7,9 +7,12 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
+package io.sbk.logger;
 
-package io.sbk.api;
+import io.sbk.perl.TimeUnit;
 
-public interface CountRW extends CountReaders, CountWriters {
-
+public class MetricsConfig {
+    public int port;
+    public String context;
+    public TimeUnit latencyTimeUnit;
 }

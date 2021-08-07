@@ -16,12 +16,12 @@ import com.apple.foundationdb.record.provider.foundationdb.FDBStoredRecord;
 import com.apple.foundationdb.tuple.Tuple;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 
 import java.io.EOFException;
 import java.io.IOException;

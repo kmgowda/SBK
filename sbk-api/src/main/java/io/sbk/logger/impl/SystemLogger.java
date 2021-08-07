@@ -8,21 +8,21 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.logger.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Action;
 import io.sbk.api.InputOptions;
-import io.sbk.api.Logger;
-import io.sbk.perl.LoggerConfig;
+import io.sbk.logger.Logger;
+import io.sbk.logger.LoggerConfig;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.perl.TimeUnit;
-import io.sbk.perl.impl.MicroSeconds;
-import io.sbk.perl.impl.MilliSeconds;
-import io.sbk.perl.impl.NanoSeconds;
+import io.sbk.time.impl.MicroSeconds;
+import io.sbk.time.impl.MilliSeconds;
+import io.sbk.time.impl.NanoSeconds;
 import io.sbk.system.Printer;
 
 import java.io.IOException;
@@ -67,7 +67,8 @@ public class SystemLogger implements Logger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            loggerConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(LOGGER_FILE),
+            loggerConfig = mapper.readValue(
+                    io.sbk.logger.impl.SystemLogger.class.getClassLoader().getResourceAsStream(LOGGER_FILE),
                     LoggerConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();

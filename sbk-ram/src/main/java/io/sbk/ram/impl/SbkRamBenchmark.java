@@ -19,7 +19,7 @@ import io.sbk.ram.RamLogger;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
 import io.sbk.perl.impl.HashMapLatencyRecorder;
 import io.sbk.perl.LatencyRecordWindow;

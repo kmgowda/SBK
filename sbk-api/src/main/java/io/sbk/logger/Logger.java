@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api;
+package io.sbk.logger;
 
 import io.sbk.perl.ReportLatency;
 

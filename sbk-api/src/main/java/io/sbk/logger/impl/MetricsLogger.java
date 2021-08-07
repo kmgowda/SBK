@@ -7,15 +7,15 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl.impl;
+package io.sbk.logger.impl;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Print;
-import io.sbk.perl.Time;
+import io.sbk.logger.Print;
+import io.sbk.time.Time;
 import io.sbk.perl.TimeUnit;
 
 import java.text.DecimalFormat;

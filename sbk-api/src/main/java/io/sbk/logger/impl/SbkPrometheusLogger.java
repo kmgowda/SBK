@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.logger.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,9 +15,9 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.Action;
 import io.sbk.api.Config;
 import io.sbk.api.InputOptions;
-import io.sbk.perl.MetricsConfig;
-import io.sbk.perl.Print;
-import io.sbk.perl.Time;
+import io.sbk.logger.MetricsConfig;
+import io.sbk.logger.Print;
+import io.sbk.time.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ public class SbkPrometheusLogger extends SbkCSVLogger {
     }
 
     public InputStream getMetricsConfigStream() {
-        return  io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        return  io.sbk.logger.impl.SbkPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
     @Override

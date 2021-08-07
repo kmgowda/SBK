@@ -7,17 +7,16 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.data.impl;
 
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 /**
  * Class for processing byte[] data.
  */
-public class StringHandler implements DataType<String> {
-    final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
-    final static String FORMAT_STRING = "%0"+ TIME_HEADER_SIZE + "d";
+public class ByteArray implements DataType<byte[]> {
 
     /**
      * Create byte array data.
@@ -25,8 +24,8 @@ public class StringHandler implements DataType<String> {
      * @return T return the data.
      */
     @Override
-    public String allocate(int size) {
-        return create(size);
+    public byte[] allocate(int size) {
+         return new byte[size];
     }
 
     /**
@@ -35,13 +34,13 @@ public class StringHandler implements DataType<String> {
      * @return T return the data.
      */
     @Override
-    public String create(int size) {
+    public byte[] create(int size) {
         Random random = new Random();
-        byte[] bytes = new byte[size];
+        byte[] bytes = allocate(size);
         for (int i = 0; i < size; ++i) {
             bytes[i] = (byte) (random.nextInt(26) + 65);
         }
-        return new String(bytes);
+        return bytes;
     }
 
     /**
@@ -50,35 +49,39 @@ public class StringHandler implements DataType<String> {
      * @return return size of the data.
      */
     @Override
-    public int length(String data) {
-        return data.length();
+    public int length(byte[] data) {
+        return data.length;
     }
 
     /**
      * Set the time for data.
      * @param  data data
      * @param  time time to set
-     * @return return the data.
+     * @return byte[] return the data.
      */
     @Override
-    public String setTime(String data, long time) {
-        final String timeString = String.format(FORMAT_STRING, time);
-        return timeString + data.substring(TIME_HEADER_SIZE);
+    public byte[] setTime(byte[] data, long time) {
+        byte[] bytes = ByteBuffer.allocate(TIME_HEADER_BYTES).putLong(0, time).array();
+        System.arraycopy(bytes, 0, data, 0, TIME_HEADER_BYTES);
+        return data;
     }
 
     /**
      * Get the time of data.
      * @param  data data
-     * @return long return the time set by last {@link StringHandler#setTime(String, long)}} )}}.
+     * @return long return the time set by last {@link ByteArray#setTime(byte[], long)}} )}}.
      */
     @Override
-    public long getTime(String data) {
-        return Long.parseLong(data.substring(0, TIME_HEADER_SIZE));
+    public long getTime(byte[] data) {
+        return ByteBuffer.allocate(TIME_HEADER_BYTES).put(data, 0, TIME_HEADER_BYTES).getLong(0);
     }
 
+    /**
+     * Get minimum Write and Read Data Size.
+     * @return int minimum data size Write and Read.
+     */
     @Override
     public int getWriteReadMinSize() {
-        return TIME_HEADER_SIZE;
+        return TIME_HEADER_BYTES;
     }
-
 }

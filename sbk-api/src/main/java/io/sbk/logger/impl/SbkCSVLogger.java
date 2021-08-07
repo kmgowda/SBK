@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.logger.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,7 +17,7 @@ import io.sbk.api.Action;
 import io.sbk.api.Config;
 import io.sbk.api.InputOptions;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 
 import java.io.FileWriter;
 

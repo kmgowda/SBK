@@ -123,10 +123,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li><a href="SystemLogger.html" title="class in io.sbk.api.impl">io.sbk.api.impl.SystemLogger</a></li>
+<li><a href="SystemLogger.html" title="class in io.sbk.api.impl">io.sbk.logger.impl.SystemLogger</a></li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.api.impl.Sl4jResultLogger</li>
+<li>io.sbk.logger.impl.Sl4jResultLogger</li>
 </ul>
 </li>
 </ul>
@@ -157,7 +157,7 @@ extends <a href="SystemLogger.html" title="class in io.sbk.api.impl">SystemLogge
 </a>
 <h3>Field Summary</h3>
 <ul class="blockList">
-<li class="blockList"><a id="fields.inherited.from.class.io.sbk.api.impl.SystemLogger">
+<li class="blockList"><a id="fields.inherited.from.class.io.sbk.logger.impl.SystemLogger">
 <!--   -->
 </a>
 <h3>Fields inherited from class&nbsp;io.sbk.api.impl.<a href="SystemLogger.html" title="class in io.sbk.api.impl">SystemLogger</a></h3>
@@ -241,11 +241,11 @@ extends <a href="SystemLogger.html" title="class in io.sbk.api.impl">SystemLogge
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.SystemLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.SystemLogger">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.api.impl.<a href="SystemLogger.html" title="class in io.sbk.api.impl">SystemLogger</a></h3>
-<code><a href="SystemLogger.html#addArgs(io.sbk.api.InputOptions)">addArgs</a>, <a href="SystemLogger.html#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">appendPercentiles</a>, <a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#close(io.sbk.api.InputOptions)">close</a>, <a href="SystemLogger.html#decrementReaders()">decrementReaders</a>, <a href="SystemLogger.html#decrementWriters()">decrementWriters</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getReportingIntervalSeconds()">getReportingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a>, <a href="SystemLogger.html#incrementReaders()">incrementReaders</a>, <a href="SystemLogger.html#incrementWriters()">incrementWriters</a>, <a href="SystemLogger.html#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.perl.Time)">open</a>, <a href="SystemLogger.html#parseArgs(io.sbk.api.InputOptions)">parseArgs</a></code></li>
+<code><a href="SystemLogger.html#addArgs(io.sbk.api.InputOptions)">addArgs</a>, <a href="SystemLogger.html#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">appendPercentiles</a>, <a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#close(io.sbk.api.InputOptions)">close</a>, <a href="SystemLogger.html#decrementReaders()">decrementReaders</a>, <a href="SystemLogger.html#decrementWriters()">decrementWriters</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getReportingIntervalSeconds()">getReportingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a>, <a href="SystemLogger.html#incrementReaders()">incrementReaders</a>, <a href="SystemLogger.html#incrementWriters()">incrementWriters</a>, <a href="SystemLogger.html#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">open</a>, <a href="SystemLogger.html#parseArgs(io.sbk.api.InputOptions)">parseArgs</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.java.lang.Object">
@@ -255,14 +255,14 @@ extends <a href="SystemLogger.html" title="class in io.sbk.api.impl">SystemLogge
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.Logger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.Logger">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.api.<a href="../Logger.html" title="interface in io.sbk.api">Logger</a></h3>
 <code><a href="../Logger.html#recordLatency(long,int,int,long)">recordLatency</a></code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.PerformanceLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.PerformanceLogger">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.api.<a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></h3>

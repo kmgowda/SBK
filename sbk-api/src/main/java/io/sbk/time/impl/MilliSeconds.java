@@ -8,20 +8,19 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl.impl;
+package io.sbk.time.impl;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.perl.TimeUnit;
 
-
-final public class NanoSeconds implements Time {
+final public class MilliSeconds implements Time {
 
     /**
      * get the Time Unit.
-     * @return time Unit in nanoseconds.;
+     * @return time Unit in milliseconds
      */
     public TimeUnit getTimeUnit() {
-        return TimeUnit.ns;
+        return TimeUnit.ms;
     }
 
 
@@ -30,54 +29,55 @@ final public class NanoSeconds implements Time {
      * @return current Time
      */
     public long getCurrentTime() {
-        return System.nanoTime();
+        return System.currentTimeMillis();
     }
 
     /**
-     * get the current Time.
-     * @param h time stamp in Nano seconds
-     * @param l time stamp in nano seconds, the l should be less than h
+     * get the elapsed time .
+     * @param h time stamp in milliseconds
+     * @param l time stamp in milliseconds, the l should be less than h
      * @return elapsed time in milliseconds
      */
     public double elapsedMilliSeconds(long h, long l) {
-        return elapsed(h, l) / (PerlConfig.NS_PER_MS * 1.0);
+        return elapsed(h, l);
     }
 
     /**
-     * get the current Time.
-     * @param h time stamp in Nano seconds.
-     * @param l time stamp in Nano seconds, the l should be less than h
+     * get the elapsed tiome.
+     * @param h time stamp in milliseconds
+     * @param l time stamp in milliseconds, the l should be less than h
      * @return elapsed time in seconds
      */
     public double elapsedSeconds(long h, long l) {
-        return elapsed(h, l) / (PerlConfig.NS_PER_SEC * 1.0);
+        return elapsed(h, l) / (PerlConfig.MS_PER_SEC * 1.0);
     }
 
     /**
      * convert the time to Nanoseconds.
-     * @param t time duration in nanoseconds.
+     * @param t time duration in milliseconds
      * @return converted time in nanoseconds
      */
     public double convertToNanoSeconds(double t) {
-        return t;
+        return t * PerlConfig.NS_PER_MS;
     }
 
     /**
      * convert the time to Micro seconds.
-     * @param t time duration in nanoseconds.
+     * @param t time duration in milliseconds
      * @return converted time in microseconds
      */
     public double convertToMicroSeconds(double t) {
-        return t / PerlConfig.NS_PER_MICRO;
+        return t * PerlConfig.MICROS_PER_MS;
     }
 
     /**
      * convert the time to Milliseconds.
-     * @param t time duration in nanoseconds.
+     * @param t time duration in milliseconds
      * @return converted time in Milliseconds
      */
     public double convertToMilliSeconds(double t) {
-        return t / PerlConfig.NS_PER_MS;
+        return t;
     }
+
 
 }

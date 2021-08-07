@@ -10,8 +10,9 @@
 
 package io.sbk.api;
 
+import io.sbk.data.DataType;
 import io.sbk.perl.PerlConfig;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 
 import java.io.EOFException;
 import java.io.IOException;

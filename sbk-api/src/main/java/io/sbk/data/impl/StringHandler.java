@@ -7,18 +7,17 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.data.impl;
 
-import com.google.protobuf.ByteString;
-import io.sbk.api.DataType;
-
-import java.nio.ByteBuffer;
+import io.sbk.data.DataType;
 import java.util.Random;
 
 /**
- * Class for processing Byte String data.
+ * Class for processing byte[] data.
  */
-public class ProtoBufByteString implements DataType<ByteString> {
+public class StringHandler implements DataType<String> {
+    final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
+    final static String FORMAT_STRING = "%0"+ TIME_HEADER_SIZE + "d";
 
     /**
      * Create byte array data.
@@ -26,8 +25,8 @@ public class ProtoBufByteString implements DataType<ByteString> {
      * @return T return the data.
      */
     @Override
-    public ByteString allocate(int size) {
-        return ByteString.copyFrom(new byte[size]);
+    public String allocate(int size) {
+        return create(size);
     }
 
     /**
@@ -36,13 +35,13 @@ public class ProtoBufByteString implements DataType<ByteString> {
      * @return T return the data.
      */
     @Override
-    public ByteString create(int size) {
+    public String create(int size) {
         Random random = new Random();
         byte[] bytes = new byte[size];
         for (int i = 0; i < size; ++i) {
             bytes[i] = (byte) (random.nextInt(26) + 65);
         }
-        return ByteString.copyFrom(bytes);
+        return new String(bytes);
     }
 
     /**
@@ -51,43 +50,35 @@ public class ProtoBufByteString implements DataType<ByteString> {
      * @return return size of the data.
      */
     @Override
-    public int length(ByteString data) {
-        return data.size();
+    public int length(String data) {
+        return data.length();
     }
 
     /**
      * Set the time for data.
      * @param  data data
      * @param  time time to set
-     * @return byte[] return the data.
+     * @return return the data.
      */
     @Override
-    public ByteString setTime(ByteString data, long time) {
-        byte[] dataBytes = data.toByteArray();
-        byte[] bytes = ByteBuffer.allocate(TIME_HEADER_BYTES).putLong(0, time).array();
-        System.arraycopy(bytes, 0, dataBytes, 0, TIME_HEADER_BYTES);
-        return ByteString.copyFrom(dataBytes);
+    public String setTime(String data, long time) {
+        final String timeString = String.format(FORMAT_STRING, time);
+        return timeString + data.substring(TIME_HEADER_SIZE);
     }
 
     /**
      * Get the time of data.
      * @param  data data
-     * @return long return the time set by last {@link ByteArray#setTime(byte[], long)}} )}}.
+     * @return long return the time set by last {@link StringHandler#setTime(String, long)}} )}}.
      */
     @Override
-    public long getTime(ByteString data) {
-        return data.asReadOnlyByteBuffer().getLong(0);
+    public long getTime(String data) {
+        return Long.parseLong(data.substring(0, TIME_HEADER_SIZE));
     }
 
-
-    /**
-     * Get minimum Write and Read Data Size.
-     * @return int minimum data size Write and Read.
-     */
     @Override
     public int getWriteReadMinSize() {
-        return TIME_HEADER_BYTES;
+        return TIME_HEADER_SIZE;
     }
 
 }
-

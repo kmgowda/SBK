@@ -7,10 +7,18 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl;
 
-public class MetricsConfig {
-    public int port;
-    public String context;
-    public TimeUnit latencyTimeUnit;
+package io.sbk.logger;
+
+public interface CountReaders {
+
+    /**
+     * Increment Readers.
+     */
+    void incrementReaders();
+
+    /**
+     * Decrement Readers.
+     */
+    void decrementReaders();
 }

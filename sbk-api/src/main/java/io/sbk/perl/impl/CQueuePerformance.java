@@ -21,7 +21,7 @@ import io.sbk.system.Printer;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.perl.SendChannel;
-import io.sbk.perl.Time;
+import io.sbk.time.Time;
 import io.sbk.perl.TimeStamp;
 import io.sbk.perl.Channel;
 import lombok.Synchronized;

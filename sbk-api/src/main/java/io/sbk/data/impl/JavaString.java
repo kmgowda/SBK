@@ -7,9 +7,9 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.data.impl;
 
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import java.nio.ByteBuffer;
 import java.util.Random;
 

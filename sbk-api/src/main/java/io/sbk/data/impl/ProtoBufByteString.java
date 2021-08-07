@@ -7,16 +7,18 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.data.impl;
 
-import io.sbk.api.DataType;
+import com.google.protobuf.ByteString;
+import io.sbk.data.DataType;
+
 import java.nio.ByteBuffer;
 import java.util.Random;
 
 /**
- * Class for processing byte[] data.
+ * Class for processing Byte String data.
  */
-public class ByteArray implements DataType<byte[]> {
+public class ProtoBufByteString implements DataType<ByteString> {
 
     /**
      * Create byte array data.
@@ -24,8 +26,8 @@ public class ByteArray implements DataType<byte[]> {
      * @return T return the data.
      */
     @Override
-    public byte[] allocate(int size) {
-         return new byte[size];
+    public ByteString allocate(int size) {
+        return ByteString.copyFrom(new byte[size]);
     }
 
     /**
@@ -34,13 +36,13 @@ public class ByteArray implements DataType<byte[]> {
      * @return T return the data.
      */
     @Override
-    public byte[] create(int size) {
+    public ByteString create(int size) {
         Random random = new Random();
-        byte[] bytes = allocate(size);
+        byte[] bytes = new byte[size];
         for (int i = 0; i < size; ++i) {
             bytes[i] = (byte) (random.nextInt(26) + 65);
         }
-        return bytes;
+        return ByteString.copyFrom(bytes);
     }
 
     /**
@@ -49,8 +51,8 @@ public class ByteArray implements DataType<byte[]> {
      * @return return size of the data.
      */
     @Override
-    public int length(byte[] data) {
-        return data.length;
+    public int length(ByteString data) {
+        return data.size();
     }
 
     /**
@@ -60,10 +62,11 @@ public class ByteArray implements DataType<byte[]> {
      * @return byte[] return the data.
      */
     @Override
-    public byte[] setTime(byte[] data, long time) {
+    public ByteString setTime(ByteString data, long time) {
+        byte[] dataBytes = data.toByteArray();
         byte[] bytes = ByteBuffer.allocate(TIME_HEADER_BYTES).putLong(0, time).array();
-        System.arraycopy(bytes, 0, data, 0, TIME_HEADER_BYTES);
-        return data;
+        System.arraycopy(bytes, 0, dataBytes, 0, TIME_HEADER_BYTES);
+        return ByteString.copyFrom(dataBytes);
     }
 
     /**
@@ -72,9 +75,10 @@ public class ByteArray implements DataType<byte[]> {
      * @return long return the time set by last {@link ByteArray#setTime(byte[], long)}} )}}.
      */
     @Override
-    public long getTime(byte[] data) {
-        return ByteBuffer.allocate(TIME_HEADER_BYTES).put(data, 0, TIME_HEADER_BYTES).getLong(0);
+    public long getTime(ByteString data) {
+        return data.asReadOnlyByteBuffer().getLong(0);
     }
+
 
     /**
      * Get minimum Write and Read Data Size.
@@ -84,4 +88,6 @@ public class ByteArray implements DataType<byte[]> {
     public int getWriteReadMinSize() {
         return TIME_HEADER_BYTES;
     }
+
 }
+

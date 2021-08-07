@@ -9,7 +9,7 @@
  */
 package io.sbk.Redis;
 import io.sbk.api.DataReader;
-import io.sbk.api.DataType;
+import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
@@ -17,7 +17,7 @@ import io.sbk.api.ParameterOptions;
 import java.io.IOException;
 
 import io.sbk.system.Printer;
-import io.sbk.api.impl.StringHandler;
+import io.sbk.data.impl.StringHandler;
 import redis.clients.jedis.Jedis;
 
 

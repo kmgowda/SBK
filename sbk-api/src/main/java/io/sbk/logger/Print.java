@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl;
+package io.sbk.logger;
 
 public interface Print {
     /**

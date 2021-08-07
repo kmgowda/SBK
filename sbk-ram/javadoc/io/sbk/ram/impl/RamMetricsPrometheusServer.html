@@ -123,13 +123,13 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.perl.impl.MetricsLogger</li>
+<li>io.sbk.logger.impl.MetricsLogger</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.api.impl.RWMetricsLogger</li>
+<li>io.sbk.logger.impl.RWMetricsLogger</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.api.impl.RWMetricsPrometheusServer</li>
+<li>io.sbk.logger.impl.RWMetricsPrometheusServer</li>
 <li>
 <ul class="inheritance">
 <li>io.sbk.ram.impl.RamMetricsPrometheusServer</li>
@@ -147,11 +147,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.sbk.api.CountReaders</code>, <code>io.sbk.api.CountRW</code>, <code>io.sbk.api.CountWriters</code>, <code>io.sbk.perl.Print</code>, <code><a href="../CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></code></dd>
+<dd><code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code>io.sbk.logger.Print</code>, <code><a href="../CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></code></dd>
 </dl>
 <hr>
 <pre>public class <span class="typeNameLabel">RamMetricsPrometheusServer</span>
-extends io.sbk.api.impl.RWMetricsPrometheusServer
+extends io.sbk.logger.impl.RWMetricsPrometheusServer
 implements <a href="../CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></pre>
 </li>
 </ul>
@@ -167,10 +167,10 @@ implements <a href="../CountConnections.html" title="interface in io.sbk.ram">Co
 </a>
 <h3>Field Summary</h3>
 <ul class="blockList">
-<li class="blockList"><a id="fields.inherited.from.class.io.sbk.perl.impl.MetricsLogger">
+<li class="blockList"><a id="fields.inherited.from.class.io.sbk.logger.impl.MetricsLogger">
 <!--   -->
 </a>
-<h3>Fields inherited from class&nbsp;io.sbk.perl.impl.MetricsLogger</h3>
+<h3>Fields inherited from class&nbsp;io.sbk.logger.impl.MetricsLogger</h3>
 <code>format, metricPrefix, registry</code></li>
 </ul>
 </li>
@@ -190,11 +190,11 @@ implements <a href="../CountConnections.html" title="interface in io.sbk.ram">Co
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr class="altColor">
-<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(java.lang.String,java.lang.String,double%5B%5D,io.sbk.perl.Time,io.sbk.perl.MetricsConfig)">RamMetricsPrometheusServer</a></span>&#8203;(java.lang.String&nbsp;header,
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(java.lang.String,java.lang.String,double%5B%5D,io.sbk.time.Time,io.sbk.logger.MetricsConfig)">RamMetricsPrometheusServer</a></span>&#8203;(java.lang.String&nbsp;header,
                           java.lang.String&nbsp;action,
                           double[]&nbsp;percentiles,
-                          io.sbk.perl.Time&nbsp;time,
-                          io.sbk.perl.MetricsConfig&nbsp;config)</code></th>
+                          io.sbk.time.Time&nbsp;time,
+                          io.sbk.logger.MetricsConfig&nbsp;config)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 </table>
@@ -231,24 +231,24 @@ implements <a href="../CountConnections.html" title="interface in io.sbk.ram">Co
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.RWMetricsPrometheusServer">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.RWMetricsPrometheusServer">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.api.impl.RWMetricsPrometheusServer</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.logger.impl.RWMetricsPrometheusServer</h3>
 <code>start, stop</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.RWMetricsLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.RWMetricsLogger">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.api.impl.RWMetricsLogger</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.logger.impl.RWMetricsLogger</h3>
 <code>decrementReaders, decrementWriters, incrementReaders, incrementWriters, setMaxReaders, setMaxWriters, setReaders, setWriters</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.impl.MetricsLogger">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.MetricsLogger">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.perl.impl.MetricsLogger</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.logger.impl.MetricsLogger</h3>
 <code>close, print</code></li>
 </ul>
 <ul class="blockList">
@@ -274,7 +274,7 @@ implements <a href="../CountConnections.html" title="interface in io.sbk.ram">Co
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a id="&lt;init&gt;(java.lang.String,java.lang.String,double[],io.sbk.perl.Time,io.sbk.perl.MetricsConfig)">
+<a id="&lt;init&gt;(java.lang.String,java.lang.String,double[],io.sbk.time.Time,io.sbk.logger.MetricsConfig)">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -283,8 +283,8 @@ implements <a href="../CountConnections.html" title="interface in io.sbk.ram">Co
 <pre>public&nbsp;RamMetricsPrometheusServer&#8203;(java.lang.String&nbsp;header,
                                   java.lang.String&nbsp;action,
                                   double[]&nbsp;percentiles,
-                                  io.sbk.perl.Time&nbsp;time,
-                                  io.sbk.perl.MetricsConfig&nbsp;config)
+                                  io.sbk.time.Time&nbsp;time,
+                                  io.sbk.logger.MetricsConfig&nbsp;config)
                            throws java.io.IOException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>

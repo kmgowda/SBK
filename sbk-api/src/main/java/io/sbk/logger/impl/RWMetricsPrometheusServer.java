@@ -8,15 +8,14 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.logger.impl;
 
-import io.sbk.perl.MetricsConfig;
-import io.sbk.perl.impl.PrometheusServer;
-import io.sbk.perl.Time;
+import io.sbk.logger.MetricsConfig;
+import io.sbk.time.Time;
 
 import java.io.IOException;
 
-public class RWMetricsPrometheusServer extends RWMetricsLogger  {
+public class RWMetricsPrometheusServer extends RWMetricsLogger {
     final private PrometheusServer server;
 
     private RWMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,

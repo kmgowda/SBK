@@ -7,12 +7,10 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl;
 
-public class LoggerConfig {
-    public int reportingSeconds;
-    public TimeUnit timeUnit;
-    public long minLatency;
-    public long maxLatency;
-    public String percentiles;
+package io.sbk.logger;
+
+
+public interface CountRW extends CountReaders, CountWriters {
+
 }

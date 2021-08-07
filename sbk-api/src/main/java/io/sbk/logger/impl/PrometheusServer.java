@@ -8,7 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl.impl;
+package io.sbk.logger.impl;
 
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.core.instrument.Clock;
