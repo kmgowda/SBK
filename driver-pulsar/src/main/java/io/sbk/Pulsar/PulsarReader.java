@@ -10,7 +10,7 @@
 package io.sbk.Pulsar;
 
 import io.sbk.api.Reader;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

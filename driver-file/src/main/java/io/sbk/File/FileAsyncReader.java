@@ -11,7 +11,7 @@ package io.sbk.File;
 
 import io.sbk.api.AsyncReader;
 import io.sbk.data.DataType;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 
 
 import java.io.EOFException;

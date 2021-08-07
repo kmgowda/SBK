@@ -10,7 +10,7 @@
 
 package io.sbk.Pravega;
 
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import io.pravega.client.stream.EventStreamReader;

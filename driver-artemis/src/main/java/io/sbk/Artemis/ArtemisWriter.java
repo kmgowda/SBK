@@ -13,7 +13,7 @@ import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.time.Time;
 import io.sbk.api.Writer;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
 import org.apache.activemq.artemis.api.core.client.ClientMessage;
 import org.apache.activemq.artemis.api.core.client.ClientProducer;

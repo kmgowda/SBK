@@ -126,13 +126,13 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>io.sbk.options.impl.SbkOptions</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.parameters.impl.SbkParameters</li>
+<li>io.sbk.api.impl.SbkParameters</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.parameters.impl.SbkDriversParameters</li>
+<li>io.sbk.api.impl.SbkDriversParameters</li>
 <li>
 <ul class="inheritance">
-<li>io.sbk.parameters.impl.SbkGemParameters</li>
+<li>io.sbk.gem.impl.SbkGemParameters</li>
 </ul>
 </li>
 </ul>
@@ -147,11 +147,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.sbk.options.InputOptions</code>, <code>io.sbk.parameters.ParameterOptions</code>, <code>io.sbk.parameters.Parameters</code>, <code><a href="../GemParameterOptions.html" title="interface in io.sbk.gem">GemParameterOptions</a></code>, <code><a href="../GemParameters.html" title="interface in io.sbk.gem">GemParameters</a></code>, <code><a href="../GetArguments.html" title="interface in io.sbk.gem">GetArguments</a></code></dd>
+<dd><code>io.sbk.options.InputOptions</code>, <code>io.sbk.api.ParameterOptions</code>, <code>io.sbk.api.Parameters</code>, <code><a href="../GemParameterOptions.html" title="interface in io.sbk.gem">GemParameterOptions</a></code>, <code><a href="../GemParameters.html" title="interface in io.sbk.gem">GemParameters</a></code>, <code><a href="../GetArguments.html" title="interface in io.sbk.gem">GetArguments</a></code></dd>
 </dl>
 <hr>
 <pre>public class <span class="typeNameLabel">SbkGemParameters</span>
-extends io.sbk.parameters.impl.SbkDriversParameters
+extends io.sbk.api.impl.SbkDriversParameters
 implements <a href="../GemParameterOptions.html" title="interface in io.sbk.gem">GemParameterOptions</a></pre>
 </li>
 </ul>
@@ -224,10 +224,10 @@ implements <a href="../GemParameterOptions.html" title="interface in io.sbk.gem"
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.parameters.impl.SbkParameters">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.impl.SbkParameters">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;io.sbk.parameters.impl.SbkParameters</h3>
+<h3>Methods inherited from class&nbsp;io.sbk.api.impl.SbkParameters</h3>
 <code>getReadersCount, getReadersStep, getReadersStepSeconds, getRecordSize, getRecordsPerSec, getRecordsPerSync, getTimeoutMS, getTotalRecords, getTotalSecondsToRun, getWritersCount, getWritersStep, getWritersStepSeconds, isWriteAndRead</code></li>
 </ul>
 <ul class="blockList">
@@ -245,7 +245,7 @@ implements <a href="../GemParameterOptions.html" title="interface in io.sbk.gem"
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.parameters.GemParameters">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.gem.GemParameters">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.gem.<a href="../GemParameters.html" title="interface in io.sbk.gem">GemParameters</a></h3>
@@ -266,10 +266,10 @@ implements <a href="../GemParameterOptions.html" title="interface in io.sbk.gem"
 <code>addOption, addOption, getHelpText, getOptionValue, getOptionValue, hasOption, printHelp</code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.io.sbk.parameters.Parameters">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.api.Parameters">
 <!--   -->
 </a>
-<h3>Methods inherited from interface&nbsp;io.sbk.parameters.Parameters</h3>
+<h3>Methods inherited from interface&nbsp;io.sbk.api.Parameters</h3>
 <code>getReadersCount, getReadersStep, getReadersStepSeconds, getRecordSize, getRecordsPerSec, getRecordsPerSync, getTimeoutMS, getTotalRecords, getTotalSecondsToRun, getWritersCount, getWritersStep, getWritersStepSeconds, isWriteAndRead</code></li>
 </ul>
 </li>
@@ -324,7 +324,7 @@ implements <a href="../GemParameterOptions.html" title="interface in io.sbk.gem"
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>parseArgs</code>&nbsp;in interface&nbsp;<code>io.sbk.options.InputOptions</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>parseArgs</code>&nbsp;in class&nbsp;<code>io.sbk.parameters.impl.SbkParameters</code></dd>
+<dd><code>parseArgs</code>&nbsp;in class&nbsp;<code>io.sbk.api.impl.SbkParameters</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>org.apache.commons.cli.ParseException</code></dd>
 <dd><code>java.lang.IllegalArgumentException</code></dd>

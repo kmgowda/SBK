@@ -9,7 +9,7 @@
  */
 package io.sbk.FileStream;
 import io.sbk.data.DataType;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.time.Time;

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 
 import io.sbk.api.Storage;
 import io.sbk.data.impl.JavaString;

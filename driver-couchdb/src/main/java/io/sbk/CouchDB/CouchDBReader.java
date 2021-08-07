@@ -10,7 +10,7 @@
 
 package io.sbk.CouchDB;
 
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;

@@ -11,7 +11,7 @@ package io.sbk.Nats;
 import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.sbk.api.Writer;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.time.Duration;

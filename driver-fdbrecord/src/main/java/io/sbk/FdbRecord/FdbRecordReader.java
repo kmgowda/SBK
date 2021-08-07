@@ -16,7 +16,7 @@ import com.apple.foundationdb.record.provider.foundationdb.FDBStoredRecord;
 import com.apple.foundationdb.tuple.Tuple;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import java.io.EOFException;

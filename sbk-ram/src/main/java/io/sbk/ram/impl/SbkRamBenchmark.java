@@ -16,7 +16,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.state.State;
 import io.sbk.config.RamConfig;
 import io.sbk.logger.RamLogger;
-import io.sbk.parameters.RamParameterOptions;
+import io.sbk.ram.RamParameterOptions;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;

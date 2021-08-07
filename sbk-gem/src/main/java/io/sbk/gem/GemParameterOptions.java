@@ -8,8 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.parameters;
+package io.sbk.gem;
 
+import io.sbk.api.ParameterOptions;
 import io.sbk.options.GetArguments;
 
 public interface GemParameterOptions extends ParameterOptions, GemParameters, GetArguments {

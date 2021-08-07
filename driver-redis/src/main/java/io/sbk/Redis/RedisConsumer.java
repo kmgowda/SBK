@@ -12,7 +12,7 @@ package io.sbk.Redis;
 
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import io.sbk.system.Printer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;

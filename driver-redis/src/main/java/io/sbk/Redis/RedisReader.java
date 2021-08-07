@@ -10,7 +10,7 @@
 
 package io.sbk.Redis;
 
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 
 import redis.clients.jedis.Jedis;

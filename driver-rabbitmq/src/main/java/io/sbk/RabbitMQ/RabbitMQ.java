@@ -11,7 +11,7 @@ package io.sbk.RabbitMQ;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 
 
 import java.io.IOException;

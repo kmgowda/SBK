@@ -10,7 +10,6 @@
 
 package io.sbk.api;
 
-import io.sbk.parameters.Parameters;
 import io.sbk.perl.SendChannel;
 
 /**

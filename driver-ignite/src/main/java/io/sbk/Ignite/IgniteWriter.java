@@ -10,7 +10,7 @@
 
 package io.sbk.Ignite;
 
-import io.sbk.parameters.ParameterOptions;
+import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import org.apache.ignite.IgniteCache;
 
