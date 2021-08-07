@@ -16,7 +16,7 @@ import io.sbk.config.GemConfig;
 import io.sbk.parameters.GemParameters;
 import io.sbk.gem.SshConnection;
 import io.sbk.gem.RemoteResponse;
-import io.sbk.perl.State;
+import io.sbk.state.State;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 import org.apache.commons.lang.StringUtils;

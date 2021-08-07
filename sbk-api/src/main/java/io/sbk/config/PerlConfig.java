@@ -8,11 +8,11 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl;
+package io.sbk.config;
 
 import java.util.concurrent.TimeUnit;
 
-public class PerlConfig {
+final public class PerlConfig {
     final public static String PERCENTILE_FORMAT = "0.##";
 
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;

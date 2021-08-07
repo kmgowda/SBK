@@ -16,7 +16,7 @@ import java.io.PrintWriter;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.options.InputOptions;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 
 import java.io.FileWriter;

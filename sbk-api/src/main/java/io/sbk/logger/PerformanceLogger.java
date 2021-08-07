@@ -13,7 +13,7 @@ package io.sbk.logger;
 import io.sbk.action.Action;
 import io.sbk.exception.ExceptionHandler;
 import io.sbk.options.InputOptions;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
 

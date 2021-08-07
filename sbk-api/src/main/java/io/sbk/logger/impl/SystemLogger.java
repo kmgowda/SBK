@@ -17,7 +17,7 @@ import io.sbk.action.Action;
 import io.sbk.options.InputOptions;
 import io.sbk.logger.Logger;
 import io.sbk.logger.LoggerConfig;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
 import io.sbk.time.impl.MicroSeconds;

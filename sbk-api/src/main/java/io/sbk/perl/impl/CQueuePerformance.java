@@ -15,8 +15,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 
-import io.sbk.perl.PerlConfig;
-import io.sbk.perl.State;
+import io.sbk.config.PerlConfig;
+import io.sbk.state.State;
 import io.sbk.system.Printer;
 import io.sbk.perl.Performance;
 import io.sbk.perl.PeriodicRecorder;

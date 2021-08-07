@@ -12,7 +12,7 @@ package io.sbk.parameters.impl;
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
 import io.sbk.options.impl.SbkOptions;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.parameters.ParameterOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

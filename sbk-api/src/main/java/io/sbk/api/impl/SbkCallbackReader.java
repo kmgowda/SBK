@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.parameters.ParameterOptions;
 import io.sbk.perl.SendChannel;

@@ -26,7 +26,7 @@ import io.sbk.grpc.Config;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.grpc.ServiceGrpc;
 import io.sbk.perl.LatencyRecorder;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 import io.sbk.system.Printer;
 import java.io.IOException;

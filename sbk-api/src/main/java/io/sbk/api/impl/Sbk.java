@@ -24,7 +24,7 @@ import io.sbk.api.StoragePackage;
 import io.sbk.logger.impl.SbkGrpcPrometheusLogger;
 import io.sbk.parameters.impl.SbkDriversParameters;
 import io.sbk.parameters.impl.SbkParameters;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.api.Storage;
 import io.sbk.time.Time;
 import io.sbk.system.Printer;

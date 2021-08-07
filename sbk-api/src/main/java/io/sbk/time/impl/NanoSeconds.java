@@ -9,7 +9,7 @@
  */
 
 package io.sbk.time.impl;
-import io.sbk.perl.PerlConfig;
+import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
 
