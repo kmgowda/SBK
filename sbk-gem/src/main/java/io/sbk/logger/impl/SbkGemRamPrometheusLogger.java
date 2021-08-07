@@ -8,10 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.gem.impl;
+package io.sbk.logger.impl;
 
-import io.sbk.gem.GemLogger;
-import io.sbk.logger.impl.SbkRamPrometheusLogger;
+import io.sbk.logger.GemLogger;
 
 public class SbkGemRamPrometheusLogger extends SbkRamPrometheusLogger implements GemLogger {
 

@@ -11,6 +11,7 @@
 package io.sbk.gem;
 
 import io.sbk.api.ParameterOptions;
+import io.sbk.options.GetArguments;
 
 public interface GemParameterOptions extends ParameterOptions, GemParameters, GetArguments {
 

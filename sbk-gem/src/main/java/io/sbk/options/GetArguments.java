@@ -8,9 +8,11 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.gem;
+package io.sbk.options;
 
-import io.sbk.logger.RamLogger;
+public interface GetArguments {
 
-public interface GemLogger extends RamLogger, GetArguments {
+    String[] getOptionsArgs();
+
+    String[] getParsedArgs();
 }
