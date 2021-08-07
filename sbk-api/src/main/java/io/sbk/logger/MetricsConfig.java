@@ -9,7 +9,7 @@
  */
 package io.sbk.logger;
 
-import io.sbk.perl.TimeUnit;
+import io.sbk.time.TimeUnit;
 
 public class MetricsConfig {
     public int port;

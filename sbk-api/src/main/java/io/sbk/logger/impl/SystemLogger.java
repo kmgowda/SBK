@@ -19,7 +19,7 @@ import io.sbk.logger.Logger;
 import io.sbk.logger.LoggerConfig;
 import io.sbk.perl.PerlConfig;
 import io.sbk.time.Time;
-import io.sbk.perl.TimeUnit;
+import io.sbk.time.TimeUnit;
 import io.sbk.time.impl.MicroSeconds;
 import io.sbk.time.impl.MilliSeconds;
 import io.sbk.time.impl.NanoSeconds;
@@ -99,7 +99,7 @@ public class SystemLogger implements Logger {
     private String getTimeUnitNames() {
         String ret = "[";
 
-        for (io.sbk.perl.TimeUnit value : TimeUnit.values()) {
+        for (TimeUnit value : TimeUnit.values()) {
             ret += value.name() +":" + value + ", ";
         }
         ret += "]";

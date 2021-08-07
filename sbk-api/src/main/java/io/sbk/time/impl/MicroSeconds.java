@@ -11,7 +11,7 @@
 package io.sbk.time.impl;
 import io.sbk.perl.PerlConfig;
 import io.sbk.time.Time;
-import io.sbk.perl.TimeUnit;
+import io.sbk.time.TimeUnit;
 
 
 final public class MicroSeconds implements Time {

@@ -15,7 +15,7 @@ import io.sbk.exception.ExceptionHandler;
 import io.sbk.options.InputOptions;
 import io.sbk.perl.PerlConfig;
 import io.sbk.time.Time;
-import io.sbk.perl.TimeUnit;
+import io.sbk.time.TimeUnit;
 
 import java.io.IOException;
 
