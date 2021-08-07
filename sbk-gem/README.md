@@ -9,7 +9,7 @@ You may obtain a copy of the License at
 -->
 # SBK-GEM : Group Execution Monitor
 
-[![Api](https://img.shields.io/badge/SBK--GEM-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-ram/javadoc/index.html)
+[![Api](https://img.shields.io/badge/SBK--GEM-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-gem/javadoc/index.html)
 
 The SBK (Storage Benchmark Kit) - GEM (Group Execution Monitor) combines SBK-RAM and SBK. you can just execute the 
 SBK instances on multiple hosts with single SBK-GEM command. For any given cluster, you are running ssh-server in 
