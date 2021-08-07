@@ -10,7 +10,7 @@
 
 package io.sbk.gem;
 
-import io.sbk.ram.RamLogger;
+import io.sbk.logger.RamLogger;
 
 public interface GemLogger extends RamLogger, GetArguments {
 }

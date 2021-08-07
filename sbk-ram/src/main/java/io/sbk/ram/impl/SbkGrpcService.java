@@ -12,7 +12,7 @@ package io.sbk.ram.impl;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
-import io.sbk.ram.CountConnections;
+import io.sbk.logger.CountConnections;
 import io.sbk.ram.RamParameters;
 import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;

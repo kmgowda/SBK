@@ -11,7 +11,7 @@
 package io.sbk.gem.impl;
 
 import io.sbk.gem.GemLogger;
-import io.sbk.ram.impl.SbkRamPrometheusLogger;
+import io.sbk.logger.impl.SbkRamPrometheusLogger;
 
 public class SbkGemRamPrometheusLogger extends SbkRamPrometheusLogger implements GemLogger {
 

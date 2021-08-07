@@ -8,9 +8,8 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram;
+package io.sbk.logger;
 
-import io.sbk.logger.PerformanceLogger;
 import io.sbk.perl.ReportLatencies;
 
 public interface RamLogger extends PerformanceLogger, ReportLatencies, SetRW, CountConnections {

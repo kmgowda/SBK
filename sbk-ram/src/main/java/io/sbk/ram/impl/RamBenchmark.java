@@ -18,7 +18,7 @@ import io.sbk.perl.State;
 import io.sbk.time.Time;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.ram.RamRegistry;
-import io.sbk.ram.SetRW;
+import io.sbk.logger.SetRW;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 

@@ -135,7 +135,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <ul>
 <li class="circle">io.sbk.logger.impl.SbkPrometheusLogger
 <ul>
-<li class="circle">io.sbk.ram.impl.SbkRamPrometheusLogger (implements io.sbk.ram.RamLogger, io.sbk.ram.SetRW)
+<li class="circle">io.sbk.logger.impl.SbkRamPrometheusLogger (implements io.sbk.logger.RamLogger, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.gem.impl.<a href="io/sbk/gem/impl/SbkGemRamPrometheusLogger.html" title="class in io.sbk.gem.impl"><span class="typeNameLink">SbkGemRamPrometheusLogger</span></a> (implements io.sbk.gem.<a href="io/sbk/gem/GemLogger.html" title="interface in io.sbk.gem">GemLogger</a>)</li>
 </ul>
@@ -153,9 +153,9 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <section role="region">
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li class="circle">io.sbk.ram.CountConnections
+<li class="circle">io.sbk.logger.CountConnections
 <ul>
-<li class="circle">io.sbk.ram.RamLogger (also extends io.sbk.logger.PerformanceLogger, io.sbk.perl.ReportLatencies, io.sbk.ram.SetRW)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.PerformanceLogger, io.sbk.perl.ReportLatencies, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="io/sbk/gem/GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
 </ul>
@@ -165,7 +165,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemBenchmark.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemBenchmark</span></a></li>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/GetArguments.html" title="interface in io.sbk.gem"><span class="typeNameLink">GetArguments</span></a>
 <ul>
-<li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.ram.RamLogger)</li>
+<li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.logger.RamLogger)</li>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.gem.<a href="io/sbk/gem/GemParameters.html" title="interface in io.sbk.gem">GemParameters</a>, io.sbk.api.ParameterOptions)</li>
 </ul>
 </li>
@@ -196,7 +196,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <ul>
 <li class="circle">io.sbk.logger.PerformanceLogger
 <ul>
-<li class="circle">io.sbk.ram.RamLogger (also extends io.sbk.ram.CountConnections, io.sbk.perl.ReportLatencies, io.sbk.ram.SetRW)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.perl.ReportLatencies, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="io/sbk/gem/GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
 </ul>
@@ -207,16 +207,16 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </li>
 <li class="circle">io.sbk.perl.ReportLatencies
 <ul>
-<li class="circle">io.sbk.ram.RamLogger (also extends io.sbk.ram.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.ram.SetRW)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="io/sbk/gem/GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="circle">io.sbk.ram.SetRW
+<li class="circle">io.sbk.logger.SetRW
 <ul>
-<li class="circle">io.sbk.ram.RamLogger (also extends io.sbk.ram.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.perl.ReportLatencies)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.perl.ReportLatencies)
 <ul>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="io/sbk/gem/GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
 </ul>

@@ -7,17 +7,15 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.ram.impl;
+package io.sbk.logger.impl;
 
 import io.sbk.api.Action;
 import io.sbk.api.Config;
-import io.sbk.ram.RamLogger;
+import io.sbk.logger.RamLogger;
 import io.sbk.api.InputOptions;
-import io.sbk.logger.impl.RWMetricsPrometheusServer;
-import io.sbk.logger.impl.SbkPrometheusLogger;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.time.Time;
-import io.sbk.ram.SetRW;
+import io.sbk.logger.SetRW;
 import io.sbk.system.Printer;
 
 import java.io.IOException;
@@ -43,7 +41,7 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
 
 
     public InputStream getMetricsConfigStream() {
-        return  io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        return  io.sbk.logger.impl.SbkRamPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
     @Override
