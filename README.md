@@ -412,8 +412,8 @@ git push --force origin <pr-branch-name>
 ```
 in the above, I'm assuming that:
 
-* upstream is kmgowda/SBK.git
-* origin is <your account>/SBK.git
+* upstream is https://github.com/kmgowda/SBK.git
+* origin is 'your github account/SBK.git'
 
 The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
 
