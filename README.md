@@ -109,8 +109,6 @@ Running SBK locally:
 ...
 usage: sbk
 Storage Benchmark Kit
-usage: sbk
-Storage Benchmark Kit
 
  -class <arg>        Storage Driver Class,
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
