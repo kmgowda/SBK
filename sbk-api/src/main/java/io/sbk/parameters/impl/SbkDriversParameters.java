@@ -7,10 +7,9 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api.impl;
+package io.sbk.parameters.impl;
 
-import io.sbk.api.Config;
-
+import io.sbk.config.Config;
 import java.util.Arrays;
 
 public class SbkDriversParameters extends SbkParameters {

@@ -10,7 +10,7 @@
 package io.sbk.RocketMQ;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.api.Callback;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;

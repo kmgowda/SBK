@@ -8,9 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.gem;
+package io.sbk.parameters;
 
-import io.sbk.api.Parameters;
+import io.sbk.gem.SshConnection;
 
 public interface GemParameters extends Parameters {
 

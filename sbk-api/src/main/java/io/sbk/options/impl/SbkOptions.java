@@ -8,11 +8,11 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.options.impl;
 
-import io.sbk.api.Config;
-import io.sbk.api.HelpException;
-import io.sbk.api.InputOptions;
+import io.sbk.config.Config;
+import io.sbk.exception.HelpException;
+import io.sbk.options.InputOptions;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

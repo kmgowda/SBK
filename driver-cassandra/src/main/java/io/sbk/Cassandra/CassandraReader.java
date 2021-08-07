@@ -12,7 +12,7 @@ package io.sbk.Cassandra;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.api.Reader;
 import java.io.EOFException;
 import java.io.IOException;

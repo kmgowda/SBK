@@ -12,8 +12,8 @@ package io.sbk.gem.impl;
 
 import io.sbk.api.Benchmark;
 import io.sbk.gem.GemBenchmark;
-import io.sbk.gem.GemConfig;
-import io.sbk.gem.GemParameters;
+import io.sbk.config.GemConfig;
+import io.sbk.parameters.GemParameters;
 import io.sbk.gem.SshConnection;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.perl.State;

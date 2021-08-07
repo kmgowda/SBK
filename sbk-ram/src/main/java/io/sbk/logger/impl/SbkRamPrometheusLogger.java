@@ -9,10 +9,10 @@
  */
 package io.sbk.logger.impl;
 
-import io.sbk.api.Action;
-import io.sbk.api.Config;
+import io.sbk.action.Action;
+import io.sbk.config.Config;
 import io.sbk.logger.RamLogger;
-import io.sbk.api.InputOptions;
+import io.sbk.options.InputOptions;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.time.Time;
 import io.sbk.logger.SetRW;

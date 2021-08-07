@@ -11,7 +11,7 @@
 package io.sbk.Ignite;
 
 import io.sbk.data.DataType;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;

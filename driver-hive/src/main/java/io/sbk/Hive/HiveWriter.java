@@ -12,7 +12,7 @@ package io.sbk.Hive;
 import io.sbk.Jdbc.JdbcConfig;
 import io.sbk.Jdbc.JdbcWriter;
 import io.sbk.data.DataType;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 
 import java.io.IOException;
 

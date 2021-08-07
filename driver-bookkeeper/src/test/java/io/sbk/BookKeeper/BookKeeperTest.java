@@ -9,9 +9,9 @@
  */
 package io.sbk.BookKeeper;
 
-import io.sbk.api.Config;
-import io.sbk.api.ParameterOptions;
-import io.sbk.api.impl.SbkDriversParameters;
+import io.sbk.config.Config;
+import io.sbk.parameters.ParameterOptions;
+import io.sbk.parameters.impl.SbkDriversParameters;
 import org.junit.Assert;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;

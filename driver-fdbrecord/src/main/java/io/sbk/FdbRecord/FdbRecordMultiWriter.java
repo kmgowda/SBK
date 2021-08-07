@@ -14,7 +14,7 @@ import com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext;
 import com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore;
 import com.google.protobuf.ByteString;
 import io.sbk.data.DataType;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.time.Time;

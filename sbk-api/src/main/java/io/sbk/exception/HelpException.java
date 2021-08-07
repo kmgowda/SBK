@@ -7,11 +7,19 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api;
 
-/**
- * class for Command Line Parameters.
- */
-public interface ParameterOptions extends InputOptions, Parameters {
+package io.sbk.exception;
 
+
+import lombok.Getter;
+
+final public class HelpException extends Exception {
+
+    @Getter
+    private final String helpText;
+
+    public HelpException(String helpText) {
+        super(helpText);
+        this.helpText = helpText;
+    }
 }

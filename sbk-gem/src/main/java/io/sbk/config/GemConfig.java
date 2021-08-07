@@ -8,9 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.gem;
+package io.sbk.config;
 
-public class GemConfig {
+final public class GemConfig {
     final public static String SBK_GEM_APP_NAME = "sbk.gem.applicationName";
     final public static String NAME = "sbk-gem";
     final public static String DESC = "Storage Benchmark Kit - Group Execution Monitor";

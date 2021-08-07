@@ -12,7 +12,7 @@ package io.sbk.HDFS;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;

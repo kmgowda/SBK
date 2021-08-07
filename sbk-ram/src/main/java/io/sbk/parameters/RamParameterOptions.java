@@ -8,18 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.parameters;
 
+import io.sbk.options.InputOptions;
 
-import lombok.Getter;
-
-public class HelpException extends Exception {
-
-    @Getter
-    private final String helpText;
-
-    public HelpException(String helpText) {
-        super(helpText);
-        this.helpText = helpText;
-    }
+public interface RamParameterOptions extends InputOptions, RamParameters {
 }

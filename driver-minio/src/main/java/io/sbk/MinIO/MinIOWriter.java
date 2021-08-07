@@ -17,7 +17,7 @@ import io.minio.errors.InternalException;
 import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
 import io.sbk.time.Time;

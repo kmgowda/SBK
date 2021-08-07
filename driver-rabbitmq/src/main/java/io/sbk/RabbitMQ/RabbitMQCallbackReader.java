@@ -10,7 +10,7 @@
 package io.sbk.RabbitMQ;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.api.Callback;
 
 import java.io.IOException;

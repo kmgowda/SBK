@@ -8,9 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram;
+package io.sbk.config;
 
-public class RamConfig {
+final public class RamConfig {
     public final static String NAME = "sbk-ram";
     final public static String DESC = "Storage Benchmark Kit - Results Aggregation Monitor";
 

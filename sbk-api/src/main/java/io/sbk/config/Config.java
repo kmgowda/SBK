@@ -8,9 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.config;
 
-public class Config {
+final public class Config {
     final public static String NAME = "sbk";
     final public static String DESC = "Storage Benchmark Kit";
     final public static String SBK_APP_HOME = "sbk.appHome";

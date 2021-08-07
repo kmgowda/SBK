@@ -160,14 +160,14 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addArgs(io.sbk.api.InputOptions)">addArgs</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addArgs(io.sbk.options.InputOptions)">addArgs</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
 <td class="colLast">
 <div class="block">Add the Metric type specific command line arguments.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#close(io.sbk.api.InputOptions)">close</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#close(io.sbk.options.InputOptions)">close</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
 <td class="colLast">
 <div class="block">Close the Logger.</div>
 </td>
@@ -209,7 +209,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">open</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">open</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params,
     java.lang.String&nbsp;storageName,
     <a href="Action.html" title="enum in io.sbk.api">Action</a>&nbsp;action,
     <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
@@ -219,7 +219,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#parseArgs(io.sbk.api.InputOptions)">parseArgs</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></span>&#8203;(<a href="InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
 <td class="colLast">
 <div class="block">Parse the Metric specific command line arguments.</div>
 </td>
@@ -245,7 +245,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </tr>
 <tr id="i10" class="altColor">
 <td class="colFirst"><code>default void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setExceptionHandler(io.sbk.api.ExceptionHandler)">setExceptionHandler</a></span>&#8203;(<a href="ExceptionHandler.html" title="interface in io.sbk.api">ExceptionHandler</a>&nbsp;handler)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setExceptionHandler(io.sbk.exception.ExceptionHandler)">setExceptionHandler</a></span>&#8203;(<a href="ExceptionHandler.html" title="interface in io.sbk.api">ExceptionHandler</a>&nbsp;handler)</code></th>
 <td class="colLast">
 <div class="block">Default implementation for setting exception handler.</div>
 </td>
@@ -274,7 +274,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a id="addArgs(io.sbk.api.InputOptions)">
+<a id="addArgs(io.sbk.options.InputOptions)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -291,7 +291,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </dl>
 </li>
 </ul>
-<a id="parseArgs(io.sbk.api.InputOptions)">
+<a id="parseArgs(io.sbk.options.InputOptions)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -308,7 +308,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </dl>
 </li>
 </ul>
-<a id="open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">
+<a id="open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -331,7 +331,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </dl>
 </li>
 </ul>
-<a id="close(io.sbk.api.InputOptions)">
+<a id="close(io.sbk.options.InputOptions)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -457,7 +457,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </dl>
 </li>
 </ul>
-<a id="setExceptionHandler(io.sbk.api.ExceptionHandler)">
+<a id="setExceptionHandler(io.sbk.exception.ExceptionHandler)">
 <!--   -->
 </a>
 <ul class="blockListLast">

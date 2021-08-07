@@ -13,7 +13,7 @@ package io.sbk.api.impl;
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataReader;
 import io.sbk.data.DataType;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.api.RateController;
 import io.sbk.logger.CountReaders;
 import io.sbk.perl.RunBenchmark;

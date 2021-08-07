@@ -11,7 +11,7 @@
 package io.sbk.RedPanda;
 
 import io.sbk.Kafka.Kafka;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 
 /**
  * Class for RedPanda Benchmarking.

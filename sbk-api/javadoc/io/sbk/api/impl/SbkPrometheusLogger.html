@@ -232,14 +232,14 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addArgs(io.sbk.api.InputOptions)">addArgs</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addArgs(io.sbk.options.InputOptions)">addArgs</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
 <td class="colLast">
 <div class="block">Add the Metric type specific command line arguments.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#close(io.sbk.api.InputOptions)">close</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#close(io.sbk.options.InputOptions)">close</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
 <td class="colLast">
 <div class="block">Close the Logger.</div>
 </td>
@@ -284,7 +284,7 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">open</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">open</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params,
     java.lang.String&nbsp;storageName,
     <a href="../Action.html" title="enum in io.sbk.api">Action</a>&nbsp;action,
     <a href="../../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
@@ -294,7 +294,7 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 </tr>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#parseArgs(io.sbk.api.InputOptions)">parseArgs</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></span>&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)</code></th>
 <td class="colLast">
 <div class="block">Parse the Metric specific command line arguments.</div>
 </td>
@@ -352,7 +352,7 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.api.<a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></h3>
-<code><a href="../PerformanceLogger.html#setExceptionHandler(io.sbk.api.ExceptionHandler)">setExceptionHandler</a></code></li>
+<code><a href="../PerformanceLogger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)">setExceptionHandler</a></code></li>
 </ul>
 </li>
 </ul>
@@ -431,7 +431,7 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 <pre class="methodSignature">public&nbsp;java.io.InputStream&nbsp;getMetricsConfigStream()</pre>
 </li>
 </ul>
-<a id="addArgs(io.sbk.api.InputOptions)">
+<a id="addArgs(io.sbk.options.InputOptions)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -439,13 +439,13 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 <h4>addArgs</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;addArgs&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)
              throws java.lang.IllegalArgumentException</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#addArgs(io.sbk.api.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
 <div class="block">Add the Metric type specific command line arguments.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../PerformanceLogger.html#addArgs(io.sbk.api.InputOptions)">addArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
+<dd><code><a href="../PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="SbkCSVLogger.html#addArgs(io.sbk.api.InputOptions)">addArgs</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
+<dd><code><a href="SbkCSVLogger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>params</code> - InputOptions object to be extended.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -453,7 +453,7 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 </dl>
 </li>
 </ul>
-<a id="parseArgs(io.sbk.api.InputOptions)">
+<a id="parseArgs(io.sbk.options.InputOptions)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -461,13 +461,13 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 <h4>parseArgs</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;parseArgs&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)
                throws java.lang.IllegalArgumentException</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#parseArgs(io.sbk.api.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
 <div class="block">Parse the Metric specific command line arguments.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../PerformanceLogger.html#parseArgs(io.sbk.api.InputOptions)">parseArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
+<dd><code><a href="../PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="SbkCSVLogger.html#parseArgs(io.sbk.api.InputOptions)">parseArgs</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
+<dd><code><a href="SbkCSVLogger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -475,7 +475,7 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 </dl>
 </li>
 </ul>
-<a id="open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">
+<a id="open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -487,13 +487,13 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
                  <a href="../../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)
           throws java.lang.IllegalArgumentException,
                  java.io.IOException</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">PerformanceLogger</a></code></span></div>
 <div class="block">Open the Logger.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../PerformanceLogger.html#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">open</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
+<dd><code><a href="../PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">open</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="SbkCSVLogger.html#open(io.sbk.api.InputOptions,java.lang.String,io.sbk.api.Action,io.sbk.time.Time)">open</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
+<dd><code><a href="SbkCSVLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.sbk.time.Time)">open</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
 <dd><code>storageName</code> - The Name of the storage.</dd>
@@ -505,7 +505,7 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 </dl>
 </li>
 </ul>
-<a id="close(io.sbk.api.InputOptions)">
+<a id="close(io.sbk.options.InputOptions)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -514,13 +514,13 @@ extends <a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogge
 <pre class="methodSignature">public&nbsp;void&nbsp;close&#8203;(<a href="../InputOptions.html" title="interface in io.sbk.api">InputOptions</a>&nbsp;params)
            throws java.lang.IllegalArgumentException,
                   java.io.IOException</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#close(io.sbk.api.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#close(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
 <div class="block">Close the Logger.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../PerformanceLogger.html#close(io.sbk.api.InputOptions)">close</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
+<dd><code><a href="../PerformanceLogger.html#close(io.sbk.options.InputOptions)">close</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.api">PerformanceLogger</a></code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="SbkCSVLogger.html#close(io.sbk.api.InputOptions)">close</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
+<dd><code><a href="SbkCSVLogger.html#close(io.sbk.options.InputOptions)">close</a></code>&nbsp;in class&nbsp;<code><a href="SbkCSVLogger.html" title="class in io.sbk.api.impl">SbkCSVLogger</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>

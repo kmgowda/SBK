@@ -8,8 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.options;
 
+import io.sbk.exception.HelpException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 

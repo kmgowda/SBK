@@ -8,10 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api;
+package io.sbk.logger;
 
-public enum Action {
-    Writing,
-    Reading,
-    Write_Reading
+public class RamHostConfig {
+    public String host;
+    public int port;
+    public int maxRecordSizeMB;
 }

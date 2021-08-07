@@ -13,9 +13,9 @@ package io.sbk.logger.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import io.sbk.api.Action;
-import io.sbk.api.Config;
-import io.sbk.api.InputOptions;
+import io.sbk.action.Action;
+import io.sbk.config.Config;
+import io.sbk.options.InputOptions;
 import io.sbk.perl.PerlConfig;
 import io.sbk.time.Time;
 

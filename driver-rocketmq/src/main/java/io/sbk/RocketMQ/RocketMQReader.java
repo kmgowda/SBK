@@ -10,7 +10,7 @@
 package io.sbk.RocketMQ;
 
 import io.sbk.api.Reader;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;

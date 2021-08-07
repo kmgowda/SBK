@@ -7,10 +7,13 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
+package io.sbk.parameters;
 
-package io.sbk.api;
+import io.sbk.options.InputOptions;
 
-public interface ExceptionHandler {
+/**
+ * class for Command Line Parameters.
+ */
+public interface ParameterOptions extends InputOptions, Parameters {
 
-    void throwException(Throwable ex);
 }

@@ -8,9 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram;
+package io.sbk.action;
 
-import io.sbk.api.InputOptions;
-
-public interface RamParameterOptions extends InputOptions, RamParameters {
+public enum Action {
+    Writing,
+    Reading,
+    Write_Reading
 }

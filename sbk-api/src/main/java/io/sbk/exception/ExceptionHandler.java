@@ -1,5 +1,5 @@
 /**
- * Copyright (c) KMG. All Rights Reserved..
+ * Copyright (c) KMG. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -8,12 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.gem;
+package io.sbk.exception;
 
-import io.sbk.api.ParameterOptions;
-import io.sbk.options.GetArguments;
+public interface ExceptionHandler {
 
-public interface GemParameterOptions extends ParameterOptions, GemParameters, GetArguments {
-
+    void throwException(Throwable ex);
 }
-

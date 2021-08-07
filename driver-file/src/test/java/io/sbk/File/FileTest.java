@@ -9,12 +9,12 @@
  */
 package io.sbk.File;
 
-import io.sbk.api.Config;
-import io.sbk.api.ParameterOptions;
+import io.sbk.config.Config;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Writer;
 import io.sbk.system.Printer;
-import io.sbk.api.impl.SbkDriversParameters;
+import io.sbk.parameters.impl.SbkDriversParameters;
 import org.junit.Assert;
 import org.junit.Test;
 

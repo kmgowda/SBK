@@ -10,7 +10,7 @@
 package io.sbk.RabbitMQ;
 
 import io.sbk.api.Reader;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Collections;

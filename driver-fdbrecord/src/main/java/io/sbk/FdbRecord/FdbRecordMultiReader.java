@@ -17,7 +17,7 @@ import com.apple.foundationdb.tuple.Tuple;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import io.sbk.data.DataType;
-import io.sbk.api.ParameterOptions;
+import io.sbk.parameters.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;

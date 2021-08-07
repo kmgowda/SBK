@@ -10,7 +10,7 @@
 
 package io.sbk.api.impl;
 
-import io.sbk.api.Config;
+import io.sbk.config.Config;
 import io.sbk.logger.PerformanceLogger;
 import io.sbk.time.Time;
 import io.sbk.perl.TimeUnit;
