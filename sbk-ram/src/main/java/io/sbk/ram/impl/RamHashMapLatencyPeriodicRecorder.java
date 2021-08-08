@@ -8,12 +8,13 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl.impl;
+package io.sbk.ram.impl;
 
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.logger.SetRW;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
+import io.sbk.perl.impl.HashMapLatencyRecorder;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.system.Printer;
 import io.sbk.perl.ReportLatencies;
@@ -132,6 +133,18 @@ public class RamHashMapLatencyPeriodicRecorder extends HashMapLatencyRecorder im
      * @param record Record Latencies
      */
     public void record(long currentTime, LatenciesRecord record) {
+        addLatenciesRecord(record);
+        if (window.isOverflow()) {
+            flush(currentTime);
+            if (isOverflow()) {
+                print(currentTime, loggerTotal, null);
+                reset(currentTime);
+            }
+        }
+    }
+
+
+    public void addLatenciesRecord(LatenciesRecord record) {
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                 record.getMaxReaders(), record.getMaxWriters());
         window.maxLatency = Math.max(record.getMaxLatency(), window.maxLatency);
@@ -143,17 +156,9 @@ public class RamHashMapLatencyPeriodicRecorder extends HashMapLatencyRecorder im
         window.validLatencyRecords += record.getValidLatencyRecords();
         window.invalidLatencyRecords += record.getInvalidLatencyRecords();
         record.getLatencyMap().forEach(window::reportLatency);
-        if (window.isOverflow()) {
-            flush(currentTime);
-            if (isOverflow()) {
-                print(currentTime, loggerTotal, null);
-                reset(currentTime);
-            }
-        }
     }
 
-
-    private void flush(long currentTime) {
+    public void flush(long currentTime) {
         final RW rwStore = new RW();
         sumRW(rwStore);
         setRW.setReaders(rwStore.readers);

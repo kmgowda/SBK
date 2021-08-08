@@ -20,4 +20,5 @@ final public class RamConfig {
     public int maxHashMapSizeMB;
     public int maxQueues;
     public int idleMS;
+    public boolean csv;
 }
