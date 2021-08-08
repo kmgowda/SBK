@@ -12,7 +12,7 @@ package io.sbk.config;
 
 import java.util.concurrent.TimeUnit;
 
-final public class PerlConfig {
+final public class PerlConfig extends LatencyConfig {
     final public static String PERCENTILE_FORMAT = "0.##";
 
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
@@ -45,7 +45,4 @@ final public class PerlConfig {
     public int qPerWorker;
     public int idleNS;
     public int maxQs;
-    public int maxArraySizeMB;
-    public int maxHashMapSizeMB;
-    public boolean csv;
 }
