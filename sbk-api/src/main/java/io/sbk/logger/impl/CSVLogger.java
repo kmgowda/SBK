@@ -24,7 +24,7 @@ import java.io.FileWriter;
 /**
  * Class for recoding/printing results to a CSV file called `out.csv`.
  */
-public class SbkCSVLogger extends SystemLogger {
+public class CSVLogger extends SystemLogger {
     final static public String DISABLE_STRING = "no";
     final static public String REGULAR_PRINT = "Regular";
     final static public String TOTAL_PRINT = "Total";
@@ -34,7 +34,7 @@ public class SbkCSVLogger extends SystemLogger {
     private long csvRowCounter;
 
 
-    public SbkCSVLogger() {
+    public CSVLogger() {
         super();
     }
 
