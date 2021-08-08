@@ -25,7 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-public class SbkOptions implements InputOptions {
+public class SbkInputOptions implements InputOptions {
     final private String benchmarkName;
     final private String header;
     final private String footer;
@@ -34,7 +34,7 @@ public class SbkOptions implements InputOptions {
     final private CommandLineParser parser;
     private CommandLine commandline;
 
-    private SbkOptions(String name, String header, String footer) {
+    private SbkInputOptions(String name, String header, String footer) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
@@ -46,7 +46,7 @@ public class SbkOptions implements InputOptions {
         options.addOption(Config.HELP_OPTION, false, "Help message");
     }
 
-    public SbkOptions(String name, String header) {
+    public SbkInputOptions(String name, String header) {
         this(name, header, Config.SBK_FOOTER);
     }
 
