@@ -15,7 +15,7 @@ You may obtain a copy of the License at
 
 [![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](https://github.com/kmgowda/SBK/tree/master/sbk-ram)   [![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](https://github.com/kmgowda/SBK/tree/master/sbk-gem)
 
-The SBK (Storage Benchmark Kit) is an open source software frame-work for the performance benchmarking of any storage system. If you are curious to measure the maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself is a very high-performance benchmark tool/framework.
+The SBK (Storage Benchmark Kit) is an open source software framework for the performance benchmarking of any storage system. If you are curious to measure the maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself is a very high-performance benchmark tool/framework.
 It massively writes the data to the storage system and reads the data from the storage system. The SBK supports multi writers and readers and also the End to End latency benchmarking.
 The latency quartiles and percentiles are calculated for complete data written/read without any sampling; hence the 
 percentiles are 100% accurate.
@@ -178,7 +178,7 @@ SBK outputs the data written/read , average throughput and latency, maximum late
 percentiles 10th, 20th, 25th, 30th, 40th, 50th, 60th, 75th, 80th, 90th, 92.5th, 95th, 97.5th, 99th, 99.25th, 99.5th, 99.75th, 99.9th, 99.95th and 99.99th for every 5 seconds time interval as show below.
 
 ```
- Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,        5 seconds,       120.2 MB,          1260685 records,    252086.6 records/sec,    24.04 MB/sec,      3.8 ms avg latency,     132 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1:  0%, SLC-2: 90%; Latency Percentiles:       3 ms 10th,       3 ms 20th,       3 ms 25th,       3 ms 30th,       3 ms 40th,       3 ms 50th,       4 ms 60th,       4 ms 70th,       4 ms 75th,       5 ms 80th,       5 ms 90th,       6 ms 92.5th,       6 ms 95th,       7 ms 97.5th,       8 ms 99th,       8 ms 99.25th,       9 ms 99.5th,      11 ms 99.75th,      13 ms 99.9th,      79 ms 99.95th,     100 ms 99.99th.
+Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,        5 seconds,       120.2 MB,          1260685 records,    252086.6 records/sec,    24.04 MB/sec,      3.8 ms avg latency,     132 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1:  0%, SLC-2: 90%; Latency Percentiles:       3 ms 10th,       3 ms 20th,       3 ms 25th,       3 ms 30th,       3 ms 40th,       3 ms 50th,       4 ms 60th,       4 ms 70th,       4 ms 75th,       5 ms 80th,       5 ms 90th,       6 ms 92.5th,       6 ms 95th,       7 ms 97.5th,       8 ms 99th,       8 ms 99.25th,       9 ms 99.5th,      11 ms 99.75th,      13 ms 99.9th,      79 ms 99.95th,     100 ms 99.99th.
 Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,        5 seconds,       146.2 MB,          1533277 records,    306471.5 records/sec,    29.23 MB/sec,      3.2 ms avg latency,      94 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1: 33%, SLC-2: 88%; Latency Percentiles:       2 ms 10th,       3 ms 20th,       3 ms 25th,       3 ms 30th,       3 ms 40th,       3 ms 50th,       3 ms 60th,       3 ms 70th,       3 ms 75th,       3 ms 80th,       4 ms 90th,       5 ms 92.5th,       5 ms 95th,       5 ms 97.5th,       6 ms 99th,       6 ms 99.25th,       6 ms 99.5th,      18 ms 99.75th,      32 ms 99.9th,      91 ms 99.95th,      92 ms 99.99th.
 Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,        5 seconds,       153.3 MB,          1606962 records,    321263.9 records/sec,    30.64 MB/sec,      3.1 ms avg latency,      28 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1: 33%, SLC-2: 79%; Latency Percentiles:       2 ms 10th,       3 ms 20th,       3 ms 25th,       3 ms 30th,       3 ms 40th,       3 ms 50th,       3 ms 60th,       3 ms 70th,       3 ms 75th,       3 ms 80th,       4 ms 90th,       4 ms 92.5th,       5 ms 95th,       5 ms 97.5th,       5 ms 99th,       5 ms 99.25th,       6 ms 99.5th,       7 ms 99.75th,       8 ms 99.9th,      25 ms 99.95th,      26 ms 99.99th.
 Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 Max Readers,        5 seconds,       149.5 MB,          1568022 records,    313541.7 records/sec,    29.90 MB/sec,      3.1 ms avg latency,      40 ms max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1: 33%, SLC-2: 85%; Latency Percentiles:       2 ms 10th,       3 ms 20th,       3 ms 25th,       3 ms 30th,       3 ms 40th,       3 ms 50th,       3 ms 60th,       3 ms 70th,       3 ms 75th,       3 ms 80th,       4 ms 90th,       4 ms 92.5th,       5 ms 95th,       5 ms 97.5th,       5 ms 99th,       5 ms 99.25th,       6 ms 99.5th,       6 ms 99.75th,       6 ms 99.9th,      37 ms 99.95th,      39 ms 99.99th.
@@ -207,13 +207,13 @@ Total : Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 M
 ### Sliding Latency Coverage (SLC) percentage factors
 The SBK yields latency data points in the form of quartiles and percentiles. For the performance analysis, these 
 quartiles and percentile latencies can be combined into two percentage factors : Sliding Latency Coverage 1 (SLC 1)
- and Sliding Latency Coverage 2 (SLC 2). 
+ and Sliding Latency Coverage 2 (SLC 2).
 
 The SLC1 indicates the percentage of dispersion from lower latency percentile to median percentile. This indicates 
 the range between all lower latencies percentiles to median latency and also dispersion from all latency values 
 which are below median latency. The SLC2 indicates the percentage of dispersion from median latency percentile and 
-all other percentile values to the last (maximum) percentile (99.99th percentile). If you are comparing two storage 
-systems which are having similar / approximate median latency percentiles then SLC2 gives which storage system is 
+all other percentile values to the last (maximum) percentile (99.99th percentile). If you are comparing two or more 
+storage systems which are having similar / approximate median latency percentiles then SLC2 gives which storage system is 
 doing better. Lower SLC2 percentage means higher the performance of the system. If you are observing too many 
 variations of SLC 2 percentage that means you have an opportunity to improve the stability of the storage system too.
 
