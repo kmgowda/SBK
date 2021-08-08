@@ -11,7 +11,7 @@ package io.sbk.api.impl;
 
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
-import io.sbk.options.impl.SbkOptions;
+import io.sbk.options.impl.SbkInputOptions;
 import io.sbk.config.PerlConfig;
 import io.sbk.api.ParameterOptions;
 import lombok.Getter;
@@ -22,7 +22,7 @@ import org.apache.commons.cli.ParseException;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-public class SbkParameters extends SbkOptions implements ParameterOptions {
+public class SbkParameters extends SbkInputOptions implements ParameterOptions {
 
     @Getter
     final private int timeoutMS;

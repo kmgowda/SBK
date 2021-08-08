@@ -13,7 +13,7 @@ import io.sbk.action.Action;
 import io.sbk.exception.HelpException;
 import io.sbk.config.RamConfig;
 import io.sbk.ram.RamParameterOptions;
-import io.sbk.options.impl.SbkOptions;
+import io.sbk.options.impl.SbkInputOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -24,7 +24,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-final public class SbkRamParameters extends SbkOptions implements RamParameterOptions {
+final public class SbkRamParameters extends SbkInputOptions implements RamParameterOptions {
 
     @Getter
     private String storageName;

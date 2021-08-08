@@ -14,7 +14,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.config.PerlConfig;
-import io.sbk.logger.Print;
+import io.sbk.perl.Print;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
 

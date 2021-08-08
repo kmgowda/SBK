@@ -11,7 +11,7 @@
 package io.sbk.perl.impl;
 
 import io.sbk.perl.LatencyRecordWindow;
-import io.sbk.logger.Print;
+import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatency;
 import io.sbk.system.Printer;
 import org.apache.commons.csv.CSVFormat;
