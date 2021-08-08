@@ -16,7 +16,7 @@ import io.sbk.system.Printer;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.config.PerlConfig;
 import io.sbk.perl.PeriodicRecorder;
-import io.sbk.logger.Print;
+import io.sbk.perl.Print;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
