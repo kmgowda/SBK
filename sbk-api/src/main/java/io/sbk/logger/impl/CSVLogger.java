@@ -19,7 +19,8 @@ import io.sbk.options.InputOptions;
 import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 
-import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Class for recoding/printing results to a CSV file called `out.csv`.
@@ -69,7 +70,7 @@ public class CSVLogger extends SystemLogger {
             headerBuilder.append(",Percentile_");
             headerBuilder.append(percentileName);
         }
-        csvWriter = new PrintWriter(new FileWriter(csvFile, false));
+        csvWriter = new PrintWriter(Files.newBufferedWriter(Paths.get(csvFile)));
         csvWriter.println(headerBuilder);
     }
 

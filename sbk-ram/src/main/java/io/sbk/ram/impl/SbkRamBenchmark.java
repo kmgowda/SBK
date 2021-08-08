@@ -13,6 +13,7 @@ package io.sbk.ram.impl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
+import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.config.RamConfig;
 import io.sbk.logger.RamLogger;
@@ -28,6 +29,7 @@ import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -42,7 +44,7 @@ public class SbkRamBenchmark implements Benchmark {
     final private RamLogger logger;
     final private RamParameterOptions params;
     final private LinkedBlockingQueue<LatenciesRecord> queue;
-    final private LatencyRecordWindow window;
+    final private RamPeriodicRecorder latencyRecorder;
     final private Server server;
     final private SbkGrpcService service;
     final private RamBenchmark benchmark;
@@ -76,10 +78,9 @@ public class SbkRamBenchmark implements Benchmark {
         }
 
         queue = new LinkedBlockingQueue<>();
-        window = createLatencyWindow();
-        benchmark = new RamBenchmark(ramConfig.maxQueues, ramConfig.idleMS, window, time,
-                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC,
-                logger, logger, logger);
+        latencyRecorder = createLatencyRecorder();
+        benchmark = new RamBenchmark(ramConfig.maxQueues, ramConfig.idleMS, time, latencyRecorder,
+                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC);
         service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
         server = ServerBuilder.forPort(params.getRamPort()).addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
@@ -104,6 +105,23 @@ public class SbkRamBenchmark implements Benchmark {
 
         }
         return window;
+    }
+
+    private RamPeriodicRecorder createLatencyRecorder() {
+        final LatencyRecordWindow window = createLatencyWindow();
+        final RamPeriodicRecorder latencyRecorder;
+
+        if (ramConfig.csv) {
+            latencyRecorder =  new RamCSVLatencyPeriodicRecorder(window, ramConfig.maxHashMapSizeMB,
+                    logger, logger::printTotal, logger, logger,
+                    RamConfig.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
+            Printer.log.info("Total Window Latency Store: HashMap and CSV file");
+        } else {
+            latencyRecorder =  new RamHashMapLatencyPeriodicRecorder(window, ramConfig.maxHashMapSizeMB,
+                    logger, logger::printTotal, logger, logger);
+            Printer.log.info("Total Window Latency Store: HashMap");
+        }
+        return latencyRecorder;
     }
 
     /**

@@ -27,11 +27,11 @@ import java.util.Iterator;
  */
 @NotThreadSafe
 public class HashMapLatencyRecorder extends LatencyRecordWindow {
-    final public HashMap<Long, Long> latencies;
-    final public int maxHashMapSizeMB;
-    final public long maxHashMapSizeBytes;
-    final public int incBytes;
-    public long hashMapBytesCount;
+    final protected HashMap<Long, Long> latencies;
+    final protected int maxHashMapSizeMB;
+    final protected long maxHashMapSizeBytes;
+    final protected int incBytes;
+    protected long hashMapBytesCount;
 
     public HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                                   double[] percentiles, Time time, int maxHashMapSizeMB) {

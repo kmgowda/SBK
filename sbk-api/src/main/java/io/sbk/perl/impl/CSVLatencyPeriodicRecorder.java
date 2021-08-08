@@ -27,12 +27,12 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 
 @NotThreadSafe
-public class CompositeCSVLatencyRecorder extends CompositeHashMapLatencyRecorder {
+public class CSVLatencyPeriodicRecorder extends HashMapLatencyPeriodicRecorder {
     final private String csvFile;
     private CSVPrinter csvPrinter;
 
-    public CompositeCSVLatencyRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
-                                       Print loggerTotal, ReportLatency reportLatency, String fileName) {
+    public CSVLatencyPeriodicRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
+                                      Print loggerTotal, ReportLatency reportLatency, String fileName) {
         super(window, maxHashMapSizeMB, logger, loggerTotal, reportLatency);
         csvFile = fileName;
         csvPrinter = null;

@@ -6,23 +6,27 @@
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
-*/
+ */
 
 package io.sbk.perl;
 
 /**
  * Interface for recording latencies.
  */
-public interface PeriodicRecorder extends TotalPeriodicWindow {
+public interface TotalPeriodicWindow extends PeriodicWindow {
 
     /**
-     * Record the Event/record.
+     * Start the Total Window.
      *
-     * @param startTime start time
-     * @param endTime end time
-     * @param bytes number of bytes
-     * @param events number of events (records)
+     * @param startTime starting time.
      */
-    void record(long startTime, long endTime, int bytes, int events);
+    void start(long startTime);
 
+
+    /**
+     * Stop the Total Window.
+     *
+     * @param endTime current time.
+     */
+    void stop(long endTime);
 }

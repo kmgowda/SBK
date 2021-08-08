@@ -6,23 +6,24 @@
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
-*/
+ */
 
-package io.sbk.perl;
+package io.sbk.ram;
+
+import io.sbk.grpc.LatenciesRecord;
+import io.sbk.perl.TotalPeriodicWindow;
 
 /**
  * Interface for recording latencies.
  */
-public interface PeriodicRecorder extends TotalPeriodicWindow {
+public interface RamPeriodicRecorder extends TotalPeriodicWindow {
 
     /**
      * Record the Event/record.
      *
-     * @param startTime start time
-     * @param endTime end time
-     * @param bytes number of bytes
-     * @param events number of events (records)
+     * @param  currentTime Current Time
+     * @param record Latencies Record
      */
-    void record(long startTime, long endTime, int bytes, int events);
+    void record(long currentTime, LatenciesRecord record);
 
 }
