@@ -16,7 +16,7 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.exception.HelpException;
 import io.sbk.api.impl.SbkUtils;
-import io.sbk.logger.impl.SbkRamPrometheusLogger;
+import io.sbk.logger.impl.RamPrometheusLogger;
 import io.sbk.config.RamConfig;
 import io.sbk.logger.RamLogger;
 import io.sbk.ram.RamParameterOptions;
@@ -107,7 +107,7 @@ public class SbkRam {
         ramConfig = mapper.readValue(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 RamConfig.class);
 
-        logger = Objects.requireNonNullElseGet(outLogger, SbkRamPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, RamPrometheusLogger::new);
 
         params = new SbkRamParameters(appName, ramConfig.port, ramConfig.maxConnections);
         logger.addArgs(params);

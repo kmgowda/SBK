@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
+public class GrpcPrometheusLogger extends PrometheusLogger {
     final static String CONFIG_FILE = "ramhost.properties";
     final static int LATENCY_MAP_BYTES = 16;
 
@@ -54,7 +54,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
     private StreamObserver<com.google.protobuf.Empty> observer;
     private ExceptionHandler exceptionHandler;
 
-    public SbkGrpcPrometheusLogger() {
+    public GrpcPrometheusLogger() {
         super();
     }
 
@@ -92,7 +92,7 @@ public class SbkGrpcPrometheusLogger extends SbkPrometheusLogger {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             ramHostConfig = mapper.readValue(
-                    io.sbk.logger.impl.SbkGrpcPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+                    GrpcPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     RamHostConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -25,7 +25,7 @@ import io.sbk.config.GemConfig;
 import io.sbk.logger.GemLogger;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.RemoteResponse;
-import io.sbk.logger.impl.SbkGemRamPrometheusLogger;
+import io.sbk.logger.impl.GemRamPrometheusLogger;
 import io.sbk.time.Time;
 import io.sbk.config.RamConfig;
 import io.sbk.ram.RamParameterOptions;
@@ -163,7 +163,7 @@ public class SbkGem {
             gemConfig.remoteDir += "-"+version;
         }
 
-        logger = Objects.requireNonNullElseGet(outLogger, SbkGemRamPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, GemRamPrometheusLogger::new);
 
         if (StringUtils.isEmpty(className)) {
             storageDevice = null;

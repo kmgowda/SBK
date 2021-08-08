@@ -141,11 +141,12 @@ public class SbkBenchmark implements Benchmark {
 
         if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
             Printer.log.info("Window Latency Store: Array");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time, perlConfig.maxHashMapSizeMB);
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
+                    time, perlConfig.maxHashMapSizeMB);
             Printer.log.info("Window Latency Store: HashMap");
 
         }

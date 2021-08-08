@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW, RamLogger {
+public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
     final static String CONFIG_FILE = "ram-metrics.properties";
     final static String SBK_RAM_PREFIX = "Sbk-Ram";
     private AtomicInteger connections;
@@ -34,14 +34,14 @@ public class SbkRamPrometheusLogger extends SbkPrometheusLogger implements SetRW
     private RamMetricsPrometheusServer prometheusServer;
 
 
-    public SbkRamPrometheusLogger() {
+    public RamPrometheusLogger() {
         super();
         prometheusServer = null;
     }
 
 
     public InputStream getMetricsConfigStream() {
-        return  io.sbk.logger.impl.SbkRamPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        return  RamPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
     @Override
