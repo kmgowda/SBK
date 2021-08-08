@@ -27,7 +27,8 @@ final public class PerlConfig {
     final public static int DEFAULT_TIMEOUT_MS = MS_PER_SEC;
     final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / MS_PER_SEC;
 
-    final public static long LONG_MAX = Long.MAX_VALUE / 64;
+    final public static long LONG_MAX = Long.MAX_VALUE >> 2;
+    final public static long TOTAL_LATENCY_MAX = Long.MAX_VALUE >> 1;
 
     final public static int MIN_Q_PER_WORKER = 1;
 

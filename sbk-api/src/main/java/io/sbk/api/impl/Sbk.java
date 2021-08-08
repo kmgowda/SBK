@@ -21,7 +21,7 @@ import io.sbk.exception.HelpException;
 import io.sbk.api.ParameterOptions;
 import io.sbk.logger.Logger;
 import io.sbk.api.StoragePackage;
-import io.sbk.logger.impl.SbkGrpcPrometheusLogger;
+import io.sbk.logger.impl.GrpcPrometheusLogger;
 import io.sbk.config.PerlConfig;
 import io.sbk.api.Storage;
 import io.sbk.time.Time;
@@ -148,7 +148,7 @@ public class Sbk {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 PerlConfig.class);
-        logger = Objects.requireNonNullElseGet(outLogger, SbkGrpcPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, GrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
                 appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName : appName;
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
