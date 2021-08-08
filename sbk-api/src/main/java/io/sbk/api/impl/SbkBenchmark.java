@@ -24,8 +24,8 @@ import io.sbk.api.Storage;
 import io.sbk.state.State;
 import io.sbk.time.Time;
 import io.sbk.perl.impl.ArrayLatencyRecorder;
-import io.sbk.perl.impl.CompositeCSVLatencyRecorder;
-import io.sbk.perl.impl.CompositeHashMapLatencyRecorder;
+import io.sbk.perl.impl.CSVLatencyPeriodicRecorder;
+import io.sbk.perl.impl.HashMapLatencyPeriodicRecorder;
 import io.sbk.perl.impl.HashMapLatencyRecorder;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.impl.CQueuePerformance;
@@ -150,12 +150,12 @@ public class SbkBenchmark implements Benchmark {
 
         }
         if (perlConfig.csv) {
-            latencyRecorder = new CompositeCSVLatencyRecorder(window, perlConfig.maxHashMapSizeMB,
+            latencyRecorder = new CSVLatencyPeriodicRecorder(window, perlConfig.maxHashMapSizeMB,
                     logger, logger::printTotal, logger,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv" );
             Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {
-            latencyRecorder = new CompositeHashMapLatencyRecorder(window, perlConfig.maxHashMapSizeMB,
+            latencyRecorder = new HashMapLatencyPeriodicRecorder(window, perlConfig.maxHashMapSizeMB,
                     logger, logger::printTotal, logger);
             Printer.log.info("Total Window Latency Store: HashMap");
         }

@@ -24,14 +24,14 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements PeriodicRecorder {
+public class HashMapLatencyPeriodicRecorder extends HashMapLatencyRecorder implements PeriodicRecorder {
     final protected LatencyRecordWindow window;
     final protected Print windowLogger;
     final protected Print loggerTotal;
     final protected ReportLatency reportLatency;
 
-    public CompositeHashMapLatencyRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
-                                           Print loggerTotal, ReportLatency reportLatency) {
+    public HashMapLatencyPeriodicRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
+                                          Print loggerTotal, ReportLatency reportLatency) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
                 window.totalRecordsMax, window.totalBytesMax, window.percentiles.fractions, window.time, maxHashMapSizeMB);
         this.window = window;

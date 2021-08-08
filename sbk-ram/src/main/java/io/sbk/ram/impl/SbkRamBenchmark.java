@@ -13,7 +13,7 @@ package io.sbk.ram.impl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
-import io.sbk.perl.impl.RamCompositeHashMapLatencyRecorder;
+import io.sbk.perl.impl.RamHashMapLatencyPeriodicRecorder;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.config.RamConfig;
@@ -80,7 +80,7 @@ public class SbkRamBenchmark implements Benchmark {
 
         queue = new LinkedBlockingQueue<>();
         window = createLatencyWindow();
-        latencyRecorder = new RamCompositeHashMapLatencyRecorder(window, ramConfig.maxHashMapSizeMB,
+        latencyRecorder = new RamHashMapLatencyPeriodicRecorder(window, ramConfig.maxHashMapSizeMB,
                 logger, logger::printTotal, logger, logger);
         benchmark = new RamBenchmark(ramConfig.maxQueues, ramConfig.idleMS, time, latencyRecorder,
                 logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC);

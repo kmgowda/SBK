@@ -28,7 +28,7 @@ import java.util.HashMap;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class RamCompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements RamPeriodicRecorder {
+public class RamHashMapLatencyPeriodicRecorder extends HashMapLatencyRecorder implements RamPeriodicRecorder {
     final protected LatencyRecordWindow window;
     final protected Print windowLogger;
     final protected Print loggerTotal;
@@ -36,8 +36,8 @@ public class RamCompositeHashMapLatencyRecorder extends HashMapLatencyRecorder i
     private final SetRW setRW;
     private final HashMap<Long, RW> table;
 
-    public RamCompositeHashMapLatencyRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
-                                           Print loggerTotal, ReportLatencies reportLatencies, SetRW setRW) {
+    public RamHashMapLatencyPeriodicRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
+                                             Print loggerTotal, ReportLatencies reportLatencies, SetRW setRW) {
         super(window.lowLatency, window.highLatency, window.totalLatencyMax,
                 window.totalRecordsMax, window.totalBytesMax, window.percentiles.fractions, window.time, maxHashMapSizeMB);
         this.window = window;
