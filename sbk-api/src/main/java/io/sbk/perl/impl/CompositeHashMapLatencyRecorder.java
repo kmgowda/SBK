@@ -13,7 +13,6 @@ package io.sbk.perl.impl;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatency;
 import io.sbk.system.Printer;
-import io.sbk.perl.ReportLatencies;
 import io.sbk.config.PerlConfig;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.perl.Print;
@@ -25,11 +24,11 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements ReportLatencies, PeriodicRecorder {
-    final public LatencyRecordWindow window;
-    final public Print windowLogger;
-    final public Print loggerTotal;
-    final public ReportLatency reportLatency;
+public class CompositeHashMapLatencyRecorder extends HashMapLatencyRecorder implements PeriodicRecorder {
+    final protected LatencyRecordWindow window;
+    final protected Print windowLogger;
+    final protected Print loggerTotal;
+    final protected ReportLatency reportLatency;
 
     public CompositeHashMapLatencyRecorder(LatencyRecordWindow window, int maxHashMapSizeMB, Print logger,
                                            Print loggerTotal, ReportLatency reportLatency) {
