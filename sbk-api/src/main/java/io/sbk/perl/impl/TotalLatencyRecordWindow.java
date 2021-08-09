@@ -28,14 +28,14 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
         this.totalLogger = totalLogger;
     }
 
-    public void windowOverflow(long currTime) {
+    public void checkWindowOverflowAndReset(long currTime) {
         if (window.isOverflow()) {
             stopWindow(currTime);
             startWindow(currTime);
         }
     }
 
-    public void totalOverflow(long currTime) {
+    public void checkTotalOverflowAndReset(long currTime) {
         if (totalWindow.isOverflow()) {
             stop(currTime);
             start(currTime);
@@ -55,7 +55,7 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
     @Override
     public void stopWindow(long stopTime) {
         window.print(stopTime, windowLogger, totalWindow);
-        totalOverflow(stopTime);
+        checkTotalOverflowAndReset(stopTime);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
     @Override
     public void stop(long endTime) {
         if (window.totalRecords > 0) {
-            window.print(endTime, windowLogger, totalWindow);
+            stopWindow(endTime);
         }
         totalWindow.print(endTime, totalLogger, null);
     }
