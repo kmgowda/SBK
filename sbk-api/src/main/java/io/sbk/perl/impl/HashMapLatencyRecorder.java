@@ -26,12 +26,12 @@ import java.util.Iterator;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class HashMapLatencyRecorder extends LatencyRecordWindow {
-    final protected HashMap<Long, Long> latencies;
-    final protected int maxHashMapSizeMB;
-    final protected long maxHashMapSizeBytes;
-    final protected int incBytes;
-    protected long hashMapBytesCount;
+final public class HashMapLatencyRecorder extends LatencyRecordWindow {
+    final private HashMap<Long, Long> latencies;
+    final private int maxHashMapSizeMB;
+    final private long maxHashMapSizeBytes;
+    final private int incBytes;
+    private long hashMapBytesCount;
 
     public HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                                   double[] percentiles, Time time, int maxHashMapSizeMB) {

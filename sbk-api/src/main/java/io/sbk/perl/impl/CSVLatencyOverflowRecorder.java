@@ -27,9 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class CSVLatencyOverflowRecorder extends LatencyRecordWindow {
-    final LatencyRecordWindow latencyBuffer;
-    final CSVLatencyReporter csvReporter;
+final public class CSVLatencyOverflowRecorder extends LatencyRecordWindow {
+    final private LatencyRecordWindow latencyBuffer;
+    final private CSVLatencyReporter csvReporter;
 
     public CSVLatencyOverflowRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                       long bytesMax, double[] percentilesFractions, Time time, LatencyRecordWindow latencyBuffer,
