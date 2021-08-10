@@ -49,4 +49,5 @@ final public class PerlConfig {
     public int maxArraySizeMB;
     public int maxHashMapSizeMB;
     public boolean csv;
+    public int csvFileSizeMB;
 }

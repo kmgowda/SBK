@@ -52,9 +52,10 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    final public boolean isOverflow() {
+    final public boolean isFull() {
         return (this.hashMapBytesCount > this.maxHashMapSizeBytes ) || super.isOverflow();
     }
+
 
     @Override
     final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {

@@ -10,6 +10,7 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.config.PerlConfig;
 import io.sbk.perl.LatencyPercentiles;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
@@ -27,27 +28,35 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-final public class CSVLatencyOverflowRecorder extends LatencyRecordWindow {
+final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
     final private LatencyRecordWindow latencyBuffer;
     final private CSVLatencyReporter csvReporter;
 
-    public CSVLatencyOverflowRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
-                                      long bytesMax, double[] percentilesFractions, Time time, LatencyRecordWindow latencyBuffer,
-                                      String fileName) {
+
+    public CSVExtendedLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
+                                      long bytesMax, double[] percentilesFractions, Time time,
+                                      LatencyRecordWindow latencyBuffer, int csvFileSizeMB, String fileName) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentilesFractions, time);
         this.latencyBuffer = latencyBuffer;
-        this.csvReporter = new CSVLatencyReporter(this, fileName);
+        this.csvReporter = new CSVLatencyReporter(this, csvFileSizeMB, fileName);
+
     }
 
 
     private static class CSVLatencyReporter implements ReportLatencies {
         final LatencyRecorder recorder;
         final private String csvFile;
+        final private long maxCSvSizeBytes;
+        final private int incBytes;
+        private long csvBytesCount;
         private CSVPrinter csvPrinter;
 
-        public CSVLatencyReporter(LatencyRecorder recorder, String fileName) {
+        public CSVLatencyReporter(LatencyRecorder recorder, int csvFileSizeMB, String fileName) {
             this.recorder = recorder;
             this.csvFile = fileName;
+            this.maxCSvSizeBytes = csvFileSizeMB * PerlConfig.BYTES_PER_MB;
+            this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
+            this.csvBytesCount = 0;
             this.csvPrinter = null;
         }
 
@@ -70,6 +79,7 @@ final public class CSVLatencyOverflowRecorder extends LatencyRecordWindow {
             if (csvPrinter != null) {
                 try {
                     csvPrinter.printRecord(latency, count);
+                    csvBytesCount += incBytes;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -109,11 +119,14 @@ final public class CSVLatencyOverflowRecorder extends LatencyRecordWindow {
             deleteCSVFile();
         }
 
+        public boolean isFull() {
+            return csvBytesCount >= maxCSvSizeBytes;
+        }
 
     }
 
-   private void checkOverflow() {
-        if (latencyBuffer.isOverflow()) {
+   private void checkBufferFull() {
+        if (latencyBuffer.isFull()) {
             latencyBuffer.copyPercentiles(percentiles, csvReporter);
         }
    }
@@ -121,19 +134,19 @@ final public class CSVLatencyOverflowRecorder extends LatencyRecordWindow {
     @Override
     public void reportLatencyRecord(LatencyRecord record) {
         latencyBuffer.reportLatencyRecord(record);
-        checkOverflow();
+        checkBufferFull();
     }
 
     @Override
     public void reportLatency(long latency, long count) {
         latencyBuffer.reportLatency(latency, count);
-        checkOverflow();
+        checkBufferFull();
     }
 
     @Override
     public void recordLatency(long startTime, int bytes, int events, long latency) {
         latencyBuffer.recordLatency(startTime, bytes, events, latency);
-        checkOverflow();
+        checkBufferFull();
     }
 
     @Override
@@ -142,5 +155,9 @@ final public class CSVLatencyOverflowRecorder extends LatencyRecordWindow {
         latencyBuffer.copyPercentiles(percentiles, reportLatencies);
     }
 
+    @Override
+    final public boolean isFull() {
+       return csvReporter.isFull() || super.isOverflow();
+    }
 
 }

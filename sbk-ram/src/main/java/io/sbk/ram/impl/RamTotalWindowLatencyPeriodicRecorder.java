@@ -82,7 +82,7 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
      */
     public void record(long currentTime, LatenciesRecord record) {
         addLatenciesRecord(record);
-        checkWindowOverflowAndReset(currentTime);
+        checkWindowFullAndReset(currentTime);
     }
 
 
@@ -117,7 +117,7 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
      */
     public void stopWindow(long currentTime) {
         flush(currentTime);
-        checkTotalOverflowAndReset(currentTime);
+        checkTotalWindowFullAndReset(currentTime);
     }
 
 

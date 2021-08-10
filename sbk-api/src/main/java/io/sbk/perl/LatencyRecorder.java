@@ -37,7 +37,7 @@ public class LatencyRecorder extends LatencyRecord {
      *
      * @return isOverflow condition occurred or not
      */
-    public boolean isOverflow() {
+    final public boolean isOverflow() {
         return (totalLatency > totalLatencyMax) || (totalBytes > totalBytesMax)
                 || (totalRecords > totalRecordsMax);
 

@@ -68,6 +68,11 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
+    final public boolean isFull() {
+        return super.isOverflow();
+    }
+
+    @Override
     final public void reportLatencyRecord(LatencyRecord record) {
         super.updateRecord(record);
     }

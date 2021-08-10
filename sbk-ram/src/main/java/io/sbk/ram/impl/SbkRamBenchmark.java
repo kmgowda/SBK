@@ -14,7 +14,7 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
-import io.sbk.perl.impl.CSVLatencyOverflowRecorder;
+import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.config.RamConfig;
@@ -119,9 +119,9 @@ public class SbkRamBenchmark implements Benchmark {
                 time, ramConfig.maxHashMapSizeMB);
 
         if (ramConfig.csv) {
-            totalWindowWrapper = new CSVLatencyOverflowRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+            totalWindowWrapper = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
-                    percentileFractions, time, totalWindow,
+                    percentileFractions, time, totalWindow, ramConfig.csvFileSizeMB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {

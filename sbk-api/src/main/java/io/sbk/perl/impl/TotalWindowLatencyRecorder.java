@@ -24,6 +24,6 @@ public class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow impleme
     @Override
     public void recordLatency(long startTime, int bytes, int events, long latency) {
         window.recordLatency(startTime, bytes, events, latency);
-        checkWindowOverflowAndReset(startTime);
+        checkWindowFullAndReset(startTime);
     }
 }
