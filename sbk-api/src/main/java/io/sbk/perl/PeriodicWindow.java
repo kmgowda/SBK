@@ -34,7 +34,7 @@ public interface PeriodicWindow {
      * Stop the Recording window.
      * Results from startWindow to this method are printed /flushed.
      *
-     * @param currentTime current time.
+     * @param stopTime  stopTime.
      */
-    void stopWindow(long currentTime);
+    void stopWindow(long stopTime);
 }

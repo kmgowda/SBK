@@ -28,7 +28,7 @@ final public class LatencyPercentiles {
         this.index = 0;
     }
 
-    public void reset(long totalRecords) {
+    final public void reset(long totalRecords) {
         for (int i = 0; i < fractions.length; i++) {
             latencyIndexes[i] = (long) (totalRecords * fractions[i]);
             latencies[i] = 0;
@@ -39,7 +39,7 @@ final public class LatencyPercentiles {
         index = 0;
     }
 
-    public  int copyLatency(long latency, long count, long startIndex, long endIndex) {
+    final public int copyLatency(long latency, long count, long startIndex, long endIndex) {
         int ret = 0;
 
         if (medianIndex >= startIndex && medianIndex < endIndex) {

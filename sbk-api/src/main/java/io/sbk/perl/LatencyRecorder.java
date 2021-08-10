@@ -37,7 +37,7 @@ public class LatencyRecorder extends LatencyRecord {
      *
      * @return isOverflow condition occurred or not
      */
-    public boolean isOverflow() {
+    final public boolean isOverflow() {
         return (totalLatency > totalLatencyMax) || (totalBytes > totalBytesMax)
                 || (totalRecords > totalRecordsMax);
 
@@ -46,17 +46,39 @@ public class LatencyRecorder extends LatencyRecord {
     /**
      * Add the record.
      *
+     * @param totalRecords total records
+     * @param totalLatency total latency
+     * @param totalBytes total bytes
+     * @param invalidLatencyRecords  invalid latency records
+     * @param lowerLatencyDiscardRecords lower discarded latency records
+     * @param higherLatencyDiscardRecords higher discarded latency records
+     * @param validLatencyRecords valid latency records
+     * @param maxLatency Max latency
+     */
+    final public void updateRecord(long totalRecords, long totalLatency, long totalBytes,
+                                   long invalidLatencyRecords, long lowerLatencyDiscardRecords,
+                                   long higherLatencyDiscardRecords, long validLatencyRecords,
+                                   long maxLatency) {
+        this.totalRecords += totalRecords;
+        this.totalLatency += totalLatency;
+        this.totalBytes += totalBytes;
+        this.invalidLatencyRecords += invalidLatencyRecords;
+        this.lowerLatencyDiscardRecords += lowerLatencyDiscardRecords;
+        this.higherLatencyDiscardRecords += higherLatencyDiscardRecords;
+        this.validLatencyRecords += validLatencyRecords;
+        this.maxLatency = Math.max(this.maxLatency, maxLatency);
+    }
+
+
+    /**
+     * Add the record.
+     *
      * @param record Latency record
      */
     final public void updateRecord(LatencyRecord record) {
-        this.totalRecords += record.totalRecords;
-        this.totalLatency += record.totalLatency;
-        this.totalBytes += record.totalBytes;
-        this.invalidLatencyRecords += record.invalidLatencyRecords;
-        this.lowerLatencyDiscardRecords += record.lowerLatencyDiscardRecords;
-        this.higherLatencyDiscardRecords += record.higherLatencyDiscardRecords;
-        this.validLatencyRecords += record.validLatencyRecords;
-        this.maxLatency = Math.max(this.maxLatency, record.maxLatency);
+        updateRecord(record.totalRecords, record.totalLatency, record.totalBytes,
+                record.invalidLatencyRecords, record.lowerLatencyDiscardRecords,
+                record.higherLatencyDiscardRecords, record.validLatencyRecords, record.maxLatency);
     }
 
     /**

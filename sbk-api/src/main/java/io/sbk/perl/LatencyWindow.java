@@ -107,4 +107,11 @@ abstract public class LatencyWindow extends LatencyRecorder {
      * @param reportLatencies  Copy Latency records.
      */
     abstract public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies reportLatencies);
+
+
+    /**
+     * is the latency storage full.
+     * @return   indicate the latency storage is full or not
+     */
+    abstract public boolean isFull();
 }

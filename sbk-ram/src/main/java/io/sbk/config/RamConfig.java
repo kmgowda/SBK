@@ -21,4 +21,5 @@ final public class RamConfig {
     public int maxQueues;
     public int idleMS;
     public boolean csv;
+    public int csvFileSizeMB;
 }

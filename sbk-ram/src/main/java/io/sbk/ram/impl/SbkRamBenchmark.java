@@ -13,6 +13,8 @@ package io.sbk.ram.impl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
+import io.sbk.config.Config;
+import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.config.RamConfig;
@@ -109,18 +111,26 @@ public class SbkRamBenchmark implements Benchmark {
     private RamPeriodicRecorder createLatencyRecorder() {
         final LatencyRecordWindow window = createLatencyWindow();
         final RamPeriodicRecorder latencyRecorder;
+        final LatencyRecordWindow totalWindow;
+        final LatencyRecordWindow totalWindowWrapper;
+
+        totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
+                time, ramConfig.maxHashMapSizeMB);
 
         if (ramConfig.csv) {
-            latencyRecorder =  new RamCSVLatencyPeriodicRecorder(window, ramConfig.maxHashMapSizeMB,
-                    logger, logger::printTotal, logger, logger,
-                    RamConfig.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
+            totalWindowWrapper = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
+                    percentileFractions, time, totalWindow, ramConfig.csvFileSizeMB,
+                    Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {
-            latencyRecorder =  new RamHashMapLatencyPeriodicRecorder(window, ramConfig.maxHashMapSizeMB,
-                    logger, logger::printTotal, logger, logger);
+            totalWindowWrapper = totalWindow;
             Printer.log.info("Total Window Latency Store: HashMap");
         }
-        return latencyRecorder;
+
+        return new RamTotalWindowLatencyPeriodicRecorder(window, totalWindowWrapper, logger, logger::printTotal,
+                logger, logger);
     }
 
     /**

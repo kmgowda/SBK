@@ -22,7 +22,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  *  class for Performance statistics.
  */
 @NotThreadSafe
-public class ArrayLatencyRecorder extends LatencyRecordWindow {
+final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     final private long[] latencies;
     private int minIndex;
     private int maxIndex;
@@ -65,6 +65,11 @@ public class ArrayLatencyRecorder extends LatencyRecordWindow {
                 latencies[i] = 0;
             }
         }
+    }
+
+    @Override
+    final public boolean isFull() {
+        return super.isOverflow();
     }
 
     @Override
