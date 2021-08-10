@@ -23,9 +23,9 @@ import java.util.HashMap;
 
 public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWindow
         implements  ReportLatencies, RamPeriodicRecorder {
-    final protected ReportLatencies reportLatencies;
-    private final SetRW setRW;
-    private final HashMap<Long, RW> table;
+    final private ReportLatencies reportLatencies;
+    final private  SetRW setRW;
+    final private  HashMap<Long, RW> table;
 
     public RamTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                                  Print windowLogger, Print totalLogger,
