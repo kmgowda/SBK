@@ -65,7 +65,7 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
 
     @Override
     public void stop(long endTime) {
-        if (window.totalRecords > 0) {
+        if (window.getTotalRecords() > 0) {
             stopWindow(endTime);
         }
         totalWindow.print(endTime, totalLogger, null);

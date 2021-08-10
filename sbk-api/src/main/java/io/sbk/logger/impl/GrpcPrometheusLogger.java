@@ -209,14 +209,14 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         builder.setReaders(readers.get());
         builder.setWriters(writers.get());
         builder.setMaxWriters(maxWriters.get());
-        builder.setMaxLatency(recorder.maxLatency);
-        builder.setTotalLatency(recorder.totalLatency);
-        builder.setInvalidLatencyRecords(recorder.invalidLatencyRecords);
-        builder.setTotalBytes(recorder.totalBytes);
-        builder.setTotalRecords(recorder.totalRecords);
-        builder.setHigherLatencyDiscardRecords(recorder.higherLatencyDiscardRecords);
-        builder.setLowerLatencyDiscardRecords(recorder.lowerLatencyDiscardRecords);
-        builder.setValidLatencyRecords(recorder.validLatencyRecords);
+        builder.setMaxLatency(recorder.getMaxLatency());
+        builder.setTotalLatency(recorder.getTotalLatency());
+        builder.setInvalidLatencyRecords(recorder.getInvalidLatencyRecords());
+        builder.setTotalBytes(recorder.getTotalBytes());
+        builder.setTotalRecords(recorder.getTotalRecords());
+        builder.setHigherLatencyDiscardRecords(recorder.getHigherLatencyDiscardRecords());
+        builder.setLowerLatencyDiscardRecords(recorder.getLowerLatencyDiscardRecords());
+        builder.setValidLatencyRecords(recorder.getValidLatencyRecords());
         if (stub != null) {
             stub.addLatenciesRecord(builder.build(), observer);
         } else {

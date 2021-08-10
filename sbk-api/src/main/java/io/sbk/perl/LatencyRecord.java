@@ -10,15 +10,27 @@
 
 package io.sbk.perl;
 
-public class LatencyRecord {
-    public long totalRecords;
-    public long validLatencyRecords;
-    public long lowerLatencyDiscardRecords;
-    public long higherLatencyDiscardRecords;
-    public long invalidLatencyRecords;
-    public long totalBytes;
-    public long totalLatency;
-    public long maxLatency;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+abstract public class LatencyRecord {
+    @Getter
+    protected long totalRecords;
+    @Getter
+    protected long validLatencyRecords;
+    @Getter
+    protected long lowerLatencyDiscardRecords;
+    @Getter
+    protected long higherLatencyDiscardRecords;
+    @Getter
+    protected long invalidLatencyRecords;
+    @Getter
+    protected long totalBytes;
+    @Getter
+    protected long totalLatency;
+    @Getter
+    protected long maxLatency;
 
     public LatencyRecord() {
         reset();

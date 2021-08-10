@@ -89,14 +89,11 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
     public void addLatenciesRecord(LatenciesRecord record) {
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                 record.getMaxReaders(), record.getMaxWriters());
-        window.maxLatency = Math.max(record.getMaxLatency(), window.maxLatency);
-        window.totalRecords += record.getTotalRecords();
-        window.totalBytes += record.getTotalBytes();
-        window.totalLatency += record.getTotalLatency();
-        window.higherLatencyDiscardRecords += record.getHigherLatencyDiscardRecords();
-        window.lowerLatencyDiscardRecords += record.getLowerLatencyDiscardRecords();
-        window.validLatencyRecords += record.getValidLatencyRecords();
-        window.invalidLatencyRecords += record.getInvalidLatencyRecords();
+
+        window.updateRecord(record.getTotalRecords(), record.getTotalLatency(), record.getTotalBytes(),
+                record.getInvalidLatencyRecords(), record.getLowerLatencyDiscardRecords(),
+                record.getHigherLatencyDiscardRecords(), record.getValidLatencyRecords(), record.getMaxLatency());
+
         record.getLatencyMap().forEach(window::reportLatency);
     }
 
