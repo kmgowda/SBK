@@ -74,7 +74,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
 
     @Override
     final public void reportLatencyRecord(LatencyRecord record) {
-        super.updateRecord(record);
+        super.update(record);
     }
 
 

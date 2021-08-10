@@ -55,10 +55,10 @@ public class LatencyRecorder extends LatencyRecord {
      * @param validLatencyRecords valid latency records
      * @param maxLatency Max latency
      */
-    final public void updateRecord(long totalRecords, long totalLatency, long totalBytes,
-                                   long invalidLatencyRecords, long lowerLatencyDiscardRecords,
-                                   long higherLatencyDiscardRecords, long validLatencyRecords,
-                                   long maxLatency) {
+    final public void update(long totalRecords, long totalLatency, long totalBytes,
+                             long invalidLatencyRecords, long lowerLatencyDiscardRecords,
+                             long higherLatencyDiscardRecords, long validLatencyRecords,
+                             long maxLatency) {
         this.totalRecords += totalRecords;
         this.totalLatency += totalLatency;
         this.totalBytes += totalBytes;
@@ -75,8 +75,8 @@ public class LatencyRecorder extends LatencyRecord {
      *
      * @param record Latency record
      */
-    final public void updateRecord(LatencyRecord record) {
-        updateRecord(record.totalRecords, record.totalLatency, record.totalBytes,
+    final public void update(LatencyRecord record) {
+        update(record.totalRecords, record.totalLatency, record.totalBytes,
                 record.invalidLatencyRecords, record.lowerLatencyDiscardRecords,
                 record.higherLatencyDiscardRecords, record.validLatencyRecords, record.maxLatency);
     }

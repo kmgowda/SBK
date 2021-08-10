@@ -62,7 +62,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
 
         @Override
         public void reportLatencyRecord(LatencyRecord record) {
-            recorder.updateRecord(record);
+            recorder.update(record);
         }
 
         @Override

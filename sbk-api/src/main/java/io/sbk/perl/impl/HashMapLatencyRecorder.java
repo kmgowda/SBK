@@ -84,7 +84,7 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
 
     @Override
     final public void reportLatencyRecord(LatencyRecord record) {
-        super.updateRecord(record);
+        super.update(record);
     }
 
 
