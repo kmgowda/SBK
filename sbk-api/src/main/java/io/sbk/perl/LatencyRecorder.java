@@ -17,11 +17,11 @@ import javax.annotation.concurrent.NotThreadSafe;
  */
 @NotThreadSafe
 public class LatencyRecorder extends LatencyRecord {
-    final public long lowLatency;
-    final public long highLatency;
-    final public long totalLatencyMax;
-    final public long totalRecordsMax;
-    final public long totalBytesMax;
+    final protected long lowLatency;
+    final protected long highLatency;
+    final protected long totalLatencyMax;
+    final protected long totalRecordsMax;
+    final protected long totalBytesMax;
 
     public LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long totalBytesMax) {
         super();

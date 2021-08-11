@@ -14,9 +14,9 @@ import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 
 abstract public class LatencyWindow extends LatencyRecorder {
-    final public LatencyPercentiles percentiles;
-    final public Time time;
-    public long startTime;
+    final protected LatencyPercentiles percentiles;
+    final protected Time time;
+    protected long startTime;
     final private int[] slc;
 
 
