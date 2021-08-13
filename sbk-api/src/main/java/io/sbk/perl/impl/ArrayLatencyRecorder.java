@@ -10,6 +10,7 @@
 
 package io.sbk.perl.impl;
 
+import io.sbk.config.PerlConfig;
 import io.sbk.perl.LatencyPercentiles;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
@@ -24,6 +25,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     final private long[] latencies;
+    final private long maxMemorySizeBytes;
     private int minIndex;
     private int maxIndex;
 
@@ -32,6 +34,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
+        this.maxMemorySizeBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * size;
         this.minIndex = size;
         this.maxIndex = 0;
     }
@@ -70,6 +73,11 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     @Override
     final public boolean isFull() {
         return super.isOverflow();
+    }
+
+    @Override
+    final public long getMaxMemoryBytes() {
+        return this.maxMemorySizeBytes;
     }
 
     @Override

@@ -56,6 +56,11 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
         return (this.hashMapBytesCount > this.maxHashMapSizeBytes ) || super.isOverflow();
     }
 
+    @Override
+    final public long getMaxMemoryBytes() {
+        return maxHashMapSizeBytes;
+    }
+
 
     @Override
     final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {

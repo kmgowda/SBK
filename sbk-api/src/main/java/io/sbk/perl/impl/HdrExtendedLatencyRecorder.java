@@ -71,6 +71,10 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
             }
             percentiles.medianLatency = this.histogram.getValueAtPercentile(50);
         }
+
+        public long getMaxMemoryBytes() {
+            return histogram.getEstimatedFootprintInBytes();
+        }
     }
 
 
@@ -112,5 +116,10 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
     @Override
     final public boolean isFull() {
         return super.isOverflow();
+    }
+
+    @Override
+    final public long getMaxMemoryBytes() {
+        return hdrReporter.getMaxMemoryBytes();
     }
 }
