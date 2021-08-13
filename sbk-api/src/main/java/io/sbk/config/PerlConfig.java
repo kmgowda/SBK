@@ -41,6 +41,8 @@ final public class PerlConfig {
 
     final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
+    final public static int HDR_SIGNIFICANT_DIGITS = 3;
+
     public TimeUnit timeUnit;
     public boolean fork;
     public int qPerWorker;
@@ -48,6 +50,7 @@ final public class PerlConfig {
     public int maxQs;
     public int maxArraySizeMB;
     public int maxHashMapSizeMB;
+    public boolean histogram;
     public boolean csv;
     public int csvFileSizeMB;
 }

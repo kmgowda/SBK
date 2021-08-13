@@ -9,6 +9,7 @@
  */
 package io.sbk.perl.impl;
 
+import io.sbk.config.PerlConfig;
 import io.sbk.perl.LatencyPercentiles;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
@@ -30,7 +31,7 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
                                       LatencyRecordWindow latencyBuffer) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentilesFractions, time);
         this.latencyBuffer = latencyBuffer;
-        this.hdrReporter = new HdrLatencyReporter(this,  highLatency, 3);
+        this.hdrReporter = new HdrLatencyReporter(this,  highLatency, PerlConfig.HDR_SIGNIFICANT_DIGITS);
     }
 
     private static class HdrLatencyReporter implements ReportLatencies {
@@ -105,7 +106,7 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
     @Override
     public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies reportLatencies) {
         if (this.totalRecords > 0) {
-            Printer.log.info("Percentiles are from HdrHistogram");
+            Printer.log.info("Percentiles are from HdrHistogram!");
             latencyBuffer.copyPercentiles(percentiles, hdrReporter);
             hdrReporter.copyPercentiles(percentiles, reportLatencies);
         } else {
