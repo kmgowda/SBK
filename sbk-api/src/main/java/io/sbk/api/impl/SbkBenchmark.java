@@ -22,6 +22,7 @@ import io.sbk.config.PerlConfig;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.api.Storage;
 import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
+import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
 import io.sbk.perl.impl.TotalWindowLatencyPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.time.Time;
@@ -164,8 +165,10 @@ public class SbkBenchmark implements Benchmark {
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Latency Store: HashMap and CSV file");
         } else {
-            totalWindowWrapper = totalWindow;
-            Printer.log.info("Total Window Latency Store: HashMap");
+            totalWindowWrapper = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
+                    percentileFractions, time, totalWindow);
+            Printer.log.info("Total Window Latency Store: HashMap and HdrHistogram");
         }
 
         return new TotalWindowLatencyPeriodicRecorder(window, totalWindowWrapper, logger, logger::printTotal,
