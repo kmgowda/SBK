@@ -22,6 +22,7 @@ import io.sbk.config.PerlConfig;
 import io.sbk.perl.PeriodicRecorder;
 import io.sbk.api.Storage;
 import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
+import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
 import io.sbk.perl.impl.TotalWindowLatencyPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.time.Time;
@@ -132,6 +133,25 @@ public class SbkBenchmark implements Benchmark {
         state = State.BEGIN;
     }
 
+    private LatencyRecordWindow createLatencyWindow() {
+        final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
+        final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
+        final LatencyRecordWindow window;
+
+        if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
+            window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
+            Printer.log.info("Window Latency Store: Array, Size: " +
+                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+        } else {
+            window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
+                    time, perlConfig.maxHashMapSizeMB);
+            Printer.log.info("Window Latency Store: HashMap, Size: " +
+                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+        }
+        return window;
+    }
 
     private PeriodicRecorder createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
@@ -141,31 +161,30 @@ public class SbkBenchmark implements Benchmark {
         final LatencyRecordWindow totalWindowWrapper;
         final PeriodicRecorder latencyRecorder;
 
-        if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
-            window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
-            Printer.log.info("Window Latency Store: Array");
-        } else {
-            window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
-                    time, perlConfig.maxHashMapSizeMB);
-            Printer.log.info("Window Latency Store: HashMap");
-
-        }
+        window = createLatencyWindow();
 
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
                 time, perlConfig.maxHashMapSizeMB);
+        Printer.log.info("Total Window Latency Store: HashMap, Size: " +
+                totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
 
-        if (perlConfig.csv) {
+        if (perlConfig.histogram) {
+            totalWindowWrapper = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
+                    percentileFractions, time, totalWindow);
+            Printer.log.info(String.format("Total Window Wrapper: HdrHistogram, Size: %.2f MB",
+                    (totalWindowWrapper.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB ));
+        } else if (perlConfig.csv) {
             totalWindowWrapper = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, perlConfig.csvFileSizeMB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
-            Printer.log.info("Total Window Latency Store: HashMap and CSV file");
+            Printer.log.info("Total Window Wrapper: CSV, Size: " +
+                    totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
         } else {
             totalWindowWrapper = totalWindow;
-            Printer.log.info("Total Window Latency Store: HashMap");
+            Printer.log.info("Total Window Wrapper: None, Size: 0 MB");
         }
 
         return new TotalWindowLatencyPeriodicRecorder(window, totalWindowWrapper, logger, logger::printTotal,

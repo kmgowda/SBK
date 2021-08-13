@@ -60,4 +60,5 @@
     <allow pkg="org.ektorp" />
     <allow pkg="redis.clients" />
     <allow pkg="com.datastax" />
+    <allow pkg="org.HdrHistogram" />
 </import-control>

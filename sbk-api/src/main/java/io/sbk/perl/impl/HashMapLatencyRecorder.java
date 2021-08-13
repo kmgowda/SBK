@@ -38,7 +38,7 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new HashMap<>();
         this.maxHashMapSizeMB = maxHashMapSizeMB;
-        this.maxHashMapSizeBytes = ((long) maxHashMapSizeMB) * PerlConfig.BYTES_PER_MB;
+        this.maxHashMapSizeBytes = maxHashMapSizeMB * PerlConfig.BYTES_PER_MB;
         this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
         this.hashMapBytesCount = 0;
     }
@@ -54,6 +54,11 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
     @Override
     final public boolean isFull() {
         return (this.hashMapBytesCount > this.maxHashMapSizeBytes ) || super.isOverflow();
+    }
+
+    @Override
+    final public long getMaxMemoryBytes() {
+        return maxHashMapSizeBytes;
     }
 
 

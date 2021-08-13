@@ -15,6 +15,7 @@ import io.grpc.ServerBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
 import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
+import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.config.RamConfig;
@@ -98,12 +99,14 @@ public class SbkRamBenchmark implements Benchmark {
         if (memSizeMB < ramConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
-            Printer.log.info("Window Latency Store: Array");
+            Printer.log.info("Window Latency Store: Array, Size: " +
+                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time,
                     ramConfig.maxHashMapSizeMB);
-            Printer.log.info("Window Latency Store: HashMap");
+            Printer.log.info("Window Latency Store: HashMap, Size: " +
+                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
         }
         return window;
     }
@@ -117,16 +120,25 @@ public class SbkRamBenchmark implements Benchmark {
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
                 time, ramConfig.maxHashMapSizeMB);
+        Printer.log.info("Total Window Latency Store: HashMap, Size: " +
+                totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
 
-        if (ramConfig.csv) {
+        if (ramConfig.histogram) {
+            totalWindowWrapper = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
+                    percentileFractions, time, totalWindow);
+            Printer.log.info(String.format("Total Window Wrapper: HdrHistogram, Size: %.2f MB",
+                    (totalWindowWrapper.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB ));
+        } else if (ramConfig.csv) {
             totalWindowWrapper = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, ramConfig.csvFileSizeMB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
-            Printer.log.info("Total Window Latency Store: HashMap and CSV file");
+            Printer.log.info("Total Window Wrapper: CSV, Size: " +
+                    totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
         } else {
             totalWindowWrapper = totalWindow;
-            Printer.log.info("Total Window Latency Store: HashMap");
+            Printer.log.info("Total Window Wrapper: None, Size: 0 MB");
         }
 
         return new RamTotalWindowLatencyPeriodicRecorder(window, totalWindowWrapper, logger, logger::printTotal,

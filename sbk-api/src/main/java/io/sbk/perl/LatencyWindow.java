@@ -114,4 +114,11 @@ abstract public class LatencyWindow extends LatencyRecorder {
      * @return   indicate the latency storage is full or not
      */
     abstract public boolean isFull();
+
+
+    /**
+     * Max memory Size in Bytes.
+     * @return   Maximum window memory size in bytes
+     */
+    abstract public long getMaxMemoryBytes();
 }

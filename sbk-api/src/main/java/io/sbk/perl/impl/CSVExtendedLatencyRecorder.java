@@ -46,7 +46,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
     private static class CSVLatencyReporter implements ReportLatencies {
         final LatencyRecorder recorder;
         final private String csvFile;
-        final private long maxCSvSizeBytes;
+        final private long maxCsvSizeBytes;
         final private int incBytes;
         private long csvBytesCount;
         private CSVPrinter csvPrinter;
@@ -54,7 +54,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
         public CSVLatencyReporter(LatencyRecorder recorder, int csvFileSizeMB, String fileName) {
             this.recorder = recorder;
             this.csvFile = fileName;
-            this.maxCSvSizeBytes = csvFileSizeMB * PerlConfig.BYTES_PER_MB;
+            this.maxCsvSizeBytes = csvFileSizeMB * PerlConfig.BYTES_PER_MB;
             this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
             this.csvBytesCount = 0;
             this.csvPrinter = null;
@@ -120,7 +120,11 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
         }
 
         public boolean isFull() {
-            return csvBytesCount >= maxCSvSizeBytes;
+            return csvBytesCount >= maxCsvSizeBytes;
+        }
+
+        public long getMaxMemoryBytes() {
+            return maxCsvSizeBytes;
         }
 
     }
@@ -128,6 +132,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
    private void checkBufferFull() {
         if (latencyBuffer.isFull()) {
             latencyBuffer.copyPercentiles(percentiles, csvReporter);
+            latencyBuffer.reset();
         }
    }
 
@@ -151,13 +156,20 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
 
     @Override
     public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies reportLatencies) {
-        csvReporter.readCSV(latencyBuffer);
+        if (this.totalRecords > 0) {
+            csvReporter.readCSV(latencyBuffer);
+        }
         latencyBuffer.copyPercentiles(percentiles, reportLatencies);
     }
 
     @Override
     final public boolean isFull() {
        return csvReporter.isFull() || super.isOverflow();
+    }
+
+    @Override
+    final public long getMaxMemoryBytes() {
+       return csvReporter.getMaxMemoryBytes();
     }
 
 }
