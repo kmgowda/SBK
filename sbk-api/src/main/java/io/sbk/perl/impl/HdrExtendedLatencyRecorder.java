@@ -82,6 +82,7 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
     private void checkBufferFull() {
         if (latencyBuffer.isFull()) {
             latencyBuffer.copyPercentiles(percentiles, hdrReporter);
+            latencyBuffer.reset();
         }
     }
 

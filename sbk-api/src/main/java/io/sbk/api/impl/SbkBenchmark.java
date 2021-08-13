@@ -166,22 +166,22 @@ public class SbkBenchmark implements Benchmark {
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
                 time, perlConfig.maxHashMapSizeMB);
-        Printer.log.info("Total Window Latency Store: HashMap , Size: " +
+        Printer.log.info("Total Window Latency Store: HashMap, Size: " +
                 totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
 
         if (perlConfig.histogram) {
             totalWindowWrapper = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow);
-            Printer.log.info("Total Window Wrapper: HdrHistogram, Size: "+
-                    (totalWindowWrapper.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB +" MB");
+            Printer.log.info(String.format("Total Window Wrapper: HdrHistogram, Size: %.2f MB",
+                    (totalWindowWrapper.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB ));
         } else if (perlConfig.csv) {
             totalWindowWrapper = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, perlConfig.csvFileSizeMB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
-            Printer.log.info("Total Window Wrapper: CSV, Size: %.2f MB",
-                    totalWindowWrapper.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB );
+            Printer.log.info("Total Window Wrapper: CSV, Size: " +
+                    totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
         } else {
             totalWindowWrapper = totalWindow;
             Printer.log.info("Total Window Wrapper: None, Size: 0 MB");

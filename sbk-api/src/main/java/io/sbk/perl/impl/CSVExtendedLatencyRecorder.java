@@ -132,6 +132,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
    private void checkBufferFull() {
         if (latencyBuffer.isFull()) {
             latencyBuffer.copyPercentiles(percentiles, csvReporter);
+            latencyBuffer.reset();
         }
    }
 
@@ -155,7 +156,9 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
 
     @Override
     public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies reportLatencies) {
-        csvReporter.readCSV(latencyBuffer);
+        if (this.totalRecords > 0) {
+            csvReporter.readCSV(latencyBuffer);
+        }
         latencyBuffer.copyPercentiles(percentiles, reportLatencies);
     }
 
