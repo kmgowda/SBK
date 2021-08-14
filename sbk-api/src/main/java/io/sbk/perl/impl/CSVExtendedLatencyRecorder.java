@@ -32,14 +32,12 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
     final private LatencyRecordWindow latencyBuffer;
     final private CSVLatencyReporter csvReporter;
 
-
     public CSVExtendedLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                       long bytesMax, double[] percentilesFractions, Time time,
                                       LatencyRecordWindow latencyBuffer, int csvFileSizeMB, String fileName) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentilesFractions, time);
         this.latencyBuffer = latencyBuffer;
         this.csvReporter = new CSVLatencyReporter(this, csvFileSizeMB, fileName);
-
     }
 
 
@@ -70,6 +68,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             if (csvPrinter == null) {
                 deleteCSVFile();
                 try {
+                    Printer.log.info("Creating CSV file: " +csvFile +" ...");
                     csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
                             .withHeader(" Latency", "Records"));
                 } catch (IOException ex) {
@@ -88,6 +87,9 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
 
         private void deleteCSVFile() {
             Path fileToDeletePath = Paths.get(csvFile);
+            if (!Files.exists(fileToDeletePath)) {
+                return;
+            }
             Printer.log.info("Deleting CSV file: " +csvFile +" ...");
             try {
                 Files.delete(fileToDeletePath);
@@ -128,6 +130,18 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             return maxCsvSizeBytes;
         }
 
+        public void reset() {
+            if (csvPrinter != null) {
+                try {
+                    csvPrinter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                csvPrinter = null;
+            }
+            deleteCSVFile();
+            csvBytesCount = 0;
+        }
     }
 
    private void checkBufferFull() {
@@ -136,6 +150,13 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             latencyBuffer.reset();
         }
    }
+
+    @Override
+    public void reset(long starTime) {
+        super.reset(startTime);
+        latencyBuffer.reset(startTime);
+        csvReporter.reset();
+    }
 
     @Override
     public void reportLatencyRecord(LatencyRecord record) {

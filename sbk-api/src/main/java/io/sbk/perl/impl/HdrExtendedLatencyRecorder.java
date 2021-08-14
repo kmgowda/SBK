@@ -76,14 +76,24 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
         public long getMaxMemoryBytes() {
             return histogram.getEstimatedFootprintInBytes();
         }
-    }
 
+        public void reset() {
+            this.histogram.reset();
+        }
+    }
 
     private void checkBufferFull() {
         if (latencyBuffer.isFull()) {
             latencyBuffer.copyPercentiles(percentiles, hdrReporter);
             latencyBuffer.reset();
         }
+    }
+
+    @Override
+    public void reset(long starTime) {
+        super.reset(startTime);
+        latencyBuffer.reset(startTime);
+        hdrReporter.reset();
     }
 
     @Override
