@@ -181,7 +181,7 @@ public class SbkBenchmark implements Benchmark {
                     percentileFractions, time, totalWindow, perlConfig.csvFileSizeMB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Wrapper: CSV, Size: " +
-                    totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+                    totalWindowWrapper.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
         } else {
             totalWindowWrapper = totalWindow;
             Printer.log.info("Total Window Wrapper: None, Size: 0 MB");

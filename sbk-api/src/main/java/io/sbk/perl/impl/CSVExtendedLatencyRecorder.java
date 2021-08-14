@@ -54,7 +54,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
         public CSVLatencyReporter(LatencyRecorder recorder, int csvFileSizeMB, String fileName) {
             this.recorder = recorder;
             this.csvFile = fileName;
-            this.maxCsvSizeBytes = csvFileSizeMB * PerlConfig.BYTES_PER_MB;
+            this.maxCsvSizeBytes = (long) csvFileSizeMB * PerlConfig.BYTES_PER_MB;
             this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
             this.csvBytesCount = 0;
             this.csvPrinter = null;
@@ -88,6 +88,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
 
         private void deleteCSVFile() {
             Path fileToDeletePath = Paths.get(csvFile);
+            Printer.log.info("Deleting CSV file: " +csvFile +" ...");
             try {
                 Files.delete(fileToDeletePath);
             } catch (IOException ex) {
@@ -104,7 +105,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
                 }
                 csvPrinter = null;
             }
-            Printer.log.info("Reading CSV file :" +csvFile +" ...");
+            Printer.log.info("Reading CSV file: " +csvFile +" ...");
             reportLatencies.reportLatencyRecord(recorder);
             try {
                 CSVParser csvParser = new CSVParser(Files.newBufferedReader(Paths.get(csvFile)), CSVFormat.DEFAULT
