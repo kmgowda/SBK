@@ -115,7 +115,7 @@ public class SbkRamBenchmark implements Benchmark {
         final LatencyRecordWindow window = createLatencyWindow();
         final RamPeriodicRecorder latencyRecorder;
         final LatencyRecordWindow totalWindow;
-        final LatencyRecordWindow totalWindowWrapper;
+        final LatencyRecordWindow totalWindowExtension;
 
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
@@ -124,24 +124,24 @@ public class SbkRamBenchmark implements Benchmark {
                 totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
 
         if (ramConfig.histogram) {
-            totalWindowWrapper = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+            totalWindowExtension = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow);
-            Printer.log.info(String.format("Total Window Wrapper: HdrHistogram, Size: %.2f MB",
-                    (totalWindowWrapper.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB ));
+            Printer.log.info(String.format("Total Window Extension: HdrHistogram, Size: %.2f MB",
+                    (totalWindowExtension.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB ));
         } else if (ramConfig.csv) {
-            totalWindowWrapper = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+            totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, ramConfig.csvFileSizeMB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
-            Printer.log.info("Total Window Wrapper: CSV, Size: " +
-                    totalWindowWrapper.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+            Printer.log.info("Total Window Extension: CSV, Size: " +
+                    totalWindowExtension.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
         } else {
-            totalWindowWrapper = totalWindow;
-            Printer.log.info("Total Window Wrapper: None, Size: 0 MB");
+            totalWindowExtension = totalWindow;
+            Printer.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new RamTotalWindowLatencyPeriodicRecorder(window, totalWindowWrapper, logger, logger::printTotal,
+        return new RamTotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
                 logger, logger);
     }
 
