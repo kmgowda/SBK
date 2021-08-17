@@ -181,9 +181,11 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
         if (this.totalRecords > 0) {
             csvReporter.readCSV(latencyBuffer);
         }
+
+        latencyBuffer.copyPercentiles(percentiles, reportLatencies);
+        // Update the current Window values to print
         super.reset();
         super.update(latencyBuffer);
-        latencyBuffer.copyPercentiles(percentiles, reportLatencies);
     }
 
     @Override

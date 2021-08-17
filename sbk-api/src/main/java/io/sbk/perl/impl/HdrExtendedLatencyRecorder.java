@@ -121,6 +121,9 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
             latencyBuffer.copyPercentiles(percentiles, hdrReporter);
             hdrReporter.copyPercentiles(percentiles, reportLatencies);
         } else {
+            // Update the current Window values to print
+            super.reset();
+            super.update(latencyBuffer);
             latencyBuffer.copyPercentiles(percentiles, reportLatencies);
         }
     }
