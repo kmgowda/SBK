@@ -16,7 +16,7 @@ import io.sbk.time.Time;
 abstract public class LatencyWindow extends LatencyRecorder {
     final protected LatencyPercentiles percentiles;
     final protected Time time;
-    protected long startTime;
+    private long startTime;
     final private int[] slc;
 
 

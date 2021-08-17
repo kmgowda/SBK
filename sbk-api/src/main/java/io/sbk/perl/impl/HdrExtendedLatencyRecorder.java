@@ -90,7 +90,7 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
     }
 
     @Override
-    public void reset(long starTime) {
+    public void reset(long startTime) {
         super.reset(startTime);
         latencyBuffer.reset(startTime);
         hdrReporter.reset();
