@@ -178,10 +178,10 @@ public class SbkBenchmark implements Benchmark {
         } else if (perlConfig.csv) {
             totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
-                    percentileFractions, time, totalWindow, perlConfig.csvFileSizeMB,
+                    percentileFractions, time, totalWindow, perlConfig.csvFileSizeGB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Extension: CSV, Size: " +
-                    totalWindowExtension.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+                    totalWindowExtension.getMaxMemoryBytes() / PerlConfig.BYTES_PER_GB +" GB");
         } else {
             totalWindowExtension = totalWindow;
             Printer.log.info("Total Window Extension: None, Size: 0 MB");

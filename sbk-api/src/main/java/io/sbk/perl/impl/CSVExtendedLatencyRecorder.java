@@ -34,10 +34,10 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
 
     public CSVExtendedLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                       long bytesMax, double[] percentilesFractions, Time time,
-                                      LatencyRecordWindow latencyBuffer, int csvFileSizeMB, String fileName) {
+                                      LatencyRecordWindow latencyBuffer, int csvFileSizeGB, String fileName) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentilesFractions, time);
         this.latencyBuffer = latencyBuffer;
-        this.csvReporter = new CSVLatencyReporter(this, csvFileSizeMB, fileName);
+        this.csvReporter = new CSVLatencyReporter(this, csvFileSizeGB, fileName);
     }
 
 
@@ -49,10 +49,10 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
         private long csvBytesCount;
         private CSVPrinter csvPrinter;
 
-        public CSVLatencyReporter(LatencyRecorder recorder, int csvFileSizeMB, String fileName) {
+        public CSVLatencyReporter(LatencyRecorder recorder, int csvFileSizeGB, String fileName) {
             this.recorder = recorder;
             this.csvFile = fileName;
-            this.maxCsvSizeBytes = (long) csvFileSizeMB * PerlConfig.BYTES_PER_MB;
+            this.maxCsvSizeBytes = csvFileSizeGB * PerlConfig.BYTES_PER_GB;
             this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
             this.csvBytesCount = 0;
             this.csvPrinter = null;

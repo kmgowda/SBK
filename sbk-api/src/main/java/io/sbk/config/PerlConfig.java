@@ -18,6 +18,7 @@ final public class PerlConfig {
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
     final public static int BYTES_PER_KB = 1024;
     final public static int BYTES_PER_MB = BYTES_PER_KB * BYTES_PER_KB;
+    final public static long BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_MB;
 
     final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5;
     final public static int NS_PER_MICRO = 1000;
@@ -53,5 +54,5 @@ final public class PerlConfig {
     public int totalMaxHashMapSizeMB;
     public boolean histogram;
     public boolean csv;
-    public int csvFileSizeMB;
+    public int csvFileSizeGB;
 }
