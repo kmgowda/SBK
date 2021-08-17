@@ -70,7 +70,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
                 slc[0], slc[1], this.percentiles.latencies);
     }
     
-    final public void getSLC(LatencyPercentiles percentiles, int[] slc) {
+    final private void getSLC(LatencyPercentiles percentiles, int[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length-1;
