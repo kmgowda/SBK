@@ -119,7 +119,7 @@ public class SbkRamBenchmark implements Benchmark {
 
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
-                time, ramConfig.maxHashMapSizeMB);
+                time, ramConfig.totalMaxHashMapSizeMB);
         Printer.log.info("Total Window Latency Store: HashMap, Size: " +
                 totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
 

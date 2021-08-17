@@ -50,6 +50,7 @@ final public class PerlConfig {
     public int maxQs;
     public int maxArraySizeMB;
     public int maxHashMapSizeMB;
+    public int totalMaxHashMapSizeMB;
     public boolean histogram;
     public boolean csv;
     public int csvFileSizeMB;

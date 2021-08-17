@@ -18,6 +18,7 @@ final public class RamConfig {
     public int maxConnections;
     public int maxArraySizeMB;
     public int maxHashMapSizeMB;
+    public int totalMaxHashMapSizeMB;
     public int maxQueues;
     public int idleMS;
     public boolean histogram;
