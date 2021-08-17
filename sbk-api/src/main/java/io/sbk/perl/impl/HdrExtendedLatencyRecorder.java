@@ -90,7 +90,7 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
     }
 
     @Override
-    public void reset(long starTime) {
+    public void reset(long startTime) {
         super.reset(startTime);
         latencyBuffer.reset(startTime);
         hdrReporter.reset();
@@ -121,6 +121,9 @@ public class HdrExtendedLatencyRecorder  extends LatencyRecordWindow {
             latencyBuffer.copyPercentiles(percentiles, hdrReporter);
             hdrReporter.copyPercentiles(percentiles, reportLatencies);
         } else {
+            // Update the current Window values to print
+            super.reset();
+            super.update(latencyBuffer);
             latencyBuffer.copyPercentiles(percentiles, reportLatencies);
         }
     }

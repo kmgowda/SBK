@@ -152,7 +152,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
    }
 
     @Override
-    public void reset(long starTime) {
+    public void reset(long startTime) {
         super.reset(startTime);
         latencyBuffer.reset(startTime);
         csvReporter.reset();
@@ -181,7 +181,11 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
         if (this.totalRecords > 0) {
             csvReporter.readCSV(latencyBuffer);
         }
+
         latencyBuffer.copyPercentiles(percentiles, reportLatencies);
+        // Update the current Window values to print
+        super.reset();
+        super.update(latencyBuffer);
     }
 
     @Override

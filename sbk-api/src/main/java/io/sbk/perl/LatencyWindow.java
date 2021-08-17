@@ -16,7 +16,7 @@ import io.sbk.time.Time;
 abstract public class LatencyWindow extends LatencyRecorder {
     final protected LatencyPercentiles percentiles;
     final protected Time time;
-    protected long startTime;
+    private long startTime;
     final private int[] slc;
 
 
@@ -56,21 +56,25 @@ abstract public class LatencyWindow extends LatencyRecorder {
      * @param copyLatencies  Copy Latency values
      */
     final public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
+        copyPercentiles(percentiles, copyLatencies);
+        getSLC(percentiles, slc);
+        print(endTime, logger);
+    }
+    
+    final private void print(long endTime, Print logger) {
         final double elapsedSec = time.elapsedSeconds(endTime, startTime);
         final long totalLatencyRecords  = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
         final double recsPerSec =  elapsedSec > 0 ? this.totalRecords / elapsedSec : 0;
         final double mbPerSec = elapsedSec > 0 ? (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0)) / elapsedSec : 0;
         final double avgLatency = totalLatencyRecords > 0 ? this.totalLatency / (double) totalLatencyRecords : 0;
-        copyPercentiles(percentiles, copyLatencies);
-        getSLC(percentiles, slc);
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                 slc[0], slc[1], this.percentiles.latencies);
     }
     
-    final public void getSLC(LatencyPercentiles percentiles, int[] slc) {
+    final private void getSLC(LatencyPercentiles percentiles, int[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length-1;
