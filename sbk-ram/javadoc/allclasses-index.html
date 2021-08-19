@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":1,"i1":2,"i2":2,"i3":1,"i4":2,"i5":1,"i6":1,"i7":1,"i8":2,"i9":2,"i10":2,"i11":2,"i12":2,"i13":2,"i14":1};
+var data = {"i0":1,"i1":2,"i2":2,"i3":1,"i4":2,"i5":1,"i6":1,"i7":1,"i8":2,"i9":1,"i10":2,"i11":2,"i12":2,"i13":2,"i14":2,"i15":2,"i16":1};
 var tabs = {65535:["t0","All Classes"],1:["t1","Interface Summary"],2:["t2","Class Summary"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -111,7 +111,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><a href="io/sbk/ram/CountConnections.html" title="interface in io.sbk.ram">CountConnections</a></td>
+<td class="colFirst"><a href="io/sbk/logger/CountConnections.html" title="interface in io.sbk.logger">CountConnections</a></td>
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
 <tr id="i1" class="rowColor">
@@ -119,15 +119,15 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><a href="io/sbk/ram/RamConfig.html" title="class in io.sbk.ram">RamConfig</a></td>
+<td class="colFirst"><a href="io/sbk/config/RamConfig.html" title="class in io.sbk.config">RamConfig</a></td>
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><a href="io/sbk/ram/RamLogger.html" title="interface in io.sbk.ram">RamLogger</a></td>
+<td class="colFirst"><a href="io/sbk/logger/RamLogger.html" title="interface in io.sbk.logger">RamLogger</a></td>
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><a href="io/sbk/ram/impl/RamMetricsPrometheusServer.html" title="class in io.sbk.ram.impl">RamMetricsPrometheusServer</a></td>
+<td class="colFirst"><a href="io/sbk/logger/impl/RamMetricsPrometheusServer.html" title="class in io.sbk.logger.impl">RamMetricsPrometheusServer</a></td>
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
 <tr id="i5" class="rowColor">
@@ -139,45 +139,55 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
 <tr id="i7" class="rowColor">
+<td class="colFirst"><a href="io/sbk/ram/RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a></td>
+<th class="colLast" scope="row">
+<div class="block">Interface for recording latencies.</div>
+</th>
+</tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><a href="io/sbk/logger/impl/RamPrometheusLogger.html" title="class in io.sbk.logger.impl">RamPrometheusLogger</a></td>
+<th class="colLast" scope="row">
+<div class="block">Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.</div>
+</th>
+</tr>
+<tr id="i9" class="rowColor">
 <td class="colFirst"><a href="io/sbk/ram/RamRegistry.html" title="interface in io.sbk.ram">RamRegistry</a></td>
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i10" class="altColor">
+<td class="colFirst"><a href="io/sbk/ram/impl/RamTotalWindowLatencyPeriodicRecorder.html" title="class in io.sbk.ram.impl">RamTotalWindowLatencyPeriodicRecorder</a></td>
+<th class="colLast" scope="row">&nbsp;</th>
+</tr>
+<tr id="i11" class="rowColor">
 <td class="colFirst"><a href="io/sbk/ram/impl/SbkGrpcService.html" title="class in io.sbk.ram.impl">SbkGrpcService</a></td>
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><a href="io/sbk/ram/impl/SbkRam.html" title="class in io.sbk.ram.impl">SbkRam</a></td>
 <th class="colLast" scope="row">
 <div class="block">Main class of SBK Server.</div>
 </th>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><a href="io/sbk/ram/impl/SbkRamBenchmark.html" title="class in io.sbk.ram.impl">SbkRamBenchmark</a></td>
 <th class="colLast" scope="row">
 <div class="block">Class for performing the benchmark.</div>
 </th>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><a href="io/sbk/main/SbkRamMain.html" title="class in io.sbk.main">SbkRamMain</a></td>
 <th class="colLast" scope="row">
 <div class="block">Main class of SBK Server.</div>
 </th>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><a href="io/sbk/ram/impl/SbkRamParameters.html" title="class in io.sbk.ram.impl">SbkRamParameters</a></td>
 <th class="colLast" scope="row">
 <div class="block">Class for processing command Line arguments/parameters.</div>
 </th>
 </tr>
-<tr id="i13" class="rowColor">
-<td class="colFirst"><a href="io/sbk/ram/impl/SbkRamPrometheusLogger.html" title="class in io.sbk.ram.impl">SbkRamPrometheusLogger</a></td>
-<th class="colLast" scope="row">
-<div class="block">Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.</div>
-</th>
-</tr>
-<tr id="i14" class="altColor">
-<td class="colFirst"><a href="io/sbk/ram/SetRW.html" title="interface in io.sbk.ram">SetRW</a></td>
+<tr id="i16" class="altColor">
+<td class="colFirst"><a href="io/sbk/logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a></td>
 <th class="colLast" scope="row">&nbsp;</th>
 </tr>
 </table>
