@@ -145,7 +145,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
-<dd><code><a href="impl/ArrayLatencyRecorder.html" title="class in io.sbk.perl.impl">ArrayLatencyRecorder</a></code>, <code><a href="impl/HashMapLatencyRecorder.html" title="class in io.sbk.perl.impl">HashMapLatencyRecorder</a></code></dd>
+<dd><code><a href="impl/ArrayLatencyRecorder.html" title="class in io.sbk.perl.impl">ArrayLatencyRecorder</a></code>, <code><a href="impl/CSVExtendedLatencyRecorder.html" title="class in io.sbk.perl.impl">CSVExtendedLatencyRecorder</a></code>, <code><a href="impl/HashMapLatencyRecorder.html" title="class in io.sbk.perl.impl">HashMapLatencyRecorder</a></code>, <code><a href="impl/HdrExtendedLatencyRecorder.html" title="class in io.sbk.perl.impl">HdrExtendedLatencyRecorder</a></code></dd>
 </dl>
 <hr>
 <pre>@NotThreadSafe
@@ -170,7 +170,7 @@ implements <a href="ReportLatency.html" title="interface in io.sbk.perl">ReportL
 <!--   -->
 </a>
 <h3>Fields inherited from class&nbsp;io.sbk.perl.<a href="LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></h3>
-<code><a href="LatencyWindow.html#percentiles">percentiles</a>, <a href="LatencyWindow.html#startTime">startTime</a>, <a href="LatencyWindow.html#time">time</a></code></li>
+<code><a href="LatencyWindow.html#percentiles">percentiles</a>, <a href="LatencyWindow.html#time">time</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="fields.inherited.from.class.io.sbk.perl.LatencyRecorder">
@@ -209,7 +209,7 @@ implements <a href="ReportLatency.html" title="interface in io.sbk.perl">ReportL
                    long&nbsp;totalRecordsMax,
                    long&nbsp;bytesMax,
                    double[]&nbsp;percentilesFractions,
-                   <a href="Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
+                   <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 </table>
@@ -228,14 +228,14 @@ implements <a href="ReportLatency.html" title="interface in io.sbk.perl">ReportL
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.perl.<a href="LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></h3>
-<code><a href="LatencyWindow.html#copyPercentiles(io.sbk.perl.LatencyPercentiles,io.sbk.perl.ReportLatencies)">copyPercentiles</a>, <a href="LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="LatencyWindow.html#getSLC(io.sbk.perl.LatencyPercentiles,int%5B%5D)">getSLC</a>, <a href="LatencyWindow.html#print(long,io.sbk.perl.Print,io.sbk.perl.ReportLatencies)">print</a>, <a href="LatencyWindow.html#reset(long)">reset</a></code></li>
+<code><a href="LatencyWindow.html#copyPercentiles(io.sbk.perl.LatencyPercentiles,io.sbk.perl.ReportLatencies)">copyPercentiles</a>, <a href="LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="LatencyWindow.html#getMaxMemoryBytes()">getMaxMemoryBytes</a>, <a href="LatencyWindow.html#isFull()">isFull</a>, <a href="LatencyWindow.html#print(long,io.sbk.perl.Print,io.sbk.perl.ReportLatencies)">print</a>, <a href="LatencyWindow.html#reset(long)">reset</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.LatencyRecorder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.perl.<a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecorder</a></h3>
-<code><a href="LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="LatencyRecorder.html#record(long,long,long)">record</a>, <a href="LatencyRecorder.html#updateRecord(io.sbk.perl.LatencyRecord)">updateRecord</a></code></li>
+<code><a href="LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="LatencyRecorder.html#record(long,long,long)">record</a>, <a href="LatencyRecorder.html#update(long,long,long,long,long,long,long,long)">update</a>, <a href="LatencyRecorder.html#update(io.sbk.perl.LatencyRecord)">update</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.LatencyRecord">
@@ -293,7 +293,7 @@ implements <a href="ReportLatency.html" title="interface in io.sbk.perl">ReportL
                            long&nbsp;totalRecordsMax,
                            long&nbsp;bytesMax,
                            double[]&nbsp;percentilesFractions,
-                           <a href="Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</pre>
+                           <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</pre>
 </li>
 </ul>
 </li>

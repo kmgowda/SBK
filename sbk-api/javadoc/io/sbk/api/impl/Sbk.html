@@ -180,7 +180,7 @@ extends java.lang.Object</pre>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#buildBenchmark(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.Logger)">buildBenchmark</a></span>&#8203;(java.lang.String[]&nbsp;args,
               java.lang.String&nbsp;packageName,
               java.lang.String&nbsp;applicationName,
-              <a href="../Logger.html" title="interface in io.sbk.api">Logger</a>&nbsp;outLogger)</code></th>
+              <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)</code></th>
 <td class="colLast">
 <div class="block">Build the Benchmark Object.</div>
 </td>
@@ -190,7 +190,7 @@ extends java.lang.Object</pre>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#run(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.Logger)">run</a></span>&#8203;(java.lang.String[]&nbsp;args,
    java.lang.String&nbsp;packageName,
    java.lang.String&nbsp;applicationName,
-   <a href="../Logger.html" title="interface in io.sbk.api">Logger</a>&nbsp;outLogger)</code></th>
+   <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)</code></th>
 <td class="colLast">
 <div class="block">Run the Performance Benchmarking .</div>
 </td>
@@ -247,7 +247,7 @@ extends java.lang.Object</pre>
 <pre class="methodSignature">public static&nbsp;void&nbsp;run&#8203;(java.lang.String[]&nbsp;args,
                        java.lang.String&nbsp;packageName,
                        java.lang.String&nbsp;applicationName,
-                       <a href="../Logger.html" title="interface in io.sbk.api">Logger</a>&nbsp;outLogger)
+                       <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)
                 throws org.apache.commons.cli.ParseException,
                        java.lang.IllegalArgumentException,
                        java.io.IOException,
@@ -293,12 +293,12 @@ extends java.lang.Object</pre>
 <pre class="methodSignature">public static&nbsp;<a href="../Benchmark.html" title="interface in io.sbk.api">Benchmark</a>&nbsp;buildBenchmark&#8203;(java.lang.String[]&nbsp;args,
                                        java.lang.String&nbsp;packageName,
                                        java.lang.String&nbsp;applicationName,
-                                       <a href="../Logger.html" title="interface in io.sbk.api">Logger</a>&nbsp;outLogger)
+                                       <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)
                                 throws org.apache.commons.cli.ParseException,
                                        java.lang.IllegalArgumentException,
                                        java.io.IOException,
                                        java.lang.InstantiationException,
-                                       <a href="../HelpException.html" title="class in io.sbk.api">HelpException</a>,
+                                       <a href="../../exception/HelpException.html" title="class in io.sbk.exception">HelpException</a>,
                                        java.lang.ClassNotFoundException,
                                        java.lang.reflect.InvocationTargetException,
                                        java.lang.NoSuchMethodException,
@@ -316,7 +316,7 @@ extends java.lang.Object</pre>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>Benchmark interface</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../HelpException.html" title="class in io.sbk.api">HelpException</a></code> - if '-help' option is supplied.</dd>
+<dd><code><a href="../../exception/HelpException.html" title="class in io.sbk.exception">HelpException</a></code> - if '-help' option is supplied.</dd>
 <dd><code>org.apache.commons.cli.ParseException</code> - If an exception occurred while parsing command line arguments.</dd>
 <dd><code>java.lang.IllegalArgumentException</code> - If an exception occurred due to invalid arguments.</dd>
 <dd><code>java.io.IOException</code> - If an exception occurred due to write or read failures.</dd>

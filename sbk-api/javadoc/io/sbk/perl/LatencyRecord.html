@@ -135,7 +135,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd><code><a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecorder</a></code></dd>
 </dl>
 <hr>
-<pre>public class <span class="typeNameLabel">LatencyRecord</span>
+<pre>public abstract class <span class="typeNameLabel">LatencyRecord</span>
 extends java.lang.Object</pre>
 </li>
 </ul>
@@ -158,42 +158,42 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#higherLatencyDiscardRecords">higherLatencyDiscardRecords</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#invalidLatencyRecords">invalidLatencyRecords</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#lowerLatencyDiscardRecords">lowerLatencyDiscardRecords</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#maxLatency">maxLatency</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#totalBytes">totalBytes</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#totalLatency">totalLatency</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#totalRecords">totalRecords</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validLatencyRecords">validLatencyRecords</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -273,7 +273,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>totalRecords</h4>
-<pre>public&nbsp;long totalRecords</pre>
+<pre>protected&nbsp;long totalRecords</pre>
 </li>
 </ul>
 <a id="validLatencyRecords">
@@ -282,7 +282,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>validLatencyRecords</h4>
-<pre>public&nbsp;long validLatencyRecords</pre>
+<pre>protected&nbsp;long validLatencyRecords</pre>
 </li>
 </ul>
 <a id="lowerLatencyDiscardRecords">
@@ -291,7 +291,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>lowerLatencyDiscardRecords</h4>
-<pre>public&nbsp;long lowerLatencyDiscardRecords</pre>
+<pre>protected&nbsp;long lowerLatencyDiscardRecords</pre>
 </li>
 </ul>
 <a id="higherLatencyDiscardRecords">
@@ -300,7 +300,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>higherLatencyDiscardRecords</h4>
-<pre>public&nbsp;long higherLatencyDiscardRecords</pre>
+<pre>protected&nbsp;long higherLatencyDiscardRecords</pre>
 </li>
 </ul>
 <a id="invalidLatencyRecords">
@@ -309,7 +309,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>invalidLatencyRecords</h4>
-<pre>public&nbsp;long invalidLatencyRecords</pre>
+<pre>protected&nbsp;long invalidLatencyRecords</pre>
 </li>
 </ul>
 <a id="totalBytes">
@@ -318,7 +318,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>totalBytes</h4>
-<pre>public&nbsp;long totalBytes</pre>
+<pre>protected&nbsp;long totalBytes</pre>
 </li>
 </ul>
 <a id="totalLatency">
@@ -327,7 +327,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>totalLatency</h4>
-<pre>public&nbsp;long totalLatency</pre>
+<pre>protected&nbsp;long totalLatency</pre>
 </li>
 </ul>
 <a id="maxLatency">
@@ -336,7 +336,7 @@ extends java.lang.Object</pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>maxLatency</h4>
-<pre>public&nbsp;long maxLatency</pre>
+<pre>protected&nbsp;long maxLatency</pre>
 </li>
 </ul>
 </li>

@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -95,7 +95,7 @@ loadScripts(document, 'script');</script>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
@@ -154,13 +154,9 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt>All Implemented Interfaces:</dt>
 <dd><code><a href="../ReportLatencies.html" title="interface in io.sbk.perl">ReportLatencies</a></code>, <code><a href="../ReportLatency.html" title="interface in io.sbk.perl">ReportLatency</a></code></dd>
 </dl>
-<dl>
-<dt>Direct Known Subclasses:</dt>
-<dd><code><a href="CompositeHashMapLatencyRecorder.html" title="class in io.sbk.perl.impl">CompositeHashMapLatencyRecorder</a></code></dd>
-</dl>
 <hr>
 <pre>@NotThreadSafe
-public class <span class="typeNameLabel">HashMapLatencyRecorder</span>
+public final class <span class="typeNameLabel">HashMapLatencyRecorder</span>
 extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">LatencyRecordWindow</a></pre>
 <div class="block">class for Performance statistics.</div>
 </li>
@@ -176,45 +172,12 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <!--   -->
 </a>
 <h3>Field Summary</h3>
-<table class="memberSummary">
-<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colSecond" scope="col">Field</th>
-<th class="colLast" scope="col">Description</th>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>long</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hashMapBytesCount">hashMapBytesCount</a></span></code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#incBytes">incBytes</a></span></code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.util.HashMap&lt;java.lang.Long,&#8203;java.lang.Long&gt;</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#latencies">latencies</a></span></code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#maxHashMapSizeBytes">maxHashMapSizeBytes</a></span></code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#maxHashMapSizeMB">maxHashMapSizeMB</a></span></code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-</table>
 <ul class="blockList">
 <li class="blockList"><a id="fields.inherited.from.class.io.sbk.perl.LatencyWindow">
 <!--   -->
 </a>
 <h3>Fields inherited from class&nbsp;io.sbk.perl.<a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></h3>
-<code><a href="../LatencyWindow.html#percentiles">percentiles</a>, <a href="../LatencyWindow.html#startTime">startTime</a>, <a href="../LatencyWindow.html#time">time</a></code></li>
+<code><a href="../LatencyWindow.html#percentiles">percentiles</a>, <a href="../LatencyWindow.html#time">time</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="fields.inherited.from.class.io.sbk.perl.LatencyRecorder">
@@ -253,7 +216,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
                       long&nbsp;totalRecordsMax,
                       long&nbsp;bytesMax,
                       double[]&nbsp;percentiles,
-                      <a href="../Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                      <a href="../../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                       int&nbsp;maxHashMapSizeMB)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -284,13 +247,20 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isOverflow()">isOverflow</a></span>()</code></th>
+<td class="colFirst"><code>long</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMaxMemoryBytes()">getMaxMemoryBytes</a></span>()</code></th>
 <td class="colLast">
-<div class="block">is Overflow condition for this recorder.</div>
+<div class="block">Max memory Size in Bytes.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isFull()">isFull</a></span>()</code></th>
+<td class="colLast">
+<div class="block">is the latency storage full.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#recordLatency(long,int,int,long)">recordLatency</a></span>&#8203;(long&nbsp;startTime,
              int&nbsp;bytes,
@@ -300,7 +270,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <div class="block">Record the latency.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reportLatency(long,long)">reportLatency</a></span>&#8203;(long&nbsp;latency,
              long&nbsp;count)</code></th>
@@ -308,14 +278,14 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <div class="block">Report one latency .</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reportLatencyRecord(io.sbk.perl.LatencyRecord)">reportLatencyRecord</a></span>&#8203;(<a href="../LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord</a>&nbsp;record)</code></th>
 <td class="colLast">
 <div class="block">Report a latency Record.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reset(long)">reset</a></span>&#8203;(long&nbsp;startTime)</code></th>
 <td class="colLast">
@@ -328,14 +298,14 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.perl.<a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></h3>
-<code><a href="../LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="../LatencyWindow.html#getSLC(io.sbk.perl.LatencyPercentiles,int%5B%5D)">getSLC</a>, <a href="../LatencyWindow.html#print(long,io.sbk.perl.Print,io.sbk.perl.ReportLatencies)">print</a></code></li>
+<code><a href="../LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="../LatencyWindow.html#print(long,io.sbk.perl.Print,io.sbk.perl.ReportLatencies)">print</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.LatencyRecorder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.perl.<a href="../LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecorder</a></h3>
-<code><a href="../LatencyRecorder.html#record(long,long,long)">record</a>, <a href="../LatencyRecorder.html#updateRecord(io.sbk.perl.LatencyRecord)">updateRecord</a></code></li>
+<code><a href="../LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="../LatencyRecorder.html#record(long,long,long)">record</a>, <a href="../LatencyRecorder.html#update(long,long,long,long,long,long,long,long)">update</a>, <a href="../LatencyRecorder.html#update(io.sbk.perl.LatencyRecord)">update</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.LatencyRecord">
@@ -360,61 +330,6 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
-<!-- ============ FIELD DETAIL =========== -->
-<section role="region">
-<ul class="blockList">
-<li class="blockList"><a id="field.detail">
-<!--   -->
-</a>
-<h3>Field Detail</h3>
-<a id="latencies">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>latencies</h4>
-<pre>public final&nbsp;java.util.HashMap&lt;java.lang.Long,&#8203;java.lang.Long&gt; latencies</pre>
-</li>
-</ul>
-<a id="maxHashMapSizeMB">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>maxHashMapSizeMB</h4>
-<pre>public final&nbsp;int maxHashMapSizeMB</pre>
-</li>
-</ul>
-<a id="maxHashMapSizeBytes">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>maxHashMapSizeBytes</h4>
-<pre>public final&nbsp;long maxHashMapSizeBytes</pre>
-</li>
-</ul>
-<a id="incBytes">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>incBytes</h4>
-<pre>public final&nbsp;int incBytes</pre>
-</li>
-</ul>
-<a id="hashMapBytesCount">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>hashMapBytesCount</h4>
-<pre>public&nbsp;long hashMapBytesCount</pre>
-</li>
-</ul>
-</li>
-</ul>
-</section>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <section role="region">
 <ul class="blockList">
@@ -434,7 +349,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
                               long&nbsp;totalRecordsMax,
                               long&nbsp;bytesMax,
                               double[]&nbsp;percentiles,
-                              <a href="../Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                              <a href="../../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                               int&nbsp;maxHashMapSizeMB)</pre>
 </li>
 </ul>
@@ -465,20 +380,37 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 </dl>
 </li>
 </ul>
-<a id="isOverflow()">
+<a id="isFull()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>isOverflow</h4>
-<pre class="methodSignature">public final&nbsp;boolean&nbsp;isOverflow()</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../LatencyRecorder.html#isOverflow()">LatencyRecorder</a></code></span></div>
-<div class="block">is Overflow condition for this recorder.</div>
+<h4>isFull</h4>
+<pre class="methodSignature">public final&nbsp;boolean&nbsp;isFull()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../LatencyWindow.html#isFull()">LatencyWindow</a></code></span></div>
+<div class="block">is the latency storage full.</div>
 <dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../LatencyRecorder.html#isOverflow()">isOverflow</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecorder</a></code></dd>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../LatencyWindow.html#isFull()">isFull</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>isOverflow condition occurred or not</dd>
+<dd>indicate the latency storage is full or not</dd>
+</dl>
+</li>
+</ul>
+<a id="getMaxMemoryBytes()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMaxMemoryBytes</h4>
+<pre class="methodSignature">public final&nbsp;long&nbsp;getMaxMemoryBytes()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../LatencyWindow.html#getMaxMemoryBytes()">LatencyWindow</a></code></span></div>
+<div class="block">Max memory Size in Bytes.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../LatencyWindow.html#getMaxMemoryBytes()">getMaxMemoryBytes</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Maximum window memory size in bytes</dd>
 </dl>
 </li>
 </ul>
@@ -611,7 +543,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>

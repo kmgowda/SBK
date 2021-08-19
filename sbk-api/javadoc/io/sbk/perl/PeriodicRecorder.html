@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6};
+var data = {"i0":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -123,11 +123,16 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <ul class="blockList">
 <li class="blockList">
 <dl>
+<dt>All Superinterfaces:</dt>
+<dd><code><a href="PeriodicWindow.html" title="interface in io.sbk.perl">PeriodicWindow</a></code>, <code><a href="TotalPeriodicWindow.html" title="interface in io.sbk.perl">TotalPeriodicWindow</a></code></dd>
+</dl>
+<dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><code><a href="impl/CompositeCSVLatencyRecorder.html" title="class in io.sbk.perl.impl">CompositeCSVLatencyRecorder</a></code>, <code><a href="impl/CompositeHashMapLatencyRecorder.html" title="class in io.sbk.perl.impl">CompositeHashMapLatencyRecorder</a></code></dd>
+<dd><code><a href="impl/TotalWindowLatencyPeriodicRecorder.html" title="class in io.sbk.perl.impl">TotalWindowLatencyPeriodicRecorder</a></code></dd>
 </dl>
 <hr>
-<pre>public interface <span class="typeNameLabel">PeriodicRecorder</span></pre>
+<pre>public interface <span class="typeNameLabel">PeriodicRecorder</span>
+extends <a href="TotalPeriodicWindow.html" title="interface in io.sbk.perl">TotalPeriodicWindow</a></pre>
 <div class="block">Interface for recording latencies.</div>
 </li>
 </ul>
@@ -150,13 +155,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>long</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#elapsedMilliSecondsWindow(long)">elapsedMilliSecondsWindow</a></span>&#8203;(long&nbsp;currentTime)</code></th>
-<td class="colLast">
-<div class="block">Get the current time duration of this window starting from startWindow.</div>
-</td>
-</tr>
-<tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#record(long,long,int,int)">record</a></span>&#8203;(long&nbsp;startTime,
       long&nbsp;endTime,
@@ -166,35 +164,21 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Record the Event/record.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#start(long)">start</a></span>&#8203;(long&nbsp;startTime)</code></th>
-<td class="colLast">
-<div class="block">Start the Recorder.</div>
-</td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startWindow(long)">startWindow</a></span>&#8203;(long&nbsp;startTime)</code></th>
-<td class="colLast">
-<div class="block">Start the Recording window.</div>
-</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#stop(long)">stop</a></span>&#8203;(long&nbsp;endTime)</code></th>
-<td class="colLast">
-<div class="block">Stop the Recorder.</div>
-</td>
-</tr>
-<tr id="i5" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#stopWindow(long)">stopWindow</a></span>&#8203;(long&nbsp;currentTime)</code></th>
-<td class="colLast">
-<div class="block">Stop the Recording window.</div>
-</td>
-</tr>
 </table>
+<ul class="blockList">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.PeriodicWindow">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;io.sbk.perl.<a href="PeriodicWindow.html" title="interface in io.sbk.perl">PeriodicWindow</a></h3>
+<code><a href="PeriodicWindow.html#elapsedMilliSecondsWindow(long)">elapsedMilliSecondsWindow</a>, <a href="PeriodicWindow.html#startWindow(long)">startWindow</a>, <a href="PeriodicWindow.html#stopWindow(long)">stopWindow</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.TotalPeriodicWindow">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;io.sbk.perl.<a href="TotalPeriodicWindow.html" title="interface in io.sbk.perl">TotalPeriodicWindow</a></h3>
+<code><a href="TotalPeriodicWindow.html#start(long)">start</a>, <a href="TotalPeriodicWindow.html#stop(long)">stop</a></code></li>
+</ul>
 </li>
 </ul>
 </section>
@@ -211,54 +195,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a id="start(long)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>start</h4>
-<pre class="methodSignature">void&nbsp;start&#8203;(long&nbsp;startTime)</pre>
-<div class="block">Start the Recorder.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>startTime</code> - starting time.</dd>
-</dl>
-</li>
-</ul>
-<a id="startWindow(long)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>startWindow</h4>
-<pre class="methodSignature">void&nbsp;startWindow&#8203;(long&nbsp;startTime)</pre>
-<div class="block">Start the Recording window.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>startTime</code> - starting time.</dd>
-</dl>
-</li>
-</ul>
-<a id="elapsedMilliSecondsWindow(long)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>elapsedMilliSecondsWindow</h4>
-<pre class="methodSignature">long&nbsp;elapsedMilliSecondsWindow&#8203;(long&nbsp;currentTime)</pre>
-<div class="block">Get the current time duration of this window starting from startWindow.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>currentTime</code> - current time.</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>elapsed Time in Milliseconds from the startTime.</dd>
-</dl>
-</li>
-</ul>
 <a id="record(long,long,int,int)">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>record</h4>
 <pre class="methodSignature">void&nbsp;record&#8203;(long&nbsp;startTime,
@@ -272,35 +212,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd><code>endTime</code> - end time</dd>
 <dd><code>bytes</code> - number of bytes</dd>
 <dd><code>events</code> - number of events (records)</dd>
-</dl>
-</li>
-</ul>
-<a id="stopWindow(long)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>stopWindow</h4>
-<pre class="methodSignature">void&nbsp;stopWindow&#8203;(long&nbsp;currentTime)</pre>
-<div class="block">Stop the Recording window.
- Results from startWindow to this method are printed /flushed.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>currentTime</code> - current time.</dd>
-</dl>
-</li>
-</ul>
-<a id="stop(long)">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>stop</h4>
-<pre class="methodSignature">void&nbsp;stop&#8203;(long&nbsp;endTime)</pre>
-<div class="block">Stop the Recorder.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>endTime</code> - current time.</dd>
 </dl>
 </li>
 </ul>

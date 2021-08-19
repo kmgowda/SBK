@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -165,27 +165,27 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#highLatency">highLatency</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#lowLatency">lowLatency</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#totalBytesMax">totalBytesMax</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#totalLatencyMax">totalLatencyMax</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>long</code></td>
+<td class="colFirst"><code>protected long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#totalRecordsMax">totalRecordsMax</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -257,7 +257,21 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#updateRecord(io.sbk.perl.LatencyRecord)">updateRecord</a></span>&#8203;(<a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord</a>&nbsp;record)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#update(long,long,long,long,long,long,long,long)">update</a></span>&#8203;(long&nbsp;totalRecords,
+      long&nbsp;totalLatency,
+      long&nbsp;totalBytes,
+      long&nbsp;invalidLatencyRecords,
+      long&nbsp;lowerLatencyDiscardRecords,
+      long&nbsp;higherLatencyDiscardRecords,
+      long&nbsp;validLatencyRecords,
+      long&nbsp;maxLatency)</code></th>
+<td class="colLast">
+<div class="block">Add the record.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#update(io.sbk.perl.LatencyRecord)">update</a></span>&#8203;(<a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord</a>&nbsp;record)</code></th>
 <td class="colLast">
 <div class="block">Add the record.</div>
 </td>
@@ -299,7 +313,7 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 <ul class="blockList">
 <li class="blockList">
 <h4>lowLatency</h4>
-<pre>public final&nbsp;long lowLatency</pre>
+<pre>protected final&nbsp;long lowLatency</pre>
 </li>
 </ul>
 <a id="highLatency">
@@ -308,7 +322,7 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 <ul class="blockList">
 <li class="blockList">
 <h4>highLatency</h4>
-<pre>public final&nbsp;long highLatency</pre>
+<pre>protected final&nbsp;long highLatency</pre>
 </li>
 </ul>
 <a id="totalLatencyMax">
@@ -317,7 +331,7 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 <ul class="blockList">
 <li class="blockList">
 <h4>totalLatencyMax</h4>
-<pre>public final&nbsp;long totalLatencyMax</pre>
+<pre>protected final&nbsp;long totalLatencyMax</pre>
 </li>
 </ul>
 <a id="totalRecordsMax">
@@ -326,7 +340,7 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 <ul class="blockList">
 <li class="blockList">
 <h4>totalRecordsMax</h4>
-<pre>public final&nbsp;long totalRecordsMax</pre>
+<pre>protected final&nbsp;long totalRecordsMax</pre>
 </li>
 </ul>
 <a id="totalBytesMax">
@@ -335,7 +349,7 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 <ul class="blockListLast">
 <li class="blockList">
 <h4>totalBytesMax</h4>
-<pre>public final&nbsp;long totalBytesMax</pre>
+<pre>protected final&nbsp;long totalBytesMax</pre>
 </li>
 </ul>
 </li>
@@ -377,7 +391,7 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 <ul class="blockList">
 <li class="blockList">
 <h4>isOverflow</h4>
-<pre class="methodSignature">public&nbsp;boolean&nbsp;isOverflow()</pre>
+<pre class="methodSignature">public final&nbsp;boolean&nbsp;isOverflow()</pre>
 <div class="block">is Overflow condition for this recorder.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -385,13 +399,41 @@ extends <a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord<
 </dl>
 </li>
 </ul>
-<a id="updateRecord(io.sbk.perl.LatencyRecord)">
+<a id="update(long,long,long,long,long,long,long,long)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>updateRecord</h4>
-<pre class="methodSignature">public final&nbsp;void&nbsp;updateRecord&#8203;(<a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord</a>&nbsp;record)</pre>
+<h4>update</h4>
+<pre class="methodSignature">public final&nbsp;void&nbsp;update&#8203;(long&nbsp;totalRecords,
+                         long&nbsp;totalLatency,
+                         long&nbsp;totalBytes,
+                         long&nbsp;invalidLatencyRecords,
+                         long&nbsp;lowerLatencyDiscardRecords,
+                         long&nbsp;higherLatencyDiscardRecords,
+                         long&nbsp;validLatencyRecords,
+                         long&nbsp;maxLatency)</pre>
+<div class="block">Add the record.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>totalRecords</code> - total records</dd>
+<dd><code>totalLatency</code> - total latency</dd>
+<dd><code>totalBytes</code> - total bytes</dd>
+<dd><code>invalidLatencyRecords</code> - invalid latency records</dd>
+<dd><code>lowerLatencyDiscardRecords</code> - lower discarded latency records</dd>
+<dd><code>higherLatencyDiscardRecords</code> - higher discarded latency records</dd>
+<dd><code>validLatencyRecords</code> - valid latency records</dd>
+<dd><code>maxLatency</code> - Max latency</dd>
+</dl>
+</li>
+</ul>
+<a id="update(io.sbk.perl.LatencyRecord)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>update</h4>
+<pre class="methodSignature">public final&nbsp;void&nbsp;update&#8203;(<a href="LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord</a>&nbsp;record)</pre>
 <div class="block">Add the record.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
