@@ -199,8 +199,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#initialize(io.sbk.api.Worker,long,long,io.sbk.data.DataType,io.sbk.time.Time,io.sbk.api.Callback)">initialize</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
           long&nbsp;secondsToRun,
           long&nbsp;recordsCount,
-          <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-          <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+          <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+          <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
           <a href="Callback.html" title="interface in io.sbk.api">Callback</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;callback)</code></th>
 <td class="colLast">
 <div class="block">Default Implementation to initialize the callback reader.</div>
@@ -218,8 +218,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsReader(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time)">RecordsReader</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
              long&nbsp;recordsCount,
-             <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-             <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
+             <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+             <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></th>
 <td class="colLast">
 <div class="block">Implementation for benchmarking reader by reading given number of records.</div>
 </td>
@@ -228,8 +228,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsReaderRateControl(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time,io.sbk.api.RateController)">RecordsReaderRateControl</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                         long&nbsp;recordsCount,
-                        <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                        <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                        <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                        <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                         <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)</code></th>
 <td class="colLast">
 <div class="block">Benchmarking reader by reading given number of records with Rate controlled.</div>
@@ -239,8 +239,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsReaderRW(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time)">RecordsReaderRW</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                long&nbsp;recordsCount,
-               <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-               <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
+               <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+               <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></th>
 <td class="colLast">
 <div class="block">Default implementation for benchmarking reader by reading given number of records.</div>
 </td>
@@ -249,8 +249,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsReaderRWRateControl(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time,io.sbk.api.RateController)">RecordsReaderRWRateControl</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                           long&nbsp;recordsCount,
-                          <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                          <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                          <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                          <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                           <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)</code></th>
 <td class="colLast">
 <div class="block">Benchmarking reader by reading given number of records with Rate controlled.</div>
@@ -260,8 +260,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsTimeReader(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time)">RecordsTimeReader</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                  long&nbsp;secondsToRun,
-                 <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                 <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
+                 <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                 <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></th>
 <td class="colLast">
 <div class="block">Default implementation for benchmarking reader by reading events/records for specific time duration.</div>
 </td>
@@ -270,8 +270,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsTimeReaderRateControl(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time,io.sbk.api.RateController)">RecordsTimeReaderRateControl</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                             long&nbsp;secondsToRun,
-                            <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                            <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                            <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                            <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                             <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)</code></th>
 <td class="colLast">
 <div class="block">Benchmarking reader by reading events/records for specific time duration with Rate controlled.</div>
@@ -281,8 +281,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsTimeReaderRW(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time)">RecordsTimeReaderRW</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                    long&nbsp;secondsToRun,
-                   <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                   <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
+                   <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                   <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></th>
 <td class="colLast">
 <div class="block">Default implementation for benchmarking reader by reading events/records for specific time duration.</div>
 </td>
@@ -291,8 +291,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#RecordsTimeReaderRWRateControl(io.sbk.api.Worker,long,io.sbk.data.DataType,io.sbk.time.Time,io.sbk.api.RateController)">RecordsTimeReaderRWRateControl</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                               long&nbsp;secondsToRun,
-                              <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                              <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                              <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                              <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                               <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)</code></th>
 <td class="colLast">
 <div class="block">Benchmarking reader by reading events/records for specific time duration with Rate controlled.</div>
@@ -303,8 +303,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#run(io.sbk.api.Worker,long,long,io.sbk.data.DataType,io.sbk.time.Time,io.sbk.api.Callback)">run</a></span>&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
    long&nbsp;secondsToRun,
    long&nbsp;recordsCount,
-   <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-   <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+   <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+   <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
    <a href="Callback.html" title="interface in io.sbk.api">Callback</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;callback)</code></th>
 <td class="colLast">
 <div class="block">Default Implementation run the Benchmark.</div>
@@ -445,8 +445,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <pre class="methodSignature">public&nbsp;void&nbsp;initialize&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                        long&nbsp;secondsToRun,
                        long&nbsp;recordsCount,
-                       <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                       <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                       <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                       <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                        <a href="Callback.html" title="interface in io.sbk.api">Callback</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;callback)
                 throws java.io.IOException</pre>
 <div class="block">Default Implementation to initialize the callback reader.</div>
@@ -497,8 +497,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <pre class="methodSignature">public&nbsp;void&nbsp;run&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                 long&nbsp;secondsToRun,
                 long&nbsp;recordsCount,
-                <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                 <a href="Callback.html" title="interface in io.sbk.api">Callback</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;callback)
          throws java.io.IOException</pre>
 <div class="block">Default Implementation run the Benchmark.</div>
@@ -523,8 +523,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsReader</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsReader&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                           long&nbsp;recordsCount,
-                          <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                          <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)
+                          <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                          <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)
                    throws java.io.EOFException,
                           java.io.IOException</pre>
 <div class="block">Implementation for benchmarking reader by reading given number of records.</div>
@@ -550,8 +550,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsReaderRW</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsReaderRW&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                             long&nbsp;recordsCount,
-                            <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                            <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)
+                            <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                            <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)
                      throws java.io.EOFException,
                             java.io.IOException</pre>
 <div class="block">Default implementation for benchmarking reader by reading given number of records.</div>
@@ -577,8 +577,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsTimeReader</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsTimeReader&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                               long&nbsp;secondsToRun,
-                              <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                              <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)
+                              <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                              <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)
                        throws java.io.EOFException,
                               java.io.IOException</pre>
 <div class="block">Default implementation for benchmarking reader by reading events/records for specific time duration.</div>
@@ -604,8 +604,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsTimeReaderRW</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsTimeReaderRW&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                                 long&nbsp;secondsToRun,
-                                <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                                <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)
+                                <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                                <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)
                          throws java.io.EOFException,
                                 java.io.IOException</pre>
 <div class="block">Default implementation for benchmarking reader by reading events/records for specific time duration.</div>
@@ -631,8 +631,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsReaderRateControl</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsReaderRateControl&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                                      long&nbsp;recordsCount,
-                                     <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                                     <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                                     <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                                     <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                                      <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)
                               throws java.io.EOFException,
                                      java.io.IOException</pre>
@@ -660,8 +660,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsReaderRWRateControl</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsReaderRWRateControl&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                                        long&nbsp;recordsCount,
-                                       <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                                       <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                                       <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                                       <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                                        <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)
                                 throws java.io.EOFException,
                                        java.io.IOException</pre>
@@ -690,8 +690,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsTimeReaderRateControl</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsTimeReaderRateControl&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                                          long&nbsp;secondsToRun,
-                                         <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                                         <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                                         <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                                         <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                                          <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)
                                   throws java.io.EOFException,
                                          java.io.IOException</pre>
@@ -719,8 +719,8 @@ implements <a href="DataReader.html" title="interface in io.sbk.api">DataReader<
 <h4>RecordsTimeReaderRWRateControl</h4>
 <pre class="methodSignature">public&nbsp;void&nbsp;RecordsTimeReaderRWRateControl&#8203;(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;reader,
                                            long&nbsp;secondsToRun,
-                                           <a href="DataType.html" title="interface in io.sbk.api">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
-                                           <a href="../perl/Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time,
+                                           <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="AbstractCallbackReader.html" title="type parameter in AbstractCallbackReader">T</a>&gt;&nbsp;dType,
+                                           <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time,
                                            <a href="RateController.html" title="interface in io.sbk.api">RateController</a>&nbsp;rController)
                                     throws java.io.EOFException,
                                            java.io.IOException</pre>

@@ -105,21 +105,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <ul>
 <li class="circle">java.lang.Object
 <ul>
-<li class="circle">io.sbk.logger.impl.MetricsLogger (implements io.sbk.perl.Print)
-<ul>
-<li class="circle">io.sbk.logger.impl.RWMetricsLogger (implements io.sbk.logger.CountRW)
-<ul>
-<li class="circle">io.sbk.logger.impl.RWMetricsPrometheusServer
-<ul>
-<li class="circle">io.sbk.ram.impl.<a href="RamMetricsPrometheusServer.html" title="class in io.sbk.ram.impl"><span class="typeNameLink">RamMetricsPrometheusServer</span></a> (implements io.sbk.ram.<a href="../CountConnections.html" title="interface in io.sbk.ram">CountConnections</a>)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="circle">io.sbk.ram.impl.<a href="RamBenchmark.html" title="class in io.sbk.ram.impl"><span class="typeNameLink">RamBenchmark</span></a> (implements io.sbk.api.Benchmark, io.sbk.ram.<a href="../RamRegistry.html" title="interface in io.sbk.ram">RamRegistry</a>)</li>
-<li class="circle">io.sbk.options.impl.SbkOptions (implements io.sbk.options.InputOptions)
+<li class="circle">io.sbk.options.impl.SbkInputOptions (implements io.sbk.options.InputOptions)
 <ul>
 <li class="circle">io.sbk.ram.impl.<a href="SbkRamParameters.html" title="class in io.sbk.ram.impl"><span class="typeNameLink">SbkRamParameters</span></a> (implements io.sbk.ram.<a href="../RamParameterOptions.html" title="interface in io.sbk.ram">RamParameterOptions</a>)</li>
 </ul>
@@ -131,17 +118,9 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="circle">io.sbk.ram.impl.<a href="SbkGrpcService.html" title="class in io.sbk.ram.impl"><span class="typeNameLink">SbkGrpcService</span></a></li>
 </ul>
 </li>
-<li class="circle">io.sbk.logger.impl.SystemLogger (implements io.sbk.logger.Logger)
+<li class="circle">io.sbk.perl.impl.TotalLatencyRecordWindow (implements io.sbk.perl.TotalPeriodicWindow)
 <ul>
-<li class="circle">io.sbk.logger.impl.SbkCSVLogger
-<ul>
-<li class="circle">io.sbk.logger.impl.SbkPrometheusLogger
-<ul>
-<li class="circle">io.sbk.ram.impl.<a href="SbkRamPrometheusLogger.html" title="class in io.sbk.ram.impl"><span class="typeNameLink">SbkRamPrometheusLogger</span></a> (implements io.sbk.ram.<a href="../RamLogger.html" title="interface in io.sbk.ram">RamLogger</a>, io.sbk.ram.<a href="../SetRW.html" title="interface in io.sbk.ram">SetRW</a>)</li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="circle">io.sbk.ram.impl.<a href="RamTotalWindowLatencyPeriodicRecorder.html" title="class in io.sbk.ram.impl"><span class="typeNameLink">RamTotalWindowLatencyPeriodicRecorder</span></a> (implements io.sbk.ram.<a href="../RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a>, io.sbk.perl.ReportLatencies)</li>
 </ul>
 </li>
 </ul>

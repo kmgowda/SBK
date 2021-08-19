@@ -105,7 +105,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <ul>
 <li class="circle">java.lang.Object
 <ul>
-<li class="circle">io.sbk.gem.<a href="GemConfig.html" title="class in io.sbk.gem"><span class="typeNameLink">GemConfig</span></a></li>
 <li class="circle">io.sbk.gem.<a href="RemoteResponse.html" title="class in io.sbk.gem"><span class="typeNameLink">RemoteResponse</span></a></li>
 <li class="circle">io.sbk.gem.<a href="SshConnection.html" title="class in io.sbk.gem"><span class="typeNameLink">SshConnection</span></a></li>
 <li class="circle">io.sbk.gem.<a href="SshUtils.html" title="class in io.sbk.gem"><span class="typeNameLink">SshUtils</span></a></li>
@@ -116,19 +115,9 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <section role="region">
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li class="circle">io.sbk.logger.CountConnections
-<ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.PerformanceLogger, io.sbk.perl.ReportLatencies, io.sbk.logger.SetRW)
-<ul>
-<li class="circle">io.sbk.gem.<a href="GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="circle">io.sbk.gem.<a href="GemBenchmark.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemBenchmark</span></a></li>
-<li class="circle">io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem"><span class="typeNameLink">GetArguments</span></a>
+<li class="circle">io.sbk.options.<a href="../options/GetArguments.html" title="interface in io.sbk.options"><span class="typeNameLink">GetArguments</span></a>
 <ul>
-<li class="circle">io.sbk.gem.<a href="GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.logger.RamLogger)</li>
 <li class="circle">io.sbk.gem.<a href="GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.gem.<a href="GemParameters.html" title="interface in io.sbk.gem">GemParameters</a>, io.sbk.api.ParameterOptions)</li>
 </ul>
 </li>
@@ -136,7 +125,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <ul>
 <li class="circle">io.sbk.api.ParameterOptions (also extends io.sbk.api.Parameters)
 <ul>
-<li class="circle">io.sbk.gem.<a href="GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.gem.<a href="GemParameters.html" title="interface in io.sbk.gem">GemParameters</a>, io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
+<li class="circle">io.sbk.gem.<a href="GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.gem.<a href="GemParameters.html" title="interface in io.sbk.gem">GemParameters</a>, io.sbk.options.<a href="../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>
 </li>
 </ul>
@@ -145,43 +134,12 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <ul>
 <li class="circle">io.sbk.gem.<a href="GemParameters.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameters</span></a>
 <ul>
-<li class="circle">io.sbk.gem.<a href="GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>, io.sbk.api.ParameterOptions)</li>
+<li class="circle">io.sbk.gem.<a href="GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.options.<a href="../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>, io.sbk.api.ParameterOptions)</li>
 </ul>
 </li>
 <li class="circle">io.sbk.api.ParameterOptions (also extends io.sbk.options.InputOptions)
 <ul>
-<li class="circle">io.sbk.gem.<a href="GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.gem.<a href="GemParameters.html" title="interface in io.sbk.gem">GemParameters</a>, io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="circle">io.sbk.perl.Print
-<ul>
-<li class="circle">io.sbk.logger.PerformanceLogger
-<ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.perl.ReportLatencies, io.sbk.logger.SetRW)
-<ul>
-<li class="circle">io.sbk.gem.<a href="GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="circle">io.sbk.perl.ReportLatencies
-<ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.logger.SetRW)
-<ul>
-<li class="circle">io.sbk.gem.<a href="GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="circle">io.sbk.logger.SetRW
-<ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.perl.ReportLatencies)
-<ul>
-<li class="circle">io.sbk.gem.<a href="GemLogger.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemLogger</span></a> (also extends io.sbk.gem.<a href="GetArguments.html" title="interface in io.sbk.gem">GetArguments</a>)</li>
+<li class="circle">io.sbk.gem.<a href="GemParameterOptions.html" title="interface in io.sbk.gem"><span class="typeNameLink">GemParameterOptions</span></a> (also extends io.sbk.gem.<a href="GemParameters.html" title="interface in io.sbk.gem">GemParameters</a>, io.sbk.options.<a href="../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>
 </li>
 </ul>

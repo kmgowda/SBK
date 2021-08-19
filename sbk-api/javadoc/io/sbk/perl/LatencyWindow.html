@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":6,"i1":10,"i2":10,"i3":10,"i4":10};
+var data = {"i0":6,"i1":10,"i2":6,"i3":6,"i4":10,"i5":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -168,17 +168,12 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code><a href="LatencyPercentiles.html" title="class in io.sbk.perl">LatencyPercentiles</a></code></td>
+<td class="colFirst"><code>protected <a href="LatencyPercentiles.html" title="class in io.sbk.perl">LatencyPercentiles</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#percentiles">percentiles</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>long</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startTime">startTime</a></span></code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code><a href="Time.html" title="interface in io.sbk.perl">Time</a></code></td>
+<td class="colFirst"><code>protected <a href="../time/Time.html" title="interface in io.sbk.time">Time</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#time">time</a></span></code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -220,7 +215,7 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
              long&nbsp;totalRecordsMax,
              long&nbsp;bytesMax,
              double[]&nbsp;percentilesFractions,
-             <a href="Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
+             <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 </table>
@@ -257,12 +252,20 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSLC(io.sbk.perl.LatencyPercentiles,int%5B%5D)">getSLC</a></span>&#8203;(<a href="LatencyPercentiles.html" title="class in io.sbk.perl">LatencyPercentiles</a>&nbsp;percentiles,
-      int[]&nbsp;slc)</code></th>
-<td class="colLast">&nbsp;</td>
+<td class="colFirst"><code>abstract long</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMaxMemoryBytes()">getMaxMemoryBytes</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Max memory Size in Bytes.</div>
+</td>
 </tr>
 <tr id="i3" class="rowColor">
+<td class="colFirst"><code>abstract boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isFull()">isFull</a></span>()</code></th>
+<td class="colLast">
+<div class="block">is the latency storage full.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(long,io.sbk.perl.Print,io.sbk.perl.ReportLatencies)">print</a></span>&#8203;(long&nbsp;endTime,
      <a href="Print.html" title="interface in io.sbk.perl">Print</a>&nbsp;logger,
@@ -271,7 +274,7 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
 <div class="block">Print the window statistics.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reset(long)">reset</a></span>&#8203;(long&nbsp;startTime)</code></th>
 <td class="colLast">
@@ -284,7 +287,7 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.perl.<a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecorder</a></h3>
-<code><a href="LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="LatencyRecorder.html#record(long,long,long)">record</a>, <a href="LatencyRecorder.html#updateRecord(io.sbk.perl.LatencyRecord)">updateRecord</a></code></li>
+<code><a href="LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="LatencyRecorder.html#record(long,long,long)">record</a>, <a href="LatencyRecorder.html#update(long,long,long,long,long,long,long,long)">update</a>, <a href="LatencyRecorder.html#update(io.sbk.perl.LatencyRecord)">update</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.LatencyRecord">
@@ -322,25 +325,16 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
 <ul class="blockList">
 <li class="blockList">
 <h4>percentiles</h4>
-<pre>public final&nbsp;<a href="LatencyPercentiles.html" title="class in io.sbk.perl">LatencyPercentiles</a> percentiles</pre>
+<pre>protected final&nbsp;<a href="LatencyPercentiles.html" title="class in io.sbk.perl">LatencyPercentiles</a> percentiles</pre>
 </li>
 </ul>
 <a id="time">
 <!--   -->
 </a>
-<ul class="blockList">
-<li class="blockList">
-<h4>time</h4>
-<pre>public final&nbsp;<a href="Time.html" title="interface in io.sbk.perl">Time</a> time</pre>
-</li>
-</ul>
-<a id="startTime">
-<!--   -->
-</a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>startTime</h4>
-<pre>public&nbsp;long startTime</pre>
+<h4>time</h4>
+<pre>protected final&nbsp;<a href="../time/Time.html" title="interface in io.sbk.time">Time</a> time</pre>
 </li>
 </ul>
 </li>
@@ -365,7 +359,7 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
                      long&nbsp;totalRecordsMax,
                      long&nbsp;bytesMax,
                      double[]&nbsp;percentilesFractions,
-                     <a href="Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</pre>
+                     <a href="../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</pre>
 </li>
 </ul>
 </li>
@@ -426,20 +420,10 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
 </dl>
 </li>
 </ul>
-<a id="getSLC(io.sbk.perl.LatencyPercentiles,int[])">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getSLC</h4>
-<pre class="methodSignature">public final&nbsp;void&nbsp;getSLC&#8203;(<a href="LatencyPercentiles.html" title="class in io.sbk.perl">LatencyPercentiles</a>&nbsp;percentiles,
-                         int[]&nbsp;slc)</pre>
-</li>
-</ul>
 <a id="copyPercentiles(io.sbk.perl.LatencyPercentiles,io.sbk.perl.ReportLatencies)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>copyPercentiles</h4>
 <pre class="methodSignature">public abstract&nbsp;void&nbsp;copyPercentiles&#8203;(<a href="LatencyPercentiles.html" title="class in io.sbk.perl">LatencyPercentiles</a>&nbsp;percentiles,
@@ -449,6 +433,34 @@ extends <a href="LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecor
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>percentiles</code> - Copy Percentiles</dd>
 <dd><code>reportLatencies</code> - Copy Latency records.</dd>
+</dl>
+</li>
+</ul>
+<a id="isFull()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isFull</h4>
+<pre class="methodSignature">public abstract&nbsp;boolean&nbsp;isFull()</pre>
+<div class="block">is the latency storage full.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>indicate the latency storage is full or not</dd>
+</dl>
+</li>
+</ul>
+<a id="getMaxMemoryBytes()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getMaxMemoryBytes</h4>
+<pre class="methodSignature">public abstract&nbsp;long&nbsp;getMaxMemoryBytes()</pre>
+<div class="block">Max memory Size in Bytes.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Maximum window memory size in bytes</dd>
 </dl>
 </li>
 </ul>

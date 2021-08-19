@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -156,7 +156,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dl>
 <hr>
 <pre>@NotThreadSafe
-public class <span class="typeNameLabel">ArrayLatencyRecorder</span>
+public final class <span class="typeNameLabel">ArrayLatencyRecorder</span>
 extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">LatencyRecordWindow</a></pre>
 <div class="block">class for Performance statistics.</div>
 </li>
@@ -177,7 +177,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <!--   -->
 </a>
 <h3>Fields inherited from class&nbsp;io.sbk.perl.<a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></h3>
-<code><a href="../LatencyWindow.html#percentiles">percentiles</a>, <a href="../LatencyWindow.html#startTime">startTime</a>, <a href="../LatencyWindow.html#time">time</a></code></li>
+<code><a href="../LatencyWindow.html#percentiles">percentiles</a>, <a href="../LatencyWindow.html#time">time</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="fields.inherited.from.class.io.sbk.perl.LatencyRecorder">
@@ -216,7 +216,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
                     long&nbsp;totalRecordsMax,
                     long&nbsp;bytesMax,
                     double[]&nbsp;percentiles,
-                    <a href="../Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</code></th>
+                    <a href="../../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 </table>
@@ -246,6 +246,20 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>long</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMaxMemoryBytes()">getMaxMemoryBytes</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Max memory Size in Bytes.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isFull()">isFull</a></span>()</code></th>
+<td class="colLast">
+<div class="block">is the latency storage full.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#recordLatency(long,int,int,long)">recordLatency</a></span>&#8203;(long&nbsp;startTime,
              int&nbsp;bytes,
@@ -255,7 +269,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <div class="block">Record the latency.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reportLatency(long,long)">reportLatency</a></span>&#8203;(long&nbsp;latency,
              long&nbsp;count)</code></th>
@@ -263,14 +277,14 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <div class="block">Report one latency .</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reportLatencyRecord(io.sbk.perl.LatencyRecord)">reportLatencyRecord</a></span>&#8203;(<a href="../LatencyRecord.html" title="class in io.sbk.perl">LatencyRecord</a>&nbsp;record)</code></th>
 <td class="colLast">
 <div class="block">Report a latency Record.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reset(long)">reset</a></span>&#8203;(long&nbsp;startTime)</code></th>
 <td class="colLast">
@@ -283,14 +297,14 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.perl.<a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></h3>
-<code><a href="../LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="../LatencyWindow.html#getSLC(io.sbk.perl.LatencyPercentiles,int%5B%5D)">getSLC</a>, <a href="../LatencyWindow.html#print(long,io.sbk.perl.Print,io.sbk.perl.ReportLatencies)">print</a></code></li>
+<code><a href="../LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="../LatencyWindow.html#print(long,io.sbk.perl.Print,io.sbk.perl.ReportLatencies)">print</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.LatencyRecorder">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.perl.<a href="../LatencyRecorder.html" title="class in io.sbk.perl">LatencyRecorder</a></h3>
-<code><a href="../LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="../LatencyRecorder.html#record(long,long,long)">record</a>, <a href="../LatencyRecorder.html#updateRecord(io.sbk.perl.LatencyRecord)">updateRecord</a></code></li>
+<code><a href="../LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="../LatencyRecorder.html#record(long,long,long)">record</a>, <a href="../LatencyRecorder.html#update(long,long,long,long,long,long,long,long)">update</a>, <a href="../LatencyRecorder.html#update(io.sbk.perl.LatencyRecord)">update</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.perl.LatencyRecord">
@@ -334,7 +348,7 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
                             long&nbsp;totalRecordsMax,
                             long&nbsp;bytesMax,
                             double[]&nbsp;percentiles,
-                            <a href="../Time.html" title="interface in io.sbk.perl">Time</a>&nbsp;time)</pre>
+                            <a href="../../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</pre>
 </li>
 </ul>
 </li>
@@ -380,6 +394,40 @@ extends <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">Laten
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>percentiles</code> - Copy Percentiles</dd>
 <dd><code>copyLatencies</code> - Copy Latency records.</dd>
+</dl>
+</li>
+</ul>
+<a id="isFull()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isFull</h4>
+<pre class="methodSignature">public final&nbsp;boolean&nbsp;isFull()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../LatencyWindow.html#isFull()">LatencyWindow</a></code></span></div>
+<div class="block">is the latency storage full.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../LatencyWindow.html#isFull()">isFull</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>indicate the latency storage is full or not</dd>
+</dl>
+</li>
+</ul>
+<a id="getMaxMemoryBytes()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMaxMemoryBytes</h4>
+<pre class="methodSignature">public final&nbsp;long&nbsp;getMaxMemoryBytes()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../LatencyWindow.html#getMaxMemoryBytes()">LatencyWindow</a></code></span></div>
+<div class="block">Max memory Size in Bytes.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../LatencyWindow.html#getMaxMemoryBytes()">getMaxMemoryBytes</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.sbk.perl">LatencyWindow</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Maximum window memory size in bytes</dd>
 </dl>
 </li>
 </ul>

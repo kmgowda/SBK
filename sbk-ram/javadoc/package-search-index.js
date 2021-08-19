@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.sbk.main"},{"l":"io.sbk.ram"},{"l":"io.sbk.ram.impl"}]
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.sbk.config"},{"l":"io.sbk.logger"},{"l":"io.sbk.logger.impl"},{"l":"io.sbk.main"},{"l":"io.sbk.ram"},{"l":"io.sbk.ram.impl"}]
