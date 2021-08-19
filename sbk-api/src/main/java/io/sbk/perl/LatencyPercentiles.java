@@ -38,6 +38,7 @@ final public class LatencyPercentiles {
         }
         medianIndex = totalRecords >> 1;
         medianLatency = 0;
+        medianLatencyCount = 0;
         index = 0;
     }
 
