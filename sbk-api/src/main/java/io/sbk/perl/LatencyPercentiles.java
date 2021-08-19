@@ -15,6 +15,7 @@ final public class LatencyPercentiles {
     final public long[] latencyIndexes;
     final public long[] latencyCount;
     public long medianLatency;
+    public long medianLatencyCount;
     public long medianIndex;
     private int index;
 
@@ -24,6 +25,7 @@ final public class LatencyPercentiles {
         this.latencyIndexes = new long[this.fractions.length];
         this.latencyCount = new long[this.fractions.length];
         this.medianLatency = 0;
+        this.medianLatencyCount = 0;
         this.medianIndex = 0;
         this.index = 0;
     }
@@ -44,6 +46,7 @@ final public class LatencyPercentiles {
 
         if (medianIndex >= startIndex && medianIndex < endIndex) {
             medianLatency = latency;
+            medianLatencyCount = count;
             ret++;
         }
   
