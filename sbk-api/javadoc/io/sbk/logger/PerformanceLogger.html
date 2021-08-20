@@ -226,7 +226,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </tr>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">printTotal</a></span>&#8203;(double&nbsp;seconds,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a></span>&#8203;(double&nbsp;seconds,
           long&nbsp;bytes,
           long&nbsp;records,
           double&nbsp;recsPerSec,
@@ -236,8 +236,8 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
           long&nbsp;invalid,
           long&nbsp;lowerDiscard,
           long&nbsp;higherDiscard,
-          int&nbsp;slc1,
-          int&nbsp;slc2,
+          long&nbsp;slc1,
+          long&nbsp;slc2,
           long[]&nbsp;percentiles)</code></th>
 <td class="colLast">
 <div class="block">Print the Total Periodic performance results.</div>
@@ -256,7 +256,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;io.sbk.perl.<a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a></h3>
-<code><a href="../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></code></li>
+<code><a href="../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></code></li>
 </ul>
 </li>
 </ul>
@@ -348,7 +348,7 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 </dl>
 </li>
 </ul>
-<a id="printTotal(double,long,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -364,8 +364,8 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
                 long&nbsp;invalid,
                 long&nbsp;lowerDiscard,
                 long&nbsp;higherDiscard,
-                int&nbsp;slc1,
-                int&nbsp;slc2,
+                long&nbsp;slc1,
+                long&nbsp;slc2,
                 long[]&nbsp;percentiles)</pre>
 <div class="block">Print the Total Periodic performance results.</div>
 <dl>
@@ -380,8 +380,8 @@ extends <a href="../perl/Print.html" title="interface in io.sbk.perl">Print</a><
 <dd><code>invalid</code> - Number of invalid/negative latencies</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
-<dd><code>slc1</code> - Sliding Latency Coverage percentage</dd>
-<dd><code>slc2</code> - Sliding Latency Coverage percentage</dd>
+<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
+<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
 <dd><code>percentiles</code> - Array of percentiles.</dd>
 </dl>
 </li>

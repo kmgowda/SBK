@@ -154,7 +154,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
      long&nbsp;bytes,
      long&nbsp;records,
      double&nbsp;recsPerSec,
@@ -164,8 +164,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
      long&nbsp;invalid,
      long&nbsp;lowerDiscard,
      long&nbsp;higherDiscard,
-     int&nbsp;slc1,
-     int&nbsp;slc2,
+     long&nbsp;slc1,
+     long&nbsp;slc2,
      long[]&nbsp;percentiles)</code></th>
 <td class="colLast">
 <div class="block">Print the Periodic performance results.</div>
@@ -188,7 +188,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a id="print(double,long,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="print(double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -204,8 +204,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
            long&nbsp;invalid,
            long&nbsp;lowerDiscard,
            long&nbsp;higherDiscard,
-           int&nbsp;slc1,
-           int&nbsp;slc2,
+           long&nbsp;slc1,
+           long&nbsp;slc2,
            long[]&nbsp;percentiles)</pre>
 <div class="block">Print the Periodic performance results.</div>
 <dl>
@@ -220,8 +220,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd><code>invalid</code> - Number of invalid/negative latencies.</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
-<dd><code>slc1</code> - Sliding Latency Coverage percentage</dd>
-<dd><code>slc2</code> - Sliding Latency Coverage percentage</dd>
+<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
+<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
 <dd><code>percentiles</code> - Array of percentiles.</dd>
 </dl>
 </li>

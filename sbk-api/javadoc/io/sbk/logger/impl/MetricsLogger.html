@@ -229,7 +229,7 @@ implements <a href="../../perl/Print.html" title="interface in io.sbk.perl">Prin
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
      long&nbsp;bytes,
      long&nbsp;records,
      double&nbsp;recsPerSec,
@@ -239,8 +239,8 @@ implements <a href="../../perl/Print.html" title="interface in io.sbk.perl">Prin
      long&nbsp;invalid,
      long&nbsp;lowerDiscard,
      long&nbsp;higherDiscard,
-     int&nbsp;slc1,
-     int&nbsp;slc2,
+     long&nbsp;slc1,
+     long&nbsp;slc2,
      long[]&nbsp;percentileValues)</code></th>
 <td class="colLast">
 <div class="block">Print the Periodic performance results.</div>
@@ -340,7 +340,7 @@ implements <a href="../../perl/Print.html" title="interface in io.sbk.perl">Prin
 <pre class="methodSignature">public&nbsp;void&nbsp;close()</pre>
 </li>
 </ul>
-<a id="print(double,long,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="print(double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -356,14 +356,14 @@ implements <a href="../../perl/Print.html" title="interface in io.sbk.perl">Prin
                         long&nbsp;invalid,
                         long&nbsp;lowerDiscard,
                         long&nbsp;higherDiscard,
-                        int&nbsp;slc1,
-                        int&nbsp;slc2,
+                        long&nbsp;slc1,
+                        long&nbsp;slc2,
                         long[]&nbsp;percentileValues)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">Print</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">Print</a></code></span></div>
 <div class="block">Print the Periodic performance results.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></code>&nbsp;in interface&nbsp;<code><a href="../../perl/Print.html" title="interface in io.sbk.perl">Print</a></code></dd>
+<dd><code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></code>&nbsp;in interface&nbsp;<code><a href="../../perl/Print.html" title="interface in io.sbk.perl">Print</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>seconds</code> - reporting seconds</dd>
 <dd><code>bytes</code> - number of bytes read/write</dd>
@@ -375,8 +375,8 @@ implements <a href="../../perl/Print.html" title="interface in io.sbk.perl">Prin
 <dd><code>invalid</code> - Number of invalid/negative latencies.</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
-<dd><code>slc1</code> - Sliding Latency Coverage percentage</dd>
-<dd><code>slc2</code> - Sliding Latency Coverage percentage</dd>
+<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
+<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
 <dd><code>percentileValues</code> - Array of percentiles.</dd>
 </dl>
 </li>
