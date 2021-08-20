@@ -39,7 +39,6 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         prometheusServer = null;
     }
 
-
     public InputStream getMetricsConfigStream() {
         return  RamPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
@@ -83,7 +82,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     private void print(String ramPrefix, String prefix, double seconds, long bytes, long records, double recsPerSec,
                        double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                       long higherDiscard, int slc1, int slc2, long[] percentileValues) {
+                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder(ramPrefix);
         out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
@@ -95,7 +94,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      int slc1, int slc2, long[] percentileValues) {
+                      long slc1, long slc2, long[] percentileValues) {
         print(SBK_RAM_PREFIX,  prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (prometheusServer != null) {
@@ -112,7 +111,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           int slc1, int slc2, long[] percentileValues) {
+                           long slc1, long slc2, long[] percentileValues) {
         print("Total : " + SBK_RAM_PREFIX, prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
                 maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {

@@ -227,11 +227,11 @@ public class SystemLogger implements Logger {
 
     public void appendPercentiles(StringBuilder out, long seconds, double mBytes, long records, double recsPerSec,
                                   double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                                       long higherDiscard, int slc1, int slc2, long[] percentileValues) {
+                                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
                             +", %8.1f %s avg latency, %7d %s max latency;"
                             + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"
-                            + " SLC-1: %2d%%, SLC-2: %2d%%;",
+                            + " SLC-1: %3d, SLC-2: %3d;",
                 seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,
                 timeUnitText, invalid, lowerDiscard, higherDiscard, slc1, slc2));
         out.append(" Latency Percentiles: ");
@@ -252,7 +252,7 @@ public class SystemLogger implements Logger {
 
     public String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
                                     double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                                    long higherDiscard, int slc1, int slc2, long[] percentileValues) {
+                                    long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         appendWritesAndReaders(out);
         appendPercentiles(out, (long) seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
@@ -263,7 +263,7 @@ public class SystemLogger implements Logger {
 
     private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                       int slc1, int slc2, long[] percentileValues) {
+                       long slc1, long slc2, long[] percentileValues) {
 
         System.out.print(buildResultString(new StringBuilder(prefix), seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
@@ -272,7 +272,7 @@ public class SystemLogger implements Logger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      int slc1, int slc2, long[] percentileValues) {
+                      long slc1, long slc2, long[] percentileValues) {
         print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
     }
@@ -280,7 +280,7 @@ public class SystemLogger implements Logger {
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           int slc1, int slc2, long[] percentileValues) {
+                           long slc1, long slc2, long[] percentileValues) {
         print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
