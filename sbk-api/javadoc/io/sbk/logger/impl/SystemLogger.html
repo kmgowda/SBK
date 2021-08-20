@@ -271,7 +271,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">appendPercentiles</a></span>&#8203;(java.lang.StringBuilder&nbsp;out,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">appendPercentiles</a></span>&#8203;(java.lang.StringBuilder&nbsp;out,
                  long&nbsp;seconds,
                  double&nbsp;mBytes,
                  long&nbsp;records,
@@ -282,8 +282,8 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
                  long&nbsp;invalid,
                  long&nbsp;lowerDiscard,
                  long&nbsp;higherDiscard,
-                 int&nbsp;slc1,
-                 int&nbsp;slc2,
+                 long&nbsp;slc1,
+                 long&nbsp;slc2,
                  long[]&nbsp;percentileValues)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -294,7 +294,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">buildResultString</a></span>&#8203;(java.lang.StringBuilder&nbsp;out,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">buildResultString</a></span>&#8203;(java.lang.StringBuilder&nbsp;out,
                  double&nbsp;seconds,
                  long&nbsp;bytes,
                  long&nbsp;records,
@@ -305,8 +305,8 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
                  long&nbsp;invalid,
                  long&nbsp;lowerDiscard,
                  long&nbsp;higherDiscard,
-                 int&nbsp;slc1,
-                 int&nbsp;slc2,
+                 long&nbsp;slc1,
+                 long&nbsp;slc2,
                  long[]&nbsp;percentileValues)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -399,7 +399,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 </tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
      long&nbsp;bytes,
      long&nbsp;records,
      double&nbsp;recsPerSec,
@@ -409,8 +409,8 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
      long&nbsp;invalid,
      long&nbsp;lowerDiscard,
      long&nbsp;higherDiscard,
-     int&nbsp;slc1,
-     int&nbsp;slc2,
+     long&nbsp;slc1,
+     long&nbsp;slc2,
      long[]&nbsp;percentileValues)</code></th>
 <td class="colLast">
 <div class="block">Print the Periodic performance results.</div>
@@ -418,7 +418,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 </tr>
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">printTotal</a></span>&#8203;(double&nbsp;seconds,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a></span>&#8203;(double&nbsp;seconds,
           long&nbsp;bytes,
           long&nbsp;records,
           double&nbsp;recsPerSec,
@@ -428,8 +428,8 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
           long&nbsp;invalid,
           long&nbsp;lowerDiscard,
           long&nbsp;higherDiscard,
-          int&nbsp;slc1,
-          int&nbsp;slc2,
+          long&nbsp;slc1,
+          long&nbsp;slc2,
           long[]&nbsp;percentileValues)</code></th>
 <td class="colLast">
 <div class="block">Print the Total Periodic performance results.</div>
@@ -842,7 +842,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 </dl>
 </li>
 </ul>
-<a id="appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -859,8 +859,8 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
                               long&nbsp;invalid,
                               long&nbsp;lowerDiscard,
                               long&nbsp;higherDiscard,
-                              int&nbsp;slc1,
-                              int&nbsp;slc2,
+                              long&nbsp;slc1,
+                              long&nbsp;slc2,
                               long[]&nbsp;percentileValues)</pre>
 </li>
 </ul>
@@ -873,7 +873,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <pre class="methodSignature">public&nbsp;void&nbsp;appendWritesAndReaders&#8203;(java.lang.StringBuilder&nbsp;out)</pre>
 </li>
 </ul>
-<a id="buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -890,12 +890,12 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
                                           long&nbsp;invalid,
                                           long&nbsp;lowerDiscard,
                                           long&nbsp;higherDiscard,
-                                          int&nbsp;slc1,
-                                          int&nbsp;slc2,
+                                          long&nbsp;slc1,
+                                          long&nbsp;slc2,
                                           long[]&nbsp;percentileValues)</pre>
 </li>
 </ul>
-<a id="print(double,long,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="print(double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -911,14 +911,14 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
                   long&nbsp;invalid,
                   long&nbsp;lowerDiscard,
                   long&nbsp;higherDiscard,
-                  int&nbsp;slc1,
-                  int&nbsp;slc2,
+                  long&nbsp;slc1,
+                  long&nbsp;slc2,
                   long[]&nbsp;percentileValues)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">Print</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">Print</a></code></span></div>
 <div class="block">Print the Periodic performance results.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></code>&nbsp;in interface&nbsp;<code><a href="../../perl/Print.html" title="interface in io.sbk.perl">Print</a></code></dd>
+<dd><code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></code>&nbsp;in interface&nbsp;<code><a href="../../perl/Print.html" title="interface in io.sbk.perl">Print</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>seconds</code> - reporting seconds</dd>
 <dd><code>bytes</code> - number of bytes read/write</dd>
@@ -930,13 +930,13 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <dd><code>invalid</code> - Number of invalid/negative latencies.</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
-<dd><code>slc1</code> - Sliding Latency Coverage percentage</dd>
-<dd><code>slc2</code> - Sliding Latency Coverage percentage</dd>
+<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
+<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
 <dd><code>percentileValues</code> - Array of percentiles.</dd>
 </dl>
 </li>
 </ul>
-<a id="printTotal(double,long,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -952,14 +952,14 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
                        long&nbsp;invalid,
                        long&nbsp;lowerDiscard,
                        long&nbsp;higherDiscard,
-                       int&nbsp;slc1,
-                       int&nbsp;slc2,
+                       long&nbsp;slc1,
+                       long&nbsp;slc2,
                        long[]&nbsp;percentileValues)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">PerformanceLogger</a></code></span></div>
 <div class="block">Print the Total Periodic performance results.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">printTotal</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>seconds</code> - reporting seconds</dd>
 <dd><code>bytes</code> - number of bytes read/write</dd>
@@ -971,8 +971,8 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <dd><code>invalid</code> - Number of invalid/negative latencies</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
-<dd><code>slc1</code> - Sliding Latency Coverage percentage</dd>
-<dd><code>slc2</code> - Sliding Latency Coverage percentage</dd>
+<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
+<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
 <dd><code>percentileValues</code> - Array of percentiles.</dd>
 </dl>
 </li>

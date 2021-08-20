@@ -65,7 +65,7 @@ public class CSVLogger extends SystemLogger {
         headerBuilder.append(",Storage,Action,LatencyTimeUnit");
         headerBuilder.append(",Writers,Readers,MaxWriters,MaxReaders");
         headerBuilder.append(",ReportSeconds,MB,Records,Records/Sec,MB/Sec");
-        headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard,SLC1%,SLC2%");
+        headerBuilder.append(",AvgLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard,SLC1,SLC2");
         for (String percentileName : percentileNames) {
             headerBuilder.append(",Percentile_");
             headerBuilder.append(percentileName);
@@ -86,7 +86,7 @@ public class CSVLogger extends SystemLogger {
     final public void writeToCSV(String header, String type, long connections, long maxConnections,
                            long seconds, long bytes, long records, double recsPerSec,
                            double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           int slc1, int slc2, long[] percentileValues) {
+                           long slc1, long slc2, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
                 String.format("%16d,%s,%s,%s,%s"
@@ -110,7 +110,7 @@ public class CSVLogger extends SystemLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      int slc1, int slc2, long[] percentileValues) {
+                      long slc1, long slc2, long[] percentileValues) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
@@ -123,7 +123,7 @@ public class CSVLogger extends SystemLogger {
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           int slc1, int slc2, long[] percentileValues) {
+                           long slc1, long slc2, long[] percentileValues) {
         super.printTotal( seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {

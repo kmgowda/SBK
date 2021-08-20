@@ -301,7 +301,7 @@ extends <a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</
 </tr>
 <tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></span>&#8203;(double&nbsp;seconds,
      long&nbsp;bytes,
      long&nbsp;records,
      double&nbsp;recsPerSec,
@@ -311,8 +311,8 @@ extends <a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</
      long&nbsp;invalid,
      long&nbsp;lowerDiscard,
      long&nbsp;higherDiscard,
-     int&nbsp;slc1,
-     int&nbsp;slc2,
+     long&nbsp;slc1,
+     long&nbsp;slc2,
      long[]&nbsp;percentileValues)</code></th>
 <td class="colLast">
 <div class="block">Print the Periodic performance results.</div>
@@ -324,14 +324,14 @@ extends <a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.logger.impl.<a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></h3>
-<code><a href="CSVLogger.html#openCSV()">openCSV</a>, <a href="CSVLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">printTotal</a>, <a href="CSVLogger.html#writeToCSV(java.lang.String,java.lang.String,long,long,long,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">writeToCSV</a></code></li>
+<code><a href="CSVLogger.html#openCSV()">openCSV</a>, <a href="CSVLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a>, <a href="CSVLogger.html#writeToCSV(java.lang.String,java.lang.String,long,long,long,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">writeToCSV</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.io.sbk.logger.impl.SystemLogger">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.sbk.logger.impl.<a href="SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></h3>
-<code><a href="SystemLogger.html#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">appendPercentiles</a>, <a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getReportingIntervalSeconds()">getReportingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a></code></li>
+<code><a href="SystemLogger.html#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">appendPercentiles</a>, <a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getReportingIntervalSeconds()">getReportingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.java.lang.Object">
@@ -597,7 +597,7 @@ extends <a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</
 </dl>
 </li>
 </ul>
-<a id="print(double,long,long,double,double,double,long,long,long,long,int,int,long[])">
+<a id="print(double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -613,16 +613,16 @@ extends <a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</
                   long&nbsp;invalid,
                   long&nbsp;lowerDiscard,
                   long&nbsp;higherDiscard,
-                  int&nbsp;slc1,
-                  int&nbsp;slc2,
+                  long&nbsp;slc1,
+                  long&nbsp;slc2,
                   long[]&nbsp;percentileValues)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">Print</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">Print</a></code></span></div>
 <div class="block">Print the Periodic performance results.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></code>&nbsp;in interface&nbsp;<code><a href="../../perl/Print.html" title="interface in io.sbk.perl">Print</a></code></dd>
+<dd><code><a href="../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></code>&nbsp;in interface&nbsp;<code><a href="../../perl/Print.html" title="interface in io.sbk.perl">Print</a></code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="CSVLogger.html#print(double,long,long,double,double,double,long,long,long,long,int,int,long%5B%5D)">print</a></code>&nbsp;in class&nbsp;<code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></code></dd>
+<dd><code><a href="CSVLogger.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></code>&nbsp;in class&nbsp;<code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>seconds</code> - reporting seconds</dd>
 <dd><code>bytes</code> - number of bytes read/write</dd>
@@ -634,8 +634,8 @@ extends <a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</
 <dd><code>invalid</code> - Number of invalid/negative latencies.</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
-<dd><code>slc1</code> - Sliding Latency Coverage percentage</dd>
-<dd><code>slc2</code> - Sliding Latency Coverage percentage</dd>
+<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
+<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
 <dd><code>percentileValues</code> - Array of percentiles.</dd>
 </dl>
 </li>

@@ -17,7 +17,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
     final protected LatencyPercentiles percentiles;
     final protected Time time;
     private long startTime;
-    final private int[] slc;
+    final private long[] slc;
 
 
     public LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
@@ -25,7 +25,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
         this.percentiles = new LatencyPercentiles(percentilesFractions);
         this.time = time;
-        this.slc = new int[2];
+        this.slc = new long[2];
     }
 
     /**
@@ -74,7 +74,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
                 slc[0], slc[1], this.percentiles.latencies);
     }
     
-    final private void getSLC(LatencyPercentiles percentiles, int[] slc) {
+    final private void getSLCold(LatencyPercentiles percentiles, int[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length-1;
@@ -101,6 +101,37 @@ abstract public class LatencyWindow extends LatencyRecorder {
         }
         if (cnt2 > 0) {
             slc[1] = (int) ((1 - slcFactor2 / cnt2) * 100);
+        }
+    }
+
+    final private void getSLC(LatencyPercentiles percentiles, long[] slc) {
+        slc[0] = 0;
+        slc[1] = 0;
+        final int h = percentiles.latencies.length-1;
+        if (h <= 0 || percentiles.latencies[h] <= 0) {
+            return;
+        }
+        final double minVal = percentiles.latencies[0] * 1.0;
+        final double midVal = percentiles.medianLatency * 1.0;
+        long cnt1 = 0;
+        long cnt2 = 0;
+        double slcFactor1 = 0;
+        double slcFactor2 = 0;
+        for (int i = 1; i <= h; i++) {
+            if (percentiles.latencies[i] <= midVal && minVal > 0) {
+                slcFactor1 +=  (percentiles.latencies[i] - minVal) / minVal;
+                cnt1++;
+            } else if (midVal > 0) {
+                slcFactor2 += (percentiles.latencies[i] - midVal) / midVal;
+                cnt2++;
+            }
+        }
+
+        if (cnt1 > 0) {
+            slc[0] = (long) ( (slcFactor1 + cnt1 -1) / cnt1);
+        }
+        if (cnt2 > 0) {
+            slc[1] = (long) ((slcFactor2 + cnt2 -1) / cnt2);
         }
     }
 
