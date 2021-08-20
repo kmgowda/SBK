@@ -204,9 +204,9 @@ Total : Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 M
 
 ```
 
-### Sliding Latency Coverage (SLC) percentage factors
+### Sliding Latency Coverage (SLC)  factors
 The SBK yields latency data points in the form of quartiles and percentiles. For the performance analysis, these 
-quartiles and percentile latencies can be combined into two percentage factors : Sliding Latency Coverage 1 (SLC 1)
+quartiles and percentile latencies can be combined into two factors : Sliding Latency Coverage 1 (SLC 1)
  and Sliding Latency Coverage 2 (SLC 2).
 
 The SLC1 indicates the percentage of dispersion from lower latency percentile to median percentile. This indicates 
@@ -214,8 +214,8 @@ the range between all lower latencies percentiles to median latency and also dis
 which are below median latency. The SLC2 indicates the percentage of dispersion from median latency percentile and 
 all other percentile values to the last (maximum) percentile (99.99th percentile). If you are comparing two or more 
 storage systems which are having similar / approximate median latency percentiles then SLC2 gives which storage system is 
-doing better. Lower SLC2 percentage means higher the performance of the system. If you are observing too many 
-variations of SLC 2 percentage that means you have an opportunity to improve the stability of the storage system too.
+doing better. Lower SLC2 factor means higher the performance of the system. If you are observing too many 
+variations of SLC 2 factor that means you have an opportunity to improve the stability of the storage system too.
 
 ### Performance results to CSV file
 you can use option "-csvfile" to specify the csv file to log all the performance results for future analytics.
