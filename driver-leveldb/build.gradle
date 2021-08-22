@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(":sbk-api")
+    // https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb
+    implementation group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
+}

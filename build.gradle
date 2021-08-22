@@ -312,6 +312,7 @@ dependencies {
 	compile project(':driver-db2')
 	compile project(':driver-cephs3')
 	compile project(':driver-openio')
+	compile project(':driver-leveldb')
 }
 
 //create a single Jar with all dependencies

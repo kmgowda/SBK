@@ -68,6 +68,7 @@ COPY --chown=root:root driver-null ${APP_HOME}/driver-null
 COPY --chown=root:root driver-csv ${APP_HOME}/driver-csv
 COPY --chown=root:root driver-redis ${APP_HOME}/driver-redis
 COPY --chown=root:root driver-cassandra ${APP_HOME}/driver-cassandra
+COPY --chown=root:root driver-leveldb ${APP_HOME}/driver-leveldb
 
 
 
