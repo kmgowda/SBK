@@ -109,7 +109,7 @@ public class SbkRam {
 
         // disable CSV
         ramConfig.csv = false;
-        
+
         logger = Objects.requireNonNullElseGet(outLogger, RamPrometheusLogger::new);
 
         params = new SbkRamParameters(appName, ramConfig.port, ramConfig.maxConnections);
