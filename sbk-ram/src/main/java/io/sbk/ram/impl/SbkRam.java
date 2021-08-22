@@ -107,6 +107,9 @@ public class SbkRam {
         ramConfig = mapper.readValue(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 RamConfig.class);
 
+        // disable CSV
+        ramConfig.csv = false;
+        
         logger = Objects.requireNonNullElseGet(outLogger, RamPrometheusLogger::new);
 
         params = new SbkRamParameters(appName, ramConfig.port, ramConfig.maxConnections);

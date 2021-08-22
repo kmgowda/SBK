@@ -148,6 +148,10 @@ public class Sbk {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
                 PerlConfig.class);
+
+        // No CSV backup
+        perlConfig.csv = false;
+
         logger = Objects.requireNonNullElseGet(outLogger, GrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
                 appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName : appName;
