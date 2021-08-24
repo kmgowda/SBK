@@ -1,0 +1,15 @@
+sbkArgs:
+  nodes: >
+        localhost
+        10.20.30.40
+        100.200.300.400
+        kmg-host-1, kmg-host-2
+
+  class: file
+  readers: 1
+  size: 10
+  time: ns 
+  seconds: 60 
+  gemuser: kmg 
+  gempass: 1234
+  sbkdir: /Users/kmg/projects/SBK/build/install/sbk
