@@ -23,6 +23,7 @@ import io.sbk.yal.impl.SbkYalParameters;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
@@ -49,11 +50,12 @@ public class SbkGemYal {
      * @throws InterruptedException If an exception occurred if the writers and readers are interrupted.
      * @throws ExecutionException If an exception occurred.
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
+     * @throws HelpException if '-help' is used or yaml file is missing.
      * @return Array of remote responses
      */
     public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
                                        GemLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InterruptedException, ExecutionException, TimeoutException {
+            IOException, InterruptedException, ExecutionException, TimeoutException, HelpException {
             return runBenchmark(args, packageName, applicationName, outLogger);
     }
 
@@ -61,11 +63,12 @@ public class SbkGemYal {
     private static RemoteResponse[] runBenchmark(final String[] args, final String packageName,
                                              final String applicationName, GemLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,
-            ExecutionException, TimeoutException {
-        final SbkYalParameters params;
-        final YalConfig yalConfig;
+            ExecutionException, TimeoutException, HelpException {
         final String version = io.sbk.gem.impl.SbkGem.class.getPackage().getImplementationVersion();
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName : SbkGemYal.NAME;
+        final String[] gemArgs;
+        final SbkYalParameters params;
+        final YalConfig yalConfig;
         Printer.log.info(SbkGemYal.DESC);
         Printer.log.info(SbkGemYal.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
@@ -80,11 +83,18 @@ public class SbkGemYal {
 
         try {
             params.parseArgs(args);
-        } catch (HelpException e) {
+        } catch (HelpException ex) {
             params.printHelp();
-            return null;
+            throw ex;
         }
 
-        return SbkGem.run(YalUtils.getYamlArgs(params.getFileName()), packageName, applicationName, outLogger);
+        try {
+            gemArgs = YalUtils.getYamlArgs(params.getFileName());
+        } catch (FileNotFoundException ex) {
+            Printer.log.error(ex.toString());
+            params.printHelp();
+            throw new HelpException(ex.toString());
+        }
+        return SbkGem.run(gemArgs, packageName, applicationName, outLogger);
     }
 }

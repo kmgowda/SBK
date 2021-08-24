@@ -10,9 +10,9 @@
 
 package io.sbk.main;
 
+import io.sbk.exception.HelpException;
 import io.sbk.gem.impl.SbkGemYal;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -23,7 +23,7 @@ public class SbkGemYalMain {
     public static void main(final String[] args) {
         try {
             SbkGemYal.run(args, null, null, null);
-        } catch (UnrecognizedOptionException ex) {
+        } catch (HelpException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException |
                 InterruptedException | ExecutionException ex) {
