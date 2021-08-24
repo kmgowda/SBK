@@ -273,6 +273,7 @@ dependencies {
 	compile project(":sbk-gem")
 	compile project(":sbk-ram")
 	compile project(":sbk-gem")
+	compile project(":sbk-gem-yal")
 	compile project(":driver-concurrentq")
 	compile project(":driver-file")
 	compile project(":driver-filestream")

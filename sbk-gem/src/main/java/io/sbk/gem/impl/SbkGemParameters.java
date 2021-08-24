@@ -84,7 +84,9 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
         final String nodeString = getOptionValue("nodes", config.nodes);
-        String[] nodes = nodeString.split(",");
+        String[] nodes = nodeString.replace("[ ]+", " ")
+                .replace("[,]+", ",")
+                .split("[ ,\n]+");
         config.gemuser = getOptionValue("gemuser", config.gemuser);
         config.gempass = getOptionValue("gempass", config.gempass);
         config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
