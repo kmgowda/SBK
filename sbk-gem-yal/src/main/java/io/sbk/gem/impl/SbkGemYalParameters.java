@@ -11,28 +11,18 @@
 package io.sbk.gem.impl;
 
 import io.sbk.config.YalConfig;
-import io.sbk.exception.HelpException;
-import io.sbk.gem.YalParameters;
-import io.sbk.options.impl.SbkInputOptions;
-import org.apache.commons.cli.ParseException;
+import io.sbk.yal.impl.SbkYalParameters;
 
-public class SbkGemYalParameters extends SbkInputOptions implements YalParameters {
-    private YalConfig config;
+public class SbkGemYalParameters extends SbkYalParameters {
 
     public SbkGemYalParameters(String name, String desc, YalConfig config) {
-        super(name, desc);
-        this.config = config;
-        addOption("f", true, "SBK GEM YAML file, default: "+config.yamlFileName);
+        super(name, desc, config);
     }
 
     @Override
-    public String getFileName() {
-      return this.config.yamlFileName;
+    public String getFileOptionDescription() {
+        return "SBK-GEM YAML file, default: " + config.yamlFileName;
     }
 
-    @Override
-    public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
-        super.parseArgs(args);
-        config.yamlFileName = getOptionValue("f", config.yamlFileName);
-    }
 }
+

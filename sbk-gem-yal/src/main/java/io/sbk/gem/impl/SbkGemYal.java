@@ -13,27 +13,26 @@ package io.sbk.gem.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
-import io.sbk.gem.YalMap;
 import io.sbk.logger.GemLogger;
 import io.sbk.system.Printer;
+import io.sbk.yal.YalUtils;
+import io.sbk.yal.impl.SbkYalParameters;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
+    final static String NAME = "sbk-gem-yal";
+    final static String DESC = "SBK-GEM-YAML Arguments Loader";
 
     /**
      * Run the Performance Benchmarking .
@@ -63,12 +62,12 @@ public class SbkGemYal {
                                              final String applicationName, GemLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,
             ExecutionException, TimeoutException {
-        final SbkGemYalParameters params;
+        final SbkYalParameters params;
         final YalConfig yalConfig;
         final String version = io.sbk.gem.impl.SbkGem.class.getPackage().getImplementationVersion();
-        final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName : YalConfig.NAME;
-        Printer.log.info(YalConfig.DESC);
-        Printer.log.info(YalConfig.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
+        final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName : SbkGemYal.NAME;
+        Printer.log.info(SbkGemYal.DESC);
+        Printer.log.info(SbkGemYal.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
@@ -77,7 +76,7 @@ public class SbkGemYal {
 
         yalConfig = mapper.readValue(io.sbk.gem.impl.SbkGemYal.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 YalConfig.class);
-        params = new SbkGemYalParameters(appName, YalConfig.DESC, yalConfig);
+        params = new SbkGemYalParameters(appName, SbkGemYal.DESC, yalConfig);
 
         try {
             params.parseArgs(args);
@@ -86,20 +85,6 @@ public class SbkGemYal {
             return null;
         }
 
-        return SbkGem.run(getYamlArgs(params.getFileName()), packageName, applicationName, outLogger);
+        return SbkGem.run(YalUtils.getYamlArgs(params.getFileName()), packageName, applicationName, outLogger);
     }
-
-    private static String[] getYamlArgs(String yamlFileName) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
-
-        final YalMap yap = mapper.readValue(new File(yamlFileName), YalMap.class);
-        final List<String> lt = new ArrayList<>();
-        yap.args.forEach((k, v) -> {
-            lt.add("-"+k.strip());
-            lt.add(v.replaceAll("\\n+", " ").strip());
-        });
-       return lt.toArray(new String[0]);
-    }
-
 }

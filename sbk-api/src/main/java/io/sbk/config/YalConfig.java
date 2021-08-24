@@ -11,8 +11,6 @@
 package io.sbk.config;
 
 final public class YalConfig {
-    final public static String NAME = "sbk-gem-yal";
-    final public static String DESC = "SBK-GEM-YAML Arguments Loader";
 
     public String yamlFileName;
 }

@@ -8,19 +8,18 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-
-package io.sbk.gem;
+package io.sbk.yal;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
-public class YalMap {
-    public Map<String, String> args;
+final public class YalMap {
+    public Map<String, String> sbkArgs;
 
     @JsonCreator
-    public YalMap(@JsonProperty("args") Map<String, String> args) {
-        this.args = args;
+    public YalMap(@JsonProperty("sbkArgs") Map<String, String> args) {
+        this.sbkArgs = args;
     }
 }
