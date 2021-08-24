@@ -113,7 +113,7 @@ public class SbkGem {
         final GemLogger logger;
         final RamConfig ramConfig;
         final Time time;
-        final String version = io.sbk.ram.impl.SbkRam.class.getPackage().getImplementationVersion();
+        final String version = io.sbk.gem.impl.SbkGem.class.getPackage().getImplementationVersion();
         final String sbkGemAppName = System.getProperty(GemConfig.SBK_GEM_APP_NAME);
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
                 StringUtils.isNotEmpty(sbkGemAppName) ? sbkGemAppName : GemConfig.NAME;

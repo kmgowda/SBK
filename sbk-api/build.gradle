@@ -42,6 +42,7 @@ dependencies {
     compile group:'io.micrometer', name:'micrometer-registry-prometheus', version: micrometerVersion
     compile group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
     compile group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
     testCompile group: 'junit', name: 'junit', version: junitVersion
