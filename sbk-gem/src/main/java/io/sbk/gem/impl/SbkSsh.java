@@ -40,10 +40,11 @@ public class SbkSsh {
 
     @Synchronized
     private void creationSession(long timeoutSeconds) {
+        Printer.log.info("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' starting...");
         try {
             client.start();
             session = SshUtils.createSession(client, connection, timeoutSeconds);
-            Printer.log.info("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' Success..");
+            Printer.log.info("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' Success.");
         } catch (IOException e) {
             Printer.log.error("SBK-GEM: Ssh Connection to host '"+ connection.getHost()+"' time out!");
             session = null;
