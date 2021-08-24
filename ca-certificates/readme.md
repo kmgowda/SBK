@@ -1,1 +1,0 @@
-This folder can be used place the Digital certificates the clients can use to authenticate with the servers.
