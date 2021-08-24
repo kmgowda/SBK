@@ -66,13 +66,13 @@ public class SbkGemYal {
                                              final String applicationName, GemLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,
             ExecutionException, TimeoutException, HelpException {
-        final String version = io.sbk.gem.impl.SbkGem.class.getPackage().getImplementationVersion();
+        final String version = io.sbk.gem.impl.SbkGemYal.class.getPackage().getImplementationVersion();
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName : SbkGemYal.NAME;
         final String[] gemArgs;
         final SbkYalParameters params;
         final YalConfig yalConfig;
         
-        Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
+        Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGemYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
         Printer.log.info(SbkGemYal.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
