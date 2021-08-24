@@ -13,6 +13,7 @@ package io.sbk.gem.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
@@ -34,6 +35,7 @@ public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
     final static String DESC = "SBK-GEM-YAML Arguments Loader";
+    final static String BANNER_FILE = "gem-yal-banner.txt";
 
     /**
      * Run the Performance Benchmarking .
@@ -69,6 +71,8 @@ public class SbkGemYal {
         final String[] gemArgs;
         final SbkYalParameters params;
         final YalConfig yalConfig;
+        
+        Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
         Printer.log.info(SbkGemYal.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: "+Arrays.toString(args));
