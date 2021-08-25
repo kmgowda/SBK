@@ -19,7 +19,8 @@ import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.logger.GemLogger;
 import io.sbk.system.Printer;
-import io.sbk.yal.YalUtils;
+import io.sbk.yal.impl.SbkGemYmlMap;
+import io.sbk.yal.YmlMap;
 import io.sbk.yal.impl.SbkYalParameters;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
@@ -93,7 +94,7 @@ public class SbkGemYal {
         }
 
         try {
-            gemArgs = YalUtils.getYmlArgs(params.getFileName());
+            gemArgs = YmlMap.getYmlArgs(params.getFileName(), SbkGemYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             params.printHelp();
