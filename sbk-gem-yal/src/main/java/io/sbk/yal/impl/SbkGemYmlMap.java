@@ -20,7 +20,7 @@ import java.util.Map;
 public class SbkGemYmlMap extends YmlMap {
 
     @JsonCreator
-    public SbkGemYmlMap(@JsonProperty("sbkArgs") Map<String, String> args) {
+    public SbkGemYmlMap(@JsonProperty("sbkGemArgs") Map<String, String> args) {
         super(args);
     }
 }
