@@ -16,10 +16,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 final public class YalMap {
-    public Map<String, String> sbkArgs;
+    public Map<String, String> args;
 
     @JsonCreator
     public YalMap(@JsonProperty("sbkArgs") Map<String, String> args) {
-        this.sbkArgs = args;
+        this.args = args;
     }
 }

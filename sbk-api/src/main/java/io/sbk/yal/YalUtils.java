@@ -26,7 +26,7 @@ public class YalUtils {
 
         final YalMap yap = mapper.readValue(new File(yamlFileName), YalMap.class);
         final List<String> lt = new ArrayList<>();
-        yap.sbkArgs.forEach((k, v) -> {
+        yap.args.forEach((k, v) -> {
             lt.add("-"+k.strip());
             lt.add(v.replaceAll("\\n+", " ").strip());
         });
