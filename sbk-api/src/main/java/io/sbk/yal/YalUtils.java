@@ -20,11 +20,11 @@ import java.util.List;
 
 public class YalUtils {
 
-    public static String[] getYamlArgs(String yamlFileName) throws IOException {
+    public static String[] getYmlArgs(String fileName) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
 
-        final YalMap yap = mapper.readValue(new File(yamlFileName), YalMap.class);
+        final YalMap yap = mapper.readValue(new File(fileName), YalMap.class);
         final List<String> lt = new ArrayList<>();
         yap.args.forEach((k, v) -> {
             lt.add("-"+k.strip());

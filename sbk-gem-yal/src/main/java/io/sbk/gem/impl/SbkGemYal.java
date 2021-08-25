@@ -34,7 +34,7 @@ import java.util.concurrent.TimeoutException;
 public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
-    final static String DESC = "SBK-GEM-YAML Arguments Loader";
+    final static String DESC = "SBK-GEM-YML Arguments Loader";
     final static String BANNER_FILE = "gem-yal-banner.txt";
 
     /**
@@ -93,7 +93,7 @@ public class SbkGemYal {
         }
 
         try {
-            gemArgs = YalUtils.getYamlArgs(params.getFileName());
+            gemArgs = YalUtils.getYmlArgs(params.getFileName());
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             params.printHelp();
