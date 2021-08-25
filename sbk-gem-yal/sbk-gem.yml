@@ -6,7 +6,7 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 
-sbkArgs:
+sbkGemArgs:
   nodes: >
         localhost
         10.20.30.40

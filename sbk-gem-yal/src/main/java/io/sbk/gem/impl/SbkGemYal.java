@@ -19,7 +19,8 @@ import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.logger.GemLogger;
 import io.sbk.system.Printer;
-import io.sbk.yal.YalUtils;
+import io.sbk.yal.impl.SbkGemYmlMap;
+import io.sbk.yal.YmlMap;
 import io.sbk.yal.impl.SbkYalParameters;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +35,7 @@ import java.util.concurrent.TimeoutException;
 public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
-    final static String DESC = "SBK-GEM-YAML Arguments Loader";
+    final static String DESC = "SBK-GEM-YML Arguments Loader";
     final static String BANNER_FILE = "gem-yal-banner.txt";
 
     /**
@@ -93,7 +94,7 @@ public class SbkGemYal {
         }
 
         try {
-            gemArgs = YalUtils.getYamlArgs(params.getFileName());
+            gemArgs = YmlMap.getYmlArgs(params.getFileName(), SbkGemYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             params.printHelp();

@@ -17,16 +17,22 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class YalUtils {
+public abstract class YmlMap {
+    public Map<String, String> args;
 
-    public static String[] getYamlArgs(String yamlFileName) throws IOException {
+    public YmlMap(Map<String, String> args) {
+        this.args = args;
+    }
+
+    public final static String[] getYmlArgs(String fileName, Class<? extends YmlMap> tClass) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
 
-        final YalMap yap = mapper.readValue(new File(yamlFileName), YalMap.class);
+        final YmlMap yap = mapper.readValue(new File(fileName), tClass);
         final List<String> lt = new ArrayList<>();
-        yap.sbkArgs.forEach((k, v) -> {
+        yap.args.forEach((k, v) -> {
             lt.add("-"+k.strip());
             lt.add(v.replaceAll("\\n+", " ").strip());
         });
