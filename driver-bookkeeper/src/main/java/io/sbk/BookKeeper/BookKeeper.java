@@ -5,23 +5,23 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.BookKeeper;
 
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-import java.io.IOException;
-import java.net.URI;
-
+import io.sbk.api.Storage;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.namespace.Namespace;
 import org.apache.distributedlog.api.namespace.NamespaceBuilder;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Class for Bookkeeper Benchmarking.
@@ -43,9 +43,9 @@ public class BookKeeper implements Storage<byte[]> {
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
-        params.addOption("ensembleSize", true, "EnsembleSize (default value is in "+CONFIGFILE+" )");
-        params.addOption("writeQuorum", true, "WriteQuorum  (default value is in "+CONFIGFILE+" )");
-        params.addOption("ackQuorum", true, "AckQuorum (default value is in "+CONFIGFILE+" )");
+        params.addOption("ensembleSize", true, "EnsembleSize (default value is in " + CONFIGFILE + " )");
+        params.addOption("writeQuorum", true, "WriteQuorum  (default value is in " + CONFIGFILE + " )");
+        params.addOption("ackQuorum", true, "AckQuorum (default value is in " + CONFIGFILE + " )");
         params.addOption("recreate", true,
                 "If the log is already existing, delete and recreate the same (default: false)");
     }
@@ -53,7 +53,7 @@ public class BookKeeper implements Storage<byte[]> {
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         recreate = false;
-        logName =  params.getOptionValue("log", null);
+        logName = params.getOptionValue("log", null);
         uriName = params.getOptionValue("uri", null);
         if (uriName == null) {
             throw new IllegalArgumentException("Error: Must specify Bookkeeper/Distributed log IP address");
@@ -66,7 +66,7 @@ public class BookKeeper implements Storage<byte[]> {
             propsConf.load(getClass().getClassLoader().getResourceAsStream(CONFIGFILE));
         } catch (ConfigurationException ex) {
             ex.printStackTrace();
-            throw  new IllegalArgumentException(ex);
+            throw new IllegalArgumentException(ex);
         }
         conf = new DistributedLogConfiguration();
         conf.loadConf(propsConf);
@@ -83,7 +83,7 @@ public class BookKeeper implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         namespace = NamespaceBuilder.newBuilder()
                 .conf(conf)
                 .uri(dlogUri)

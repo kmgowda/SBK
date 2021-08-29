@@ -5,13 +5,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Artemis;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
+import io.sbk.api.ParameterOptions;
 import io.sbk.system.Printer;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
 import org.apache.activemq.artemis.api.core.ActiveMQQueueExistsException;
@@ -25,7 +25,7 @@ import java.io.IOException;
 /**
  * Class for Artemis Push Reader.
  */
-public class ArtemisCallbackReader  extends AbstractCallbackReader<byte[]> {
+public class ArtemisCallbackReader extends AbstractCallbackReader<byte[]> {
     private final ClientConsumer consumer;
     private final ClientSession session;
 
@@ -61,7 +61,7 @@ public class ArtemisCallbackReader  extends AbstractCallbackReader<byte[]> {
                 }
             });
         } catch (ActiveMQException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 

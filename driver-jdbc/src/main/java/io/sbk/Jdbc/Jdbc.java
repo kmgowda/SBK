@@ -5,17 +5,20 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Jdbc;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
-import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-import io.sbk.system.Printer;
+import io.sbk.api.Storage;
+import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
+import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -27,10 +30,6 @@ import java.sql.Statement;
 import java.util.Objects;
 import java.util.Properties;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-
 /**
  * Class for Jdbc.
  */
@@ -41,9 +40,9 @@ public class Jdbc implements Storage<String> {
     private final static String SQLITE_NAME = "sqlite";
 
     private final static String CONFIGFILE = "jdbc.properties";
+    final public DataType<String> dType = new SbkString();
     public String driverType;
     public JdbcConfig config;
-    final public DataType<String> dType =  new SbkString();
 
     /**
      * Get the JDBC config file.
@@ -73,7 +72,7 @@ public class Jdbc implements Storage<String> {
      */
     public String createTableQuery(final ParameterOptions params) throws IllegalArgumentException {
         String query;
-        if (driverType.equalsIgnoreCase(DERBY_NAME) ) {
+        if (driverType.equalsIgnoreCase(DERBY_NAME)) {
             query = "CREATE TABLE " + config.table +
                     "(ID BIGINT GENERATED ALWAYS AS IDENTITY not null primary key" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
@@ -143,7 +142,7 @@ public class Jdbc implements Storage<String> {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
-             addArgs(params, mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
+            addArgs(params, mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),
                     JdbcConfig.class));
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -164,7 +163,7 @@ public class Jdbc implements Storage<String> {
         if (params.getWritersCount() > 0 && params.getReadersCount() > 0) {
             throw new IllegalArgumentException("Error: JDBC: Specify either writers or readers, both are not allowed");
         }
-        config.table =  params.getOptionValue("table", config.table);
+        config.table = params.getOptionValue("table", config.table);
         if (params.hasOption("driver")) {
             config.driver = params.getOptionValue("driver", config.driver);
         }
@@ -176,11 +175,11 @@ public class Jdbc implements Storage<String> {
 
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         try {
             Class.forName(config.driver);
         } catch (ClassNotFoundException ex) {
-            Printer.log.error("The JDBC Driver: "+ config.driver+" not found");
+            Printer.log.error("The JDBC Driver: " + config.driver + " not found");
             throw new IOException(ex);
         }
         final Connection conn;
@@ -211,7 +210,7 @@ public class Jdbc implements Storage<String> {
             Printer.log.info("JDBC Driver Version: " + dbmd.getDriverVersion());
             st = conn.createStatement();
         } catch (SQLException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
         if (params.getWritersCount() > 0) {
 
@@ -224,7 +223,7 @@ public class Jdbc implements Storage<String> {
             }
 
             if (config.reCreate) {
-                Printer.log.info("Deleting the Table: "+ config.table);
+                Printer.log.info("Deleting the Table: " + config.table);
                 final String query = dropTableQuery(params);
                 try {
                     st.execute(query);
@@ -247,7 +246,7 @@ public class Jdbc implements Storage<String> {
                 if (!conn.getAutoCommit()) {
                     conn.commit();
                 }
-            } catch ( SQLException ex) {
+            } catch (SQLException ex) {
                 Printer.log.info(ex.getMessage());
                 try {
                     conn.rollback();
@@ -257,8 +256,8 @@ public class Jdbc implements Storage<String> {
             }
             try {
                 conn.close();
-            } catch ( SQLException ex) {
-                throw  new IOException(ex);
+            } catch (SQLException ex) {
+                throw new IOException(ex);
             }
         }
     }
@@ -297,14 +296,14 @@ public class Jdbc implements Storage<String> {
         try {
             DriverManager.getConnection(config.url, props);
         } catch (SQLException ex) {
-           // throw new IOException(ex);
+            // throw new IOException(ex);
         }
     }
 
     @Override
     public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         try {
-           return new JdbcWriter(id, params, config, dType);
+            return new JdbcWriter(id, params, config, dType);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -314,7 +313,7 @@ public class Jdbc implements Storage<String> {
     @Override
     public DataReader<String> createReader(final int id, final ParameterOptions params) {
         try {
-            return  new JdbcReader(id, params, config);
+            return new JdbcReader(id, params, config);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

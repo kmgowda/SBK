@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.FoundationDB;
@@ -13,11 +13,11 @@ package io.sbk.FoundationDB;
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 
 import java.io.EOFException;
@@ -59,7 +59,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         if (config.multiClient && this.db != null) {
             this.db.close();
         }
@@ -68,7 +68,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     @Override
     public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
         final Status ret = db.read(tr -> {
             long startKey = key;
@@ -98,7 +98,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     @Override
     public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         final Status ret = db.read(tr -> {
             long startKey = key;
             Status stat = new Status();

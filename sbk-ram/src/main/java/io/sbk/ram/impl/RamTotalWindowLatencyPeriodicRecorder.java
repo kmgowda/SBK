@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.ram.impl;
@@ -22,10 +22,10 @@ import io.sbk.ram.RamPeriodicRecorder;
 import java.util.HashMap;
 
 public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWindow
-        implements  ReportLatencies, RamPeriodicRecorder {
+        implements ReportLatencies, RamPeriodicRecorder {
     final private ReportLatencies reportLatencies;
-    final private  SetRW setRW;
-    final private  HashMap<Long, RW> table;
+    final private SetRW setRW;
+    final private HashMap<Long, RW> table;
 
     public RamTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                                  Print windowLogger, Print totalLogger,
@@ -50,30 +50,6 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
         reportLatencies.reportLatency(latency, count);
     }
 
-
-    private static class RW {
-        public int readers;
-        public int writers;
-        public int maxReaders;
-        public int maxWriters;
-
-        public RW() {
-            reset();
-        }
-
-        public void reset() {
-            readers = writers = maxWriters = maxReaders = 0;
-        }
-
-        public void update(int readers, int writers, int maxReaders, int maxWriters) {
-            this.readers = Math.max(this.readers, readers);
-            this.writers = Math.max(this.writers, writers);
-            this.maxReaders = Math.max(this.maxReaders, maxReaders);
-            this.maxWriters = Math.max(this.maxWriters, maxWriters);
-        }
-    }
-
-
     /**
      * Record the latency.
      *
@@ -84,7 +60,6 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
         addLatenciesRecord(record);
         checkWindowFullAndReset(currentTime);
     }
-
 
     public void addLatenciesRecord(LatenciesRecord record) {
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
@@ -117,9 +92,8 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
         checkTotalWindowFullAndReset(currentTime);
     }
 
-
     private void addRW(long key, int readers, int writers, int maxReaders, int maxWriters) {
-       RW cur = table.get(key);
+        RW cur = table.get(key);
         if (cur == null) {
             cur = new RW();
             table.put(key, cur);
@@ -135,6 +109,28 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
             ret.maxWriters += data.maxWriters;
         });
         table.clear();
+    }
+
+    private static class RW {
+        public int readers;
+        public int writers;
+        public int maxReaders;
+        public int maxWriters;
+
+        public RW() {
+            reset();
+        }
+
+        public void reset() {
+            readers = writers = maxWriters = maxReaders = 0;
+        }
+
+        public void update(int readers, int writers, int maxReaders, int maxWriters) {
+            this.readers = Math.max(this.readers, readers);
+            this.writers = Math.max(this.writers, writers);
+            this.maxReaders = Math.max(this.maxReaders, maxReaders);
+            this.maxWriters = Math.max(this.maxWriters, maxWriters);
+        }
     }
 
 }

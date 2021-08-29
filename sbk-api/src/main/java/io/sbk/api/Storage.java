@@ -5,15 +5,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api;
-import io.sbk.data.impl.ByteArray;
-import java.io.IOException;
+
 import com.google.common.reflect.TypeToken;
 import io.sbk.data.DataType;
+import io.sbk.data.impl.ByteArray;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
@@ -82,12 +83,13 @@ public interface Storage<T> {
      * @throws IllegalArgumentException if data type is other than byte[]
      */
     default DataType<T> getDataType() throws IllegalArgumentException {
-        final TypeToken<T> typeToken = new TypeToken<T>(getClass()) { };
+        final TypeToken<T> typeToken = new TypeToken<T>(getClass()) {
+        };
         final Type type = typeToken.getComponentType().getType();
         if (type.getTypeName().equals("byte")) {
             return (DataType<T>) new ByteArray();
         } else {
-            throw new IllegalArgumentException("The data type is your class which implements Benchmark interface is not byte[]"+
+            throw new IllegalArgumentException("The data type is your class which implements Benchmark interface is not byte[]" +
                     ", Override/Implement the 'dataType' method");
         }
     }

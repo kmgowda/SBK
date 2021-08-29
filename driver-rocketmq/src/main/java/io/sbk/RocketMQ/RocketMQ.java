@@ -5,26 +5,26 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RocketMQ;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.google.common.io.BaseEncoding;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-
-import java.io.IOException;
-import java.util.Random;
-import java.util.Set;
-
+import io.sbk.api.Storage;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.TopicConfig;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
 import org.apache.rocketmq.tools.command.CommandUtil;
+
+import java.io.IOException;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * Class for RocketMQ driver.
@@ -51,7 +51,7 @@ public class RocketMQ implements Storage<byte[]> {
 
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
-        params.addOption("cluster", true, "Cluster name default: "+DEFAULT_CLUSTER);
+        params.addOption("cluster", true, "Cluster name default: " + DEFAULT_CLUSTER);
         params.addOption("topic", true, "Topic name");
         params.addOption("nameserver", true, "Name Server URI");
         params.addOption("partitions", true, "Number of partitions of the topic (default: 1)");
@@ -60,7 +60,7 @@ public class RocketMQ implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        topicName =  params.getOptionValue("topic", null);
+        topicName = params.getOptionValue("topic", null);
         namesAdr = params.getOptionValue("nameserver", null);
         if (namesAdr == null) {
             throw new IllegalArgumentException("Error: Must specify Name server IP address");
@@ -70,7 +70,7 @@ public class RocketMQ implements Storage<byte[]> {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
         subscriptionName = topicName + getRandomString();
-        clusterName =  params.getOptionValue("cluster", DEFAULT_CLUSTER);
+        clusterName = params.getOptionValue("cluster", DEFAULT_CLUSTER);
         partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
         async = Boolean.parseBoolean(params.getOptionValue("async", "false"));
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -82,10 +82,10 @@ public class RocketMQ implements Storage<byte[]> {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
-     }
+    }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         this.rmqAdmin = new DefaultMQAdminExt();
         this.rmqAdmin.setNamesrvAddr(namesAdr);
         this.rmqAdmin.setInstanceName("AdminInstance-" + getRandomString());
@@ -107,7 +107,7 @@ public class RocketMQ implements Storage<byte[]> {
             topicConfig.setReadQueueNums(Math.max(1, partitions / brokerList.size()));
             topicConfig.setWriteQueueNums(Math.max(1, partitions / brokerList.size()));
 
-            for (String brokerAddr: brokerList) {
+            for (String brokerAddr : brokerList) {
                 this.rmqAdmin.createAndUpdateTopicConfig(brokerAddr, topicConfig);
             }
         } catch (Exception ex) {

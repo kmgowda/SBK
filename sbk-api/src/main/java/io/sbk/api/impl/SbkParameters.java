@@ -5,15 +5,15 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.ParameterOptions;
 import io.sbk.config.Config;
+import io.sbk.config.PerlConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.options.impl.SbkInputOptions;
-import io.sbk.config.PerlConfig;
-import io.sbk.api.ParameterOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -145,7 +145,7 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
         if (throughput < 0 && totalSecondsToRun > 0) {
             long recsPerSec = totalRecords / workersCnt;
             if (recsPerSec > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("Error: The Records per Second value :" +recsPerSec +"is more than "+Integer.MAX_VALUE);
+                throw new IllegalArgumentException("Error: The Records per Second value :" + recsPerSec + "is more than " + Integer.MAX_VALUE);
             }
             recordsPerSec = (int) recsPerSec;
         } else if (throughput > 0) {

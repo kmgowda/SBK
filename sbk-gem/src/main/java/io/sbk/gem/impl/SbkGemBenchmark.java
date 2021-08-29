@@ -5,17 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.gem.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.gem.GemBenchmark;
 import io.sbk.config.GemConfig;
+import io.sbk.gem.GemBenchmark;
 import io.sbk.gem.GemParameters;
-import io.sbk.gem.SshConnection;
 import io.sbk.gem.RemoteResponse;
+import io.sbk.gem.SshConnection;
 import io.sbk.state.State;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
@@ -56,7 +56,7 @@ public class SbkGemBenchmark implements GemBenchmark {
         this.config.remoteTimeoutSeconds = Long.MAX_VALUE;
         this.params = params;
         this.sbkArgs = sbkArgs;
-        this.retFuture =  new CompletableFuture<>();
+        this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         final SshConnection[] connections = params.getConnections();
         if (config.fork) {
@@ -67,32 +67,25 @@ public class SbkGemBenchmark implements GemBenchmark {
         this.remoteResults = new RemoteResponse[connections.length];
         this.nodes = new SbkSsh[connections.length];
         for (int i = 0; i < connections.length; i++) {
-            nodes[i] =  new SbkSsh(connections[i],  executor);
+            nodes[i] = new SbkSsh(connections[i], executor);
         }
         this.consMap = new ConnectionsMap(connections);
     }
 
-    private final static class ConnectionsMap {
-        private final Map<Map.Entry<String, String>, Boolean>  kMap;
-
-        public ConnectionsMap(SshConnection[] conn) {
-            this.kMap = new HashMap<>();
-            for (SshConnection sshConnection : conn) {
-                this.kMap.put(Map.entry(sshConnection.getHost().toLowerCase(), sshConnection.getDir().toLowerCase()), false);
-            }
+    private static int parseJavaVersion(String text) {
+        if (StringUtils.isEmpty(text)) {
+            return Integer.MAX_VALUE;
         }
+        final String[] tmp = text.split("\"", 2);
+        return Integer.parseInt(tmp[1].split("\\.")[0]);
+    }
 
-        void reset() {
-            this.kMap.keySet().forEach(k -> this.kMap.put(k, false));
+    private static SshResponseStream[] createMultiSshResponseStream(int length, boolean stdout) {
+        final SshResponseStream[] results = new SshResponseStream[length];
+        for (int i = 0; i < results.length; i++) {
+            results[i] = new SshResponseStream(stdout);
         }
-
-        void visit(SshConnection conn) {
-            this.kMap.put(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()), true);
-        }
-
-        boolean isVisited(SshConnection conn) {
-            return this.kMap.get(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()));
-        }
+        return results;
     }
 
     @Override
@@ -130,7 +123,7 @@ public class SbkGemBenchmark implements GemBenchmark {
         }
         Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
-        final int  javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
+        final int javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0]);
 
         final SshResponseStream[] sshResults = createMultiSshResponseStream(nodes.length, true);
@@ -156,7 +149,7 @@ public class SbkGemBenchmark implements GemBenchmark {
         }
         boolean stop = false;
         if (!ret.isDone()) {
-            final String errMsg = "SBK-GEM: command: " + cmd +" time out after " + config.maxIterations + " iterations";
+            final String errMsg = "SBK-GEM: command: " + cmd + " time out after " + config.maxIterations + " iterations";
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         } else {
@@ -164,7 +157,7 @@ public class SbkGemBenchmark implements GemBenchmark {
                 String stdOut = sshResults[i].stdOutputStream.toString();
                 String stdErr = sshResults[i].errOutputStream.toString();
                 if (javaMajorVersion > parseJavaVersion(stdOut) && javaMajorVersion > parseJavaVersion(stdErr)) {
-                    Printer.log.info("Java version :" + javaMajorVersion+" , mismatch at : "+ nodes[i].connection.getHost());
+                    Printer.log.info("Java version :" + javaMajorVersion + " , mismatch at : " + nodes[i].connection.getHost());
                     stop = true;
                 }
             }
@@ -174,7 +167,7 @@ public class SbkGemBenchmark implements GemBenchmark {
         if (stop) {
             throw new InterruptedException();
         }
-        Printer.log.info("SBK-GEM: Matching Java Major Version: " +javaMajorVersion +" Success..");
+        Printer.log.info("SBK-GEM: Matching Java Major Version: " + javaMajorVersion + " Success..");
         final String remoteDir = Paths.get(params.getSbkDir()).getFileName().toString();
 
         if (params.isCopy()) {
@@ -242,7 +235,7 @@ public class SbkGemBenchmark implements GemBenchmark {
                 throw new InterruptedException(errMsg);
             }
 
-            Printer.log.info("Copy SBK application: '"+ params.getSbkCommand() +"' to remote nodes Success..");
+            Printer.log.info("Copy SBK application: '" + params.getSbkCommand() + "' to remote nodes Success..");
 
         } //end of copy
 
@@ -252,16 +245,16 @@ public class SbkGemBenchmark implements GemBenchmark {
         // Start remote SBK instances
         final SshResponseStream[] sbkResults = createMultiSshResponseStream(nodes.length, true);
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
-        final String sbkCommand = sbkDir + File.separator + params.getSbkCommand()+" "+sbkArgs;
-        Printer.log.info("SBK-GEM: Remote SBK command: " +sbkCommand);
+        final String sbkCommand = sbkDir + File.separator + params.getSbkCommand() + " " + sbkArgs;
+        Printer.log.info("SBK-GEM: Remote SBK command: " + sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir()+ File.separator + sbkCommand,
+            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir() + File.separator + sbkCommand,
                     config.remoteTimeoutSeconds, sbkResults[i]);
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfArray);
         sbkFuture.exceptionally(ex -> {
-           shutdown(ex);
-           return null;
+            shutdown(ex);
+            return null;
         });
 
         sbkFuture.thenAccept(x -> {
@@ -271,7 +264,6 @@ public class SbkGemBenchmark implements GemBenchmark {
 
         return retFuture;
     }
-
 
     private boolean remoteDirectoryDelete() throws InterruptedException, ConnectException {
         final CompletableFuture<?>[] rmCfArray = new CompletableFuture[nodes.length];
@@ -306,24 +298,6 @@ public class SbkGemBenchmark implements GemBenchmark {
         return true;
     }
 
-
-    private static int parseJavaVersion( String text) {
-        if (StringUtils.isEmpty(text)) {
-            return Integer.MAX_VALUE;
-        }
-        final String[] tmp = text.split("\"", 2);
-        return  Integer.parseInt(tmp[1].split("\\.")[0]);
-    }
-
-
-    private static SshResponseStream[] createMultiSshResponseStream(int length, boolean stdout) {
-        final SshResponseStream[] results = new SshResponseStream[length];
-        for (int i = 0; i < results.length; i++) {
-            results[i] = new SshResponseStream(stdout);
-        }
-        return results;
-    }
-
     @Synchronized
     private void fillSshResults(SshResponseStream[] responseStreams) {
         final SshConnection[] connections = params.getConnections();
@@ -332,7 +306,6 @@ public class SbkGemBenchmark implements GemBenchmark {
                     responseStreams[i].errOutputStream.toString(), connections[i].getHost());
         }
     }
-
 
     /**
      * Shutdown SBK Benchmark.
@@ -352,7 +325,7 @@ public class SbkGemBenchmark implements GemBenchmark {
                     rmEx.printStackTrace();
                 }
             }
-            for (SbkSsh node: nodes) {
+            for (SbkSsh node : nodes) {
                 node.stop();
             }
             ramBenchmark.stop();
@@ -366,9 +339,31 @@ public class SbkGemBenchmark implements GemBenchmark {
         }
     }
 
-
     @Override
     public void stop() {
         shutdown(null);
+    }
+
+    private final static class ConnectionsMap {
+        private final Map<Map.Entry<String, String>, Boolean> kMap;
+
+        public ConnectionsMap(SshConnection[] conn) {
+            this.kMap = new HashMap<>();
+            for (SshConnection sshConnection : conn) {
+                this.kMap.put(Map.entry(sshConnection.getHost().toLowerCase(), sshConnection.getDir().toLowerCase()), false);
+            }
+        }
+
+        void reset() {
+            this.kMap.keySet().forEach(k -> this.kMap.put(k, false));
+        }
+
+        void visit(SshConnection conn) {
+            this.kMap.put(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()), true);
+        }
+
+        boolean isVisited(SshConnection conn) {
+            return this.kMap.get(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()));
+        }
     }
 }

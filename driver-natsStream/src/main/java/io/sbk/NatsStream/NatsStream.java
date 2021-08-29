@@ -5,20 +5,20 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.NatsStream;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.nats.streaming.Options.Builder;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-
+import io.sbk.api.Storage;
 
 import java.io.IOException;
-import io.nats.streaming.Options.Builder;
 
 
 /**
@@ -44,13 +44,13 @@ public class NatsStream implements Storage<byte[]> {
         }
 
         params.addOption("topic", true, "Topic name");
-        params.addOption("uri", true, "Server URI, default uri: "+config.uri);
+        params.addOption("uri", true, "Server URI, default uri: " + config.uri);
         params.addOption("cluster", true, "Cluster ID, default id: " + config.clusterName);
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        topicName =  params.getOptionValue("topic", null);
+        topicName = params.getOptionValue("topic", null);
         if (topicName == null) {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
@@ -59,8 +59,8 @@ public class NatsStream implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
-        optsBuilder =  new Builder();
+    public void openStorage(final ParameterOptions params) throws IOException {
+        optsBuilder = new Builder();
         optsBuilder.natsUrl(config.uri);
         optsBuilder.maxPubAcksInFlight(config.maxPubAcksInFlight);
     }

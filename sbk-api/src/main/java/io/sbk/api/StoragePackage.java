@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.api;
 
@@ -51,18 +51,13 @@ final public class StoragePackage {
         }
     }
 
-
-    private static class StringCompareIgnoreCase implements Comparator<String> {
-
-        @Override
-        public int compare(String o1, String o2) {
-            return o1.compareToIgnoreCase(o2);
-        }
+    public static Storage<?> getStorageInstance(String storageFullPath) throws ClassNotFoundException,
+            NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        return (Storage<?>) Class.forName(storageFullPath).getConstructor().newInstance();
     }
 
-
     public boolean isEmpty() {
-        return  simpleNames.length == 0;
+        return simpleNames.length == 0;
     }
 
     public String[] getDrivers() {
@@ -79,18 +74,18 @@ final public class StoragePackage {
     }
 
     public void printDrivers() {
-        final String printStr = "Available Storage Drivers in package '"+ packageName+"': "+simpleNames.length;
+        final String printStr = "Available Storage Drivers in package '" + packageName + "': " + simpleNames.length;
         final StringBuilder builder = new StringBuilder(printStr);
         builder.append(" [");
         int length = printStr.length() + 30;
         for (int i = 0; i < simpleNames.length; i++) {
             builder.append(simpleNames[i]);
             length += simpleNames[i].length();
-            if (i+1 < simpleNames.length) {
+            if (i + 1 < simpleNames.length) {
                 builder.append(", ");
                 length += 2;
             }
-            if (length > MAX_PRINT_WIDTH && i+1 < simpleNames.length) {
+            if (length > MAX_PRINT_WIDTH && i + 1 < simpleNames.length) {
                 builder.append("\n");
                 length = 0;
             }
@@ -99,10 +94,12 @@ final public class StoragePackage {
         Printer.log.info(String.valueOf(builder));
     }
 
+    private static class StringCompareIgnoreCase implements Comparator<String> {
 
-    public static Storage<?> getStorageInstance(String storageFullPath) throws ClassNotFoundException,
-            NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        return (Storage<?>) Class.forName(storageFullPath).getConstructor().newInstance();
+        @Override
+        public int compare(String o1, String o2) {
+            return o1.compareToIgnoreCase(o2);
+        }
     }
 
 }

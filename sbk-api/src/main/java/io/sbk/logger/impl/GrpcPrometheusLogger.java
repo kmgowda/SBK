@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.logger.impl;
 
@@ -18,17 +18,18 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.sbk.action.Action;
+import io.sbk.config.PerlConfig;
 import io.sbk.exception.ExceptionHandler;
-import io.sbk.options.InputOptions;
-import io.sbk.logger.RamHostConfig;
 import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.grpc.ServiceGrpc;
+import io.sbk.logger.RamHostConfig;
+import io.sbk.options.InputOptions;
 import io.sbk.perl.LatencyRecorder;
-import io.sbk.config.PerlConfig;
-import io.sbk.time.Time;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -58,32 +59,10 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         super();
     }
 
-
-    private class ResponseObserver<T> implements StreamObserver<T> {
-
-        @Override
-        public void onNext(Object value) {
-
-        }
-
-        @Override
-        public void onError(Throwable ex) {
-                // graceful exit may not work GRPC
-                Runtime.getRuntime().exit(1);
-        }
-
-        @Override
-        public void onCompleted() {
-
-        }
-    }
-
-
     @Override
     public void setExceptionHandler(ExceptionHandler handler) {
         this.exceptionHandler = handler;
     }
-
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
@@ -101,17 +80,16 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         maxLatencyBytes = ramHostConfig.maxRecordSizeMB * PerlConfig.BYTES_PER_MB;
         ramHostConfig.host = DISABLE_STRING;
         params.addOption("ram", true, "SBK RAM host" +
-                "; '" +DISABLE_STRING+"' disables this option, default: " + ramHostConfig.host);
+                "; '" + DISABLE_STRING + "' disables this option, default: " + ramHostConfig.host);
         params.addOption("ramport", true, "SBK RAM Port" +
-                "; default: " + ramHostConfig.port );
+                "; default: " + ramHostConfig.port);
         //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
     }
-
 
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        ramHostConfig.host = params.getOptionValue("ram", ramHostConfig.host );
+        ramHostConfig.host = params.getOptionValue("ram", ramHostConfig.host);
         enable = !ramHostConfig.host.equalsIgnoreCase("no");
         if (!enable) {
             return;
@@ -122,14 +100,13 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         exceptionHandler = null;
     }
 
-
     @Override
     public void open(final InputOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
         if (!enable) {
             return;
         }
-        channel = ManagedChannelBuilder.forTarget(ramHostConfig.host+":"+ ramHostConfig.port).usePlaintext().build();
+        channel = ManagedChannelBuilder.forTarget(ramHostConfig.host + ":" + ramHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
         try {
@@ -139,24 +116,24 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
             throw new IOException("GRPC GetConfig failed");
         }
         if (!config.getStorageName().equalsIgnoreCase(storageName)) {
-            throw new IllegalArgumentException("SBK RAM storage name : "+config.getStorageName()
-                    + " ,Supplied storage name: "+storageName +" are not same!");
+            throw new IllegalArgumentException("SBK RAM storage name : " + config.getStorageName()
+                    + " ,Supplied storage name: " + storageName + " are not same!");
         }
         if (!config.getAction().name().equalsIgnoreCase(action.name())) {
-            throw new IllegalArgumentException("SBK RAM action: "+config.getAction().name()
-                    + " ,Supplied action : "+action.name() +" are not same!");
+            throw new IllegalArgumentException("SBK RAM action: " + config.getAction().name()
+                    + " ,Supplied action : " + action.name() + " are not same!");
         }
         if (!config.getTimeUnit().name().equalsIgnoreCase(time.getTimeUnit().name())) {
-            throw new IllegalArgumentException("SBK RAM Time Unit: "+config.getTimeUnit().name()
-                    + " ,Supplied Time Unit : "+time.getTimeUnit().name() +" are not same!");
+            throw new IllegalArgumentException("SBK RAM Time Unit: " + config.getTimeUnit().name()
+                    + " ,Supplied Time Unit : " + time.getTimeUnit().name() + " are not same!");
         }
         if (config.getMinLatency() != getMinLatency()) {
-            Printer.log.warn("SBK RAM , min latency : "+config.getMinLatency()
-                    +", local min latency: "+getMinLatency() +" are not same!");
+            Printer.log.warn("SBK RAM , min latency : " + config.getMinLatency()
+                    + ", local min latency: " + getMinLatency() + " are not same!");
         }
         if (config.getMaxLatency() != getMaxLatency()) {
-            Printer.log.warn("SBK RAM , min latency : "+config.getMaxLatency()
-                    +", local min latency: "+getMaxLatency() +" are not same!");
+            Printer.log.warn("SBK RAM , min latency : " + config.getMaxLatency()
+                    + ", local min latency: " + getMaxLatency() + " are not same!");
         }
         try {
             clientID = blockingStub.registerClient(config).getId();
@@ -166,7 +143,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         }
 
         if (clientID < 0) {
-            String errMsg = "Invalid client id: "+clientID+" received from SBK RAM";
+            String errMsg = "Invalid client id: " + clientID + " received from SBK RAM";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
@@ -177,8 +154,8 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                 PerlConfig.LONG_MAX, PerlConfig.LONG_MAX);
         builder = LatenciesRecord.newBuilder();
         if (blocking) {
-          stub = null;
-          observer = null;
+            stub = null;
+            observer = null;
         } else {
             stub = ServiceGrpc.newStub(channel);
             observer = new ResponseObserver<>();
@@ -187,7 +164,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     }
 
     @Override
-    public void close(final InputOptions params) throws IllegalArgumentException, IOException  {
+    public void close(final InputOptions params) throws IllegalArgumentException, IOException {
         super.close(params);
         if (!enable) {
             return;
@@ -227,7 +204,6 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         latencyBytes = 0;
     }
 
-
     /**
      *  record every latency.
      */
@@ -255,8 +231,27 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                       long slc1, long slc2, long[] percentileValues) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
-        if (latencyBytes > 0 ) {
+        if (latencyBytes > 0) {
             sendLatenciesRecord();
+        }
+    }
+
+    private class ResponseObserver<T> implements StreamObserver<T> {
+
+        @Override
+        public void onNext(Object value) {
+
+        }
+
+        @Override
+        public void onError(Throwable ex) {
+            // graceful exit may not work GRPC
+            Runtime.getRuntime().exit(1);
+        }
+
+        @Override
+        public void onCompleted() {
+
         }
     }
 

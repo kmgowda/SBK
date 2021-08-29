@@ -5,13 +5,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RocketMQ;
 
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
+import io.sbk.api.ParameterOptions;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
@@ -28,7 +28,7 @@ public class RocketMQCallbackReader extends AbstractCallbackReader<byte[]> {
     final private ParameterOptions params;
 
     public RocketMQCallbackReader(int readerId, ParameterOptions params, String namesAdr, String topicName,
-                                  RocketMQClientConfig config, String subscriptionName ) throws IOException {
+                                  RocketMQClientConfig config, String subscriptionName) throws IOException {
         this.params = params;
         rmqConsumer = new DefaultMQPushConsumer(subscriptionName);
         rmqConsumer.setNamesrvAddr(namesAdr);
@@ -40,23 +40,23 @@ public class RocketMQCallbackReader extends AbstractCallbackReader<byte[]> {
             rmqConsumer.subscribe(topicName, "*");
         } catch (MQClientException ex) {
             ex.printStackTrace();
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
-      }
+    }
 
     @Override
     public void start(Callback<byte[]> callback) throws IOException {
         try {
             rmqConsumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
                 for (MessageExt message : msgs) {
-                   callback.consume(message.getBody());
+                    callback.consume(message.getBody());
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             });
             rmqConsumer.start();
         } catch (MQClientException ex) {
             ex.printStackTrace();
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 

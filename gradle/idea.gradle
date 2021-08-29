@@ -15,10 +15,10 @@ plugins.withId('idea') {
             provider.node.component
                     .find { it.@name == 'CompilerConfiguration' }
                     .annotationProcessing.replaceNode {
-                        annotationProcessing {
-                            profile(name: 'Default', default: true, enabled: true)
-                        }
-                    }
+                annotationProcessing {
+                    profile(name: 'Default', default: true, enabled: true)
+                }
+            }
         }
     }
 }

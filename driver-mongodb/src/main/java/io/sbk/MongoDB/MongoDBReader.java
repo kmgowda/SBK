@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.MongoDB;
@@ -25,7 +25,7 @@ import java.io.IOException;
  * Class for Reader.
  */
 public class MongoDBReader implements Reader<byte[]> {
-    final private  MongoCollection<Document> databaseCollection;
+    final private MongoCollection<Document> databaseCollection;
     final private ParameterOptions params;
     private long key;
     private int cnt;
@@ -49,6 +49,6 @@ public class MongoDBReader implements Reader<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 }

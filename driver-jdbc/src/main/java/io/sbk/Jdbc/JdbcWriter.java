@@ -5,17 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Jdbc;
 
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -30,14 +30,14 @@ import java.util.concurrent.CompletableFuture;
  */
 public class JdbcWriter implements Writer<String> {
     final public JdbcConfig config;
-    final public String  data;
+    final public String data;
     final private Connection conn;
     final private Statement st;
     final private DataType<String> dType;
-    final private String  defaultInsertQuery;
+    final private String defaultInsertQuery;
 
     public JdbcWriter(int writerID, ParameterOptions params,
-                       JdbcConfig config, DataType<String> dType) throws IOException {
+                      JdbcConfig config, DataType<String> dType) throws IOException {
         final Properties props = new Properties();
         this.dType = dType;
         if (config.user != null) {
@@ -57,7 +57,7 @@ public class JdbcWriter implements Writer<String> {
             st = conn.createStatement();
 
         } catch (SQLException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
         this.config = config;
         this.data = dType.create(params.getRecordSize());
@@ -77,9 +77,9 @@ public class JdbcWriter implements Writer<String> {
             st.executeUpdate(gerWriteQuery());
         } catch (SQLException ex) {
             Printer.log.error("JDBC: recordWrite failed !");
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
-        status.endTime =  time.getCurrentTime();
+        status.endTime = time.getCurrentTime();
         record.send(id, status.startTime, status.endTime, size, 1);
     }
 
@@ -89,7 +89,7 @@ public class JdbcWriter implements Writer<String> {
         try {
             st.executeUpdate(gerWriteQuery());
         } catch (SQLException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
         return null;
     }
@@ -101,7 +101,7 @@ public class JdbcWriter implements Writer<String> {
                 conn.commit();
             }
         } catch (SQLException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 

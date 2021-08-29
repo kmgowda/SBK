@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.FdbRecord;
 
@@ -16,11 +16,11 @@ import com.apple.foundationdb.record.provider.foundationdb.FDBStoredRecord;
 import com.apple.foundationdb.tuple.Tuple;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 
 import java.io.EOFException;
@@ -38,7 +38,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     private long cnt;
 
     public FdbRecordMultiReader(int id, ParameterOptions params, FDBDatabase db,
-                                Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
+                                Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
         this.params = params;
         this.key = FdbRecord.generateStartKey(id);
         this.cnt = 0;
@@ -65,13 +65,13 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 
     @Override
     public void recordRead(DataType<ByteString> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
         final Status ret = db.run(context -> {
             long startKey = key;
@@ -105,7 +105,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     @Override
     public void recordReadTime(DataType<ByteString> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         final Status ret = db.run(context -> {
             long startKey = key;
             Status stat = new Status();

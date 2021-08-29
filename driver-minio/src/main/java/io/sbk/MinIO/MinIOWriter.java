@@ -5,10 +5,11 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.MinIO;
+
 import io.minio.MinioClient;
 import io.minio.ServerSideEncryption;
 import io.minio.errors.ErrorResponseException;
@@ -18,11 +19,11 @@ import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
+import io.sbk.time.Time;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -58,7 +59,7 @@ public class MinIOWriter implements Writer<byte[]> {
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InvalidKeyException | NoResponseException |
                 XmlPullParserException | ErrorResponseException | InternalException | InvalidArgumentException |
                 InsufficientDataException e) {
-           throw new IOException(e);
+            throw new IOException(e);
         }
         status.endTime = time.getCurrentTime();
         status.bytes = size;
@@ -86,7 +87,7 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
-       dataStream.close();
+    public void close() throws IOException {
+        dataStream.close();
     }
 }

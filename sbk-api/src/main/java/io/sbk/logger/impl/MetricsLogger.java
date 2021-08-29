@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.logger.impl;
 
@@ -38,10 +38,6 @@ public class MetricsLogger implements Print {
     final private AtomicDouble maxLatency;
     final private AtomicDouble[] percentileGauges;
     final private Convert convert;
-
-    private interface Convert {
-        double apply(double val);
-    }
 
     public MetricsLogger(String header, String action, double[] percentiles,
                          Time time, TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
@@ -86,7 +82,6 @@ public class MetricsLogger implements Print {
         registry.close();
     }
 
-
     @Override
     final public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
@@ -103,5 +98,10 @@ public class MetricsLogger implements Print {
         for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
             this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));
         }
+    }
+
+
+    private interface Convert {
+        double apply(double val);
     }
 }

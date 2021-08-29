@@ -5,25 +5,23 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RabbitMQ;
 
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.TimeoutException;
-
-import com.rabbitmq.client.BuiltinExchangeType;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-
 
 
 /**
@@ -46,6 +44,24 @@ public class RabbitMQCallbackReader extends AbstractCallbackReader<byte[]> {
         this.consumer = null;
     }
 
+    @Override
+    public void start(Callback<byte[]> callback) throws IOException {
+        this.consumer = new Consumer(channel, callback);
+        channel.basicConsume(queueName, true, this.consumer);
+    }
+
+    @Override
+    public void stop() throws IOException {
+        try {
+            if (this.channel.isOpen()) {
+                this.channel.close();
+            }
+        } catch (TimeoutException ex) {
+            ex.printStackTrace();
+            throw new IOException(ex);
+        }
+    }
+
     private static class Consumer extends DefaultConsumer {
         private Channel channel;
         private Callback<byte[]> callback;
@@ -64,24 +80,5 @@ public class RabbitMQCallbackReader extends AbstractCallbackReader<byte[]> {
             }
         }
 
-    }
-
-
-    @Override
-    public void start(Callback<byte[]> callback) throws IOException {
-        this.consumer = new Consumer(channel, callback);
-        channel.basicConsume(queueName, true, this.consumer);
-    }
-
-    @Override
-    public void stop() throws IOException {
-        try {
-            if (this.channel.isOpen()) {
-                this.channel.close();
-            }
-        } catch (TimeoutException ex) {
-            ex.printStackTrace();
-            throw  new IOException(ex);
-        }
     }
 }

@@ -24,7 +24,7 @@ plugins.withId('application') {
             manifest {
                 attributes("Class-Path":
                         configurations.runtime.collect { it.name }.join(' ') + ' ' +
-                        jar.archiveName
+                                jar.archiveName
                 )
             }
         }

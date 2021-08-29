@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.ram.impl;
@@ -13,10 +13,10 @@ package io.sbk.ram.impl;
 import io.sbk.api.Benchmark;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.ram.RamPeriodicRecorder;
-import io.sbk.state.State;
-import io.sbk.time.Time;
 import io.sbk.ram.RamRegistry;
+import io.sbk.state.State;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class RamBenchmark implements Benchmark, RamRegistry  {
+public class RamBenchmark implements Benchmark, RamRegistry {
     private final int idleMS;
     private final Time time;
     private final int reportingIntervalMS;
@@ -41,7 +41,7 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
 
-    public RamBenchmark(int maxQueue, int idleMS,  Time time, RamPeriodicRecorder window, int reportingIntervalMS) {
+    public RamBenchmark(int maxQueue, int idleMS, Time time, RamPeriodicRecorder window, int reportingIntervalMS) {
         this.idleMS = idleMS;
         this.window = window;
         this.time = time;
@@ -60,7 +60,7 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
         LatenciesRecord record;
         boolean doWork = true;
         boolean notFound;
-        Printer.log.info("LatenciesRecord Benchmark Started" );
+        Printer.log.info("LatenciesRecord Benchmark Started");
         long currentTime = time.getCurrentTime();
         window.start(currentTime);
         window.startWindow(currentTime);
@@ -83,13 +83,12 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
 
             currentTime = time.getCurrentTime();
             if (window.elapsedMilliSecondsWindow(currentTime) > reportingIntervalMS) {
-               window.stopWindow(currentTime);
-               window.startWindow(currentTime);
+                window.stopWindow(currentTime);
+                window.startWindow(currentTime);
             }
         }
         window.stop(currentTime);
     }
-
 
 
     @Override
@@ -130,7 +129,6 @@ public class RamBenchmark implements Benchmark, RamRegistry  {
             }
         }
     }
-
 
 
     @Override

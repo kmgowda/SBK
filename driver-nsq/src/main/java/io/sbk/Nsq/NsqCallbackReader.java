@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Nsq;
 
@@ -13,8 +13,8 @@ import com.github.brainlag.nsq.NSQConsumer;
 import com.github.brainlag.nsq.lookup.DefaultNSQLookup;
 import com.github.brainlag.nsq.lookup.NSQLookup;
 import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.ParameterOptions;
 import io.sbk.api.Callback;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 
@@ -24,8 +24,8 @@ import java.io.IOException;
 public class NsqCallbackReader extends AbstractCallbackReader<byte[]> {
     final private String topicName;
     final private String subscriptionName;
-    final private  NSQLookup lookup;
-    private  NSQConsumer consumer;
+    final private NSQLookup lookup;
+    private NSQConsumer consumer;
 
     public NsqCallbackReader(int readerId, ParameterOptions params, String topicName,
                              String subscriptionName, NsqClientConfig config) throws IOException {

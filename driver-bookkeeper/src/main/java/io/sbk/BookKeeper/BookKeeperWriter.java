@@ -5,9 +5,10 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.BookKeeper;
+
 import io.sbk.api.Writer;
 import org.apache.distributedlog.DLSN;
 import org.apache.distributedlog.LogRecord;
@@ -41,7 +42,7 @@ public class BookKeeperWriter implements Writer<byte[]> {
     public CompletableFuture<DLSN> writeAsync(byte[] data) throws IOException {
         LogRecord record = new LogRecord(
                 sequencer.nextId(), data);
-        ret =  writer.write(record);
+        ret = writer.write(record);
         return ret;
     }
 
@@ -55,7 +56,7 @@ public class BookKeeperWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         try {
             writer.asyncClose().get();
         } catch (InterruptedException | ExecutionException ex) {

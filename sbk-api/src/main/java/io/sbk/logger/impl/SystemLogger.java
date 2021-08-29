@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.logger.impl;
@@ -14,16 +14,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
-import io.sbk.options.InputOptions;
+import io.sbk.config.PerlConfig;
 import io.sbk.logger.Logger;
 import io.sbk.logger.LoggerConfig;
-import io.sbk.config.PerlConfig;
+import io.sbk.options.InputOptions;
+import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
 import io.sbk.time.impl.MicroSeconds;
 import io.sbk.time.impl.MilliSeconds;
 import io.sbk.time.impl.NanoSeconds;
-import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -47,11 +47,11 @@ public class SystemLogger implements Logger {
     public String[] percentileNames;
     public Action action;
     public Time time;
+    final private DecimalFormat format;
     private LoggerConfig loggerConfig;
     private TimeUnit timeUnit;
     private long minLatency;
     private long maxLatency;
-    final private DecimalFormat format;
 
     public SystemLogger() {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
@@ -88,11 +88,11 @@ public class SystemLogger implements Logger {
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
                 "; default: " + loggerConfig.timeUnit.name());
         params.addOption("minlatency", true,
-                "Minimum latency; use '-time' for time unit; default: "+ loggerConfig.minLatency
-                        +" "+loggerConfig.timeUnit.name());
+                "Minimum latency; use '-time' for time unit; default: " + loggerConfig.minLatency
+                        + " " + loggerConfig.timeUnit.name());
         params.addOption("maxlatency", true,
-                "Maximum latency; use '-time' for time unit; default: "+ loggerConfig.maxLatency
-                        +" "+loggerConfig.timeUnit.name());
+                "Maximum latency; use '-time' for time unit; default: " + loggerConfig.maxLatency
+                        + " " + loggerConfig.timeUnit.name());
     }
 
 
@@ -100,7 +100,7 @@ public class SystemLogger implements Logger {
         String ret = "[";
 
         for (TimeUnit value : TimeUnit.values()) {
-            ret += value.name() +":" + value + ", ";
+            ret += value.name() + ":" + value + ", ";
         }
         ret += "]";
 
@@ -113,9 +113,9 @@ public class SystemLogger implements Logger {
         try {
             timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
         } catch (IllegalArgumentException ex) {
-            Printer.log.error("Invalid value for option '-time', valid values "+
+            Printer.log.error("Invalid value for option '-time', valid values " +
                     Arrays.toString(Arrays.stream(TimeUnit.values()).map(Enum::name).toArray()));
-            throw  ex;
+            throw ex;
         }
 
         //copy the default values
@@ -158,14 +158,14 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public void open(final InputOptions params, final String storageName, Action action, Time time) throws  IOException {
+    public void open(final InputOptions params, final String storageName, Action action, Time time) throws IOException {
         this.params = params;
         this.storageName = storageName;
         this.action = action;
         this.time = time;
-        this.prefix = storageName+" "+action.name();
+        this.prefix = storageName + " " + action.name();
         this.timeUnitText = getTimeUnit().name();
-        for (double p: this.percentiles) {
+        for (double p : this.percentiles) {
             if (p < 0 || p > 100) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(percentiles));
                 Printer.log.error("Percentile indices should be greater than 0 and less than 100");
@@ -175,7 +175,7 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public void close(final InputOptions params) throws IOException  {
+    public void close(final InputOptions params) throws IOException {
     }
 
     @Override
@@ -227,11 +227,11 @@ public class SystemLogger implements Logger {
 
     public void appendPercentiles(StringBuilder out, long seconds, double mBytes, long records, double recsPerSec,
                                   double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                                  long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
-                            +", %8.1f %s avg latency, %7d %s max latency;"
-                            + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"
-                            + " SLC-1: %3d, SLC-2: %3d;",
+                        + ", %8.1f %s avg latency, %7d %s max latency;"
+                        + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"
+                        + " SLC-1: %3d, SLC-2: %3d;",
                 seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,
                 timeUnitText, invalid, lowerDiscard, higherDiscard, slc1, slc2));
         out.append(" Latency Percentiles: ");
@@ -255,7 +255,7 @@ public class SystemLogger implements Logger {
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         appendWritesAndReaders(out);
-        appendPercentiles(out, (long) seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency,  maxLatency,
+        appendPercentiles(out, (long) seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append(".\n");
         return out.toString();

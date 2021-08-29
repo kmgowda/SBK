@@ -5,26 +5,27 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api.impl;
 
 import io.sbk.config.Config;
 import io.sbk.logger.PerformanceLogger;
+import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
 import io.sbk.time.impl.MicroSeconds;
 import io.sbk.time.impl.MilliSeconds;
 import io.sbk.time.impl.NanoSeconds;
-import io.sbk.system.Printer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class SbkUtils {
 
-    public static Time getTime(PerformanceLogger logger ) {
+    public static Time getTime(PerformanceLogger logger) {
         final TimeUnit timeUnit = logger.getTimeUnit();
         final Time ret;
         if (timeUnit == TimeUnit.mcs) {
@@ -34,9 +35,9 @@ public class SbkUtils {
         } else {
             ret = new MilliSeconds();
         }
-        Printer.log.info("Time Unit: "+ ret.getTimeUnit().toString());
-        Printer.log.info("Minimum Latency: "+logger.getMinLatency()+" "+ret.getTimeUnit().name());
-        Printer.log.info("Maximum Latency: "+logger.getMaxLatency()+" "+ret.getTimeUnit().name());
+        Printer.log.info("Time Unit: " + ret.getTimeUnit().toString());
+        Printer.log.info("Minimum Latency: " + logger.getMinLatency() + " " + ret.getTimeUnit().name());
+        Printer.log.info("Maximum Latency: " + logger.getMaxLatency() + " " + ret.getTimeUnit().name());
         return ret;
     }
 
@@ -44,7 +45,7 @@ public class SbkUtils {
         if (args == null) {
             return new String[0];
         }
-        if (args.length <  2) {
+        if (args.length < 2) {
             return args;
         }
         final List<String> optsList = Arrays.asList(opts);
@@ -69,8 +70,8 @@ public class SbkUtils {
         }
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals(Config.CLASS_OPTION_ARG)) {
-                if (i+1 < args.length) {
-                    return args[i+1];
+                if (i + 1 < args.length) {
+                    return args[i + 1];
                 } else {
                     return "";
                 }

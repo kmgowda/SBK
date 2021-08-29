@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.logger.impl;
@@ -22,7 +22,7 @@ public class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implem
     final private AtomicInteger maxConnections;
 
     public RamMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,
-                                      MetricsConfig config)  throws IOException {
+                                      MetricsConfig config) throws IOException {
         super(header, action, percentiles, time, config);
         final String name = metricPrefix + "_Connections";
         final String maxName = metricPrefix + "_Max_Connections";

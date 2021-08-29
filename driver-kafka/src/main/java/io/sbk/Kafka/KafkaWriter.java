@@ -5,23 +5,23 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Kafka;
-import io.sbk.data.DataType;
+
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
+import io.sbk.time.Time;
+import lombok.Synchronized;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
-
-import lombok.Synchronized;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 
 /**
  * Class for Kafka writer/producer.
@@ -51,11 +51,11 @@ public class KafkaWriter implements Writer<byte[]> {
     private CompletableFuture writeAsyncFuture(byte[] data) {
         CompletableFuture<Void> retFuture = new CompletableFuture();
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
-                if (exception == null) {
-                    retFuture.complete(null);
-                } else {
-                    retFuture.completeExceptionally(exception);
-                }
+            if (exception == null) {
+                retFuture.complete(null);
+            } else {
+                retFuture.completeExceptionally(exception);
+            }
         });
         return retFuture;
     }

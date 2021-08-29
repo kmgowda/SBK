@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.CSV;
 
@@ -13,6 +13,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -46,7 +47,7 @@ public class CSVWriter implements Writer<String> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         csvPrinter.close();
     }
 }

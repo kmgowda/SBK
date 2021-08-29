@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.FoundationDB;
@@ -17,9 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-
+import io.sbk.api.Storage;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -33,6 +32,10 @@ public class FoundationDB implements Storage<byte[]> {
     private FDB fdb;
     private Database db;
 
+    public static long generateStartKey(int id) {
+        return (long) id * (long) Integer.MAX_VALUE;
+    }
+
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -45,18 +48,18 @@ public class FoundationDB implements Storage<byte[]> {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("cfile", true, "cluster file, default : "+ config.cFile);
-        params.addOption("multiclient", true, "client connection per Writer/Reader, default : "+ config.multiClient);
+        params.addOption("cfile", true, "cluster file, default : " + config.cFile);
+        params.addOption("multiclient", true, "client connection per Writer/Reader, default : " + config.multiClient);
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        config.cFile =  params.getOptionValue("cfile", config.cFile);
+        config.cFile = params.getOptionValue("cfile", config.cFile);
         config.multiClient = Boolean.parseBoolean(params.getOptionValue("multiclient", Boolean.toString(config.multiClient)));
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         fdb = FDB.selectAPIVersion(config.version);
         if (config.multiClient) {
             db = null;
@@ -98,9 +101,5 @@ public class FoundationDB implements Storage<byte[]> {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    public static long generateStartKey(int id) {
-        return (long) id * (long) Integer.MAX_VALUE;
     }
 }

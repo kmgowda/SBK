@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.ram;
@@ -16,7 +16,7 @@ public interface RamParameters {
 
     /**
      * Get Storage Name.
-     * @return   Name of the storage
+     * @return Name of the storage
      */
     String getStorageName();
 
@@ -29,17 +29,15 @@ public interface RamParameters {
 
     /**
      * Get the Port number to user.
-     * @return   port number.
+     * @return port number.
      */
     int getRamPort();
 
     /**
      * get Max Connections.
-     * @return   Maximum allowed connections.
+     * @return Maximum allowed connections.
      */
     int getMaxConnections();
-
-
 
 
 }

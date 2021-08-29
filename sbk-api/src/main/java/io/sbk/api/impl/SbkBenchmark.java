@@ -5,32 +5,32 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.api.impl;
 
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
-import io.sbk.config.Config;
 import io.sbk.api.DataReader;
-import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
-import io.sbk.logger.Logger;
-import io.sbk.perl.Performance;
-import io.sbk.config.PerlConfig;
-import io.sbk.perl.PeriodicRecorder;
 import io.sbk.api.Storage;
+import io.sbk.config.Config;
+import io.sbk.config.PerlConfig;
+import io.sbk.data.DataType;
+import io.sbk.logger.Logger;
+import io.sbk.perl.LatencyRecordWindow;
+import io.sbk.perl.Performance;
+import io.sbk.perl.PeriodicRecorder;
+import io.sbk.perl.impl.ArrayLatencyRecorder;
+import io.sbk.perl.impl.CQueuePerformance;
 import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
+import io.sbk.perl.impl.HashMapLatencyRecorder;
 import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
 import io.sbk.perl.impl.TotalWindowLatencyPeriodicRecorder;
 import io.sbk.state.State;
-import io.sbk.time.Time;
-import io.sbk.perl.impl.ArrayLatencyRecorder;
-import io.sbk.perl.impl.HashMapLatencyRecorder;
-import io.sbk.perl.LatencyRecordWindow;
-import io.sbk.perl.impl.CQueuePerformance;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 import lombok.Synchronized;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -142,13 +142,13 @@ public class SbkBenchmark implements Benchmark {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
             Printer.log.info("Window Latency Store: Array, Size: " +
-                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
                     time, perlConfig.maxHashMapSizeMB);
             Printer.log.info("Window Latency Store: HashMap, Size: " +
-                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
         }
         return window;
     }
@@ -167,21 +167,21 @@ public class SbkBenchmark implements Benchmark {
                 PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
                 time, perlConfig.totalMaxHashMapSizeMB);
         Printer.log.info("Total Window Latency Store: HashMap, Size: " +
-                totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB +" MB");
+                totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
 
         if (perlConfig.histogram) {
             totalWindowExtension = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow);
             Printer.log.info(String.format("Total Window Extension: HdrHistogram, Size: %.2f MB",
-                    (totalWindowExtension.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB ));
+                    (totalWindowExtension.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB));
         } else if (perlConfig.csv) {
             totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, perlConfig.csvFileSizeGB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Extension: CSV, Size: " +
-                    totalWindowExtension.getMaxMemoryBytes() / PerlConfig.BYTES_PER_GB +" GB");
+                    totalWindowExtension.getMaxMemoryBytes() / PerlConfig.BYTES_PER_GB + " GB");
         } else {
             totalWindowExtension = totalWindow;
             Printer.log.info("Total Window Extension: None, Size: 0 MB");
@@ -251,12 +251,12 @@ public class SbkBenchmark implements Benchmark {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, maxQs, params, writeStats.getSendChannel(),
-                                dType, time, writers.get(i), logger,  executor))
+                                dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs,  params, null,
+                        .map(i -> new SbkWriter(i, maxQs, params, null,
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             }
@@ -271,7 +271,7 @@ public class SbkBenchmark implements Benchmark {
                             readStats.getSendChannel(), dType, time, readers.get(i),
                             logger, executor))
                     .collect(Collectors.toList());
-        }  else {
+        } else {
             sbkReaders = null;
         }
 
@@ -293,7 +293,7 @@ public class SbkBenchmark implements Benchmark {
             final long delta = recordsPerWriter > 0 ?
                     params.getTotalRecords() - (recordsPerWriter * params.getWritersCount()) : 0;
 
-            writersCB = CompletableFuture.runAsync( () -> {
+            writersCB = CompletableFuture.runAsync(() -> {
                 long secondsToRun = params.getTotalSecondsToRun();
                 boolean doWork = true;
                 int i = 0;
@@ -303,7 +303,7 @@ public class SbkBenchmark implements Benchmark {
                         try {
                             CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
                                     i + j + 1 == params.getWritersCount() ?
-                                    recordsPerWriter + delta : recordsPerWriter);
+                                            recordsPerWriter + delta : recordsPerWriter);
                             writeFutures.add(ret);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -324,10 +324,10 @@ public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor).thenAccept( d -> {
+            }, executor).thenAccept(d -> {
                 try {
                     CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0])).get();
-                } catch (InterruptedException  | ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
             });
@@ -350,11 +350,11 @@ public class SbkBenchmark implements Benchmark {
                 long secondsToRun = params.getTotalSecondsToRun();
                 boolean doWork = true;
                 int i = 0;
-                while (i < params.getReadersCount() && doWork)  {
-                    int stepCnt = Math.min(params.getReadersStep(), params.getReadersCount()-i);
+                while (i < params.getReadersCount() && doWork) {
+                    int stepCnt = Math.min(params.getReadersStep(), params.getReadersCount() - i);
                     for (int j = 0; j < stepCnt; j++) {
                         try {
-                            CompletableFuture<Void> ret = sbkReaders.get(i+j).run(secondsToRun, i+j+1 == params.getReadersCount() ?
+                            CompletableFuture<Void> ret = sbkReaders.get(i + j).run(secondsToRun, i + j + 1 == params.getReadersCount() ?
                                     recordsPerReader + delta : recordsPerReader);
                             readFutures.add(ret);
                         } catch (IOException e) {
@@ -376,10 +376,10 @@ public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor).thenAccept( d -> {
+            }, executor).thenAccept(d -> {
                         try {
                             CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0])).get();
-                        } catch (InterruptedException  | ExecutionException e) {
+                        } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
                         }
                     }

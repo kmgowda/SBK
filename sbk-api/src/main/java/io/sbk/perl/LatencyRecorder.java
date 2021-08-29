@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.perl;
@@ -96,7 +96,7 @@ public class LatencyRecorder extends LatencyRecord {
         if (latency < 0) {
             this.invalidLatencyRecords += events;
         } else {
-            this.totalLatency +=  latency * events;
+            this.totalLatency += latency * events;
             if (latency < this.lowLatency) {
                 this.lowerLatencyDiscardRecords += events;
             } else if (latency > this.highLatency) {

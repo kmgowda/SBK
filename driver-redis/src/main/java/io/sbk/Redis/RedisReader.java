@@ -5,14 +5,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Redis;
 
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-
 import redis.clients.jedis.Jedis;
 
 import java.io.EOFException;
@@ -32,14 +31,14 @@ public class RedisReader implements Reader<String> {
     public String read() throws IOException, EOFException {
         String ret = jedis.lpop(listName);
         if (ret == null) {
-            throw  new EOFException();
+            throw new EOFException();
         }
         return ret;
     }
 
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
 
     }
 }

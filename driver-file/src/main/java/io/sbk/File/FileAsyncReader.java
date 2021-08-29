@@ -5,14 +5,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.File;
 
 import io.sbk.api.AsyncReader;
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
-
+import io.sbk.data.DataType;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -57,7 +56,7 @@ public class FileAsyncReader implements AsyncReader<ByteBuffer> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         in.close();
     }
 }

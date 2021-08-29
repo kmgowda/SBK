@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.gem.impl;
@@ -14,24 +14,24 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
-import io.sbk.config.Config;
-import io.sbk.data.DataType;
-import io.sbk.exception.HelpException;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbk.api.impl.SbkUtils;
-import io.sbk.gem.GemBenchmark;
+import io.sbk.config.Config;
 import io.sbk.config.GemConfig;
-import io.sbk.logger.GemLogger;
+import io.sbk.config.RamConfig;
+import io.sbk.data.DataType;
+import io.sbk.exception.HelpException;
+import io.sbk.gem.GemBenchmark;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.RemoteResponse;
+import io.sbk.logger.GemLogger;
 import io.sbk.logger.impl.GemRamPrometheusLogger;
-import io.sbk.time.Time;
-import io.sbk.config.RamConfig;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.ram.impl.SbkRamBenchmark;
 import io.sbk.ram.impl.SbkRamParameters;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
@@ -70,13 +70,13 @@ public class SbkGem {
      * @return Array of remote responses
      */
     public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
-                           GemLogger outLogger) throws ParseException, IllegalArgumentException,
+                                       GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
         final GemBenchmark benchmark;
         try {
             benchmark = buildBenchmark(args, packageName, applicationName, outLogger);
         } catch (HelpException ex) {
-           return null;
+            return null;
         }
         final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
         ret.thenAccept(results -> printRemoteResults(results, false));
@@ -132,14 +132,14 @@ public class SbkGem {
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(GemConfig.DESC);
-        Printer.log.info(GemConfig.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
-        Printer.log.info("Arguments List: "+Arrays.toString(args));
+        Printer.log.info(GemConfig.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
+        Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
-        Printer.log.info("Storage Drivers Package: "+ storagePackageName);
-        Printer.log.info(Config.SBK_APP_NAME + ": "+ Objects.requireNonNullElse(sbkAppName, ""));
-        Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
-        Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
-        Printer.log.info("'"+Config.CLASS_OPTION_ARG +"': "+ Objects.requireNonNullElse(argsClassName, ""));
+        Printer.log.info("Storage Drivers Package: " + storagePackageName);
+        Printer.log.info(Config.SBK_APP_NAME + ": " + Objects.requireNonNullElse(sbkAppName, ""));
+        Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
+        Printer.log.info(Config.SBK_APP_HOME + ": " + Objects.requireNonNullElse(sbkAppHome, ""));
+        Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + Objects.requireNonNullElse(argsClassName, ""));
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -160,7 +160,7 @@ public class SbkGem {
         }
         gemConfig.remoteDir = appName;
         if (StringUtils.isNotEmpty(version)) {
-            gemConfig.remoteDir += "-"+version;
+            gemConfig.remoteDir += "-" + version;
         }
 
         logger = Objects.requireNonNullElseGet(outLogger, GemRamPrometheusLogger::new);
@@ -173,13 +173,13 @@ public class SbkGem {
                 device = packageStore.getStorage(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                     IllegalAccessException | InstantiationException ex) {
-                Printer.log.warn("Instantiation of storage class '"+className+ "' from the package '" +
+                Printer.log.warn("Instantiation of storage class '" + className + "' from the package '" +
                         storagePackageName + "' failed!, " + "error: " + ex);
             }
             storageDevice = device;
         }
 
-        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " "+Config.CLASS_OPTION_ARG +" "+argsClassName :
+        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName :
                 appName;
         storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
 
@@ -199,7 +199,7 @@ public class SbkGem {
         int i = 1;
 
         while (true) {
-            Printer.log.info("SBK-GEM ["+i+ "]: Arguments to process : "+Arrays.toString(processArgs));
+            Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " + Arrays.toString(processArgs));
             i++;
             try {
                 params.parseArgs(processArgs);
@@ -221,7 +221,7 @@ public class SbkGem {
                 }
                 continue;
             } catch (HelpException ex) {
-                System.out.println("\n"+ex.getHelpText());
+                System.out.println("\n" + ex.getHelpText());
                 throw ex;
             }
             break;
@@ -230,7 +230,7 @@ public class SbkGem {
         if (storageDevice != null) {
             final DataType<?> dType = storageDevice.getDataType();
             if (dType == null) {
-                String errMsg = "No storage Data type of Remote Storage device: "+ className;
+                String errMsg = "No storage Data type of Remote Storage device: " + className;
                 Printer.log.error(errMsg);
                 throw new ParseException(errMsg);
             }
@@ -238,9 +238,9 @@ public class SbkGem {
             int minSize = dType.getWriteReadMinSize();
             if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
                 String errMsg =
-                        "Invalid record size: "+ params.getRecordSize() +
-                                ", For both Writers and Readers, minimum data size should be "+ minSize +
-                                " for data type: " +dType.getClass().getName();
+                        "Invalid record size: " + params.getRecordSize() +
+                                ", For both Writers and Readers, minimum data size should be " + minSize +
+                                " for data type: " + dType.getClass().getName();
                 Printer.log.error(errMsg);
                 throw new ParseException(errMsg);
             }
@@ -257,7 +257,7 @@ public class SbkGem {
         final String[] sbkArgsList = SbkUtils.removeOptionArgsAndValues(
                 SbkUtils.removeOptionArgsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
         final StringBuilder sbkArgsBuilder = new StringBuilder(Config.CLASS_OPTION_ARG + " " + className);
-        for (String arg: sbkArgsList) {
+        for (String arg : sbkArgsList) {
             sbkArgsBuilder.append(" ");
             sbkArgsBuilder.append(arg);
         }
@@ -269,9 +269,9 @@ public class SbkGem {
         sbkArgsBuilder.append(" -ram " + params.getLocalHost());
         sbkArgsBuilder.append(" -ramport " + params.getRamPort());
 
-        Printer.log.info("SBK dir: "+params.getSbkDir());
-        Printer.log.info("SBK command: "+params.getSbkCommand());
-        Printer.log.info("Arguments to remote SBK command: "+ sbkArgsBuilder);
+        Printer.log.info("SBK dir: " + params.getSbkDir());
+        Printer.log.info("SBK command: " + params.getSbkCommand());
+        Printer.log.info("Arguments to remote SBK command: " + sbkArgsBuilder);
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
         ramConfig.maxConnections = params.getConnections().length;
@@ -284,7 +284,7 @@ public class SbkGem {
         ramArgsList.add(Integer.toString(params.getConnections().length));
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
-        Printer.log.info("Arguments to  SBK-RAM: "+ Arrays.toString(ramArgs));
+        Printer.log.info("Arguments to  SBK-RAM: " + Arrays.toString(ramArgs));
 
         ramParams = new SbkRamParameters(appName, params.getRamPort(), params.getConnections().length);
         try {
@@ -306,7 +306,7 @@ public class SbkGem {
         System.out.println("SBK-GEM Remote Results");
         for (int i = 0; i < results.length; i++) {
             System.out.println(separatorText);
-            System.out.println("Host "+ (i+1) +": "+results[i].host +", return code: "+results[i].returnCode);
+            System.out.println("Host " + (i + 1) + ": " + results[i].host + ", return code: " + results[i].returnCode);
             if (all || results[i].returnCode != 0) {
                 System.out.println();
                 System.out.println(" : stdout : \n");

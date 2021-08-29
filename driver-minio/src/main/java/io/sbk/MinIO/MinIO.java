@@ -5,41 +5,37 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.MinIO;
-
-import io.minio.Result;
-import io.minio.errors.InvalidArgumentException;
-import io.minio.messages.Item;
-import io.sbk.api.DataReader;
-import io.sbk.data.DataType;
-import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
-import io.sbk.api.ParameterOptions;
-import io.sbk.data.impl.ByteArray;
-
-import java.io.IOException;
-
-
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-
 import io.minio.MinioClient;
+import io.minio.Result;
 import io.minio.errors.ErrorResponseException;
 import io.minio.errors.InsufficientDataException;
 import io.minio.errors.InternalException;
+import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.InvalidEndpointException;
 import io.minio.errors.InvalidPortException;
 import io.minio.errors.NoResponseException;
 import io.minio.errors.RegionConflictException;
+import io.minio.messages.Item;
+import io.sbk.api.DataReader;
+import io.sbk.api.DataWriter;
+import io.sbk.api.ParameterOptions;
+import io.sbk.api.Storage;
+import io.sbk.data.DataType;
+import io.sbk.data.impl.ByteArray;
 import io.sbk.system.Printer;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 /**
  * Class for MinIO.
@@ -74,18 +70,18 @@ public class MinIO implements Storage<byte[]> {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("bucket", true, "Bucket name, default bucket name: "+config.bucketName);
-        params.addOption("url", true, "Minio url, default url: "+config.url);
-        params.addOption("key", true, "Access Key, default User name: "+config.accessKey);
-        params.addOption("secret", true, "secret key, default password: "+config.secretKey);
+        params.addOption("bucket", true, "Bucket name, default bucket name: " + config.bucketName);
+        params.addOption("url", true, "Minio url, default url: " + config.url);
+        params.addOption("key", true, "Access Key, default User name: " + config.accessKey);
+        params.addOption("secret", true, "secret key, default password: " + config.secretKey);
         params.addOption("recreate", true,
-                "If the table is already existing, delete and recreate the same, default: "+config.reCreate);
+                "If the table is already existing, delete and recreate the same, default: " + config.reCreate);
 
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        config.bucketName =  params.getOptionValue("bucket", config.bucketName);
+        config.bucketName = params.getOptionValue("bucket", config.bucketName);
         config.url = params.getOptionValue("url", config.url);
         config.accessKey = params.getOptionValue("key", config.accessKey);
         config.secretKey = params.getOptionValue("secret", config.secretKey);
@@ -106,29 +102,29 @@ public class MinIO implements Storage<byte[]> {
             // Check if the bucket already exists.
             boolean isExist = mclient.bucketExists(config.bucketName);
             if (isExist) {
-                Printer.log.info("Bucket '" + config.bucketName +"' already exists.");
+                Printer.log.info("Bucket '" + config.bucketName + "' already exists.");
                 if (config.reCreate && params.getWritersCount() > 0) {
-                    Printer.log.info("Deleting the Bucket: " + config.bucketName );
+                    Printer.log.info("Deleting the Bucket: " + config.bucketName);
                     //Delete all existing objects first
                     final Iterable<Result<Item>> results =
                             mclient.listObjects(config.bucketName, config.bucketName, false);
                     Item item;
                     for (Result<Item> result : results) {
                         item = result.get();
-                        Printer.log.info("Deleting the object: " + item.objectName() );
+                        Printer.log.info("Deleting the object: " + item.objectName());
                         mclient.removeObject(config.bucketName, item.objectName());
                     }
                     mclient.removeBucket(config.bucketName);
                     isExist = false;
                 }
             } else if (params.getWritersCount() < 1) {
-                throw  new IOException("Bucket '" + config.bucketName +"' does not exist.");
+                throw new IOException("Bucket '" + config.bucketName + "' does not exist.");
             } else {
-                Printer.log.info("Bucket '" + config.bucketName +"' does not exist.");
+                Printer.log.info("Bucket '" + config.bucketName + "' does not exist.");
             }
 
             if (!isExist && params.getWritersCount() > 0) {
-                Printer.log.info("Creating the Bucket: " + config.bucketName );
+                Printer.log.info("Creating the Bucket: " + config.bucketName);
                 mclient.makeBucket(config.bucketName);
             }
         } catch (InvalidPortException | InvalidEndpointException | org.xmlpull.v1.XmlPullParserException |
@@ -151,7 +147,7 @@ public class MinIO implements Storage<byte[]> {
 
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
-        return  new MinIOReader(id, params, config, mclient);
+        return new MinIOReader(id, params, config, mclient);
     }
 
     @Override

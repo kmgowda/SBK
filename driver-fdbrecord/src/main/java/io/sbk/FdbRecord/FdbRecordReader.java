@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.FdbRecord;
 
@@ -32,7 +32,7 @@ public class FdbRecordReader implements Reader<ByteString> {
     private long key;
 
     public FdbRecordReader(int id, ParameterOptions params, FDBDatabase db,
-                           Function<FDBRecordContext, FDBRecordStore> recordStoreProvider ) throws IOException {
+                           Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
         this.key = FdbRecord.generateStartKey(id);
         this.db = db;
         this.recordStoreProvider = recordStoreProvider;
@@ -57,6 +57,6 @@ public class FdbRecordReader implements Reader<ByteString> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 }

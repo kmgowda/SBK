@@ -5,22 +5,22 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Pulsar;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Storage;
+import org.apache.pulsar.client.api.PulsarClient;
+import org.apache.pulsar.client.api.PulsarClientException;
 
 import java.io.IOException;
 import java.util.Objects;
-
-import org.apache.pulsar.client.api.PulsarClient;
-import org.apache.pulsar.client.api.PulsarClientException;
 
 /**
  * Class for Pulsar Benchmarking.
@@ -54,8 +54,8 @@ public class Pulsar implements Storage<byte[]> {
         params.addOption("admin", true,
                 "Admin URI, required to create the partitioned topic, default: " + config.adminUri);
         params.addOption("partitions", true,
-                "Number of partitions of the topic, default: "+ config.partitions);
-        params.addOption("ensembleSize", true, "EnsembleSize default: " + config.ensembleSize );
+                "Number of partitions of the topic, default: " + config.partitions);
+        params.addOption("ensembleSize", true, "EnsembleSize default: " + config.ensembleSize);
         params.addOption("writeQuorum", true, "WriteQuorum default: " + config.writeQuorum);
         params.addOption("ackQuorum", true, "AckQuorum default: " + config.ackQuorum);
         params.addOption("deduplication", true,
@@ -65,35 +65,35 @@ public class Pulsar implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        config.topicName =  params.getOptionValue("topic", config.topicName);
+        config.topicName = params.getOptionValue("topic", config.topicName);
         config.brokerUri = params.getOptionValue("broker", config.brokerUri);
 
         config.adminUri = params.getOptionValue("admin", config.adminUri);
-        config.cluster =  params.getOptionValue("cluster", DEFAULT_CLUSTER);
+        config.cluster = params.getOptionValue("cluster", DEFAULT_CLUSTER);
         config.partitions = Integer.parseInt(params.getOptionValue("partitions", String.valueOf(config.partitions)));
-        config.ioThreads =  Integer.parseInt(params.getOptionValue("threads", String.valueOf(config.ioThreads)));
+        config.ioThreads = Integer.parseInt(params.getOptionValue("threads", String.valueOf(config.ioThreads)));
         config.ensembleSize = Integer.parseInt(params.getOptionValue("ensembleSize", String.valueOf(config.ensembleSize)));
         config.writeQuorum = Integer.parseInt(params.getOptionValue("writeQuorum", String.valueOf(config.writeQuorum)));
         config.ackQuorum = Integer.parseInt(params.getOptionValue("ackQuorum", String.valueOf(config.ackQuorum)));
         config.deduplicationEnabled = Boolean.parseBoolean(params.getOptionValue("recreate",
-                                        String.valueOf(config.deduplicationEnabled)));
+                String.valueOf(config.deduplicationEnabled)));
 
         final String[] names = config.topicName.split("[/]");
         try {
-            config.nameSpace = names[names.length-2];
+            config.nameSpace = names[names.length - 2];
         } catch (ArrayIndexOutOfBoundsException ex) {
             config.nameSpace = DEFAULT_NAMESPACE;
         }
         try {
-            config.tenant = names[names.length-3];
-        } catch ( ArrayIndexOutOfBoundsException ex) {
+            config.tenant = names[names.length - 3];
+        } catch (ArrayIndexOutOfBoundsException ex) {
             config.tenant = DEFAULT_TENANT;
         }
 
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         try {
             client = PulsarClient.builder().ioThreads(config.ioThreads).serviceUrl(config.brokerUri).build();
         } catch (PulsarClientException ex) {
@@ -129,7 +129,7 @@ public class Pulsar implements Storage<byte[]> {
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
-            return new PulsarReader(id, params, config.topicName, config.topicName+"rdGrp", client);
+            return new PulsarReader(id, params, config.topicName, config.topicName + "rdGrp", client);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

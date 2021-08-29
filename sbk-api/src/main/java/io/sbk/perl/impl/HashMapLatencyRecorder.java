@@ -5,16 +5,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.perl.impl;
 
+import io.sbk.config.PerlConfig;
 import io.sbk.perl.LatencyPercentiles;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
-import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -53,7 +53,7 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
 
     @Override
     final public boolean isFull() {
-        return (this.hashMapBytesCount > this.maxHashMapSizeBytes ) || super.isOverflow();
+        return (this.hashMapBytesCount > this.maxHashMapSizeBytes) || super.isOverflow();
     }
 
     @Override
@@ -68,12 +68,12 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
             copyLatencies.reportLatencyRecord(this);
         }
         percentiles.reset(validLatencyRecords);
-        Iterator<Long> keys =  latencies.keySet().stream().sorted().iterator();
+        Iterator<Long> keys = latencies.keySet().stream().sorted().iterator();
         long curIndex = 0;
         while (keys.hasNext()) {
-            final long latency  = keys.next();
+            final long latency = keys.next();
             final long count = latencies.get(latency);
-            final long nextIndex =  curIndex + count;
+            final long nextIndex = curIndex + count;
 
             if (copyLatencies != null) {
                 copyLatencies.reportLatency(latency, count);
@@ -84,7 +84,6 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
         }
         hashMapBytesCount = 0;
     }
-
 
 
     @Override

@@ -5,19 +5,20 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.FoundationDB;
 
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
+import io.sbk.time.Time;
+
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -61,7 +62,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         if (config.multiClient && this.db != null) {
             this.db.close();
         }
@@ -69,10 +70,10 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
 
     @Override
     public void writeSetTime(DataType<byte[]> dType, byte[] data, int size, Time time, Status status) throws IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         final long ctime = time.getCurrentTime();
         status.bytes = size * recs;
-        status.records =  recs;
+        status.records = recs;
         status.startTime = ctime;
         db.run(tr -> {
             long keyCnt = key;
@@ -88,9 +89,9 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
                             Status status, SendChannel sendChannel, int id) throws IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         status.bytes = size * recs;
-        status.records =  recs;
+        status.records = recs;
         status.startTime = time.getCurrentTime();
         db.run(tr -> {
             long keyCnt = key;

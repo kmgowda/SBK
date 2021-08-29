@@ -5,19 +5,18 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Pravega;
 
-import io.sbk.api.ParameterOptions;
-import io.sbk.api.Reader;
-
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamReader;
-import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.pravega.client.stream.ReaderConfig;
 import io.pravega.client.stream.ReinitializationRequiredException;
-import io.pravega.client.EventStreamClientFactory;
+import io.pravega.client.stream.impl.ByteArraySerializer;
+import io.sbk.api.ParameterOptions;
+import io.sbk.api.Reader;
 
 import java.io.IOException;
 
@@ -34,7 +33,7 @@ public class PravegaReader implements Reader<byte[]> {
         final String readerSt = Integer.toString(id);
         this.params = params;
         reader = factory.createReader(readerSt, readergrp,
-                        new ByteArraySerializer(), ReaderConfig.builder().build());
+                new ByteArraySerializer(), ReaderConfig.builder().build());
     }
 
     @Override

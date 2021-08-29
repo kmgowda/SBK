@@ -5,17 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.gem.impl;
 
 import io.sbk.api.impl.SbkDriversParameters;
-import io.sbk.exception.HelpException;
 import io.sbk.config.GemConfig;
+import io.sbk.config.PerlConfig;
+import io.sbk.exception.HelpException;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.SshConnection;
-import io.sbk.config.PerlConfig;
 import io.sbk.system.Printer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -63,19 +63,19 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
             Printer.log.error(ex.toString());
             this.localHost = GemConfig.LOCAL_HOST;
         }
-        addOption("nodes", true, "remote hostnames separated by ',' , default: "+config.nodes);
+        addOption("nodes", true, "remote hostnames separated by ',' , default: " + config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
         addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.gempass);
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkdir);
         addOption("sbkcommand", true,
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
-        addOption("copy", true, "Copy the SBK package to remote hosts; default: "+ config.copy);
-        addOption("delete", true, "Delete SBK package after benchmark; default: "+ config.delete);
+        addOption("copy", true, "Copy the SBK package to remote hosts; default: " + config.copy);
+        addOption("delete", true, "Delete SBK package after benchmark; default: " + config.delete);
         addOption("localhost", true, "this local RAM host name, default: " + localHost);
         addOption("ramport", true, "RAM port number; default: " + ramPort);
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                            "-copy", "-delete", "-localhost", "-ramport"};
+                "-copy", "-delete", "-localhost", "-ramport"};
         this.parsedArgs = null;
     }
 
@@ -101,7 +101,7 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
                 config.gempass, "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
                 "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
                 "-delete", Boolean.toString(config.delete), "-localhost", localHost, "-ramport",
-                Integer.toString(ramPort) };
+                Integer.toString(ramPort)};
 
         connections = new SshConnection[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
@@ -116,7 +116,7 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
         }
 
         if (!Files.isDirectory(Paths.get(config.sbkdir))) {
-            String errMsg = "The SBK application directory: "+config.sbkdir +" not found!";
+            String errMsg = "The SBK application directory: " + config.sbkdir + " not found!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
@@ -131,13 +131,13 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
         Path sbkCommandPath = Paths.get(sbkFullCommand);
 
         if (!Files.exists(sbkCommandPath)) {
-            String errMsg = "The sbk executable command: "+sbkFullCommand+" not found!";
+            String errMsg = "The sbk executable command: " + sbkFullCommand + " not found!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
 
         if (!Files.isExecutable(sbkCommandPath)) {
-            String errMsg = "The executable permissions are not found for command: "+sbkFullCommand;
+            String errMsg = "The executable permissions are not found for command: " + sbkFullCommand;
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }

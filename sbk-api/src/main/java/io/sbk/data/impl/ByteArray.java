@@ -5,11 +5,12 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.data.impl;
 
 import io.sbk.data.DataType;
+
 import java.nio.ByteBuffer;
 import java.util.Random;
 
@@ -25,7 +26,7 @@ public class ByteArray implements DataType<byte[]> {
      */
     @Override
     public byte[] allocate(int size) {
-         return new byte[size];
+        return new byte[size];
     }
 
     /**

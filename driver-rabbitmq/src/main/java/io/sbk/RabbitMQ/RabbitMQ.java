@@ -5,20 +5,20 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RabbitMQ;
+
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-
+import io.sbk.api.Storage;
+import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import io.sbk.system.Printer;
 
 
 /**
@@ -47,7 +47,7 @@ public class RabbitMQ implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        topicName =  params.getOptionValue("topic", null);
+        topicName = params.getOptionValue("topic", null);
         brokerUri = params.getOptionValue("broker", null);
         if (brokerUri == null) {
             throw new IllegalArgumentException("Error: Must specify Broker IP address");
@@ -63,7 +63,7 @@ public class RabbitMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setAutomaticRecoveryEnabled(true);
         connectionFactory.setHost(brokerUri);
@@ -74,7 +74,7 @@ public class RabbitMQ implements Storage<byte[]> {
             connection = connectionFactory.newConnection();
         } catch (TimeoutException ex) {
             ex.printStackTrace();
-            throw  new IOException("Timeout Exception occurred at openStorage of RabbitMQ");
+            throw new IOException("Timeout Exception occurred at openStorage of RabbitMQ");
         }
 
     }

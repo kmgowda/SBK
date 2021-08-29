@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.BookKeeper;
 
@@ -29,7 +29,7 @@ public class BookKeeperReader implements Reader<byte[]> {
 
     @Override
     public byte[] read() throws IOException {
-        LogRecord  record = reader.readNext(true);
+        LogRecord record = reader.readNext(true);
         if (record != null) {
             return record.getPayload();
         }
@@ -37,7 +37,7 @@ public class BookKeeperReader implements Reader<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         reader.close();
     }
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.logger.impl;
@@ -41,12 +41,12 @@ public class PrometheusServer extends CompositeMeterRegistry {
         this.server = createHttpServer();
     }
 
-    public void start() throws IOException  {
+    public void start() throws IOException {
         server.start();
     }
 
 
-    public void stop() throws  IOException {
+    public void stop() throws IOException {
         server.stop(0);
     }
 

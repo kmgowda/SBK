@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.LevelDB;
@@ -20,11 +20,12 @@ import io.sbk.api.Storage;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
-import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+
+import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
 /**
  * Class for RocksDB Benchmarking.
@@ -33,6 +34,10 @@ public class LevelDB implements Storage<byte[]> {
     private final static String CONFIGFILE = "leveldb.properties";
     private LevelDBConfig config;
     private DB db;
+
+    public static long generateStartKey(int id) {
+        return (long) id * (long) Integer.MAX_VALUE;
+    }
 
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
@@ -46,18 +51,18 @@ public class LevelDB implements Storage<byte[]> {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("lfile", true, "LevelDB file, default : "+ config.lFile);
+        params.addOption("lfile", true, "LevelDB file, default : " + config.lFile);
         params.addOption("cache", true, "LevelDB cache size in bytes ");
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        config.lFile =  params.getOptionValue("lfile", config.lFile);
-        config.cache =  Long.parseLong(params.getOptionValue("cache", String.valueOf(params.getRecordSize())));
+        config.lFile = params.getOptionValue("lfile", config.lFile);
+        config.cache = Long.parseLong(params.getOptionValue("cache", String.valueOf(params.getRecordSize())));
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         Options options = new Options();
         options.createIfMissing(true);
         options.cacheSize(config.cache);
@@ -90,10 +95,6 @@ public class LevelDB implements Storage<byte[]> {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    public static long generateStartKey(int id) {
-        return (long) id * (long) Integer.MAX_VALUE;
     }
 }
 

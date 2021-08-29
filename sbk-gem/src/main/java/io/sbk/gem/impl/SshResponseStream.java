@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.gem.impl;
@@ -15,9 +15,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 public final class SshResponseStream {
-    public int returnCode;
     public final OutputStream errOutputStream;
     public final OutputStream stdOutputStream;
+    public int returnCode;
 
 
     public SshResponseStream(boolean stdout) {

@@ -5,23 +5,22 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api.impl;
 
 import io.sbk.api.BiConsumer;
-import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
+import io.sbk.api.Worker;
+import io.sbk.data.DataType;
 import io.sbk.logger.CountWriters;
 import io.sbk.perl.RunBenchmark;
-
 import io.sbk.perl.SendChannel;
-import io.sbk.time.Time;
-import io.sbk.api.Worker;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -60,16 +59,16 @@ public class SbkWriter extends Worker implements RunBenchmark {
     @Override
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
-        return  CompletableFuture.runAsync( () -> {
+        return CompletableFuture.runAsync(() -> {
             wCount.incrementWriters();
             try {
                 if (secondsToRun > 0) {
-                    Printer.log.info("Writer " + id +" started , run seconds: "+secondsToRun);
+                    Printer.log.info("Writer " + id + " started , run seconds: " + secondsToRun);
                 } else {
-                    Printer.log.info("Writer " + id +" started , records: "+recordsCount);
+                    Printer.log.info("Writer " + id + " started , records: " + recordsCount);
                 }
                 perf.apply(secondsToRun, recordsCount);
-                Printer.log.info("Writer " + id +" exited");
+                Printer.log.info("Writer " + id + " exited");
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -103,17 +102,17 @@ public class SbkWriter extends Worker implements RunBenchmark {
         return perfWriter;
     }
 
-    private void RecordsWriter(long secondsToRun, long recordsCount) throws  IOException {
+    private void RecordsWriter(long secondsToRun, long recordsCount) throws IOException {
         writer.RecordsWriter(this, recordsCount, dType, payload, dataSize, time);
     }
 
 
-    private void RecordsWriterSync(long secondsToRun, long recordsCount) throws  IOException {
+    private void RecordsWriterSync(long secondsToRun, long recordsCount) throws IOException {
         writer.RecordsWriterSync(this, recordsCount, dType, payload, dataSize, time, rCnt);
     }
 
 
-    private void RecordsWriterTime(long secondsToRun, long recordsCount) throws  IOException {
+    private void RecordsWriterTime(long secondsToRun, long recordsCount) throws IOException {
         writer.RecordsWriterTime(this, secondsToRun, dType, payload, dataSize, time);
     }
 

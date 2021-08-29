@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.RocksDB;
@@ -41,7 +41,7 @@ public class RocksDBWriter implements Writer<byte[]> {
         try {
             db.put(String.valueOf(this.key++).getBytes(), data);
         } catch (RocksDBException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
         return null;
     }
@@ -51,6 +51,6 @@ public class RocksDBWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.config;
@@ -34,13 +34,12 @@ final public class PerlConfig {
     final public static int MIN_Q_PER_WORKER = 1;
 
     final public static int MS_PER_MIN = MS_PER_SEC * 60;
+    final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 3;
     final public static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
     final public static long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
     final public static int MIN_IDLE_NS = NS_PER_MICRO;
     final public static int DEFAULT_MIN_LATENCY = 0;
-    final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 3;
-
-    final public static  double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
+    final public static double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
     final public static int HDR_SIGNIFICANT_DIGITS = 3;
 

@@ -5,23 +5,23 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.ram.impl;
 
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
-import io.sbk.exception.HelpException;
 import io.sbk.api.impl.SbkUtils;
-import io.sbk.logger.impl.RamPrometheusLogger;
 import io.sbk.config.RamConfig;
+import io.sbk.exception.HelpException;
 import io.sbk.logger.RamLogger;
+import io.sbk.logger.impl.RamPrometheusLogger;
 import io.sbk.ram.RamParameterOptions;
-import io.sbk.time.Time;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
@@ -86,7 +86,7 @@ public class SbkRam {
      * @return Benchmark Interface
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
-                                             RamLogger outLogger) throws ParseException, IllegalArgumentException,
+                                           RamLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, HelpException {
         final RamParameterOptions params;
         final RamLogger logger;
@@ -97,7 +97,7 @@ public class SbkRam {
 
         Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(RamConfig.DESC);
-        Printer.log.info(RamConfig.NAME.toUpperCase() +" Version: " + version);
+        Printer.log.info(RamConfig.NAME.toUpperCase() + " Version: " + version);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
@@ -122,8 +122,8 @@ public class SbkRam {
             Printer.log.error(ex.toString());
             throw ex;
         } catch (HelpException ex) {
-            System.out.println("\n"+ex.getHelpText());
-            throw  ex;
+            System.out.println("\n" + ex.getHelpText());
+            throw ex;
         }
 
         time = SbkUtils.getTime(logger);

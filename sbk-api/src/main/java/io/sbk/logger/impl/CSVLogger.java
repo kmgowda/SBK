@@ -5,20 +5,19 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.logger.impl;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import io.sbk.action.Action;
 import io.sbk.config.Config;
-import io.sbk.options.InputOptions;
 import io.sbk.config.PerlConfig;
+import io.sbk.options.InputOptions;
 import io.sbk.time.Time;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -76,7 +75,7 @@ public class CSVLogger extends SystemLogger {
 
 
     @Override
-    public void open(final InputOptions params, final String storageName, Action action, Time time) throws  IOException {
+    public void open(final InputOptions params, final String storageName, Action action, Time time) throws IOException {
         super.open(params, storageName, action, time);
         if (csvEnable) {
             openCSV();
@@ -84,16 +83,16 @@ public class CSVLogger extends SystemLogger {
     }
 
     final public void writeToCSV(String header, String type, long connections, long maxConnections,
-                           long seconds, long bytes, long records, double recsPerSec,
-                           double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentileValues) {
+                                 long seconds, long bytes, long records, double recsPerSec,
+                                 double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                                 long slc1, long slc2, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
                 String.format("%16d,%s,%s,%s,%s"
-                        + ",%s,%s,%s"
-                        + ",%5d,%5d,%5d,%5d"
-                        + ",%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d"
-                        + ",%8d,%8d,%8d,%2d,%2d",
+                                + ",%s,%s,%s"
+                                + ",%5d,%5d,%5d,%5d"
+                                + ",%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d"
+                                + ",%8d,%8d,%8d,%2d,%2d",
                         ++csvRowCounter, header, type, connections, maxConnections,
                         storageName, action.name(), timeUnitText,
                         writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
@@ -124,7 +123,7 @@ public class CSVLogger extends SystemLogger {
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long slc1, long slc2, long[] percentileValues) {
-        super.printTotal( seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        super.printTotal(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
             writeToCSV(Config.NAME, TOTAL_PRINT, 0, 0,

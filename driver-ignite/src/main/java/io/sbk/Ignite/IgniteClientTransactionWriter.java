@@ -5,17 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Ignite;
 
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
+import io.sbk.time.Time;
 import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientTransaction;
 import org.apache.ignite.client.IgniteClient;
@@ -53,7 +53,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 
     @Override
@@ -61,7 +61,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
         final int recs = params.getRecordsPerSync();
         final long ctime = time.getCurrentTime();
         status.bytes = size * recs;
-        status.records =  recs;
+        status.records = recs;
         status.startTime = ctime;
         ClientTransaction tx = client.transactions().txStart();
         long keyCnt = key;
@@ -78,7 +78,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
                             Status status, SendChannel sendChannel, int id) throws IOException {
         final int recs = params.getRecordsPerSync();
         status.bytes = size * recs;
-        status.records =  recs;
+        status.records = recs;
         status.startTime = time.getCurrentTime();
         ClientTransaction tx = client.transactions().txStart();
         long keyCnt = key;

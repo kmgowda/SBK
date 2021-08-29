@@ -15,7 +15,7 @@ plugins.withId('java') {
     apply plugin: 'maven'
 
     compileJava {
-        
+
         options.compilerArgs.addAll([
                 "-Xlint:deprecation",
                 "-Xlint:divzero",
@@ -28,7 +28,7 @@ plugins.withId('java') {
         ])
     }
 
-   task sourceJar(type: Jar) {
+    task sourceJar(type: Jar) {
         classifier = 'sources'
         from sourceSets.main.java
     }
@@ -63,7 +63,7 @@ plugins.withId('java') {
     }
 
     tasks.withType(Test) {
-        systemProperties 'logback.configurationFile' : new File(buildDir,'resources/test/logback.xml').absolutePath
+        systemProperties 'logback.configurationFile': new File(buildDir, 'resources/test/logback.xml').absolutePath
         testLogging.showStandardStreams = false
         testLogging.exceptionFormat = "FULL"
         testLogging.showCauses = true
@@ -77,8 +77,8 @@ plugins.withId('java') {
 
     dependencies {
         // The production code uses the SLF4J logging API at compile time
-        compile group: 'org.slf4j', name:'slf4j-api', version: slf4jVersion
-        testCompile group: 'junit', name:'junit', version: junitVersion
+        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+        testCompile group: 'junit', name: 'junit', version: junitVersion
         testCompile "org.mockito:mockito-core:${mockitoVersion}"
     }
 }

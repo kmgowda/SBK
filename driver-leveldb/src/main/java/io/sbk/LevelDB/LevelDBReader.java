@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.LevelDB;
@@ -13,6 +13,7 @@ package io.sbk.LevelDB;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import org.iq80.leveldb.DB;
+
 import java.io.EOFException;
 import java.io.IOException;
 
@@ -41,6 +42,6 @@ public class LevelDBReader implements Reader<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 }

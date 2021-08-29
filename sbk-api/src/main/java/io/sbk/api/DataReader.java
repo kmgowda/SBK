@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api;
@@ -107,7 +107,7 @@ public interface DataReader<T> {
      * @throws IOException If an exception occurred.
      */
     void RecordsReaderRWRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
-                                     RateController rController) throws EOFException, IOException;
+                                    RateController rController) throws EOFException, IOException;
 
     /**
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
@@ -121,7 +121,7 @@ public interface DataReader<T> {
      * @throws IOException If an exception occurred.
      */
     void RecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
-                                       RateController rController) throws EOFException, IOException;
+                                      RateController rController) throws EOFException, IOException;
 
     /**
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.

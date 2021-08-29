@@ -5,14 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Nsq;
 
 import com.github.brainlag.nsq.NSQProducer;
 import com.github.brainlag.nsq.exceptions.NSQException;
-import io.sbk.api.Writer;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Writer;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -26,7 +26,7 @@ public class NsqWriter implements Writer<byte[]> {
     final private String topicName;
 
     public NsqWriter(int writerID, ParameterOptions params,
-                         String topicName, NsqClientConfig config) throws IOException {
+                     String topicName, NsqClientConfig config) throws IOException {
         final String[] uri = config.uri.split(":", 2);
         this.topicName = topicName;
         producer = new NSQProducer();
@@ -40,7 +40,7 @@ public class NsqWriter implements Writer<byte[]> {
         try {
             producer.produce(topicName, data);
         } catch (NSQException | TimeoutException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
         return null;
     }

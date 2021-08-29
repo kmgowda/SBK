@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api;
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Interface for Writers.
  */
-public interface Writer<T>  extends DataRecordsWriter<T> {
+public interface Writer<T> extends DataRecordsWriter<T> {
 
     /**
      * Asynchronously Writes the data .
@@ -87,14 +87,14 @@ public interface Writer<T>  extends DataRecordsWriter<T> {
                              Status status, SendChannel sendChannel, int id) throws IOException {
         CompletableFuture<?> ret;
         status.bytes = size;
-        status.records =  1;
+        status.records = 1;
         status.startTime = time.getCurrentTime();
         ret = writeAsync(data);
         if (ret == null) {
             status.endTime = time.getCurrentTime();
             sendChannel.send(id, status.startTime, status.endTime, size, status.records);
         } else {
-            final long beginTime =  status.startTime;
+            final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
                 sendChannel.sendException(id, ex);
                 return null;

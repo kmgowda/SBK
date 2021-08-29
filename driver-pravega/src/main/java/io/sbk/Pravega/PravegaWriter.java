@@ -5,24 +5,23 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Pravega;
 
-import io.sbk.data.DataType;
+import io.pravega.client.EventStreamClientFactory;
+import io.pravega.client.stream.EventStreamWriter;
+import io.pravega.client.stream.EventWriterConfig;
+import io.pravega.client.stream.impl.ByteArraySerializer;
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
+import io.sbk.time.Time;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-
-import io.pravega.client.stream.EventStreamWriter;
-import io.pravega.client.stream.impl.ByteArraySerializer;
-import io.pravega.client.stream.EventWriterConfig;
-import io.pravega.client.EventStreamClientFactory;
 
 /**
  * Class for Pravega writer/producer.
@@ -69,11 +68,11 @@ public class PravegaWriter implements Writer<byte[]> {
 
     @Override
     public void sync() throws IOException {
-            producer.flush();
+        producer.flush();
     }
 
     @Override
     public synchronized void close() throws IOException {
-            producer.close();
+        producer.close();
     }
 }

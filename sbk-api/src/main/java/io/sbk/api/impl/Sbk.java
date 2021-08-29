@@ -5,27 +5,27 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.api.impl;
 
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
+import io.sbk.api.ParameterOptions;
+import io.sbk.api.Storage;
+import io.sbk.api.StoragePackage;
 import io.sbk.config.Config;
+import io.sbk.config.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.exception.HelpException;
-import io.sbk.api.ParameterOptions;
 import io.sbk.logger.Logger;
-import io.sbk.api.StoragePackage;
 import io.sbk.logger.impl.GrpcPrometheusLogger;
-import io.sbk.config.PerlConfig;
-import io.sbk.api.Storage;
-import io.sbk.time.Time;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
@@ -116,7 +116,7 @@ public class Sbk {
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
                 StringUtils.isNotEmpty(sbkApplicationName) ? sbkApplicationName : Config.NAME;
-        final String storagePackageName =  StringUtils.isNotEmpty(packageName) ? packageName : Config.SBK_PACKAGE_NAME;
+        final String storagePackageName = StringUtils.isNotEmpty(packageName) ? packageName : Config.SBK_PACKAGE_NAME;
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
@@ -134,14 +134,14 @@ public class Sbk {
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         Printer.log.info(Config.DESC);
-        Printer.log.info(Config.NAME.toUpperCase() +" Version: "+version);
-        Printer.log.info("Arguments List: "+Arrays.toString(args));
+        Printer.log.info(Config.NAME.toUpperCase() + " Version: " + version);
+        Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
-        Printer.log.info("Storage Drivers Package: "+ storagePackageName);
-        Printer.log.info(Config.SBK_APP_NAME + ": "+   Objects.requireNonNullElse(sbkApplicationName, ""));
-        Printer.log.info(Config.SBK_APP_HOME+": "+ Objects.requireNonNullElse(sbkAppHome, ""));
-        Printer.log.info(Config.SBK_CLASS_NAME + ": "+ Objects.requireNonNullElse(sbkClassName, ""));
-        Printer.log.info("'"+Config.CLASS_OPTION_ARG +"': "+ argsClassName);
+        Printer.log.info("Storage Drivers Package: " + storagePackageName);
+        Printer.log.info(Config.SBK_APP_NAME + ": " + Objects.requireNonNullElse(sbkApplicationName, ""));
+        Printer.log.info(Config.SBK_APP_HOME + ": " + Objects.requireNonNullElse(sbkAppHome, ""));
+        Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
+        Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + argsClassName);
         packageStore.printDrivers();
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -169,9 +169,9 @@ public class Sbk {
         } else {
             try {
                 storageDevice = packageStore.getStorage(className);
-            } catch (ClassNotFoundException | NoSuchMethodException |  InvocationTargetException
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
                     | IllegalAccessException ex) {
-                Printer.log.error("Instantiation of storage class '"+className+ "' from the package '" +
+                Printer.log.error("Instantiation of storage class '" + className + "' from the package '" +
                         storagePackageName + "' failed!, " + "error: " + ex);
                 final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
                 logger.addArgs(helpParams);
@@ -202,7 +202,7 @@ public class Sbk {
             Printer.log.error(ex.toString());
             throw ex;
         } catch (HelpException ex) {
-            System.out.println("\n"+ex.getHelpText());
+            System.out.println("\n" + ex.getHelpText());
             throw ex;
         }
 
@@ -216,9 +216,9 @@ public class Sbk {
         int minSize = dType.getWriteReadMinSize();
         if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
             String errMsg =
-                    "Invalid record size: "+ params.getRecordSize() +
-                            ", For both Writers and Readers, minimum data size should be "+ minSize +
-                            " for data type: " +dType.getClass().getName();
+                    "Invalid record size: " + params.getRecordSize() +
+                            ", For both Writers and Readers, minimum data size should be " + minSize +
+                            " for data type: " + dType.getClass().getName();
             Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }

@@ -5,15 +5,15 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.AsyncFile;
 
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 
 import java.io.EOFException;
@@ -45,7 +45,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
     @Override
     public ByteBuffer read() throws IOException {
-            return null;
+        return null;
     }
 
 
@@ -79,7 +79,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
     @Override
     public void recordReadTime(DataType<ByteBuffer> dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
-        final ByteBuffer buffer =  dType.allocate(params.getRecordSize());
+        final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
 
@@ -105,7 +105,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         in.close();
     }
 }

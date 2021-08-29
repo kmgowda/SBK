@@ -5,18 +5,18 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.logger.impl;
 
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.RamLogger;
+import io.sbk.logger.SetRW;
 import io.sbk.options.InputOptions;
 import io.sbk.perl.LatencyRecord;
-import io.sbk.time.Time;
-import io.sbk.logger.SetRW;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +40,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
     public InputStream getMetricsConfigStream() {
-        return  RamPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        return RamPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                       long slc1, long slc2, long[] percentileValues) {
-        print(SBK_RAM_PREFIX,  prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        print(SBK_RAM_PREFIX, prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (prometheusServer != null) {
             prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
