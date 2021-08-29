@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.perl;
@@ -16,12 +16,12 @@ import io.sbk.time.Time;
 abstract public class LatencyWindow extends LatencyRecorder {
     final protected LatencyPercentiles percentiles;
     final protected Time time;
-    private long startTime;
     final private long[] slc;
+    private long startTime;
 
 
     public LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
-                        double[] percentilesFractions, Time time) {
+                         double[] percentilesFractions, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
         this.percentiles = new LatencyPercentiles(percentilesFractions);
         this.time = time;
@@ -60,12 +60,12 @@ abstract public class LatencyWindow extends LatencyRecorder {
         getSLC(percentiles, slc);
         print(endTime, logger);
     }
-    
+
     final private void print(long endTime, Print logger) {
         final double elapsedSec = time.elapsedSeconds(endTime, startTime);
-        final long totalLatencyRecords  = this.validLatencyRecords +
+        final long totalLatencyRecords = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
-        final double recsPerSec =  elapsedSec > 0 ? this.totalRecords / elapsedSec : 0;
+        final double recsPerSec = elapsedSec > 0 ? this.totalRecords / elapsedSec : 0;
         final double mbPerSec = elapsedSec > 0 ? (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0)) / elapsedSec : 0;
         final double avgLatency = totalLatencyRecords > 0 ? this.totalLatency / (double) totalLatencyRecords : 0;
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
@@ -73,11 +73,11 @@ abstract public class LatencyWindow extends LatencyRecorder {
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                 slc[0], slc[1], this.percentiles.latencies);
     }
-    
+
     final private void getSLCold(LatencyPercentiles percentiles, int[] slc) {
         slc[0] = 0;
         slc[1] = 0;
-        final int h = percentiles.latencies.length-1;
+        final int h = percentiles.latencies.length - 1;
         if (h <= 0 || percentiles.latencies[h] <= 0) {
             return;
         }
@@ -107,7 +107,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
     final private void getSLC(LatencyPercentiles percentiles, long[] slc) {
         slc[0] = 0;
         slc[1] = 0;
-        final int h = percentiles.latencies.length-1;
+        final int h = percentiles.latencies.length - 1;
         if (h <= 0 || percentiles.latencies[h] <= 0) {
             return;
         }
@@ -119,7 +119,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         double slcFactor2 = 0;
         for (int i = 1; i <= h; i++) {
             if (percentiles.latencies[i] <= midVal && minVal > 0) {
-                slcFactor1 +=  (percentiles.latencies[i] - minVal) / minVal;
+                slcFactor1 += (percentiles.latencies[i] - minVal) / minVal;
                 cnt1++;
             } else if (midVal > 0) {
                 slcFactor2 += (percentiles.latencies[i] - midVal) / midVal;
@@ -128,10 +128,10 @@ abstract public class LatencyWindow extends LatencyRecorder {
         }
 
         if (cnt1 > 0) {
-            slc[0] = (long) ( (slcFactor1 + cnt1 -1) / cnt1);
+            slc[0] = (long) ((slcFactor1 + cnt1 - 1) / cnt1);
         }
         if (cnt2 > 0) {
-            slc[1] = (long) ((slcFactor2 + cnt2 -1) / cnt2);
+            slc[1] = (long) ((slcFactor2 + cnt2 - 1) / cnt2);
         }
     }
 
@@ -146,14 +146,14 @@ abstract public class LatencyWindow extends LatencyRecorder {
 
     /**
      * is the latency storage full.
-     * @return   indicate the latency storage is full or not
+     * @return indicate the latency storage is full or not
      */
     abstract public boolean isFull();
 
 
     /**
      * Max memory Size in Bytes.
-     * @return   Maximum window memory size in bytes
+     * @return Maximum window memory size in bytes
      */
     abstract public long getMaxMemoryBytes();
 }

@@ -5,17 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.MongoDB;
 
 import com.mongodb.client.MongoCollection;
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
+import io.sbk.time.Time;
 import org.bson.Document;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
         Document document = new Document();
-        document.put("index",  Long.toString(key++));
+        document.put("index", Long.toString(key++));
         document.put("data", data);
         databaseCollection.insertOne(document);
         return null;
@@ -53,15 +53,15 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 
     @Override
     public void writeSetTime(DataType<byte[]> dType, byte[] data, int size, Time time, Status status) throws IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         final long ctime = time.getCurrentTime();
         status.bytes = size * recs;
-        status.records =  recs;
+        status.records = recs;
         status.startTime = ctime;
         final LinkedList<Document> lt = new LinkedList<>();
         for (int i = 0; i < recs; i++) {
@@ -77,10 +77,10 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
                             Status status, SendChannel sendChannel, int id) throws IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         final LinkedList<Document> lt = new LinkedList<>();
         status.bytes = size * recs;
-        status.records =  recs;
+        status.records = recs;
         status.startTime = time.getCurrentTime();
         for (int i = 0; i < recs; i++) {
             Document document = new Document();

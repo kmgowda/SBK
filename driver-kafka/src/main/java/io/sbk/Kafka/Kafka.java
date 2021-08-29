@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Kafka;
 
@@ -14,20 +14,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
-
+import io.sbk.api.Storage;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.requests.IsolationLevel;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
-
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.requests.IsolationLevel;
-import org.apache.kafka.common.serialization.ByteArraySerializer;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 
 /**
  * Class for Kafka Benchmarking.
@@ -50,11 +48,11 @@ public class Kafka implements Storage<byte[]> {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
-        params.addOption("broker", true, "Broker URI, default: " + config.brokerUri );
+        params.addOption("broker", true, "Broker URI, default: " + config.brokerUri);
         params.addOption("topic", true, "Topic name, default: " + config.topicName);
-        params.addOption("partitions", true, "partitions, default: "+ config.partitions);
-        params.addOption("replica", true, "Replication factor, default: "+ config.replica);
-        params.addOption("sync", true, "Minimum in-sync Replicas, default: "+ config.sync);
+        params.addOption("partitions", true, "partitions, default: " + config.partitions);
+        params.addOption("replica", true, "Replication factor, default: " + config.replica);
+        params.addOption("sync", true, "Minimum in-sync Replicas, default: " + config.sync);
         params.addOption("create", true,
                 "Create (recreate) the topic, valid only for writers, default: " + config.create);
     }
@@ -66,7 +64,7 @@ public class Kafka implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        config.topicName =  params.getOptionValue("topic", config.topicName);
+        config.topicName = params.getOptionValue("topic", config.topicName);
         config.brokerUri = params.getOptionValue("broker", config.brokerUri);
         config.partitions = Integer.parseInt(params.getOptionValue("partitions", Integer.toString(config.partitions)));
         config.replica = Short.parseShort(params.getOptionValue("replica", Integer.toString(config.replica)));
@@ -111,7 +109,7 @@ public class Kafka implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         producerConfig = createProducerConfig(params);
         consumerConfig = createConsumerConfig(params);
         if (params.getWritersCount() > 0 && config.create) {

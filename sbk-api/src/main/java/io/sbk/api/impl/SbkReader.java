@@ -5,22 +5,22 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api.impl;
 
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataReader;
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.RateController;
+import io.sbk.api.Worker;
+import io.sbk.data.DataType;
 import io.sbk.logger.CountReaders;
 import io.sbk.perl.RunBenchmark;
 import io.sbk.perl.SendChannel;
-import io.sbk.time.Time;
-import io.sbk.api.Worker;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -56,13 +56,13 @@ public class SbkReader extends Worker implements RunBenchmark {
     @Override
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
-        return  CompletableFuture.runAsync( () -> {
+        return CompletableFuture.runAsync(() -> {
             rCount.incrementReaders();
             try {
                 if (secondsToRun > 0) {
-                    Printer.log.info("Reader " + id +" started , run seconds: "+secondsToRun);
+                    Printer.log.info("Reader " + id + " started , run seconds: " + secondsToRun);
                 } else {
-                    Printer.log.info("Reader " + id +" started , records: "+recordsCount);
+                    Printer.log.info("Reader " + id + " started , records: " + recordsCount);
                 }
                 perf.apply(secondsToRun, recordsCount);
                 Printer.log.info("Reader " + id + " exited");
@@ -78,7 +78,7 @@ public class SbkReader extends Worker implements RunBenchmark {
     private BiConsumer createBenchmark() {
         final BiConsumer perfReader;
         if (params.getTotalSecondsToRun() > 0) {
-            if (params.isWriteAndRead() ) {
+            if (params.isWriteAndRead()) {
                 if (params.getRecordsPerSec() > 0) {
                     perfReader = this::RecordsTimeReaderRWRateControl;
                 } else {
@@ -92,7 +92,7 @@ public class SbkReader extends Worker implements RunBenchmark {
                 }
             }
         } else {
-            if (params.isWriteAndRead() ) {
+            if (params.isWriteAndRead()) {
                 if (params.getRecordsPerSec() > 0) {
                     perfReader = this::RecordsReaderRWRateControl;
                 } else {
@@ -127,19 +127,19 @@ public class SbkReader extends Worker implements RunBenchmark {
     }
 
     private void RecordsReaderRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
-        reader.RecordsReaderRateControl(this, recordsCount, dType, time,  rCnt);
+        reader.RecordsReaderRateControl(this, recordsCount, dType, time, rCnt);
     }
 
     private void RecordsReaderRWRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
-        reader.RecordsReaderRWRateControl(this, recordsCount, dType, time,  rCnt);
+        reader.RecordsReaderRWRateControl(this, recordsCount, dType, time, rCnt);
     }
 
     private void RecordsTimeReaderRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
-        reader.RecordsTimeReaderRateControl(this, secondsToRun, dType, time,  rCnt);
+        reader.RecordsTimeReaderRateControl(this, secondsToRun, dType, time, rCnt);
     }
 
     private void RecordsTimeReaderRWRateControl(long secondsToRun, long recordsCount) throws EOFException, IOException {
-        reader.RecordsTimeReaderRWRateControl(this, secondsToRun, dType, time,  rCnt);
+        reader.RecordsTimeReaderRWRateControl(this, secondsToRun, dType, time, rCnt);
     }
 
 }

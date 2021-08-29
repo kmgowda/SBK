@@ -5,18 +5,18 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.api.impl;
 
 import io.sbk.api.Benchmark;
+import io.sbk.api.Callback;
+import io.sbk.api.ParameterOptions;
+import io.sbk.api.Worker;
 import io.sbk.config.PerlConfig;
 import io.sbk.data.DataType;
-import io.sbk.api.ParameterOptions;
 import io.sbk.perl.SendChannel;
-import io.sbk.api.Callback;
 import io.sbk.time.Time;
-import io.sbk.api.Worker;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,7 +38,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
 
     public SbkCallbackReader(int readerId, int idMax, ParameterOptions params, SendChannel sendChannel,
                              DataType dataType, Time time) {
-        super(readerId, idMax,  params, sendChannel);
+        super(readerId, idMax, params, sendChannel);
         this.dataType = dataType;
         this.time = time;
         this.ret = new CompletableFuture<>();
@@ -71,7 +71,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % recordIDMax);
         sendChannel.send(id, startTime, endTime, dataSize, events);
-        if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime)  >= this.msToRun)) {
+        if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun)) {
             ret.complete(null);
         } else if (this.totalRecords > cnt) {
             ret.complete(null);
@@ -80,7 +80,7 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
 
     @Override
     public void consume(Object data) {
-            callback.consume(data);
+        callback.consume(data);
     }
 
     final private void consumeRead(Object data) {

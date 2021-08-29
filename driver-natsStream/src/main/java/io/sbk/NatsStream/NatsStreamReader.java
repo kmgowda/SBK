@@ -5,13 +5,10 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.NatsStream;
 
-import io.sbk.api.AbstractCallbackReader;
-import io.sbk.api.ParameterOptions;
-import io.sbk.api.Callback;
 import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import io.nats.streaming.NatsStreaming;
@@ -19,6 +16,9 @@ import io.nats.streaming.Options.Builder;
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.Subscription;
 import io.nats.streaming.SubscriptionOptions;
+import io.sbk.api.AbstractCallbackReader;
+import io.sbk.api.Callback;
+import io.sbk.api.ParameterOptions;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -56,7 +56,7 @@ public class NatsStreamReader extends AbstractCallbackReader<byte[]> {
                 }
             }, subBuilder.build());
         } catch (InterruptedException | TimeoutException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 

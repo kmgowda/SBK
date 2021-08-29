@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.CSV;
 
@@ -13,10 +13,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
-import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
 
 import java.io.IOException;
@@ -41,12 +41,12 @@ public class CSV implements Storage<String> {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
-        params.addOption("file", true, "File name, default file name : "+config.fileName);
+        params.addOption("file", true, "File name, default file name : " + config.fileName);
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        config.fileName =  params.getOptionValue("file", config.fileName);
+        config.fileName = params.getOptionValue("file", config.fileName);
         if (params.getWritersCount() > 1) {
             throw new IllegalArgumentException("Writers should be only 1 for File writing");
         }
@@ -56,7 +56,7 @@ public class CSV implements Storage<String> {
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
     }
 
     @Override

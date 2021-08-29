@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.gem.impl;
@@ -19,8 +19,8 @@ import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.logger.GemLogger;
 import io.sbk.system.Printer;
-import io.sbk.yal.impl.SbkGemYmlMap;
 import io.sbk.yal.YmlMap;
+import io.sbk.yal.impl.SbkGemYmlMap;
 import io.sbk.yal.impl.SbkYalParameters;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
@@ -59,12 +59,12 @@ public class SbkGemYal {
     public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
                                        GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, HelpException {
-            return runBenchmark(args, packageName, applicationName, outLogger);
+        return runBenchmark(args, packageName, applicationName, outLogger);
     }
 
 
     private static RemoteResponse[] runBenchmark(final String[] args, final String packageName,
-                                             final String applicationName, GemLogger outLogger)
+                                                 final String applicationName, GemLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,
             ExecutionException, TimeoutException, HelpException {
         final String version = io.sbk.gem.impl.SbkGemYal.class.getPackage().getImplementationVersion();
@@ -72,11 +72,11 @@ public class SbkGemYal {
         final String[] gemArgs;
         final SbkYalParameters params;
         final YalConfig yalConfig;
-        
+
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGemYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
-        Printer.log.info(SbkGemYal.NAME.toUpperCase() +" Version: "+ Objects.requireNonNullElse(version, ""));
-        Printer.log.info("Arguments List: "+Arrays.toString(args));
+        Printer.log.info(SbkGemYal.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
+        Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())

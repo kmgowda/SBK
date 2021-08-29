@@ -5,16 +5,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Ignite;
 
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientTransaction;
@@ -53,13 +53,13 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 
     @Override
     public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
         ClientTransaction tx = client.transactions().txStart();
         long startKey = key;
@@ -112,7 +112,6 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
         cnt += status.records;
         sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
-
 
 
 }

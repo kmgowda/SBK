@@ -5,12 +5,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api.impl;
-import io.sbk.config.PerlConfig;
+
 import io.sbk.api.RateController;
+import io.sbk.config.PerlConfig;
 
 final public class SbkRateController implements RateController {
     private static final long MIN_SLEEP_NS = 2 * PerlConfig.NS_PER_MS;
@@ -42,7 +43,7 @@ final public class SbkRateController implements RateController {
      * @param elapsedSec    Elapsed seconds
      */
     @Override
-    public void control(final long events, final double  elapsedSec) {
+    public void control(final long events, final double elapsedSec) {
         if (this.recordsPerSec <= 0) {
             return;
         }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Jdbc;
 
@@ -51,9 +51,9 @@ public class JdbcReader implements Reader<String> {
             st = conn.createStatement();
 
         } catch (SQLException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
-        readQuery = "SELECT * from "+ config.table;
+        readQuery = "SELECT * from " + config.table;
         res = null;
     }
 
@@ -67,7 +67,7 @@ public class JdbcReader implements Reader<String> {
             try {
                 res = st.executeQuery(getReadQuery());
             } catch (SQLException ex) {
-                Printer.log.error("JDBC:JdbcReader "+getReadQuery()+" failed");
+                Printer.log.error("JDBC:JdbcReader " + getReadQuery() + " failed");
                 ex.printStackTrace();
                 res = null;
             }
@@ -76,9 +76,9 @@ public class JdbcReader implements Reader<String> {
                 if (res.next()) {
                     return res.getString(2);
                 } else {
-                    throw  new EOFException("JDBC : file red EOF");
+                    throw new EOFException("JDBC : file red EOF");
                 }
-            } catch ( SQLException ex) {
+            } catch (SQLException ex) {
                 Printer.log.error("JDBC:JdbcReader result next failed");
                 ex.printStackTrace();
             }

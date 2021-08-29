@@ -5,25 +5,24 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Kafka;
 
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Properties;
-import java.util.Arrays;
-
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * Class for Kafka reader/consumer.

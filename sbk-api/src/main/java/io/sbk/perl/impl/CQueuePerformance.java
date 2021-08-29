@@ -5,29 +5,28 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.perl.impl;
 
+import io.sbk.config.PerlConfig;
+import io.sbk.perl.Channel;
+import io.sbk.perl.Performance;
+import io.sbk.perl.PeriodicRecorder;
+import io.sbk.perl.SendChannel;
+import io.sbk.perl.TimeStamp;
+import io.sbk.state.State;
+import io.sbk.system.Printer;
+import io.sbk.time.Time;
+import lombok.Synchronized;
+
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
-
-import io.sbk.config.PerlConfig;
-import io.sbk.state.State;
-import io.sbk.system.Printer;
-import io.sbk.perl.Performance;
-import io.sbk.perl.PeriodicRecorder;
-import io.sbk.perl.SendChannel;
-import io.sbk.time.Time;
-import io.sbk.perl.TimeStamp;
-import io.sbk.perl.Channel;
-import lombok.Synchronized;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
@@ -67,7 +66,7 @@ final public class CQueuePerformance implements Performance {
             this.channels = new CQueueChannel[1];
             this.index = 1;
         } else {
-            maxQs =  Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
+            maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
             this.channels = new CQueueChannel[workers];
             this.index = workers;
         }
@@ -86,7 +85,7 @@ final public class CQueuePerformance implements Performance {
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        Printer.log.info("Performance Logger Started" );
+        Printer.log.info("Performance Logger Started");
         periodicLogger.start(startTime);
         periodicLogger.startWindow(startTime);
         while (doWork) {
@@ -105,7 +104,7 @@ final public class CQueuePerformance implements Performance {
                             if (time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
                                 doWork = false;
                             }
-                        } else if (totalRecords > 0  && recordsCnt >= totalRecords) {
+                        } else if (totalRecords > 0 && recordsCnt >= totalRecords) {
                             doWork = false;
                         }
                     }
@@ -137,6 +136,72 @@ final public class CQueuePerformance implements Performance {
             }
         }
         periodicLogger.stop(ctime);
+    }
+
+    @Override
+    @Synchronized
+    public SendChannel getSendChannel() {
+        if (channels.length == 1) {
+            return channels[0];
+        }
+        index += 1;
+        if (index >= channels.length) {
+            index = 0;
+        }
+        return channels[index];
+    }
+
+    @Synchronized
+    private void shutdown(Throwable ex) {
+        if (state != State.END) {
+            state = State.END;
+            if (qFuture != null) {
+                if (!qFuture.isDone()) {
+                    long endTime = time.getCurrentTime();
+                    for (Channel ch : channels) {
+                        ch.sendEndTime(endTime);
+                    }
+                    try {
+                        qFuture.get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    for (Channel ch : channels) {
+                        ch.clear();
+                    }
+                }
+                qFuture = null;
+            }
+            if (ex != null) {
+                Printer.log.warn("Performance Logger Shutdown with Exception:" + ex);
+                retFuture.completeExceptionally(ex);
+            } else {
+                Printer.log.info("Performance Logger Shutdown");
+                retFuture.complete(null);
+            }
+        }
+    }
+
+    @Override
+    @Synchronized
+    public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
+        if (state == State.BEGIN) {
+            state = State.RUN;
+            qFuture = CompletableFuture.runAsync(() -> runPerformance(secondsToRun, recordsCount), executor);
+            qFuture.whenComplete((ret, ex) -> {
+                shutdown(ex);
+            });
+        }
+        return retFuture;
+    }
+
+    @Override
+    public void stop() {
+        shutdown(null);
+    }
+
+    interface Throw {
+        void onException(Throwable ex);
     }
 
     /**
@@ -179,16 +244,10 @@ final public class CQueuePerformance implements Performance {
         }
 
         public void setElastic(long diffTime) {
-            elasticCount =  (totalCount * windowInterval) / diffTime;
+            elasticCount = (totalCount * windowInterval) / diffTime;
             totalCount = 0;
         }
     }
-
-
-    interface Throw {
-        void onException(Throwable ex);
-    }
-
 
     @NotThreadSafe
     static final class CQueueChannel implements Channel {
@@ -218,7 +277,7 @@ final public class CQueuePerformance implements Performance {
         }
 
         public void clear() {
-            for (ConcurrentLinkedQueue<TimeStamp> q: cQueues) {
+            for (ConcurrentLinkedQueue<TimeStamp> q : cQueues) {
                 q.clear();
             }
         }
@@ -233,72 +292,9 @@ final public class CQueuePerformance implements Performance {
         }
     }
 
-    @Override
-    @Synchronized
-    public SendChannel getSendChannel() {
-        if (channels.length == 1) {
-                return channels[0];
-        }
-        index += 1;
-        if (index >= channels.length) {
-            index = 0;
-        }
-        return  channels[index];
-    }
-
     final private class OnError implements Throw {
         public void onException(Throwable ex) {
             shutdown(ex);
         }
-    }
-
-    @Synchronized
-    private void shutdown(Throwable ex) {
-        if (state != State.END ) {
-            state = State.END;
-            if (qFuture != null) {
-                if (!qFuture.isDone()) {
-                    long endTime = time.getCurrentTime();
-                    for (Channel ch : channels) {
-                        ch.sendEndTime(endTime);
-                    }
-                    try {
-                        qFuture.get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    for (Channel ch : channels) {
-                        ch.clear();
-                    }
-                }
-                qFuture = null;
-            }
-            if (ex != null) {
-                Printer.log.warn("Performance Logger Shutdown with Exception:" + ex);
-                retFuture.completeExceptionally(ex);
-            } else {
-                Printer.log.info("Performance Logger Shutdown");
-                retFuture.complete(null);
-            }
-        }
-    }
-
-
-    @Override
-    @Synchronized
-    public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
-        if (state == State.BEGIN) {
-            state = State.RUN;
-            qFuture =  CompletableFuture.runAsync(() -> runPerformance(secondsToRun, recordsCount), executor);
-            qFuture.whenComplete((ret, ex) -> {
-                shutdown(ex);
-            });
-        }
-        return retFuture;
-    }
-
-    @Override
-    public void stop()  {
-            shutdown(null);
     }
 }

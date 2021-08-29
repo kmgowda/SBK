@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.logger.impl;
@@ -19,7 +19,7 @@ public class RWMetricsPrometheusServer extends RWMetricsLogger {
     final private PrometheusServer server;
 
     private RWMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,
-                                      MetricsConfig config, PrometheusServer server)  {
+                                      MetricsConfig config, PrometheusServer server) {
         super(header, action, percentiles, time, config.latencyTimeUnit, server);
         this.server = server;
     }
@@ -29,11 +29,11 @@ public class RWMetricsPrometheusServer extends RWMetricsLogger {
         this(header, action, percentiles, time, config, new PrometheusServer(config.port, config.context));
     }
 
-    public void start() throws IOException  {
+    public void start() throws IOException {
         server.start();
     }
 
-    public void stop() throws  IOException {
+    public void stop() throws IOException {
         super.close();
         server.stop();
     }

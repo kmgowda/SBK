@@ -5,13 +5,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api;
 
-import io.sbk.data.DataType;
 import io.sbk.config.PerlConfig;
+import io.sbk.data.DataType;
 import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 
@@ -20,7 +20,7 @@ import java.io.IOException;
 /**
  * Interface for Data Records Writers.
  */
-public interface DataRecordsWriter<T>  extends DataWriter<T> {
+public interface DataRecordsWriter<T> extends DataWriter<T> {
 
     /**
      * Flush / Sync the  data.
@@ -102,7 +102,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterSync(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
-                                   Time time,  RateController rController) throws IOException {
+                                   Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
@@ -191,7 +191,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt,  secondsElapsed);
+                rController.control(cnt, secondsElapsed);
             }
             sync();
         }
@@ -212,7 +212,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterRW(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
-                                 Time time,  RateController rController) throws IOException {
+                                 Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
@@ -250,7 +250,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterTimeRW(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
-                                     Time time,  RateController rController) throws IOException {
+                                     Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
@@ -269,7 +269,7 @@ public interface DataRecordsWriter<T>  extends DataWriter<T> {
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt,  secondsElapsed);
+                rController.control(cnt, secondsElapsed);
             }
             sync();
         }

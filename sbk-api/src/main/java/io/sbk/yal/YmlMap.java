@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.yal;
@@ -33,7 +33,7 @@ public abstract class YmlMap {
         final YmlMap yap = mapper.readValue(new File(fileName), tClass);
         final List<String> lt = new ArrayList<>();
         yap.args.forEach((k, v) -> {
-            lt.add("-"+k.strip());
+            lt.add("-" + k.strip());
             lt.add(v.replaceAll("\\n+", " ").strip());
         });
         return lt.toArray(new String[0]);

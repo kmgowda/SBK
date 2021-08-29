@@ -5,23 +5,22 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Pulsar;
 
-import org.apache.pulsar.client.api.PulsarClientException;
+import com.google.common.collect.Sets;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminBuilder;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.admin.PulsarAdminException.ConflictException;
 import org.apache.pulsar.client.admin.PulsarAdminException.NotFoundException;
+import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.common.policies.data.BacklogQuota;
 import org.apache.pulsar.common.policies.data.BacklogQuota.RetentionPolicy;
+import org.apache.pulsar.common.policies.data.ClusterData;
 import org.apache.pulsar.common.policies.data.PersistencePolicies;
 import org.apache.pulsar.common.policies.data.TenantInfo;
-import org.apache.pulsar.common.policies.data.ClusterData;
-import com.google.common.collect.Sets;
-
 
 import java.io.IOException;
 import java.util.Collections;
@@ -47,7 +46,7 @@ public class PulsarTopicHandler {
     }
 
 
-    public void createTopic(boolean recreate) throws  IOException {
+    public void createTopic(boolean recreate) throws IOException {
         if (config.tenant != null && config.nameSpace != null) {
             final String fullNameSpace = config.tenant + "/" + config.nameSpace;
             if (config.cluster != null) {
@@ -73,7 +72,7 @@ public class PulsarTopicHandler {
             try {
                 adminClient.namespaces().createNamespace(fullNameSpace);
             } catch (ConflictException ex) {
-               /* ex.printStackTrace(); */
+                /* ex.printStackTrace(); */
             } catch (PulsarAdminException ex) {
                 throw new IOException(ex);
             }
@@ -93,7 +92,7 @@ public class PulsarTopicHandler {
         if (recreate) {
             try {
                 adminClient.topics().deletePartitionedTopic(config.topicName);
-            } catch (NotFoundException  ex) {
+            } catch (NotFoundException ex) {
                 /* already deleted or not existing */
             } catch (PulsarAdminException ex) {
                 throw new IOException(ex);
@@ -109,7 +108,7 @@ public class PulsarTopicHandler {
         }
     }
 
-    public  void close() {
+    public void close() {
         pulsarAdmin.clone();
     }
 }

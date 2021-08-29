@@ -5,16 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Artemis;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Storage;
 import org.apache.activemq.artemis.api.core.RoutingType;
 import org.apache.activemq.artemis.api.core.SimpleString;
 import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
@@ -48,12 +49,12 @@ public class Artemis implements Storage<byte[]> {
         }
 
         params.addOption("topic", true, "Topic name");
-        params.addOption("uri", true, "Broker URI, default uri: "+config.uri);
+        params.addOption("uri", true, "Broker URI, default uri: " + config.uri);
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        topicName =  params.getOptionValue("topic", null);
+        topicName = params.getOptionValue("topic", null);
         if (topicName == null) {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
@@ -61,7 +62,7 @@ public class Artemis implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         try {
             ServerLocator serverLocator = ActiveMQClient.createServerLocator(config.uri);
             serverLocator.setConfirmationWindowSize(1000);
@@ -85,7 +86,7 @@ public class Artemis implements Storage<byte[]> {
                 session.close();
             }
         } catch (Exception ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
 
         if (sessionFactory != null) {

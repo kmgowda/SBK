@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.options.impl;
@@ -39,7 +39,7 @@ public class SbkInputOptions implements InputOptions {
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
-        this.header = header+"\n\n";
+        this.header = header + "\n\n";
         this.footer = footer;
         this.commandline = null;
 
@@ -96,7 +96,7 @@ public class SbkInputOptions implements InputOptions {
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         commandline = parser.parse(options, args, false);
         if (commandline.hasOption("help")) {
-            throw  new HelpException(getHelpText());
+            throw new HelpException(getHelpText());
         }
     }
 }

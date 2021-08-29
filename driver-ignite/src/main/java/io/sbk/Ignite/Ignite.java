@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Ignite;
@@ -15,8 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Storage;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.client.ClientCache;
@@ -36,6 +36,10 @@ public class Ignite implements Storage<byte[]> {
     private ClientCache<Long, byte[]> clientCache;
     private IgniteClient igniteClient;
     private org.apache.ignite.Ignite ignite;
+
+    public static long generateStartKey(int id) {
+        return (long) id * (long) Integer.MAX_VALUE;
+    }
 
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
@@ -57,10 +61,10 @@ public class Ignite implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        config.url =  params.getOptionValue("url", config.url);
+        config.url = params.getOptionValue("url", config.url);
         config.cacheName = params.getOptionValue("cache", config.cacheName);
         if (params.hasOption("cfile")) {
-            config.cFile =  params.getOptionValue("cfile", config.cFile);
+            config.cFile = params.getOptionValue("cfile", config.cFile);
         } else {
             config.cFile = null;
         }
@@ -68,7 +72,7 @@ public class Ignite implements Storage<byte[]> {
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         if (config.isClient) {
             ClientConfiguration cfg = new ClientConfiguration().setAddresses(config.url);
             igniteClient = Ignition.startClient(cfg);
@@ -78,7 +82,7 @@ public class Ignite implements Storage<byte[]> {
             if (params.getWritersCount() > 0) {
                 clientCache.clear();
             }
-        }  else {
+        } else {
             if (config.cFile != null) {
                 ignite = Ignition.start(config.cFile);
             } else {
@@ -87,7 +91,7 @@ public class Ignite implements Storage<byte[]> {
             igniteClient = null;
             clientCache = null;
 
-            if (params.getWritersCount() > 0 ) {
+            if (params.getWritersCount() > 0) {
                 cache = ignite.getOrCreateCache(config.cacheName);
                 cache.destroy();
                 cache.close();
@@ -104,7 +108,7 @@ public class Ignite implements Storage<byte[]> {
             try {
                 igniteClient.close();
             } catch (Exception ex) {
-                throw  new IOException(ex);
+                throw new IOException(ex);
             }
         }
     }
@@ -151,9 +155,5 @@ public class Ignite implements Storage<byte[]> {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    public static long generateStartKey(int id) {
-        return (long) id * (long) Integer.MAX_VALUE;
     }
 }

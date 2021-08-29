@@ -5,12 +5,12 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Template;
 
-import io.sbk.api.Reader;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Reader;
 
 import java.io.IOException;
 
@@ -24,11 +24,11 @@ public class TemplateReader implements Reader<byte[]> {
 
     @Override
     public byte[] read() throws IOException {
-         throw new IOException("Its Template Reader Driver");
+        throw new IOException("Its Template Reader Driver");
     }
 
     @Override
     public void close() throws IOException {
-         throw new IOException("Its Template Reader Driver");
+        throw new IOException("Its Template Reader Driver");
     }
 }

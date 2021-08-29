@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.gem;
@@ -41,7 +41,7 @@ public final class SshUtils {
     }
 
     public static void runCommand(final ClientSession session, String cmd, long timeoutSeconds,
-                                          SshResponseStream response) throws IOException {
+                                  SshResponseStream response) throws IOException {
         // Create the exec and channel its output/error streams
         final ChannelExec execChannel = session.createExecChannel(cmd);
         execChannel.setErr(response.errOutputStream);
@@ -54,7 +54,7 @@ public final class SshUtils {
 
         // Check if timed out
         if (events.contains(ClientChannelEvent.TIMEOUT)) {
-            throw new IOException("The cmd: "+cmd+" timeout !");
+            throw new IOException("The cmd: " + cmd + " timeout !");
         }
 
         if (session.isOpen()) {
@@ -63,8 +63,8 @@ public final class SshUtils {
         }
     }
 
-    public static void copyDirectory(final ClientSession session,  String srcPath,
-                                     String dstPath)  throws IOException {
+    public static void copyDirectory(final ClientSession session, String srcPath,
+                                     String dstPath) throws IOException {
 
         final ScpClientCreator creator = ScpClientCreator.instance();
         final ScpClient scpClient = creator.createScpClient(session);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.main;
@@ -28,7 +28,7 @@ public class SbkMain {
         try {
             Sbk.run(args, null, null, null);
         } catch (UnrecognizedOptionException ex) {
-          System.exit(2);
+            System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                 ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
                 NoSuchMethodException | IllegalAccessException ex) {

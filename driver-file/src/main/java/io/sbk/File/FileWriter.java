@@ -5,15 +5,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.File;
-import io.sbk.data.DataType;
+
 import io.sbk.api.ParameterOptions;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
-import io.sbk.time.Time;
 import io.sbk.api.Writer;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
+import io.sbk.time.Time;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -67,7 +68,7 @@ public class FileWriter implements Writer<ByteBuffer> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         out.close();
     }
 }

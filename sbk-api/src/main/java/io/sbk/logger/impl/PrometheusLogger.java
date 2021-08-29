@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.logger.impl;
 
@@ -14,11 +14,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
-import io.sbk.options.InputOptions;
 import io.sbk.logger.MetricsConfig;
+import io.sbk.options.InputOptions;
 import io.sbk.perl.Print;
-import io.sbk.time.Time;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -40,12 +41,12 @@ public class PrometheusLogger extends CSVLogger {
     }
 
     public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
-        return new RWMetricsPrometheusServer(Config.NAME+" "+storageName, action.name(),
+        return new RWMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
                 percentiles, time, metricsConfig);
     }
 
     public InputStream getMetricsConfigStream() {
-        return  PrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        return PrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
     @Override
@@ -61,14 +62,14 @@ public class PrometheusLogger extends CSVLogger {
         }
 
         params.addOption("context", true, "Prometheus Metric context" +
-                "; '"+DISABLE_STRING+"' disables this option; default: " + metricsConfig.port + metricsConfig.context);
+                "; '" + DISABLE_STRING + "' disables this option; default: " + metricsConfig.port + metricsConfig.context);
     }
 
 
     @Override
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        final String parsedContext =  params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
+        final String parsedContext = params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
         if (parsedContext.equalsIgnoreCase(DISABLE_STRING)) {
             contextDisabled = true;
         } else {
@@ -97,7 +98,7 @@ public class PrometheusLogger extends CSVLogger {
     }
 
     @Override
-    public void close(final InputOptions params) throws IllegalArgumentException, IOException  {
+    public void close(final InputOptions params) throws IllegalArgumentException, IOException {
         if (prometheusServer != null) {
             prometheusServer.stop();
         }
@@ -133,7 +134,7 @@ public class PrometheusLogger extends CSVLogger {
 
     @Override
     public void decrementReaders() {
-       super.decrementReaders();
+        super.decrementReaders();
         if (prometheusServer != null) {
             prometheusServer.decrementReaders();
         }
@@ -153,6 +154,6 @@ public class PrometheusLogger extends CSVLogger {
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                       long slc1, long slc2, long[] percentileValues) {
         printer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2,  percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 }

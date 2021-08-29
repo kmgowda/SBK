@@ -5,11 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RabbitMQ;
-import io.sbk.api.Writer;
+
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.ConfirmListener;
+import com.rabbitmq.client.Connection;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Writer;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -21,12 +27,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
-import com.rabbitmq.client.BuiltinExchangeType;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConfirmListener;
-import com.rabbitmq.client.AMQP.BasicProperties;
-
 /**
  * Class for RabbitMQ Writer.
  */
@@ -35,13 +35,13 @@ public class RabbitMQWriter implements Writer<byte[]> {
     final private String key;
     final private Channel channel;
     final private String topicName;
-    final private  ConfirmListener listener;
+    final private ConfirmListener listener;
     final private ConcurrentHashMap<Long, CompletableFuture<Void>> futureConcurrentHashMap;
     final private boolean isPersist;
-    private  volatile SortedSet<Long> ackSet;
+    private volatile SortedSet<Long> ackSet;
 
     public RabbitMQWriter(int writerID, ParameterOptions params,
-                          Connection connection, String topicName, boolean isPersist ) throws IOException {
+                          Connection connection, String topicName, boolean isPersist) throws IOException {
         this.key = String.valueOf(writerID);
         this.isPersist = isPersist;
         this.topicName = topicName;
@@ -57,7 +57,7 @@ public class RabbitMQWriter implements Writer<byte[]> {
                 if (multiple) {
                     SortedSet<Long> treeHeadSet = ackSet.headSet(deliveryTag + 1);
                     synchronized (ackSet) {
-                        for (Iterator iterator = treeHeadSet.iterator(); iterator.hasNext();) {
+                        for (Iterator iterator = treeHeadSet.iterator(); iterator.hasNext(); ) {
                             long value = (long) iterator.next();
                             iterator.remove();
                             CompletableFuture<Void> future = futureConcurrentHashMap.get(value);

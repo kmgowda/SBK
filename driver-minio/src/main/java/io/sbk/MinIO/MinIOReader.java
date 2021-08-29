@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.MinIO;
 
@@ -18,11 +18,11 @@ import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
 import io.minio.messages.Item;
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -39,8 +39,8 @@ public class MinIOReader implements Reader<byte[]> {
     final private MinIOConfig config;
     final private MinioClient client;
 
-    public MinIOReader(int id, ParameterOptions params, MinIOConfig config, MinioClient client)  {
-        this.params  = params;
+    public MinIOReader(int id, ParameterOptions params, MinIOConfig config, MinioClient client) {
+        this.params = params;
         this.config = config;
         this.client = client;
     }
@@ -60,11 +60,11 @@ public class MinIOReader implements Reader<byte[]> {
                 status.endTime = time.getCurrentTime();
                 sendChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
                 inStream.close();
-              }
+            }
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
                 InvalidKeyException | NoResponseException | XmlPullParserException | ErrorResponseException |
                 InternalException | InvalidArgumentException ex) {
-                throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 
@@ -92,16 +92,16 @@ public class MinIOReader implements Reader<byte[]> {
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
                 InvalidKeyException | NoResponseException | XmlPullParserException | ErrorResponseException |
                 InternalException | InvalidArgumentException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 
     @Override
     public byte[] read() throws IOException {
-            return null;
+        return null;
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 }

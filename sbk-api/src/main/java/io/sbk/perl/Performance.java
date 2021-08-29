@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.perl;
 
@@ -14,16 +14,16 @@ package io.sbk.perl;
  */
 public interface Performance extends RunBenchmark {
 
-     /**
-      * stop/shutdown the Benchmark.
-      *
-      */
-     void stop();
+    /**
+     * stop/shutdown the Benchmark.
+     *
+     */
+    void stop();
 
-     /**
-      * Get the SendChannel to get the benchmark results.
-      *
-      * @return SendChannel to get the benchmark results.
-      */
-     SendChannel getSendChannel();
+    /**
+     * Get the SendChannel to get the benchmark results.
+     *
+     * @return SendChannel to get the benchmark results.
+     */
+    SendChannel getSendChannel();
 }

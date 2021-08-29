@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.FdbRecord;
 
@@ -24,10 +24,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.google.protobuf.ByteString;
 import io.sbk.api.DataReader;
-import io.sbk.data.DataType;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.data.DataType;
 import io.sbk.data.impl.ProtoBufByteString;
 
 import java.io.IOException;
@@ -43,6 +43,10 @@ public class FdbRecord implements Storage<ByteString> {
     private FDBDatabase db;
     private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
 
+    public static long generateStartKey(int id) {
+        return (long) id * (long) Integer.MAX_VALUE;
+    }
+
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
@@ -55,8 +59,8 @@ public class FdbRecord implements Storage<ByteString> {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("cfile", true, "cluster file, default : "+ config.cFile);
-        params.addOption("keyspace", true, "Key space name, default : "+ config.keySpace);
+        params.addOption("cfile", true, "cluster file, default : " + config.cFile);
+        params.addOption("keyspace", true, "Key space name, default : " + config.keySpace);
     }
 
     @Override
@@ -65,8 +69,8 @@ public class FdbRecord implements Storage<ByteString> {
             throw new IllegalArgumentException("Specify either Writer or readers ; both are not allowed");
         }
 
-        config.cFile =  params.getOptionValue("cfile", config.cFile);
-        config.keySpace =  params.getOptionValue("keyspace", config.keySpace);
+        config.cFile = params.getOptionValue("cfile", config.cFile);
+        config.keySpace = params.getOptionValue("keyspace", config.keySpace);
     }
 
     @Override
@@ -110,7 +114,7 @@ public class FdbRecord implements Storage<ByteString> {
             } else {
                 return new FdbRecordWriter(id, params, db, recordStoreProvider);
             }
-         } catch (IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
             return null;
         }
@@ -134,11 +138,6 @@ public class FdbRecord implements Storage<ByteString> {
     @Override
     public DataType<ByteString> getDataType() {
         return new ProtoBufByteString();
-    }
-
-
-    public static long generateStartKey(int id) {
-        return (long) id * (long) Integer.MAX_VALUE;
     }
 
 }

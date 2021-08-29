@@ -5,15 +5,15 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.ram.impl;
 
 import io.sbk.action.Action;
-import io.sbk.exception.HelpException;
 import io.sbk.config.RamConfig;
-import io.sbk.ram.RamParameterOptions;
+import io.sbk.exception.HelpException;
 import io.sbk.options.impl.SbkInputOptions;
+import io.sbk.ram.RamParameterOptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -36,7 +36,7 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
     private int maxConnections;
 
     @Getter
-    private  int ramPort;
+    private int ramPort;
 
     public SbkRamParameters(String name, int port, int maxConnections) {
         super(name, RamConfig.DESC);
@@ -44,8 +44,8 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
         this.ramPort = port;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");
         addOption("action", true, "action [r: read, w: write, wr: write and read], default: r");
-        addOption("ramport", true, "RAM port number; default: "+ramPort);
-        addOption("max", true, "Maximum number of connections; default: "+maxConnections);
+        addOption("ramport", true, "RAM port number; default: " + ramPort);
+        addOption("max", true, "Maximum number of connections; default: " + maxConnections);
     }
 
 

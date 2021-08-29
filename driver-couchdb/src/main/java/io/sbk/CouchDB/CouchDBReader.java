@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.CouchDB;
@@ -46,12 +46,12 @@ public class CouchDBReader implements Reader<String> {
                 return (String) map.get("data");
             }
         } catch (DocumentNotFoundException ex) {
-            throw new EOFException("Key : "+ k + "not found");
+            throw new EOFException("Key : " + k + "not found");
         }
         return null;
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 }

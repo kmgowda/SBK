@@ -5,36 +5,36 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Pravega;
 
+import io.pravega.client.ClientConfig;
+import io.pravega.client.admin.ReaderGroupManager;
+import io.pravega.client.admin.StreamManager;
+import io.pravega.client.segment.impl.Segment;
+import io.pravega.client.stream.ReaderGroup;
+import io.pravega.client.stream.ReaderGroupConfig;
+import io.pravega.client.stream.ScalingPolicy;
+import io.pravega.client.stream.Stream;
+import io.pravega.client.stream.StreamConfiguration;
+import io.pravega.client.stream.impl.ControllerImpl;
+import io.pravega.client.stream.impl.StreamImpl;
+import io.pravega.client.stream.impl.StreamSegments;
+import io.sbk.system.Printer;
+
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.net.URISyntaxException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import io.pravega.client.stream.impl.ControllerImpl;
-import io.pravega.client.admin.StreamManager;
-import io.pravega.client.stream.StreamConfiguration;
-import io.pravega.client.stream.ReaderGroupConfig;
-import io.pravega.client.admin.ReaderGroupManager;
-import io.pravega.client.stream.ReaderGroup;
-import io.pravega.client.stream.ScalingPolicy;
-import io.pravega.client.stream.impl.StreamSegments;
-import io.pravega.client.segment.impl.Segment;
-import io.pravega.client.stream.impl.StreamImpl;
-import io.pravega.client.ClientConfig;
-import io.pravega.client.stream.Stream;
-import io.sbk.system.Printer;
 
 /**
  * Class for Pravega stream and segments.
@@ -54,10 +54,10 @@ public class PravegaStreamHandler {
     ReaderGroupConfig rdGrpConfig;
 
     public PravegaStreamHandler(String scope, String stream,
-                         String rdGrpName,
-                         String uri, int segs,
-                         int timeout, ControllerImpl contrl,
-                         ScheduledExecutorService bgexecutor) throws Exception {
+                                String rdGrpName,
+                                String uri, int segs,
+                                int timeout, ControllerImpl contrl,
+                                ScheduledExecutorService bgexecutor) throws Exception {
         this.scope = scope;
         this.stream = stream;
         this.rdGrpName = rdGrpName;

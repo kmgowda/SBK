@@ -5,15 +5,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Artemis;
+
+import io.sbk.api.ParameterOptions;
+import io.sbk.api.Status;
+import io.sbk.api.Writer;
 import io.sbk.data.DataType;
 import io.sbk.perl.SendChannel;
-import io.sbk.api.Status;
 import io.sbk.time.Time;
-import io.sbk.api.Writer;
-import io.sbk.api.ParameterOptions;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
 import org.apache.activemq.artemis.api.core.client.ClientMessage;
 import org.apache.activemq.artemis.api.core.client.ClientProducer;
@@ -26,11 +27,11 @@ import java.util.concurrent.CompletableFuture;
  * Class for NATS Stream Writer.
  */
 public class ArtemisWriter implements Writer<byte[]> {
-    final private  ClientSession session;
-    final private  ClientProducer producer;
+    final private ClientSession session;
+    final private ClientProducer producer;
 
     public ArtemisWriter(int writerID, ParameterOptions params,
-                            String topicName, ArtemisClientConfig config, ClientSession session) throws IOException {
+                         String topicName, ArtemisClientConfig config, ClientSession session) throws IOException {
         this.session = session;
         try {
             producer = session.createProducer(topicName);
@@ -45,7 +46,7 @@ public class ArtemisWriter implements Writer<byte[]> {
         status.startTime = ctime;
         status.bytes = size;
         status.records = 1;
-        ClientMessage msg = session.createMessage(true /* durable */ );
+        ClientMessage msg = session.createMessage(true /* durable */);
         msg.setTimestamp(ctime);
         msg.getBodyBuffer().writeBytes(data);
         try {
@@ -53,7 +54,7 @@ public class ArtemisWriter implements Writer<byte[]> {
                 final long endTime = time.getCurrentTime();
                 record.send(id, ctime, endTime, size, 1);
             });
-        } catch ( ActiveMQException ex) {
+        } catch (ActiveMQException ex) {
             ex.printStackTrace();
         }
     }
@@ -61,11 +62,11 @@ public class ArtemisWriter implements Writer<byte[]> {
 
     @Override
     public CompletableFuture<Void> writeAsync(byte[] data) throws IOException {
-        ClientMessage msg = session.createMessage(true /* durable */ );
+        ClientMessage msg = session.createMessage(true /* durable */);
         msg.getBodyBuffer().writeBytes(data);
         try {
             producer.send(msg);
-        } catch ( ActiveMQException ex) {
+        } catch (ActiveMQException ex) {
             ex.printStackTrace();
         }
         return null;
@@ -81,7 +82,7 @@ public class ArtemisWriter implements Writer<byte[]> {
         try {
             producer.close();
         } catch (ActiveMQException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 }

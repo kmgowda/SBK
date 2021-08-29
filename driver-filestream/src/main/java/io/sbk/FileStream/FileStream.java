@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.FileStream;
 
@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Storage;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -39,11 +39,11 @@ public class FileStream implements Storage<byte[]> {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("file", true, "File name, default file name : "+config.fileName);
-        params.addOption("append", true, "Append writes, default : "+config.isAppend);
+        params.addOption("file", true, "File name, default file name : " + config.fileName);
+        params.addOption("append", true, "Append writes, default : " + config.isAppend);
         params.addOption("recreate", true,
-                "if file exists, delete and create it for write operation, default : "+config.reCreate);
-        params.addOption("buffer", true, "Buffered Write/Read , default: "+config.isBuffered);
+                "if file exists, delete and create it for write operation, default : " + config.reCreate);
+        params.addOption("buffer", true, "Buffered Write/Read , default: " + config.isBuffered);
 
     }
 
@@ -55,14 +55,14 @@ public class FileStream implements Storage<byte[]> {
         if (params.getReadersCount() > 0 && params.getWritersCount() > 0) {
             throw new IllegalArgumentException("Specify either Writer or readers ; both are not allowed");
         }
-        config.fileName =  params.getOptionValue("file", config.fileName);
-        config.isAppend =  Boolean.parseBoolean(params.getOptionValue("append", String.valueOf(config.isAppend)));
-        config.reCreate =  Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
-        config.isBuffered =  Boolean.parseBoolean(params.getOptionValue("buffer", String.valueOf(config.isBuffered)));
+        config.fileName = params.getOptionValue("file", config.fileName);
+        config.isAppend = Boolean.parseBoolean(params.getOptionValue("append", String.valueOf(config.isAppend)));
+        config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
+        config.isBuffered = Boolean.parseBoolean(params.getOptionValue("buffer", String.valueOf(config.isBuffered)));
     }
 
     @Override
-    public void openStorage(final ParameterOptions params) throws  IOException {
+    public void openStorage(final ParameterOptions params) throws IOException {
         if (config.reCreate && params.getWritersCount() > 0) {
             java.io.File file = new java.io.File(config.fileName);
             file.delete();

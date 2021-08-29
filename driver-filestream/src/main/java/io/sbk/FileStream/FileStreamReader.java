@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.FileStream;
 
@@ -37,11 +37,11 @@ public class FileStreamReader implements Reader<byte[]> {
         } else if (ret < readBuffer.length) {
             return Arrays.copyOf(readBuffer, ret);
         }
-        return  readBuffer;
+        return readBuffer;
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
         in.close();
     }
 }

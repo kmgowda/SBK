@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.Cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
+
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +22,7 @@ public class CassandraWriter implements Writer<String> {
     final public CqlSession session;
 
     public CassandraWriter(int writerID, ParameterOptions params,
-                      CassandraConfig config, CqlSession session) throws IOException {
+                           CassandraConfig config, CqlSession session) throws IOException {
         this.config = config;
         this.session = session;
     }
@@ -31,7 +32,7 @@ public class CassandraWriter implements Writer<String> {
     public CompletableFuture writeAsync(String data) throws IOException {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
                 .append(config.keyspace).append(".").append(config.table).append(" (id, data) ")
-                .append("VALUES (").append(UUID.randomUUID() )
+                .append("VALUES (").append(UUID.randomUUID())
                 .append(", '").append(data).append("');");
         String query = sb.toString();
         session.execute(query);

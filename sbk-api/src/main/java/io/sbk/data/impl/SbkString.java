@@ -5,11 +5,12 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.data.impl;
 
 import io.sbk.data.DataType;
+
 import java.util.Random;
 
 /**
@@ -17,7 +18,7 @@ import java.util.Random;
  */
 public class SbkString implements DataType<String> {
     final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
-    final static String FORMAT_STRING = "%0"+ TIME_HEADER_SIZE + "d";
+    final static String FORMAT_STRING = "%0" + TIME_HEADER_SIZE + "d";
 
     /**
      * Create byte array data.

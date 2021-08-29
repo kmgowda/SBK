@@ -5,13 +5,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api;
 
-import io.sbk.data.DataType;
 import io.sbk.config.PerlConfig;
+import io.sbk.data.DataType;
 import io.sbk.time.Time;
 
 import java.io.EOFException;
@@ -63,38 +63,11 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % reader.recordIDMax);
         reader.sendChannel.send(id, startTime, endTime, dataSize, events);
-        if (this.msToRun > 0 && ((endTime - beginTime)  >= this.msToRun)) {
+        if (this.msToRun > 0 && ((endTime - beginTime) >= this.msToRun)) {
             complete();
         } else if (this.recordsCount > cnt) {
             complete();
         }
-    }
-
-
-    private class ConsumeRead implements Callback<T> {
-
-        public void consume(final T data) {
-            final long endTime = time.getCurrentTime();
-            recordBenchmark(endTime, endTime, dataType.length(data), 1);
-        }
-
-        public void record(long startTime, long endTime, int dataSize, int records) {
-            recordBenchmark(startTime, endTime, dataSize, records);
-        }
-
-    }
-
-
-    private class ConsumeRW implements Callback<T> {
-
-        public void consume(final T data) {
-            recordBenchmark(dataType.getTime(data), time.getCurrentTime(), dataType.length(data), 1);
-        }
-
-        public void record(long startTime, long endTime, int dataSize, int records) {
-            recordBenchmark(startTime, endTime, dataSize, records);
-        }
-
     }
 
     /**
@@ -123,12 +96,11 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
     /**
      * Default Implementation complete the read.
      */
-    public void complete()  {
+    public void complete() {
         if (ret != null) {
             ret.complete(null);
         }
     }
-
 
     /**
      * Default Implementation to wait for the readers to complete.
@@ -141,10 +113,9 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
                 ret.get();
             }
         } catch (ExecutionException | InterruptedException ex) {
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
-
 
     /**
      * Default Implementation run the Benchmark.
@@ -161,7 +132,6 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
         initialize(reader, secondsToRun, recordsCount, dType, time, callback);
         waitToComplete();
     }
-
 
     /**
      * Implementation for benchmarking reader by reading given number of records.
@@ -255,8 +225,6 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
         run(reader, 0, recordsCount, dType, time, new ConsumeRW());
     }
 
-
-
     /**
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
      *
@@ -288,6 +256,31 @@ public abstract class AbstractCallbackReader<T> implements DataReader<T> {
     public void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                                RateController rController) throws EOFException, IOException {
         run(reader, secondsToRun, 0, dType, time, new ConsumeRW());
+    }
+
+    private class ConsumeRead implements Callback<T> {
+
+        public void consume(final T data) {
+            final long endTime = time.getCurrentTime();
+            recordBenchmark(endTime, endTime, dataType.length(data), 1);
+        }
+
+        public void record(long startTime, long endTime, int dataSize, int records) {
+            recordBenchmark(startTime, endTime, dataSize, records);
+        }
+
+    }
+
+    private class ConsumeRW implements Callback<T> {
+
+        public void consume(final T data) {
+            recordBenchmark(dataType.getTime(data), time.getCurrentTime(), dataType.length(data), 1);
+        }
+
+        public void record(long startTime, long endTime, int dataSize, int records) {
+            recordBenchmark(startTime, endTime, dataSize, records);
+        }
+
     }
 
 }

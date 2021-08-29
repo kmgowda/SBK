@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Pravega;
@@ -13,22 +13,21 @@ package io.sbk.Pravega;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.pravega.client.ClientConfig;
+import io.pravega.client.EventStreamClientFactory;
+import io.pravega.client.stream.ReaderGroup;
+import io.pravega.client.stream.impl.ControllerImpl;
+import io.pravega.client.stream.impl.ControllerImplConfig;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.Storage;
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Storage;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import io.pravega.client.ClientConfig;
-import io.pravega.client.stream.ReaderGroup;
-import io.pravega.client.stream.impl.ControllerImpl;
-import io.pravega.client.stream.impl.ControllerImplConfig;
-import io.pravega.client.EventStreamClientFactory;
 
 /**
  * Class for Pravega benchmarking.
@@ -65,7 +64,7 @@ public class Pravega implements Storage<byte[]> {
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.scopeName = params.getOptionValue("scope", config.scopeName);
-        config.streamName =  params.getOptionValue("stream", config.streamName);
+        config.streamName = params.getOptionValue("stream", config.streamName);
         config.controllerUri = params.getOptionValue("controller", config.controllerUri);
         config.segmentCount = Integer.parseInt(params.getOptionValue("segments", Integer.toString(config.segmentCount)));
         if (params.hasOption("recreate")) {
@@ -110,14 +109,14 @@ public class Pravega implements Storage<byte[]> {
             }
 
             factory = EventStreamClientFactory.withScope(config.scopeName, ClientConfig.builder()
-                                        .controllerURI(new URI(config.controllerUri)).build());
+                    .controllerURI(new URI(config.controllerUri)).build());
         } catch (Exception ex) {
-             throw new IOException(ex);
+            throw new IOException(ex);
         }
     }
 
     @Override
-    public  void closeStorage(final ParameterOptions params) throws IOException {
+    public void closeStorage(final ParameterOptions params) throws IOException {
         if (readerGroup != null) {
             readerGroup.close();
         }

@@ -5,20 +5,21 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.ram.impl;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
-import io.sbk.logger.CountConnections;
-import io.sbk.ram.RamParameters;
 import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;
 import io.sbk.grpc.ServiceGrpc;
-import io.sbk.time.Time;
+import io.sbk.logger.CountConnections;
+import io.sbk.ram.RamParameters;
 import io.sbk.ram.RamRegistry;
+import io.sbk.time.Time;
+
 import java.security.InvalidKeyException;
 import java.util.concurrent.atomic.AtomicInteger;
 

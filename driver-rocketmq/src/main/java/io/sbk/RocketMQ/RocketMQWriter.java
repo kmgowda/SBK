@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package io.sbk.RocketMQ;
+
+import io.sbk.api.ParameterOptions;
+import io.sbk.api.Writer;
 import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
-import io.sbk.api.Writer;
-import io.sbk.api.ParameterOptions;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -48,7 +49,7 @@ public class RocketMQWriter implements Writer<byte[]> {
             rmqProducer.start();
         } catch (MQClientException ex) {
             ex.printStackTrace();
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
     }
 
@@ -100,11 +101,11 @@ public class RocketMQWriter implements Writer<byte[]> {
 
                 @Override
                 public void onException(final Throwable e) {
-                  e.printStackTrace();
+                    e.printStackTrace();
                 }
             });
         } catch (Exception ex) {
-          ex.printStackTrace();
+            ex.printStackTrace();
         }
 
         return ctime;
@@ -117,7 +118,7 @@ public class RocketMQWriter implements Writer<byte[]> {
             this.rmqProducer.send(message);
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw  new IOException(ex);
+            throw new IOException(ex);
         }
         return null;
     }

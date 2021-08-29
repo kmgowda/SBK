@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.api;
@@ -111,7 +111,7 @@ public interface AsyncReader<T> extends DataRecordsReader<T> {
         } else {
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                    sendChannel.send(id, dType.getTime(d), endTime, dType.length(d), status.records);
+                sendChannel.send(id, dType.getTime(d), endTime, dType.length(d), status.records);
             });
         }
     }

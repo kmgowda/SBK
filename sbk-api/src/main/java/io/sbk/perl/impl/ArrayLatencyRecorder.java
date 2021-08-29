@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.perl.impl;
@@ -32,7 +32,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     public ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                 long bytesMax, double[] percentiles, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
-        final int size = (int) Math.min(highLatency-lowLatency, Integer.MAX_VALUE);
+        final int size = (int) Math.min(highLatency - lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
         this.maxMemorySizeBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * size;
         this.minIndex = size;
@@ -54,11 +54,11 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
         }
         percentiles.reset(validLatencyRecords);
         long curIndex = 0;
-        for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex+1); i++) {
+        for (int i = minIndex; i < Math.min(latencies.length, this.maxIndex + 1); i++) {
             if (latencies[i] > 0) {
                 final long latency = i + lowLatency;
                 final long count = latencies[i];
-                final long nextIndex =  curIndex + count;
+                final long nextIndex = curIndex + count;
 
                 if (copyLatencies != null) {
                     copyLatencies.reportLatency(latency, count);
@@ -95,7 +95,6 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
             this.latencies[index] += count;
         }
     }
-
 
 
     /**

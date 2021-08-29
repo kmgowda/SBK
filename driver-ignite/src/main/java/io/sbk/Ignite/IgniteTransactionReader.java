@@ -5,16 +5,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 package io.sbk.Ignite;
 
-import io.sbk.data.DataType;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
-import io.sbk.perl.SendChannel;
 import io.sbk.api.Status;
+import io.sbk.data.DataType;
+import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.transactions.Transaction;
@@ -52,13 +52,13 @@ public class IgniteTransactionReader implements Reader<byte[]> {
     }
 
     @Override
-    public void close() throws  IOException {
+    public void close() throws IOException {
     }
 
     @Override
     public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs =  params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
         Transaction tx = ignite.transactions().txStart();
         long startKey = key;
@@ -86,7 +86,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
     @Override
     public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
-        final int recs =   params.getRecordsPerSync();
+        final int recs = params.getRecordsPerSync();
         Transaction tx = ignite.transactions().txStart();
         long startKey = key;
         Status stat = new Status();
