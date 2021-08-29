@@ -6,8 +6,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-       // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-gradle-plugin
-       classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
+        // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-gradle-plugin
+        classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
     }
 }
 

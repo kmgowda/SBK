@@ -30,16 +30,16 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
-    annotationProcessor group: 'org.projectlombok' , name:'lombok', version: lombokVersion
-    compile group:'org.projectlombok', name:'lombok', version: lombokVersion
-    compile group:'commons-cli', name:'commons-cli', version: commonsCliVersion
-    compile	group:'org.apache.commons', name:'commons-csv', version: apacheCommonsVersion
-    compile group:'org.slf4j', name:'slf4j-api', version: slf4jVersion
-    compile group:'org.slf4j', name:'slf4j-simple', version: slf4jVersion
-    compile group:'org.reflections', name:'reflections', version: reflectionsVersion
-    compile group:'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
-    compile group:'io.micrometer', name:'micrometer-registry-jmx' , version: micrometerVersion
-    compile group:'io.micrometer', name:'micrometer-registry-prometheus', version: micrometerVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    compile group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
+    compile group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsVersion
+    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    compile group: 'org.reflections', name: 'reflections', version: reflectionsVersion
+    compile group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
+    compile group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
+    compile group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
     compile group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion

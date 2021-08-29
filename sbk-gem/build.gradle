@@ -33,7 +33,7 @@ application {
 }
 
 dependencies {
-    annotationProcessor group: 'org.projectlombok' , name:'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     compile project(":sbk-ram")
 
     // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina

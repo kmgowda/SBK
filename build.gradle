@@ -14,18 +14,18 @@ import org.gradle.internal.jvm.Jvm
 import java.util.regex.Matcher
 
 buildscript {
-	repositories {
-		mavenLocal()
-		jcenter()
-		mavenCentral()
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
-	}
-	dependencies {
-		classpath "gradle.plugin.com.palantir.graal:gradle-graal:0.7.2"
-	}
-	println "Build JVM Version is : " + Jvm.current()
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.palantir.graal:gradle-graal:0.7.2"
+    }
+    println "Build JVM Version is : " + Jvm.current()
 
 }
 
@@ -38,320 +38,320 @@ apply plugin: 'checkstyle'
 def SbkMainClass = "io.sbk.main.SbkMain"
 
 allprojects {
-	repositories {
-		mavenLocal()
-		jcenter()
-		mavenCentral()
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
-	}
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
 
-	apply plugin: 'java'
-	apply plugin: 'idea'
-	apply plugin: 'eclipse'
-	apply plugin: 'application'
-	apply plugin: "com.palantir.graal"
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+    apply plugin: 'application'
+    apply plugin: "com.palantir.graal"
 
-	dependencies {
-		compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
-		testCompile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
-	}
+    dependencies {
+        compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
+        testCompile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
+    }
 
-	apply from: "$rootDir/gradle/application.gradle"
-	apply from: "$rootDir/gradle/checkstyle.gradle"
-	apply from: "$rootDir/gradle/eclipse.gradle"
-	apply from: "$rootDir/gradle/spotbugs.gradle"
-	apply from: "$rootDir/gradle/idea.gradle"
-	apply from: "$rootDir/gradle/jacoco.gradle"
-	apply from: "$rootDir/gradle/java.gradle"
-	apply from: "$rootDir/gradle/protobuf.gradle"
+    apply from: "$rootDir/gradle/application.gradle"
+    apply from: "$rootDir/gradle/checkstyle.gradle"
+    apply from: "$rootDir/gradle/eclipse.gradle"
+    apply from: "$rootDir/gradle/spotbugs.gradle"
+    apply from: "$rootDir/gradle/idea.gradle"
+    apply from: "$rootDir/gradle/jacoco.gradle"
+    apply from: "$rootDir/gradle/java.gradle"
+    apply from: "$rootDir/gradle/protobuf.gradle"
 
-	def sbkProjectName = rootProject.name + project.path.replace(":", "-")
-	sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-" , rootProject.name+"-")
-	sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
-	sbkProjectName = sbkProjectName.replace("--", "-")
-	if (sbkProjectName == rootProject.name + "-") {
-		sbkProjectName = rootProject.name
-	}
-	archivesBaseName = sbkProjectName
-	version = sbkVersion
+    def sbkProjectName = rootProject.name + project.path.replace(":", "-")
+    sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-", rootProject.name + "-")
+    sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
+    sbkProjectName = sbkProjectName.replace("--", "-")
+    if (sbkProjectName == rootProject.name + "-") {
+        sbkProjectName = rootProject.name
+    }
+    archivesBaseName = sbkProjectName
+    version = sbkVersion
 
-	def sbkClass = ""
-	if (project.path.startsWith(":driver-")) {
-		sbkClass = project.path.replace(":driver-","")
-	}
-	jar {
-		manifest {
-			attributes 'Name': sbkProjectName,
-					'Specification-Title': "Storage Benchmark Kit",
-					'Specification-Version': sbkVersion,
-					'Specification-Vendor': "KMG",
-					'Implementation-Title': sbkProjectName,
-					'Implementation-Version': sbkVersion,
-					'Implementation-Vendor': "KMG"
-		}
-	}
+    def sbkClass = ""
+    if (project.path.startsWith(":driver-")) {
+        sbkClass = project.path.replace(":driver-", "")
+    }
+    jar {
+        manifest {
+            attributes 'Name': sbkProjectName,
+                    'Specification-Title': "Storage Benchmark Kit",
+                    'Specification-Version': sbkVersion,
+                    'Specification-Vendor': "KMG",
+                    'Implementation-Title': sbkProjectName,
+                    'Implementation-Version': sbkVersion,
+                    'Implementation-Vendor': "KMG"
+        }
+    }
 
-	distributions {
-		main {
-			distributionBaseName.set(archivesBaseName)
-		}
-	}
+    distributions {
+        main {
+            distributionBaseName.set(archivesBaseName)
+        }
+    }
 
-	application {
-		mainClassName = SbkMainClass
-		applicationName = archivesBaseName
-		applicationDefaultJvmArgs = ['-Dsbk.applicationName='+applicationName, '-Dsbk.className='+sbkClass,
-									 '-Dsbk.appHome=SBK_APP_HOME']
-	}
+    application {
+        mainClassName = SbkMainClass
+        applicationName = archivesBaseName
+        applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + sbkClass,
+                                     '-Dsbk.appHome=SBK_APP_HOME']
+    }
 
-	task generateDashboards(type: Copy) {
-		if (project.path.startsWith(":driver-")) {
-			def outDir = 'build/dashboard'
-			def outFile = sbkProjectName+"-"+sbkVersion+".json"
-			def sbkClassUpperCase = sbkClass.toUpperCase()
+    task generateDashboards(type: Copy) {
+        if (project.path.startsWith(":driver-")) {
+            def outDir = 'build/dashboard'
+            def outFile = sbkProjectName + "-" + sbkVersion + ".json"
+            def sbkClassUpperCase = sbkClass.toUpperCase()
 
-			/*
-			call with parameter
-			./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/grafana/dashboards"
-			to generate dashboard files on single folder
-			 */
-			if (project.hasProperty("outdir")) {
-				outDir = outdir
-				outFile = sbkProjectName+".json"
-			}
+            /*
+            call with parameter
+            ./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/grafana/dashboards"
+            to generate dashboard files on single folder
+             */
+            if (project.hasProperty("outdir")) {
+                outDir = outdir
+                outFile = sbkProjectName + ".json"
+            }
 
 
-			from "$rootDir/dashboard-template.json"
-			into outDir
-			filter { line -> line.replaceAll('SBK@2020', sbkClassUpperCase) }
-			rename 'dashboard-template.json', outFile
+            from "$rootDir/dashboard-template.json"
+            into outDir
+            filter { line -> line.replaceAll('SBK@2020', sbkClassUpperCase) }
+            rename 'dashboard-template.json', outFile
 
-			doLast {
-				println "generatering file : " + outDir + "/" + outFile
-			}
-		}
-	}
+            doLast {
+                println "generatering file : " + outDir + "/" + outFile
+            }
+        }
+    }
 
-	task generateDockerfiles() {
-		def baseDriverToSkip="sbk-api"
-		def buffer = ""
-		def outDir = 'build/dockers'
-		def outFile = sbkProjectName+"-"+sbkVersion
+    task generateDockerfiles() {
+        def baseDriverToSkip = "sbk-api"
+        def buffer = ""
+        def outDir = 'build/dockers'
+        def outFile = sbkProjectName + "-" + sbkVersion
 
-		/*
-       	 	call with parameter
-        	./gradlew generateDockerfiles -Poutdir="/Users/kmg/projects/SBK/dockers"
-        	to generate dashboard files on single folder
+        /*
+                call with parameter
+            ./gradlew generateDockerfiles -Poutdir="/Users/kmg/projects/SBK/dockers"
+            to generate dashboard files on single folder
         */
-		if (project.hasProperty("outdir")) {
-			outDir = outdir
-			outFile = sbkProjectName
-		}
+        if (project.hasProperty("outdir")) {
+            outDir = outdir
+            outFile = sbkProjectName
+        }
 
 
-		if (project.path.startsWith(":driver-")) {
-			doLast {
-				println "generatering file : " + outDir + "/" + outFile
+        if (project.path.startsWith(":driver-")) {
+            doLast {
+                println "generatering file : " + outDir + "/" + outFile
 
-				configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-					def id = artifact.moduleVersion.id
-					if (id.group.toString() == rootProject.name) {
-						if (id.name != baseDriverToSkip) {
-							buffer += "COPY --chown=root:root " +id.name +" \${APP_HOME}/" + id.name + "\n"
-						}
-					}
-				}
-				buffer += "COPY --chown=root:root " +project.name +" \${APP_HOME}/" + project.name + "\n"
-				copy {
-					from "$rootDir/driver-docker-template"
-					into outDir
-					filter { line -> line.replaceAll('PROJECT@SBK', project.name) }
-					filter { line -> line.replaceAll('APP@SBK', sbkProjectName) }
-					filter { line -> line.replace("COPY@SBK", buffer) }
-					rename 'driver-docker-template', outFile
-				}
-			}
-		} else if (project.name == rootProject.name) {
-			doLast {
-				println "generatering file : " + outDir + "/" + outFile
+                configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                    def id = artifact.moduleVersion.id
+                    if (id.group.toString() == rootProject.name) {
+                        if (id.name != baseDriverToSkip) {
+                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
+                        }
+                    }
+                }
+                buffer += "COPY --chown=root:root " + project.name + " \${APP_HOME}/" + project.name + "\n"
+                copy {
+                    from "$rootDir/driver-docker-template"
+                    into outDir
+                    filter { line -> line.replaceAll('PROJECT@SBK', project.name) }
+                    filter { line -> line.replaceAll('APP@SBK', sbkProjectName) }
+                    filter { line -> line.replace("COPY@SBK", buffer) }
+                    rename 'driver-docker-template', outFile
+                }
+            }
+        } else if (project.name == rootProject.name) {
+            doLast {
+                println "generatering file : " + outDir + "/" + outFile
 
-				configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-					def id = artifact.moduleVersion.id
-					if (id.group.toString() == rootProject.name) {
-						if (id.name != baseDriverToSkip) {
-							buffer += "COPY --chown=root:root " +id.name +" \${APP_HOME}/" + id.name + "\n"
-						}
-					}
-				}
-				copy {
-					from "$rootDir/docker-template"
-					into outDir
-					filter { line -> line.replace("COPY@SBK", buffer) }
-					rename 'docker-template', outFile
-				}
-			}
-		}
-	}
+                configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                    def id = artifact.moduleVersion.id
+                    if (id.group.toString() == rootProject.name) {
+                        if (id.name != baseDriverToSkip) {
+                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
+                        }
+                    }
+                }
+                copy {
+                    from "$rootDir/docker-template"
+                    into outDir
+                    filter { line -> line.replace("COPY@SBK", buffer) }
+                    rename 'docker-template', outFile
+                }
+            }
+        }
+    }
 
-	graal {
-		def className = sbkClass.capitalize();
-		mainClass SbkMainClass
-		outputName sbkProjectName
-		javaVersion '11'
-		graalVersion '21.0.0'
-		option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
-		option "--initialize-at-build-time=io.sbk.$className"
-		option "-H:+AllowIncompleteClasspath"
-		option "-H:ResourceConfigurationFiles=$rootDir/resource-config.json"
-		option "-H:ReflectionConfigurationFiles=$rootDir/reflection-config.json"
-		option "--no-fallback"
-		option "-H:Optimize=3"
-	}
+    graal {
+        def className = sbkClass.capitalize();
+        mainClass SbkMainClass
+        outputName sbkProjectName
+        javaVersion '11'
+        graalVersion '21.0.0'
+        option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
+        option "--initialize-at-build-time=io.sbk.$className"
+        option "-H:+AllowIncompleteClasspath"
+        option "-H:ResourceConfigurationFiles=$rootDir/resource-config.json"
+        option "-H:ReflectionConfigurationFiles=$rootDir/reflection-config.json"
+        option "--no-fallback"
+        option "-H:Optimize=3"
+    }
 
 }
 
 task printDependencies {
-	doLast {
-		project.subprojects.findAll().each {
-			println "subproject : " + it.name
-			it.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-				def id = artifact.moduleVersion.id
-				if (id.group.toString() == rootProject.name) {
-					println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
-				}
-			}
-			println()
-		}
-		println("Root project : "+rootProject.name)
-		configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-			def id = artifact.moduleVersion.id
-			if (id.group.toString() == rootProject.name) {
-				println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
-			}
-		}
-		println()
+    doLast {
+        project.subprojects.findAll().each {
+            println "subproject : " + it.name
+            it.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                def id = artifact.moduleVersion.id
+                if (id.group.toString() == rootProject.name) {
+                    println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+                }
+            }
+            println()
+        }
+        println("Root project : " + rootProject.name)
+        configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            def id = artifact.moduleVersion.id
+            if (id.group.toString() == rootProject.name) {
+                println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+            }
+        }
+        println()
 
 
-	}
+    }
 }
 
 
 /*
    Example command : ./gradlew printdrivers -Preadme
-   another command : ./gradlew printdrivers -Preadme -Pdec   (add the project decription)
+   another command : ./gradlew printdrivers -Preadme -Pdec   (add the project description)
  */
 task printDrivers {
-	String readmePrefix= "https://github.com/kmgowda/SBK/tree/master/"
+    String readmePrefix = "https://github.com/kmgowda/SBK/tree/master/"
 
-	doLast {
-		int i = 1;
-		println();
-		project.subprojects.findAll().each {
-			if (it.name.startsWith("driver-") && !it.name.equals("driver-template")) {
-				String out = it.name
-				String dec = it.getDescription()
-				if (project.hasProperty("readme")) {
-					String name = it.name.replace("driver-", "")
-					if (dec != null && project.hasProperty("dec")) {
-						out = "[" + name.capitalize() + "](" + readmePrefix + it.name + " \""+ dec +"\"" +")"
-					} else {
-						out = "[" + name.capitalize() + "](" + readmePrefix + it.name + ")"
-					}
-				}
-				printf("%4d. %s\n", i, out)
-				i++;
-			}
-		}
-	}
+    doLast {
+        int i = 1;
+        println();
+        project.subprojects.findAll().each {
+            if (it.name.startsWith("driver-") && !it.name.equals("driver-template")) {
+                String out = it.name
+                String dec = it.getDescription()
+                if (project.hasProperty("readme")) {
+                    String name = it.name.replace("driver-", "")
+                    if (dec != null && project.hasProperty("dec")) {
+                        out = "[" + name.capitalize() + "](" + readmePrefix + it.name + " \"" + dec + "\"" + ")"
+                    } else {
+                        out = "[" + name.capitalize() + "](" + readmePrefix + it.name + ")"
+                    }
+                }
+                printf("%4d. %s\n", i, out)
+                i++;
+            }
+        }
+    }
 }
 
 
 /* Include your driver below */
 dependencies {
-	compile project(":sbk-gem")
-	compile project(":sbk-ram")
-	compile project(":sbk-gem")
-	compile project(":sbk-gem-yal")
-	compile project(":driver-concurrentq")
-	compile project(":driver-file")
-	compile project(":driver-filestream")
-	compile project(":driver-asyncfile")
-	compile project(":driver-hdfs")
-	compile project(":driver-bookkeeper")
-	compile project(":driver-rabbitmq")
-	compile project(":driver-rocketmq")
-	compile project(":driver-pulsar")
-	compile project(":driver-kafka")
-	compile project(":driver-pravega")
-	compile project(":driver-nats")
-	compile project(':driver-natsStream')
-	compile project(':driver-artemis')
-	compile project(':driver-nsq')
-	compile project(':driver-jdbc')
-	compile project(':driver-minio')
-	compile project(':driver-foundationdb')
-	compile project(':driver-fdbrecord')
-	compile project(':driver-mongodb')
-	compile project(':driver-rocksdb')
-	compile project(':driver-ignite')
-	compile project(':driver-couchdb')
-	compile project(':driver-hive')
-	compile project(':driver-null')
-	compile project(':driver-sqlite')
-	compile project(':driver-mysql')
-	compile project(':driver-mariadb')
-	compile project(':driver-postgresql')
-	compile project(':driver-derby')
-	compile project(':driver-mssql')
-	compile project(':driver-redpanda')
-	compile project(':driver-csv')
-	compile project(':driver-redis')
-	compile project(':driver-seaweeds3')
-	compile project(':driver-cassandra')
-	compile project(':driver-db2')
-	compile project(':driver-cephs3')
-	compile project(':driver-openio')
-	compile project(':driver-leveldb')
+    compile project(":sbk-gem")
+    compile project(":sbk-ram")
+    compile project(":sbk-gem")
+    compile project(":sbk-gem-yal")
+    compile project(":driver-concurrentq")
+    compile project(":driver-file")
+    compile project(":driver-filestream")
+    compile project(":driver-asyncfile")
+    compile project(":driver-hdfs")
+    compile project(":driver-bookkeeper")
+    compile project(":driver-rabbitmq")
+    compile project(":driver-rocketmq")
+    compile project(":driver-pulsar")
+    compile project(":driver-kafka")
+    compile project(":driver-pravega")
+    compile project(":driver-nats")
+    compile project(':driver-natsStream')
+    compile project(':driver-artemis')
+    compile project(':driver-nsq')
+    compile project(':driver-jdbc')
+    compile project(':driver-minio')
+    compile project(':driver-foundationdb')
+    compile project(':driver-fdbrecord')
+    compile project(':driver-mongodb')
+    compile project(':driver-rocksdb')
+    compile project(':driver-ignite')
+    compile project(':driver-couchdb')
+    compile project(':driver-hive')
+    compile project(':driver-null')
+    compile project(':driver-sqlite')
+    compile project(':driver-mysql')
+    compile project(':driver-mariadb')
+    compile project(':driver-postgresql')
+    compile project(':driver-derby')
+    compile project(':driver-mssql')
+    compile project(':driver-redpanda')
+    compile project(':driver-csv')
+    compile project(':driver-redis')
+    compile project(':driver-seaweeds3')
+    compile project(':driver-cassandra')
+    compile project(':driver-db2')
+    compile project(':driver-cephs3')
+    compile project(':driver-openio')
+    compile project(':driver-leveldb')
 }
 
 //create a single Jar with all dependencies
 task buildJar(type: Jar) {
-	manifest {
-		attributes	'Implementation-Title': rootProject.name,
-					'Implementation-Version': sbkVersion,
-					'Main-Class': SbkMainClass
-	}
-	zip64 true
-	baseName = rootProject.name
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-	exclude 'META-INF/*.RSA'
-	exclude 'META-INF/*.SF'
-	exclude 'META-INF/*.DSA'
-	with jar
+    manifest {
+        attributes 'Implementation-Title': rootProject.name,
+                'Implementation-Version': sbkVersion,
+                'Main-Class': SbkMainClass
+    }
+    zip64 true
+    baseName = rootProject.name
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    with jar
 }
 
 task SbkGem(type: CreateStartScripts) {
-	mainClassName = 'io.sbk.main.SbkGemMain'
-	applicationName = 'sbk-gem'
-	defaultJvmOpts = ['-Dsbk.applicationName='+rootProject.name, '-Dsbk.appHome=SBK_APP_HOME']
-	outputDir = startScripts.outputDir
-	classpath = startScripts.classpath
+    mainClassName = 'io.sbk.main.SbkGemMain'
+    applicationName = 'sbk-gem'
+    defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME']
+    outputDir = startScripts.outputDir
+    classpath = startScripts.classpath
 
-	SbkGem {
-		doLast {
-			unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-			windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-			// Replace the classpath on windows with the pathing JAR and the main archive
-			windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
-					"set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
-		}
-	}
+    SbkGem {
+        doLast {
+            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
+            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
+            // Replace the classpath on windows with the pathing JAR and the main archive
+            windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
+                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
+        }
+    }
 }
 
 applicationDistribution.into("bin") {
-	duplicatesStrategy= DuplicatesStrategy.EXCLUDE
-	from(SbkGem)
-	fileMode = 0755
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(SbkGem)
+    fileMode = 0755
 }
