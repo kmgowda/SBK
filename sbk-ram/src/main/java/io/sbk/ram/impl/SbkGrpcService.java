@@ -19,6 +19,7 @@ import io.sbk.logger.CountConnections;
 import io.sbk.ram.RamParameters;
 import io.sbk.ram.RamRegistry;
 import io.sbk.time.Time;
+import org.jetbrains.annotations.NotNull;
 
 import java.security.InvalidKeyException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,7 +62,7 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
 
     @Override
     public void registerClient(io.sbk.grpc.Config request,
-                               io.grpc.stub.StreamObserver<io.sbk.grpc.ClientID> responseObserver) {
+                               @NotNull io.grpc.stub.StreamObserver<io.sbk.grpc.ClientID> responseObserver) {
         responseObserver.onNext(ClientID.newBuilder().setId(registry.getID()).build());
         responseObserver.onCompleted();
         countConnections.incrementConnections();
