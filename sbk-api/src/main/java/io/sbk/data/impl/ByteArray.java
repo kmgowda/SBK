@@ -10,6 +10,7 @@
 package io.sbk.data.impl;
 
 import io.sbk.data.DataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -50,7 +51,7 @@ public class ByteArray implements DataType<byte[]> {
      * @return return size of the data.
      */
     @Override
-    public int length(byte[] data) {
+    public int length(@NotNull byte[] data) {
         return data.length;
     }
 

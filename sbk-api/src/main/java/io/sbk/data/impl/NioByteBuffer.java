@@ -10,6 +10,7 @@
 package io.sbk.data.impl;
 
 import io.sbk.data.DataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -52,7 +53,7 @@ public class NioByteBuffer implements DataType<ByteBuffer> {
      * @return return size of the data.
      */
     @Override
-    public int length(ByteBuffer data) {
+    public int length(@NotNull ByteBuffer data) {
         return data.limit();
     }
 
@@ -63,7 +64,7 @@ public class NioByteBuffer implements DataType<ByteBuffer> {
      * @return ByteBuffer return the data.
      */
     @Override
-    public ByteBuffer setTime(ByteBuffer data, long time) {
+    public ByteBuffer setTime(@NotNull ByteBuffer data, long time) {
         data.putLong(0, time);
         return data;
     }
@@ -74,7 +75,7 @@ public class NioByteBuffer implements DataType<ByteBuffer> {
      * @return long return the time set by last {@link NioByteBuffer#setTime(ByteBuffer, long)}} )}}.
      */
     @Override
-    public long getTime(ByteBuffer data) {
+    public long getTime(@NotNull ByteBuffer data) {
         return data.getLong(0);
     }
 

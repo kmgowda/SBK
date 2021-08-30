@@ -15,6 +15,7 @@ import io.sbk.config.Config;
 import io.sbk.config.PerlConfig;
 import io.sbk.options.InputOptions;
 import io.sbk.time.Time;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -85,7 +86,7 @@ public class CSVLogger extends SystemLogger {
     final public void writeToCSV(String header, String type, long connections, long maxConnections,
                                  long seconds, long bytes, long records, double recsPerSec,
                                  double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                                 long slc1, long slc2, long[] percentileValues) {
+                                 long slc1, long slc2, @NotNull long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
                 String.format("%16d,%s,%s,%s,%s"

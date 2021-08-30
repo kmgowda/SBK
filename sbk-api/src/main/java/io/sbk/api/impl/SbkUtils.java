@@ -18,6 +18,8 @@ import io.sbk.time.TimeUnit;
 import io.sbk.time.impl.MicroSeconds;
 import io.sbk.time.impl.MilliSeconds;
 import io.sbk.time.impl.NanoSeconds;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +27,7 @@ import java.util.List;
 
 public class SbkUtils {
 
-    public static Time getTime(PerformanceLogger logger) {
+    public static @NotNull Time getTime(@NotNull PerformanceLogger logger) {
         final TimeUnit timeUnit = logger.getTimeUnit();
         final Time ret;
         if (timeUnit == TimeUnit.mcs) {
@@ -41,7 +43,8 @@ public class SbkUtils {
         return ret;
     }
 
-    public static String[] removeOptionArgsAndValues(String[] args, String[] opts) {
+    @Contract("null, _ -> new")
+    public static @NotNull String[] removeOptionArgsAndValues(String[] args, String[] opts) {
         if (args == null) {
             return new String[0];
         }

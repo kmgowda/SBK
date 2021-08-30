@@ -11,6 +11,7 @@ package io.sbk.data.impl;
 
 import com.google.protobuf.ByteString;
 import io.sbk.data.DataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -51,7 +52,7 @@ public class ProtoBufByteString implements DataType<ByteString> {
      * @return return size of the data.
      */
     @Override
-    public int length(ByteString data) {
+    public int length(@NotNull ByteString data) {
         return data.size();
     }
 
@@ -62,7 +63,7 @@ public class ProtoBufByteString implements DataType<ByteString> {
      * @return byte[] return the data.
      */
     @Override
-    public ByteString setTime(ByteString data, long time) {
+    public ByteString setTime(@NotNull ByteString data, long time) {
         byte[] dataBytes = data.toByteArray();
         byte[] bytes = ByteBuffer.allocate(TIME_HEADER_BYTES).putLong(0, time).array();
         System.arraycopy(bytes, 0, dataBytes, 0, TIME_HEADER_BYTES);
@@ -75,7 +76,7 @@ public class ProtoBufByteString implements DataType<ByteString> {
      * @return long return the time set by last {@link ByteArray#setTime(byte[], long)}} )}}.
      */
     @Override
-    public long getTime(ByteString data) {
+    public long getTime(@NotNull ByteString data) {
         return data.asReadOnlyByteBuffer().getLong(0);
     }
 

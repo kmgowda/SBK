@@ -24,6 +24,7 @@ import io.sbk.time.TimeUnit;
 import io.sbk.time.impl.MicroSeconds;
 import io.sbk.time.impl.MilliSeconds;
 import io.sbk.time.impl.NanoSeconds;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -109,7 +110,7 @@ public class SystemLogger implements Logger {
 
 
     @Override
-    public void parseArgs(final InputOptions params) throws IllegalArgumentException {
+    public void parseArgs(final @NotNull InputOptions params) throws IllegalArgumentException {
         try {
             timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
         } catch (IllegalArgumentException ex) {
@@ -158,7 +159,7 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public void open(final InputOptions params, final String storageName, Action action, Time time) throws IOException {
+    public void open(final InputOptions params, final String storageName, @NotNull Action action, Time time) throws IOException {
         this.params = params;
         this.storageName = storageName;
         this.action = action;
@@ -225,9 +226,9 @@ public class SystemLogger implements Logger {
         readers.decrementAndGet();
     }
 
-    public void appendPercentiles(StringBuilder out, long seconds, double mBytes, long records, double recsPerSec,
+    public void appendPercentiles(@NotNull StringBuilder out, long seconds, double mBytes, long records, double recsPerSec,
                                   double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                                  long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                                  long higherDiscard, long slc1, long slc2, @NotNull long[] percentileValues) {
         out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
                         + ", %8.1f %s avg latency, %7d %s max latency;"
                         + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"
@@ -245,7 +246,7 @@ public class SystemLogger implements Logger {
         }
     }
 
-    public void appendWritesAndReaders(StringBuilder out) {
+    public void appendWritesAndReaders(@NotNull StringBuilder out) {
         out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
         out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
     }

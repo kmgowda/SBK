@@ -12,6 +12,7 @@ package io.sbk.yal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public abstract class YmlMap {
         this.args = args;
     }
 
-    public final static String[] getYmlArgs(String fileName, Class<? extends YmlMap> tClass) throws IOException {
+    public final static @NotNull String[] getYmlArgs(String fileName, Class<? extends YmlMap> tClass) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
 

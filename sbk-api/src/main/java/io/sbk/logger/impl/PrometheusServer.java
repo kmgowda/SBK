@@ -18,6 +18,7 @@ import io.micrometer.jmx.JmxMeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,7 +51,7 @@ public class PrometheusServer extends CompositeMeterRegistry {
         server.stop(0);
     }
 
-    private HttpServer createHttpServer() throws IOException {
+    private @NotNull HttpServer createHttpServer() throws IOException {
         final HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext(context, httpExchange -> {
             String response = prometheusRegistry.scrape();

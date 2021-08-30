@@ -12,6 +12,7 @@ package io.sbk.logger.impl;
 
 import io.sbk.logger.MetricsConfig;
 import io.sbk.time.Time;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ public class RWMetricsPrometheusServer extends RWMetricsLogger {
     final private PrometheusServer server;
 
     private RWMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,
-                                      MetricsConfig config, PrometheusServer server) {
+                                      @NotNull MetricsConfig config, PrometheusServer server) {
         super(header, action, percentiles, time, config.latencyTimeUnit, server);
         this.server = server;
     }
