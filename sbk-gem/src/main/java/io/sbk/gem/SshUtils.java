@@ -19,6 +19,7 @@ import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.scp.client.ScpClient;
 import org.apache.sshd.scp.client.ScpClientCreator;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -40,8 +41,8 @@ public final class SshUtils {
         return session;
     }
 
-    public static void runCommand(final ClientSession session, String cmd, long timeoutSeconds,
-                                  SshResponseStream response) throws IOException {
+    public static void runCommand(final @NotNull ClientSession session, String cmd, long timeoutSeconds,
+                                  @NotNull SshResponseStream response) throws IOException {
         // Create the exec and channel its output/error streams
         final ChannelExec execChannel = session.createExecChannel(cmd);
         execChannel.setErr(response.errOutputStream);

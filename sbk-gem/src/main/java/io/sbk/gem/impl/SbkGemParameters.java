@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -52,7 +53,7 @@ public class SbkGemParameters extends SbkDriversParameters implements GemParamet
     @Getter
     private int ramPort;
 
-    public SbkGemParameters(String name, String[] drivers, GemConfig config, int ramport) {
+    public SbkGemParameters(String name, String[] drivers, @NotNull GemConfig config, int ramport) {
         super(name, GemConfig.DESC, drivers);
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * PerlConfig.MS_PER_SEC;
