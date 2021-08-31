@@ -62,4 +62,5 @@
     <allow pkg="com.datastax" />
     <allow pkg="org.HdrHistogram" />
     <allow pkg="org.iq80.leveldb" />
+    <allow pkg="org.jetbrains" />
 </import-control>

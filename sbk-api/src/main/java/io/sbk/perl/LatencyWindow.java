@@ -12,6 +12,7 @@ package io.sbk.perl;
 
 import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
+import org.jetbrains.annotations.NotNull;
 
 abstract public class LatencyWindow extends LatencyRecorder {
     final protected LatencyPercentiles percentiles;
@@ -74,7 +75,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
                 slc[0], slc[1], this.percentiles.latencies);
     }
 
-    final private void getSLCold(LatencyPercentiles percentiles, int[] slc) {
+    final private void getSLCold(@NotNull LatencyPercentiles percentiles, @NotNull int[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length - 1;
@@ -104,7 +105,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         }
     }
 
-    final private void getSLC(LatencyPercentiles percentiles, long[] slc) {
+    final private void getSLC(@NotNull LatencyPercentiles percentiles, @NotNull long[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length - 1;

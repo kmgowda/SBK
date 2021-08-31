@@ -19,6 +19,7 @@ import io.sbk.state.State;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import lombok.Synchronized;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -51,7 +52,7 @@ final public class CQueuePerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerformance(PerlConfig perlConfig, int workers, PeriodicRecorder periodicLogger,
+    public CQueuePerformance(@NotNull PerlConfig perlConfig, int workers, PeriodicRecorder periodicLogger,
                              int reportingIntervalMS, Time time, ExecutorService executor) {
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;

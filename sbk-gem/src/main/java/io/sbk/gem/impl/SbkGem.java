@@ -35,6 +35,8 @@ import io.sbk.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,8 +71,8 @@ public class SbkGem {
      * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
      * @return Array of remote responses
      */
-    public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
-                                       GemLogger outLogger) throws ParseException, IllegalArgumentException,
+    public static @NotNull RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
+                                                GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
         final GemBenchmark benchmark;
         try {
@@ -104,8 +106,9 @@ public class SbkGem {
      * @throws IOException If an exception occurred due to write or read failures.
      * @return Benchmark Interface
      */
-    public static GemBenchmark buildBenchmark(final String[] args, final String packageName,
-                                              final String applicationName, GemLogger outLogger)
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull GemBenchmark buildBenchmark(final String[] args, final String packageName,
+                                                       final String applicationName, GemLogger outLogger)
             throws ParseException, IOException, HelpException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
@@ -300,7 +303,7 @@ public class SbkGem {
     }
 
 
-    public static void printRemoteResults(RemoteResponse[] results, boolean all) {
+    public static void printRemoteResults(@NotNull RemoteResponse[] results, boolean all) {
         final String separatorText = "-".repeat(80);
         System.out.println();
         System.out.println("SBK-GEM Remote Results");

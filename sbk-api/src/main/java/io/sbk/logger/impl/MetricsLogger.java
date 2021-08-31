@@ -17,6 +17,7 @@ import io.sbk.config.PerlConfig;
 import io.sbk.perl.Print;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 
@@ -39,8 +40,8 @@ public class MetricsLogger implements Print {
     final private AtomicDouble[] percentileGauges;
     final private Convert convert;
 
-    public MetricsLogger(String header, String action, double[] percentiles,
-                         Time time, TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
+    public MetricsLogger(@NotNull String header, @NotNull String action,  @NotNull double[] percentiles,
+                         Time time, @NotNull TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
         this.metricPrefix = header.replace(" ", "_").toUpperCase() + "_"
                 + action.replace(" ", "_");

@@ -21,6 +21,7 @@ import io.sbk.perl.RunBenchmark;
 import io.sbk.perl.SendChannel;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -75,7 +76,7 @@ public class SbkReader extends Worker implements RunBenchmark {
         }, executor);
     }
 
-    private BiConsumer createBenchmark() {
+    private @NotNull BiConsumer createBenchmark() {
         final BiConsumer perfReader;
         if (params.getTotalSecondsToRun() > 0) {
             if (params.isWriteAndRead()) {

@@ -10,6 +10,7 @@
 package io.sbk.data.impl;
 
 import io.sbk.data.DataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 
@@ -51,7 +52,7 @@ public class SbkString implements DataType<String> {
      * @return return size of the data.
      */
     @Override
-    public int length(String data) {
+    public int length(@NotNull String data) {
         return data.length();
     }
 
@@ -62,7 +63,7 @@ public class SbkString implements DataType<String> {
      * @return return the data.
      */
     @Override
-    public String setTime(String data, long time) {
+    public String setTime(@NotNull String data, long time) {
         final String timeString = String.format(FORMAT_STRING, time);
         return timeString + data.substring(TIME_HEADER_SIZE);
     }
@@ -73,7 +74,7 @@ public class SbkString implements DataType<String> {
      * @return long return the time set by last {@link SbkString#setTime(String, long)}} )}}.
      */
     @Override
-    public long getTime(String data) {
+    public long getTime(@NotNull String data) {
         return Long.parseLong(data.substring(0, TIME_HEADER_SIZE));
     }
 

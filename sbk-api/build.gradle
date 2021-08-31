@@ -45,6 +45,7 @@ dependencies {
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
     compile group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
+    implementation group: 'org.jetbrains', name:'annotations', version: jetbrainVersion
     testCompile group: 'junit', name: 'junit', version: junitVersion
 }
 

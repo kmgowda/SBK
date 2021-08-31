@@ -18,6 +18,7 @@ import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.perl.impl.TotalLatencyRecordWindow;
 import io.sbk.ram.RamPeriodicRecorder;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
@@ -61,7 +62,7 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
         checkWindowFullAndReset(currentTime);
     }
 
-    public void addLatenciesRecord(LatenciesRecord record) {
+    public void addLatenciesRecord(@NotNull LatenciesRecord record) {
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                 record.getMaxReaders(), record.getMaxWriters());
 

@@ -11,6 +11,8 @@ package io.sbk.api;
 
 import io.sbk.system.Printer;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -51,7 +53,7 @@ final public class StoragePackage {
         }
     }
 
-    public static Storage<?> getStorageInstance(String storageFullPath) throws ClassNotFoundException,
+    public static @NotNull Storage<?> getStorageInstance(String storageFullPath) throws ClassNotFoundException,
             NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return (Storage<?>) Class.forName(storageFullPath).getConstructor().newInstance();
     }
@@ -64,7 +66,7 @@ final public class StoragePackage {
         return simpleNames;
     }
 
-    public Storage<?> getStorage(String storageName) throws ClassNotFoundException, NoSuchMethodException,
+    public @NotNull Storage<?> getStorage(String storageName) throws ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
         final int i = Arrays.binarySearch(simpleNames, storageName, stringComparator);
         if (i < 0) {
@@ -96,8 +98,10 @@ final public class StoragePackage {
 
     private static class StringCompareIgnoreCase implements Comparator<String> {
 
+
         @Override
-        public int compare(String o1, String o2) {
+        @Contract(pure = true)
+        public int compare(@NotNull String o1, String o2) {
             return o1.compareToIgnoreCase(o2);
         }
     }

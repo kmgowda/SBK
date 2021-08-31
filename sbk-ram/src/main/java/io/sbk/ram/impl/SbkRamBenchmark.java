@@ -29,6 +29,8 @@ import io.sbk.state.State;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import lombok.Synchronized;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
@@ -68,7 +70,7 @@ public class SbkRamBenchmark implements Benchmark {
      * @throws IOException          If Exception occurs.
      */
     public SbkRamBenchmark(RamConfig ramConfig, RamParameterOptions params,
-                           RamLogger logger, Time time) throws IOException {
+                           @NotNull RamLogger logger, Time time) throws IOException {
         this.ramConfig = ramConfig;
         this.params = params;
         this.logger = logger;
@@ -91,7 +93,7 @@ public class SbkRamBenchmark implements Benchmark {
     }
 
 
-    private LatencyRecordWindow createLatencyWindow() {
+    private @NotNull LatencyRecordWindow createLatencyWindow() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
         final LatencyRecordWindow window;
@@ -111,7 +113,8 @@ public class SbkRamBenchmark implements Benchmark {
         return window;
     }
 
-    private RamPeriodicRecorder createLatencyRecorder() {
+    @Contract(" -> new")
+    private @NotNull RamPeriodicRecorder createLatencyRecorder() {
         final LatencyRecordWindow window = createLatencyWindow();
         final RamPeriodicRecorder latencyRecorder;
         final LatencyRecordWindow totalWindow;

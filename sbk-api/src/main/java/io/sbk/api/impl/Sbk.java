@@ -29,6 +29,8 @@ import io.sbk.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -108,8 +110,9 @@ public class Sbk {
      * @throws IllegalAccessException if the exception occurs.
      * @return Benchmark interface
      */
-    public static Benchmark buildBenchmark(final String[] args, final String packageName,
-                                           final String applicationName, final Logger outLogger) throws ParseException,
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull Benchmark buildBenchmark(final String[] args, final String packageName,
+                                                    final String applicationName, final Logger outLogger) throws ParseException,
             IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException,
             InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();

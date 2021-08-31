@@ -20,6 +20,7 @@ import io.sbk.state.State;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.File;
@@ -50,7 +51,7 @@ public class SbkGemBenchmark implements GemBenchmark {
     @GuardedBy("this")
     private State state;
 
-    public SbkGemBenchmark(Benchmark ramBenchmark, GemConfig config, GemParameters params, String sbkArgs) {
+    public SbkGemBenchmark(Benchmark ramBenchmark, @NotNull GemConfig config, @NotNull GemParameters params, String sbkArgs) {
         this.ramBenchmark = ramBenchmark;
         this.config = config;
         this.config.remoteTimeoutSeconds = Long.MAX_VALUE;
@@ -80,7 +81,7 @@ public class SbkGemBenchmark implements GemBenchmark {
         return Integer.parseInt(tmp[1].split("\\.")[0]);
     }
 
-    private static SshResponseStream[] createMultiSshResponseStream(int length, boolean stdout) {
+    private static @NotNull SshResponseStream[] createMultiSshResponseStream(int length, boolean stdout) {
         final SshResponseStream[] results = new SshResponseStream[length];
         for (int i = 0; i < results.length; i++) {
             results[i] = new SshResponseStream(stdout);
@@ -347,7 +348,7 @@ public class SbkGemBenchmark implements GemBenchmark {
     private final static class ConnectionsMap {
         private final Map<Map.Entry<String, String>, Boolean> kMap;
 
-        public ConnectionsMap(SshConnection[] conn) {
+        public ConnectionsMap(@NotNull SshConnection[] conn) {
             this.kMap = new HashMap<>();
             for (SshConnection sshConnection : conn) {
                 this.kMap.put(Map.entry(sshConnection.getHost().toLowerCase(), sshConnection.getDir().toLowerCase()), false);
@@ -358,11 +359,11 @@ public class SbkGemBenchmark implements GemBenchmark {
             this.kMap.keySet().forEach(k -> this.kMap.put(k, false));
         }
 
-        void visit(SshConnection conn) {
+        void visit(@NotNull SshConnection conn) {
             this.kMap.put(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()), true);
         }
 
-        boolean isVisited(SshConnection conn) {
+        boolean isVisited(@NotNull SshConnection conn) {
             return this.kMap.get(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()));
         }
     }

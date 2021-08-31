@@ -18,6 +18,7 @@ import io.sbk.state.State;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import lombok.Synchronized;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.concurrent.CompletableFuture;
@@ -97,7 +98,7 @@ public class RamBenchmark implements Benchmark, RamRegistry {
     }
 
     @Override
-    public void enQueue(LatenciesRecord record) {
+    public void enQueue(@NotNull LatenciesRecord record) {
         final int index = (int) (record.getClientID() % cQueues.length);
         cQueues[index].add(record);
     }

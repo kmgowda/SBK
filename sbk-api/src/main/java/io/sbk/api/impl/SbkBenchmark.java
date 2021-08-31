@@ -32,6 +32,8 @@ import io.sbk.state.State;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import lombok.Synchronized;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
@@ -86,7 +88,7 @@ public class SbkBenchmark implements Benchmark {
      */
     public SbkBenchmark(Action action, PerlConfig perlConfig,
                         ParameterOptions params, Storage<Object> storage,
-                        DataType<Object> dType, Logger logger, Time time) throws IOException {
+                        DataType<Object> dType, @NotNull Logger logger, Time time) throws IOException {
         this.dType = dType;
         this.action = action;
         this.perlConfig = perlConfig;
@@ -153,7 +155,8 @@ public class SbkBenchmark implements Benchmark {
         return window;
     }
 
-    private PeriodicRecorder createLatencyRecorder() {
+    @Contract(" -> new")
+    private @NotNull PeriodicRecorder createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
         final LatencyRecordWindow window;

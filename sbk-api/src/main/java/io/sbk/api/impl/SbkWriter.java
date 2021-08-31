@@ -21,6 +21,7 @@ import io.sbk.perl.RunBenchmark;
 import io.sbk.perl.SendChannel;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
     final private int dataSize;
 
     public SbkWriter(int writerID, int idMax, ParameterOptions params, SendChannel sendChannel,
-                     DataType<Object> dType, Time time, DataWriter<Object> writer,
+                     @NotNull DataType<Object> dType, Time time, DataWriter<Object> writer,
                      CountWriters wCount, ExecutorService executor) {
         super(writerID, idMax, params, sendChannel);
         this.dType = dType;
@@ -76,7 +77,7 @@ public class SbkWriter extends Worker implements RunBenchmark {
         }, executor);
     }
 
-    private BiConsumer createBenchmark() {
+    private @NotNull BiConsumer createBenchmark() {
         final BiConsumer perfWriter;
         if (params.getTotalSecondsToRun() > 0) {
             if (params.isWriteAndRead()) {
