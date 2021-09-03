@@ -136,6 +136,7 @@ public class SbkGem {
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(GemConfig.DESC);
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
+        Printer.log.info(GemConfig.NAME.toUpperCase() +" Website: " + Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Storage Drivers Package: " + storagePackageName);

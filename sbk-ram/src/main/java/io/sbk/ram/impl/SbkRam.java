@@ -15,6 +15,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.api.Benchmark;
 import io.sbk.api.impl.SbkUtils;
+import io.sbk.config.Config;
 import io.sbk.config.RamConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.logger.RamLogger;
@@ -98,6 +99,7 @@ public class SbkRam {
         Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(RamConfig.DESC);
         Printer.log.info(RamConfig.NAME.toUpperCase() + " Version: " + version);
+        Printer.log.info(RamConfig.NAME.toUpperCase() +" Website: "+ Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
@@ -109,7 +111,6 @@ public class SbkRam {
 
         // disable CSV
         ramConfig.csv = false;
-
         logger = Objects.requireNonNullElseGet(outLogger, RamPrometheusLogger::new);
 
         params = new SbkRamParameters(appName, ramConfig.port, ramConfig.maxConnections);
