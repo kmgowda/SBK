@@ -138,6 +138,7 @@ public class Sbk {
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         Printer.log.info(Config.DESC);
         Printer.log.info(Config.NAME.toUpperCase() + " Version: " + version);
+        Printer.log.info(Config.NAME.toUpperCase() +" Website: "+ Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Storage Drivers Package: " + storagePackageName);

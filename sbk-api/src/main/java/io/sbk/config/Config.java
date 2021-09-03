@@ -17,7 +17,8 @@ final public class Config {
     final public static String SBK_APP_NAME = "sbk.applicationName";
     final public static String SBK_CLASS_NAME = "sbk.className";
     final public static String SBK_PACKAGE_NAME = "io.sbk";
-    final public static String SBK_FOOTER = "\nPlease report issues at https://github.com/kmgowda/SBK";
+    final public static String SBK_WEBSITE_NAME = "https://github.com/kmgowda/SBK";
+    final public static String SBK_FOOTER = "\nPlease report issues at " + SBK_WEBSITE_NAME;
     public final static String CLASS_OPTION = "class";
     public final static String HELP_OPTION = "help";
     public final static String ARG_PREFIX = "-";
