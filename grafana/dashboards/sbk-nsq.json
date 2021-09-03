@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1627650252932,
+  "iteration": 1630666127615,
   "links": [],
   "panels": [
     {
@@ -1026,148 +1026,98 @@
           "type": "gauge"
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "custom": {},
-              "links": []
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 100
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 10000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 100000000
+                  }
+                ]
+              },
+              "unit": "short"
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 11,
             "w": 8,
             "x": 16,
             "y": 16
           },
-          "hiddenSeries": false,
-          "id": 10,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
+          "id": 71,
           "options": {
-            "alertThreshold": true
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
           },
-          "percentage": false,
           "pluginVersion": "7.3.7",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_NSQ_Writing_ms_10",
+              "expr": "SBK_NSQ_Writing_SLC_1",
               "interval": "",
-              "legendFormat": "",
+              "legendFormat": "SLC 1",
               "refId": "A"
             },
             {
-              "expr": "SBK_NSQ_Writing_ms_25",
+              "expr": "SBK_NSQ_Writing_SLC_2",
               "interval": "",
-              "legendFormat": "",
+              "legendFormat": "SLC 2",
               "refId": "B"
-            },
-            {
-              "expr": "SBK_NSQ_Writing_ms_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_NSQ_Writing_ms_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_NSQ_Writing_ms_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_NSQ_Writing_ms_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_NSQ_Writing_ms_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_NSQ_Writing_ms_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_NSQ_Writing_ms_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
             }
           ],
-          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
-          "title": "NSQ Write Percentiles (Milliseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "ms",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "title": "NSQ Write  Sliding Latency Coverage (SLC)",
+          "type": "stat"
         },
         {
           "datasource": "Prometheus",
@@ -1550,6 +1500,150 @@
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 10,
+            "w": 8,
+            "x": 16,
+            "y": 27
+          },
+          "hiddenSeries": false,
+          "id": 10,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.3.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "SBK_NSQ_Writing_ms_10",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_25",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_50",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_75",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_90",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_95",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_99_9",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "expr": "SBK_NSQ_Writing_ms_99_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "NSQ Write Percentiles (Milliseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
@@ -1633,8 +1727,8 @@
           "gridPos": {
             "h": 10,
             "w": 8,
-            "x": 16,
-            "y": 27
+            "x": 0,
+            "y": 37
           },
           "id": 12,
           "options": {
@@ -2430,148 +2524,98 @@
       "type": "gauge"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "custom": {},
-          "links": []
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 500
+              },
+              {
+                "color": "#EF843C",
+                "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": []
       },
-      "fill": 1,
-      "fillGradient": 0,
       "gridPos": {
         "h": 11,
         "w": 8,
         "x": 16,
         "y": 19
       },
-      "hiddenSeries": false,
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
+      "id": 73,
       "options": {
-        "alertThreshold": true
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
       },
-      "percentage": false,
       "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
       "targets": [
         {
-          "expr": "SBK_NSQ_Reading_ms_10",
+          "expr": "SBK_NSQ_Reading_SLC_1",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "SLC 1",
           "refId": "A"
         },
         {
-          "expr": "SBK_NSQ_Reading_ms_25",
+          "expr": "SBK_NSQ_Reading_SLC_2",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "SLC 2",
           "refId": "B"
-        },
-        {
-          "expr": "SBK_NSQ_Reading_ms_50",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "expr": "SBK_NSQ_Reading_ms_75",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "expr": "SBK_NSQ_Reading_ms_90",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "expr": "SBK_NSQ_Reading_ms_95",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "expr": "SBK_NSQ_Reading_ms_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "expr": "SBK_NSQ_Reading_ms_99_9",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "expr": "SBK_NSQ_Reading_ms_99_99",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
         }
       ],
-      "thresholds": [],
       "timeFrom": null,
-      "timeRegions": [],
       "timeShift": null,
-      "title": "NSQ Read Percentiles (Milli Seconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "ms",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "title": "NSQ Read  Sliding Latency Coverage (SLC)",
+      "type": "stat"
     },
     {
       "datasource": "Prometheus",
@@ -2954,6 +2998,150 @@
       }
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 30
+      },
+      "hiddenSeries": false,
+      "id": 22,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.7",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_NSQ_Reading_ms_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_NSQ_Reading_ms_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "NSQ Read Percentiles (Milli Seconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
@@ -3033,8 +3221,8 @@
       "gridPos": {
         "h": 11,
         "w": 8,
-        "x": 16,
-        "y": 30
+        "x": 0,
+        "y": 41
       },
       "id": 24,
       "options": {
@@ -3078,7 +3266,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 52
       },
       "id": 56,
       "panels": [
@@ -3162,7 +3350,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 9
+            "y": 49
           },
           "hiddenSeries": false,
           "id": 61,
@@ -3259,7 +3447,7 @@
             "h": 11,
             "w": 8,
             "x": 8,
-            "y": 9
+            "y": 49
           },
           "hiddenSeries": false,
           "id": 36,
@@ -3392,7 +3580,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 9
+            "y": 49
           },
           "id": 52,
           "options": {
@@ -3447,7 +3635,7 @@
             "h": 11,
             "w": 8,
             "x": 0,
-            "y": 20
+            "y": 60
           },
           "hiddenSeries": false,
           "id": 54,
@@ -3687,7 +3875,7 @@
             "h": 5,
             "w": 3,
             "x": 8,
-            "y": 20
+            "y": 60
           },
           "id": 30,
           "options": {
@@ -3792,7 +3980,7 @@
             "h": 6,
             "w": 5,
             "x": 11,
-            "y": 20
+            "y": 60
           },
           "id": 32,
           "options": {
@@ -3821,6 +4009,503 @@
           "type": "gauge"
         },
         {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 100
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 10000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 100000000
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 60
+          },
+          "id": 75,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_NSQ_Write_Reading_SLC_1",
+              "interval": "",
+              "legendFormat": "SLC 1",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_SLC_2",
+              "interval": "",
+              "legendFormat": "SLC 2",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "NSQ Write-Read Sliding Latency Coverage (SLC)",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 8,
+            "y": 65
+          },
+          "id": 40,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_NSQ_Write_Reading_Readers",
+              "interval": "",
+              "legendFormat": "Active Readers",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_Max_Readers",
+              "interval": "",
+              "legendFormat": "Max Readers",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_Writers",
+              "interval": "",
+              "legendFormat": "Active Writers",
+              "refId": "C"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_Max_Writers",
+              "interval": "",
+              "legendFormat": "Max Writers",
+              "refId": "D"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "NSQ Write-Read  Writers and Readers",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 11,
+            "y": 66
+          },
+          "id": 42,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_NSQ_Write_Reading_LowerDiscardedLatencyRecords_total",
+              "interval": "",
+              "legendFormat": "Lower",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_HigherDiscardLatencyRecords_total",
+              "interval": "",
+              "legendFormat": "Higher",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_InvalidLatencyRecords_total",
+              "interval": "",
+              "legendFormat": "Invalid/Negative",
+              "refId": "C"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "NSQ Write-Read  Discarded Latencies",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 10000000
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 100000000
+                  }
+                ]
+              },
+              "unit": "µs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 71
+          },
+          "id": 51,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.3.7",
+          "targets": [
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_AvgLatency",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_MaxLatency",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "NSQ Write-Read Avg and Max Latencies (Microseconds)",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 8,
+            "y": 71
+          },
+          "hiddenSeries": false,
+          "id": 53,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.3.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_10",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_25",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_50",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_75",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_90",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_95",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_99_9",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "expr": "SBK_NSQ_Write_Reading_mcs_99_99",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "NSQ Write-Read Percentiles (Microseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "µs",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -3838,7 +4523,7 @@
             "h": 11,
             "w": 8,
             "x": 16,
-            "y": 20
+            "y": 71
           },
           "hiddenSeries": false,
           "id": 34,
@@ -3967,409 +4652,6 @@
           "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
-              "custom": {
-                "align": null,
-                "filterable": false
-              },
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 8,
-            "y": 25
-          },
-          "id": 40,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_NSQ_Write_Reading_Readers",
-              "interval": "",
-              "legendFormat": "Active Readers",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_Max_Readers",
-              "interval": "",
-              "legendFormat": "Max Readers",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_Writers",
-              "interval": "",
-              "legendFormat": "Active Writers",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_Max_Writers",
-              "interval": "",
-              "legendFormat": "Max Writers",
-              "refId": "D"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "NSQ Write-Read  Writers and Readers",
-          "type": "stat"
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 11,
-            "y": 26
-          },
-          "id": 42,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_NSQ_Write_Reading_LowerDiscardedLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Lower",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_HigherDiscardLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Higher",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_InvalidLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Invalid/Negative",
-              "refId": "C"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "NSQ Write-Read  Discarded Latencies",
-          "type": "stat"
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 10000000
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 100000000
-                  }
-                ]
-              },
-              "unit": "µs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 31
-          },
-          "id": 51,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "7.3.7",
-          "targets": [
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_AvgLatency",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_MaxLatency",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "NSQ Write-Read Avg and Max Latencies (Microseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 8,
-            "y": 31
-          },
-          "hiddenSeries": false,
-          "id": 53,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.7",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_10",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_NSQ_Write_Reading_mcs_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "NSQ Write-Read Percentiles (Microseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "µs",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
               "custom": {},
               "mappings": [],
               "noValue": "0",
@@ -4449,8 +4731,8 @@
           "gridPos": {
             "h": 11,
             "w": 8,
-            "x": 16,
-            "y": 31
+            "x": 0,
+            "y": 82
           },
           "id": 38,
           "options": {
