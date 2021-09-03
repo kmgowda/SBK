@@ -20,6 +20,7 @@ import io.sbk.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
@@ -38,6 +39,8 @@ public class MetricsLogger implements Print {
     final private AtomicDouble avgLatency;
     final private AtomicDouble maxLatency;
     final private AtomicDouble[] percentileGauges;
+    final private AtomicLong slc1;
+    final private AtomicLong slc2;
     final private Convert convert;
 
     public MetricsLogger(@NotNull String header, @NotNull String action,  @NotNull double[] percentiles,
@@ -55,6 +58,8 @@ public class MetricsLogger implements Print {
         final String invalidLatencyRecordsName = metricPrefix + "_InvalidLatencyRecords";
         final String lowerDiscardName = metricPrefix + "_LowerDiscardedLatencyRecords";
         final String higherDiscardName = metricPrefix + "_HigherDiscardLatencyRecords";
+        final String slc1Name = metricPrefix + "_SLC_1";
+        final String slc2Name = metricPrefix + "_SLC_2";
         this.registry = compositeRegistry;
         this.bytes = this.registry.counter(bytesName);
         this.records = this.registry.counter(recordsName);
@@ -65,6 +70,8 @@ public class MetricsLogger implements Print {
         this.recsPsec = this.registry.gauge(recsPsecName, new AtomicDouble());
         this.avgLatency = this.registry.gauge(avgLatencyName, new AtomicDouble());
         this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicDouble());
+        this.slc1 = this.registry.gauge(slc1Name, new AtomicLong());
+        this.slc2 = this.registry.gauge(slc2Name, new AtomicLong());
         this.percentileGauges = new AtomicDouble[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
             this.percentileGauges[i] = this.registry.gauge(metricPrefix + "_" + metricUnit + "_" + format.format(percentiles[i]),
@@ -94,13 +101,14 @@ public class MetricsLogger implements Print {
         this.higherDiscard.increment(higherDiscard);
         this.recsPsec.set(recsPerSec);
         this.mbPsec.set(mbPerSec);
+        this.slc1.set(slc1);
+        this.slc2.set(slc2);
         this.avgLatency.set(convert.apply(avgLatency));
         this.maxLatency.set(convert.apply((double) maxLatency));
         for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
             this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));
         }
     }
-
 
     private interface Convert {
         double apply(double val);
