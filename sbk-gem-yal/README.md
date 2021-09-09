@@ -9,7 +9,7 @@ You may obtain a copy of the License at
 -->
 # SBK-GEM-YAL : YML Arguments Loader
 
-[![Api](https://img.shields.io/badge/SBK--GEM--YAL-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-gem/javadoc/index.html)
+[![Api](https://img.shields.io/badge/SBK--GEM--YAL-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-gem-yal/javadoc/index.html)
 
 The SBK-GEM-YAL (YML Arguments Loader) is a wrapper for [SBK-GEM](https://github.com/kmgowda/SBK/tree/master/sbk-gem).
 The SBK-GEM-YAL extracts arguments from the YML file and invokes the SBK-GEM command with the same arguments as command 
