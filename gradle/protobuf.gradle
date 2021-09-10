@@ -36,9 +36,9 @@ plugins.withId('com.google.protobuf') {
     }
 
     dependencies {
-        compile group: 'io.grpc', name: 'grpc-netty', version: grpcVersion
-        compile group: 'io.grpc', name: 'grpc-protobuf', version: grpcVersion
-        compile group: 'io.grpc', name: 'grpc-stub', version: grpcVersion
+        api group: 'io.grpc', name: 'grpc-netty', version: grpcVersion
+        api group: 'io.grpc', name: 'grpc-protobuf', version: grpcVersion
+        api group: 'io.grpc', name: 'grpc-stub', version: grpcVersion
     }
 
     idea {

@@ -9,7 +9,7 @@
  *
  */
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
 
@@ -39,5 +39,5 @@ application {
 dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
-    compile project(":sbk-api")
+    api project(":sbk-api")
 }

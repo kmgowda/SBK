@@ -7,8 +7,8 @@ repositories {
 }
 
 dependencies {
-    compile project(":driver-jdbc")
+    api project(":driver-jdbc")
     // https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc
-    compile group: 'org.apache.hive', name: 'hive-jdbc', version: '1.1.0'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    api group: 'org.apache.hive', name: 'hive-jdbc', version: '1.1.0'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }

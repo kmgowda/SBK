@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
-    compile 'com.rabbitmq:amqp-client:5.8.0'
+    api project(":sbk-api")
+    api 'com.rabbitmq:amqp-client:5.8.0'
 }

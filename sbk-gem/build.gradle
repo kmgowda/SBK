@@ -9,7 +9,7 @@
  *
  */
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
 buildscript {
@@ -35,7 +35,7 @@ application {
 dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     implementation group: 'org.jetbrains', name:'annotations', version: jetbrainVersion
-    compile project(":sbk-ram")
+    api project(":sbk-ram")
 
     // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
     implementation group: 'org.apache.sshd', name: 'sshd-common', version: sshdVersion

@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.apache.activemq/artemis-core-client
-    compile group: 'org.apache.activemq', name: 'artemis-core-client', version: '2.11.0'
+    api group: 'org.apache.activemq', name: 'artemis-core-client', version: '2.11.0'
 }

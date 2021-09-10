@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     implementation 'io.nats:jnats:2.6.7'
 }

@@ -8,14 +8,12 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
-plugins.withId('java') {
+plugins.withId('java-library') {
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
     apply plugin: 'signing'
-    apply plugin: 'maven'
 
     compileJava {
-
         options.compilerArgs.addAll([
                 "-Xlint:deprecation",
                 "-Xlint:divzero",
@@ -39,6 +37,7 @@ plugins.withId('java') {
         classpath = sourceSets.main.runtimeClasspath
         failOnError = false
     }
+
     task javadocJar(type: Jar) {
         classifier = 'javadoc'
         from generateJavadoc
@@ -49,7 +48,7 @@ plugins.withId('java') {
         classifier = 'tests'
         from sourceSets.test.output
     }
-    artifacts { testRuntime testJar }
+    artifacts { runtimeOnly testJar }
 
     if (project.hasProperty("doSigning")) {
         signing {
@@ -76,9 +75,9 @@ plugins.withId('java') {
     }
 
     dependencies {
-        // The production code uses the SLF4J logging API at compile time
-        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-        testCompile group: 'junit', name: 'junit', version: junitVersion
-        testCompile "org.mockito:mockito-core:${mockitoVersion}"
+        // The production code uses the SLF4J logging API at api time
+        api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+        api group: 'junit', name: 'junit', version: junitVersion
+        api "org.mockito:mockito-core:${mockitoVersion}"
     }
 }

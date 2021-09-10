@@ -8,11 +8,11 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.apache.ignite/ignite-core
-    compile group: 'org.apache.ignite', name: 'ignite-core', version: '2.8.1'
+    api group: 'org.apache.ignite', name: 'ignite-core', version: '2.8.1'
 
     // https://mvnrepository.com/artifact/org.apache.ignite/ignite-spring
-    compile group: 'org.apache.ignite', name: 'ignite-spring', version: '2.8.1'
+    api group: 'org.apache.ignite', name: 'ignite-spring', version: '2.8.1'
 
 }

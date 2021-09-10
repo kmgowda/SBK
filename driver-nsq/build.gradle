@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
-    compile group: 'com.github.brainlag', name: 'nsq-client', version: '1.0.0.RC4'
+    api project(":sbk-api")
+    api group: 'com.github.brainlag', name: 'nsq-client', version: '1.0.0.RC4'
 }

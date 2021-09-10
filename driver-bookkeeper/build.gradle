@@ -19,6 +19,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
-    compile 'org.apache.distributedlog:distributedlog-core-shaded:4.9.2'
+    api project(":sbk-api")
+    api 'org.apache.distributedlog:distributedlog-core-shaded:4.9.2'
 }

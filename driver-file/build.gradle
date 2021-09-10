@@ -5,5 +5,5 @@ plugins {
 description = "Local File Systems Benchmarking"
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
 }

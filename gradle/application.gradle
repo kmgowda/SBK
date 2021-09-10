@@ -16,6 +16,10 @@ plugins.withId('application') {
         artifacts.remove artifacts.find { it.hasProperty('archiveTask') && it.archiveTask.is(distTar) }
     }
 
+    configurations {
+        runtime
+    }
+
     task pathingJar(type: Jar) {
         appendix = 'pathing'
 
