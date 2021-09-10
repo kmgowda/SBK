@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb
     implementation group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
 }

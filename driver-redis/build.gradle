@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     // https://mvnrepository.com/artifact/redis.clients/jedis
     implementation group: 'redis.clients', name: 'jedis', version: '3.5.1'
 }

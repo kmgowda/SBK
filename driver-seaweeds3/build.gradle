@@ -4,5 +4,5 @@ plugins {
 
 
 dependencies {
-    compile project(":driver-minio")
+    api project(":driver-minio")
 }

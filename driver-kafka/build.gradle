@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
-    compile "org.apache.kafka:kafka-clients:2.4.1"
+    api project(":sbk-api")
+    api "org.apache.kafka:kafka-clients:2.4.1"
 }

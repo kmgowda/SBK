@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver
-    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.5'
+    api group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.5'
 }

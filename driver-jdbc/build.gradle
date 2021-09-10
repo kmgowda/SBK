@@ -8,25 +8,25 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.apache.derby/derby
-    compile group: 'org.apache.derby', name: 'derby', version: '10.10.2.0'
+    api group: 'org.apache.derby', name: 'derby', version: '10.10.2.0'
     // https://mvnrepository.com/artifact/org.apache.derby/derbyclient
-    compile group: 'org.apache.derby', name: 'derbyclient', version: '10.10.2.0'
-    compile group: 'org.apache.derby', name: 'derbynet', version: '10.10.2.0'
+    api group: 'org.apache.derby', name: 'derbyclient', version: '10.10.2.0'
+    api group: 'org.apache.derby', name: 'derbynet', version: '10.10.2.0'
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.22'
+    api group: 'mysql', name: 'mysql-connector-java', version: '8.0.22'
     // https://mvnrepository.com/artifact/org.postgresql/postgresql
-    compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
+    api group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
 
     // https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc
-    compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.2.jre8'
+    api group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.2.jre8'
 
     // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
-    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.31.1'
+    api group: 'org.xerial', name: 'sqlite-jdbc', version: '3.31.1'
 
     // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
-    compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.1'
+    api group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.1'
 
 
 }

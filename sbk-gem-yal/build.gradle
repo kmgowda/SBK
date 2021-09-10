@@ -9,7 +9,7 @@
  *
  */
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
 buildscript {
@@ -28,12 +28,12 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 application {
-    mainClassName = 'io.sbk.main.SbkGemYalMain'
+    mainClass = 'io.sbk.main.SbkGemYalMain'
     applicationDefaultJvmArgs = ['-Dsbk.applicationName=', '-Dsbk.className=', '-Dsbk.appHome=SBK_APP_HOME']
 }
 
 dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     implementation group: 'org.jetbrains', name:'annotations', version: jetbrainVersion
-    compile project(":sbk-gem")
+    api project(":sbk-gem")
 }

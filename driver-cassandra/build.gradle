@@ -4,7 +4,7 @@ plugins {
 
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
     // https://mvnrepository.com/artifact/com.datastax.oss/java-driver-core
     implementation group: 'com.datastax.oss', name: 'java-driver-core', version: '4.11.1'
 }

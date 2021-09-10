@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
-    compile "io.pravega:pravega-client:0.6.0"
+    api project(":sbk-api")
+    api "io.pravega:pravega-client:0.6.0"
 }

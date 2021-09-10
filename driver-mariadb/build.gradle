@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile project(":driver-mysql")
+    api project(":driver-mysql")
 }

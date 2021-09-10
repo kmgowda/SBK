@@ -9,7 +9,7 @@
  *
  */
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
 
@@ -31,22 +31,22 @@ apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    compile group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
-    compile group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsVersion
-    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    compile group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    compile group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
-    compile group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
-    compile group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
-    compile group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
-    compile group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
+    api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    api group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
+    api group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsVersion
+    api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    api group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
+    api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
+    api group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
+    api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
+    api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
+    api group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
     implementation group: 'org.jetbrains', name:'annotations', version: jetbrainVersion
-    testCompile group: 'junit', name: 'junit', version: junitVersion
+    testImplementation group: 'junit', name: 'junit', version: junitVersion
 }
 
 

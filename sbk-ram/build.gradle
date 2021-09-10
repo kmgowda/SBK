@@ -9,7 +9,7 @@
  *
  */
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
 
@@ -32,12 +32,12 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 application {
-    mainClassName = 'io.sbk.main.SbkRamMain'
+    mainClass = 'io.sbk.main.SbkRamMain'
 }
 
 
 dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
-    compile project(":sbk-api")
+    api project(":sbk-api")
 }

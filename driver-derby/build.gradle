@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile project(":driver-jdbc")
+    api project(":driver-jdbc")
 }

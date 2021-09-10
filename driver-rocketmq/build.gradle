@@ -8,8 +8,8 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
-    compile group: 'org.apache.rocketmq', name: 'rocketmq-common', version: '4.6.1'
-    compile group: 'org.apache.rocketmq', name: 'rocketmq-tools', version: '4.6.1'
-    compile group: 'org.apache.rocketmq', name: 'rocketmq-client', version: '4.6.1'
+    api project(":sbk-api")
+    api group: 'org.apache.rocketmq', name: 'rocketmq-common', version: '4.6.1'
+    api group: 'org.apache.rocketmq', name: 'rocketmq-tools', version: '4.6.1'
+    api group: 'org.apache.rocketmq', name: 'rocketmq-client', version: '4.6.1'
 }

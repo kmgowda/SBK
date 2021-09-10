@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile project(":driver-kafka")
+    api project(":driver-kafka")
 }

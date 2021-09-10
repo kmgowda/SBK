@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
+    api project(":sbk-api")
 }

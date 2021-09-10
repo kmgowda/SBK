@@ -16,7 +16,6 @@ import java.util.regex.Matcher
 buildscript {
     repositories {
         mavenLocal()
-        jcenter()
         mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
@@ -30,7 +29,7 @@ buildscript {
 }
 
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'checkstyle'
@@ -40,22 +39,21 @@ def SbkMainClass = "io.sbk.main.SbkMain"
 allprojects {
     repositories {
         mavenLocal()
-        jcenter()
         mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
 
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'idea'
     apply plugin: 'eclipse'
     apply plugin: 'application'
     apply plugin: "com.palantir.graal"
 
     dependencies {
-        compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
-        testCompile group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
+        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
+        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
     }
 
     apply from: "$rootDir/gradle/application.gradle"
@@ -100,7 +98,7 @@ allprojects {
     }
 
     application {
-        mainClassName = SbkMainClass
+        mainClass = SbkMainClass
         applicationName = archivesBaseName
         applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + sbkClass,
                                      '-Dsbk.appHome=SBK_APP_HOME']
@@ -268,50 +266,50 @@ task printDrivers {
 
 /* Include your driver below */
 dependencies {
-    compile project(":sbk-gem")
-    compile project(":sbk-ram")
-    compile project(":sbk-gem")
-    compile project(":sbk-gem-yal")
-    compile project(":driver-concurrentq")
-    compile project(":driver-file")
-    compile project(":driver-filestream")
-    compile project(":driver-asyncfile")
-    compile project(":driver-hdfs")
-    compile project(":driver-bookkeeper")
-    compile project(":driver-rabbitmq")
-    compile project(":driver-rocketmq")
-    compile project(":driver-pulsar")
-    compile project(":driver-kafka")
-    compile project(":driver-pravega")
-    compile project(":driver-nats")
-    compile project(':driver-natsStream')
-    compile project(':driver-artemis')
-    compile project(':driver-nsq')
-    compile project(':driver-jdbc')
-    compile project(':driver-minio')
-    compile project(':driver-foundationdb')
-    compile project(':driver-fdbrecord')
-    compile project(':driver-mongodb')
-    compile project(':driver-rocksdb')
-    compile project(':driver-ignite')
-    compile project(':driver-couchdb')
-    compile project(':driver-hive')
-    compile project(':driver-null')
-    compile project(':driver-sqlite')
-    compile project(':driver-mysql')
-    compile project(':driver-mariadb')
-    compile project(':driver-postgresql')
-    compile project(':driver-derby')
-    compile project(':driver-mssql')
-    compile project(':driver-redpanda')
-    compile project(':driver-csv')
-    compile project(':driver-redis')
-    compile project(':driver-seaweeds3')
-    compile project(':driver-cassandra')
-    compile project(':driver-db2')
-    compile project(':driver-cephs3')
-    compile project(':driver-openio')
-    compile project(':driver-leveldb')
+    api project(":sbk-gem")
+    api project(":sbk-ram")
+    api project(":sbk-gem")
+    api project(":sbk-gem-yal")
+    api project(":driver-concurrentq")
+    api project(":driver-file")
+    api project(":driver-filestream")
+    api project(":driver-asyncfile")
+    api project(":driver-hdfs")
+    api project(":driver-bookkeeper")
+    api project(":driver-rabbitmq")
+    api project(":driver-rocketmq")
+    api project(":driver-pulsar")
+    api project(":driver-kafka")
+    api project(":driver-pravega")
+    api project(":driver-nats")
+    api project(':driver-natsStream')
+    api project(':driver-artemis')
+    api project(':driver-nsq')
+    api project(':driver-jdbc')
+    api project(':driver-minio')
+    api project(':driver-foundationdb')
+    api project(':driver-fdbrecord')
+    api project(':driver-mongodb')
+    api project(':driver-rocksdb')
+    api project(':driver-ignite')
+    api project(':driver-couchdb')
+    api project(':driver-hive')
+    api project(':driver-null')
+    api project(':driver-sqlite')
+    api project(':driver-mysql')
+    api project(':driver-mariadb')
+    api project(':driver-postgresql')
+    api project(':driver-derby')
+    api project(':driver-mssql')
+    api project(':driver-redpanda')
+    api project(':driver-csv')
+    api project(':driver-redis')
+    api project(':driver-seaweeds3')
+    api project(':driver-cassandra')
+    api project(':driver-db2')
+    api project(':driver-cephs3')
+    api project(':driver-openio')
+    api project(':driver-leveldb')
 }
 
 //create a single Jar with all dependencies
@@ -322,8 +320,8 @@ task buildJar(type: Jar) {
                 'Main-Class': SbkMainClass
     }
     zip64 true
-    baseName = rootProject.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    archiveBaseName = rootProject.name
+    from { configurations.api.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude 'META-INF/*.RSA'
     exclude 'META-INF/*.SF'
     exclude 'META-INF/*.DSA'
@@ -331,7 +329,7 @@ task buildJar(type: Jar) {
 }
 
 task SbkGem(type: CreateStartScripts) {
-    mainClassName = 'io.sbk.main.SbkGemMain'
+    mainClass = 'io.sbk.main.SbkGemMain'
     applicationName = 'sbk-gem'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME']
     outputDir = startScripts.outputDir
@@ -343,13 +341,13 @@ task SbkGem(type: CreateStartScripts) {
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             // Replace the classpath on windows with the pathing JAR and the main archive
             windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
-                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
+                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName};%APP_HOME%\\lib\\${jar.archiveFileName}"))
         }
     }
 }
 
 task SbkGemYal(type: CreateStartScripts) {
-    mainClassName = 'io.sbk.main.SbkGemYalMain'
+    mainClass = 'io.sbk.main.SbkGemYalMain'
     applicationName = 'sbk-gem-yal'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME']
     outputDir = startScripts.outputDir
@@ -361,7 +359,7 @@ task SbkGemYal(type: CreateStartScripts) {
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             // Replace the classpath on windows with the pathing JAR and the main archive
             windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
-                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
+                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName};%APP_HOME%\\lib\\${jar.archiveFileName}"))
         }
     }
 }

@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":sbk-api")
-    compile 'io.minio:minio:6.0.8'
+    api project(":sbk-api")
+    api 'io.minio:minio:6.0.8'
 }
