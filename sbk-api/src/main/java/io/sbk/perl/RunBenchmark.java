@@ -26,7 +26,7 @@ public interface RunBenchmark {
      *                     read/write. If secondsToRun is higher than 0, then this parameter is ignored.
      * @return CompletableFuture.
      * @throws IllegalStateException If an exception occurred.
-     * @throws IOException End of File exception
+     * @throws IOException           End of File exception
      */
     CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException,
             IllegalStateException;

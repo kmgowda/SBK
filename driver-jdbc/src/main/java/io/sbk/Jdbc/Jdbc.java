@@ -47,6 +47,7 @@ public class Jdbc implements Storage<String> {
     /**
      * Get the JDBC config file.
      * The first invocation of the method is always in addArgs.
+     *
      * @return JDBC driver name
      */
     public String getConfigFile() {
@@ -57,6 +58,7 @@ public class Jdbc implements Storage<String> {
      * Get the JDBC Driver String.
      * This method is always invoked after reading the configuration file.
      * The first invocation of the method is always in addArgs.
+     *
      * @return JDBC driver name
      */
     public String getDriver() {
@@ -66,9 +68,10 @@ public class Jdbc implements Storage<String> {
 
     /**
      * Query for Creating a Table.
+     *
      * @param params Parameters object to be extended.
-     * @throws IllegalArgumentException If an exception occurred.
      * @return Query String.
+     * @throws IllegalArgumentException If an exception occurred.
      */
     public String createTableQuery(final ParameterOptions params) throws IllegalArgumentException {
         String query;
@@ -99,9 +102,10 @@ public class Jdbc implements Storage<String> {
 
     /**
      * Query for Deleting the Table.
+     *
      * @param params Parameters object to be extended.
-     * @throws IllegalArgumentException If an exception occurred.
      * @return Query String.
+     * @throws IllegalArgumentException If an exception occurred.
      */
     public String dropTableQuery(final ParameterOptions params) throws IllegalArgumentException {
         return "DROP TABLE " + config.table;
@@ -109,7 +113,8 @@ public class Jdbc implements Storage<String> {
 
     /**
      * Add the driver specific command line arguments.
-     * @param params Parameters object to be extended.
+     *
+     * @param params     Parameters object to be extended.
      * @param jdbcConfig JDBC Configuration.
      * @throws IllegalArgumentException If an exception occurred.
      */
@@ -133,7 +138,8 @@ public class Jdbc implements Storage<String> {
 
     /**
      * Add the driver specific command line arguments.
-     * @param params Parameters object to be extended.
+     *
+     * @param params     Parameters object to be extended.
      * @param configFile Configuration file to read.
      * @throws IllegalArgumentException If an exception occurred.
      */

@@ -15,6 +15,7 @@ public interface SetRW {
 
     /**
      * Set Writers.
+     *
      * @param val new value.
      */
     void setWriters(int val);
@@ -22,18 +23,21 @@ public interface SetRW {
 
     /**
      * Set Max Writers.
+     *
      * @param val new value.
      */
     void setMaxWriters(int val);
 
     /**
      * Set Readers.
+     *
      * @param val new value.
      */
     void setReaders(int val);
 
     /**
      * Set Max Readers.
+     *
      * @param val new value.
      */
     void setMaxReaders(int val);

@@ -63,11 +63,11 @@ public class SbkRamBenchmark implements Benchmark {
     /**
      * Create SBK Server Benchmark.
      *
-     * @param  ramConfig         Configuration parameters
-     * @param  params               Benchmarking input Parameters
-     * @param  logger               output logger
-     * @param  time                 time interface
-     * @throws IOException          If Exception occurs.
+     * @param ramConfig Configuration parameters
+     * @param params    Benchmarking input Parameters
+     * @param logger    output logger
+     * @param time      time interface
+     * @throws IOException If Exception occurs.
      */
     public SbkRamBenchmark(RamConfig ramConfig, RamParameterOptions params,
                            @NotNull RamLogger logger, Time time) throws IOException {
@@ -156,7 +156,7 @@ public class SbkRamBenchmark implements Benchmark {
      * or exits if the input the number of records are written/read.
      * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
      *
-     * @throws IOException If an exception occurred.
+     * @throws IOException           If an exception occurred.
      * @throws IllegalStateException If an exception occurred.
      */
     @Override
@@ -184,7 +184,6 @@ public class SbkRamBenchmark implements Benchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
-     *
      */
     @Synchronized
     private void shutdown() {

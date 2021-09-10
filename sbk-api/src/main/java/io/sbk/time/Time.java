@@ -15,6 +15,7 @@ public interface Time {
 
     /**
      * get the Time Unit.
+     *
      * @return time Unit
      */
     TimeUnit getTimeUnit();
@@ -22,6 +23,7 @@ public interface Time {
 
     /**
      * get the current Time.
+     *
      * @return current Time
      */
     long getCurrentTime();
@@ -29,6 +31,7 @@ public interface Time {
 
     /**
      * get the duration between two time stamps.
+     *
      * @param h time stamp
      * @param l time stamp, the l should be less than h
      * @return elapsed time.
@@ -39,6 +42,7 @@ public interface Time {
 
     /**
      * get the elapsed Time in milliseconds.
+     *
      * @param h time stamp
      * @param l time stamp, the l should be less than h
      * @return elapsed time in milliseconds
@@ -47,6 +51,7 @@ public interface Time {
 
     /**
      * get the elapsed Time in seconds.
+     *
      * @param h time stamp
      * @param l time stamp, the l should be less than h
      * @return elapsed time in seconds
@@ -55,6 +60,7 @@ public interface Time {
 
     /**
      * convert the time to Nanoseconds.
+     *
      * @param t time duration
      * @return converted time in nanoseconds
      */
@@ -62,6 +68,7 @@ public interface Time {
 
     /**
      * convert the time to Micro seconds.
+     *
      * @param t time duration
      * @return converted time in microseconds
      */
@@ -69,6 +76,7 @@ public interface Time {
 
     /**
      * convert the time to Milliseconds.
+     *
      * @param t time duration
      * @return converted time in Milliseconds
      */

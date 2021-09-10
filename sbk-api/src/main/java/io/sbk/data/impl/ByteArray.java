@@ -22,6 +22,7 @@ public class ByteArray implements DataType<byte[]> {
 
     /**
      * Create byte array data.
+     *
      * @param size size (number of bytes) of the data to create.
      * @return T return the data.
      */
@@ -32,6 +33,7 @@ public class ByteArray implements DataType<byte[]> {
 
     /**
      * Create byte array data and fill the random data.
+     *
      * @param size size (number of bytes) of the data to create.
      * @return T return the data.
      */
@@ -47,7 +49,8 @@ public class ByteArray implements DataType<byte[]> {
 
     /**
      * Get the size of the given data in terms of number of bytes for writers.
-     * @param  data data
+     *
+     * @param data data
      * @return return size of the data.
      */
     @Override
@@ -57,8 +60,9 @@ public class ByteArray implements DataType<byte[]> {
 
     /**
      * Set the time for data.
-     * @param  data data
-     * @param  time time to set
+     *
+     * @param data data
+     * @param time time to set
      * @return byte[] return the data.
      */
     @Override
@@ -70,7 +74,8 @@ public class ByteArray implements DataType<byte[]> {
 
     /**
      * Get the time of data.
-     * @param  data data
+     *
+     * @param data data
      * @return long return the time set by last {@link ByteArray#setTime(byte[], long)}} )}}.
      */
     @Override
@@ -80,6 +85,7 @@ public class ByteArray implements DataType<byte[]> {
 
     /**
      * Get minimum Write and Read Data Size.
+     *
      * @return int minimum data size Write and Read.
      */
     @Override

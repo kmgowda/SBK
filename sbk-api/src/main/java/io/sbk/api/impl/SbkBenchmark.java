@@ -77,14 +77,14 @@ public class SbkBenchmark implements Benchmark {
     /**
      * Create SBK Benchmark.
      *
-     * @param  action               Action
-     * @param  perlConfig           Configuration parameters
-     * @param  params               Benchmarking input Parameters
-     * @param  storage              Storage device/client/driver for benchmarking
-     * @param  dType                Data Type.
-     * @param  logger               output logger
-     * @param  time                 time interface
-     * @throws IOException          If Exception occurs.
+     * @param action     Action
+     * @param perlConfig Configuration parameters
+     * @param params     Benchmarking input Parameters
+     * @param storage    Storage device/client/driver for benchmarking
+     * @param dType      Data Type.
+     * @param logger     output logger
+     * @param time       time interface
+     * @throws IOException If Exception occurs.
      */
     public SbkBenchmark(Action action, PerlConfig perlConfig,
                         ParameterOptions params, Storage<Object> storage,
@@ -202,7 +202,7 @@ public class SbkBenchmark implements Benchmark {
      * or exits if the input the number of records are written/read.
      * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
      *
-     * @throws IOException If an exception occurred.
+     * @throws IOException           If an exception occurred.
      * @throws IllegalStateException If an exception occurred.
      */
     @Override
@@ -429,7 +429,6 @@ public class SbkBenchmark implements Benchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
-     *
      */
     @Synchronized
     private void shutdown(Throwable ex) {

@@ -42,17 +42,18 @@ public class SbkRam {
 
     /**
      * Run the Performance Benchmarking .
-     * @param args command line arguments.
+     *
+     * @param args            command line arguments.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , SbkServer is used by default.
-     * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                  logger will be used.
-     * @throws ParseException If an exception occurred while parsing command line arguments.
+     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                        logger will be used.
+     * @throws ParseException           If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
-     * @throws IOException If an exception occurred due to write or read failures.
-     * @throws InstantiationException if the exception occurred due to initiation failures.
-     * @throws InterruptedException If an exception occurred if the writers and readers are interrupted.
-     * @throws ExecutionException If an exception occurred.
-     * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
+     * @throws IOException              If an exception occurred due to write or read failures.
+     * @throws InstantiationException   if the exception occurred due to initiation failures.
+     * @throws InterruptedException     If an exception occurred if the writers and readers are interrupted.
+     * @throws ExecutionException       If an exception occurred.
+     * @throws TimeoutException         If an exception occurred if an I/O operation is timed out.
      */
     public static void run(final String[] args, final String applicationName,
                            RamLogger outLogger) throws ParseException, IllegalArgumentException,
@@ -76,15 +77,15 @@ public class SbkRam {
     /**
      * Build the Benchmark Object.
      *
-     * @param args command line arguments.
+     * @param args            command line arguments.
      * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
-     * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                  logger will be used.
-     * @throws HelpException if '-help' option is supplied.
-     * @throws ParseException If an exception occurred while parsing command line arguments.
-     * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
-     * @throws IOException If an exception occurred due to write or read failures.
+     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                        logger will be used.
      * @return Benchmark Interface
+     * @throws HelpException            if '-help' option is supplied.
+     * @throws ParseException           If an exception occurred while parsing command line arguments.
+     * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
+     * @throws IOException              If an exception occurred due to write or read failures.
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
                                            RamLogger outLogger) throws ParseException, IllegalArgumentException,
@@ -99,7 +100,7 @@ public class SbkRam {
         Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(RamConfig.DESC);
         Printer.log.info(RamConfig.NAME.toUpperCase() + " Version: " + version);
-        Printer.log.info(RamConfig.NAME.toUpperCase() +" Website: "+ Config.SBK_WEBSITE_NAME);
+        Printer.log.info(RamConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 

@@ -20,9 +20,9 @@ public interface GemBenchmark {
      * Start the Benchmark.
      *
      * @return CompletableFuture.
-     * @throws IOException If an exception occurred.
-     * @throws InterruptedException If an exception occurred
-     * @throws ExecutionException If an exception occurred
+     * @throws IOException           If an exception occurred.
+     * @throws InterruptedException  If an exception occurred
+     * @throws ExecutionException    If an exception occurred
      * @throws IllegalStateException If an exception occurred.
      */
     CompletableFuture<RemoteResponse[]> start() throws IOException, InterruptedException, ExecutionException,
@@ -30,7 +30,6 @@ public interface GemBenchmark {
 
     /**
      * stop/shutdown the Benchmark.
-     *
      */
     void stop();
 }

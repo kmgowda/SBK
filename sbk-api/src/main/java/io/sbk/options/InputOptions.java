@@ -18,8 +18,9 @@ public interface InputOptions {
 
     /**
      * Add the driver specific command line arguments.
-     * @param name Name of the parameter to add.
-     * @param hasArg flag signalling if an argument is required after this option.
+     *
+     * @param name        Name of the parameter to add.
+     * @param hasArg      flag signalling if an argument is required after this option.
      * @param description Self-documenting description.
      * @return Options return the added options
      */
@@ -27,7 +28,8 @@ public interface InputOptions {
 
     /**
      * Parse the driver specific command line arguments.
-     * @param name Name of the parameter to add.
+     *
+     * @param name        Name of the parameter to add.
      * @param description Self-documenting description.
      * @return Options return the added options
      */
@@ -35,6 +37,7 @@ public interface InputOptions {
 
     /**
      * Returns whether the named Option is a member of this Parameters.
+     *
      * @param name name of the parameter option
      * @return true if the named Option is a member of this Options
      */
@@ -42,6 +45,7 @@ public interface InputOptions {
 
     /**
      * Retrieve the Option matching the parameter name specified.
+     *
      * @param name Name of the parameter.
      * @return parameter value
      */
@@ -49,7 +53,8 @@ public interface InputOptions {
 
     /**
      * Retrieve the Option matching the parameter name specified.
-     * @param name Name of the parameter.
+     *
+     * @param name         Name of the parameter.
      * @param defaultValue default value if the parameter not found
      * @return parameter value
      */
@@ -58,6 +63,7 @@ public interface InputOptions {
 
     /**
      * Get the -help output.
+     *
      * @return formatted Help text
      */
     String getHelpText();
@@ -72,10 +78,11 @@ public interface InputOptions {
 
     /**
      * Parse the command line arguments.
+     *
      * @param args list of command line arguments.
      * @throws IllegalArgumentException If an exception occurred.
-     * @throws ParseException If an exception occurred.
-     * @throws HelpException If the 'help' option is supplied.
+     * @throws ParseException           If an exception occurred.
+     * @throws HelpException            If the 'help' option is supplied.
      */
     void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException;
 }

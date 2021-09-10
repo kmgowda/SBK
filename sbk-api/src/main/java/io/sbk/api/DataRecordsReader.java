@@ -26,14 +26,14 @@ public interface DataRecordsReader<T> extends DataReader<T> {
     /**
      * Record the single or multiple reads performance statistics.
      *
-     * @param dType      dataType
-     * @param size      size of data in bytes
-     * @param time  time interface
-     * @param status     read status to return; {@link io.sbk.api.Status}
+     * @param dType       dataType
+     * @param size        size of data in bytes
+     * @param time        time interface
+     * @param status      read status to return; {@link io.sbk.api.Status}
      * @param sendChannel to call for benchmarking
-     * @param  id   Identifier for recordTime
+     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException;
@@ -41,14 +41,14 @@ public interface DataRecordsReader<T> extends DataReader<T> {
     /**
      * Record the single or multiple reads performance statistics along with the starting time in the data.
      *
-     * @param dType      dataType
-     * @param size      size of data in bytes 
-     * @param time  time interface
-     * @param status     read status to return; {@link io.sbk.api.Status}
+     * @param dType       dataType
+     * @param size        size of data in bytes
+     * @param time        time interface
+     * @param status      read status to return; {@link io.sbk.api.Status}
      * @param sendChannel to call for benchmarking
-     * @param  id   Identifier for recordTime
+     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     void recordReadTime(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException;
@@ -72,12 +72,12 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Default implementation for benchmarking reader by reading given number of records.
      * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, SendChannel, int)}
      *
-     * @param reader  Reader Descriptor
+     * @param reader       Reader Descriptor
      * @param recordsCount Records count
-     * @param dType  dataType
-     * @param time  time interface
+     * @param dType        dataType
+     * @param time         time interface
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException,
             IOException {
@@ -88,12 +88,12 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Default implementation for benchmarking reader by reading given number of records.
      * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, SendChannel, int)}
      *
-     * @param reader      Reader Descriptor
+     * @param reader       Reader Descriptor
      * @param recordsCount Records count
-     * @param dType     dataType
-     * @param time  time interface
+     * @param dType        dataType
+     * @param time         time interface
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsReaderRW(Worker reader, long recordsCount, DataType<T> dType, Time time) throws EOFException,
             IOException {
@@ -120,12 +120,12 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
      * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, SendChannel, int)}
      *
-     * @param reader  Reader Descriptor
-     * @param secondsToRun  Number of seconds to run
-     * @param dType  dataType
-     * @param time  time interface
+     * @param reader       Reader Descriptor
+     * @param secondsToRun Number of seconds to run
+     * @param dType        dataType
+     * @param time         time interface
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsTimeReader(Worker reader, long secondsToRun, DataType<T> dType, Time time) throws EOFException,
             IOException {
@@ -137,12 +137,12 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
      * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, SendChannel, int)}
      *
-     * @param reader  Reader Descriptor
-     * @param secondsToRun  Number of seconds to run
-     * @param dType  dataType
-     * @param time  time interface
+     * @param reader       Reader Descriptor
+     * @param secondsToRun Number of seconds to run
+     * @param dType        dataType
+     * @param time         time interface
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsTimeReaderRW(Worker reader, long secondsToRun, DataType<T> dType, Time time) throws EOFException, IOException {
         genericRecordsTimeReader(reader, secondsToRun, dType, time, this::recordReadTime);
@@ -171,13 +171,13 @@ public interface DataRecordsReader<T> extends DataReader<T> {
     /**
      * Benchmarking reader by reading given number of records with Rate controlled.
      *
-     * @param reader  Reader Descriptor
+     * @param reader       Reader Descriptor
      * @param recordsCount Records count
-     * @param dType  dataType
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param dType        dataType
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                           RateController rController) throws EOFException,
@@ -189,13 +189,13 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Benchmarking reader by reading given number of records with Rate controlled.
      * used while another writer is writing the data.
      *
-     * @param reader      Reader Descriptor
+     * @param reader       Reader Descriptor
      * @param recordsCount Records count
-     * @param dType     dataType
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param dType        dataType
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsReaderRWRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                             RateController rController) throws EOFException, IOException {
@@ -227,13 +227,13 @@ public interface DataRecordsReader<T> extends DataReader<T> {
     /**
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
      *
-     * @param reader  Reader Descriptor
-     * @param secondsToRun  Number of seconds to run
-     * @param dType  dataType
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param reader       Reader Descriptor
+     * @param secondsToRun Number of seconds to run
+     * @param dType        dataType
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                               RateController rController) throws EOFException,
@@ -245,13 +245,13 @@ public interface DataRecordsReader<T> extends DataReader<T> {
      * Benchmarking reader by reading events/records for specific time duration with Rate controlled.
      * used while another writer is writing the data.
      *
-     * @param reader  Reader Descriptor
-     * @param secondsToRun  Number of seconds to run
-     * @param dType  dataType
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param reader       Reader Descriptor
+     * @param secondsToRun Number of seconds to run
+     * @param dType        dataType
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                                 RateController rController) throws EOFException, IOException {

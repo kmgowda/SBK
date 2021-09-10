@@ -43,7 +43,7 @@ public class MetricsLogger implements Print {
     final private AtomicLong slc2;
     final private Convert convert;
 
-    public MetricsLogger(@NotNull String header, @NotNull String action,  @NotNull double[] percentiles,
+    public MetricsLogger(@NotNull String header, @NotNull String action, @NotNull double[] percentiles,
                          Time time, @NotNull TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
         this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
         this.metricPrefix = header.replace(" ", "_").toUpperCase() + "_"

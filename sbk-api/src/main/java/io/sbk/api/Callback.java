@@ -14,6 +14,7 @@ public interface Callback<T> {
 
     /**
      * Consume the data.
+     *
      * @param data data read from storage client/device.
      */
     void consume(final T data);
@@ -24,9 +25,9 @@ public interface Callback<T> {
      * then below method can be overridden.
      *
      * @param startTime Start time
-     * @param endTime End Time.
+     * @param endTime   End Time.
      * @param dataSize  size of the data in bytes.
-     * @param records  number of records/events/messages.
+     * @param records   number of records/events/messages.
      */
     default void record(long startTime, long endTime, int dataSize, int records) {
 

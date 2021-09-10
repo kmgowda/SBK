@@ -20,11 +20,10 @@ public interface BiConsumer {
      *
      * @param secondsToRun number of seconds to Run
      * @param recordsCount Maximum number of records to count.
-     *                If this value 0 or less than 0,then run the benchmark till secondsToRun.
-     *
+     *                     If this value 0 or less than 0,then run the benchmark till secondsToRun.
      * @throws IllegalStateException If an exception occurred.
-     * @throws EOFException End of File exception
-     * @throws IOException If an exception occurred.
+     * @throws EOFException          End of File exception
+     * @throws IOException           If an exception occurred.
      */
     void apply(long secondsToRun, long recordsCount) throws IOException, EOFException, IllegalStateException;
 }

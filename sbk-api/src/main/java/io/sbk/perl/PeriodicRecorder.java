@@ -19,9 +19,9 @@ public interface PeriodicRecorder extends TotalPeriodicWindow {
      * Record the Event/record.
      *
      * @param startTime start time
-     * @param endTime end time
-     * @param bytes number of bytes
-     * @param events number of events (records)
+     * @param endTime   end time
+     * @param bytes     number of bytes
+     * @param events    number of events (records)
      */
     void record(long startTime, long endTime, int bytes, int events);
 

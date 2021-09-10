@@ -52,9 +52,10 @@ abstract public class LatencyWindow extends LatencyRecorder {
 
     /**
      * Print the window statistics.
-     * @param endTime End time.
-     * @param logger printer interface.
-     * @param copyLatencies  Copy Latency values
+     *
+     * @param endTime       End time.
+     * @param logger        printer interface.
+     * @param copyLatencies Copy Latency values
      */
     final public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
         copyPercentiles(percentiles, copyLatencies);
@@ -139,14 +140,16 @@ abstract public class LatencyWindow extends LatencyRecorder {
 
     /**
      * get the Percentiles.
-     * @param percentiles Copy Percentiles
-     * @param reportLatencies  Copy Latency records.
+     *
+     * @param percentiles     Copy Percentiles
+     * @param reportLatencies Copy Latency records.
      */
     abstract public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies reportLatencies);
 
 
     /**
      * is the latency storage full.
+     *
      * @return indicate the latency storage is full or not
      */
     abstract public boolean isFull();
@@ -154,6 +157,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
 
     /**
      * Max memory Size in Bytes.
+     *
      * @return Maximum window memory size in bytes
      */
     abstract public long getMaxMemoryBytes();

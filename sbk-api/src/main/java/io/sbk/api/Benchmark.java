@@ -20,16 +20,15 @@ public interface Benchmark {
      * Start the Benchmark.
      *
      * @return CompletableFuture.
-     * @throws IOException If an exception occurred.
-     * @throws InterruptedException If an exception occurred
-     * @throws ExecutionException If an exception occurred
+     * @throws IOException           If an exception occurred.
+     * @throws InterruptedException  If an exception occurred
+     * @throws ExecutionException    If an exception occurred
      * @throws IllegalStateException If an exception occurred.
      */
     CompletableFuture<Void> start() throws IOException, InterruptedException, ExecutionException, IllegalStateException;
 
     /**
      * stop/shutdown the Benchmark.
-     *
      */
     void stop();
 }

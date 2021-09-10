@@ -16,7 +16,6 @@ public interface Performance extends RunBenchmark {
 
     /**
      * stop/shutdown the Benchmark.
-     *
      */
     void stop();
 

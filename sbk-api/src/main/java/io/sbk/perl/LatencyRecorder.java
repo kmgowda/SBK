@@ -13,7 +13,7 @@ package io.sbk.perl;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- *  Base class for Performance statistics.
+ * Base class for Performance statistics.
  */
 @NotThreadSafe
 public class LatencyRecorder extends LatencyRecord {
@@ -46,14 +46,14 @@ public class LatencyRecorder extends LatencyRecord {
     /**
      * Add the record.
      *
-     * @param totalRecords total records
-     * @param totalLatency total latency
-     * @param totalBytes total bytes
-     * @param invalidLatencyRecords  invalid latency records
-     * @param lowerLatencyDiscardRecords lower discarded latency records
+     * @param totalRecords                total records
+     * @param totalLatency                total latency
+     * @param totalBytes                  total bytes
+     * @param invalidLatencyRecords       invalid latency records
+     * @param lowerLatencyDiscardRecords  lower discarded latency records
      * @param higherLatencyDiscardRecords higher discarded latency records
-     * @param validLatencyRecords valid latency records
-     * @param maxLatency Max latency
+     * @param validLatencyRecords         valid latency records
+     * @param maxLatency                  Max latency
      */
     final public void update(long totalRecords, long totalLatency, long totalBytes,
                              long invalidLatencyRecords, long lowerLatencyDiscardRecords,
@@ -84,8 +84,8 @@ public class LatencyRecorder extends LatencyRecord {
     /**
      * Record the latency and return if the latency is valid or not.
      *
-     * @param bytes number of bytes.
-     * @param events number of events(records).
+     * @param bytes   number of bytes.
+     * @param events  number of events(records).
      * @param latency latency value in milliseconds.
      * @return is valid latency record or not
      */
