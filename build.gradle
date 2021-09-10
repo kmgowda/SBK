@@ -98,7 +98,7 @@ allprojects {
     }
 
     application {
-        mainClassName = SbkMainClass
+        mainClass = SbkMainClass
         applicationName = archivesBaseName
         applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + sbkClass,
                                      '-Dsbk.appHome=SBK_APP_HOME']
@@ -320,7 +320,7 @@ task buildJar(type: Jar) {
                 'Main-Class': SbkMainClass
     }
     zip64 true
-    baseName = rootProject.name
+    archiveBaseName = rootProject.name
     from { configurations.api.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude 'META-INF/*.RSA'
     exclude 'META-INF/*.SF'
@@ -329,7 +329,7 @@ task buildJar(type: Jar) {
 }
 
 task SbkGem(type: CreateStartScripts) {
-    mainClassName = 'io.sbk.main.SbkGemMain'
+    mainClass = 'io.sbk.main.SbkGemMain'
     applicationName = 'sbk-gem'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME']
     outputDir = startScripts.outputDir
@@ -341,13 +341,13 @@ task SbkGem(type: CreateStartScripts) {
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             // Replace the classpath on windows with the pathing JAR and the main archive
             windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
-                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
+                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName};%APP_HOME%\\lib\\${jar.archiveFileName}"))
         }
     }
 }
 
 task SbkGemYal(type: CreateStartScripts) {
-    mainClassName = 'io.sbk.main.SbkGemYalMain'
+    mainClass = 'io.sbk.main.SbkGemYalMain'
     applicationName = 'sbk-gem-yal'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME']
     outputDir = startScripts.outputDir
@@ -359,7 +359,7 @@ task SbkGemYal(type: CreateStartScripts) {
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             // Replace the classpath on windows with the pathing JAR and the main archive
             windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
-                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
+                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName};%APP_HOME%\\lib\\${jar.archiveFileName}"))
         }
     }
 }

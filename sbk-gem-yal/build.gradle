@@ -28,7 +28,7 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 application {
-    mainClassName = 'io.sbk.main.SbkGemYalMain'
+    mainClass = 'io.sbk.main.SbkGemYalMain'
     applicationDefaultJvmArgs = ['-Dsbk.applicationName=', '-Dsbk.className=', '-Dsbk.appHome=SBK_APP_HOME']
 }
 
