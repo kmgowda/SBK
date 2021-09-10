@@ -16,7 +16,6 @@ import java.util.regex.Matcher
 buildscript {
     repositories {
         mavenLocal()
-        jcenter()
         mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
@@ -40,7 +39,6 @@ def SbkMainClass = "io.sbk.main.SbkMain"
 allprojects {
     repositories {
         mavenLocal()
-        jcenter()
         mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
