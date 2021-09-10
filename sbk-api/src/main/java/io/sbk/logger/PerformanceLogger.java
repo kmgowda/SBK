@@ -27,6 +27,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Add the Metric type specific command line arguments.
+     *
      * @param params InputOptions object to be extended.
      * @throws IllegalArgumentException If an exception occurred.
      */
@@ -34,6 +35,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Parse the Metric specific command line arguments.
+     *
      * @param params InputOptions object to be parsed for driver specific parameters/arguments.
      * @throws IllegalArgumentException If an exception occurred.
      */
@@ -42,10 +44,11 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Open the Logger.
-     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
+     *
+     * @param params      InputOptions object to be parsed for driver specific parameters/arguments.
      * @param storageName The Name of the storage.
-     * @param action  action to print
-     * @param time  time interface
+     * @param action      action to print
+     * @param time        time interface
      * @throws IOException If an exception occurred.
      */
     void open(final InputOptions params, final String storageName, final Action action, Time time)
@@ -53,6 +56,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Close the Logger.
+     *
      * @param params InputOptions object to be parsed for driver specific parameters/arguments.
      * @throws IOException If an exception occurred.
      */
@@ -61,19 +65,20 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Print the Total Periodic performance results.
-     * @param seconds reporting seconds
-     * @param bytes number of bytes read/write
-     * @param records data to write.
-     * @param recsPerSec  records per second.
-     * @param mbPerSec Throughput value in terms of MB (Mega Bytes) per Second.
-     * @param avgLatency Average Latency.
-     * @param maxLatency Maximum Latency.
-     * @param invalid   Number of invalid/negative latencies
-     * @param lowerDiscard number of discarded latencies which are less than minimum latency.
+     *
+     * @param seconds       reporting seconds
+     * @param bytes         number of bytes read/write
+     * @param records       data to write.
+     * @param recsPerSec    records per second.
+     * @param mbPerSec      Throughput value in terms of MB (Mega Bytes) per Second.
+     * @param avgLatency    Average Latency.
+     * @param maxLatency    Maximum Latency.
+     * @param invalid       Number of invalid/negative latencies
+     * @param lowerDiscard  number of discarded latencies which are less than minimum latency.
      * @param higherDiscard number of discarded latencies which are higher than maximum latency.
-     * @param slc1 Sliding Latency Coverage factor
-     * @param slc2 Sliding Latency Coverage factor
-     * @param percentiles Array of percentiles.
+     * @param slc1          Sliding Latency Coverage factor
+     * @param slc2          Sliding Latency Coverage factor
+     * @param percentiles   Array of percentiles.
      */
     void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                     long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
@@ -81,6 +86,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Default implementation of Reporting interval.
+     *
      * @return reporting time interval in seconds.
      */
     default int getReportingIntervalSeconds() {
@@ -90,6 +96,7 @@ public interface PerformanceLogger extends Print {
     /**
      * Default implementation of time Unit.
      * Default time unit is Milliseconds.
+     *
      * @return time unit.
      */
     default TimeUnit getTimeUnit() {
@@ -98,6 +105,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Default implementation of minimum latency.
+     *
      * @return minimum latency value.
      */
     default long getMinLatency() {
@@ -106,6 +114,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Default implementation of Maximum latency.
+     *
      * @return Maximum latency value.
      */
     default long getMaxLatency() {
@@ -114,6 +123,7 @@ public interface PerformanceLogger extends Print {
 
     /**
      * Default implementation of percentile Indices.
+     *
      * @return array of percentile Indices.
      */
     default double[] getPercentiles() {

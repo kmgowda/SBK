@@ -19,8 +19,10 @@ import static org.junit.Assert.assertNotNull;
 
 //create the test Class for Bookkeeper Benchmarking
 public class BookKeeperTest {
-    /**.
-     *  * Initializing variable        */
+    /**
+     * .
+     * * Initializing variable
+     */
     private final static String CONFIGFILE = "BookKeeper.properties";
     final String[] drivers = {"BookKeeper"};
     final String benchmarkName = Config.NAME + " -class bookkeeper";
@@ -46,7 +48,7 @@ public class BookKeeperTest {
     }
 
     /**
-     Test code for parseArgs.
+     * Test code for parseArgs.
      */
     @Test
     public void parseArgs() {

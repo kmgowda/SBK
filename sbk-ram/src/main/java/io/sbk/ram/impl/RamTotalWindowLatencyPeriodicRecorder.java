@@ -55,7 +55,7 @@ public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWin
      * Record the latency.
      *
      * @param currentTime current time.
-     * @param record Record Latencies
+     * @param record      Record Latencies
      */
     public void record(long currentTime, LatenciesRecord record) {
         addLatenciesRecord(record);

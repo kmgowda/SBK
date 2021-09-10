@@ -313,7 +313,6 @@ public class SbkGemBenchmark implements GemBenchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
-     *
      */
     @Synchronized
     private void shutdown(Throwable ex) {

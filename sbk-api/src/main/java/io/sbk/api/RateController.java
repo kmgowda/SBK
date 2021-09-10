@@ -25,8 +25,8 @@ public interface RateController {
     /**
      * Blocks for small amounts of time to achieve target Throughput/events per sec.
      *
-     * @param records current cumulative records
-     * @param elapsedSec   Elapsed Seconds
+     * @param records    current cumulative records
+     * @param elapsedSec Elapsed Seconds
      */
     void control(long records, double elapsedSec);
 

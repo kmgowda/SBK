@@ -24,6 +24,7 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
 
     /**
      * Flush / Sync the  data.
+     *
      * @throws IOException If an exception occurred.
      */
     void sync() throws IOException;
@@ -32,12 +33,11 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
     /**
      * Write the Data and attach the start time to data.
      *
-     *
-     * @param dType   Data Type interface
-     * @param data  data to writer
-     * @param size  size of the data
-     * @param time  time interface
-     * @param status  write status to return; {@link io.sbk.api.Status}
+     * @param dType  Data Type interface
+     * @param data   data to writer
+     * @param size   size of the data
+     * @param time   time interface
+     * @param status write status to return; {@link io.sbk.api.Status}
      * @throws IOException If an exception occurred.
      */
     void writeSetTime(DataType<T> dType, T data, int size, Time time, Status status) throws IOException;
@@ -46,13 +46,13 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
     /**
      * Write the data and record the benchmark statistics.
      *
-     * @param dType   Data Type interface
-     * @param data   data to write
-     * @param size  size of the data
-     * @param time  time interface
-     * @param status Write status to return; {@link io.sbk.api.Status}
+     * @param dType       Data Type interface
+     * @param data        data to write
+     * @param size        size of the data
+     * @param time        time interface
+     * @param status      Write status to return; {@link io.sbk.api.Status}
      * @param sendChannel to call for benchmarking
-     * @param  id   Identifier for recordTime
+     * @param id          Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
     void recordWrite(DataType<T> dType, T data, int size, Time time,
@@ -64,12 +64,12 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
      * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
      * sync is invoked after writing all the records.
      *
-     * @param writer Writer Descriptor
+     * @param writer       Writer Descriptor
      * @param recordsCount Records Count
-     * @param dType  Data Type interface
-     * @param data  data to write
-     * @param size  size of the data
-     * @param time  time interface
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriter(Worker writer, long recordsCount, DataType<T> dType, T data, int size, Time time) throws IOException {
@@ -92,13 +92,13 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
      * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
      * sync is invoked after writing given set of records.
      *
-     * @param writer Writer Descriptor
+     * @param writer       Writer Descriptor
      * @param recordsCount Records Count
-     * @param dType  Data Type interface
-     * @param data  data to write
-     * @param size  size of the data
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterSync(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
@@ -130,12 +130,12 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
      * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
      * sync is invoked after writing records for given time.
      *
-     * @param writer Writer Descriptor
+     * @param writer       Writer Descriptor
      * @param secondsToRun Number of seconds to Run
-     * @param dType  Data Type interface
-     * @param data  data to write
-     * @param size  size of the data
-     * @param time  time interface
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterTime(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
@@ -162,13 +162,13 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
      * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
      * sync is invoked after writing given set of records.
      *
-     * @param writer Writer Descriptor
+     * @param writer       Writer Descriptor
      * @param secondsToRun Number of seconds to Run
-     * @param dType  Data Type interface
-     * @param data  data to write
-     * @param size  size of the data
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterTimeSync(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
@@ -202,13 +202,13 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
      * Write is performed using {@link io.sbk.api.DataRecordsWriter#writeSetTime(DataType, Object, int, Time, Status)} .
      * sync is invoked after writing given set of records.
      *
-     * @param writer Writer Descriptor
+     * @param writer       Writer Descriptor
      * @param recordsCount Records Count
-     * @param dType  Data Type interface
-     * @param data  data to write
-     * @param size  size of the data
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterRW(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
@@ -240,13 +240,13 @@ public interface DataRecordsWriter<T> extends DataWriter<T> {
      * Write is performed using {@link io.sbk.api.DataRecordsWriter#writeSetTime(DataType, Object, int, Time, Status)} .
      * sync is invoked after writing given set of records.
      *
-     * @param writer Writer Descriptor
+     * @param writer       Writer Descriptor
      * @param secondsToRun Number of seconds to Run
-     * @param dType  Data Type interface
-     * @param data  data to write
-     * @param size  size of the data
-     * @param time  time interface
-     * @param rController Rate Controller
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
      * @throws IOException If an exception occurred.
      */
     default void RecordsWriterTimeRW(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,

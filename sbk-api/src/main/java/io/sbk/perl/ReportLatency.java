@@ -16,9 +16,9 @@ public interface ReportLatency {
      * Record the latency.
      *
      * @param startTime start time.
-     * @param bytes number of bytes.
-     * @param events number of events(records).
-     * @param latency latency value in milliseconds.
+     * @param bytes     number of bytes.
+     * @param events    number of events(records).
+     * @param latency   latency value in milliseconds.
      */
     void recordLatency(long startTime, int bytes, int events, long latency);
 }

@@ -39,8 +39,8 @@ final public class SbkRateController implements RateController {
     /**
      * Blocks for small amounts of time to achieve target Throughput/events per sec.
      *
-     * @param events    current cumulative events
-     * @param elapsedSec    Elapsed seconds
+     * @param events     current cumulative events
+     * @param elapsedSec Elapsed seconds
      */
     @Override
     public void control(final long events, final double elapsedSec) {

@@ -38,7 +38,7 @@ public class PravegaWriter implements Writer<byte[]> {
     /**
      * Writes the data and benchmark.
      *
-     * @param dType   Data Type interface
+     * @param dType  Data Type interface
      * @param data   data to write
      * @param size   size of the data
      * @param status Write status to return

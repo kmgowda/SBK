@@ -19,6 +19,7 @@ final public class NanoSeconds implements Time {
 
     /**
      * get the Time Unit.
+     *
      * @return time Unit in nanoseconds.;
      */
     public TimeUnit getTimeUnit() {
@@ -28,6 +29,7 @@ final public class NanoSeconds implements Time {
 
     /**
      * get the current Time.
+     *
      * @return current Time
      */
     public long getCurrentTime() {
@@ -36,6 +38,7 @@ final public class NanoSeconds implements Time {
 
     /**
      * get the current Time.
+     *
      * @param h time stamp in Nano seconds
      * @param l time stamp in nano seconds, the l should be less than h
      * @return elapsed time in milliseconds
@@ -46,6 +49,7 @@ final public class NanoSeconds implements Time {
 
     /**
      * get the current Time.
+     *
      * @param h time stamp in Nano seconds.
      * @param l time stamp in Nano seconds, the l should be less than h
      * @return elapsed time in seconds
@@ -56,6 +60,7 @@ final public class NanoSeconds implements Time {
 
     /**
      * convert the time to Nanoseconds.
+     *
      * @param t time duration in nanoseconds.
      * @return converted time in nanoseconds
      */
@@ -65,6 +70,7 @@ final public class NanoSeconds implements Time {
 
     /**
      * convert the time to Micro seconds.
+     *
      * @param t time duration in nanoseconds.
      * @return converted time in microseconds
      */
@@ -74,6 +80,7 @@ final public class NanoSeconds implements Time {
 
     /**
      * convert the time to Milliseconds.
+     *
      * @param t time duration in nanoseconds.
      * @return converted time in Milliseconds
      */

@@ -50,6 +50,7 @@ public class MinIO implements Storage<byte[]> {
     /**
      * Get the JDBC config file.
      * The first invocation of the method is always in addArgs.
+     *
      * @return JDBC driver name
      */
     public String getConfigFile() {

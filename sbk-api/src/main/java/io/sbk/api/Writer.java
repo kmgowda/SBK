@@ -24,6 +24,7 @@ public interface Writer<T> extends DataRecordsWriter<T> {
 
     /**
      * Asynchronously Writes the data .
+     *
      * @param data data to write
      * @return CompletableFuture completable future. null if the write completed synchronously .
      * @throws IOException If an exception occurred.
@@ -32,12 +33,14 @@ public interface Writer<T> extends DataRecordsWriter<T> {
 
     /**
      * Close the  Writer.
+     *
      * @throws IOException If an exception occurred.
      */
     void close() throws IOException;
 
     /**
      * Flush / Sync the  data.
+     *
      * @throws IOException If an exception occurred.
      */
     default void sync() throws IOException {
@@ -51,11 +54,11 @@ public interface Writer<T> extends DataRecordsWriter<T> {
      * If you are intend to use your own payload, then also you can use override this method.
      * you can write multiple records with this method.
      *
-     * @param dType   Data Type interface
-     * @param data  data to writer
-     * @param size  size of the data
-     * @param time  time interface
-     * @param status  write status to return
+     * @param dType  Data Type interface
+     * @param data   data to writer
+     * @param size   size of the data
+     * @param time   time interface
+     * @param status write status to return
      * @throws IOException If an exception occurred.
      */
     default void writeSetTime(DataType<T> dType, T data, int size, Time time, Status status) throws IOException {
@@ -74,13 +77,13 @@ public interface Writer<T> extends DataRecordsWriter<T> {
      * If you are intend to use your own payload, then also you can use override this method.
      * you can write multiple records with this method.
      *
-     * @param dType   Data Type interface
-     * @param data   data to write
-     * @param size  size of the data
-     * @param time  time interface
-     * @param status Write status to return
+     * @param dType       Data Type interface
+     * @param data        data to write
+     * @param size        size of the data
+     * @param time        time interface
+     * @param status      Write status to return
      * @param sendChannel to call for benchmarking
-     * @param  id   Identifier for recordTime
+     * @param id          Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
     default void recordWrite(DataType<T> dType, T data, int size, Time time,

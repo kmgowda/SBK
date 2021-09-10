@@ -40,21 +40,22 @@ public class SbkGemYal {
 
     /**
      * Run the Performance Benchmarking .
-     * @param args command line arguments.
-     * @param packageName  Name of the package where storage class is available.
-     *                     If you pass null to this parameter, then default package name "io.sbk" is used.
+     *
+     * @param args            command line arguments.
+     * @param packageName     Name of the package where storage class is available.
+     *                        If you pass null to this parameter, then default package name "io.sbk" is used.
      * @param applicationName Name of the application. will be used in the 'help' message. if it is 'null' ,
      *                        SbkServer is used by default.
-     * @param outLogger Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                  logger will be used.
-     * @throws ParseException If an exception occurred while parsing command line arguments.
-     * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
-     * @throws IOException If an exception occurred due to write or read failures.
-     * @throws InterruptedException If an exception occurred if the writers and readers are interrupted.
-     * @throws ExecutionException If an exception occurred.
-     * @throws TimeoutException If an exception occurred if an I/O operation is timed out.
-     * @throws HelpException if '-help' is used or yaml file is missing.
+     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                        logger will be used.
      * @return Array of remote responses
+     * @throws ParseException           If an exception occurred while parsing command line arguments.
+     * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
+     * @throws IOException              If an exception occurred due to write or read failures.
+     * @throws InterruptedException     If an exception occurred if the writers and readers are interrupted.
+     * @throws ExecutionException       If an exception occurred.
+     * @throws TimeoutException         If an exception occurred if an I/O operation is timed out.
+     * @throws HelpException            if '-help' is used or yaml file is missing.
      */
     public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
                                        GemLogger outLogger) throws ParseException, IllegalArgumentException,

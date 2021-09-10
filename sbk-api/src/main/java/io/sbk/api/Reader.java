@@ -24,14 +24,16 @@ public interface Reader<T> extends DataRecordsReader<T> {
 
     /**
      * Read the data.
+     *
      * @return T return the data.
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     T read() throws EOFException, IOException;
 
     /**
      * Close the  Reader.
+     *
      * @throws IOException If an exception occurred.
      */
     void close() throws IOException;
@@ -45,14 +47,14 @@ public interface Reader<T> extends DataRecordsReader<T> {
      * If you are intend to read multiple records then you can override this method.
      * otherwise, use the default implementation and don't override this method.
      *
-     * @param dType      dataType
-     * @param size  size of the data in bytes
-     * @param time  time interface
-     * @param status     Timestamp
+     * @param dType       dataType
+     * @param size        size of the data in bytes
+     * @param time        time interface
+     * @param status      Timestamp
      * @param sendChannel to call for benchmarking
-     * @param  id   Identifier for recordTime
+     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {
@@ -78,14 +80,14 @@ public interface Reader<T> extends DataRecordsReader<T> {
      * If you are intend to read multiple records then you can override this method.
      * otherwise, use the default implementation and don't override this method.
      *
-     * @param dType      dataType
-     * @param size  size of the data in bytes
-     * @param time  time interface
-     * @param status     Timestamp
+     * @param dType       dataType
+     * @param size        size of the data in bytes
+     * @param time        time interface
+     * @param status      Timestamp
      * @param sendChannel to call for benchmarking
-     * @param  id   Identifier for recordTime
+     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
-     * @throws IOException If an exception occurred.
+     * @throws IOException  If an exception occurred.
      */
     default void recordReadTime(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
             throws EOFException, IOException {

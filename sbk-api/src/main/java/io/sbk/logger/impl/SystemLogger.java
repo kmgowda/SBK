@@ -35,11 +35,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for recoding/printing results on System.out.
  */
 public class SystemLogger implements Logger {
-    final private static String LOGGER_FILE = "logger.properties";
-    final public AtomicInteger writers;
-    final public AtomicInteger readers;
-    final public AtomicInteger maxWriters;
-    final public AtomicInteger maxReaders;
+    private final static String LOGGER_FILE = "logger.properties";
+    public final AtomicInteger writers;
+    public final AtomicInteger readers;
+    public final AtomicInteger maxWriters;
+    public final AtomicInteger maxReaders;
     public String storageName;
     public String prefix;
     public String timeUnitText;
@@ -48,7 +48,7 @@ public class SystemLogger implements Logger {
     public String[] percentileNames;
     public Action action;
     public Time time;
-    final private DecimalFormat format;
+    private final DecimalFormat format;
     private LoggerConfig loggerConfig;
     private TimeUnit timeUnit;
     private long minLatency;

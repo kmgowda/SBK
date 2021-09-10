@@ -25,7 +25,7 @@ public interface ReportLatencies {
      * Report one latency .
      *
      * @param latency Latency value
-     * @param count  Number of times the latency value is observed
+     * @param count   Number of times the latency value is observed
      */
     void reportLatency(long latency, long count);
 }

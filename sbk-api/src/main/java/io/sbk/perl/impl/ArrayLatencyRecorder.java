@@ -20,7 +20,7 @@ import io.sbk.time.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- *  class for Performance statistics.
+ * class for Performance statistics.
  */
 @NotThreadSafe
 final public class ArrayLatencyRecorder extends LatencyRecordWindow {
@@ -99,10 +99,11 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
 
     /**
      * Record the latency.
-     *  @param startTime start time.
-     * @param bytes number of bytes.
-     * @param events number of events(records).
-     * @param latency latency value in milliseconds.
+     *
+     * @param startTime start time.
+     * @param bytes     number of bytes.
+     * @param events    number of events(records).
+     * @param latency   latency value in milliseconds.
      */
     @Override
     final public void recordLatency(long startTime, int bytes, int events, long latency) {

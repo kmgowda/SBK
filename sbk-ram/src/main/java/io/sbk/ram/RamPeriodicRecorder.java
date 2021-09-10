@@ -21,8 +21,8 @@ public interface RamPeriodicRecorder extends TotalPeriodicWindow {
     /**
      * Record the Event/record.
      *
-     * @param  currentTime Current Time
-     * @param record Latencies Record
+     * @param currentTime Current Time
+     * @param record      Latencies Record
      */
     void record(long currentTime, LatenciesRecord record);
 

@@ -205,7 +205,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     }
 
     /**
-     *  record every latency.
+     * record every latency.
      */
     @Override
     public void recordLatency(long startTime, int bytes, int events, long latency) {

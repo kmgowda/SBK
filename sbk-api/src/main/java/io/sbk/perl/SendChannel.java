@@ -16,19 +16,20 @@ package io.sbk.perl;
 public interface SendChannel {
     /**
      * send the benchmarking data.
-     * @param  id  Channel identifier
+     *
+     * @param id        Channel identifier
      * @param startTime Start time
-     * @param endTime End Time.
+     * @param endTime   End Time.
      * @param dataSize  size of the data in bytes.
-     * @param records  number of records/events/messages.
+     * @param records   number of records/events/messages.
      */
     void send(int id, long startTime, long endTime, int dataSize, int records);
 
     /**
      * send the Exception.
      *
-     * @param  id  Channel identifier
-     * @param  ex Exception
+     * @param id Channel identifier
+     * @param ex Exception
      */
     void sendException(int id, Throwable ex);
 }
