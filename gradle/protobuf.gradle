@@ -47,7 +47,8 @@ plugins.withId('com.google.protobuf') {
             sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/grpc")
         }
     }
-
+ 
+    sourceJar.dependsOn(['generateProto', 'generateTestProto'])
     ideaModule.dependsOn(['generateProto', 'generateTestProto'])
     eclipseClasspath.dependsOn(['generateProto', 'generateTestProto'])
 }
