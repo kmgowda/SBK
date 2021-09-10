@@ -34,6 +34,6 @@ application {
 
 dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    implementation group: 'org.jetbrains', name:'annotations', version: jetbrainVersion
+    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
     api project(":sbk-gem")
 }
