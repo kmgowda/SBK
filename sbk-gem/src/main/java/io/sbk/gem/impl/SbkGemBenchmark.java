@@ -125,7 +125,7 @@ public class SbkGemBenchmark implements GemBenchmark {
         Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
         final int javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
-                split("\\.")[0]);
+                split("\\.")[0].substring(0, 2));
 
         final SshResponseStream[] sshResults = createMultiSshResponseStream(nodes.length, true);
         final String cmd = "java -version";
