@@ -313,6 +313,7 @@ public class SbkGemBenchmark implements GemBenchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
+     *
      * @param ex Throwable exception
      */
     @Synchronized

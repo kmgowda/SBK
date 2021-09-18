@@ -44,8 +44,8 @@ public class CSVLogger extends SystemLogger {
         super.addArgs(params);
         params.addOption("csvfile", true,
                 """
-                            CSV file to record results;
-                            'no' disables this option, default: no""");
+                        CSV file to record results;
+                        'no' disables this option, default: no""");
         csvEnable = false;
         csvFile = DISABLE_STRING;
         csvRowCounter = 0;

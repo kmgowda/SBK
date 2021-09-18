@@ -98,14 +98,14 @@ public class SystemLogger implements Logger {
 
 
     private String getTimeUnitNames() {
-        String ret = "[";
+        StringBuilder ret = new StringBuilder("[");
 
         for (TimeUnit value : TimeUnit.values()) {
-            ret += value.name() + ":" + value + ", ";
+            ret.append(value.name()).append(":").append(value).append(", ");
         }
-        ret += "]";
+        ret.append("]");
 
-        return ret.replace(", ]", "]");
+        return ret.toString().replace(", ]", "]");
     }
 
 

@@ -429,6 +429,7 @@ public class SbkBenchmark implements Benchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
+     *
      * @param ex Throwable exception
      */
     @Synchronized

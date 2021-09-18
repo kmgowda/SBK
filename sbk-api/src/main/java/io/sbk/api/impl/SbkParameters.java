@@ -81,8 +81,8 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
                         <arg> number of events(records) per Write or Read Transaction""");
         addOption("seconds", true,
                 """
-                    Number of seconds to run
-                    if not specified, runs forever""");
+                        Number of seconds to run
+                        if not specified, runs forever""");
         addOption("throughput", true,
                 """
                         If > 0, throughput in MB/s
