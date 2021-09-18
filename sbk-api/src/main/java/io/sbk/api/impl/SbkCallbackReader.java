@@ -83,12 +83,12 @@ public class SbkCallbackReader extends Worker implements Callback, Benchmark {
         callback.consume(data);
     }
 
-    final private void consumeRead(Object data) {
+    private void consumeRead(Object data) {
         final long endTime = time.getCurrentTime();
         record(endTime, endTime, dataType.length(data), 1);
     }
 
-    final private void consumeRW(Object data) {
+    private void consumeRW(Object data) {
         record(dataType.getTime(data), time.getCurrentTime(), dataType.length(data), 1);
     }
 }

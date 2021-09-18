@@ -71,13 +71,18 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
         addOption("readers", true, "Number of readers");
         addOption("size", true, "Size of each message (event or record)");
         addOption("records", true,
-                "Number of records(events) if 'seconds' not specified;\n" +
-                        "otherwise, Maximum records per second by writer(s) " +
-                        "and/or Number of records per second by reader(s)");
+                """
+                        Number of records(events) if 'seconds' not specified;
+                        otherwise, Maximum records per second by writer(s) and/or
+                        Number of records per second by reader(s)""");
         addOption("sync", true,
-                "Each Writer calls flush/sync after writing <arg> number of of events(records)" +
-                        " ; <arg> number of events(records) per Write or Read Transaction");
-        addOption("seconds", true, "Number of seconds to run; if not specified, runs forever");
+                """
+                        Each Writer calls flush/sync after writing <arg> number of of events(records); and/or
+                        <arg> number of events(records) per Write or Read Transaction""");
+        addOption("seconds", true,
+                """
+                    Number of seconds to run
+                    if not specified, runs forever""");
         addOption("throughput", true,
                 """
                         If > 0, throughput in MB/s

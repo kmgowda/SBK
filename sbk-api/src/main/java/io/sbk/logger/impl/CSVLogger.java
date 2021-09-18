@@ -42,8 +42,10 @@ public class CSVLogger extends SystemLogger {
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
-        params.addOption("csvfile", true, "CSV file to record results" +
-                "; 'no' disables this option, default: no");
+        params.addOption("csvfile", true,
+                """
+                            CSV file to record results;
+                            'no' disables this option, default: no""");
         csvEnable = false;
         csvFile = DISABLE_STRING;
         csvRowCounter = 0;
