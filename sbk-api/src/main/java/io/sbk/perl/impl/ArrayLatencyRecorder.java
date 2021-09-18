@@ -34,7 +34,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency - lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
-        this.maxMemorySizeBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * size;
+        this.maxMemorySizeBytes = (long) PerlConfig.LATENCY_VALUE_SIZE_BYTES * size;
         this.minIndex = size;
         this.maxIndex = 0;
     }

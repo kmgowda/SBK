@@ -79,9 +79,10 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
                         " ; <arg> number of events(records) per Write or Read Transaction");
         addOption("seconds", true, "Number of seconds to run; if not specified, runs forever");
         addOption("throughput", true,
-                "If > 0, throughput in MB/s\n" +
-                        "If 0, writes/reads 'records'\n" +
-                        "If -1, get the maximum throughput (default: -1)");
+                """
+                        If > 0, throughput in MB/s
+                        If 0, writes/reads 'records'
+                        If -1, get the maximum throughput (default: -1)""");
         addOption("wstep", true,
                 "Number of writers/step, default: 1");
         addOption("wsec", true,

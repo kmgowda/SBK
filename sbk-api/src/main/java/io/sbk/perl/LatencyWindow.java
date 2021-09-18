@@ -63,7 +63,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         print(endTime, logger);
     }
 
-    final private void print(long endTime, Print logger) {
+    private void print(long endTime, Print logger) {
         final double elapsedSec = time.elapsedSeconds(endTime, startTime);
         final long totalLatencyRecords = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
@@ -76,7 +76,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
                 slc[0], slc[1], this.percentiles.latencies);
     }
 
-    final private void getSLCold(@NotNull LatencyPercentiles percentiles, @NotNull int[] slc) {
+    private void getSLCold(@NotNull LatencyPercentiles percentiles, @NotNull int[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length - 1;
@@ -106,7 +106,7 @@ abstract public class LatencyWindow extends LatencyRecorder {
         }
     }
 
-    final private void getSLC(@NotNull LatencyPercentiles percentiles, @NotNull long[] slc) {
+    private void getSLC(@NotNull LatencyPercentiles percentiles, @NotNull long[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length - 1;

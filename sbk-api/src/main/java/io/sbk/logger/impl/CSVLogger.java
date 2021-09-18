@@ -53,11 +53,7 @@ public class CSVLogger extends SystemLogger {
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         csvFile = params.getOptionValue("csvfile", DISABLE_STRING);
-        if (csvFile.compareToIgnoreCase(DISABLE_STRING) == 0) {
-            csvEnable = false;
-        } else {
-            csvEnable = true;
-        }
+        csvEnable = csvFile.compareToIgnoreCase(DISABLE_STRING) != 0;
     }
 
     final public void openCSV() throws IOException {

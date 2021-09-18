@@ -27,7 +27,7 @@
         <module name="MissingOverride"/>
         <module name="IllegalThrows">
             <property name="illegalClassNames"
-                      value="java.lang.Throwable, java.lang.Error, java.lang.RuntimeException, PravegaException"/>
+                      value="java.lang.Throwable, java.lang.Error, java.lang.RuntimeException, HelpException"/>
         </module>
         <module name="FallThrough"/>
         <module name="SimplifyBooleanExpression"/>
