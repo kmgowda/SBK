@@ -52,7 +52,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
         status.records = 1;
         final String[] guid = new String[1];
         final AckHandler acb = (s, e) -> {
-            if ((e != null) || !guid[0].equals(s)) {
+            if (e != null || !guid[0].equals(s)) {
                 Printer.log.error("NAT Streaming Writer failed !");
             } else {
                 final long endTime = time.getCurrentTime();
