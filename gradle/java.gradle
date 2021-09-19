@@ -35,6 +35,7 @@ plugins.withId('java-library') {
     task generateJavadoc(type: Javadoc) {
         source = sourceSets.main.allJava
         classpath = sourceSets.main.runtimeClasspath
+        options.addBooleanOption("Xdoclint:-missing", true)
         failOnError = false
     }
 
