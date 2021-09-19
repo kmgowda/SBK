@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * Interface for Data Record Readers.
  */
-public interface DataRecordsReader<T> extends DataReader<T> {
+public sealed interface DataRecordsReader<T> extends DataReader<T> permits AsyncReader, Reader {
 
     /**
      * Record the single or multiple reads performance statistics.

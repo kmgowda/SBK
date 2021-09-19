@@ -18,7 +18,7 @@ import java.io.IOException;
 /**
  * Interface for Basic Data Writers.
  */
-public interface DataWriter<T> {
+public sealed interface DataWriter<T> permits DataRecordsWriter {
 
 
     /**
