@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SbkUtils {
+final public class SbkUtils {
 
     public static @NotNull Time getTime(@NotNull PerformanceLogger logger) {
         final TimeUnit timeUnit = logger.getTimeUnit();
