@@ -26,18 +26,18 @@ import java.util.concurrent.atomic.AtomicLong;
  * Deprecated
  * This interface is replaced by Abstract class AbstractCallbackReader and SbkReader.
  */
-final public class SbkCallbackReader extends Worker implements Callback, Benchmark {
-    final private DataType dataType;
+final public class SbkCallbackReader extends Worker implements Callback<Object>, Benchmark {
+    final private DataType<Object> dataType;
     final private Time time;
     final private CompletableFuture<Void> ret;
-    final private Callback callback;
+    final private Callback<Object> callback;
     final private AtomicLong readCnt;
     final private double msToRun;
     final private long totalRecords;
     private long beginTime;
 
     public SbkCallbackReader(int readerId, int idMax, ParameterOptions params, SendChannel sendChannel,
-                             DataType dataType, Time time) {
+                             DataType<Object> dataType, Time time) {
         super(readerId, idMax, params, sendChannel);
         this.dataType = dataType;
         this.time = time;
