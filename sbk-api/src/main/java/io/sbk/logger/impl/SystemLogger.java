@@ -89,10 +89,14 @@ public class SystemLogger implements Logger {
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
                 "; default: " + loggerConfig.timeUnit.name());
         params.addOption("minlatency", true,
-                "Minimum latency; use '-time' for time unit; default: " + loggerConfig.minLatency
+                """
+                        Minimum latency;
+                        use '-time' for time unit; default:""" + loggerConfig.minLatency
                         + " " + loggerConfig.timeUnit.name());
         params.addOption("maxlatency", true,
-                "Maximum latency; use '-time' for time unit; default: " + loggerConfig.maxLatency
+                """
+                        Maximum latency;
+                        use '-time' for time unit; default:""" + loggerConfig.maxLatency
                         + " " + loggerConfig.timeUnit.name());
     }
 
