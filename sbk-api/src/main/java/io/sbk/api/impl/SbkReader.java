@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Reader Benchmarking Implementation.
  */
-public class SbkReader extends Worker implements RunBenchmark {
+final public class SbkReader extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataReader<Object> reader;
     final private Time time;

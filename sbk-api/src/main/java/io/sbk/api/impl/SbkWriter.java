@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Writer Benchmarking Implementation.
  */
-public class SbkWriter extends Worker implements RunBenchmark {
+final public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;
     final private DataWriter<Object> writer;
     final private Time time;

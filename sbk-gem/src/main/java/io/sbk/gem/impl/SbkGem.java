@@ -49,7 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class SbkGem {
+final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
     final static String RAM_CONFIG_FILE = "ram.properties";
     final static String BANNER_FILE = "gem-banner.txt";

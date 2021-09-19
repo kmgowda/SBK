@@ -53,7 +53,7 @@ import java.util.stream.IntStream;
 /**
  * Class for performing the benchmark.
  */
-public class SbkBenchmark implements Benchmark {
+final public class SbkBenchmark implements Benchmark {
     final private Action action;
     final private PerlConfig perlConfig;
     final private Storage<Object> storage;
