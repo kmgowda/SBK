@@ -149,7 +149,6 @@ final public class SbkBenchmark implements Benchmark {
         final LatencyRecordWindow window;
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
-        final PeriodicRecorder latencyRecorder;
 
         window = createLatencyWindow();
 
@@ -406,6 +405,7 @@ final public class SbkBenchmark implements Benchmark {
             });
         }
         logger.setExceptionHandler(this::shutdown);
+        assert chainFuture != null;
         chainFuture.thenRunAsync(this::stop, executor);
 
         return retFuture;
