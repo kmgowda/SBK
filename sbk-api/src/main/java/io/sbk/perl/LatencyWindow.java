@@ -14,7 +14,7 @@ import io.sbk.config.PerlConfig;
 import io.sbk.time.Time;
 import org.jetbrains.annotations.NotNull;
 
-abstract public class LatencyWindow extends LatencyRecorder {
+abstract public sealed class LatencyWindow extends LatencyRecorder permits LatencyRecordWindow {
     final protected LatencyPercentiles percentiles;
     final protected Time time;
     final private long[] slc;

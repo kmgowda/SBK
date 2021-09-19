@@ -15,7 +15,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 
 @NotThreadSafe
-public abstract class LatencyRecordWindow extends LatencyWindow implements ReportLatency, ReportLatencies {
+public abstract non-sealed class LatencyRecordWindow extends LatencyWindow implements ReportLatency, ReportLatencies {
 
     public LatencyRecordWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                long bytesMax, double[] percentilesFractions, Time time) {

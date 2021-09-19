@@ -16,7 +16,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Base class for Performance statistics.
  */
 @NotThreadSafe
-public class LatencyRecorder extends LatencyRecord {
+public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow {
     final protected long lowLatency;
     final protected long highLatency;
     final protected long totalLatencyMax;
