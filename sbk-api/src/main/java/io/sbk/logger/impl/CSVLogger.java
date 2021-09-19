@@ -34,7 +34,6 @@ public class CSVLogger extends SystemLogger {
     public PrintWriter csvWriter;
     private long csvRowCounter;
 
-
     public CSVLogger() {
         super();
     }

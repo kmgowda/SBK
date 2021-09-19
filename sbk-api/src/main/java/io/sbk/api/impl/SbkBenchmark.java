@@ -103,31 +103,18 @@ public class SbkBenchmark implements Benchmark {
             percentileFractions[i] = percentiles[i] / 100.0;
         }
 
-        if (perlConfig.maxQs > 0) {
-            this.maxQs = perlConfig.maxQs;
-        } else {
-            this.maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
-        }
+        this.maxQs = perlConfig.maxQs > 0 ?
+                perlConfig.maxQs : Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
-        if (perlConfig.fork) {
-            executor = new ForkJoinPool(threadCount);
-        } else {
-            executor = Executors.newFixedThreadPool(threadCount);
-        }
-        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
-            writeStats = new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
-                    logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
-        } else {
-            writeStats = null;
-        }
+        executor = perlConfig.fork ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
+        writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
+                new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
+                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor) : null;
 
-        if (params.getReadersCount() > 0) {
-            readStats = new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
-                    logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor);
-        } else {
-            readStats = null;
-        }
+        readStats = params.getReadersCount() > 0 ?
+                new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
+                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor) : null;
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();
