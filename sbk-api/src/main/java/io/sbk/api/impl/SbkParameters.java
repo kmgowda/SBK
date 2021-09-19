@@ -73,7 +73,7 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
         addOption("records", true,
                 """
                         Number of records(events) if 'seconds' not specified;
-                        otherwise, Maximum records per second by writer(s) and/or
+                        otherwise, Maximum records per second by writer(s); and/or
                         Number of records per second by reader(s)""");
         addOption("sync", true,
                 """
