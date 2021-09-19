@@ -45,25 +45,25 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
 
 
     @Override
-    final public void reset(long startTime) {
+    public void reset(long startTime) {
         super.reset(startTime);
         this.latencies.clear();
         this.hashMapBytesCount = 0;
     }
 
     @Override
-    final public boolean isFull() {
+    public boolean isFull() {
         return (this.hashMapBytesCount > this.maxHashMapSizeBytes) || super.isOverflow();
     }
 
     @Override
-    final public long getMaxMemoryBytes() {
+    public long getMaxMemoryBytes() {
         return maxHashMapSizeBytes;
     }
 
 
     @Override
-    final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
+    public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
         if (copyLatencies != null) {
             copyLatencies.reportLatencyRecord(this);
         }
@@ -87,13 +87,13 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
 
 
     @Override
-    final public void reportLatencyRecord(LatencyRecord record) {
+    public void reportLatencyRecord(LatencyRecord record) {
         super.update(record);
     }
 
 
     @Override
-    final public void reportLatency(long latency, long count) {
+    public void reportLatency(long latency, long count) {
         Long val = latencies.get(latency);
         if (val == null) {
             val = 0L;
@@ -111,7 +111,7 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
      * @param latency   latency value in milliseconds.
      */
     @Override
-    final public void recordLatency(long startTime, int bytes, int events, long latency) {
+    public void recordLatency(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
             reportLatency(latency, events);
         }

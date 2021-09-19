@@ -40,7 +40,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    final public void reset(long startTime) {
+    public void reset(long startTime) {
         super.reset(startTime);
         this.maxIndex = 0;
         this.minIndex = Integer.MAX_VALUE;
@@ -48,7 +48,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
 
 
     @Override
-    final public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
+    public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
         if (copyLatencies != null) {
             copyLatencies.reportLatencyRecord(this);
         }
@@ -71,23 +71,23 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    final public boolean isFull() {
+    public boolean isFull() {
         return super.isOverflow();
     }
 
     @Override
-    final public long getMaxMemoryBytes() {
+    public long getMaxMemoryBytes() {
         return this.maxMemorySizeBytes;
     }
 
     @Override
-    final public void reportLatencyRecord(LatencyRecord record) {
+    public void reportLatencyRecord(LatencyRecord record) {
         super.update(record);
     }
 
 
     @Override
-    final public void reportLatency(long latency, long count) {
+    public void reportLatency(long latency, long count) {
         final int index = (int) (latency - this.lowLatency);
         if (index < this.latencies.length) {
             this.minIndex = Math.min(this.minIndex, index);
@@ -106,7 +106,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
      * @param latency   latency value in milliseconds.
      */
     @Override
-    final public void recordLatency(long startTime, int bytes, int events, long latency) {
+    public void recordLatency(long startTime, int bytes, int events, long latency) {
         if (record(bytes, events, latency)) {
             reportLatency(latency, events);
         }

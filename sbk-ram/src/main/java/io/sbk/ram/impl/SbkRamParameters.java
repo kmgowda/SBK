@@ -54,21 +54,16 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
         super.parseArgs(args);
 
         storageName = getOptionValue("class", null);
-
         if (storageName == null) {
             throw new UnrecognizedOptionException("storage 'class' name is NOT supplied! ");
         }
 
         String actionString = getOptionValue("action", "r");
-
-        if (actionString.equalsIgnoreCase("wr")) {
-            action = Action.Write_Reading;
-        } else if (actionString.equalsIgnoreCase("w")) {
-            action = Action.Writing;
-        } else {
-            action = Action.Reading;
-        }
-
+        action = switch (actionString.toLowerCase()) {
+            case "wr" -> Action.Write_Reading;
+            case "w" -> Action.Writing;
+            default -> Action.Reading;
+        };
         maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
         ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
     }

@@ -83,21 +83,15 @@ public class SbkWriter extends Worker implements RunBenchmark {
             if (params.isWriteAndRead()) {
                 perfWriter = this::RecordsWriterTimeRW;
             } else {
-                if (params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE) {
-                    perfWriter = this::RecordsWriterTimeSync;
-                } else {
-                    perfWriter = this::RecordsWriterTime;
-                }
+                perfWriter = params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
+                        this::RecordsWriterTimeSync : this::RecordsWriterTime;
             }
         } else {
             if (params.isWriteAndRead()) {
                 perfWriter = this::RecordsWriterRW;
             } else {
-                if (params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE) {
-                    perfWriter = this::RecordsWriterSync;
-                } else {
-                    perfWriter = this::RecordsWriter;
-                }
+                perfWriter = params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
+                        this::RecordsWriterSync : this::RecordsWriter;
             }
         }
         return perfWriter;

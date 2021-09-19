@@ -79,7 +79,6 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
                 responseObserver.onNext(Empty.newBuilder().build());
                 responseObserver.onCompleted();
             }
-
         } catch (IllegalStateException ex) {
             ex.printStackTrace();
             if (responseObserver != null) {
