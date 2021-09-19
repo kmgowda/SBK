@@ -10,8 +10,7 @@
 
 package io.sbk.time;
 
-public interface Time {
-
+public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
 
     /**
      * get the Time Unit.

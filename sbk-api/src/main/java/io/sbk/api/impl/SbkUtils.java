@@ -15,9 +15,9 @@ import io.sbk.logger.PerformanceLogger;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
-import io.sbk.time.impl.MicroSeconds;
-import io.sbk.time.impl.MilliSeconds;
-import io.sbk.time.impl.NanoSeconds;
+import io.sbk.time.MicroSeconds;
+import io.sbk.time.MilliSeconds;
+import io.sbk.time.NanoSeconds;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

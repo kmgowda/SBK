@@ -21,9 +21,9 @@ import io.sbk.options.InputOptions;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
-import io.sbk.time.impl.MicroSeconds;
-import io.sbk.time.impl.MilliSeconds;
-import io.sbk.time.impl.NanoSeconds;
+import io.sbk.time.MicroSeconds;
+import io.sbk.time.MilliSeconds;
+import io.sbk.time.NanoSeconds;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
