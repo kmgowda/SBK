@@ -13,7 +13,7 @@ package io.sbk.perl;
 /**
  * Interface for recording benchmarking data.
  */
-public interface SendChannel {
+public sealed interface SendChannel permits Channel {
     /**
      * send the benchmarking data.
      *
