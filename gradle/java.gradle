@@ -41,6 +41,7 @@ plugins.withId('java-library') {
 
     task javadocJar(type: Jar) {
         classifier = 'javadoc'
+        exclude "**/generated/**"
         from generateJavadoc
     }
     artifacts { archives javadocJar }
