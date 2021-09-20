@@ -10,13 +10,10 @@
 
 # Running Container
 
-FROM openjdk:11-jre
+FROM openjdk:17.0-jre
 MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 
 USER root
-
-COPY ca-certificates/* /usr/local/share/ca-certificates/
-RUN update-ca-certificates
 
 ENV APP_NAME=sbk
 
