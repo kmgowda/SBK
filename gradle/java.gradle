@@ -13,6 +13,9 @@ plugins.withId('java-library') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
+    sourceCompatibility = jdkVersion
+    targetCompatibility = jdkVersion
+
     compileJava {
         options.compilerArgs.addAll([
                 "-Xlint:deprecation",
