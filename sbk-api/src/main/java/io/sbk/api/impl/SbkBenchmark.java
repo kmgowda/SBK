@@ -110,11 +110,13 @@ final public class SbkBenchmark implements Benchmark {
         executor = perlConfig.fork ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
                 new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
-                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor) : null;
+                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, params.getTimeoutMS(),
+                        this.time, executor) : null;
 
         readStats = params.getReadersCount() > 0 ?
                 new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
-                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, this.time, executor) : null;
+                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, params.getTimeoutMS(),
+                        this.time, executor) : null;
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();

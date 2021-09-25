@@ -36,6 +36,7 @@ import java.util.concurrent.locks.LockSupport;
 final public class CQueuePerformance implements Performance {
     final private int windowIntervalMS;
     final private int idleNS;
+    final private int timeoutMS;
     final private Time time;
     final private PeriodicRecorder periodicLogger;
     final private ExecutorService executor;
@@ -53,9 +54,10 @@ final public class CQueuePerformance implements Performance {
 
 
     public CQueuePerformance(@NotNull PerlConfig perlConfig, int workers, PeriodicRecorder periodicLogger,
-                             int reportingIntervalMS, Time time, ExecutorService executor) {
+                             int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
+        this.timeoutMS = timeoutMS;
         this.time = time;
         this.periodicLogger = periodicLogger;
         this.executor = executor;
@@ -79,7 +81,7 @@ final public class CQueuePerformance implements Performance {
 
     private void runPerformance(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
-        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, idleNS);
+        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, timeoutMS, idleNS);
         final long startTime = time.getCurrentTime();
         boolean doWork = true;
         long ctime = startTime;
@@ -218,12 +220,11 @@ final public class CQueuePerformance implements Performance {
         private long idleCount;
         private long totalCount;
 
-        public ElasticWaitCounter(int windowInterval, int idleNS) {
+        public ElasticWaitCounter(int windowInterval, int timeoutMS, int idleNS) {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
-            double minWaitTimeMS = windowInterval / 50.0;
-            countRatio = (PerlConfig.NS_PER_MS * 1.0) / idleNS;
-            minIdleCount = (long) (countRatio * minWaitTimeMS);
+            countRatio = (PerlConfig.NS_PER_MS * 1.0) / this.idleNS;
+            minIdleCount = (long) (countRatio * timeoutMS);
             elasticCount = minIdleCount;
             idleCount = 0;
             totalCount = 0;
