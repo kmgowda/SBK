@@ -21,9 +21,9 @@ import io.sbk.options.InputOptions;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
-import io.sbk.time.impl.MicroSeconds;
-import io.sbk.time.impl.MilliSeconds;
-import io.sbk.time.impl.NanoSeconds;
+import io.sbk.time.MicroSeconds;
+import io.sbk.time.MilliSeconds;
+import io.sbk.time.NanoSeconds;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -89,23 +89,27 @@ public class SystemLogger implements Logger {
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
                 "; default: " + loggerConfig.timeUnit.name());
         params.addOption("minlatency", true,
-                "Minimum latency; use '-time' for time unit; default: " + loggerConfig.minLatency
+                """
+                        Minimum latency;
+                        use '-time' for time unit; default:""" + loggerConfig.minLatency
                         + " " + loggerConfig.timeUnit.name());
         params.addOption("maxlatency", true,
-                "Maximum latency; use '-time' for time unit; default: " + loggerConfig.maxLatency
+                """
+                        Maximum latency;
+                        use '-time' for time unit; default:""" + loggerConfig.maxLatency
                         + " " + loggerConfig.timeUnit.name());
     }
 
 
     private String getTimeUnitNames() {
-        String ret = "[";
+        StringBuilder ret = new StringBuilder("[");
 
         for (TimeUnit value : TimeUnit.values()) {
-            ret += value.name() + ":" + value + ", ";
+            ret.append(value.name()).append(":").append(value).append(", ");
         }
-        ret += "]";
+        ret.append("]");
 
-        return ret.replace(", ]", "]");
+        return ret.toString().replace(", ]", "]");
     }
 
 
@@ -123,35 +127,39 @@ public class SystemLogger implements Logger {
         minLatency = loggerConfig.minLatency;
         maxLatency = loggerConfig.maxLatency;
         Time convertTime = null;
-        if (timeUnit == TimeUnit.ms) {
-            if (loggerConfig.timeUnit == TimeUnit.ns) {
-                convertTime = new NanoSeconds();
-            } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
-                convertTime = new MicroSeconds();
+        switch (timeUnit) {
+            case ms -> {
+                convertTime = switch (loggerConfig.timeUnit) {
+                    case ns -> new NanoSeconds();
+                    case mcs -> new MicroSeconds();
+                    default -> null;
+                };
+                if (convertTime != null) {
+                    minLatency = (long) convertTime.convertToMilliSeconds(loggerConfig.minLatency);
+                    maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+                }
             }
-            if (convertTime != null) {
-                minLatency = (long) convertTime.convertToMilliSeconds(loggerConfig.minLatency);
-                maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+            case ns -> {
+                convertTime = switch (loggerConfig.timeUnit) {
+                    case ms -> new MilliSeconds();
+                    case mcs -> new MicroSeconds();
+                    default -> null;
+                };
+                if (convertTime != null) {
+                    minLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.minLatency);
+                    maxLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.maxLatency);
+                }
             }
-        } else if (timeUnit == TimeUnit.ns) {
-            if (loggerConfig.timeUnit == TimeUnit.ms) {
-                convertTime = new MilliSeconds();
-            } else if (loggerConfig.timeUnit == TimeUnit.mcs) {
-                convertTime = new MicroSeconds();
-            }
-            if (convertTime != null) {
-                minLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.minLatency);
-                maxLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.maxLatency);
-            }
-        } else if (timeUnit == TimeUnit.mcs) {
-            if (loggerConfig.timeUnit == TimeUnit.ms) {
-                convertTime = new MilliSeconds();
-            } else if (loggerConfig.timeUnit == TimeUnit.ns) {
-                convertTime = new NanoSeconds();
-            }
-            if (convertTime != null) {
-                minLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.minLatency);
-                maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+            case mcs -> {
+                convertTime = switch (loggerConfig.timeUnit) {
+                    case ms -> new MilliSeconds();
+                    case ns -> new NanoSeconds();
+                    default -> null;
+                };
+                if (convertTime != null) {
+                    minLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.minLatency);
+                    maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+                }
             }
         }
         minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK Server.
  */
-public class SbkRam {
+final public class SbkRam {
     final static String CONFIG_FILE = "ram.properties";
     final static String BANNER_FILE = "ram-banner.txt";
 

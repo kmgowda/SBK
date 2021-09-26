@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-abstract public class LatencyRecord {
+abstract public sealed class LatencyRecord permits LatencyRecorder {
     @Getter
     protected long totalRecords;
     @Getter

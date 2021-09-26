@@ -8,12 +8,9 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.time.impl;
+package io.sbk.time;
 
 import io.sbk.config.PerlConfig;
-import io.sbk.time.Time;
-import io.sbk.time.TimeUnit;
-
 
 final public class MicroSeconds implements Time {
 

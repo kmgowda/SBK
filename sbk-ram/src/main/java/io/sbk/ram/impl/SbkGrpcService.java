@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.security.InvalidKeyException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
+final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger connections;
     private final Config config;
     private final CountConnections countConnections;
@@ -79,7 +79,6 @@ public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
                 responseObserver.onNext(Empty.newBuilder().build());
                 responseObserver.onCompleted();
             }
-
         } catch (IllegalStateException ex) {
             ex.printStackTrace();
             if (responseObserver != null) {

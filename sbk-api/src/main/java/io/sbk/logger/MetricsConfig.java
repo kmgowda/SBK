@@ -11,7 +11,7 @@ package io.sbk.logger;
 
 import io.sbk.time.TimeUnit;
 
-public class MetricsConfig {
+public final class MetricsConfig {
     public int port;
     public String context;
     public TimeUnit latencyTimeUnit;

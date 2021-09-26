@@ -15,9 +15,9 @@ import io.sbk.logger.PerformanceLogger;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
-import io.sbk.time.impl.MicroSeconds;
-import io.sbk.time.impl.MilliSeconds;
-import io.sbk.time.impl.NanoSeconds;
+import io.sbk.time.MicroSeconds;
+import io.sbk.time.MilliSeconds;
+import io.sbk.time.NanoSeconds;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,18 +25,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SbkUtils {
+final public class SbkUtils {
 
     public static @NotNull Time getTime(@NotNull PerformanceLogger logger) {
         final TimeUnit timeUnit = logger.getTimeUnit();
-        final Time ret;
-        if (timeUnit == TimeUnit.mcs) {
-            ret = new MicroSeconds();
-        } else if (timeUnit == TimeUnit.ns) {
-            ret = new NanoSeconds();
-        } else {
-            ret = new MilliSeconds();
-        }
+        final Time ret = switch (timeUnit) {
+            case mcs -> new MicroSeconds();
+            case ns -> new NanoSeconds();
+            default -> new MilliSeconds();
+        };
         Printer.log.info("Time Unit: " + ret.getTimeUnit().toString());
         Printer.log.info("Minimum Latency: " + logger.getMinLatency() + " " + ret.getTimeUnit().name());
         Printer.log.info("Maximum Latency: " + logger.getMaxLatency() + " " + ret.getTimeUnit().name());

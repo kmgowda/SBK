@@ -34,7 +34,6 @@ public class CSVLogger extends SystemLogger {
     public PrintWriter csvWriter;
     private long csvRowCounter;
 
-
     public CSVLogger() {
         super();
     }
@@ -42,8 +41,10 @@ public class CSVLogger extends SystemLogger {
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
-        params.addOption("csvfile", true, "CSV file to record results" +
-                "; 'no' disables this option, default: no");
+        params.addOption("csvfile", true,
+                """
+                        CSV file to record results;
+                        'no' disables this option, default: no""");
         csvEnable = false;
         csvFile = DISABLE_STRING;
         csvRowCounter = 0;
@@ -53,11 +54,7 @@ public class CSVLogger extends SystemLogger {
     public void parseArgs(final InputOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         csvFile = params.getOptionValue("csvfile", DISABLE_STRING);
-        if (csvFile.compareToIgnoreCase(DISABLE_STRING) == 0) {
-            csvEnable = false;
-        } else {
-            csvEnable = true;
-        }
+        csvEnable = csvFile.compareToIgnoreCase(DISABLE_STRING) != 0;
     }
 
     final public void openCSV() throws IOException {

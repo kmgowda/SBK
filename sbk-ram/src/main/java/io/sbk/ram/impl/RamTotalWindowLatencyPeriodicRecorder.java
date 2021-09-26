@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
-public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWindow
+final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWindow
         implements ReportLatencies, RamPeriodicRecorder {
     final private ReportLatencies reportLatencies;
     final private SetRW setRW;

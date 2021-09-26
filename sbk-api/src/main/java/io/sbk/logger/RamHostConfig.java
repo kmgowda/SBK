@@ -10,7 +10,7 @@
 
 package io.sbk.logger;
 
-public class RamHostConfig {
+public final class RamHostConfig {
     public String host;
     public int port;
     public int maxRecordSizeMB;

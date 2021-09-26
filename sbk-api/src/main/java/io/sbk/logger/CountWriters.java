@@ -10,7 +10,7 @@
 
 package io.sbk.logger;
 
-public interface CountWriters {
+public sealed interface CountWriters permits CountRW {
 
     /**
      * Increment Writers.

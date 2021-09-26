@@ -61,8 +61,8 @@ public class PrometheusLogger extends CSVLogger {
             throw new IllegalArgumentException(ex);
         }
 
-        params.addOption("context", true, "Prometheus Metric context" +
-                "; '" + DISABLE_STRING + "' disables this option; default: " + metricsConfig.port + metricsConfig.context);
+        params.addOption("context", true, "Prometheus Metric context;" +
+                "\n'" + DISABLE_STRING + "' disables this option; default: " + metricsConfig.port + metricsConfig.context);
     }
 
 

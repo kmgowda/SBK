@@ -43,7 +43,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Class for performing the benchmark.
  */
-public class SbkRamBenchmark implements Benchmark {
+final public class SbkRamBenchmark implements Benchmark {
     final RamConfig ramConfig;
     final private Time time;
     final private RamLogger logger;

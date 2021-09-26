@@ -98,7 +98,6 @@ final public class StoragePackage {
 
     private static class StringCompareIgnoreCase implements Comparator<String> {
 
-
         @Override
         @Contract(pure = true)
         public int compare(@NotNull String o1, String o2) {

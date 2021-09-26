@@ -11,7 +11,7 @@ package io.sbk.logger;
 
 import io.sbk.time.TimeUnit;
 
-public class LoggerConfig {
+public final class LoggerConfig {
     public int reportingSeconds;
     public TimeUnit timeUnit;
     public long minLatency;

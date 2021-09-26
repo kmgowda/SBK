@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class SbkGemYal {
+public final class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
     final static String DESC = "SBK-GEM-YML Arguments Loader";

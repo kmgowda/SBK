@@ -23,7 +23,7 @@ import java.net.ConnectException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
-public class SbkSsh {
+final public class SbkSsh {
     final public SshConnection connection;
     final private SshClient client;
     final private ExecutorService executor;

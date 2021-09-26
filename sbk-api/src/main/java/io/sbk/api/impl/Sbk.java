@@ -44,7 +44,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK.
  */
-public class Sbk {
+final public class Sbk {
     final static String CONFIGFILE = "sbk.properties";
     final static String BANNERFILE = "banner.txt";
 

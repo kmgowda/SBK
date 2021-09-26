@@ -13,6 +13,9 @@ plugins.withId('java-library') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
+    sourceCompatibility = jdkVersion
+    targetCompatibility = jdkVersion
+
     compileJava {
         options.compilerArgs.addAll([
                 "-Xlint:deprecation",
@@ -35,11 +38,13 @@ plugins.withId('java-library') {
     task generateJavadoc(type: Javadoc) {
         source = sourceSets.main.allJava
         classpath = sourceSets.main.runtimeClasspath
+        options.addBooleanOption("Xdoclint:-missing", true)
         failOnError = false
     }
 
     task javadocJar(type: Jar) {
         classifier = 'javadoc'
+        exclude "**/generated/**"
         from generateJavadoc
     }
     artifacts { archives javadocJar }

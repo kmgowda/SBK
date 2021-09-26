@@ -12,8 +12,8 @@ plugins.withId('checkstyle') {
     checkstyle {
         toolVersion = checkstyleToolVersion
 
-        configDirectory = file("$rootProject.projectDir/checkstyle")
-        configFile = new File(rootDir, "checkstyle/checkstyle.xml")
+        configDirectory = file("$rootDir/checkstyle")
+        configFile = file("${rootDir}/checkstyle/checkstyle.xml")
         configProperties = [importControlFile: "$rootDir/checkstyle/import-control.xml",
                             suppressionsFile : "$rootDir/checkstyle/suppressions.xml"]
     }

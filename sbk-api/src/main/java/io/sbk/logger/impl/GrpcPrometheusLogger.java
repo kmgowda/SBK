@@ -236,7 +236,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         }
     }
 
-    private class ResponseObserver<T> implements StreamObserver<T> {
+    private static class ResponseObserver<T> implements StreamObserver<T> {
 
         @Override
         public void onNext(Object value) {
