@@ -13,7 +13,7 @@ package io.sbk.gem.impl;
 import io.sbk.config.YalConfig;
 import io.sbk.yal.impl.SbkYalParameters;
 
-public class SbkGemYalParameters extends SbkYalParameters {
+public final class SbkGemYalParameters extends SbkYalParameters {
 
     public SbkGemYalParameters(String name, String desc, YalConfig config) {
         super(name, desc, config);

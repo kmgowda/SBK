@@ -21,7 +21,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK Server.
  */
-public class SbkRamMain {
+public final class SbkRamMain {
 
     public static void main(final String[] args) {
         try {

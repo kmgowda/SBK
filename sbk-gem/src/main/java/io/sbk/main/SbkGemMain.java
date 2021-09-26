@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class SbkGemMain {
+public final class SbkGemMain {
 
     public static void main(final String[] args) {
         try {
