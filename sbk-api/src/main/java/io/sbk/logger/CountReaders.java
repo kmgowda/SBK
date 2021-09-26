@@ -10,7 +10,7 @@
 
 package io.sbk.logger;
 
-public interface CountReaders {
+public sealed interface CountReaders permits CountRW {
 
     /**
      * Increment Readers.
