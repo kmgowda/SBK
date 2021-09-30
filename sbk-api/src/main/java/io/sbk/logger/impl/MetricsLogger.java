@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
-public class MetricsLogger implements Print {
+public sealed class MetricsLogger implements Print permits RWMetricsLogger {
     final public String metricPrefix;
     final public MeterRegistry registry;
     final public DecimalFormat format;
