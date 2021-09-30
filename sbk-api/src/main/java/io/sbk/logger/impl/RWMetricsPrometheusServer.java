@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-public class RWMetricsPrometheusServer extends RWMetricsLogger {
+public non-sealed class RWMetricsPrometheusServer extends RWMetricsLogger {
     final private PrometheusServer server;
 
     private RWMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,

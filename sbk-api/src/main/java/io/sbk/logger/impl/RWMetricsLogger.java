@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for recoding/printing benchmark results of Readers and Writers
  * on micrometer Composite Meter Registry.
  */
-public class RWMetricsLogger extends MetricsLogger implements CountRW {
+public sealed class RWMetricsLogger extends MetricsLogger implements CountRW permits RWMetricsPrometheusServer {
     final private AtomicInteger writers;
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;
