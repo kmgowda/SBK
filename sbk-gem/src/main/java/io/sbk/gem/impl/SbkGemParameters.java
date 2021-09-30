@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Slf4j
-public class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
+public final class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
 
     final private GemConfig config;
 
