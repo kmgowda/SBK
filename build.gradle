@@ -24,8 +24,8 @@ buildscript {
     dependencies {
         classpath "gradle.plugin.com.palantir.graal:gradle-graal:0.7.2"
     }
-    println "Build JVM Version is : " + Jvm.current()
-
+    println "Build JVM Version    : " + Jvm.current()
+    println "Build Gradle version : $gradle.gradleVersion"
 }
 
 
