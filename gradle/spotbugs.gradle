@@ -34,6 +34,5 @@ plugins.withId('com.github.spotbugs') {
 
     dependencies {
         api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
-        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
     }
 }
