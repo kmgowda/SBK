@@ -23,7 +23,9 @@ buildscript {
     }
     dependencies {
         classpath group: 'gradle.plugin.com.palantir.graal', name:'gradle-graal' , version:graalvmPluginVersion
-        classpath group: 'com.github.spotbugs.snom' , name:'spotbugs-gradle-plugin', version:spotbugsPluginVersion
+        classpath group: 'com.github.spotbugs.snom', name:'spotbugs-gradle-plugin', version:spotbugsPluginVersion
+        classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
+        classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
 
     println "Build JVM Version    : " + Jvm.current()
@@ -63,6 +65,7 @@ allprojects {
     apply from: "$rootDir/gradle/jacoco.gradle"
     apply from: "$rootDir/gradle/java.gradle"
     apply from: "$rootDir/gradle/protobuf.gradle"
+    apply from: "$rootDir/gradle/mkdocs.gradle"
 
     def sbkProjectName = rootProject.name + project.path.replace(":", "-")
     sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-", rootProject.name + "-")
