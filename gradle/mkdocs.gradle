@@ -18,6 +18,7 @@ if (gradleProject == gradleProject.rootProject) {
 mkdocs {
     sourcesDir = "$rootDir/documentation/src"
     buildDir = "$rootDir/documentation/generated"
+
     updateSiteUrl = false
     strict = false
 }
