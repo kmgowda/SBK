@@ -22,21 +22,15 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'gradle.plugin.com.palantir.graal', name:'gradle-graal' , version:graalvmPluginVersion
         classpath group: 'com.github.spotbugs.snom', name:'spotbugs-gradle-plugin', version:spotbugsPluginVersion
-        classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
-        classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
+        classpath group: 'gradle.plugin.com.palantir.graal', name:'gradle-graal' , version:graalvmPluginVersion
+       // classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
+        //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
 
     println "Build JVM Version    : " + Jvm.current()
     println "Build Gradle Version : $gradle.gradleVersion"
 }
-
-
-apply plugin: 'java-library'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'checkstyle'
 
 def SbkMainClass = "io.sbk.main.SbkMain"
 
@@ -54,8 +48,11 @@ allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
     apply plugin: 'application'
-    apply plugin: "com.palantir.graal"
-   // apply plugin: "com.github.spotbugs"
+    // apply plugin: "com.github.spotbugs"
+
+    // Disable graalvm builds
+    //apply plugin: "com.palantir.graal"
+
 
     apply from: "$rootDir/gradle/application.gradle"
     apply from: "$rootDir/gradle/checkstyle.gradle"
@@ -194,11 +191,12 @@ allprojects {
         }
     }
 
+    /*
     graal {
         def className = sbkClass.capitalize();
         mainClass SbkMainClass
         outputName sbkProjectName
-        javaVersion '11'
+        javaVersion '17'
         graalVersion '21.0.0'
         option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
         option "--initialize-at-build-time=io.sbk.$className"
@@ -208,7 +206,7 @@ allprojects {
         option "--no-fallback"
         option "-H:Optimize=3"
     }
-
+    */
 }
 
 task printDependencies {
