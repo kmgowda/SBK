@@ -22,8 +22,10 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.com.palantir.graal:gradle-graal:$graalvmVersion"
+        classpath group: 'gradle.plugin.com.palantir.graal', name:'gradle-graal' , version:graalvmPluginVersion
+        classpath group: 'com.github.spotbugs.snom' , name:'spotbugs-gradle-plugin', version:spotbugsPluginVersion
     }
+
     println "Build JVM Version    : " + Jvm.current()
     println "Build Gradle Version : $gradle.gradleVersion"
 }
