@@ -31,6 +31,8 @@ COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
 
 # Copy the SBK storage drivers
+COPY --chown=root:root driver-jdbc ${APP_HOME}/driver-jdbc
+COPY --chown=root:root driver-jdbc ${APP_HOME}/driver-jdbc
 COPY --chown=root:root driver-postgresql ${APP_HOME}/driver-postgresql
 
 
