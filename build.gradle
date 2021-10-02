@@ -53,11 +53,7 @@ allprojects {
     apply plugin: 'checkstyle'
     apply plugin: 'application'
     apply plugin: "com.palantir.graal"
-
-    dependencies {
-        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
-        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
-    }
+    apply plugin: "com.github.spotbugs"
 
     apply from: "$rootDir/gradle/application.gradle"
     apply from: "$rootDir/gradle/checkstyle.gradle"
