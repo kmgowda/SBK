@@ -1,7 +1,4 @@
 <FindBugsFilter>
-    <Match> <!-- generated code -->
-        <Package name="io.pravega.controller.stream.api.grpc.v1" />
-    </Match>
     <Match> <!-- does not work well with futures -->
         <Bug pattern="NP_NONNULL_PARAM_VIOLATION" />
     </Match>
@@ -31,10 +28,6 @@
     </Match>
     <Match> <!-- This is intended in these and only these classes -->
         <Or>
-            <Class name="io.pravega.common.io.FixedByteArrayOutputStream" />
-            <Class name="io.pravega.common.util.ByteArraySegment" />
-            <Class name="io.pravega.controller.store.stream.tables.Data" />
-            <Class name="io.pravega.segmentstore.server.logs.operations.StreamSegmentAppendOperation" />
             <Class name="io.sbk.FdbRecord.FdbRecordLayerProto" />
         </Or>
         <Or>
