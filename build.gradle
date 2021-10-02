@@ -151,7 +151,7 @@ allprojects {
             doLast {
                 println "generatering file : " + outDir + "/" + outFile
 
-                configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == rootProject.name) {
                         if (id.name != baseDriverToSkip) {
@@ -173,7 +173,7 @@ allprojects {
             doLast {
                 println "generatering file : " + outDir + "/" + outFile
 
-                configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == rootProject.name) {
                         if (id.name != baseDriverToSkip) {
@@ -213,7 +213,7 @@ task printDependencies {
     doLast {
         project.subprojects.findAll().each {
             println "subproject : " + it.name
-            it.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            it.configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                 def id = artifact.moduleVersion.id
                 if (id.group.toString() == rootProject.name) {
                     println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
@@ -222,7 +222,7 @@ task printDependencies {
             println()
         }
         println("Root project : " + rootProject.name)
-        configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             def id = artifact.moduleVersion.id
             if (id.group.toString() == rootProject.name) {
                 println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
