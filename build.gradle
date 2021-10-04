@@ -315,7 +315,8 @@ dependencies {
 //create a single Jar with all dependencies
 task buildJar(type: Jar) {
     manifest {
-        attributes 'Specification-Title': "Storage Benchmark Kit",
+        attributes 'Name': rootProject.name.toUpperCase(),
+                'Specification-Title': "Storage Benchmark Kit",
                 'Specification-Version': sbkVersion,
                 'Specification-Vendor': "KMG",
                 'Implementation-Title': rootProject.name.toUpperCase(),
