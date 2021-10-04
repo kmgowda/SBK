@@ -23,12 +23,12 @@ plugins.withId('application') {
         doFirst {
             manifest {
                 attributes("Class-Path":
-                        configurations.runtimeClasspath.collect { it.name }.join(' ') + ' ' +
-                                jar.archiveFileName
+                        configurations.runtimeClasspath.collect { it.name }.join(' ')
                 )
             }
         }
     }
+
     applicationDistribution.from(pathingJar) {
         into "lib"
     }
