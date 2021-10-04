@@ -8,7 +8,8 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
-plugins.withId('java-library') {
+plugins.withId('java') {
+    apply plugin: 'java-library'
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
     apply plugin: 'signing'

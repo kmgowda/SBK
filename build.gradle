@@ -43,7 +43,7 @@ allprojects {
         }
     }
 
-    apply plugin: 'java-library'
+    apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
@@ -53,14 +53,13 @@ allprojects {
     // Disable graalvm builds
     //apply plugin: "com.palantir.graal"
 
-
+    apply from: "$rootDir/gradle/java.gradle"
     apply from: "$rootDir/gradle/application.gradle"
     apply from: "$rootDir/gradle/checkstyle.gradle"
     apply from: "$rootDir/gradle/eclipse.gradle"
     apply from: "$rootDir/gradle/spotbugs.gradle"
     apply from: "$rootDir/gradle/idea.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
-    apply from: "$rootDir/gradle/java.gradle"
     apply from: "$rootDir/gradle/protobuf.gradle"
     
     def sbkProjectName = rootProject.name + project.path.replace(":", "-")
