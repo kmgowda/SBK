@@ -23,7 +23,7 @@ plugins.withId('application') {
         doFirst {
             manifest {
                 attributes("Class-Path":
-                        configurations.runtimeClasspath.collect { it.name }.join(' ') + ' ' +
+                        configurations.compileClasspath.collect { it.name }.join(' ') + ' ' +
                                 jar.archiveFileName
                 )
             }
