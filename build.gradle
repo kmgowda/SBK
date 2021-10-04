@@ -77,14 +77,14 @@ allprojects {
     if (project.path.startsWith(":driver-")) {
         sbkClass = project.path.replace(":driver-", "")
     }
-    
+
     jar {
         manifest {
-            attributes 'Name': sbkProjectName,
+            attributes 'Name': sbkProjectName.toUpperCase(),
                     'Specification-Title': "Storage Benchmark Kit",
                     'Specification-Version': sbkVersion,
                     'Specification-Vendor': "KMG",
-                    'Implementation-Title': sbkProjectName,
+                    'Implementation-Title': sbkProjectName.toUpperCase(),
                     'Implementation-Version': sbkVersion,
                     'Implementation-Vendor': "KMG"
         }
@@ -315,8 +315,12 @@ dependencies {
 //create a single Jar with all dependencies
 task buildJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': rootProject.name,
+        attributes 'Specification-Title': "Storage Benchmark Kit",
+                'Specification-Version': sbkVersion,
+                'Specification-Vendor': "KMG",
+                'Implementation-Title': rootProject.name.toUpperCase(),
                 'Implementation-Version': sbkVersion,
+                'Implementation-Vendor': "KMG",
                 'Main-Class': SbkMainClass
     }
     zip64 true
