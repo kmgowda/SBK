@@ -32,7 +32,6 @@ COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
 
 # Copy the SBK storage drivers
 COPY --chown=root:root driver-kafka ${APP_HOME}/driver-kafka
-COPY --chown=root:root driver-kafka ${APP_HOME}/driver-kafka
 COPY --chown=root:root driver-redpanda ${APP_HOME}/driver-redpanda
 
 
