@@ -36,9 +36,12 @@ plugins.withId('application') {
     startScripts {
         doLast {
             unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-            // in gradle 7 jar.archiveFileName is not getting extracted properly, so use deprecated archiveName.
+            // in gradle 6+ jar.archiveFileName is not getting extracted properly, so use deprecated archiveName.
             // Replace the classpath on windows with the pathing JAR and the main archive
+            unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*', Matcher.quoteReplacement(
+                    "CLASSPATH=\$APP_HOME/lib/${pathingJar.archiveName}:\$APP_HOME/lib/${jar.archiveName}"))
+
+            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
                     "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
         }
