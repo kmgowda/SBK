@@ -21,16 +21,9 @@ plugins.withId('application') {
 
         // Delay configuring the manifest to avoid resolving the configuration
         doFirst {
-            /*
             manifest {
                 attributes("Class-Path":
-                        configurations.runtimeClasspath.collect { it.name }.join(' ')+" "+jar.archiveFileName
-                )
-            }
-             */
-            manifest {
-                attributes("Class-Path":
-                        configurations.runtimeClasspath.collect { it.name }.join(' ')
+                        configurations.runtimeClasspath.collect { it.name }.join(' ')+" "+jar.archiveName
                 )
             }
         }
@@ -44,12 +37,10 @@ plugins.withId('application') {
         doLast {
             unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-            /*
-            // in gradle 7 jar.archiveFileName is not getting extracted properly.
+            // in gradle 7 jar.archiveFileName is not getting extracted properly, so use deprecated archiveName.
             // Replace the classpath on windows with the pathing JAR and the main archive
             windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*', Matcher.quoteReplacement(
-                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName};%APP_HOME%\\lib\\${jar.archiveFileName}"))
-             */
+                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveName};%APP_HOME%\\lib\\${jar.archiveName}"))
         }
     }
 }
