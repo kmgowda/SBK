@@ -17,7 +17,7 @@ import io.sbk.yal.YmlMap;
 
 import java.util.Map;
 
-public class SbkGemYmlMap extends YmlMap {
+public final class SbkGemYmlMap extends YmlMap {
 
     @JsonCreator
     public SbkGemYmlMap(@JsonProperty("sbkGemArgs") Map<String, String> args) {

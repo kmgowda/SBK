@@ -17,7 +17,7 @@ import io.sbk.time.Time;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implements CountConnections {
+public final class RamMetricsPrometheusServer extends RWMetricsPrometheusServer implements CountConnections {
     final private AtomicInteger connections;
     final private AtomicInteger maxConnections;
 

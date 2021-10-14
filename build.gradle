@@ -22,17 +22,15 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.com.palantir.graal:gradle-graal:0.7.2"
+        classpath group: 'com.github.spotbugs.snom', name:'spotbugs-gradle-plugin', version:spotbugsPluginVersion
+        classpath group: 'gradle.plugin.com.palantir.graal', name:'gradle-graal' , version:graalvmPluginVersion
+       // classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
+        //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
-    println "Build JVM Version is : " + Jvm.current()
 
+    println "Build JVM Version    : " + Jvm.current()
+    println "Build Gradle Version : $gradle.gradleVersion"
 }
-
-
-apply plugin: 'java-library'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'checkstyle'
 
 def SbkMainClass = "io.sbk.main.SbkMain"
 
@@ -45,26 +43,25 @@ allprojects {
         }
     }
 
-    apply plugin: 'java-library'
+    apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'eclipse'
+    apply plugin: 'checkstyle'
     apply plugin: 'application'
-    apply plugin: "com.palantir.graal"
+    // apply plugin: "com.github.spotbugs"
 
-    dependencies {
-        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
-        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsAnnotationsVersion
-    }
+    // Disable graalvm builds
+    //apply plugin: "com.palantir.graal"
 
+    apply from: "$rootDir/gradle/java.gradle"
     apply from: "$rootDir/gradle/application.gradle"
     apply from: "$rootDir/gradle/checkstyle.gradle"
     apply from: "$rootDir/gradle/eclipse.gradle"
     apply from: "$rootDir/gradle/spotbugs.gradle"
     apply from: "$rootDir/gradle/idea.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
-    apply from: "$rootDir/gradle/java.gradle"
     apply from: "$rootDir/gradle/protobuf.gradle"
-
+    
     def sbkProjectName = rootProject.name + project.path.replace(":", "-")
     sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-", rootProject.name + "-")
     sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
@@ -79,13 +76,14 @@ allprojects {
     if (project.path.startsWith(":driver-")) {
         sbkClass = project.path.replace(":driver-", "")
     }
+
     jar {
         manifest {
-            attributes 'Name': sbkProjectName,
+            attributes 'Name': sbkProjectName.toUpperCase(),
                     'Specification-Title': "Storage Benchmark Kit",
                     'Specification-Version': sbkVersion,
                     'Specification-Vendor': "KMG",
-                    'Implementation-Title': sbkProjectName,
+                    'Implementation-Title': sbkProjectName.toUpperCase(),
                     'Implementation-Version': sbkVersion,
                     'Implementation-Vendor': "KMG"
         }
@@ -153,7 +151,7 @@ allprojects {
             doLast {
                 println "generatering file : " + outDir + "/" + outFile
 
-                configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == rootProject.name) {
                         if (id.name != baseDriverToSkip) {
@@ -175,7 +173,7 @@ allprojects {
             doLast {
                 println "generatering file : " + outDir + "/" + outFile
 
-                configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == rootProject.name) {
                         if (id.name != baseDriverToSkip) {
@@ -193,11 +191,12 @@ allprojects {
         }
     }
 
+    /*
     graal {
         def className = sbkClass.capitalize();
         mainClass SbkMainClass
         outputName sbkProjectName
-        javaVersion '11'
+        javaVersion '17'
         graalVersion '21.0.0'
         option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
         option "--initialize-at-build-time=io.sbk.$className"
@@ -207,14 +206,14 @@ allprojects {
         option "--no-fallback"
         option "-H:Optimize=3"
     }
-
+    */
 }
 
 task printDependencies {
     doLast {
         project.subprojects.findAll().each {
             println "subproject : " + it.name
-            it.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            it.configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                 def id = artifact.moduleVersion.id
                 if (id.group.toString() == rootProject.name) {
                     println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
@@ -223,7 +222,7 @@ task printDependencies {
             println()
         }
         println("Root project : " + rootProject.name)
-        configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             def id = artifact.moduleVersion.id
             if (id.group.toString() == rootProject.name) {
                 println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
@@ -315,8 +314,13 @@ dependencies {
 //create a single Jar with all dependencies
 task buildJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': rootProject.name,
+        attributes 'Name': rootProject.name.toUpperCase(),
+                'Specification-Title': "Storage Benchmark Kit",
+                'Specification-Version': sbkVersion,
+                'Specification-Vendor': "KMG",
+                'Implementation-Title': rootProject.name.toUpperCase(),
                 'Implementation-Version': sbkVersion,
+                'Implementation-Vendor': "KMG",
                 'Main-Class': SbkMainClass
     }
     zip64 true

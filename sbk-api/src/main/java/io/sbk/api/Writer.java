@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Interface for Writers.
  */
-public interface Writer<T> extends DataRecordsWriter<T> {
+public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
 
     /**
      * Asynchronously Writes the data .

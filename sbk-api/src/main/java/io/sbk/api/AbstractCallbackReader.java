@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Abstract class for Callback Reader.
  */
-public abstract class AbstractCallbackReader<T> implements DataReader<T> {
+public abstract non-sealed class AbstractCallbackReader<T> implements DataReader<T> {
     private DataType<T> dataType;
     private Time time;
     private CompletableFuture<Void> ret;

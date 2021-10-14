@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK.
  */
-public class SbkMain {
+public final class SbkMain {
 
     public static void main(final String[] args) {
         try {

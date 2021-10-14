@@ -8,6 +8,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
+
 def gradleProject = project
 if (gradleProject == gradleProject.rootProject) {
     apply plugin: 'org.hidetake.ssh'
@@ -17,25 +18,9 @@ if (gradleProject == gradleProject.rootProject) {
 mkdocs {
     sourcesDir = "$rootDir/documentation/src"
     buildDir = "$rootDir/documentation/generated"
+
     updateSiteUrl = false
+    strict = false
 }
 
-remotes {
-    webServer {
-        host = hostname
-        user = username
-        identity = file("$rootDir/sbk.pem")
-    }
-}
-
-task deploy {
-    dependsOn 'mkdocsBuild'
-    doLast {
-        ssh.run {
-            session(remotes.webServer) {
-                put from: "$rootDir/documentation/generated/$SBKVersion", into: '/var/www/github.com/kmgowda/sbk/docs'
-            }
-        }
-    }
-}
 

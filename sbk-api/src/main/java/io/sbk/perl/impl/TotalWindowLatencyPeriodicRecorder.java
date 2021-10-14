@@ -16,7 +16,7 @@ import io.sbk.perl.Print;
 import io.sbk.perl.ReportLatency;
 import io.sbk.time.Time;
 
-public class TotalWindowLatencyPeriodicRecorder extends TotalWindowLatencyRecorder implements PeriodicRecorder {
+public final class TotalWindowLatencyPeriodicRecorder extends TotalWindowLatencyRecorder implements PeriodicRecorder {
     private final Time time;
     private final ReportLatency reportLatency;
 

@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class RamBenchmark implements Benchmark, RamRegistry {
+final public class RamBenchmark implements Benchmark, RamRegistry {
     private final int idleMS;
     private final Time time;
     private final int reportingIntervalMS;

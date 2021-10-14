@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Interface for Asynchronous Readers.
  */
-public interface AsyncReader<T> extends DataRecordsReader<T> {
+public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
 
     /**
      * Read the dat asynchronously.

@@ -20,7 +20,7 @@ import java.io.IOException;
 /**
  * Interface for Readers.
  */
-public interface Reader<T> extends DataRecordsReader<T> {
+public non-sealed interface Reader<T> extends DataRecordsReader<T> {
 
     /**
      * Read the data.

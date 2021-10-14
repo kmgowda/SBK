@@ -49,7 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class SbkGem {
+final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
     final static String RAM_CONFIG_FILE = "ram.properties";
     final static String BANNER_FILE = "gem-banner.txt";
@@ -268,11 +268,11 @@ public class SbkGem {
         }
         time = SbkUtils.getTime(logger);
         sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
-        sbkArgsBuilder.append(" -minlatency " + logger.getMinLatency());
-        sbkArgsBuilder.append(" -maxlatency " + logger.getMaxLatency());
+        sbkArgsBuilder.append(" -minlatency ").append(logger.getMinLatency());
+        sbkArgsBuilder.append(" -maxlatency ").append(logger.getMaxLatency());
         sbkArgsBuilder.append(" -context no");
-        sbkArgsBuilder.append(" -ram " + params.getLocalHost());
-        sbkArgsBuilder.append(" -ramport " + params.getRamPort());
+        sbkArgsBuilder.append(" -ram ").append(params.getLocalHost());
+        sbkArgsBuilder.append(" -ramport ").append(params.getRamPort());
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());

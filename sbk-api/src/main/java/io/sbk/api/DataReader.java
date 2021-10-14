@@ -19,9 +19,9 @@ import java.io.IOException;
 /**
  * Interface for Basic Data Readers.
  */
-public interface DataReader<T> {
+public sealed interface DataReader<T> permits AbstractCallbackReader, DataRecordsReader {
 
-    /**
+    /**ß
      * Close the  Reader.
      *
      * @throws IOException If an exception occurred.

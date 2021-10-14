@@ -9,7 +9,7 @@
  */
 package io.sbk.perl;
 
-public interface Channel extends SendChannel {
+public non-sealed interface Channel extends SendChannel {
 
     /**
      * Receive the benchmarking timestamp.

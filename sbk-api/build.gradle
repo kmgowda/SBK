@@ -32,6 +32,7 @@ apply from: "$rootDir/gradle/maven.gradle"
 dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
     api group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
     api group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsVersion
     api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion

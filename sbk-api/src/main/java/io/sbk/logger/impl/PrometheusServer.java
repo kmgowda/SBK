@@ -25,7 +25,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-public class PrometheusServer extends CompositeMeterRegistry {
+public final class PrometheusServer extends CompositeMeterRegistry {
     final private int port;
     final private String context;
     final private PrometheusMeterRegistry prometheusRegistry;

@@ -8,10 +8,14 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
-plugins.withId('java-library') {
+plugins.withId('java') {
+    apply plugin: 'java-library'
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
     apply plugin: 'signing'
+
+    sourceCompatibility = jdkVersion
+    targetCompatibility = jdkVersion
 
     compileJava {
         options.compilerArgs.addAll([
@@ -35,11 +39,13 @@ plugins.withId('java-library') {
     task generateJavadoc(type: Javadoc) {
         source = sourceSets.main.allJava
         classpath = sourceSets.main.runtimeClasspath
+        options.addBooleanOption("Xdoclint:-missing", true)
         failOnError = false
     }
 
     task javadocJar(type: Jar) {
         classifier = 'javadoc'
+        exclude "**/generated/**"
         from generateJavadoc
     }
     artifacts { archives javadocJar }

@@ -20,7 +20,7 @@ import java.io.IOException;
 /**
  * Interface for Data Records Writers.
  */
-public interface DataRecordsWriter<T> extends DataWriter<T> {
+public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Writer {
 
     /**
      * Flush / Sync the  data.

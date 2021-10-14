@@ -37,7 +37,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SbkGemBenchmark implements GemBenchmark {
+final public class SbkGemBenchmark implements GemBenchmark {
     private final Benchmark ramBenchmark;
     private final GemConfig config;
     private final GemParameters params;
@@ -313,6 +313,8 @@ public class SbkGemBenchmark implements GemBenchmark {
      *
      * closes all writers/readers.
      * closes the storage device/client.
+     *
+     * @param ex Throwable exception
      */
     @Synchronized
     private void shutdown(Throwable ex) {
