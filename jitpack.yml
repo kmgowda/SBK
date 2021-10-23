@@ -9,4 +9,4 @@
 ##
 
 jdk:
-  - openjdk9
+  - openjdk17
