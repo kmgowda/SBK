@@ -30,11 +30,11 @@ plugins.withId('java') {
         ])
     }
 
-    task sourceJar(type: Jar) {
+    task sourcesJar(type: Jar) {
         classifier = 'sources'
         from sourceSets.main.java
     }
-    artifacts { archives sourceJar }
+    artifacts { archives sourcesJar }
 
     task generateJavadoc(type: Javadoc) {
         source = sourceSets.main.allJava

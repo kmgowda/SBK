@@ -49,7 +49,7 @@ plugins.withId('com.google.protobuf') {
         }
     }
 
-    sourceJar.dependsOn(['generateProto', 'generateTestProto'])
+    sourcesJar.dependsOn(['generateProto', 'generateTestProto'])
     ideaModule.dependsOn(['generateProto', 'generateTestProto'])
     eclipseClasspath.dependsOn(['generateProto', 'generateTestProto'])
 }
