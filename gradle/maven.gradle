@@ -87,8 +87,4 @@ plugins.withId('maven-publish') {
             }
         }
     }
-
-    signing {
-        sign publishing.publications.mavenJava
-    }
 }
