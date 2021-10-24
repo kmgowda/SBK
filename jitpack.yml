@@ -15,4 +15,4 @@ before_install:
   - source ./jitpack_setup.sh
 
 install:
-  - ./gradlew build :lib:publishToMavenLocal
+  - ./gradlew build
