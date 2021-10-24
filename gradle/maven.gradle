@@ -9,7 +9,7 @@
  *
  */
 plugins.withId('maven-publish') {
-    group = 'io.github.kmgowda.sbk'
+    group = sbkGroup
     setVersion(sbkVersion)
 
     java {
