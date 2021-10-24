@@ -10,8 +10,12 @@
 
 echo "Jit pack setup for SBK"
 echo "Default JAVA_HOME :$JAVA_HOME"
-echo "Default java : `which java`"
+echo "Default java path:`which java`"
+echo "Default java version"
+java --version
 wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 source install-jdk.sh -F 17 -L GPL
 echo "Updated JAVA_HOME :$JAVA_HOME"
-echo "Updated java : `which java`"
+echo "Updated java path :`which java`"
+echo "Updated java version"
+java --version
