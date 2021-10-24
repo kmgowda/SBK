@@ -13,8 +13,3 @@ jdk:
 
 before_install:
   - source ./jitpack_setup.sh
-
-GROUP=io.github.kmgowda.sbk
-
-env:
-  GROUP: io.github.kmgowda.sbk
