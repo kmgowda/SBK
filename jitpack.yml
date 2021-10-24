@@ -10,3 +10,6 @@
 
 jdk:
   - openjdk17
+
+before_install:
+  - source ./jitpack_setup.sh
