@@ -13,6 +13,3 @@ jdk:
 
 before_install:
   - source ./jitpack_setup.sh
-
-install:
-  - ./gradlew build
