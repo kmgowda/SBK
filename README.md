@@ -78,12 +78,12 @@ We welcome open source developers to contribute to this project by adding a driv
 
 ## Build SBK
 
-### Prerequisites
+**Prerequisites**
 
 - Java 17+
 - Gradle 7+
 
-### Building
+**Building**
 
 Checkout the source code:
 
@@ -205,7 +205,7 @@ Total : Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 M
 
 ```
 
-### Sliding Latency Coverage (SLC)  factors
+**Sliding Latency Coverage (SLC)  factors**
 The SBK yields latency data points in the form of quartiles and percentiles. For the performance analysis, these 
 quartiles and percentile latencies can be combined into two factors : Sliding Latency Coverage 1 (SLC 1)
  and Sliding Latency Coverage 2 (SLC 2).
@@ -218,7 +218,7 @@ storage systems which are having similar / approximate median latency percentile
 doing better. Lower SLC2 factor means higher the performance of the system. If you are observing too many 
 variations of SLC 2 factor that means you have an opportunity to improve the stability of the storage system too.
 
-### Performance results to CSV file
+**Performance results to CSV file**
 you can use option "-csvfile" to specify the csv file to log all the performance results for future analytics.
 
 ### Grafana Dashboards of SBK
@@ -236,7 +236,7 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 
 [![Pulsar Grafana Dashboard](images/pulsar-grafana.png)](https://github.com/kmgowda/SBK/blob/master/images/pulsar-grafana.png)
 
-#### Port conflicts between storage servers and grafana/prometheus
+**Port conflicts between storage servers and grafana/prometheus**
 * If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) before deploying the prometheus. 
 * If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you 
   can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json]
@@ -309,7 +309,8 @@ The SBK can be executed in the following modes:
 4. End to End Latency Mode
 ```
 
-### 1 - Burst Mode / Max Rate Mode
+**1 - Burst Mode / Max Rate Mode**
+
 In this mode, the SBK pushes/pulls the messages to/from the storage client(device/driver) as much as possible.
 This mode is used to find the maximum and throughput that can be obtained from the storage device or storage cluster (server).
 This mode can be used for both writers and readers.
@@ -335,7 +336,8 @@ in the case you want to write/read the certain number of records.events use the 
 -records <number> indicates that total <number> of records to write/read
 ```
 
-### 2 - Throughput Mode
+**2 - Throughput Mode**
+
 In this mode, the SBK  pushes/pulls/from the messages to the storage client(device/driver) with specified 
 approximate maximum throughput in terms of Mega Bytes/second (MB/s).
 This mode is used to find the least latency that can be obtained from the storage device or storage cluster (server) for given throughput.
@@ -361,7 +363,8 @@ in the case you want to write/read the certain number of events use the -records
 -records 1000000 indicates that total 1000000 (1 million) of events will be written at the throughput speed of 10MB/sec
 ```
 
-### 3 - Rate limiter Mode
+**3 - Rate limiter Mode**
+
 This mode is another form of controlling writers/readers throughput by limiting the number of records per second.
 In this mode, the SBK pushes/pulls the messages to/from the storage client (device/driver) with specified approximate maximum records per sec.
 This mode is used to find the least latency that can be obtained from the storage device or storage cluster (server) for events rate.
@@ -381,7 +384,7 @@ This test will be executed for 60seconds (1 minutes) because option -seconds 60 
 Note that in this mode, there is 'NO total number of events' to specify hence the user must supply the time to run using the -seconds option.
 ```
 
-### 4 - End to End Latency Mode
+**4 - End to End Latency Mode**
 In this mode, the SBK writes and reads the messages to the storage client (device/driver) and records the end to end latency.
 End to end latency means the time duration between the beginning of the writing event/record to stream, and the time after reading the event/record.
 in this mode user must specify both the number of writers and readers.
@@ -421,7 +424,7 @@ in the above, I'm assuming that:
 
 The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
 
-### Lombok
+**Lombok**
 SBK uses [[Lombok](https://projectlombok.org)] for code optimizations; I suggest the same for all the contributors too.
 If you use an IDE you'll need to install a plugin to make the IDE understand it. Using IntelliJ is recommended.
 
