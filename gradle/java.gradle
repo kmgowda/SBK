@@ -14,8 +14,8 @@ plugins.withId('java') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
-    sourceCompatibility = jdkVersion
-    targetCompatibility = jdkVersion
+   // sourceCompatibility = JavaVersion.VERSION_17
+  //  targetCompatibility = JavaVersion.VERSION_1_8
 
     compileJava {
         options.compilerArgs.addAll([
