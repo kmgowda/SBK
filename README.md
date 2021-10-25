@@ -206,6 +206,7 @@ Total : Pulsar Writing     1 Writers,     0 Readers,      1 Max Writers,     0 M
 ```
 
 **Sliding Latency Coverage (SLC)  factors**
+
 The SBK yields latency data points in the form of quartiles and percentiles. For the performance analysis, these 
 quartiles and percentile latencies can be combined into two factors : Sliding Latency Coverage 1 (SLC 1)
  and Sliding Latency Coverage 2 (SLC 2).
@@ -219,6 +220,7 @@ doing better. Lower SLC2 factor means higher the performance of the system. If y
 variations of SLC 2 factor that means you have an opportunity to improve the stability of the storage system too.
 
 **Performance results to CSV file**
+
 you can use option "-csvfile" to specify the csv file to log all the performance results for future analytics.
 
 ### Grafana Dashboards of SBK
@@ -263,7 +265,7 @@ docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -br
   metric data for Prometheus.  
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
-### SBK Docker Compose
+**SBK Docker Compose**
 
 The SBK docker compose consists of SBK docker image, Grafana and prometheus docker images. 
 The [grafana image](https://github.com/kmgowda/SBK/blob/master/grafana/Dockerfile) contains the [dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards) which can be directly deployed for the performance analytics.
@@ -385,6 +387,7 @@ Note that in this mode, there is 'NO total number of events' to specify hence th
 ```
 
 **4 - End to End Latency Mode**
+
 In this mode, the SBK writes and reads the messages to the storage client (device/driver) and records the end to end latency.
 End to end latency means the time duration between the beginning of the writing event/record to stream, and the time after reading the event/record.
 in this mode user must specify both the number of writers and readers.
@@ -425,6 +428,7 @@ in the above, I'm assuming that:
 The rebase might introduce conflicts, so you better do it frequently to avoid outrageous sessions of conflict resolving.
 
 **Lombok**
+
 SBK uses [[Lombok](https://projectlombok.org)] for code optimizations; I suggest the same for all the contributors too.
 If you use an IDE you'll need to install a plugin to make the IDE understand it. Using IntelliJ is recommended.
 
@@ -587,7 +591,6 @@ Storage Benchmark Kit
 Please report issues at https://github.com/kmgowda/SBK
 
 ```
-
 
 ## Use SBK git hub packages
 Instead of using entire SBK framework, if you just want to use the [SBK framework API](https://github.com/kmgowda?tab=packages&repo_name=SBK) packages to measure the performance benchmarking of your storage device/software, then follow the below simple and easy steps.
