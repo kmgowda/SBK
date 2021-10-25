@@ -241,8 +241,7 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 **Port conflicts between storage servers and grafana/prometheus**
 * If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) before deploying the prometheus. 
 * If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you 
-  can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json]
-  (https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json) too
+  can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json) too
 
 
 ## Distributed SBK
