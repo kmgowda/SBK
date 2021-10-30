@@ -32,6 +32,46 @@ It massively writes the data to the storage system and reads the data from the s
 The latency quartiles and percentiles are calculated for complete data written/read without any sampling; hence the 
 percentiles are 100% accurate.
 
+The design principle of SBK is the **Performance Benchmarking of _'Any Storage System'_ with _'Any Type of data payload'_ and _'Any Time Stamp'_**,
+because, the SBK is not specific to particular type of storage system,
+it can be used for performance benchmarking of any storage system, let it be file system, databases , any distributed storage systems or message queues by adding SBK driver which specifies the IO operations of storage system.
+you can find the list of supported drivers below.
+The SBK supports a variety of payloads too, such as byte array, byte buffer, string, and you can add your own payload type.
+The Latency values can be measured either in milliseconds, microseconds or nanoseconds using SBK.
+
+
+*SBK supports performance benchmarking of following storage systems*
+
+**#**|**Driver**|**#**|**Driver**
+:-----:|:-----:|:-----:|:-----:
+1|[Artemis](driver-artemis)|21|[Mariadb](driver-mariadb)
+2|[Asyncfile](driver-asyncfile)|22|[Minio](driver-minio)
+3|[Bookkeeper](driver-bookkeeper)|23|[Mongodb](driver-mongodb)
+4|[Cassandra](driver-cassandra)|24|[Mssql](driver-mssql)
+5|[Cephs3](driver-cephs3)|25|[Mysql](driver-mysql)
+6|[Concurrentq](driver-concurrentq)|26|[Nats](driver-nats)
+7|[Couchdb](driver-couchdb)|27|[NatsStream](driver-natsStream)
+8|[Csv](driver-csv)|28|[Nsq](driver-nsq)
+9|[Db2](driver-db2)|29|[Null](driver-null)
+10|[Derby](driver-derby)|30|[Openio](driver-openio)
+11|[Fdbrecord](driver-fdbrecord)|31|[Postgresql](driver-postgresql)
+12|[File](driver-file)|32|[Pravega](driver-pravega)
+13|[Filestream](driver-filestream)|33|[Pulsar](driver-pulsar)
+14|[Foundationdb](driver-foundationdb)|34|[Rabbitmq](driver-rabbitmq)
+15|[Hdfs](driver-hdfs)|35|[Redis](driver-redis)
+16|[Hive](driver-hive)|36|[Redpanda](driver-redpanda)
+17|[Ignite](driver-ignite)|37|[Rocketmq](driver-rocketmq)
+18|[Jdbc](driver-jdbc)|38|[Rocksdb](driver-rocksdb)
+19|[Kafka](driver-kafka)|39|[Seaweeds3](driver-seaweeds3)
+20|[Leveldb](driver-leveldb)|40|[Sqlite](driver-sqlite)
+
+*In the future, many more storage systems drivers will be plugged in* 
+
+We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to : 
+* [Contributing to SBK](#contributing-to-sbk) for the Contributing guidelines.
+* [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or 
+  client) for performance benchmarking.
+
 ___
 
 <p align="center">
@@ -45,47 +85,6 @@ ___
 </p>
 
 ___
-
-The design principle of SBK is the **Performance Benchmarking of _'Any Storage System'_ with _'Any Type of data payload'_ and _'Any Time Stamp'_**,
-because, the SBK is not specific to particular type of storage system,
-it can be used for performance benchmarking of any storage system, let it be file system, databases , any distributed storage systems or message queues by adding SBK driver which specifies the IO operations of storage system.
-you can find the list of supported drivers below.
-The SBK supports a variety of payloads too, such as byte array, byte buffer, string, and you can add your own payload type.
-The Latency values can be measured either in milliseconds, microseconds or nanoseconds using SBK.
-
-
-*SBK supports performance benchmarking of following storage systems*
-
-**#**|**Driver**|**#**|**Driver**
-:-----:|:-----:|:-----:|:-----:
-1|[Artemis](https://github.com/kmgowda/SBK/tree/master/driver-artemis)|21|[Mariadb](https://github.com/kmgowda/SBK/tree/master/driver-mariadb)
-2|[Asyncfile](https://github.com/kmgowda/SBK/tree/master/driver-asyncfile)|22|[Minio](https://github.com/kmgowda/SBK/tree/master/driver-minio)
-3|[Bookkeeper](https://github.com/kmgowda/SBK/tree/master/driver-bookkeeper)|23|[Mongodb](https://github.com/kmgowda/SBK/tree/master/driver-mongodb)
-4|[Cassandra](https://github.com/kmgowda/SBK/tree/master/driver-cassandra)|24|[Mssql](https://github.com/kmgowda/SBK/tree/master/driver-mssql)
-5|[Cephs3](https://github.com/kmgowda/SBK/tree/master/driver-cephs3)|25|[Mysql](https://github.com/kmgowda/SBK/tree/master/driver-mysql)
-6|[Concurrentq](https://github.com/kmgowda/SBK/tree/master/driver-concurrentq)|26|[Nats](https://github.com/kmgowda/SBK/tree/master/driver-nats)
-7|[Couchdb](https://github.com/kmgowda/SBK/tree/master/driver-couchdb)|27|[NatsStream](https://github.com/kmgowda/SBK/tree/master/driver-natsStream)
-8|[Csv](https://github.com/kmgowda/SBK/tree/master/driver-csv)|28|[Nsq](https://github.com/kmgowda/SBK/tree/master/driver-nsq)
-9|[Db2](https://github.com/kmgowda/SBK/tree/master/driver-db2)|29|[Null](https://github.com/kmgowda/SBK/tree/master/driver-null)
-10|[Derby](https://github.com/kmgowda/SBK/tree/master/driver-derby)|30|[Openio](https://github.com/kmgowda/SBK/tree/master/driver-openio)
-11|[Fdbrecord](https://github.com/kmgowda/SBK/tree/master/driver-fdbrecord)|31|[Postgresql](https://github.com/kmgowda/SBK/tree/master/driver-postgresql)
-12|[File](https://github.com/kmgowda/SBK/tree/master/driver-file)|32|[Pravega](https://github.com/kmgowda/SBK/tree/master/driver-pravega)
-13|[Filestream](https://github.com/kmgowda/SBK/tree/master/driver-filestream)|33|[Pulsar](https://github.com/kmgowda/SBK/tree/master/driver-pulsar)
-14|[Foundationdb](https://github.com/kmgowda/SBK/tree/master/driver-foundationdb)|34|[Rabbitmq](https://github.com/kmgowda/SBK/tree/master/driver-rabbitmq)
-15|[Hdfs](https://github.com/kmgowda/SBK/tree/master/driver-hdfs)|35|[Redis](https://github.com/kmgowda/SBK/tree/master/driver-redis)
-16|[Hive](https://github.com/kmgowda/SBK/tree/master/driver-hive)|36|[Redpanda](https://github.com/kmgowda/SBK/tree/master/driver-redpanda)
-17|[Ignite](https://github.com/kmgowda/SBK/tree/master/driver-ignite)|37|[Rocketmq](https://github.com/kmgowda/SBK/tree/master/driver-rocketmq)
-18|[Jdbc](https://github.com/kmgowda/SBK/tree/master/driver-jdbc)|38|[Rocksdb](https://github.com/kmgowda/SBK/tree/master/driver-rocksdb)
-19|[Kafka](https://github.com/kmgowda/SBK/tree/master/driver-kafka)|39|[Seaweeds3](https://github.com/kmgowda/SBK/tree/master/driver-seaweeds3)
-20|[Leveldb](https://github.com/kmgowda/SBK/tree/master/driver-leveldb)|40|[Sqlite](https://github.com/kmgowda/SBK/tree/master/driver-sqlite)
-
-*In the future, many more storage systems drivers will be plugged in* 
-
-We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to : 
-* [Contributing to SBK](#contributing-to-sbk) for the Contributing guidelines.
-* [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or 
-  client) for performance benchmarking.
-
 
 ## Build SBK
 
