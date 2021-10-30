@@ -229,13 +229,13 @@ When you run the SBK, by default it starts the http server and all the output be
 If you want to change the port number and context, you can use the command line argument **-context** to change the same.
 you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
 If you want to include additional SBK nodes/instances to fetch the performance data or from port number other than 
-9718, you need to extend or update [targets.json](./grafana/prometheus/targets.json)
+9718, you need to extend or update [targets.json](grafana/prometheus/targets.json)
 In case, if you are fetching metrics/benchmark data from remote http server , or from the context other than **metrics** then you need to change the [default prometheus server configuration](grafana/prometheus/prometheus.yml) too.
 Run the grafana server (cum a client) to fetch the benchmark data from prometheus.
 For example, if you are running a local grafana server then by default it fetches the data from the prometheus server at the local port 9090.
 You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default username / password.
 You can import the grafana dashboards to fetch the SBK benchmark data of the existing supported storage drivers from 
-[grafana dashboards](grafana/dashboards).
+[grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
@@ -270,7 +270,7 @@ docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -br
 **SBK Docker Compose**
 
 The SBK docker compose consists of SBK docker image, Grafana and prometheus docker images. 
-The [grafana image](grafana/Dockerfile) contains the [dashboards](grafana/dashboards) which can be directly deployed for the performance analytics.
+The [grafana image](grafana) contains the dashboards which can be directly deployed for the performance analytics.
 
 As an example, just follow the below steps to see the performance graphs
 
@@ -299,7 +299,7 @@ As an example, just follow the below steps to see the performance graphs
 ## SBK Kubernetes
 check these [SBK Kubernetes Deployments samples](kubernetes) for details 
 on SBK as kubernetes pod.
-If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment](grafana)
+If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment](grafana/README.md#grafana-with-kubernetes)
 
 
 ## SBK Execution Modes
