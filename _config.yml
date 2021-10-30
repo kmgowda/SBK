@@ -4,7 +4,7 @@ description: "Storage Benchmark Kit"
 show_downloads: "false"
 
 # title image
-title-img: "images/SBK-log.png"
+title-img: "images/SBK-logo.png"
 
 # Image to show in the navigation bar - works best with a square image
 # Remove this parameter if you don't want an image in the navbar
