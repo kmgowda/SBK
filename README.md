@@ -13,7 +13,7 @@ You may obtain a copy of the License at
 
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
-[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](./sbk-ram/README.md) 
+[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](./sbk-ram) 
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](./sbk-gem/README.md)
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](./sbk-gem-yal/README.md)
 
