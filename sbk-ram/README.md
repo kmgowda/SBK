@@ -20,7 +20,7 @@ storage server / Storage cluster with multiple storage clients (SBK instances) a
 latency percentiles for the whole storage cluster/server. SBK-RAM logs the integrated results to standard output device/logger and to the grafana through prometheus metrics.
 
 ## Build SBK-RAM
-SBK-RAM is a submodule/project of the SBK framework. If you [build SBK](https://github.com/kmgowda/SBK#build-sbk), it builds the SBK-RAM server too.
+SBK-RAM is a submodule/project of the SBK framework. If you [build SBK](./../README.md#build-sbk), it builds the SBK-RAM server too.
 
 ## Running SBK-RAM locally
 The standard help output with SBK-RAM parameters as follows

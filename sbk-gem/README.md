@@ -19,8 +19,7 @@ in all the given nodes SBK command is executed. The SBK-RAM integrate the perfor
 by remote nodes.
 
 ## Build SBK-GEM
-SBK-GEM is a submodule/project of the SBK framework. If you [build SBK](https://github.com/kmgowda/SBK#build-sbk), 
-it builds the SBK-GEM package too.
+SBK-GEM is a submodule/project of the SBK framework. If you [build SBK](./../README.md#build-sbk), it builds the SBK-GEM package too.
 
 ## Running SBK-GEM locally
 The standard help output with SBK-GEM parameters as follows

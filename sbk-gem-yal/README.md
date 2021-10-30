@@ -19,8 +19,8 @@ Use this example YML file [sbk-gem.yml](https://github.com/kmgowda/SBK/blob/mast
 your own YML file for SBK-GEM-YAL command/application.
 
 ## Build SBK-GEM-YAL
-SBK-GEM-YAL is a submodule/project of the SBK framework. If you [build SBK](https://github.com/kmgowda/SBK#build-sbk),
-it builds the SBK-GEM-YAL package too.
+SBK-GEM-YAL is a submodule/project of the SBK framework. If you  [build SBK](./../README.md#build-sbk), it builds 
+the SBK-GEM-YAL package too.
 
 ## Running SBK-GEM-YAL locally
 The standard help output with SBK-GEM-YAL parameters as follows
