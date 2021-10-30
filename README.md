@@ -13,6 +13,10 @@ You may obtain a copy of the License at
 
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
+[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](sbk-ram)
+[![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](sbk-gem)
+[![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](sbk-gem-yal)
+
 ___
 
 <p align="center">
@@ -22,10 +26,6 @@ ___
 </p>
 
 ___
-
-[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](sbk-ram) 
-[![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](sbk-gem)
-[![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](sbk-gem-yal)
 
 The SBK (Storage Benchmark Kit) is an open source software framework for the performance benchmarking of any storage system. If you are curious to measure the maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself is a very high-performance benchmark tool/framework.
 It massively writes the data to the storage system and reads the data from the storage system. The SBK supports multi writers and readers and also the End to End latency benchmarking.
