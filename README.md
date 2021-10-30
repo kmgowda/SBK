@@ -13,6 +13,16 @@ You may obtain a copy of the License at
 
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
+___
+
+<p align="center">
+    <a href="https://kmgowda.github.io/SBK/?from=SBK">
+        <img src="images/SBK-logo-small.png" alt="Storage Benchmark Kit" width="100" height="100">
+    </a>
+</p>
+
+___
+
 [![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](sbk-ram) 
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](sbk-gem)
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](sbk-gem-yal)
