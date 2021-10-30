@@ -13,9 +13,9 @@ You may obtain a copy of the License at
 
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
-[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](./sbk-ram) 
-[![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](./sbk-gem/README.md)
-[![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](./sbk-gem-yal/README.md)
+[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-red)](sbk-ram) 
+[![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](sbk-gem)
+[![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](sbk-gem-yal)
 
 The SBK (Storage Benchmark Kit) is an open source software framework for the performance benchmarking of any storage system. If you are curious to measure the maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself is a very high-performance benchmark tool/framework.
 It massively writes the data to the storage system and reads the data from the storage system. The SBK supports multi writers and readers and also the End to End latency benchmarking.
@@ -72,8 +72,9 @@ The Latency values can be measured either in milliseconds, microseconds or nanos
 *In the future, many more storage systems drivers will be plugged in* 
 
 We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to : 
-* [Contributing to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#contributing-to-sbk) for the Contributing guidelines.
-* [Add your storage driver to SBK](https://github.com/kmgowda/sbk/blob/master/README.md#add-your-driver-to-sbk) to know how to add your driver (storage device driver or client) for performance benchmarking.
+* [Contributing to SBK](#contributing-to-sbk) for the Contributing guidelines.
+* [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or 
+  client) for performance benchmarking.
 
 
 ## Build SBK
@@ -227,25 +228,27 @@ you can use option "-csvfile" to specify the csv file to log all the performance
 When you run the SBK, by default it starts the http server and all the output benchmark data is directed to the default port number: **9718** and **metrics** context.
 If you want to change the port number and context, you can use the command line argument **-context** to change the same.
 you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
-If you want to include additional SBK nodes/instances to fetch the performance data or from port number other than 9718, you need to extend or update [targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json)
-In case, if you are fetching metrics/benchmark data from remote http server , or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) too.
+If you want to include additional SBK nodes/instances to fetch the performance data or from port number other than 
+9718, you need to extend or update [targets.json](./grafana/prometheus/targets.json)
+In case, if you are fetching metrics/benchmark data from remote http server , or from the context other than **metrics** then you need to change the [default prometheus server configuration](grafana/prometheus/prometheus.yml) too.
 Run the grafana server (cum a client) to fetch the benchmark data from prometheus.
 For example, if you are running a local grafana server then by default it fetches the data from the prometheus server at the local port 9090.
 You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default username / password.
-You can import the grafana dashboards to fetch the SBK benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
+You can import the grafana dashboards to fetch the SBK benchmark data of the existing supported storage drivers from 
+[grafana dashboards](grafana/dashboards).
 
 The sample output of Standalone Pulsar benchmark data with grafana is below
 
-[![Pulsar Grafana Dashboard](images/pulsar-grafana.png)](https://github.com/kmgowda/SBK/blob/master/images/pulsar-grafana.png)
+[![Pulsar Grafana Dashboard](images/pulsar-grafana.png)](images/pulsar-grafana.png)
 
 **Port conflicts between storage servers and grafana/prometheus**
-* If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) before deploying the prometheus. 
+* If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](grafana/prometheus/prometheus.yml) before deploying the prometheus. 
 * If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you 
-  can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/targets.json) too
+  can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json](grafana/prometheus/targets.json) too
 
 
 ## Distributed SBK
-SBK can be deployed in a distributed clusters using [**SBK-RAM**](https://github.com/kmgowda/SBK/tree/master/sbk-ram)
+SBK can be deployed in a distributed clusters using [**SBK-RAM**](./sbk-ram)
 
 
 ## SBK Docker Containers
@@ -267,11 +270,11 @@ docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -br
 **SBK Docker Compose**
 
 The SBK docker compose consists of SBK docker image, Grafana and prometheus docker images. 
-The [grafana image](https://github.com/kmgowda/SBK/blob/master/grafana/Dockerfile) contains the [dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards) which can be directly deployed for the performance analytics.
+The [grafana image](grafana/Dockerfile) contains the [dashboards](grafana/dashboards) which can be directly deployed for the performance analytics.
 
 As an example, just follow the below steps to see the performance graphs
 
-1. In the SBK directory build the 'SBK' service of the [docker compose](https://github.com/kmgowda/SBK/blob/master/docker-compose.yml) file as follows.
+1. In the SBK directory build the 'SBK' service of the [docker compose](docker-compose.yml) file as follows.
 
    ```
    <SBK dir>% docker-compose build 
@@ -287,17 +290,16 @@ As an example, just follow the below steps to see the performance graphs
 
 1. login to [grafana local host port 3000](http://localhost:3000) with username **admin** and password **sbk**
 1. go to dashboard menu and pick the dashboard of the storage device on which you are running the performance benchmarking.
-   in the above example, you can choose the [Concurrent Queue dashboard](https://github.com/kmgowda/SBK/blob/master/grafana/dashboards/sbk-concurrentq.json).
+   in the above example, you can choose the [Concurrent Queue dashboard](grafana/dashboards/sbk-concurrentq.json).
 1. The SBK docker compose runs the SBK image as docker container. 
    In case, if you are running SBK as an application, and you want to see the SBK performance graphs using Grafana,
-   then use [Grafana Docker compose](https://github.com/kmgowda/SBK/tree/master/grafana)
+   then use [Grafana Docker compose](grafana)
    
    
 ## SBK Kubernetes
-check these [SBK Kubernetes Deployments samples](https://github.com/kmgowda/SBK/tree/master/kubernetes) for details 
+check these [SBK Kubernetes Deployments samples](kubernetes) for details 
 on SBK as kubernetes pod.
-If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment]
-(https://github.com/kmgowda/SBK/tree/master/grafana#grafana-with-kubernetes)
+If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment](grafana)
 
 
 ## SBK Execution Modes
