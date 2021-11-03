@@ -238,7 +238,7 @@ task printDependencies {
    another command : ./gradlew printdrivers -Preadme -Pdec   (add the project description)
  */
 task printDrivers {
-    String readmePrefix = "https://github.com/kmgowda/SBK/tree/master/"
+    String readmePrefix = ""
 
     doLast {
         int i = 1;
