@@ -353,7 +353,7 @@ task SbkGem(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxPort:'\$APP_HOME'/bin/jmx-config.yml")
+                        "=$jmxRamPort:'\$APP_HOME'/bin/jmx-config.yml")
             }
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             //make sure that we enclose $APP_HOME within ' ' character set
@@ -364,7 +364,7 @@ task SbkGem(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxPort:'\$APP_HOME'\\bin\\jmx-config.yml")
+                        "=$jmxRamPort:'\$APP_HOME'\\bin\\jmx-config.yml")
             }
         }
     }
@@ -391,7 +391,7 @@ task SbkGemYal(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxPort:'\$APP_HOME'/bin/jmx-config.yml")
+                        "=$jmxRamPort:'\$APP_HOME'/bin/jmx-config.yml")
             }
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             //make sure that we enclose $APP_HOME within ' ' character set
@@ -402,7 +402,7 @@ task SbkGemYal(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxPort:'\$APP_HOME'\\bin\\jmx-config.yml")
+                        "=$jmxRamPort:'\$APP_HOME'\\bin\\jmx-config.yml")
             }
         }
     }
