@@ -50,5 +50,10 @@ plugins.withId('application') {
                     Matcher.quoteReplacement(
                     "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName.get()};%APP_HOME%\\lib\\${jar.archiveFileName.get()}"))
         }
+
+        copy {
+            from "$rootDir/jmx-agent.yml"
+            into outputDir
+        }
     }
 }
