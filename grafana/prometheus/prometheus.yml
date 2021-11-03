@@ -42,3 +42,13 @@ scrape_configs:
     file_sd_configs:
       - files:
           - 'ram-targets.json'
+
+  - job_name: 'sbk-jmx'
+    file_sd_configs:
+      - files:
+          - 'jmx-targets.json'
+
+  - job_name: 'sbk-ram-jmx'
+    file_sd_configs:
+      - files:
+          - 'ram-jmx-targets.json'
