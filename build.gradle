@@ -343,6 +343,9 @@ task SbkGem(type: CreateStartScripts) {
         doLast {
             unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
 
+            //make sure that we enclose $APP_HOME within ' ' character set
+            unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
+
             // Replace the classpath on windows with the pathing JAR and the main archive
             unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
                     Matcher.quoteReplacement(
@@ -366,6 +369,9 @@ task SbkGemYal(type: CreateStartScripts) {
     SbkGemYal {
         doLast {
             unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
+
+            //make sure that we enclose $APP_HOME within ' ' character set
+            unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
 
             // Replace the classpath on windows with the pathing JAR and the main archive
             unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
