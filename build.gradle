@@ -99,7 +99,7 @@ allprojects {
         mainClass = SbkMainClass
         applicationName = archivesBaseName
         applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + sbkClass,
-                                     '-Dsbk.appHome=SBK_APP_HOME']
+                                     '-Dsbk.appHome=SBK_APP_HOME' , '-Dsbk.jmxExport=' +jmxExport]
     }
 
     task generateDashboards(type: Copy) {
