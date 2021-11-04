@@ -263,7 +263,9 @@ the command is below
 ```
 ./gradelew installDist -PjmxExport=true
 ```
-All the SBK JVM metrics will be available at http://localhost:9720/metrics The network port **9720** to used to expose the metrics.
+All the SBK JVM metrics will be available at http://localhost:9720/metrics The network port **9720** to used to 
+expose the metrics. use [SBK-JMX grafana dashboard](grafana/dashboards/sbk-jmx-metrics.json) to analyse the SBK-JVM 
+metrics.
 
 
 ## Distributed SBK
