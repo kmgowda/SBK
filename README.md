@@ -270,7 +270,7 @@ metrics.
 
 ## Distributed SBK
 SBK can be deployed in a distributed clusters using [**SBK-RAM**](./sbk-ram) [**SBK-GEM**](./sbk-gem) and 
-[**SBK-GEM**](./sbk-gem-yal)
+[**SBK-GEM-YAL**](./sbk-gem-yal)
 
 ## SBK Docker Containers
 The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
