@@ -140,7 +140,7 @@ Storage Benchmark Kit
  -minlatency <arg>   Minimum latency; use '-time' for time unit; default:
                      0 ms
  -ram <arg>          SBK RAM host; 'no' disables this option, default: no
- -ramport <arg>      SBK RAM Port; default: 9716
+ -ramport <arg>      SBK RAM Port; default: 9717
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'seconds' not specified;
                      otherwise, Maximum records per second by writer(s)
@@ -572,7 +572,7 @@ Storage Benchmark Kit
  -partitions <arg>      Number of partitions of the topic, default: 1
  -ram <arg>             SBK RAM host; 'no' disables this option, default:
                         no
- -ramport <arg>         SBK RAM Port; default: 9716
+ -ramport <arg>         SBK RAM Port; default: 9717
  -readers <arg>         Number of readers
  -records <arg>         Number of records(events) if 'seconds' not
                         specified;

@@ -50,7 +50,7 @@ Storage Benchmark Kit - Results Aggregation Monitor
                   disables the metrics
  -help            Help message
  -max <arg>       Maximum number of connections; default: 1000
- -ramport <arg>   RAM port number; default: 9716
+ -ramport <arg>   RAM port number; default: 9717
  -time <arg>      Latency Time Unit [ms:MILLISECONDS, mcs:MICROSECONDS,
                   ns:NANOSECONDS]; default: ms
 
@@ -108,7 +108,7 @@ Sbk-Ram     0 Connections,     2 Max Connections: file Reading     0 Writers,   
 
 Note that the SBK-RAM indicates the number of active connections and maximum connections in a session.
 while running an SBK instance make sure that you supply the RAM Host address (IP address). Optionally you supply the
-port number too , the default port number is **9716**.
+port number too , the default port number is **9717**.
 
 A sample SBK instance execution output is as follows:
 
@@ -168,7 +168,7 @@ Total : File Reading     0 Writers,     0 Readers,      0 Max Writers,     1 Max
 ```
 
 Note that option **-ram** is used to supply the SBK-RAM host ; In the above example, its localhost and default port
-is 9716.
+is 9717.
 
 ## SBK-RAM Docker Containers
 The SBK-RAM Docker images are available at [SBK Docker](https://hub.docker.com/repository/docker/kmgowda/sbk-ram)
@@ -180,11 +180,11 @@ docker pull kmgowda/sbk-ram
 
 you can straightaway run the docker image too, For example
 ```
-docker run -p 127.0.0.1:9716:9716/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram:latest -class file -time ns
+docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram:latest -class file -time ns
 ```
 * Note that the option **-p 127.0.0.1:9719:9719/tcp** redirects the 9719 port to local port to send the performance
   metric data for Prometheus.
-* Another option **-p 127.0.0.1:9716:9716/tcp** redirect the port 9716 port to local port to receive the performance
+* Another option **-p 127.0.0.1:9717:9717/tcp** redirect the port 9717 port to local port to receive the performance
   results from SBK instances.
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
@@ -221,10 +221,10 @@ As an example, just follow the below steps to see the performance graphs
 2. Run the 'sbk-ram' service as follows.
 
  ```
- <SBK dir>% docker-compose run -p 127.0.0.1:9716:9716/tcp sbk-ram -class file -time ns
+ <SBK dir>% docker-compose run -p 127.0.0.1:9717:9717/tcp sbk-ram -class file -time ns
 
  ```
-Note that , 9716 is the exposed port from sbk-ram container to receive the benchmark results from remote SBK
+Note that , 9717 is the exposed port from sbk-ram container to receive the benchmark results from remote SBK
 instances via localhost.
 The option **-class** is the same as in SBK command/application. you should use the same storage class and time unit in SBK instances too.
 
