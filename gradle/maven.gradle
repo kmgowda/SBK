@@ -41,25 +41,6 @@ plugins.withId('maven-publish') {
             mavenJava(MavenPublication) {
                 from(components.java)
 
-                if (!project.property("signing.keyId")) {
-                    project.setProperty("signing.keyId", System.getenv("SIGNING_KEYID"))
-                }
-
-                if (!project.property("signing.password")) {
-                    project.setProperty("signing.password", System.getenv("SIGNING_PASSWORD"))
-                }
-
-                if (!project.property("signing.secretKeyRingFile")) {
-                    def secretKeyPath = project.file("${System.getProperty("user.home")}/.gnupg/secring.gpg").absolutePath
-                    project.setProperty("signing.secretKeyRingFile", secretKeyPath)
-                }
-
-                if (project.property("signing.keyId") && project.property("signing.password") && project.property("signing.secretKeyRingFile")) {
-                    signing {
-                        sign configurations.archives
-                    }
-                }
-
                 pom {
                     groupId = group
                     name = "SBK"
@@ -84,6 +65,25 @@ plugins.withId('maven-publish') {
                         }
                     }
                 }
+            }
+        }
+
+        if (!project.property("signing.keyId")) {
+            project.setProperty("signing.keyId", System.getenv("SIGNING_KEYID"))
+        }
+
+        if (!project.property("signing.password")) {
+            project.setProperty("signing.password", System.getenv("SIGNING_PASSWORD"))
+        }
+
+        if (!project.property("signing.secretKeyRingFile")) {
+            def secretKeyPath = project.file("${System.getProperty("user.home")}/.gnupg/secring.gpg").absolutePath
+            project.setProperty("signing.secretKeyRingFile", secretKeyPath)
+        }
+
+        if (project.property("signing.keyId") && project.property("signing.password") && project.property("signing.secretKeyRingFile")) {
+            signing {
+                sign publications.mavenJava
             }
         }
     }
