@@ -794,3 +794,18 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
    *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/Main.java#L25)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
+
+# SBK Discussions
+___
+
+<p align="center">
+   Join SBK Slack Channel
+</p>
+
+<p align="center">
+    <a href="https://sbkcrew.slack.com/?from=SBK">
+        <img src="images/slack-logo.png" alt="SBK-Slack" width="50" height="50">
+    </a>
+</p>
+
+___
