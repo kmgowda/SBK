@@ -795,7 +795,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
 
-# SBK Discussions
+## SBK Discussions
 ___
 
 <p align="center">
