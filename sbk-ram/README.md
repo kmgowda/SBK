@@ -167,8 +167,29 @@ Total : File Reading     0 Writers,     0 Readers,      0 Max Writers,     1 Max
 
 ```
 
-Note that option **-ram** is used to supply the SBK-RAM host ; In the above example, its localhost and default port
-is 9717.
+Note that option **-ram** is used to supply the SBK-RAM host ; In the above example, its localhost and default port is 9717.
+
+### SBK-RAM Grafana Dashboards
+when you run the SBK-RAM, by default it starts the http server and all the output benchmark data is directed to the default port number: **9719** and **metrics** context.
+If you want to change the port number and context, you can use the command line argument **-context** to change the same.
+you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
+If you want to include additional SBK-RAM nodes/instances to fetch the performance data or from port number other than **9719**, you need to extend or update [ram-targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/ram-targets.json)
+In case, if you are fetching metrics/benchmark data from remote http server , or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) too.
+Run the grafana server (cum a client) to fetch the benchmark data from prometheus.
+For example, if you are running a local grafana server then by default it fetches the data from the prometheus server at the local port 9090.
+You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default username / password.
+You can import the grafana dashboards to fetch the SBK and SBK-RAM benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
+
+The SBK-RAM (Server side) and SBK (client side) can use the same dashboard for a selected storage driver/device. for SBK-RAM , these grafana dashboards shows the number of active and maximum connections.
+The sample output of 2 SBK instances of file system benchmark data with grafana is below
+
+[![SBK-RAM file system Dashboard](images/sbk-ram-file-grafana.png)](https://github.com/kmgowda/SBK/tree/master/sbk-ram/images/sbk-ram-file-grafana.png)
+
+### SBK-RAM JMX Exporter and Grafana
+The SBK can start the java agent to export the JVM metrics to Grafana via Prometheus. you just have build with
+parameter **-PjmxExport=true** while building SBK. Refer : [build SBK with JMX](./../README.md#SBK with JMX exporter and Grafana)
+All the SBK-RAM JVM metrics will be available at http://localhost:9721/metrics The network port **9721** to used to expose the metrics.
+
 
 ## SBK-RAM Docker Containers
 The SBK-RAM Docker images are available at [SBK Docker](https://hub.docker.com/repository/docker/kmgowda/sbk-ram)
@@ -188,22 +209,6 @@ docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram
   results from SBK instances.
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
-## SBK-RAM Grafana Dashboards
-when you run the SBK-RAM, by default it starts the http server and all the output benchmark data is directed to the default port number: **9719** and **metrics** context.
-If you want to change the port number and context, you can use the command line argument **-context** to change the same.
-you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
-If you want to include additional SBK-RAM nodes/instances to fetch the performance data or from port number other than **9719**, you need to extend or update [ram-targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/ram-targets.json)
-In case, if you are fetching metrics/benchmark data from remote http server , or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) too.
-Run the grafana server (cum a client) to fetch the benchmark data from prometheus.
-For example, if you are running a local grafana server then by default it fetches the data from the prometheus server at the local port 9090.
-You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default username / password.
-You can import the grafana dashboards to fetch the SBK and SBK-RAM benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
-
-
-The SBK-RAM (Server side) and SBK (client side) can use the same dashboard for a selected storage driver/device. for SBK-RAM , these grafana dashboards shows the number of active and maximum connections.
-The sample output of 2 SBK instances of file system benchmark data with grafana is below
-
-[![SBK-RAM file system Dashboard](images/sbk-ram-file-grafana.png)](https://github.com/kmgowda/SBK/tree/master/sbk-ram/images/sbk-ram-file-grafana.png)
 
 ## Running SBK-RAM Docker Compose
 The SBK-RAM docker compose consists of SBK-RAM docker image, Grafana and prometheus docker images.

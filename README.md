@@ -252,13 +252,23 @@ The sample output of Standalone Pulsar benchmark data with grafana is below
 
 **Port conflicts between storage servers and grafana/prometheus**
 * If you are running Pravega server in standalone/local mode or if you are running SBK in the same system in which Pravega controller is also running, then Prometheus port 9090 conflicts with the Pravega controller. So, either you change the Pravega controller port number or change the Prometheus port number in the [Prometheus targets file](grafana/prometheus/prometheus.yml) before deploying the prometheus. 
-* If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you 
-  can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json](grafana/prometheus/targets.json) too
+* If you find that using the local port 9718 conflicts with a storage server or any other application. Then, you can change the SBK's http port using **-metrics** option, and you need change the [Prometheus targets.json](grafana/prometheus/targets.json) too
+
+
+### SBK with JMX exporter and Grafana
+The SBK can start the java agent to export the JVM metrics to Grafana via Prometheus. you just have build with 
+parameter **-PjmxExport=true** while building SBK.
+
+the command is below
+```
+./gradelew installDist -PjmxExport=true
+```
+All the SBK JVM metrics will be available at http://localhost:9720/metrics The network port **9720** to used to expose the metrics.
 
 
 ## Distributed SBK
-SBK can be deployed in a distributed clusters using [**SBK-RAM**](./sbk-ram)
-
+SBK can be deployed in a distributed clusters using [**SBK-RAM**](./sbk-ram) [**SBK-GEM**](./sbk-gem) and 
+[**SBK-GEM**](./sbk-gem-yal)
 
 ## SBK Docker Containers
 The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
@@ -309,6 +319,17 @@ As an example, just follow the below steps to see the performance graphs
 check these [SBK Kubernetes Deployments samples](kubernetes) for details 
 on SBK as kubernetes pod.
 If you want to run the Grafana and prometheus as Kubernetes pods, then use [Grafana Kubernetes deployment](grafana/README.md#grafana-with-kubernetes)
+
+
+## SBK Metrics Network Ports
+
+| Network Port 	| Description                               	|
+|--------------	|-------------------------------------------	|
+| 9717         	| SBK-RAM GRPC server Port                  	|
+| 9718         	| SBK performance metrics to Prometheus     	|
+| 9719         	| SBK-RAM performance metrics to Prometheus 	|
+| 9720         	| SBK JVM/JMX metrics to Prometheus         	|
+| 9721         	| SBK-RAM JVM/JMX metrics to Prometheus     	|
 
 
 ## SBK Execution Modes
