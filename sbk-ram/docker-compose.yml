@@ -44,5 +44,5 @@ services:
       - prometheus
       - grafana
     ports:
-      - '9716:9716'
+      - '9717:9717'
       - '9719:9719'

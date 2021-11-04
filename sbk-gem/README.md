@@ -66,7 +66,7 @@ Storage Benchmark Kit - Group Execution Monitor
                      0 ms
  -nodes <arg>        remote hostnames separated by ',' , default:
                      localhost
- -ramport <arg>      RAM port number; default: 9716
+ -ramport <arg>      RAM port number; default: 9717
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'seconds' not specified;
                      otherwise, Maximum records per second by writer(s)
@@ -125,7 +125,7 @@ kmg@kmgs-MBP SBK % ./sbk-gem/build/install/sbk-gem/bin/sbk-gem -class file -read
 2021-08-20 14:25:51 INFO Maximum Latency: 180000000000 ns
 2021-08-20 14:25:51 INFO SBK dir: /Users/kmg/projects/SBK/build/install/sbk
 2021-08-20 14:25:51 INFO SBK command: bin/sbk
-2021-08-20 14:25:51 INFO Arguments to remote SBK command: -class file -readers 1 -size 10 -seconds 60 -time ns -minlatency 0 -maxlatency 180000000000 -context no -ram kmgs-MBP.Dlink -ramport 9716
+2021-08-20 14:25:51 INFO Arguments to remote SBK command: -class file -readers 1 -size 10 -seconds 60 -time ns -minlatency 0 -maxlatency 180000000000 -context no -ram kmgs-MBP.Dlink -ramport 9717
 2021-08-20 14:25:51 INFO SBK-GEM: Arguments to remote SBK command verification Success..
 2021-08-20 14:25:51 INFO Arguments to  SBK-RAM: [-class, file, -action, r, -max, 1]
 2021-08-20 14:25:51 INFO SBK-GEM: Arguments to SBK-RAM command verification Success..
@@ -146,7 +146,7 @@ kmg@kmgs-MBP SBK % ./sbk-gem/build/install/sbk-gem/bin/sbk-gem -class file -read
 2021-08-20 14:25:56 INFO SBK PrometheusLogger Started
 2021-08-20 14:25:56 INFO SBK Connections PrometheusLogger Started
 2021-08-20 14:25:56 INFO LatenciesRecord Benchmark Started
-2021-08-20 14:25:56 INFO SBK-GEM: Remote SBK command: sbk/bin/sbk -class file -readers 1 -size 10 -seconds 60 -time ns -minlatency 0 -maxlatency 180000000000 -context no -ram kmgs-MBP.Dlink -ramport 9716
+2021-08-20 14:25:56 INFO SBK-GEM: Remote SBK command: sbk/bin/sbk -class file -readers 1 -size 10 -seconds 60 -time ns -minlatency 0 -maxlatency 180000000000 -context no -ram kmgs-MBP.Dlink -ramport 9717
 Sbk-Ram     1 Connections,     1 Max Connections: file Reading     0 Writers,     0 Readers,      0 Max Writers,     0 Max Readers,        5 seconds,         0.0 MB,                0 records,         0.0 records/sec,     0.00 MB/sec,      0.0 ns avg latency,       0 ns max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1:   0, SLC-2:   0; Latency Percentiles:       0 ns 10th,       0 ns 20th,       0 ns 25th,       0 ns 30th,       0 ns 40th,       0 ns 50th,       0 ns 60th,       0 ns 70th,       0 ns 75th,       0 ns 80th,       0 ns 90th,       0 ns 92.5th,       0 ns 95th,       0 ns 97.5th,       0 ns 99th,       0 ns 99.25th,       0 ns 99.5th,       0 ns 99.75th,       0 ns 99.9th,       0 ns 99.95th,       0 ns 99.99th.
 Sbk-Ram     1 Connections,     1 Max Connections: file Reading     0 Writers,     1 Readers,      0 Max Writers,     1 Max Readers,        5 seconds,        52.3 MB,          5482367 records,   1094823.9 records/sec,    10.44 MB/sec,    827.0 ns avg latency, 4976086 ns max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1:   0, SLC-2:  10; Latency Percentiles:     675 ns 10th,     681 ns 20th,     684 ns 25th,     687 ns 30th,     692 ns 40th,     698 ns 50th,     708 ns 60th,     726 ns 70th,     735 ns 75th,     749 ns 80th,     836 ns 90th,     989 ns 92.5th,    1131 ns 95th,    1299 ns 97.5th,    1448 ns 99th,    1963 ns 99.25th,    2785 ns 99.5th,   16101 ns 99.75th,   22526 ns 99.9th,   25453 ns 99.95th,   32818 ns 99.99th.
 Sbk-Ram     1 Connections,     1 Max Connections: file Reading     0 Writers,     1 Readers,      0 Max Writers,     1 Max Readers,        5 seconds,        55.7 MB,          5843752 records,   1167122.6 records/sec,    11.13 MB/sec,    786.4 ns avg latency, 3759403 ns max latency;        0 invalid latencies; Discarded Latencies:       0 lower,        0 higher; SLC-1:   0, SLC-2:  10; Latency Percentiles:     673 ns 10th,     679 ns 20th,     682 ns 25th,     685 ns 30th,     689 ns 40th,     694 ns 50th,     700 ns 60th,     711 ns 70th,     721 ns 75th,     730 ns 80th,     801 ns 90th,     825 ns 92.5th,     835 ns 95th,     851 ns 97.5th,    1007 ns 99th,    1123 ns 99.25th,    1257 ns 99.5th,   16104 ns 99.75th,   22434 ns 99.9th,   25130 ns 99.95th,   31812 ns 99.99th.

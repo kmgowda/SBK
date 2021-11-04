@@ -11,15 +11,17 @@
 package io.sbk.logger.impl;
 
 import com.sun.net.httpserver.HttpServer;
-import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.micrometer.jmx.JmxConfig;
-import io.micrometer.jmx.JmxMeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
 import org.jetbrains.annotations.NotNull;
 
+/*
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.jmx.JmxMeterRegistry;
+ */
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -37,7 +39,10 @@ public final class PrometheusServer extends CompositeMeterRegistry {
         this.context = context;
         this.prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
+        /*
+        JMX Meter Registry is disabled
         this.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
+         */
         this.add(prometheusRegistry);
         this.server = createHttpServer();
     }

@@ -33,19 +33,4 @@ plugins.withId('application') {
         into "lib"
     }
 
-    startScripts {
-        doLast {
-            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-
-            // Replace the classpath on windows with the pathing JAR and the main archive
-            unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                    "CLASSPATH=\$APP_HOME/lib/${pathingJar.archiveFileName.get()}:\$APP_HOME/lib/${jar.archiveFileName.get()}"))
-
-            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-            windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                    "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName.get()};%APP_HOME%\\lib\\${jar.archiveFileName.get()}"))
-        }
-    }
 }
