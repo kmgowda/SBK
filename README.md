@@ -441,7 +441,7 @@ All submissions to the master are done through pull requests. If you'd like to m
 1. Create a new Github issue ([SBK issues](https://github.com/kmgowda/sbk/issues)) describing the problem / feature.
 2. Fork a branch.
 3. Make your changes.
-* you can refer ([Oracle Java Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for coding style; however, Running the Gradle build helps you to fix the Coding syte issues too.
+   * you can refer ([Oracle Java Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for coding style; however, Running the Gradle build helps you to fix the Coding syte issues too.
 4. Verify all changes are working and Gradle build checkstyle is good.
 5. Submit a pull request with Issue number, Description and your Sign-off.
 
