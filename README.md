@@ -221,9 +221,9 @@ The SBK yields latency data points in the form of quartiles and percentiles. For
 quartiles and percentile latencies can be combined into two factors : Sliding Latency Coverage 1 (SLC 1)
  and Sliding Latency Coverage 2 (SLC 2).
 
-The SLC1 indicates the percentage of dispersion from lower latency percentile to median percentile. This indicates 
+The SLC1 indicates the coefficient of dispersion from lower latency percentile to median percentile. This indicates 
 the range between all lower latencies percentiles to median latency and also dispersion from all latency values 
-which are below median latency. The SLC2 indicates the percentage of dispersion from median latency percentile and 
+which are below median latency. The SLC2 indicates the coefficient of dispersion from median latency percentile and 
 all other percentile values to the last (maximum) percentile (99.99th percentile). If you are comparing two or more 
 storage systems which are having similar / approximate median latency percentiles then SLC2 gives which storage system is 
 doing better. Lower SLC2 factor means higher the performance of the system. If you are observing too many 
