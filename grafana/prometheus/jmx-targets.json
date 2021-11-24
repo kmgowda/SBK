@@ -1,7 +1,7 @@
 [
   {
     "targets": [
-      "localhost:9720", "127.0.0.1:9720", "sbk:9720", "host.docker.internal:9720", "18.7.0.9:9720"
+      "localhost:8718", "127.0.0.1:8718", "sbk:8718", "host.docker.internal:8718", "18.7.0.9:8718"
     ]
   }
 ]

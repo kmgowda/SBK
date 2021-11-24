@@ -2189,8 +2189,8 @@
         "allValue": "",
         "current": {
           "selected": false,
-          "text": "host.docker.internal:9721",
-          "value": "host.docker.internal:9721"
+          "text": "host.docker.internal:8719",
+          "value": "host.docker.internal:8719"
         },
         "datasource": "Prometheus",
         "definition": "label_values(up{job='sbk-ram-jmx'}, instance)",
