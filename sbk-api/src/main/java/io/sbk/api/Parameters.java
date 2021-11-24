@@ -107,4 +107,11 @@ public interface Parameters {
      */
     int getReadersStepSeconds();
 
+
+    /**
+     * get Instance ID.
+     *
+     * @return get the Instance id .
+     */
+    long getInstanceID();
 }
