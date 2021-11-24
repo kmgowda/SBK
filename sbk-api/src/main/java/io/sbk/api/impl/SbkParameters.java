@@ -63,6 +63,9 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
     @Getter
     private boolean writeAndRead;
 
+    @Getter
+    private long instanceID;
+
     public SbkParameters(String name, String desc) {
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
@@ -96,6 +99,8 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
                 "Number of readers/step, default: 1");
         addOption("rsec", true,
                 "Number of seconds/step for readers, default: 0");
+        addOption("id", true,
+                "instance id, default: 0");
         addOption("help", false, "Help message");
     }
 
@@ -109,6 +114,7 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
         super.parseArgs(args);
         writersCount = Integer.parseInt(getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(getOptionValue("readers", "0"));
+        instanceID = Long.parseLong(getOptionValue("id", "0"));
 
         if (writersCount == 0 && readersCount == 0) {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");
