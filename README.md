@@ -261,9 +261,9 @@ parameter **-PjmxExport=true** while building SBK.
 
 the command is below
 ```
-./gradelew installDist -PjmxExport=true
+./gradlew installDist -PjmxExport=true
 ```
-All the SBK JVM metrics will be available at http://localhost:9720/metrics The network port **9720** to used to 
+All the SBK JVM metrics will be available at http://localhost:8718/metrics The network port **8718** to used to 
 expose the metrics. use [SBK-JMX grafana dashboard](grafana/dashboards/sbk-jmx-metrics.json) to analyse the SBK-JVM 
 metrics.
 
@@ -330,8 +330,8 @@ If you want to run the Grafana and prometheus as Kubernetes pods, then use [Graf
 | 9717         	| SBK-RAM GRPC server Port                  	|
 | 9718         	| SBK performance metrics to Prometheus     	|
 | 9719         	| SBK-RAM performance metrics to Prometheus 	|
-| 9720         	| SBK JVM/JMX metrics to Prometheus         	|
-| 9721         	| SBK-RAM JVM/JMX metrics to Prometheus     	|
+| 8718         	| SBK JVM/JMX metrics to Prometheus         	|
+| 8719         	| SBK-RAM JVM/JMX metrics to Prometheus     	|
 
 
 ## SBK Execution Modes

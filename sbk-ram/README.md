@@ -188,7 +188,7 @@ The sample output of 2 SBK instances of file system benchmark data with grafana 
 ### SBK-RAM JMX Exporter and Grafana
 The SBK can start the java agent to export the JVM metrics to Grafana via Prometheus. you just have build with
 parameter **-PjmxExport=true** while building SBK. Refer : [build SBK with JMX](./../README.md#SBK with JMX exporter and Grafana)
-All the SBK-RAM JVM metrics will be available at http://localhost:9721/metrics The network port **9721** to used to 
+All the SBK-RAM JVM metrics will be available at http://localhost:8719/metrics The network port **8719** to used to 
 expose the metrics.  use [SBK-RAM-JMX grafana dashboard](./../grafana/dashboards/sbk-ram-jmx-metrics.json) to 
 analyse the SBK-RAM JVM metrics.
 
