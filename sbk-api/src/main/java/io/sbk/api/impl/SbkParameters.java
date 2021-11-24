@@ -100,7 +100,7 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
         addOption("rsec", true,
                 "Number of seconds/step for readers, default: 0");
         addOption("id", true,
-                "instance id, default: 0");
+                "Instance ID, default: 0");
         addOption("help", false, "Help message");
     }
 
