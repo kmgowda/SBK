@@ -796,7 +796,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
 
 
-## SBK publications
+## SBK Publications
 1. The SBK is inspired from the Pravega benchmark tool, refer [Pravega benchmark tool](docs/kafka-pravega.pdf)
 2. The SBK uses the multiple concurrent queues for fast performance benchmarking, refer [Design of SBK](docs/sbk.pdf) 
 
