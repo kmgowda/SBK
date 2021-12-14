@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.Template;
+package io.sbk.SbkTemplate;
 
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
@@ -19,9 +19,9 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Class for Writer.
  */
-public class TemplateWriter implements Writer<byte[]> {
+public class SbkTemplateWriter implements Writer<byte[]> {
 
-    public TemplateWriter(int writerID, ParameterOptions params) {
+    public SbkTemplateWriter(int writerID, ParameterOptions params) {
     }
 
     @Override

@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.Template;
+package io.sbk.SbkTemplate;
 
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * Class for Storage driver.
  */
-public class Template implements Storage<byte[]> {
+public class SbkTemplate implements Storage<byte[]> {
 
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
@@ -40,11 +40,11 @@ public class Template implements Storage<byte[]> {
 
     @Override
     public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
-        return new TemplateWriter(id, params);
+        return new SbkTemplateWriter(id, params);
     }
 
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
-        return new TemplateReader(id, params);
+        return new SbkTemplateReader(id, params);
     }
 }

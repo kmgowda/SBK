@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.Template;
+package io.sbk.SbkTemplate;
 
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
@@ -17,9 +17,9 @@ import java.io.IOException;
 /**
  * Class for Reader.
  */
-public class TemplateReader implements Reader<byte[]> {
+public class SbkTemplateReader implements Reader<byte[]> {
 
-    public TemplateReader(int readerId, ParameterOptions params) {
+    public SbkTemplateReader(int readerId, ParameterOptions params) {
     }
 
     @Override
