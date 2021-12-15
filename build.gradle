@@ -417,65 +417,68 @@ applicationDistribution.into("bin") {
     fileMode = 0755
 }
 
-task deleteDriver(type: Delete) {
-    String templateName="driver-sbktemplate"
-    String driverName=templateName
-    String sbkDriverName=""
+task deleteDriver() {
+    doLast {
+        String templateName = "driver-sbktemplate"
+        String driverName = templateName
+        String sbkDriverName = ""
 
-    if (project.hasProperty("driver")) {
-        String name1 = driver
-        if (!name1.startsWith("driver-")) {
-            driverName = "driver-"+driver
+        if (project.hasProperty("driver")) {
+            String name1 = driver
+            if (!name1.startsWith("driver-")) {
+                driverName = "driver-" + driver
+            }
+            driverName = "driver-" + driver
+            sbkDriverName = driver
+            sbkDriverName = sbkDriverName.capitalize()
+        } else {
+            println "driver name is missing user -Pdriver "
+            return
         }
-        driverName = "driver-"+driver
-        sbkDriverName = driver
-        sbkDriverName = sbkDriverName.capitalize()
-    } else {
-        println "driver name is missing user -Pdriver "
-        return
+        println "Delete Driver : $driverName"
+        if (driverName.contains(templateName)) {
+            println "Invalid driver name"
+            return
+        }
+        delete "$rootDir/$driverName"
     }
-    println "Delete Driver : $driverName"
-    if (driverName.contains(templateName)) {
-        println "Invalid driver name"
-        return
-    }
-    delete "$rootDir/$driverName"
 }
 
 
-task addDriver(type: Copy, dependsOn: deleteDriver) {
-    String templateName="driver-sbktemplate"
-    String driverName=templateName
-    String sbkDriverName=""
-
-    if (project.hasProperty("driver")) {
-        String name1 = driver
-        if (!name1.startsWith("driver-")) {
-            driverName = "driver-"+driver
-        }
-        driverName = "driver-"+driver
-        sbkDriverName = driver
-        sbkDriverName = sbkDriverName.capitalize()
-    } else {
-        println "driver name is missing user -Pdriver "
-        return
-    }
-
-    println "Add Driver: $driverName"
-    if (driverName.contains(templateName)) {
-        println "Invalid driver name"
-        return
-    }
-
-    from "$rootDir/$templateName"
-    into "$rootDir/$driverName"
-    from ("$driverName/src/main/java/io/sbk/SbkTemplate") {
-        into "src/main/java/io/sbk/$sbkDriverName"
-    }
-    exclude 'build'
-    rename "SbkTemplate", sbkDriverName
-    filter { line -> line.replaceAll('SbkTemplate', sbkDriverName) }
+task addDriver(dependsOn: deleteDriver) {
     doLast {
+        String templateName = "driver-sbktemplate"
+        String driverName = templateName
+        String sbkDriverName = ""
+
+        if (project.hasProperty("driver")) {
+            String name1 = driver
+            if (!name1.startsWith("driver-")) {
+                driverName = "driver-" + driver
+            }
+            driverName = "driver-" + driver
+            sbkDriverName = driver
+            sbkDriverName = sbkDriverName.capitalize()
+        } else {
+            println "driver name is missing user -Pdriver "
+            return
+        }
+
+        println "Add Driver: $driverName"
+        if (driverName.contains(templateName)) {
+            println "Invalid driver name"
+            return
+        }
+        copy {
+            from "$rootDir/$templateName"
+            into "$rootDir/$driverName"
+            from("$driverName/src/main/java/io/sbk/SbkTemplate") {
+                into "src/main/java/io/sbk/$sbkDriverName"
+            }
+            exclude 'build'
+            rename "SbkTemplate", sbkDriverName
+            filter { line -> line.replaceAll('SbkTemplate', sbkDriverName) }
+        }
         delete "$driverName/src/main/java/io/sbk/SbkTemplate"
     }
 
