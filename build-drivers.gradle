@@ -1,0 +1,56 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
+/* Include your driver below */
+dependencies {
+    api project(":driver-concurrentq")
+    api project(":driver-file")
+    api project(":driver-filestream")
+    api project(":driver-asyncfile")
+    api project(":driver-hdfs")
+    api project(":driver-bookkeeper")
+    api project(":driver-rabbitmq")
+    api project(":driver-rocketmq")
+    api project(":driver-pulsar")
+    api project(":driver-kafka")
+    api project(":driver-pravega")
+    api project(":driver-nats")
+    api project(':driver-natsStream')
+    api project(':driver-artemis')
+    api project(':driver-nsq')
+    api project(':driver-jdbc')
+    api project(':driver-minio')
+    api project(':driver-foundationdb')
+    api project(':driver-fdbrecord')
+    api project(':driver-mongodb')
+    api project(':driver-rocksdb')
+    api project(':driver-ignite')
+    api project(':driver-couchdb')
+    api project(':driver-hive')
+    api project(':driver-null')
+    api project(':driver-sqlite')
+    api project(':driver-mysql')
+    api project(':driver-mariadb')
+    api project(':driver-postgresql')
+    api project(':driver-derby')
+    api project(':driver-mssql')
+    api project(':driver-redpanda')
+    api project(':driver-csv')
+    api project(':driver-redis')
+    api project(':driver-seaweeds3')
+    api project(':driver-cassandra')
+    api project(':driver-db2')
+    api project(':driver-cephs3')
+    api project(':driver-openio')
+    api project(':driver-leveldb')
+    /* api project(':driver-sbktemplate') */
+    /* above line is a signature */
+}

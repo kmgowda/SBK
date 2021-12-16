@@ -163,7 +163,6 @@ allprojects {
                 outFile = sbkProjectName + ".json"
             }
 
-
             from "$rootDir/dashboard-template.json"
             into outDir
             filter { line -> line.replaceAll('SBK@2020', sbkClassUpperCase) }
@@ -308,54 +307,6 @@ task printDrivers {
 }
 
 
-/* Include your driver below */
-dependencies {
-    api project(":sbk-gem")
-    api project(":sbk-ram")
-    api project(":sbk-gem")
-    api project(":sbk-gem-yal")
-    api project(":driver-concurrentq")
-    api project(":driver-file")
-    api project(":driver-filestream")
-    api project(":driver-asyncfile")
-    api project(":driver-hdfs")
-    api project(":driver-bookkeeper")
-    api project(":driver-rabbitmq")
-    api project(":driver-rocketmq")
-    api project(":driver-pulsar")
-    api project(":driver-kafka")
-    api project(":driver-pravega")
-    api project(":driver-nats")
-    api project(':driver-natsStream')
-    api project(':driver-artemis')
-    api project(':driver-nsq')
-    api project(':driver-jdbc')
-    api project(':driver-minio')
-    api project(':driver-foundationdb')
-    api project(':driver-fdbrecord')
-    api project(':driver-mongodb')
-    api project(':driver-rocksdb')
-    api project(':driver-ignite')
-    api project(':driver-couchdb')
-    api project(':driver-hive')
-    api project(':driver-null')
-    api project(':driver-sqlite')
-    api project(':driver-mysql')
-    api project(':driver-mariadb')
-    api project(':driver-postgresql')
-    api project(':driver-derby')
-    api project(':driver-mssql')
-    api project(':driver-redpanda')
-    api project(':driver-csv')
-    api project(':driver-redis')
-    api project(':driver-seaweeds3')
-    api project(':driver-cassandra')
-    api project(':driver-db2')
-    api project(':driver-cephs3')
-    api project(':driver-openio')
-    api project(':driver-leveldb')
-}
-
 //create a single Jar with all dependencies
 task buildJar(type: Jar) {
     manifest {
@@ -464,4 +415,129 @@ applicationDistribution.into("bin") {
     from(SbkGemYal)
     fileMode = 0755
 }
+
+task deleteDriver() {
+    doLast {
+        String templateName = "driver-sbktemplate"
+        String driverName = templateName
+        String sbkDriverName = ""
+
+        if (project.hasProperty("driver")) {
+            String name1 = driver
+            if (!name1.startsWith("driver-")) {
+                driverName = "driver-" + driver
+            }
+            driverName = "driver-" + driver
+            sbkDriverName = driver
+            sbkDriverName = sbkDriverName.capitalize()
+        } else {
+            println "driver name is missing user -Pdriver "
+            return
+        }
+        println "Delete Driver : $driverName"
+        if (driverName.contains(templateName)) {
+            println "Invalid driver name"
+            return
+        }
+        delete "$rootDir/$driverName"
+
+        def inFile1 = new File("$rootDir/settings-drivers.gradle").newInputStream()
+        String outText1=""
+        inFile1.eachLine {
+            String line = it
+            if (!line.contains(driverName)) {
+                outText1 += line+"\n"
+            }
+        }
+        inFile1.close()
+        File outFile1 = new File("$rootDir/settings-drivers.gradle")
+        outFile1.write(outText1)
+
+        def inFile2 = new File("$rootDir/build-drivers.gradle").newInputStream()
+        String outText2=""
+        inFile2.eachLine {
+            String line = it
+            if (!line.contains(driverName)) {
+                outText2 += line+"\n"
+            }
+        }
+        inFile2.close()
+        File outFile2 = new File("$rootDir/build-drivers.gradle")
+        outFile2.write(outText2)
+    }
+}
+
+
+task addDriver(dependsOn: deleteDriver) {
+    doLast {
+        String templateName = "driver-sbktemplate"
+        String driverName = templateName
+        String sbkDriverName = ""
+
+        if (project.hasProperty("driver")) {
+            String name1 = driver
+            if (!name1.startsWith("driver-")) {
+                driverName = "driver-" + driver
+            }
+            driverName = "driver-" + driver
+            sbkDriverName = driver
+            sbkDriverName = sbkDriverName.capitalize()
+        } else {
+            println "driver name is missing user -Pdriver "
+            return
+        }
+
+        println "Add Driver: $driverName"
+        if (driverName.contains(templateName)) {
+            println "Invalid driver name"
+            return
+        }
+        copy {
+            from "$rootDir/$templateName"
+            into "$rootDir/$driverName"
+            from("$driverName/src/main/java/io/sbk/SbkTemplate") {
+                into "src/main/java/io/sbk/$sbkDriverName"
+            }
+            exclude 'build'
+            rename "SbkTemplate", sbkDriverName
+            filter { line -> line.replaceAll('SbkTemplate', sbkDriverName) }
+        }
+        delete "$driverName/src/main/java/io/sbk/SbkTemplate"
+
+        def inFile1 = new File("$rootDir/build-drivers.gradle").newInputStream()
+        String outText1=""
+        inFile1.eachLine {
+            String line = it
+            if (line.contains(templateName)) {
+                outText1 += "    api project(':$driverName')\n"
+            }
+            outText1 += line +"\n"
+        }
+        inFile1.close()
+        File outFile1 = new File("$rootDir/build-drivers.gradle")
+        outFile1.write(outText1)
+
+        def inFile2 = new File("$rootDir/settings-drivers.gradle").newInputStream()
+        String outText2=""
+        inFile2.eachLine {
+            String line = it
+            if (line.contains(templateName)) {
+                outText2 += "include '$driverName'\n"
+            }
+            outText2 += line +"\n"
+        }
+        inFile2.close()
+        File outFile2 = new File("$rootDir/settings-drivers.gradle")
+        outFile2.write(outText2)
+    }
+}
+
+dependencies {
+    api project(":sbk-gem")
+    api project(":sbk-ram")
+    api project(":sbk-gem")
+    api project(":sbk-gem-yal")
+}
+
+apply from: "$rootDir/build-drivers.gradle"
 
