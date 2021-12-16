@@ -531,7 +531,13 @@ task addDriver(dependsOn: deleteDriver) {
         File outFile2 = new File("$rootDir/settings-drivers.gradle")
         outFile2.write(outText2)
     }
+}
 
+dependencies {
+    api project(":sbk-gem")
+    api project(":sbk-ram")
+    api project(":sbk-gem")
+    api project(":sbk-gem-yal")
 }
 
 apply from: "$rootDir/build-drivers.gradle"

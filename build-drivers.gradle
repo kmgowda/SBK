@@ -11,10 +11,6 @@
 
 /* Include your driver below */
 dependencies {
-    api project(":sbk-gem")
-    api project(":sbk-ram")
-    api project(":sbk-gem")
-    api project(":sbk-gem-yal")
     api project(":driver-concurrentq")
     api project(":driver-file")
     api project(":driver-filestream")
