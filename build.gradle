@@ -162,8 +162,7 @@ allprojects {
                 outDir = outdir
                 outFile = sbkProjectName + ".json"
             }
-
-
+            
             from "$rootDir/dashboard-template.json"
             into outDir
             filter { line -> line.replaceAll('SBK@2020', sbkClassUpperCase) }
