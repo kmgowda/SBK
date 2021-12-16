@@ -13,6 +13,8 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.data.DataType;
+import io.sbk.data.impl.ByteArray;
 
 import java.io.IOException;
 
