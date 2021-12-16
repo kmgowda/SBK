@@ -441,6 +441,30 @@ task deleteDriver() {
             return
         }
         delete "$rootDir/$driverName"
+
+        def inFile1 = new File("$rootDir/settings-drivers.gradle").newInputStream()
+        String outText1=""
+        inFile1.eachLine {
+            String line = it
+            if (!line.contains(driverName)) {
+                outText1 += line+"\n"
+            }
+        }
+        inFile1.close()
+        File outFile1 = new File("$rootDir/settings-drivers.gradle")
+        outFile1.write(outText1)
+
+        def inFile2 = new File("$rootDir/build-drivers.gradle").newInputStream()
+        String outText2=""
+        inFile2.eachLine {
+            String line = it
+            if (!line.contains(driverName)) {
+                outText2 += line+"\n"
+            }
+        }
+        inFile2.close()
+        File outFile2 = new File("$rootDir/build-drivers.gradle")
+        outFile2.write(outText2)
     }
 }
 
@@ -480,10 +504,35 @@ task addDriver(dependsOn: deleteDriver) {
             filter { line -> line.replaceAll('SbkTemplate', sbkDriverName) }
         }
         delete "$driverName/src/main/java/io/sbk/SbkTemplate"
+
+        def inFile1 = new File("$rootDir/build-drivers.gradle").newInputStream()
+        String outText1=""
+        inFile1.eachLine {
+            String line = it
+            if (line.contains(templateName)) {
+                outText1 += "    api project(':$driverName')\n"
+            }
+            outText1 += line +"\n"
+        }
+        inFile1.close()
+        File outFile1 = new File("$rootDir/build-drivers.gradle")
+        outFile1.write(outText1)
+
+        def inFile2 = new File("$rootDir/settings-drivers.gradle").newInputStream()
+        String outText2=""
+        inFile2.eachLine {
+            String line = it
+            if (line.contains(templateName)) {
+                outText2 += "include '$driverName'\n"
+            }
+            outText2 += line +"\n"
+        }
+        inFile2.close()
+        File outFile2 = new File("$rootDir/settings-drivers.gradle")
+        outFile2.write(outText2)
     }
 
 }
-
 
 apply from: "$rootDir/build-drivers.gradle"
 
