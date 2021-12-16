@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 
 /**
- * Class for Writer.
+ * Class for SbkTemplate Writer.
  */
 public class SbkTemplateWriter implements Writer<byte[]> {
 
@@ -26,17 +26,16 @@ public class SbkTemplateWriter implements Writer<byte[]> {
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
-        throw new IOException("Its Template Writer Driver");
+        throw new IOException("The SbkTemplate Writer Driver not defined");
     }
-
 
     @Override
     public void sync() throws IOException {
-        throw new IOException("Its Template Writer Driver");
+        throw new IOException("The SbkTemplate Writer Driver not defined");
     }
 
     @Override
     public void close() throws IOException {
-        throw new IOException("Its Template Writer Driver");
+        throw new IOException("The SbkTemplate Writer Driver not defined");
     }
 }

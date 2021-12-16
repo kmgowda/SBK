@@ -15,7 +15,7 @@ import io.sbk.api.Reader;
 import java.io.IOException;
 
 /**
- * Class for Reader.
+ * Class for SbkTemplate Reader.
  */
 public class SbkTemplateReader implements Reader<byte[]> {
 
@@ -24,11 +24,11 @@ public class SbkTemplateReader implements Reader<byte[]> {
 
     @Override
     public byte[] read() throws IOException {
-        throw new IOException("Its Template Reader Driver");
+        throw new IOException("The SbkTemplate Reader Driver not defined");
     }
 
     @Override
     public void close() throws IOException {
-        throw new IOException("Its Template Reader Driver");
+        throw new IOException("The SbkTemplate Reader Driver not defined");
     }
 }

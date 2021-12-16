@@ -17,25 +17,31 @@ import io.sbk.api.Storage;
 import java.io.IOException;
 
 /**
- * Class for Storage driver.
+ * Class for SbkTemplate storage driver.
+ *
+ * Incase if your data type in other than byte[] (Byte Array)
+ * then change the datatype and getDataType.
  */
 public class SbkTemplate implements Storage<byte[]> {
 
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
-
+        throw new IllegalArgumentException("The SbkTemplate Driver not defined");
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
+        throw new IllegalArgumentException("The SbkTemplate Driver not defined");
     }
 
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
+        throw new IOException("The SbkTemplate Driver not defined");
     }
 
     @Override
     public void closeStorage(final ParameterOptions params) throws IOException {
+        throw new IOException("The SbkTemplate Driver not defined");
     }
 
     @Override
@@ -46,5 +52,10 @@ public class SbkTemplate implements Storage<byte[]> {
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         return new SbkTemplateReader(id, params);
+    }
+
+    @Override
+    public DataType<byte[]> getDataType() {
+        return new ByteArray();
     }
 }
