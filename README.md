@@ -478,6 +478,125 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
 
 ## Add your driver to SBK
+
+### Add your driver to SBK using Gradle command and template driver
+1. Run the command **./gradlew addDriver -pdriver="your driver name"**
+   1. This command create the new subproject under the SBK framework with <driver name>.java and <driver name>Reader.
+      java and <driver name>Writer.java files filled with required classes definitions
+   
+2. You have to implement the following methods of Benchmark Interface:
+   a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.api.ParameterOptions))]
+   * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
+
+   b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#parseArgs(io.sbk.api.ParameterOptions))]
+
+   c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#openStorage(io.sbk.api.ParameterOptions))]
+
+   d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#closeStorage(io.sbk.api.ParameterOptions))]
+
+   e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createWriter(int,io.sbk.api.ParameterOptions))]
+   * Create Writer will be called multiple times by SBK in case of Multi writers are specified in the command line.
+
+   f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createReader(int,io.sbk.api.ParameterOptions))]
+   * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line.
+
+   g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
+   * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+   * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
+
+3. You have to implement the following methods of Writer class
+   a). Writer Data [Async or Sync]: [[writeAsync](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#writeAsync(T))]
+
+   b). Flush the data: [[sync](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#sync())]
+
+   c). Close the Writer: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#close())]
+
+   d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int))]
+
+4. You have to implement the following methods of Reader class
+   i). Read Data
+   1. for synchronous reads: [[read](hhttps://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#read())]
+      * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
+   2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AsyncReader.html)]
+      * create a new class
+      * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/driver-file/src/main/java/io/sbk/File/FileAsyncReader.java)]
+   3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AbstractCallbackReader.html)]
+      * Create a new class
+      * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/driver-rabbitmq/src/main/java/io/sbk/RabbitMQ/RabbitMQCallbackReader.java)]
+
+   ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close())] 
+
+5. That's all ; Now, Build the SBK included your driver with the command:
+
+```
+./gradlew build
+```
+
+untar the SBK  to local folder
+
+```
+tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
+```
+
+6. To invoke the benchmarking of the driver you have to issue the parameters "-class < your driver name>"
+   Example: For pulsar driver
+
+```
+<SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
+
+usage: sbk -class pulsar
+Storage Benchmark Kit
+
+ -ackQuorum <arg>       AckQuorum default: 1
+ -admin <arg>           Admin URI, required to create the partitioned
+                        topic, default: null
+ -broker <arg>          Broker URI, default: tcp://localhost:6650
+ -cluster <arg>         Cluster name (optional parameter)
+ -context <arg>         Prometheus Metric context; 'no' disables this
+                        option; default: 9718/metrics
+ -csvfile <arg>         CSV file to record results; 'no' disables this
+                        option, default: no
+ -deduplication <arg>   Enable or Disable Deduplication; default: false
+ -ensembleSize <arg>    EnsembleSize default: 1
+ -help                  Help message
+ -maxlatency <arg>      Maximum latency; use '-time' for time unit;
+                        default: 180000 ms
+ -minlatency <arg>      Minimum latency; use '-time' for time unit;
+                        default: 0 ms
+ -partitions <arg>      Number of partitions of the topic, default: 1
+ -ram <arg>             SBK RAM host; 'no' disables this option, default:
+                        no
+ -ramport <arg>         SBK RAM Port; default: 9717
+ -readers <arg>         Number of readers
+ -records <arg>         Number of records(events) if 'seconds' not
+                        specified;
+                        otherwise, Maximum records per second by writer(s)
+                        and/or Number of records per second by reader(s)
+ -rsec <arg>            Number of seconds/step for readers, default: 0
+ -rstep <arg>           Number of readers/step, default: 1
+ -seconds <arg>         Number of seconds to run; if not specified, runs
+                        forever
+ -size <arg>            Size of each message (event or record)
+ -sync <arg>            Each Writer calls flush/sync after writing <arg>
+                        number of of events(records) ; <arg> number of
+                        events(records) per Write or Read Transaction
+ -threads <arg>         io threads per Topic, default: 1
+ -throughput <arg>      If > 0, throughput in MB/s
+                        If 0, writes/reads 'records'
+                        If -1, get the maximum throughput (default: -1)
+ -time <arg>            Latency Time Unit [ms:MILLISECONDS,
+                        mcs:MICROSECONDS, ns:NANOSECONDS]; default: ms
+ -topic <arg>           Topic name, default : test
+ -writeQuorum <arg>     WriteQuorum default: 1
+ -writers <arg>         Number of writers
+ -wsec <arg>            Number of seconds/step for writers, default: 0
+ -wstep <arg>           Number of writers/step, default: 1
+
+Please report issues at https://github.com/kmgowda/SBK
+
+```
+
+### Add your driver to SBK Manually
 1. Create the gradle subproject preferable with the name **driver-<your driver(storage device) name>**.
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
@@ -568,64 +687,8 @@ untar the SBK  to local folder
 tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
+9.  To invoke the benchmarking of the driver you have to issue the parameters "-class < your driver name>"
 
-9.  To invoke the benchmarking of the driver you have issue the parameters "-class < your driver name>"
-
-Example: For pulsar driver
-```
-<SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
-
-usage: sbk -class pulsar
-Storage Benchmark Kit
-
- -ackQuorum <arg>       AckQuorum default: 1
- -admin <arg>           Admin URI, required to create the partitioned
-                        topic, default: null
- -broker <arg>          Broker URI, default: tcp://localhost:6650
- -cluster <arg>         Cluster name (optional parameter)
- -context <arg>         Prometheus Metric context; 'no' disables this
-                        option; default: 9718/metrics
- -csvfile <arg>         CSV file to record results; 'no' disables this
-                        option, default: no
- -deduplication <arg>   Enable or Disable Deduplication; default: false
- -ensembleSize <arg>    EnsembleSize default: 1
- -help                  Help message
- -maxlatency <arg>      Maximum latency; use '-time' for time unit;
-                        default: 180000 ms
- -minlatency <arg>      Minimum latency; use '-time' for time unit;
-                        default: 0 ms
- -partitions <arg>      Number of partitions of the topic, default: 1
- -ram <arg>             SBK RAM host; 'no' disables this option, default:
-                        no
- -ramport <arg>         SBK RAM Port; default: 9717
- -readers <arg>         Number of readers
- -records <arg>         Number of records(events) if 'seconds' not
-                        specified;
-                        otherwise, Maximum records per second by writer(s)
-                        and/or Number of records per second by reader(s)
- -rsec <arg>            Number of seconds/step for readers, default: 0
- -rstep <arg>           Number of readers/step, default: 1
- -seconds <arg>         Number of seconds to run; if not specified, runs
-                        forever
- -size <arg>            Size of each message (event or record)
- -sync <arg>            Each Writer calls flush/sync after writing <arg>
-                        number of of events(records) ; <arg> number of
-                        events(records) per Write or Read Transaction
- -threads <arg>         io threads per Topic, default: 1
- -throughput <arg>      If > 0, throughput in MB/s
-                        If 0, writes/reads 'records'
-                        If -1, get the maximum throughput (default: -1)
- -time <arg>            Latency Time Unit [ms:MILLISECONDS,
-                        mcs:MICROSECONDS, ns:NANOSECONDS]; default: ms
- -topic <arg>           Topic name, default : test
- -writeQuorum <arg>     WriteQuorum default: 1
- -writers <arg>         Number of writers
- -wsec <arg>            Number of seconds/step for writers, default: 0
- -wstep <arg>           Number of writers/step, default: 1
-
-Please report issues at https://github.com/kmgowda/SBK
-
-```
 
 ## Use SBK git hub packages
 Instead of using entire SBK framework, if you just want to use the [SBK framework API](https://github.com/kmgowda?tab=packages&repo_name=SBK) packages to measure the performance benchmarking of your storage device/software, then follow the below simple and easy steps.
