@@ -11,8 +11,8 @@
 package io.sbk.SbkTemplate;
 
 /**
- * Class for SbkTemplate storage default configuration.
+ * Class for SbkTemplate storage configuration.
  */
 public class SbkTemplateConfig {
-
+     // Add SbkTemplate Storage driver configuration parameters
 }
