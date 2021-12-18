@@ -30,7 +30,7 @@ import java.io.IOException;
  * then change the datatype and getDataType.
  */
 public class SbkTemplate implements Storage<byte[]> {
-    private final static String CONFIGFILE = "sbkTemplate.properties";
+    private final static String CONFIGFILE = "SbkTemplate.properties";
     private SbkTemplateConfig config;
 
     @Override
