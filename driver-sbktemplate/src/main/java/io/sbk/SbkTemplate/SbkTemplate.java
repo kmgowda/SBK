@@ -66,12 +66,12 @@ public class SbkTemplate implements Storage<byte[]> {
 
     @Override
     public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
-        return new SbkTemplateWriter(id, params);
+        return new SbkTemplateWriter(id, params, config);
     }
 
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
-        return new SbkTemplateReader(id, params);
+        return new SbkTemplateReader(id, params, config);
     }
 
     @Override
