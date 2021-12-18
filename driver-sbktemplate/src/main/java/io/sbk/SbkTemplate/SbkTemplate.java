@@ -9,6 +9,9 @@
  */
 package io.sbk.SbkTemplate;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
@@ -25,9 +28,22 @@ import java.io.IOException;
  * then change the datatype and getDataType.
  */
 public class SbkTemplate implements Storage<byte[]> {
+    private final static String CONFIGFILE = "sbkTemplate.properties";
+    private SbkTemplateConfig config;
 
     @Override
     public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        try {
+            config = mapper.readValue(
+                    Objects.requireNonNull(SbkTemplate.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
+                    SbkTemplateConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+
         throw new IllegalArgumentException("The SbkTemplate Driver not defined");
     }
 
