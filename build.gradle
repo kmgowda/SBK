@@ -477,7 +477,7 @@ task addDriver(dependsOn: deleteDriver) {
             String name1 = driver
             if (name1.startsWith("driver-")) {
                 driverName = name1
-                sbkDriverName = name1.split("driver-")[0]
+                sbkDriverName = name1.split("driver-")[1]
             } else {
                 driverName = "driver-" + name1
                 sbkDriverName = name1
