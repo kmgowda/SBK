@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class SbkTemplateWriter implements Writer<byte[]> {
 
-    public SbkTemplateWriter(int writerID, ParameterOptions params) {
+    public SbkTemplateWriter(int writerID, ParameterOptions params, SbkTemplateConfig config) {
     }
 
     @Override

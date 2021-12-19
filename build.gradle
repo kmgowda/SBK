@@ -420,16 +420,15 @@ task deleteDriver() {
     doLast {
         String templateName = "driver-sbktemplate"
         String driverName = templateName
-        String sbkDriverName = ""
 
         if (project.hasProperty("driver")) {
             String name1 = driver
-            if (!name1.startsWith("driver-")) {
-                driverName = "driver-" + driver
+            if (name1.startsWith("driver-")) {
+                driverName = name1
+            } else {
+                driverName = "driver-" + name1
             }
-            driverName = "driver-" + driver
-            sbkDriverName = driver
-            sbkDriverName = sbkDriverName.capitalize()
+            driverName = driverName.toLowerCase()
         } else {
             println "driver name is missing user -Pdriver "
             return
@@ -476,11 +475,19 @@ task addDriver(dependsOn: deleteDriver) {
 
         if (project.hasProperty("driver")) {
             String name1 = driver
-            if (!name1.startsWith("driver-")) {
-                driverName = "driver-" + driver
+            if (name1.startsWith("driver-")) {
+                driverName = name1
+                String[] lt = name1.split("driver-")
+                if (lt.length < 2) {
+                    println "Missing driver name"
+                    return
+                }
+                sbkDriverName = lt[1]
+            } else {
+                driverName = "driver-" + name1
+                sbkDriverName = name1
             }
-            driverName = "driver-" + driver
-            sbkDriverName = driver
+            driverName = driverName.toLowerCase()
             sbkDriverName = sbkDriverName.capitalize()
         } else {
             println "driver name is missing user -Pdriver "

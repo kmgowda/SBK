@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class SbkTemplateReader implements Reader<byte[]> {
 
-    public SbkTemplateReader(int readerId, ParameterOptions params) {
+    public SbkTemplateReader(int readerId, ParameterOptions params, SbkTemplateConfig config) {
     }
 
     @Override
