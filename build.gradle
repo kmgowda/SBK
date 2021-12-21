@@ -423,7 +423,10 @@ task deleteDriver() {
 
         if (project.hasProperty("driver")) {
             String name1 = driver
-            if (name1.startsWith("driver-")) {
+            if (name1.equalsIgnoreCase("driver") || name1.equalsIgnoreCase("driver-")) {
+                println "driver name is missing"
+                return
+            } else if (name1.startsWith("driver-")) {
                 driverName = name1
             } else {
                 driverName = "driver-" + name1
@@ -475,7 +478,10 @@ task addDriver(dependsOn: deleteDriver) {
 
         if (project.hasProperty("driver")) {
             String name1 = driver
-            if (name1.startsWith("driver-")) {
+            if (name1.equalsIgnoreCase("driver") || name1.equalsIgnoreCase("driver-")) {
+                println "driver name is missing"
+                return
+            } else if (name1.startsWith("driver-")) {
                 driverName = name1
                 String[] lt = name1.split("driver-")
                 if (lt.length < 2) {
