@@ -436,7 +436,7 @@ The -throughput -1 specifies the writer tries to write the events at the maximum
 ```
 
 ## Contributing to SBK
-* All submissions must be adhering to [Apache licence](LICENSE) and [Apache CLA](CLA-CORPORATE)
+* All submissions must be adhering to [Apache licence](LICENSE)
 
 All submissions to the master are done through pull requests. If you'd like to make a change:
 
