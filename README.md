@@ -443,7 +443,8 @@ All submissions to the master are done through pull requests. If you'd like to m
 1. Create a new Github issue ([SBK issues](https://github.com/kmgowda/sbk/issues)) describing the problem / feature.
 2. Fork a branch.
 3. Make your changes.
-   * you can refer ([Oracle Java Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for coding style; however, Running the Gradle build helps you to fix the Coding syte issues too.
+   * you can refer ([Oracle Java Coding Style](https://www.oracle.com/technetwork/java/codeconvtoc-136057.html)) for 
+     coding style; however, Running the Gradle build helps you to fix the Coding style issues too.
 4. Verify all changes are working and Gradle build checkstyle is good.
 5. Submit a pull request with Issue number, Description and your Sign-off.
 
@@ -810,10 +811,8 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.   
 
 
-
 ## Use SBK from Maven Central
 The SBK APIs Package is available at [maven central](https://search.maven.org/classic/#artifactdetails%7Cio.github.kmgowda%7Csbk-api%7C0.84%7Cjar) too. to use the sbk-api package, follow below steps
-
 
 1. Add the SBK git hub package repository and dependency in gradle build file of your project as follows
 
