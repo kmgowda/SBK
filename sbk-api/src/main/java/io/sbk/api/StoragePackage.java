@@ -33,8 +33,7 @@ final public class StoragePackage {
     final private StringCompareIgnoreCase stringComparator;
 
     public StoragePackage(String packageName) {
-        final Reflections reflections = new Reflections(packageName);
-        final Set<Class<? extends Storage>> subTypes = reflections.getSubTypesOf(Storage.class);
+        final Set<Class<? extends Storage>> subTypes = getStorageClasses(packageName);
         final int size = subTypes.size();
         this.packageName = packageName;
         this.stringComparator = new StringCompareIgnoreCase();
@@ -51,6 +50,11 @@ final public class StoragePackage {
                 index.incrementAndGet();
             });
         }
+    }
+
+    public static Set<Class<? extends Storage>> getStorageClasses(String packageName) {
+        final Reflections reflections = new Reflections(packageName);
+        return reflections.getSubTypesOf(Storage.class);
     }
 
     public static @NotNull Storage<?> getStorageInstance(String storageFullPath) throws ClassNotFoundException,
