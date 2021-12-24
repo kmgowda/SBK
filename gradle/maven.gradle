@@ -17,6 +17,11 @@ plugins.withId('maven-publish') {
         withSourcesJar()
     }
 
+    /*
+      Use command : ./gradlew publish  -Pmaven -Pgithub
+      -Pmaven - parameter to publish in maven central
+      -Pgithub - parameter to publish to Git hub
+     */
     publishing {
         repositories {
             if (project.hasProperty("maven")) {
