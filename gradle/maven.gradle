@@ -19,20 +19,24 @@ plugins.withId('maven-publish') {
 
     publishing {
         repositories {
-            maven {
-                name = "SBK-Maven"
-                url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-                credentials {
-                    username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
-                    password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+            if (project.hasProperty("maven")) {
+                maven {
+                    name = "SBK-Maven"
+                    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    credentials {
+                        username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
+                        password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                    }
                 }
             }
-            maven {
-                name = "SBK-GitHub"
-                url = uri("https://maven.pkg.github.com/kmgowda/SBK")
-                credentials {
-                    username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
-                    password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
+            if (project.hasProperty("github")) {
+                maven {
+                    name = "SBK-GitHub"
+                    url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+                    credentials {
+                        username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
+                        password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
+                    }
                 }
             }
         }
