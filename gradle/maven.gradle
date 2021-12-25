@@ -24,29 +24,31 @@ plugins.withId('maven-publish') {
      */
     publishing {
         repositories {
-            if (!project.hasProperty("maven") || !project.hasProperty("github")) {
-                println "Missing parameters -Pmaven or/and -Pgithub"
-                return
-            }
-            if (project.hasProperty("maven")) {
-                println "Publishing SBK packages to Maven Central"
-                maven {
-                    name = "SBK-Maven"
-                    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-                    credentials {
-                        username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
-                        password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+            if (project.gradle.startParameter.taskNames.contains("publish")) {
+                if (!project.hasProperty("maven") && !project.hasProperty("github")) {
+                    println "Missing parameters -Pmaven or/and -Pgithub"
+                    return
+                }
+                if (project.hasProperty("maven")) {
+                    println "Publishing SBK packages to Maven Central"
+                    maven {
+                        name = "SBK-Maven"
+                        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                        credentials {
+                            username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
+                            password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
+                        }
                     }
                 }
-            }
-            if (project.hasProperty("github")) {
-                println "Publishing SBK packages to Git Hub"
-                maven {
-                    name = "SBK-GitHub"
-                    url = uri("https://maven.pkg.github.com/kmgowda/SBK")
-                    credentials {
-                        username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
-                        password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
+                if (project.hasProperty("github")) {
+                    println "Publishing SBK packages to Git Hub"
+                    maven {
+                        name = "SBK-GitHub"
+                        url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+                        credentials {
+                            username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
+                            password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
+                        }
                     }
                 }
             }
