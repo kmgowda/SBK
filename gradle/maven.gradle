@@ -24,7 +24,12 @@ plugins.withId('maven-publish') {
      */
     publishing {
         repositories {
+            if (!project.hasProperty("maven") || !project.hasProperty("github")) {
+                println "Missing parameters -Pmaven or/and -Pgithub"
+                return
+            }
             if (project.hasProperty("maven")) {
+                println "Publishing SBK packages to Maven Central"
                 maven {
                     name = "SBK-Maven"
                     url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
@@ -35,6 +40,7 @@ plugins.withId('maven-publish') {
                 }
             }
             if (project.hasProperty("github")) {
+                println "Publishing SBK packages to Git Hub"
                 maven {
                     name = "SBK-GitHub"
                     url = uri("https://maven.pkg.github.com/kmgowda/SBK")
