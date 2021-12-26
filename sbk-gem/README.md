@@ -98,7 +98,7 @@ Please report issues at https://github.com/kmgowda/SBK
 An Example output of SBK-GEM with 1 SBK file system benchmarking instances is as follows:
 
 ```
-kmg@kmgs-MBP SBK % ./sbk-gem/build/install/sbk-gem/bin/sbk-gem -class file -readers 1 -size 10 -time ns -seconds 60 -gemuser kmg -gempass Laki@2322 -sbkdir /Users/kmg/projects/SBK/build/install/sbk                              
+kmg@kmgs-MBP SBK % ./sbk-gem/build/install/sbk-gem/bin/sbk-gem -class file -readers 1 -size 10 -time ns -seconds 60 -gemuser kmg -gempass pass@123456 -sbkdir /Users/kmg/projects/SBK/build/install/sbk                              
 2021-08-20 14:25:51 INFO Reflections took 69 ms to scan 3 urls, producing 88 keys and 115 values 
 2021-08-20 14:25:51 INFO 
    _____   ____    _  __            _____   ______   __  __
@@ -110,7 +110,7 @@ kmg@kmgs-MBP SBK % ./sbk-gem/build/install/sbk-gem/bin/sbk-gem -class file -read
 
 2021-08-20 14:25:51 INFO Storage Benchmark Kit - Group Execution Monitor
 2021-08-20 14:25:51 INFO SBK-GEM Version: 0.91
-2021-08-20 14:25:51 INFO Arguments List: [-class, file, -readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, Laki@2322, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
+2021-08-20 14:25:51 INFO Arguments List: [-class, file, -readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, pass@123456, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
 2021-08-20 14:25:51 INFO Java Runtime Version: 11.0.8+11
 2021-08-20 14:25:51 INFO Storage Drivers Package: io.sbk
 2021-08-20 14:25:51 INFO sbk.applicationName: 
@@ -119,7 +119,7 @@ kmg@kmgs-MBP SBK % ./sbk-gem/build/install/sbk-gem/bin/sbk-gem -class file -read
 2021-08-20 14:25:51 INFO '-class': file
 2021-08-20 14:25:51 INFO Available Storage Drivers in package 'io.sbk': 0 []
 2021-08-20 14:25:51 WARN Instantiation of storage class 'file' from the package 'io.sbk' failed!, error: java.lang.ClassNotFoundException: storage class 'file' not found in package: io.sbk
-2021-08-20 14:25:51 INFO SBK-GEM [1]: Arguments to process : [-readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, Laki@2322, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
+2021-08-20 14:25:51 INFO SBK-GEM [1]: Arguments to process : [-readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, pass@123456, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
 2021-08-20 14:25:51 INFO Time Unit: NANOSECONDS
 2021-08-20 14:25:51 INFO Minimum Latency: 0 ns
 2021-08-20 14:25:51 INFO Maximum Latency: 180000000000 ns

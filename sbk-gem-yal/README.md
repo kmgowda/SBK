@@ -92,7 +92,7 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
 2021-09-07 15:25:22 INFO Storage Benchmark Kit - Group Execution Monitor
 2021-09-07 15:25:22 INFO SBK-GEM Version: 0.92
 2021-09-07 15:25:22 INFO SBK-GEM Website: https://github.com/kmgowda/SBK
-2021-09-07 15:25:22 INFO Arguments List: [-nodes, localhost, -class, file, -readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, Laki@2322, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
+2021-09-07 15:25:22 INFO Arguments List: [-nodes, localhost, -class, file, -readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, pass@123456, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
 2021-09-07 15:25:22 INFO Java Runtime Version: 11.0.8+11
 2021-09-07 15:25:22 INFO Storage Drivers Package: io.sbk
 2021-09-07 15:25:22 INFO sbk.applicationName: sbk
@@ -104,7 +104,7 @@ AsyncFile, BookKeeper, Cassandra, CephS3, ConcurrentQ, CouchDB, CSV, Db2, Derby,
 FdbRecord, File, FileStream, FoundationDB, HDFS, Hive, Ignite, Jdbc, Kafka, LevelDB, 
 MariaDB, MinIO, MongoDB, MsSql, MySQL, Nats, NatsStream, Nsq, Null, OpenIO, PostgreSQL, 
 Pravega, Pulsar, RabbitMQ, Redis, RedPanda, RocketMQ, RocksDB, SeaweedS3, SQLite]
-2021-09-07 15:25:22 INFO SBK-GEM [1]: Arguments to process : [-nodes, localhost, -readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, Laki@2322, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
+2021-09-07 15:25:22 INFO SBK-GEM [1]: Arguments to process : [-nodes, localhost, -readers, 1, -size, 10, -time, ns, -seconds, 60, -gemuser, kmg, -gempass, pass@123456, -sbkdir, /Users/kmg/projects/SBK/build/install/sbk]
 2021-09-07 15:25:22 INFO Time Unit: NANOSECONDS
 2021-09-07 15:25:22 INFO Minimum Latency: 0 ns
 2021-09-07 15:25:22 INFO Maximum Latency: 180000000000 ns
