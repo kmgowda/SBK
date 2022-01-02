@@ -11,7 +11,7 @@ package io.perl.impl;
 
 import io.perl.PerlConfig;
 import io.perl.Channel;
-import io.perl.Performance;
+import io.perl.Perl;
 import io.perl.PeriodicLogger;
 import io.perl.SendChannel;
 import io.perl.TimeStamp;
@@ -33,7 +33,7 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * Class for Performance statistics.
  */
-final public class CQueuePerformance implements Performance {
+final public class CQueuePerl implements Perl {
     final private int windowIntervalMS;
     final private int idleNS;
     final private int timeoutMS;
@@ -53,7 +53,7 @@ final public class CQueuePerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerformance(@NotNull PerlConfig perlConfig, int maxWorkers, PeriodicLogger periodicRecorder,
+    public CQueuePerl(@NotNull PerlConfig perlConfig, int maxWorkers, PeriodicLogger periodicRecorder,
                              int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;

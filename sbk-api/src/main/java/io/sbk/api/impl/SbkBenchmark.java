@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import io.perl.Perl;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
@@ -20,10 +21,9 @@ import io.perl.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.logger.Logger;
 import io.perl.LatencyRecordWindow;
-import io.perl.Performance;
 import io.perl.PeriodicLogger;
 import io.perl.impl.ArrayLatencyRecorder;
-import io.perl.impl.CQueuePerformance;
+import io.perl.impl.CQueuePerl;
 import io.perl.impl.CSVExtendedLatencyRecorder;
 import io.perl.impl.HashMapLatencyRecorder;
 import io.perl.impl.HdrExtendedLatencyRecorder;
@@ -62,8 +62,8 @@ final public class SbkBenchmark implements Benchmark {
     final private Logger logger;
     final private ExecutorService executor;
     final private ParameterOptions params;
-    final private Performance writeStats;
-    final private Performance readStats;
+    final private Perl writeStats;
+    final private Perl readStats;
     final private int maxQs;
     final private double[] percentileFractions;
     final private ScheduledExecutorService timeoutExecutor;
@@ -109,12 +109,12 @@ final public class SbkBenchmark implements Benchmark {
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         executor = perlConfig.fork ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
-                new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
+                new CQueuePerl(perlConfig, params.getWritersCount(), createLatencyRecorder(),
                 logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
                         this.time, executor) : null;
 
         readStats = params.getReadersCount() > 0 ?
-                new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
+                new CQueuePerl(perlConfig, params.getReadersCount(), createLatencyRecorder(),
                 logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
                         this.time, executor) : null;
         timeoutExecutor = Executors.newScheduledThreadPool(1);

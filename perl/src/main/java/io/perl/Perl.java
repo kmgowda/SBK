@@ -12,7 +12,7 @@ package io.perl;
 /**
  * Interface for performance Statistics.
  */
-public interface Performance extends RunBenchmark {
+public interface Perl extends RunBenchmark {
 
     /**
      * stop/shutdown the Benchmark.
