@@ -110,12 +110,12 @@ final public class SbkBenchmark implements Benchmark {
         executor = perlConfig.fork ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
                 new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
-                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, params.getTimeoutMS(),
+                logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
                         this.time, executor) : null;
 
         readStats = params.getReadersCount() > 0 ?
                 new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
-                logger.getReportingIntervalSeconds() * PerlConfig.MS_PER_SEC, params.getTimeoutMS(),
+                logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
                         this.time, executor) : null;
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();
@@ -303,7 +303,7 @@ final public class SbkBenchmark implements Benchmark {
                     i += params.getWritersStep();
                     if (params.getWritersStepSeconds() > 0 && i < params.getWritersCount()) {
                         try {
-                            Thread.sleep((long) params.getWritersStepSeconds() * PerlConfig.MS_PER_SEC);
+                            Thread.sleep((long) params.getWritersStepSeconds() * Time.MS_PER_SEC);
                             if (params.getTotalSecondsToRun() > 0) {
                                 secondsToRun -= params.getWritersStepSeconds();
                                 if (secondsToRun <= 0) {
@@ -355,7 +355,7 @@ final public class SbkBenchmark implements Benchmark {
                     i += params.getReadersStep();
                     if (params.getReadersStepSeconds() > 0 && i < params.getReadersCount()) {
                         try {
-                            Thread.sleep((long) params.getReadersStepSeconds() * PerlConfig.MS_PER_SEC);
+                            Thread.sleep((long) params.getReadersStepSeconds() * Time.MS_PER_SEC);
                             if (params.getTotalSecondsToRun() > 0) {
                                 secondsToRun -= params.getReadersStepSeconds();
                                 if (secondsToRun <= 0) {

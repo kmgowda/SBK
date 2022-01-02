@@ -12,6 +12,15 @@ package io.sbk.time;
 
 public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
 
+    int NS_PER_MICRO = 1000;
+    int MICROS_PER_MS = 1000;
+    int MS_PER_SEC = 1000;
+
+    int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
+    long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
+    int MS_PER_MIN = MS_PER_SEC * 60;
+    int MICROS_PER_SEC = MICROS_PER_MS * MS_PER_SEC;
+
     /**
      * get the Time Unit.
      *

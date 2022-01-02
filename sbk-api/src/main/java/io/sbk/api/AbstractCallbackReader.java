@@ -10,7 +10,6 @@
 
 package io.sbk.api;
 
-import io.sbk.config.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.time.Time;
 
@@ -90,7 +89,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
         this.time = time;
         this.readCnt = new AtomicLong(0);
         this.beginTime = time.getCurrentTime();
-        this.msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
+        this.msToRun = secondsToRun * Time.MS_PER_SEC;
         this.recordsCount = recordsCount;
         this.ret = new CompletableFuture<>();
         start(callback);

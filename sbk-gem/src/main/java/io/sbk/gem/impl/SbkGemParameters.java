@@ -12,11 +12,11 @@ package io.sbk.gem.impl;
 
 import io.sbk.api.impl.SbkDriversParameters;
 import io.sbk.config.GemConfig;
-import io.sbk.config.PerlConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.SshConnection;
 import io.sbk.system.Printer;
+import io.sbk.time.Time;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -56,7 +56,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     public SbkGemParameters(String name, String[] drivers, @NotNull GemConfig config, int ramport) {
         super(name, GemConfig.DESC, drivers);
         this.config = config;
-        this.timeoutMS = config.timeoutSeconds * PerlConfig.MS_PER_SEC;
+        this.timeoutMS = config.timeoutSeconds * Time.MS_PER_SEC;
         this.ramPort = ramport;
         try {
             this.localHost = InetAddress.getLocalHost().getHostName();

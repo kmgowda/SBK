@@ -80,7 +80,7 @@ final public class CQueuePerformance implements Performance {
 
 
     private void runPerformance(final long secondsToRun, final long totalRecords) {
-        final long msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
+        final long msToRun = secondsToRun * Time.MS_PER_SEC;
         final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, timeoutMS, idleNS);
         final long startTime = time.getCurrentTime();
         boolean doWork = true;
@@ -223,7 +223,7 @@ final public class CQueuePerformance implements Performance {
         public ElasticWaitCounter(int windowInterval, int timeoutMS, int idleNS) {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
-            countRatio = (PerlConfig.NS_PER_MS * 1.0) / this.idleNS;
+            countRatio = (Time.NS_PER_MS * 1.0) / this.idleNS;
             minIdleCount = (long) (countRatio * timeoutMS);
             elasticCount = minIdleCount;
             idleCount = 0;

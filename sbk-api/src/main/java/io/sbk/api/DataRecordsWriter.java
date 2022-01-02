@@ -10,7 +10,6 @@
 
 package io.sbk.api;
 
-import io.sbk.config.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.perl.SendChannel;
 import io.sbk.time.Time;
@@ -141,7 +140,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
     default void RecordsWriterTime(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
                                    Time time) throws IOException {
         final Status status = new Status();
-        final long msToRun = secondsToRun * PerlConfig.MS_PER_SEC;
+        final long msToRun = secondsToRun * Time.MS_PER_SEC;
         long startTime = time.getCurrentTime();
         int id = writer.id % writer.recordIDMax;
         status.startTime = startTime;

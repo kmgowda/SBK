@@ -10,8 +10,6 @@
 
 package io.sbk.time;
 
-import io.sbk.config.PerlConfig;
-
 final public class NanoSeconds implements Time {
 
     /**
@@ -41,7 +39,7 @@ final public class NanoSeconds implements Time {
      * @return elapsed time in milliseconds
      */
     public double elapsedMilliSeconds(long h, long l) {
-        return elapsed(h, l) / (PerlConfig.NS_PER_MS * 1.0);
+        return elapsed(h, l) / (Time.NS_PER_MS * 1.0);
     }
 
     /**
@@ -52,7 +50,7 @@ final public class NanoSeconds implements Time {
      * @return elapsed time in seconds
      */
     public double elapsedSeconds(long h, long l) {
-        return elapsed(h, l) / (PerlConfig.NS_PER_SEC * 1.0);
+        return elapsed(h, l) / (Time.NS_PER_SEC * 1.0);
     }
 
     /**
@@ -72,7 +70,7 @@ final public class NanoSeconds implements Time {
      * @return converted time in microseconds
      */
     public double convertToMicroSeconds(double t) {
-        return t / PerlConfig.NS_PER_MICRO;
+        return t / Time.NS_PER_MICRO;
     }
 
     /**
@@ -82,7 +80,7 @@ final public class NanoSeconds implements Time {
      * @return converted time in Milliseconds
      */
     public double convertToMilliSeconds(double t) {
-        return t / PerlConfig.NS_PER_MS;
+        return t / Time.NS_PER_MS;
     }
 
 }

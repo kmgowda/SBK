@@ -11,10 +11,10 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.RateController;
-import io.sbk.config.PerlConfig;
+import io.sbk.time.Time;
 
 final public class SbkRateController implements RateController {
-    private static final long MIN_SLEEP_NS = 2 * PerlConfig.NS_PER_MS;
+    private static final long MIN_SLEEP_NS = 2 * Time.NS_PER_MS;
     private long sleepTimeNs;
     private int recordsPerSec;
     private long toSleepNs;
@@ -33,7 +33,7 @@ final public class SbkRateController implements RateController {
     public void start(final int recordsPerSec) {
         this.recordsPerSec = recordsPerSec;
         this.sleepTimeNs = this.recordsPerSec > 0 ?
-                PerlConfig.NS_PER_SEC / this.recordsPerSec : 0;
+                Time.NS_PER_SEC / this.recordsPerSec : 0;
     }
 
     /**
@@ -61,8 +61,8 @@ final public class SbkRateController implements RateController {
         if (toSleepNs >= MIN_SLEEP_NS) {
             long sleepStart = System.nanoTime();
             try {
-                final long sleepMs = toSleepNs / PerlConfig.NS_PER_MS;
-                final long sleepNs = toSleepNs - (sleepMs * PerlConfig.NS_PER_MS);
+                final long sleepMs = toSleepNs / Time.NS_PER_MS;
+                final long sleepNs = toSleepNs - (sleepMs * Time.NS_PER_MS);
                 Thread.sleep(sleepMs, (int) sleepNs);
             } catch (InterruptedException e) {
                 // will be taken care in finally block

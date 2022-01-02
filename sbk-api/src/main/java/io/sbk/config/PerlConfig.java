@@ -10,6 +10,7 @@
 
 package io.sbk.config;
 
+import io.sbk.time.Time;
 import io.sbk.time.TimeUnit;
 
 final public class PerlConfig {
@@ -21,23 +22,16 @@ final public class PerlConfig {
     final public static long BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_MB;
 
     final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5;
-    final public static int NS_PER_MICRO = 1000;
-    final public static int MICROS_PER_MS = 1000;
-    final public static int MS_PER_SEC = 1000;
-    final public static int MICROS_PER_SEC = MICROS_PER_MS * MS_PER_SEC;
-    final public static int DEFAULT_TIMEOUT_MS = MS_PER_SEC;
-    final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / MS_PER_SEC;
+    final public static int DEFAULT_TIMEOUT_MS = Time.MS_PER_SEC;
+    final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / Time.MS_PER_SEC;
 
     final public static long LONG_MAX = Long.MAX_VALUE >> 2;
     final public static long TOTAL_LATENCY_MAX = Long.MAX_VALUE >> 1;
 
     final public static int MIN_Q_PER_WORKER = 1;
 
-    final public static int MS_PER_MIN = MS_PER_SEC * 60;
-    final public static int DEFAULT_MAX_LATENCY = MS_PER_MIN * 3;
-    final public static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
-    final public static long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
-    final public static int MIN_IDLE_NS = NS_PER_MICRO;
+    final public static int DEFAULT_MAX_LATENCY = Time.MS_PER_MIN * 3;
+    final public static int MIN_IDLE_NS = Time.NS_PER_MICRO;
     final public static int DEFAULT_MIN_LATENCY = 0;
     final public static double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
