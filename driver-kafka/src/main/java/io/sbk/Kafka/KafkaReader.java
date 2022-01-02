@@ -14,7 +14,7 @@ import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
 import io.sbk.perl.SendChannel;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;

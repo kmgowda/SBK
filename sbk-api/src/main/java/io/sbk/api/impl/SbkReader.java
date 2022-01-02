@@ -20,7 +20,7 @@ import io.sbk.logger.CountReaders;
 import io.sbk.perl.RunBenchmark;
 import io.sbk.perl.SendChannel;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;

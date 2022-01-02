@@ -14,7 +14,7 @@ import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.config.PerlConfig;
 import io.sbk.options.InputOptions;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

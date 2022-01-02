@@ -9,7 +9,7 @@
  */
 package io.sbk.perl;
 
-import io.sbk.time.Time;
+import io.time.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
 

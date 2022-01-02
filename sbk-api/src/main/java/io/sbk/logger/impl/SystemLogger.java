@@ -19,11 +19,11 @@ import io.sbk.logger.Logger;
 import io.sbk.logger.LoggerConfig;
 import io.sbk.options.InputOptions;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
-import io.sbk.time.TimeUnit;
-import io.sbk.time.MicroSeconds;
-import io.sbk.time.MilliSeconds;
-import io.sbk.time.NanoSeconds;
+import io.time.Time;
+import io.time.TimeUnit;
+import io.time.MicroSeconds;
+import io.time.MilliSeconds;
+import io.time.NanoSeconds;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

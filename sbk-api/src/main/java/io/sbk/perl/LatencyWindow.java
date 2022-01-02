@@ -11,7 +11,7 @@
 package io.sbk.perl;
 
 import io.sbk.config.PerlConfig;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 abstract public sealed class LatencyWindow extends LatencyRecorder permits LatencyRecordWindow {

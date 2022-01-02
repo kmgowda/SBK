@@ -15,8 +15,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.config.PerlConfig;
 import io.sbk.perl.Print;
-import io.sbk.time.Time;
-import io.sbk.time.TimeUnit;
+import io.time.Time;
+import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;

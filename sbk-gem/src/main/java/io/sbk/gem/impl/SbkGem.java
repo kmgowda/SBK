@@ -31,7 +31,7 @@ import io.sbk.ram.RamParameterOptions;
 import io.sbk.ram.impl.SbkRamBenchmark;
 import io.sbk.ram.impl.SbkRamParameters;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;

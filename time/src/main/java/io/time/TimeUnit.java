@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.time;
+package io.time;
 
 public enum TimeUnit {
     ms {

@@ -16,7 +16,7 @@ import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.ram.RamRegistry;
 import io.sbk.state.State;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
 

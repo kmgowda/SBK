@@ -23,7 +23,7 @@ import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
 import io.sbk.perl.SendChannel;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;

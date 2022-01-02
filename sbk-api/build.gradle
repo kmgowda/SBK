@@ -30,6 +30,7 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
+    api project(":time")
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion

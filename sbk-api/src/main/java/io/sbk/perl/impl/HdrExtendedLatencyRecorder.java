@@ -16,7 +16,7 @@ import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramIterationValue;
 

@@ -10,8 +10,8 @@
 
 package io.sbk.config;
 
-import io.sbk.time.Time;
-import io.sbk.time.TimeUnit;
+import io.time.Time;
+import io.time.TimeUnit;
 
 final public class PerlConfig {
     final public static String PERCENTILE_FORMAT = "0.##";

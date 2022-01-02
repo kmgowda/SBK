@@ -28,7 +28,7 @@ import io.sbk.logger.RamHostConfig;
 import io.sbk.options.InputOptions;
 import io.sbk.perl.LatencyRecorder;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

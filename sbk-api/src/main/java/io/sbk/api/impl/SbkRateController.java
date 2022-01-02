@@ -11,7 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.api.RateController;
-import io.sbk.time.Time;
+import io.time.Time;
 
 final public class SbkRateController implements RateController {
     private static final long MIN_SLEEP_NS = 2 * Time.NS_PER_MS;

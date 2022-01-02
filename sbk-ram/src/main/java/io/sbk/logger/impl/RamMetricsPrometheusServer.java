@@ -12,7 +12,7 @@ package io.sbk.logger.impl;
 
 import io.sbk.logger.CountConnections;
 import io.sbk.logger.MetricsConfig;
-import io.sbk.time.Time;
+import io.time.Time;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;

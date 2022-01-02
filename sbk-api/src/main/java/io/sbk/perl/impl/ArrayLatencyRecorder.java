@@ -15,7 +15,7 @@ import io.sbk.perl.LatencyPercentiles;
 import io.sbk.perl.LatencyRecord;
 import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.ReportLatencies;
-import io.sbk.time.Time;
+import io.time.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
 

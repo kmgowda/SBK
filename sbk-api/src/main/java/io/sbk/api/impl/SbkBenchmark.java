@@ -30,7 +30,7 @@ import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
 import io.sbk.perl.impl.TotalWindowLatencyPeriodicRecorder;
 import io.sbk.state.State;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

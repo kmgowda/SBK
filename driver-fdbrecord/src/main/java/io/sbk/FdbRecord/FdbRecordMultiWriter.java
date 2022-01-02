@@ -18,7 +18,7 @@ import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
 import io.sbk.perl.SendChannel;
-import io.sbk.time.Time;
+import io.time.Time;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;

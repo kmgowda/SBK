@@ -18,7 +18,7 @@ import io.sbk.logger.MetricsConfig;
 import io.sbk.options.InputOptions;
 import io.sbk.perl.Print;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 
 import java.io.IOException;
 import java.io.InputStream;

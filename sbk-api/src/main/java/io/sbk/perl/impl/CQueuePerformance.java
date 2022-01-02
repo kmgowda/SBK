@@ -17,7 +17,7 @@ import io.sbk.perl.SendChannel;
 import io.sbk.perl.TimeStamp;
 import io.sbk.state.State;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
 

@@ -17,7 +17,7 @@ import io.sbk.perl.LatencyRecordWindow;
 import io.sbk.perl.LatencyRecorder;
 import io.sbk.perl.ReportLatencies;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;

@@ -14,7 +14,7 @@ import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
 import io.sbk.perl.SendChannel;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
