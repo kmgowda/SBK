@@ -14,7 +14,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.ram.RamRegistry;
-import io.sbk.state.State;
+import io.state.State;
 import io.sbk.system.Printer;
 import io.sbk.time.Time;
 import lombok.Synchronized;
