@@ -13,7 +13,7 @@ package io.perl;
 /**
  * Interface for recording latencies.
  */
-public interface PeriodicRecorder extends TotalPeriodicWindow {
+public interface PeriodicLogger extends TotalPeriodicWindow {
 
     /**
      * Record the Event/record.

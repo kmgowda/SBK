@@ -21,13 +21,13 @@ import io.sbk.data.DataType;
 import io.sbk.logger.Logger;
 import io.perl.LatencyRecordWindow;
 import io.perl.Performance;
-import io.perl.PeriodicRecorder;
+import io.perl.PeriodicLogger;
 import io.perl.impl.ArrayLatencyRecorder;
 import io.perl.impl.CQueuePerformance;
 import io.perl.impl.CSVExtendedLatencyRecorder;
 import io.perl.impl.HashMapLatencyRecorder;
 import io.perl.impl.HdrExtendedLatencyRecorder;
-import io.perl.impl.TotalWindowLatencyPeriodicRecorder;
+import io.perl.impl.TotalWindowLatencyPeriodicLogger;
 import io.state.State;
 import io.sbk.system.Printer;
 import io.time.Time;
@@ -145,7 +145,7 @@ final public class SbkBenchmark implements Benchmark {
     }
 
     @Contract(" -> new")
-    private @NotNull PeriodicRecorder createLatencyRecorder() {
+    private @NotNull PeriodicLogger createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
         final LatencyRecordWindow window;
@@ -178,7 +178,7 @@ final public class SbkBenchmark implements Benchmark {
             Printer.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
+        return new TotalWindowLatencyPeriodicLogger(window, totalWindowExtension, logger, logger::printTotal,
                 logger, time);
     }
 

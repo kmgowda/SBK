@@ -11,18 +11,18 @@
 package io.perl.impl;
 
 import io.perl.LatencyRecordWindow;
-import io.perl.PeriodicRecorder;
+import io.perl.PeriodicLogger;
 import io.perl.Print;
 import io.perl.ReportLatency;
 import io.time.Time;
 
-public final class TotalWindowLatencyPeriodicRecorder extends TotalWindowLatencyRecorder implements PeriodicRecorder {
+public final class TotalWindowLatencyPeriodicLogger extends TotalWindowLatencyRecorder implements PeriodicLogger {
     private final Time time;
     private final ReportLatency reportLatency;
 
-    public TotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
-                                              Print windowLogger, Print totalLogger,
-                                              ReportLatency reportLatency, Time time) {
+    public TotalWindowLatencyPeriodicLogger(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
+                                            Print windowLogger, Print totalLogger,
+                                            ReportLatency reportLatency, Time time) {
         super(window, totalWindow, windowLogger, totalLogger);
         this.reportLatency = reportLatency;
         this.time = time;

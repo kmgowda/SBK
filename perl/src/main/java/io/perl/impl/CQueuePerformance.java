@@ -12,7 +12,7 @@ package io.perl.impl;
 import io.perl.PerlConfig;
 import io.perl.Channel;
 import io.perl.Performance;
-import io.perl.PeriodicRecorder;
+import io.perl.PeriodicLogger;
 import io.perl.SendChannel;
 import io.perl.TimeStamp;
 import io.state.State;
@@ -38,7 +38,7 @@ final public class CQueuePerformance implements Performance {
     final private int idleNS;
     final private int timeoutMS;
     final private Time time;
-    final private PeriodicRecorder periodicLogger;
+    final private PeriodicLogger periodicRecorder;
     final private ExecutorService executor;
     final private Channel[] channels;
     final private CompletableFuture<Void> retFuture;
@@ -53,13 +53,13 @@ final public class CQueuePerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerformance(@NotNull PerlConfig perlConfig, int workers, PeriodicRecorder periodicLogger,
+    public CQueuePerformance(@NotNull PerlConfig perlConfig, int workers, PeriodicLogger periodicRecorder,
                              int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
         this.timeoutMS = timeoutMS;
         this.time = time;
-        this.periodicLogger = periodicLogger;
+        this.periodicRecorder = periodicRecorder;
         this.executor = executor;
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
@@ -89,8 +89,8 @@ final public class CQueuePerformance implements Performance {
         boolean notFound;
         TimeStamp t;
         PerlPrinter.log.info("Performance Logger Started");
-        periodicLogger.start(startTime);
-        periodicLogger.startWindow(startTime);
+        periodicRecorder.start(startTime);
+        periodicRecorder.startWindow(startTime);
         while (doWork) {
             notFound = true;
             for (int i = 0; doWork && (i < channels.length); i++) {
@@ -102,7 +102,7 @@ final public class CQueuePerformance implements Performance {
                         doWork = false;
                     } else {
                         recordsCnt += t.records;
-                        periodicLogger.record(t.startTime, t.endTime, t.bytes, t.records);
+                        periodicRecorder.record(t.startTime, t.endTime, t.bytes, t.records);
                         if (msToRun > 0) {
                             if (time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
                                 doWork = false;
@@ -111,9 +111,9 @@ final public class CQueuePerformance implements Performance {
                             doWork = false;
                         }
                     }
-                    if (periodicLogger.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
-                        periodicLogger.stopWindow(ctime);
-                        periodicLogger.startWindow(ctime);
+                    if (periodicRecorder.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
+                        periodicRecorder.stopWindow(ctime);
+                        periodicRecorder.startWindow(ctime);
                         idleCounter.reset();
                     }
                 }
@@ -122,10 +122,10 @@ final public class CQueuePerformance implements Performance {
                 if (notFound) {
                     if (idleCounter.waitAndCheck()) {
                         ctime = time.getCurrentTime();
-                        final long diffTime = periodicLogger.elapsedMilliSecondsWindow(ctime);
+                        final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
                         if (diffTime > windowIntervalMS) {
-                            periodicLogger.stopWindow(ctime);
-                            periodicLogger.startWindow(ctime);
+                            periodicRecorder.stopWindow(ctime);
+                            periodicRecorder.startWindow(ctime);
                             idleCounter.reset();
                             idleCounter.setElastic(diffTime);
                         } else {
@@ -138,7 +138,7 @@ final public class CQueuePerformance implements Performance {
                 }
             }
         }
-        periodicLogger.stop(ctime);
+        periodicRecorder.stop(ctime);
     }
 
     @Override
