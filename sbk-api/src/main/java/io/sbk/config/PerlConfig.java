@@ -10,7 +10,7 @@
 
 package io.sbk.config;
 
-import java.util.concurrent.TimeUnit;
+import io.sbk.time.TimeUnit;
 
 final public class PerlConfig {
     final public static String PERCENTILE_FORMAT = "0.##";
