@@ -53,7 +53,7 @@ final public class CQueuePerformance implements Performance {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerformance(@NotNull PerlConfig perlConfig, int workers, PeriodicLogger periodicRecorder,
+    public CQueuePerformance(@NotNull PerlConfig perlConfig, int maxWorkers, PeriodicLogger periodicRecorder,
                              int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
@@ -70,8 +70,8 @@ final public class CQueuePerformance implements Performance {
             this.index = 1;
         } else {
             maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
-            this.channels = new CQueueChannel[workers];
-            this.index = workers;
+            this.channels = new CQueueChannel[maxWorkers];
+            this.index = maxWorkers;
         }
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
