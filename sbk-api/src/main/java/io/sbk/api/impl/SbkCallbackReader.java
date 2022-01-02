@@ -14,7 +14,7 @@ import io.sbk.api.Callback;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Worker;
 import io.sbk.data.DataType;
-import io.sbk.perl.SendChannel;
+import io.perl.SendChannel;
 import io.time.Time;
 
 import java.util.concurrent.CompletableFuture;

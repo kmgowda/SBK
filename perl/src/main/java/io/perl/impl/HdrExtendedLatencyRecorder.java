@@ -7,15 +7,15 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl.impl;
+package io.perl.impl;
 
-import io.sbk.config.PerlConfig;
-import io.sbk.perl.LatencyPercentiles;
-import io.sbk.perl.LatencyRecord;
-import io.sbk.perl.LatencyRecordWindow;
-import io.sbk.perl.LatencyRecorder;
-import io.sbk.perl.ReportLatencies;
-import io.sbk.system.Printer;
+import io.perl.PerlConfig;
+import io.perl.LatencyPercentiles;
+import io.perl.LatencyRecord;
+import io.perl.LatencyRecordWindow;
+import io.perl.LatencyRecorder;
+import io.perl.ReportLatencies;
+import io.perl.system.PerlPrinter;
 import io.time.Time;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramIterationValue;
@@ -69,7 +69,7 @@ public final class HdrExtendedLatencyRecorder extends LatencyRecordWindow {
     @Override
     public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies reportLatencies) {
         if (this.totalRecords > 0) {
-            Printer.log.info("Percentiles are from HdrHistogram!");
+            PerlPrinter.log.info("Percentiles are from HdrHistogram!");
             latencyBuffer.copyPercentiles(percentiles, hdrReporter);
             hdrReporter.copyPercentiles(percentiles, reportLatencies);
         } else {

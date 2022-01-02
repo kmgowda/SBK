@@ -13,7 +13,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.sbk.perl.SendChannel;
+import io.perl.SendChannel;
 import io.time.Time;
 
 import java.io.IOException;

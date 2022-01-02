@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl;
+package io.perl;
 
 public non-sealed interface Channel extends SendChannel {
 

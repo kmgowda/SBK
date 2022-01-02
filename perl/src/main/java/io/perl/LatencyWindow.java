@@ -8,9 +8,8 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl;
+package io.perl;
 
-import io.sbk.config.PerlConfig;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 

@@ -19,6 +19,7 @@
     <allow pkg="com.google"/>
     <allow pkg="io.state"/>
     <allow pkg="io.time"/>
+    <allow pkg="io.perl"/>
     <allow pkg="io.sbk"/>
     <allow pkg="io.pravega"/>
     <allow pkg="lombok"/>

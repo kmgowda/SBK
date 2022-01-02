@@ -19,7 +19,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbk.config.Config;
-import io.sbk.config.PerlConfig;
+import io.perl.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.exception.HelpException;
 import io.sbk.logger.Logger;

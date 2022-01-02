@@ -11,10 +11,10 @@
 package io.sbk.logger;
 
 import io.sbk.action.Action;
-import io.sbk.config.PerlConfig;
+import io.perl.PerlConfig;
 import io.sbk.exception.ExceptionHandler;
 import io.sbk.options.InputOptions;
-import io.sbk.perl.Print;
+import io.perl.Print;
 import io.time.Time;
 import io.time.TimeUnit;
 

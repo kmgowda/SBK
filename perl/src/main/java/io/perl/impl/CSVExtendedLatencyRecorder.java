@@ -8,15 +8,15 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl.impl;
+package io.perl.impl;
 
-import io.sbk.config.PerlConfig;
-import io.sbk.perl.LatencyPercentiles;
-import io.sbk.perl.LatencyRecord;
-import io.sbk.perl.LatencyRecordWindow;
-import io.sbk.perl.LatencyRecorder;
-import io.sbk.perl.ReportLatencies;
-import io.sbk.system.Printer;
+import io.perl.PerlConfig;
+import io.perl.LatencyPercentiles;
+import io.perl.LatencyRecord;
+import io.perl.LatencyRecordWindow;
+import io.perl.LatencyRecorder;
+import io.perl.ReportLatencies;
+import io.perl.system.PerlPrinter;
 import io.time.Time;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -121,7 +121,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             if (csvPrinter == null) {
                 deleteCSVFile();
                 try {
-                    Printer.log.info("Creating CSV file: " + csvFile + " ...");
+                    PerlPrinter.log.info("Creating CSV file: " + csvFile + " ...");
                     csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)), CSVFormat.DEFAULT
                             .withHeader(" Latency", "Records"));
                 } catch (IOException ex) {
@@ -143,7 +143,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             if (!Files.exists(fileToDeletePath)) {
                 return;
             }
-            Printer.log.info("Deleting CSV file: " + csvFile + " ...");
+            PerlPrinter.log.info("Deleting CSV file: " + csvFile + " ...");
             try {
                 Files.delete(fileToDeletePath);
             } catch (IOException ex) {
@@ -160,7 +160,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
                 }
                 csvPrinter = null;
             }
-            Printer.log.info("Reading CSV file: " + csvFile + " ...");
+            PerlPrinter.log.info("Reading CSV file: " + csvFile + " ...");
             reportLatencies.reportLatencyRecord(recorder);
             try {
                 CSVParser csvParser = new CSVParser(Files.newBufferedReader(Paths.get(csvFile)), CSVFormat.DEFAULT

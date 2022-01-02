@@ -82,7 +82,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../CountConnections.html" title="interface in io.sbk.logger">CountConnections</a></code>, <code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code>io.sbk.logger.Logger</code>, <code>io.sbk.logger.PerformanceLogger</code>, <code><a href="../RamLogger.html" title="interface in io.sbk.logger">RamLogger</a></code>, <code><a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a></code>, <code>io.sbk.perl.Print</code>, <code>io.sbk.perl.ReportLatencies</code>, <code>io.sbk.perl.ReportLatency</code></dd>
+<dd><code><a href="../CountConnections.html" title="interface in io.sbk.logger">CountConnections</a></code>, <code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code>io.sbk.logger.Logger</code>, <code>io.sbk.logger.PerformanceLogger</code>, <code><a href="../RamLogger.html" title="interface in io.sbk.logger">RamLogger</a></code>, <code><a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a></code>, <code>io.perl.Print</code>, <code>io.perl.ReportLatencies</code>, <code>io.perl.ReportLatency</code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">RamPrometheusLogger</span>
@@ -188,7 +188,7 @@ implements <a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>,
  long&nbsp;count)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportLatencyRecord(io.sbk.perl.LatencyRecord)" class="member-name-link">reportLatencyRecord</a><wbr>(io.sbk.perl.LatencyRecord&nbsp;record)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportLatencyRecord(io.perl.LatencyRecord)" class="member-name-link">reportLatencyRecord</a><wbr>(io.perl.LatencyRecord&nbsp;record)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMaxReaders(int)" class="member-name-link">setMaxReaders</a><wbr>(int&nbsp;val)</code></div>
@@ -341,7 +341,7 @@ implements <a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>,
  long[]&nbsp;percentileValues)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>print</code>&nbsp;in interface&nbsp;<code>io.sbk.perl.Print</code></dd>
+<dd><code>print</code>&nbsp;in interface&nbsp;<code>io.perl.Print</code></dd>
 <dt>Overrides:</dt>
 <dd><code>print</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.PrometheusLogger</code></dd>
 </dl>
@@ -372,12 +372,12 @@ implements <a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>,
 </section>
 </li>
 <li>
-<section class="detail" id="reportLatencyRecord(io.sbk.perl.LatencyRecord)">
+<section class="detail" id="reportLatencyRecord(io.perl.LatencyRecord)">
 <h3>reportLatencyRecord</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reportLatencyRecord</span><wbr><span class="parameters">(io.sbk.perl.LatencyRecord&nbsp;record)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reportLatencyRecord</span><wbr><span class="parameters">(io.perl.LatencyRecord&nbsp;record)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>reportLatencyRecord</code>&nbsp;in interface&nbsp;<code>io.sbk.perl.ReportLatencies</code></dd>
+<dd><code>reportLatencyRecord</code>&nbsp;in interface&nbsp;<code>io.perl.ReportLatencies</code></dd>
 </dl>
 </section>
 </li>
@@ -388,7 +388,7 @@ implements <a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>,
  long&nbsp;count)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>reportLatency</code>&nbsp;in interface&nbsp;<code>io.sbk.perl.ReportLatencies</code></dd>
+<dd><code>reportLatency</code>&nbsp;in interface&nbsp;<code>io.perl.ReportLatencies</code></dd>
 </dl>
 </section>
 </li>

@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl;
+package io.perl;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

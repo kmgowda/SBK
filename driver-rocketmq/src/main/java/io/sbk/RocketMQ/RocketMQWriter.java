@@ -11,7 +11,7 @@ package io.sbk.RocketMQ;
 
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
-import io.sbk.perl.SendChannel;
+import io.perl.SendChannel;
 import io.time.Time;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;

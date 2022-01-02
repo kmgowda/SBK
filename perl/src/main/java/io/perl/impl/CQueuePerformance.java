@@ -7,16 +7,16 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.perl.impl;
+package io.perl.impl;
 
-import io.sbk.config.PerlConfig;
-import io.sbk.perl.Channel;
-import io.sbk.perl.Performance;
-import io.sbk.perl.PeriodicRecorder;
-import io.sbk.perl.SendChannel;
-import io.sbk.perl.TimeStamp;
+import io.perl.PerlConfig;
+import io.perl.Channel;
+import io.perl.Performance;
+import io.perl.PeriodicRecorder;
+import io.perl.SendChannel;
+import io.perl.TimeStamp;
 import io.state.State;
-import io.sbk.system.Printer;
+import io.perl.system.PerlPrinter;
 import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +88,7 @@ final public class CQueuePerformance implements Performance {
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        Printer.log.info("Performance Logger Started");
+        PerlPrinter.log.info("Performance Logger Started");
         periodicLogger.start(startTime);
         periodicLogger.startWindow(startTime);
         while (doWork) {
@@ -176,10 +176,10 @@ final public class CQueuePerformance implements Performance {
                 qFuture = null;
             }
             if (ex != null) {
-                Printer.log.warn("Performance Logger Shutdown with Exception:" + ex);
+                PerlPrinter.log.warn("Performance Logger Shutdown with Exception:" + ex);
                 retFuture.completeExceptionally(ex);
             } else {
-                Printer.log.info("Performance Logger Shutdown");
+                PerlPrinter.log.info("Performance Logger Shutdown");
                 retFuture.complete(null);
             }
         }

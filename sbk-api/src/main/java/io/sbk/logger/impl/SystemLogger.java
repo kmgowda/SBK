@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
-import io.sbk.config.PerlConfig;
+import io.perl.PerlConfig;
 import io.sbk.logger.Logger;
 import io.sbk.logger.LoggerConfig;
 import io.sbk.options.InputOptions;

@@ -8,11 +8,11 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.perl.impl;
+package io.perl.impl;
 
-import io.sbk.perl.LatencyRecordWindow;
-import io.sbk.perl.Print;
-import io.sbk.perl.ReportLatency;
+import io.perl.LatencyRecordWindow;
+import io.perl.Print;
+import io.perl.ReportLatency;
 
 public sealed class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow
         implements ReportLatency permits TotalWindowLatencyPeriodicRecorder {

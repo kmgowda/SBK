@@ -11,7 +11,7 @@ package io.sbk.api.impl;
 
 import io.sbk.api.ParameterOptions;
 import io.sbk.config.Config;
-import io.sbk.config.PerlConfig;
+import io.perl.PerlConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.options.impl.SbkInputOptions;
 import lombok.Getter;
