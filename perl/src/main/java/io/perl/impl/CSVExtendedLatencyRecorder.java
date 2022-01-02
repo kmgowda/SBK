@@ -16,7 +16,7 @@ import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
 import io.perl.LatencyRecorder;
 import io.perl.ReportLatencies;
-import io.perl.system.PerlPrinter;
+import io.perl.PerlPrinter;
 import io.time.Time;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

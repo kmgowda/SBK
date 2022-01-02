@@ -8,12 +8,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perl.system;
+package io.perl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PerlPrinter {
+final public class PerlPrinter {
     final private static String LOGGER_NAME = "PerL";
     final public static Logger log = LoggerFactory.getLogger(LOGGER_NAME);
 }

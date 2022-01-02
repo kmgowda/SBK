@@ -16,7 +16,7 @@ import io.perl.PeriodicRecorder;
 import io.perl.SendChannel;
 import io.perl.TimeStamp;
 import io.state.State;
-import io.perl.system.PerlPrinter;
+import io.perl.PerlPrinter;
 import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
