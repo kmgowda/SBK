@@ -28,7 +28,7 @@ import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
 import io.sbk.perl.impl.HashMapLatencyRecorder;
 import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
 import io.sbk.perl.impl.TotalWindowLatencyPeriodicRecorder;
-import io.sbk.state.State;
+import io.state.State;
 import io.sbk.system.Printer;
 import io.time.Time;
 import lombok.Synchronized;

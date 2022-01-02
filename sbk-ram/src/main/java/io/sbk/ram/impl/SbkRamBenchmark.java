@@ -25,7 +25,7 @@ import io.sbk.perl.impl.HashMapLatencyRecorder;
 import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.ram.RamPeriodicRecorder;
-import io.sbk.state.State;
+import io.state.State;
 import io.sbk.system.Printer;
 import io.time.Time;
 import lombok.Synchronized;
