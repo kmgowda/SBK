@@ -18,7 +18,7 @@ import io.sbk.grpc.ServiceGrpc;
 import io.sbk.logger.CountConnections;
 import io.sbk.ram.RamParameters;
 import io.sbk.ram.RamRegistry;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 import java.security.InvalidKeyException;

@@ -11,7 +11,7 @@
 package io.sbk.logger.impl;
 
 import io.sbk.logger.MetricsConfig;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

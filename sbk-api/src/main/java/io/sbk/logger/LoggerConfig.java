@@ -9,7 +9,7 @@
  */
 package io.sbk.logger;
 
-import io.sbk.time.TimeUnit;
+import io.time.TimeUnit;
 
 public final class LoggerConfig {
     public int reportingSeconds;

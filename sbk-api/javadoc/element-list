@@ -11,10 +11,10 @@ io.sbk.logger.impl
 io.sbk.main
 io.sbk.options
 io.sbk.options.impl
-io.sbk.perl
-io.sbk.perl.impl
-io.sbk.state
+io.perl
+io.perl.impl
+io.state
 io.sbk.system
-io.sbk.time
+io.time
 io.sbk.yal
 io.sbk.yal.impl

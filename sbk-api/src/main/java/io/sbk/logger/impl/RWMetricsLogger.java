@@ -12,8 +12,8 @@ package io.sbk.logger.impl;
 
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.sbk.logger.CountRW;
-import io.sbk.time.Time;
-import io.sbk.time.TimeUnit;
+import io.time.Time;
+import io.time.TimeUnit;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

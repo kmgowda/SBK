@@ -512,7 +512,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
    c). Close the Writer: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#close())]
 
-   d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int))]
+   d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int))]
 
    1. You have to implement the following methods of Reader class
 
@@ -647,7 +647,7 @@ Please report issues at https://github.com/kmgowda/SBK
         
       c). Close the Writer: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#close())]
         
-      d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.sbk.time.Time,io.sbk.api.Status,io.sbk.perl.SendChannel,int))]
+      d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int))]
 
 
 5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html)]

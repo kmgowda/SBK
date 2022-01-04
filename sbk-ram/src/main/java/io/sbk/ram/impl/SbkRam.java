@@ -22,7 +22,7 @@ import io.sbk.logger.RamLogger;
 import io.sbk.logger.impl.RamPrometheusLogger;
 import io.sbk.ram.RamParameterOptions;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 

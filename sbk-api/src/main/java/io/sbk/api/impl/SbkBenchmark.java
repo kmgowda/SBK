@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import io.perl.Perl;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
@@ -16,21 +17,20 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.config.Config;
-import io.sbk.config.PerlConfig;
+import io.perl.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.logger.Logger;
-import io.sbk.perl.LatencyRecordWindow;
-import io.sbk.perl.Performance;
-import io.sbk.perl.PeriodicRecorder;
-import io.sbk.perl.impl.ArrayLatencyRecorder;
-import io.sbk.perl.impl.CQueuePerformance;
-import io.sbk.perl.impl.CSVExtendedLatencyRecorder;
-import io.sbk.perl.impl.HashMapLatencyRecorder;
-import io.sbk.perl.impl.HdrExtendedLatencyRecorder;
-import io.sbk.perl.impl.TotalWindowLatencyPeriodicRecorder;
-import io.sbk.state.State;
+import io.perl.LatencyRecordWindow;
+import io.perl.PeriodicLogger;
+import io.perl.impl.ArrayLatencyRecorder;
+import io.perl.impl.CQueuePerl;
+import io.perl.impl.CSVExtendedLatencyRecorder;
+import io.perl.impl.HashMapLatencyRecorder;
+import io.perl.impl.HdrExtendedLatencyRecorder;
+import io.perl.impl.TotalWindowLatencyPeriodicLogger;
+import io.state.State;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -62,8 +62,8 @@ final public class SbkBenchmark implements Benchmark {
     final private Logger logger;
     final private ExecutorService executor;
     final private ParameterOptions params;
-    final private Performance writeStats;
-    final private Performance readStats;
+    final private Perl writeStats;
+    final private Perl readStats;
     final private int maxQs;
     final private double[] percentileFractions;
     final private ScheduledExecutorService timeoutExecutor;
@@ -109,12 +109,12 @@ final public class SbkBenchmark implements Benchmark {
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         executor = perlConfig.fork ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
-                new CQueuePerformance(perlConfig, params.getWritersCount(), createLatencyRecorder(),
+                new CQueuePerl(perlConfig, params.getWritersCount(), createLatencyRecorder(),
                 logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
                         this.time, executor) : null;
 
         readStats = params.getReadersCount() > 0 ?
-                new CQueuePerformance(perlConfig, params.getReadersCount(), createLatencyRecorder(),
+                new CQueuePerl(perlConfig, params.getReadersCount(), createLatencyRecorder(),
                 logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
                         this.time, executor) : null;
         timeoutExecutor = Executors.newScheduledThreadPool(1);
@@ -145,7 +145,7 @@ final public class SbkBenchmark implements Benchmark {
     }
 
     @Contract(" -> new")
-    private @NotNull PeriodicRecorder createLatencyRecorder() {
+    private @NotNull PeriodicLogger createLatencyRecorder() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
         final LatencyRecordWindow window;
@@ -178,7 +178,7 @@ final public class SbkBenchmark implements Benchmark {
             Printer.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
+        return new TotalWindowLatencyPeriodicLogger(window, totalWindowExtension, logger, logger::printTotal,
                 logger, time);
     }
 

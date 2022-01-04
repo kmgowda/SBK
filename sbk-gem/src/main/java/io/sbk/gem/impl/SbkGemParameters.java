@@ -16,7 +16,7 @@ import io.sbk.exception.HelpException;
 import io.sbk.gem.GemParameterOptions;
 import io.sbk.gem.SshConnection;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;

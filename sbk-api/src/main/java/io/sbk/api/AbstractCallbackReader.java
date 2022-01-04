@@ -11,7 +11,7 @@
 package io.sbk.api;
 
 import io.sbk.data.DataType;
-import io.sbk.time.Time;
+import io.time.Time;
 
 import java.io.EOFException;
 import java.io.IOException;

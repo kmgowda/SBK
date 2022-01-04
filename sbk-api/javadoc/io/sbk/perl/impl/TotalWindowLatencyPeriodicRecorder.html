@@ -5,7 +5,7 @@
 <title>TotalWindowLatencyPeriodicRecorder (sbk-api 0.95 API)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="declaration: package: io.sbk.perl.impl, class: TotalWindowLatencyPeriodicRecorder">
+<meta name="description" content="declaration: package: io.perl.impl, class: TotalWindowLatencyPeriodicRecorder">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../../script-dir/jquery-ui.min.css" title="Style">
@@ -68,25 +68,25 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.sbk.perl.impl</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.impl</a></div>
 <h1 title="Class TotalWindowLatencyPeriodicRecorder" class="title">Class TotalWindowLatencyPeriodicRecorder</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance"><a href="TotalLatencyRecordWindow.html" title="class in io.sbk.perl.impl">io.sbk.perl.impl.TotalLatencyRecordWindow</a>
-<div class="inheritance"><a href="TotalWindowLatencyRecorder.html" title="class in io.sbk.perl.impl">io.sbk.perl.impl.TotalWindowLatencyRecorder</a>
-<div class="inheritance">io.sbk.perl.impl.TotalWindowLatencyPeriodicRecorder</div>
+<div class="inheritance"><a href="TotalLatencyRecordWindow.html" title="class in io.perl.impl">io.perl.impl.TotalLatencyRecordWindow</a>
+<div class="inheritance"><a href="TotalWindowLatencyRecorder.html" title="class in io.perl.impl">io.perl.impl.TotalWindowLatencyRecorder</a>
+<div class="inheritance">io.perl.impl.TotalWindowLatencyPeriodicRecorder</div>
 </div>
 </div>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">PeriodicRecorder</a></code>, <code><a href="../PeriodicWindow.html" title="interface in io.sbk.perl">PeriodicWindow</a></code>, <code><a href="../ReportLatency.html" title="interface in io.sbk.perl">ReportLatency</a></code>, <code><a href="../TotalPeriodicWindow.html" title="interface in io.sbk.perl">TotalPeriodicWindow</a></code></dd>
+<dd><code><a href="../PeriodicRecorder.html" title="interface in io.perl">PeriodicRecorder</a></code>, <code><a href="../PeriodicWindow.html" title="interface in io.perl">PeriodicWindow</a></code>, <code><a href="../ReportLatency.html" title="interface in io.perl">ReportLatency</a></code>, <code><a href="../TotalPeriodicWindow.html" title="interface in io.perl">TotalPeriodicWindow</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">TotalWindowLatencyPeriodicRecorder</span>
-<span class="extends-implements">extends <a href="TotalWindowLatencyRecorder.html" title="class in io.sbk.perl.impl">TotalWindowLatencyRecorder</a>
-implements <a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">PeriodicRecorder</a></span></div>
+<span class="extends-implements">extends <a href="TotalWindowLatencyRecorder.html" title="class in io.perl.impl">TotalWindowLatencyRecorder</a>
+implements <a href="../PeriodicRecorder.html" title="interface in io.perl">PeriodicRecorder</a></span></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -95,7 +95,7 @@ implements <a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">P
 <section class="field-summary" id="field-summary">
 <h2>Field Summary</h2>
 <div class="inherited-list">
-<h3 id="fields-inherited-from-class-io.sbk.perl.impl.TotalLatencyRecordWindow">Fields inherited from class&nbsp;io.sbk.perl.impl.<a href="TotalLatencyRecordWindow.html" title="class in io.sbk.perl.impl">TotalLatencyRecordWindow</a></h3>
+<h3 id="fields-inherited-from-class-io.perl.impl.TotalLatencyRecordWindow">Fields inherited from class&nbsp;io.perl.impl.<a href="TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></h3>
 <code><a href="TotalLatencyRecordWindow.html#totalLogger">totalLogger</a>, <a href="TotalLatencyRecordWindow.html#totalWindow">totalWindow</a>, <a href="TotalLatencyRecordWindow.html#window">window</a>, <a href="TotalLatencyRecordWindow.html#windowLogger">windowLogger</a></code></div>
 </section>
 </li>
@@ -107,12 +107,12 @@ implements <a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">P
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.sbk.perl.LatencyRecordWindow,io.sbk.perl.LatencyRecordWindow,io.sbk.perl.Print,io.sbk.perl.Print,io.sbk.perl.ReportLatency,io.sbk.time.Time)" class="member-name-link">TotalWindowLatencyPeriodicRecorder</a><wbr>(<a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">LatencyRecordWindow</a>&nbsp;window,
- <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">LatencyRecordWindow</a>&nbsp;totalWindow,
- <a href="../Print.html" title="interface in io.sbk.perl">Print</a>&nbsp;windowLogger,
- <a href="../Print.html" title="interface in io.sbk.perl">Print</a>&nbsp;totalLogger,
- <a href="../ReportLatency.html" title="interface in io.sbk.perl">ReportLatency</a>&nbsp;reportLatency,
- <a href="../../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.Print,io.perl.Print,io.perl.ReportLatency,io.time.Time)" class="member-name-link">TotalWindowLatencyPeriodicRecorder</a><wbr>(<a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;window,
+ <a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;totalWindow,
+ <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;windowLogger,
+ <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;totalLogger,
+ <a href="../ReportLatency.html" title="interface in io.perl">ReportLatency</a>&nbsp;reportLatency,
+ <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -140,19 +140,19 @@ implements <a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">P
 </div>
 </div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.perl.impl.TotalWindowLatencyRecorder">Methods inherited from class&nbsp;io.sbk.perl.impl.<a href="TotalWindowLatencyRecorder.html" title="class in io.sbk.perl.impl">TotalWindowLatencyRecorder</a></h3>
+<h3 id="methods-inherited-from-class-io.perl.impl.TotalWindowLatencyRecorder">Methods inherited from class&nbsp;io.perl.impl.<a href="TotalWindowLatencyRecorder.html" title="class in io.perl.impl">TotalWindowLatencyRecorder</a></h3>
 <code><a href="TotalWindowLatencyRecorder.html#recordLatency(long,int,int,long)">recordLatency</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.perl.impl.TotalLatencyRecordWindow">Methods inherited from class&nbsp;io.sbk.perl.impl.<a href="TotalLatencyRecordWindow.html" title="class in io.sbk.perl.impl">TotalLatencyRecordWindow</a></h3>
+<h3 id="methods-inherited-from-class-io.perl.impl.TotalLatencyRecordWindow">Methods inherited from class&nbsp;io.perl.impl.<a href="TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></h3>
 <code><a href="TotalLatencyRecordWindow.html#checkTotalWindowFullAndReset(long)">checkTotalWindowFullAndReset</a>, <a href="TotalLatencyRecordWindow.html#checkWindowFullAndReset(long)">checkWindowFullAndReset</a>, <a href="TotalLatencyRecordWindow.html#elapsedMilliSecondsWindow(long)">elapsedMilliSecondsWindow</a>, <a href="TotalLatencyRecordWindow.html#start(long)">start</a>, <a href="TotalLatencyRecordWindow.html#startWindow(long)">startWindow</a>, <a href="TotalLatencyRecordWindow.html#stop(long)">stop</a>, <a href="TotalLatencyRecordWindow.html#stopWindow(long)">stopWindow</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.perl.PeriodicWindow">Methods inherited from interface&nbsp;io.sbk.perl.<a href="../PeriodicWindow.html" title="interface in io.sbk.perl">PeriodicWindow</a></h3>
+<h3 id="methods-inherited-from-class-io.perl.PeriodicWindow">Methods inherited from interface&nbsp;io.perl.<a href="../PeriodicWindow.html" title="interface in io.perl">PeriodicWindow</a></h3>
 <code><a href="../PeriodicWindow.html#elapsedMilliSecondsWindow(long)">elapsedMilliSecondsWindow</a>, <a href="../PeriodicWindow.html#startWindow(long)">startWindow</a>, <a href="../PeriodicWindow.html#stopWindow(long)">stopWindow</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.perl.TotalPeriodicWindow">Methods inherited from interface&nbsp;io.sbk.perl.<a href="../TotalPeriodicWindow.html" title="interface in io.sbk.perl">TotalPeriodicWindow</a></h3>
+<h3 id="methods-inherited-from-class-io.perl.TotalPeriodicWindow">Methods inherited from interface&nbsp;io.perl.<a href="../TotalPeriodicWindow.html" title="interface in io.perl">TotalPeriodicWindow</a></h3>
 <code><a href="../TotalPeriodicWindow.html#start(long)">start</a>, <a href="../TotalPeriodicWindow.html#stop(long)">stop</a></code></div>
 </section>
 </li>
@@ -166,14 +166,14 @@ implements <a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">P
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(io.sbk.perl.LatencyRecordWindow,io.sbk.perl.LatencyRecordWindow,io.sbk.perl.Print,io.sbk.perl.Print,io.sbk.perl.ReportLatency,io.sbk.time.Time)">
+<section class="detail" id="&lt;init&gt;(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.Print,io.perl.Print,io.perl.ReportLatency,io.time.Time)">
 <h3>TotalWindowLatencyPeriodicRecorder</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">TotalWindowLatencyPeriodicRecorder</span><wbr><span class="parameters">(<a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">LatencyRecordWindow</a>&nbsp;window,
- <a href="../LatencyRecordWindow.html" title="class in io.sbk.perl">LatencyRecordWindow</a>&nbsp;totalWindow,
- <a href="../Print.html" title="interface in io.sbk.perl">Print</a>&nbsp;windowLogger,
- <a href="../Print.html" title="interface in io.sbk.perl">Print</a>&nbsp;totalLogger,
- <a href="../ReportLatency.html" title="interface in io.sbk.perl">ReportLatency</a>&nbsp;reportLatency,
- <a href="../../time/Time.html" title="interface in io.sbk.time">Time</a>&nbsp;time)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">TotalWindowLatencyPeriodicRecorder</span><wbr><span class="parameters">(<a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;window,
+ <a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;totalWindow,
+ <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;windowLogger,
+ <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;totalLogger,
+ <a href="../ReportLatency.html" title="interface in io.perl">ReportLatency</a>&nbsp;reportLatency,
+ <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time)</span></div>
 </section>
 </li>
 </ul>
@@ -195,7 +195,7 @@ implements <a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">P
 <div class="block">Record the Event/record.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PeriodicRecorder.html#record(long,long,int,int)">record</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicRecorder.html" title="interface in io.sbk.perl">PeriodicRecorder</a></code></dd>
+<dd><code><a href="../PeriodicRecorder.html#record(long,long,int,int)">record</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicRecorder.html" title="interface in io.perl">PeriodicRecorder</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>startTime</code> - start time</dd>
 <dd><code>endTime</code> - end time</dd>

@@ -14,9 +14,9 @@ import io.sbk.config.Config;
 import io.sbk.logger.RamLogger;
 import io.sbk.logger.SetRW;
 import io.sbk.options.InputOptions;
-import io.sbk.perl.LatencyRecord;
+import io.perl.LatencyRecord;
 import io.sbk.system.Printer;
-import io.sbk.time.Time;
+import io.time.Time;
 
 import java.io.IOException;
 import java.io.InputStream;

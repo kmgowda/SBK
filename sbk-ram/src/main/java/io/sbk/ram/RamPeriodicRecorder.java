@@ -11,7 +11,7 @@
 package io.sbk.ram;
 
 import io.sbk.grpc.LatenciesRecord;
-import io.sbk.perl.TotalPeriodicWindow;
+import io.perl.TotalPeriodicWindow;
 
 /**
  * Interface for recording latencies.

@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-import io.sbk.perl.SendChannel;
+import io.perl.SendChannel;
 
 /**
  * Abstract class for Writers and Readers.
