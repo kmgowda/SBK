@@ -10,7 +10,7 @@
 package io.perl;
 
 /**
- * Interface for performance Statistics.
+ * Interface for Periodic Latencies(PerL) Statistics.
  */
 public interface Perl extends RunBenchmark {
 
