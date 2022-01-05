@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"io.time","l":"MicroSeconds"},{"p":"io.time","l":"MilliSeconds"},{"p":"io.time","l":"NanoSeconds"},{"p":"io.time","l":"Time"},{"p":"io.time","l":"TimeUnit"}];updateSearchResults();
