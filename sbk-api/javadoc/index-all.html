@@ -1615,6 +1615,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Interface for recoding/printing results.</div>
 </dd>
+<dt><a href="io/sbk/api/Worker.html#perlChannel" class="member-name-link">perlChannel</a> - Variable in class io.sbk.api.<a href="io/sbk/api/Worker.html" title="class in io.sbk.api">Worker</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/MetricsConfig.html#port" class="member-name-link">port</a> - Variable in class io.sbk.logger.<a href="io/sbk/logger/MetricsConfig.html" title="class in io.sbk.logger">MetricsConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/RamHostConfig.html#port" class="member-name-link">port</a> - Variable in class io.sbk.logger.<a href="io/sbk/logger/RamHostConfig.html" title="class in io.sbk.logger">RamHostConfig</a></dt>
@@ -1734,32 +1736,32 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Default method to record every event.</div>
 </dd>
-<dt><a href="io/sbk/api/AsyncReader.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/AsyncReader.html" title="interface in io.sbk.api">AsyncReader</a></dt>
+<dt><a href="io/sbk/api/AsyncReader.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/AsyncReader.html" title="interface in io.sbk.api">AsyncReader</a></dt>
 <dd>
 <div class="block">Default implementation for Reading data using <a href="io/sbk/api/AsyncReader.html#readAsync(int)"><code>AsyncReader.readAsync(int)</code></a> ()}
  and recording the benchmark statistics.</div>
 </dd>
-<dt><a href="io/sbk/api/DataRecordsReader.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.html" title="interface in io.sbk.api">DataRecordsReader</a></dt>
+<dt><a href="io/sbk/api/DataRecordsReader.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.html" title="interface in io.sbk.api">DataRecordsReader</a></dt>
 <dd>
 <div class="block">Record the single or multiple reads performance statistics.</div>
 </dd>
-<dt><a href="io/sbk/api/DataRecordsReader.RecordTime.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.RecordTime.html" title="interface in io.sbk.api">DataRecordsReader.RecordTime</a></dt>
+<dt><a href="io/sbk/api/DataRecordsReader.RecordTime.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.RecordTime.html" title="interface in io.sbk.api">DataRecordsReader.RecordTime</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/api/Reader.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/Reader.html" title="interface in io.sbk.api">Reader</a></dt>
+<dt><a href="io/sbk/api/Reader.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordRead(DataType&lt;T&gt;, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/Reader.html" title="interface in io.sbk.api">Reader</a></dt>
 <dd>
 <div class="block">Default implementation for Reading data using <a href="io/sbk/api/Reader.html#read()"><code>Reader.read()</code></a>
  and recording the benchmark statistics.</div>
 </dd>
-<dt><a href="io/sbk/api/AsyncReader.html#recordReadTime(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordReadTime(DataType&lt;T&gt;, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/AsyncReader.html" title="interface in io.sbk.api">AsyncReader</a></dt>
+<dt><a href="io/sbk/api/AsyncReader.html#recordReadTime(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordReadTime(DataType&lt;T&gt;, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/AsyncReader.html" title="interface in io.sbk.api">AsyncReader</a></dt>
 <dd>
 <div class="block">Default implementation for Reading data using <a href="io/sbk/api/Reader.html#read()"><code>Reader.read()</code></a>, extracting start time from data
  and recording the benchmark statistics.</div>
 </dd>
-<dt><a href="io/sbk/api/DataRecordsReader.html#recordReadTime(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordReadTime(DataType&lt;T&gt;, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.html" title="interface in io.sbk.api">DataRecordsReader</a></dt>
+<dt><a href="io/sbk/api/DataRecordsReader.html#recordReadTime(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordReadTime(DataType&lt;T&gt;, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.html" title="interface in io.sbk.api">DataRecordsReader</a></dt>
 <dd>
 <div class="block">Record the single or multiple reads performance statistics along with the starting time in the data.</div>
 </dd>
-<dt><a href="io/sbk/api/Reader.html#recordReadTime(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordReadTime(DataType&lt;T&gt;, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/Reader.html" title="interface in io.sbk.api">Reader</a></dt>
+<dt><a href="io/sbk/api/Reader.html#recordReadTime(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordReadTime(DataType&lt;T&gt;, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/Reader.html" title="interface in io.sbk.api">Reader</a></dt>
 <dd>
 <div class="block">Default implementation for Reading data using <a href="io/sbk/api/Reader.html#read()"><code>Reader.read()</code></a>, extracting start time from data
  and recording the benchmark statistics.</div>
@@ -1910,11 +1912,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">writer benchmarking by continuously writing data records for specific time duration.</div>
 </dd>
-<dt><a href="io/sbk/api/DataRecordsWriter.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordWrite(DataType&lt;T&gt;, T, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a></dt>
+<dt><a href="io/sbk/api/DataRecordsWriter.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordWrite(DataType&lt;T&gt;, T, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a></dt>
 <dd>
 <div class="block">Write the data and record the benchmark statistics.</div>
 </dd>
-<dt><a href="io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int)" class="member-name-link">recordWrite(DataType&lt;T&gt;, T, int, Time, Status, SendChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/Writer.html" title="interface in io.sbk.api">Writer</a></dt>
+<dt><a href="io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.PerlChannel,int)" class="member-name-link">recordWrite(DataType&lt;T&gt;, T, int, Time, Status, PerlChannel, int)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/Writer.html" title="interface in io.sbk.api">Writer</a></dt>
 <dd>
 <div class="block">Default implementation for writing data using <a href="io/sbk/api/Writer.html#writeAsync(T)"><code>Writer.writeAsync(Object)</code></a>  )}
  and recording the benchmark statistics.</div>
@@ -1999,7 +2001,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">SBK Callback reader implementation.</div>
 </dd>
-<dt><a href="io/sbk/api/impl/SbkCallbackReader.html#%3Cinit%3E(int,int,io.sbk.api.ParameterOptions,io.perl.SendChannel,io.sbk.data.DataType,io.time.Time)" class="member-name-link">SbkCallbackReader(int, int, ParameterOptions, SendChannel, DataType&lt;Object&gt;, Time)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkCallbackReader.html" title="class in io.sbk.api.impl">SbkCallbackReader</a></dt>
+<dt><a href="io/sbk/api/impl/SbkCallbackReader.html#%3Cinit%3E(int,int,io.sbk.api.ParameterOptions,io.perl.PerlChannel,io.sbk.data.DataType,io.time.Time)" class="member-name-link">SbkCallbackReader(int, int, ParameterOptions, PerlChannel, DataType&lt;Object&gt;, Time)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkCallbackReader.html" title="class in io.sbk.api.impl">SbkCallbackReader</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/api/impl/SbkDriversParameters.html" class="type-name-link" title="class in io.sbk.api.impl">SbkDriversParameters</a> - Class in <a href="io/sbk/api/impl/package-summary.html">io.sbk.api.impl</a></dt>
 <dd>&nbsp;</dd>
@@ -2035,7 +2037,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Reader Benchmarking Implementation.</div>
 </dd>
-<dt><a href="io/sbk/api/impl/SbkReader.html#%3Cinit%3E(int,int,io.sbk.api.ParameterOptions,io.perl.SendChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataReader,io.sbk.logger.CountReaders,java.util.concurrent.ExecutorService)" class="member-name-link">SbkReader(int, int, ParameterOptions, SendChannel, DataType&lt;Object&gt;, Time, DataReader&lt;Object&gt;, CountReaders, ExecutorService)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkReader.html" title="class in io.sbk.api.impl">SbkReader</a></dt>
+<dt><a href="io/sbk/api/impl/SbkReader.html#%3Cinit%3E(int,int,io.sbk.api.ParameterOptions,io.perl.PerlChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataReader,io.sbk.logger.CountReaders,java.util.concurrent.ExecutorService)" class="member-name-link">SbkReader(int, int, ParameterOptions, PerlChannel, DataType&lt;Object&gt;, Time, DataReader&lt;Object&gt;, CountReaders, ExecutorService)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkReader.html" title="class in io.sbk.api.impl">SbkReader</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/data/impl/SbkString.html" class="type-name-link" title="class in io.sbk.data.impl">SbkString</a> - Class in <a href="io/sbk/data/impl/package-summary.html">io.sbk.data.impl</a></dt>
 <dd>
@@ -2051,13 +2053,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Writer Benchmarking Implementation.</div>
 </dd>
-<dt><a href="io/sbk/api/impl/SbkWriter.html#%3Cinit%3E(int,int,io.sbk.api.ParameterOptions,io.perl.SendChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataWriter,io.sbk.logger.CountWriters,java.util.concurrent.ExecutorService)" class="member-name-link">SbkWriter(int, int, ParameterOptions, SendChannel, DataType&lt;Object&gt;, Time, DataWriter&lt;Object&gt;, CountWriters, ExecutorService)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkWriter.html" title="class in io.sbk.api.impl">SbkWriter</a></dt>
+<dt><a href="io/sbk/api/impl/SbkWriter.html#%3Cinit%3E(int,int,io.sbk.api.ParameterOptions,io.perl.PerlChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataWriter,io.sbk.logger.CountWriters,java.util.concurrent.ExecutorService)" class="member-name-link">SbkWriter(int, int, ParameterOptions, PerlChannel, DataType&lt;Object&gt;, Time, DataWriter&lt;Object&gt;, CountWriters, ExecutorService)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkWriter.html" title="class in io.sbk.api.impl">SbkWriter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/yal/impl/SbkYalParameters.html" class="type-name-link" title="class in io.sbk.yal.impl">SbkYalParameters</a> - Class in <a href="io/sbk/yal/impl/package-summary.html">io.sbk.yal.impl</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/yal/impl/SbkYalParameters.html#%3Cinit%3E(java.lang.String,java.lang.String,io.sbk.config.YalConfig)" class="member-name-link">SbkYalParameters(String, String, YalConfig)</a> - Constructor for class io.sbk.yal.impl.<a href="io/sbk/yal/impl/SbkYalParameters.html" title="class in io.sbk.yal.impl">SbkYalParameters</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="io/sbk/api/Worker.html#sendChannel" class="member-name-link">sendChannel</a> - Variable in class io.sbk.api.<a href="io/sbk/api/Worker.html" title="class in io.sbk.api">Worker</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/GrpcPrometheusLogger.html#sendLatenciesRecord()" class="member-name-link">sendLatenciesRecord()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcPrometheusLogger.html" title="class in io.sbk.logger.impl">GrpcPrometheusLogger</a></dt>
 <dd>&nbsp;</dd>
@@ -2404,7 +2404,7 @@ the order they are declared.</div>
 <dd>
 <div class="block">Abstract class for Writers and Readers.</div>
 </dd>
-<dt><a href="io/sbk/api/Worker.html#%3Cinit%3E(int,int,io.sbk.api.Parameters,io.perl.SendChannel)" class="member-name-link">Worker(int, int, Parameters, SendChannel)</a> - Constructor for class io.sbk.api.<a href="io/sbk/api/Worker.html" title="class in io.sbk.api">Worker</a></dt>
+<dt><a href="io/sbk/api/Worker.html#%3Cinit%3E(int,int,io.sbk.api.Parameters,io.perl.PerlChannel)" class="member-name-link">Worker(int, int, Parameters, PerlChannel)</a> - Constructor for class io.sbk.api.<a href="io/sbk/api/Worker.html" title="class in io.sbk.api">Worker</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/action/Action.html#Write_Reading" class="member-name-link">Write_Reading</a> - Enum constant in enum class io.sbk.action.<a href="io/sbk/action/Action.html" title="enum class in io.sbk.action">Action</a></dt>
 <dd>&nbsp;</dd>
