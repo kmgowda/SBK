@@ -107,7 +107,7 @@ allprojects {
                 def jmxPort = jmxSbkRamPort
 
                 if (project.path.startsWith(":driver-") || project.name == rootProject.name ||
-                        project.name == 'sbk-api') {
+                        project.name.startsWith('sbk-api')) {
                     jmxPort = jmxSbkPort
                 }
 
@@ -198,7 +198,7 @@ allprojects {
                 configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == rootProject.name) {
-                        if (id.name != baseDriverToSkip) {
+                        if (!id.name.startsWith( baseDriverToSkip)) {
                             buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
                         }
                     }
@@ -220,7 +220,7 @@ allprojects {
                 configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == rootProject.name) {
-                        if (id.name != baseDriverToSkip) {
+                        if (!id.name.startsWith( baseDriverToSkip)) {
                             buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
                         }
                     }
