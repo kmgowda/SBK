@@ -13,6 +13,8 @@ rootProject.name = 'sbk'
 
 include 'state'
 include 'time'
+include 'sbk-api:state'
+include 'sbk-api:time'
 include 'sbk-api:perl'
 include 'sbk-api'
 include 'sbk-ram'
