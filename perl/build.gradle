@@ -9,13 +9,30 @@
  *
  */
 
-plugins {
-    id 'java'
+apply plugin: 'java-library'
+apply plugin: "maven-publish"
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
+    }
 }
+
+apply from: "$rootDir/gradle/rat.gradle"
+apply from: "$rootDir/gradle/maven.gradle"
 
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
 }
 
 dependencies {
