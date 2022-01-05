@@ -42,6 +42,7 @@ allprojects {
             url "https://plugins.gradle.org/m2/"
         }
     }
+    group = sbkGroup
 
     apply plugin: 'java'
     apply plugin: 'idea'
@@ -197,7 +198,7 @@ allprojects {
 
                 configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
-                    if (id.group.toString() == rootProject.name) {
+                    if (id.group.toString() == sbkGroup) {
                         if (!id.name.startsWith( baseDriverToSkip)) {
                             buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
                         }
@@ -219,7 +220,7 @@ allprojects {
 
                 configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
-                    if (id.group.toString() == rootProject.name) {
+                    if (id.group.toString() == sbkGroup) {
                         if (!id.name.startsWith( baseDriverToSkip)) {
                             buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
                         }
@@ -259,7 +260,7 @@ task printDependencies {
             println "subproject : " + it.name
             it.configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                 def id = artifact.moduleVersion.id
-                if (id.group.toString() == rootProject.name) {
+                if (id.group.toString() == sbkGroup) {
                     println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
                 }
             }
@@ -268,7 +269,7 @@ task printDependencies {
         println("Root project : " + rootProject.name)
         configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             def id = artifact.moduleVersion.id
-            if (id.group.toString() == rootProject.name) {
+            if (id.group.toString() == sbkGroup) {
                 println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
             }
         }
