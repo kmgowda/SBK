@@ -11,7 +11,7 @@ package io.sbk.RocketMQ;
 
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
@@ -87,7 +87,7 @@ public class RocketMQWriter implements Writer<byte[]> {
     }
 
     // recordWrite override implementation , instead of completable future.
-    private long recordWriteImpl(byte[] data, int size, Time time, SendChannel record, int id) {
+    private long recordWriteImpl(byte[] data, int size, Time time, PerlChannel record, int id) {
         final long ctime = time.getCurrentTime();
         Message message = new Message(topicName, data);
 

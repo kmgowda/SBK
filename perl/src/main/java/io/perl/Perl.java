@@ -20,9 +20,9 @@ public interface Perl extends RunBenchmark {
     void stop();
 
     /**
-     * Get the SendChannel to get the benchmark results.
+     * Get the PerlChannel to get the benchmark results.
      *
-     * @return SendChannel to get the benchmark results.
+     * @return PerlChannel to get the benchmark results.
      */
-    SendChannel getSendChannel();
+    PerlChannel getPerlChannel();
 }

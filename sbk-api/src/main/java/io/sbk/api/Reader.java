@@ -11,7 +11,7 @@
 package io.sbk.api;
 
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.EOFException;
@@ -51,12 +51,12 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
      * @param size        size of the data in bytes
      * @param time        time interface
      * @param status      Timestamp
-     * @param sendChannel to call for benchmarking
+     * @param perlChannel to call for benchmarking
      * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    default void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    default void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException {
         status.startTime = time.getCurrentTime();
         final T ret = read();
@@ -67,7 +67,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
             status.endTime = time.getCurrentTime();
             status.bytes = dType.length(ret);
             status.records = 1;
-            sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 
@@ -84,12 +84,12 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
      * @param size        size of the data in bytes
      * @param time        time interface
      * @param status      Timestamp
-     * @param sendChannel to call for benchmarking
+     * @param perlChannel to call for benchmarking
      * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException {
         final T ret = read();
         if (ret == null) {
@@ -100,7 +100,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
             status.endTime = time.getCurrentTime();
             status.bytes = dType.length(ret);
             status.records = 1;
-            sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 

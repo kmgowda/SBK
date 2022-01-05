@@ -13,7 +13,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -47,7 +47,7 @@ public class HDFSWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, SendChannel record, int id) throws IOException {
+                            Status status, PerlChannel record, int id) throws IOException {
         status.startTime = time.getCurrentTime();
         out.write(data);
         status.endTime = time.getCurrentTime();

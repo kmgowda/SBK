@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 
 /**
  * Abstract class for Writers and Readers.
@@ -19,12 +19,12 @@ public abstract class Worker {
     public final int id;
     public final int recordIDMax;
     public final Parameters params;
-    public final SendChannel sendChannel;
+    public final PerlChannel perlChannel;
 
-    public Worker(int workerID, int idMax, Parameters params, SendChannel sendChannel) {
+    public Worker(int workerID, int idMax, Parameters params, PerlChannel perlChannel) {
         this.id = workerID;
         this.recordIDMax = idMax;
         this.params = params;
-        this.sendChannel = sendChannel;
+        this.perlChannel = perlChannel;
     }
 }

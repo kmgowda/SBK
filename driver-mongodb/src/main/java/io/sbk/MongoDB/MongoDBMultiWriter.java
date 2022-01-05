@@ -14,7 +14,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 import org.bson.Document;
 
@@ -76,7 +76,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, SendChannel sendChannel, int id) throws IOException {
+                            Status status, PerlChannel perlChannel, int id) throws IOException {
         final int recs = params.getRecordsPerSync();
         final LinkedList<Document> lt = new LinkedList<>();
         status.bytes = size * recs;
@@ -90,7 +90,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
         }
         databaseCollection.insertMany(lt);
         status.endTime = time.getCurrentTime();
-        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
         cnt += recs;
     }
 }

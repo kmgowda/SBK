@@ -11,7 +11,7 @@
 package io.sbk.api;
 
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.EOFException;
@@ -29,12 +29,12 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
      * @param size        size of data in bytes
      * @param time        time interface
      * @param status      read status to return; {@link io.sbk.api.Status}
-     * @param sendChannel to call for benchmarking
+     * @param perlChannel to call for benchmarking
      * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException;
 
     /**
@@ -44,12 +44,12 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
      * @param size        size of data in bytes
      * @param time        time interface
      * @param status      read status to return; {@link io.sbk.api.Status}
-     * @param sendChannel to call for benchmarking
+     * @param perlChannel to call for benchmarking
      * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    void recordReadTime(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException;
 
     default void genericRecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time,
@@ -59,7 +59,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         int id = reader.id % reader.recordIDMax;
         long i = 0;
         while (i < recordsCount) {
-            recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
             i += status.records;
             if (id >= reader.recordIDMax) {
                 id = 0;
@@ -69,7 +69,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     /**
      * Default implementation for benchmarking reader by reading given number of records.
-     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, SendChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, PerlChannel, int)}
      *
      * @param reader       Reader Descriptor
      * @param recordsCount Records count
@@ -85,7 +85,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     /**
      * Default implementation for benchmarking reader by reading given number of records.
-     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, SendChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, PerlChannel, int)}
      *
      * @param reader       Reader Descriptor
      * @param recordsCount Records count
@@ -108,7 +108,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
         int id = reader.id % reader.recordIDMax;
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
-            recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
             if (id >= reader.recordIDMax) {
                 id = 0;
             }
@@ -117,7 +117,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     /**
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
-     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, SendChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, PerlChannel, int)}
      *
      * @param reader       Reader Descriptor
      * @param secondsToRun Number of seconds to run
@@ -134,7 +134,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     /**
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
-     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, SendChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, PerlChannel, int)}
      *
      * @param reader       Reader Descriptor
      * @param secondsToRun Number of seconds to run
@@ -157,7 +157,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final long loopStartTime = time.getCurrentTime();
         rController.start(reader.params.getRecordsPerSec());
         while (i < recordsCount) {
-            recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
             i += status.records;
             if (id >= reader.recordIDMax) {
                 id = 0;
@@ -213,7 +213,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         long cnt = 0;
         rController.start(reader.params.getRecordsPerSec());
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
-            recordTime.recordRead(dType, size, time, status, reader.sendChannel, id++);
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
             if (id >= reader.recordIDMax) {
                 id = 0;
             }
@@ -259,7 +259,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     interface RecordTime<T> {
 
-        void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+        void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
                 throws EOFException, IOException;
     }
 }

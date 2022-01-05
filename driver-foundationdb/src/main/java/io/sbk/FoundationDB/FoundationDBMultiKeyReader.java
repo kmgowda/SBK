@@ -17,7 +17,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.EOFException;
@@ -66,7 +66,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
@@ -91,12 +91,12 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += recs;
         cnt += recs;
-        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
     @Override
-    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         final Status ret = db.read(tr -> {
@@ -123,7 +123,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += status.records;
         cnt += status.records;
-        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
     }
 
 }

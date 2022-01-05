@@ -18,7 +18,7 @@ import io.sbk.api.Worker;
 import io.sbk.data.DataType;
 import io.sbk.logger.CountReaders;
 import io.perl.RunBenchmark;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.sbk.system.Printer;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
@@ -41,10 +41,10 @@ final public class SbkReader extends Worker implements RunBenchmark {
     final private BiConsumer perf;
 
 
-    public SbkReader(int readerId, int idMax, ParameterOptions params, SendChannel sendChannel,
+    public SbkReader(int readerId, int idMax, ParameterOptions params, PerlChannel perlChannel,
                      DataType<Object> dType, Time time, DataReader<Object> reader,
                      CountReaders rCount, ExecutorService executor) {
-        super(readerId, idMax, params, sendChannel);
+        super(readerId, idMax, params, perlChannel);
         this.dType = dType;
         this.time = time;
         this.reader = reader;
