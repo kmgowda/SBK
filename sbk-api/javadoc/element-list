@@ -11,10 +11,6 @@ io.sbk.logger.impl
 io.sbk.main
 io.sbk.options
 io.sbk.options.impl
-io.perl
-io.perl.impl
-io.state
 io.sbk.system
-io.time
 io.sbk.yal
 io.sbk.yal.impl
