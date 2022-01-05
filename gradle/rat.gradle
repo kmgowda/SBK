@@ -20,6 +20,7 @@ rat {
             '**/gradle/wrapper/**',
             '**/build/**',
             '**/out/**',
+            '**/javadoc/**',
             '**/generated/**',
             '**/checkstyle/**',
             'deployment/aws/installer/hosts-template',
@@ -29,7 +30,6 @@ rat {
             '**/*.json',
             '**/config/*jks*',
             '**/*.txt',
-            'CODE_OF_CONDUCT.md',
-            'javadoc'
+            'CODE_OF_CONDUCT.md'
     ]
 }
