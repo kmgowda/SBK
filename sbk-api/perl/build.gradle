@@ -8,7 +8,6 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
-
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
@@ -26,7 +25,6 @@ buildscript {
 
 apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
-
 
 repositories {
     mavenCentral()

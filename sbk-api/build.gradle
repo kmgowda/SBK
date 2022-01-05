@@ -30,7 +30,7 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
-    api project(":perl")
+    api project(":sbk-api:perl")
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
     api group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
