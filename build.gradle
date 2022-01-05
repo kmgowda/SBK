@@ -176,7 +176,7 @@ allprojects {
     }
 
     task generateDockerfiles() {
-        def baseDriverToSkip = "sbk-api"
+        def driversToSkip = ["sbk-api", "state", "time", "perl"]
         def buffer = ""
         def outDir = 'build/dockers'
         def outFile = sbkProjectName + "-" + sbkVersion
@@ -199,7 +199,7 @@ allprojects {
                 configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == sbkGroup) {
-                        if (!id.name.startsWith( baseDriverToSkip)) {
+                        if (!driversToSkip.contains(id.name)) {
                             buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
                         }
                     }
@@ -221,7 +221,7 @@ allprojects {
                 configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == sbkGroup) {
-                        if (!id.name.startsWith( baseDriverToSkip)) {
+                        if (!driversToSkip.contains(id.name)) {
                             buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
                         }
                     }

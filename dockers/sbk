@@ -29,6 +29,9 @@ COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
 
 # Copy the SBK storage drivers
+COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
+COPY --chown=root:root sbk-gem ${APP_HOME}/sbk-gem
+COPY --chown=root:root sbk-ram ${APP_HOME}/sbk-ram
 COPY --chown=root:root driver-concurrentq ${APP_HOME}/driver-concurrentq
 COPY --chown=root:root driver-file ${APP_HOME}/driver-file
 COPY --chown=root:root driver-filestream ${APP_HOME}/driver-filestream
