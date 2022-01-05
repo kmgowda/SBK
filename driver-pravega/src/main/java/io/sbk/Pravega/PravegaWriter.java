@@ -17,7 +17,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class PravegaWriter implements Writer<byte[]> {
      */
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, SendChannel record, int id) throws IOException {
+                            Status status, PerlChannel record, int id) throws IOException {
         CompletableFuture<Void> ret;
         final long ctime = time.getCurrentTime();
         status.startTime = ctime;

@@ -17,7 +17,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.IOException;
@@ -87,7 +87,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     }
 
     @Override
-    public void recordWrite(DataType<ByteString> dType, ByteString data, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordWrite(DataType<ByteString> dType, ByteString data, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
         final int recs = params.getRecordsPerSync();
         status.bytes = size * recs;
         status.records = recs;
@@ -104,7 +104,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
             return null;
         });
         status.endTime = time.getCurrentTime();
-        sendChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
         cnt += recs;
     }

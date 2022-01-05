@@ -13,7 +13,7 @@ import io.perl.PerlConfig;
 import io.perl.Channel;
 import io.perl.Perl;
 import io.perl.PeriodicLogger;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.perl.TimeStamp;
 import io.state.State;
 import io.perl.PerlPrinter;
@@ -143,7 +143,7 @@ final public class CQueuePerl implements Perl {
 
     @Override
     @Synchronized
-    public SendChannel getSendChannel() {
+    public PerlChannel getPerlChannel() {
         if (channels.length == 1) {
             return channels[0];
         }

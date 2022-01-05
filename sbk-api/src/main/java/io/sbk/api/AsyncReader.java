@@ -11,7 +11,7 @@
 package io.sbk.api;
 
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.EOFException;
@@ -55,12 +55,12 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
      * @param size        size of the data in bytes
      * @param time        time interface
      * @param status      Timestamp
-     * @param sendChannel to call for benchmarking
+     * @param perlChannel to call for benchmarking
      * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    default void recordRead(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    default void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException {
         status.startTime = time.getCurrentTime();
         status.records = 1;
@@ -72,12 +72,12 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
-                sendChannel.sendException(id, ex);
+                perlChannel.sendException(id, ex);
                 return null;
             });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                sendChannel.send(id, beginTime, endTime, dType.length(d), status.records);
+                perlChannel.send(id, beginTime, endTime, dType.length(d), status.records);
             });
         }
     }
@@ -95,12 +95,12 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
      * @param size        size of the data in bytes
      * @param time        time interface
      * @param status      Timestamp
-     * @param sendChannel to call for benchmarking
+     * @param perlChannel to call for benchmarking
      * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, SendChannel sendChannel, int id)
+    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
             throws EOFException, IOException {
         status.startTime = time.getCurrentTime();
         status.records = 1;
@@ -112,7 +112,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         } else {
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                sendChannel.send(id, dType.getTime(d), endTime, dType.length(d), status.records);
+                perlChannel.send(id, dType.getTime(d), endTime, dType.length(d), status.records);
             });
         }
     }

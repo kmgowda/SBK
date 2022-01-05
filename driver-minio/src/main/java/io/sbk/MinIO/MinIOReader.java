@@ -22,7 +22,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -46,7 +46,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -58,7 +58,7 @@ public class MinIOReader implements Reader<byte[]> {
                 status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
                 inStream = client.getObject(config.bucketName, item.objectName());
                 status.endTime = time.getCurrentTime();
-                sendChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
+                perlChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
                 inStream.close();
             }
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
@@ -69,7 +69,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, int size, Time time, Status status, SendChannel sendChannel, int id) throws IOException {
+    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -85,7 +85,7 @@ public class MinIOReader implements Reader<byte[]> {
                 ret = inStream.read(inData);
                 if (ret > 0) {
                     status.endTime = dType.getTime(inData);
-                    sendChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
+                    perlChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
                 }
                 inStream.close();
             }

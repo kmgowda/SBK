@@ -11,7 +11,7 @@
 package io.sbk.api;
 
 import io.sbk.data.DataType;
-import io.perl.SendChannel;
+import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.IOException;
@@ -50,17 +50,17 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
      * @param size        size of the data
      * @param time        time interface
      * @param status      Write status to return; {@link io.sbk.api.Status}
-     * @param sendChannel to call for benchmarking
+     * @param perlChannel to call for benchmarking
      * @param id          Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
     void recordWrite(DataType<T> dType, T data, int size, Time time,
-                     Status status, SendChannel sendChannel, int id) throws IOException;
+                     Status status, PerlChannel perlChannel, int id) throws IOException;
 
 
     /**
      * Default implementation for writer benchmarking by writing given number of records.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
      * sync is invoked after writing all the records.
      *
      * @param writer       Writer Descriptor
@@ -76,7 +76,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         int id = writer.id % writer.recordIDMax;
         long i = 0;
         while (i < recordsCount) {
-            recordWrite(dType, data, size, time, status, writer.sendChannel, id);
+            recordWrite(dType, data, size, time, status, writer.perlChannel, id);
             id += 1;
             if (id >= writer.recordIDMax) {
                 id = 0;
@@ -88,7 +88,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
 
     /**
      * Default implementation for writer benchmarking by writing given number of records.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
      * sync is invoked after writing given set of records.
      *
      * @param writer       Writer Descriptor
@@ -111,7 +111,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
             while (i < loopMax) {
-                recordWrite(dType, data, size, time, status, writer.sendChannel, id);
+                recordWrite(dType, data, size, time, status, writer.perlChannel, id);
                 id += 1;
                 if (id >= writer.recordIDMax) {
                     id = 0;
@@ -126,7 +126,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
 
     /**
      * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
      * sync is invoked after writing records for given time.
      *
      * @param writer       Writer Descriptor
@@ -146,7 +146,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         status.startTime = startTime;
         double msElapsed = 0;
         while (msElapsed < msToRun) {
-            recordWrite(dType, data, size, time, status, writer.sendChannel, id);
+            recordWrite(dType, data, size, time, status, writer.perlChannel, id);
             id += 1;
             if (id >= writer.recordIDMax) {
                 id = 0;
@@ -158,7 +158,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
 
     /**
      * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, SendChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
      * sync is invoked after writing given set of records.
      *
      * @param writer       Writer Descriptor
@@ -182,7 +182,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         while (secondsElapsed < secondsToRun) {
             int i = 0;
             while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
-                recordWrite(dType, data, size, time, status, writer.sendChannel, id);
+                recordWrite(dType, data, size, time, status, writer.perlChannel, id);
                 id += 1;
                 if (id >= writer.recordIDMax) {
                     id = 0;

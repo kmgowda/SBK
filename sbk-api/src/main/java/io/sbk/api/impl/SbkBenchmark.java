@@ -241,7 +241,7 @@ final public class SbkBenchmark implements Benchmark {
             if (writeStats != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.getSendChannel(),
+                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.getPerlChannel(),
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             } else {
@@ -259,7 +259,7 @@ final public class SbkBenchmark implements Benchmark {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,
-                            readStats.getSendChannel(), dType, time, readers.get(i),
+                            readStats.getPerlChannel(), dType, time, readers.get(i),
                             logger, executor))
                     .collect(Collectors.toList());
         } else {
