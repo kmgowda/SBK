@@ -26,3 +26,14 @@ buildscript {
 
 apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
+
+task updateDocs(dependsOn: javadoc) {
+    doLast {
+        println "Update $projectDir Javadocs"
+        delete "$projectDir/javadoc"
+        copy {
+            from "$projectDir/build/docs/javadoc"
+            into "$projectDir/javadoc"
+        }
+    }
+}

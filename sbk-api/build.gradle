@@ -51,3 +51,14 @@ generateJavadoc {
     exclude 'io/sbk/grpc/LatenciesRecordOrBuilder.java'
     exclude 'io/sbk/grpc/LatenciesRecord.java'
 }
+
+task updateDocs(dependsOn: javadoc) {
+    doLast {
+        println "Update $projectDir Javadocs"
+        delete "$projectDir/javadoc"
+        copy {
+            from "$projectDir/build/docs/javadoc"
+            into "$projectDir/javadoc"
+        }
+    }
+}
