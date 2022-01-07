@@ -9,6 +9,7 @@ You may obtain a copy of the License at
 -->
 
 # PerL - Periodic Latencies for SBK
+[![Api](https://img.shields.io/badge/PerL-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-api/perl/javadoc/index.html)
 
 This module has the interfaces and implementations for calculating latencies and reporting to user/applications 
 periodically.

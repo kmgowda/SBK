@@ -8,6 +8,6 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 -->
 
-# Time Interface for SBK performance Benchmarking
+# State Enumeration constants for SBK performance Benchmarking
 
-[![Api](https://img.shields.io/badge/Time-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-api/time/javadoc/index.html)
+[![Api](https://img.shields.io/badge/State-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-api/state/javadoc/index.html)

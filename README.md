@@ -33,7 +33,7 @@ ___
 
 <p align="center">
     <a href="https://kmgowda.github.io/SBK/?from=SBK">
-        <img src="images/SBK-logo.png" alt="Storage Benchmark Kit" width="750" height="550">
+        <img src="images/SBK-logo-wide.png" alt="Storage Benchmark Kit" width="750" height="550">
     </a>
 </p>
 
