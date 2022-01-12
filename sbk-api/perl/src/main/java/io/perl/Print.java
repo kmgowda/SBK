@@ -13,7 +13,7 @@ public interface Print {
     /**
      * Print the Periodic performance results.
      *
-     * @param seconds       reporting seconds
+     * @param seconds       reporting duration in seconds
      * @param bytes         number of bytes read/write
      * @param records       data to write.
      * @param recsPerSec    records per second.
