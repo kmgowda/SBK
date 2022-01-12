@@ -29,8 +29,8 @@ public class CSVReader implements Reader<String> {
     final private Iterator<CSVRecord> csvIterator;
 
     public CSVReader(int id, ParameterOptions params, CSVConfig config) throws IOException {
-        csvParser = new CSVParser(Files.newBufferedReader(Paths.get(config.fileName)), CSVFormat.DEFAULT
-                .withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+        csvParser = new CSVParser(Files.newBufferedReader(Paths.get(config.fileName)),
+                CSVFormat.DEFAULT.builder().setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build());
         csvIterator = csvParser.iterator();
 
     }
