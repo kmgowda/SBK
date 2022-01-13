@@ -13,8 +13,8 @@
 import sys
 import argparse
 
-def main(argv):
-   parser = argparse.ArgumentParser(description='sbk-charts')
+def main():
+   parser = argparse.ArgumentParser(description='sbk charts')
    parser.add_argument('-i','--ifile', help='Input CSV file', required=True)
    parser.add_argument('-o','--ofile', help='Output xlsx file',  default="out.xlsx")
    args = parser.parse_args()
@@ -22,4 +22,4 @@ def main(argv):
    print('Output file is ', args.ofile)
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+   main()
