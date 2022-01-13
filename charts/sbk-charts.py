@@ -10,28 +10,16 @@
 
 # SBK-Charts :  Storage Benchmark Kit - Charts
 
-import sys, getopt
+import sys
+import argparse
 
 def main(argv):
-   inputFile = ''
-   outputFile = ''
-   try:
-      opts, args = getopt.getopt(argv,"i:o:",["ifile=","ofile="])
-   except getopt.GetoptError:
-      print('sbk-charts.py -i <input CSV file> -o <output file, default: out.xlsx>')
-      sys.exit(2)
-   for opt, arg in opts:
-      if opt == '-h':
-         print('sbk-charts.py -i <input CSV file> -o <output file, default: out.xlsx>')
-         sys.exit()
-      elif opt in ("-i", "--ifiles"):
-         inputFile = arg
-      elif opt in ("-o", "--ofile"):
-         outputFile = arg
-   if (len(outputFile) == 0):
-        outputFile = "out.xlsx"
-   print('Input file is ', inputFile)
-   print('Output file is ', outputFile)
+   parser = argparse.ArgumentParser(description='sbk-charts')
+   parser.add_argument('-i','--ifile', help='Input CSV file', required=True)
+   parser.add_argument('-o','--ofile', help='Output xlsx file',  default="out.xlsx")
+   args = parser.parse_args()
+   print('Input file is ', args.ifile)
+   print('Output file is ', args.ofile)
 
 if __name__ == "__main__":
    main(sys.argv[1:])
