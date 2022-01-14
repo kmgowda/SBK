@@ -92,7 +92,7 @@ public class CSVLogger extends SystemLogger {
                                 + ",%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d"
                                 + ",%8d,%8d,%8d,%2d,%2d",
                         ++csvRowCounter, header, type, connections, maxConnections,
-                        storageName, action.name(), timeUnitText,
+                        storageName, action.name(), timeUnitFullText,
                         writers.get(), readers.get(), maxWriters.get(), maxReaders.get(),
                         seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                         invalid, lowerDiscard, higherDiscard, slc1, slc2)
