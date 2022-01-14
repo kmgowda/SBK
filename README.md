@@ -481,7 +481,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 ## Add your driver to SBK
 
 ### Add your driver to SBK using Gradle command and template driver
-1. Run the command **./gradlew addDriver -pdriver="your driver name"**
+1. Run the command **./gradlew addDriver -Pdriver="your driver name"**
    1. This command create the new subproject under the SBK framework with <driver name>.java and <driver name>Reader.
       java and <driver name>Writer.java files filled with required classes definitions
    
