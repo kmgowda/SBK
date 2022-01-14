@@ -22,11 +22,13 @@ class SbkCharts:
 
     def create_sheets(self):
         df = pandas.read_csv(self.iFile)
-        header = df.columns.tolist()
+        header = df.columns.values
         wb = xlsxwriter.Workbook(self.oFile)
-        ws1 = wb.add_worksheet("Regular")
-        ws2 = wb.add_worksheet("Total")
+        ws1 = wb.add_worksheet("R-1")
+        ws2 = wb.add_worksheet("T-1")
         for c, h in enumerate(header):
+            ws1.set_column(c, c, len(h))
+            ws2.set_column(c, c, len(h))
             ws1.write(0, c, h)
             ws2.write(0, c, h)
 
@@ -35,10 +37,16 @@ class SbkCharts:
         for row in df.iterrows():
             if row[1]['Type'] == 'Total':
                 for c, h in enumerate(header):
+                    col_size = len(str(row[1][h]))+1
+                    if col_size > len(h):
+                        ws2.set_column(c, c, col_size)
                     ws2.write(r2, c, row[1][h])
                 r2 += 1
             else:
                 for c, h in enumerate(header):
+                    col_size = len(str(row[1][h])) + 1
+                    if col_size > len(h):
+                        ws1.set_column(c, c, col_size)
                     ws1.write(r1, c, row[1][h])
                 r1 += 1
         wb.close()
