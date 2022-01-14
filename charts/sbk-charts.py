@@ -12,7 +12,7 @@
 
 import argparse
 import pandas
-from openpyxl import Workbook
+import xlsxwriter
 
 
 class SbkCharts:
@@ -23,22 +23,25 @@ class SbkCharts:
     def create_sheets(self):
         df = pandas.read_csv(self.iFile)
         header = df.columns.tolist()
-        wb = Workbook()
-        ws1 = wb.active
-        ws1.title = "Regular"
-        ws2 = wb.create_sheet()
-        ws2.title = "Total"
-        ws1.append(header)
-        ws2.append(header)
+        wb = xlsxwriter.Workbook(self.oFile)
+        ws1 = wb.add_worksheet("Regular")
+        ws2 = wb.add_worksheet("Total")
+        for c, h in enumerate(header):
+            ws1.write(0, c, h)
+            ws2.write(0, c, h)
+
+        r1 = 1
+        r2 = 1
         for row in df.iterrows():
-            lt = list()
-            for h in header:
-                lt.append(row[1][h])
             if row[1]['Type'] == 'Total':
-                ws2.append(lt)
+                for c, h in enumerate(header):
+                    ws2.write(r2, c, row[1][h])
+                r2 += 1
             else:
-                ws1.append(lt)
-        wb.save(self.oFile)
+                for c, h in enumerate(header):
+                    ws1.write(r1, c, row[1][h])
+                r1 += 1
+        wb.close()
         print("xlsx file %s created" % self.oFile)
 
 
