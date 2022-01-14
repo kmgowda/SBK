@@ -11,6 +11,7 @@
 # SBK-Charts :  Storage Benchmark Kit - Charts
 
 import argparse
+from collections import OrderedDict
 
 import openpyxl
 import pandas
@@ -64,6 +65,45 @@ class SbkCharts:
             } for cell in ws[1] if cell.value
         }
 
+    def get_percentile_columns(self, ws):
+        colnames = self.get_columns_from_worksheet(ws)
+        ret = OrderedDict()
+        for key in colnames.keys():
+            if key.startswith("Percentile_"):
+                ret[key] = colnames[key]
+        return ret
+
+    def get_time_unit(self, ws):
+        colnames = self.get_columns_from_worksheet(ws)
+        return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
+
+    def create_percentile_graphs(self, wb, ws, time_unit):
+        perc = self.get_percentile_columns(ws)
+        for p in perc:
+            data_series = Reference(ws, min_col=perc[p]['number'], min_row=1,
+                               max_col=perc[p]['number'], max_row=ws.max_row)
+
+            data_series.name = p
+
+            chart = LineChart()
+            # adding data to the Bar chart object
+            chart.add_data(data_series, titles_from_data=True)
+
+            # set the title of the chart
+            chart.title = p + " variations"
+
+            # set the title of the x-axis
+            chart.x_axis.title = " Intervals "
+
+            # set the title of the y-axis
+            chart.y_axis.title = " Latency Time in "+time_unit
+
+            # add chart to the sheet
+            # the top-left corner of a chart
+            # is anchored to cell E2 .
+            newws = wb.create_sheet(p)
+            newws.add_chart(chart)
+
     def create_graphs(self):
         self.create_sheets()
         wb = openpyxl.load_workbook(self.oFile)
@@ -76,29 +116,9 @@ class SbkCharts:
                 lt.append(cell.value)
             print(lt)
         """
-        #print(self.get_columns_from_worksheet(ws1))
-        colnames = self.get_columns_from_worksheet(ws1)
-        values = Reference(ws1, min_col=colnames['Percentile_10']['number'], min_row=2, max_col=colnames['Percentile_10']['number'], max_row=ws1.max_row)
-        chart = LineChart()
-        # adding data to the Bar chart object
-        chart.add_data(values)
-
-        # set the title of the chart
-        chart.title = " Line chart "
-
-        # set the title of the x-axis
-        chart.x_axis.title = " X_AXIS "
-
-        # set the title of the y-axis
-        chart.y_axis.title = " Y_AXIS "
-
-        # add chart to the sheet
-        # the top-left corner of a chart
-        # is anchored to cell E2 .
-        ws3 = wb.create_sheet("Percentile_10")
-        ws3.add_chart(chart)
+        # print(self.get_columns_from_worksheet(ws1))
+        self.create_percentile_graphs(wb, ws1, self.get_time_unit(ws1))
         wb.save(self.oFile)
-
 
 
 def main():
