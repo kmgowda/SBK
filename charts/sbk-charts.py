@@ -98,6 +98,9 @@ class SbkCharts:
             # set the title of the y-axis
             chart.y_axis.title = " Latency Time in "+time_unit
 
+            chart.height = 40
+            chart.width = 60
+
             # add chart to the sheet
             # the top-left corner of a chart
             # is anchored to cell E2 .
