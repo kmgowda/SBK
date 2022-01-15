@@ -16,7 +16,7 @@ from collections import OrderedDict
 import openpyxl
 import pandas
 import xlsxwriter
-from openpyxl.chart import LineChart, Reference
+from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.utils import get_column_letter
 
 
@@ -80,12 +80,12 @@ class SbkCharts:
         return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
 
     def create_latency_graphs(self, wb, ws, time_unit):
-        perc = self.get_latency_columns(ws)
-        for p in perc:
-            data_series = Reference(ws, min_col=perc[p]['number'], min_row=1,
-                               max_col=perc[p]['number'], max_row=ws.max_row)
+        latencies = self.get_latency_columns(ws)
+        for x in latencies:
+            data_series = Reference(ws, min_col=latencies[x]['number'], min_row=1,
+                               max_col=latencies[x]['number'], max_row=ws.max_row)
 
-            data_series.name = p
+            data_series.name = x
 
             chart = LineChart()
 
@@ -93,7 +93,7 @@ class SbkCharts:
             chart.add_data(data_series, titles_from_data=True)
 
             # set the title of the chart
-            chart.title = p + " Variations"
+            chart.title = x + " Variations"
 
             # set the title of the x-axis
             chart.x_axis.title = " Intervals "
@@ -105,8 +105,62 @@ class SbkCharts:
             chart.width = 40
 
             # add chart to the sheet
-            newws = wb.create_sheet(p)
+            newws = wb.create_sheet(x)
             newws.add_chart(chart)
+
+    def create_throughput_MB_graph(self, wb, ws):
+        cols = self.get_columns_from_worksheet(ws)
+        data_series = Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
+                                       max_col=cols["MB/Sec"]['number'], max_row=ws.max_row), title="MB/Sec")
+
+        chart = LineChart()
+
+        # adding data
+        chart.append(data_series)
+
+        # set the title of the chart
+        chart.title = " Throughput Variations in Mega Bytes / Seconds"
+
+        # set the title of the x-axis
+        chart.x_axis.title = "Intervals"
+
+        # set the title of the y-axis
+        chart.y_axis.title = "Throughput in MB/Sec"
+
+        chart.height = 20
+        chart.width = 40
+
+        # add chart to the sheet
+        newws = wb.create_sheet("MB_Sec")
+        newws.add_chart(chart)
+
+    def create_throughput_records_graph(self, wb, ws):
+        cols = self.get_columns_from_worksheet(ws)
+
+        data_series = Series(Reference(ws, min_col=cols["Records/Sec"]['number'], min_row=2,
+                                       max_col=cols["Records/Sec"]['number'], max_row=ws.max_row), title="Records/Sec")
+
+        chart = LineChart()
+
+        # adding data
+        chart.append(data_series)
+
+        # set the title of the chart
+        chart.title = " Throughput Variations in Records / Second"
+
+        # set the title of the x-axis
+        chart.x_axis.title = " Intervals "
+
+        # set the title of the y-axis
+        chart.y_axis.title = "Throughput in Records/Sec"
+
+        chart.height = 20
+        chart.width = 40
+
+        # add chart to the sheet
+        newws = wb.create_sheet("Records_Sec")
+        newws.add_chart(chart)
+
 
     def create_graphs(self):
         self.create_sheets()
@@ -121,6 +175,8 @@ class SbkCharts:
             print(lt)
         """
         # print(self.get_columns_from_worksheet(ws1))
+        self.create_throughput_MB_graph(wb, ws1)
+        self.create_throughput_records_graph(wb, ws1)
         self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1))
         wb.save(self.oFile)
 
