@@ -30,8 +30,8 @@ public class CSVWriter implements Writer<String> {
     public CSVWriter(int id, ParameterOptions params, CSVConfig config) throws IOException {
         java.io.File file = new java.io.File(config.fileName);
         file.delete();
-        csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(config.fileName)), CSVFormat.DEFAULT
-                .withHeader("Key", "text"));
+        csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(config.fileName)),
+                CSVFormat.DEFAULT.builder().setHeader("key", "text").build());
         key = 0;
     }
 

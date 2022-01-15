@@ -43,6 +43,7 @@ public class SystemLogger implements Logger {
     public String storageName;
     public String prefix;
     public String timeUnitText;
+    public String timeUnitFullText;
     public InputOptions params;
     public double[] percentiles;
     public String[] percentileNames;
@@ -174,6 +175,7 @@ public class SystemLogger implements Logger {
         this.time = time;
         this.prefix = storageName + " " + action.name();
         this.timeUnitText = getTimeUnit().name();
+        this.timeUnitFullText = getTimeUnit().toString();
         for (double p : this.percentiles) {
             if (p < 0 || p > 100) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(percentiles));
