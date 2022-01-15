@@ -77,7 +77,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.perl.Print</code>, <code>io.perl.ReportLatency</code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../../../perl/Print.html" title="interface in io.perl">Print</a></code>, <code><a href="../../../perl/ReportLatency.html" title="interface in io.perl">ReportLatency</a></code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
 </dl>
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
@@ -127,7 +127,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#storageName" class="member-name-link">storageName</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>io.time.Time</code></div>
+<div class="col-first odd-row-color"><code><a href="../../../time/Time.html" title="interface in io.time">Time</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#time" class="member-name-link">time</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
@@ -238,7 +238,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Default implementation of Reporting interval.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.time.TimeUnit</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTimeUnit()" class="member-name-link">getTimeUnit</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Default implementation of time Unit.</div>
@@ -257,7 +257,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)" class="member-name-link">open</a><wbr>(<a href="../../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;storageName,
  @NotNull <a href="../../action/Action.html" title="enum class in io.sbk.action">Action</a>&nbsp;action,
- io.time.Time&nbsp;time)</code></div>
+ <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Open the Logger.</div>
 </div>
@@ -280,7 +280,9 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
  long&nbsp;slc1,
  long&nbsp;slc2,
  long[]&nbsp;percentileValues)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Print the Periodic performance results.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">printTotal</a><wbr>(double&nbsp;seconds,
  long&nbsp;bytes,
@@ -390,7 +392,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <li>
 <section class="detail" id="time">
 <h3>time</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">io.time.Time</span>&nbsp;<span class="element-name">time</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../../time/Time.html" title="interface in io.time">Time</a></span>&nbsp;<span class="element-name">time</span></div>
 </section>
 </li>
 </ul>
@@ -457,7 +459,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;storageName,
  @NotNull
  @NotNull <a href="../../action/Action.html" title="enum class in io.sbk.action">Action</a>&nbsp;action,
- io.time.Time&nbsp;time)</span>
+ <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time)</span>
           throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">PerformanceLogger</a></code></span></div>
 <div class="block">Open the Logger.</div>
@@ -508,7 +510,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <li>
 <section class="detail" id="getTimeUnit()">
 <h3>getTimeUnit</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">io.time.TimeUnit</span>&nbsp;<span class="element-name">getTimeUnit</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a></span>&nbsp;<span class="element-name">getTimeUnit</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getTimeUnit()">PerformanceLogger</a></code></span></div>
 <div class="block">Default implementation of time Unit.
  Default time unit is Milliseconds.</div>
@@ -673,9 +675,25 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
  long&nbsp;slc1,
  long&nbsp;slc2,
  long[]&nbsp;percentileValues)</span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">Print</a></code></span></div>
+<div class="block">Print the Periodic performance results.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>print</code>&nbsp;in interface&nbsp;<code>io.perl.Print</code></dd>
+<dd><code><a href="../../../perl/Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">print</a></code>&nbsp;in interface&nbsp;<code><a href="../../../perl/Print.html" title="interface in io.perl">Print</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>seconds</code> - reporting duration in seconds</dd>
+<dd><code>bytes</code> - number of bytes read/write</dd>
+<dd><code>records</code> - data to write.</dd>
+<dd><code>recsPerSec</code> - records per second.</dd>
+<dd><code>mbPerSec</code> - Throughput value in terms of MB (Mega Bytes) per Second.</dd>
+<dd><code>avgLatency</code> - Average Latency.</dd>
+<dd><code>maxLatency</code> - Maximum Latency.</dd>
+<dd><code>invalid</code> - Number of invalid/negative latencies.</dd>
+<dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
+<dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
+<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
+<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
+<dd><code>percentileValues</code> - Array of percentiles.</dd>
 </dl>
 </section>
 </li>

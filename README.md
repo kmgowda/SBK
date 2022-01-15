@@ -481,7 +481,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 ## Add your driver to SBK
 
 ### Add your driver to SBK using Gradle command and template driver
-1. Run the command **./gradlew addDriver -pdriver="your driver name"**
+1. Run the command **./gradlew addDriver -Pdriver="your driver name"**
    1. This command create the new subproject under the SBK framework with <driver name>.java and <driver name>Reader.
       java and <driver name>Writer.java files filled with required classes definitions
    
@@ -713,7 +713,7 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
     }
 
     dependencies {
-        implementation 'sbk:sbk-api:0.90'
+        implementation 'sbk:sbk-api:0.951'
     }
 
    ```
@@ -771,7 +771,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
     }
 
     dependencies {
-        implementation 'com.github.kmgowda.SBK:sbk-api:0.90'
+        implementation 'com.github.kmgowda.SBK:sbk-api:0.951'
     }
    
    ```
@@ -822,7 +822,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     }
 
     dependencies {
-        implementation 'io.github.kmgowda:sbk-api:0.90'
+        implementation 'io.github.kmgowda:sbk-api:0.951'
     }
    ```
    few points to remember here  
