@@ -11,11 +11,12 @@
 
 rootProject.name = 'sbk'
 
+include 'state'
+include 'time'
 include 'sbk-api'
 include 'sbk-ram'
 include 'sbk-gem'
 include 'sbk-gem-yal'
 
 apply from: "$rootDir/settings-drivers.gradle"
-include 'state'
 
