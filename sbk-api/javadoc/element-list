@@ -1,5 +1,3 @@
-io.perl
-io.perl.impl
 io.sbk.action
 io.sbk.api
 io.sbk.api.impl
@@ -16,5 +14,3 @@ io.sbk.options.impl
 io.sbk.system
 io.sbk.yal
 io.sbk.yal.impl
-io.state
-io.time
