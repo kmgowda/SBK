@@ -10,7 +10,6 @@
  */
 
 apply plugin: 'java-library'
-apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
 
 buildscript {
@@ -21,7 +20,6 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
         classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
     }
 }
@@ -30,7 +28,6 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
-    api project(":perl")
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
     api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
@@ -40,33 +37,5 @@ dependencies {
     api group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
     api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     api group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    api group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
-    api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
-    api group: 'io.prometheus.jmx', name: jmxAgent, version: jmxPrometheusVersion
-    api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
-    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
-    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
-}
-
-
-generateJavadoc {
-    // follow the package path , it should not be folder path.
-    // but dont use . (dot) in the path
-    exclude 'io/sbk/grpc/ServiceGrpc.java'
-    exclude 'io/sbk/grpc/LatenciesRecordOrBuilder.java'
-    exclude 'io/sbk/grpc/LatenciesRecord.java'
-}
-
-task updateDocs(dependsOn: javadoc) {
-    doLast {
-        println "Update $projectDir Javadocs"
-        delete "$projectDir/javadoc"
-        copy {
-            from "$projectDir/build/docs/javadoc"
-            into "$projectDir/javadoc"
-        }
-    }
 }

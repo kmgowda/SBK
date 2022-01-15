@@ -547,8 +547,7 @@ task addDriver(dependsOn: deleteDriver) {
 }
 
 dependencies {
-    api project(":state")
-    api project(":time")
+    api project(":perl")
     api project(":sbk-api")
     api project(":sbk-ram")
     api project(":sbk-gem")
