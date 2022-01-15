@@ -20,7 +20,7 @@ from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.utils import get_column_letter
 
 
-class SbkCharts:
+class SbkSheets:
     def __init__(self, iFile, oFile):
         self.iFile = iFile
         self.oFile = oFile
@@ -56,6 +56,11 @@ class SbkCharts:
                 r1 += 1
         wb.close()
         print("xlsx file %s created" % self.oFile)
+
+
+class SbkCharts:
+    def __init__(self, file):
+        self.file = file
 
     def get_columns_from_worksheet(self, ws):
         return {
@@ -190,8 +195,7 @@ class SbkCharts:
         newws.add_chart(chart)
 
     def create_graphs(self):
-        self.create_sheets()
-        wb = openpyxl.load_workbook(self.oFile)
+        wb = openpyxl.load_workbook(self.file)
         ws1 = wb["R-1"]
         ws2 = wb["T-1"]
         """
@@ -205,7 +209,7 @@ class SbkCharts:
         self.create_throughput_MB_graph(wb, ws1)
         self.create_throughput_records_graph(wb, ws1)
         self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1))
-        wb.save(self.oFile)
+        wb.save(self.file)
 
 
 def main():
@@ -213,9 +217,11 @@ def main():
     parser.add_argument('-i', '--ifile', help='Input CSV file', required=True)
     parser.add_argument('-o', '--ofile', help='Output xlsx file', default="out.xlsx")
     args = parser.parse_args()
-    charts = SbkCharts(args.ifile, args.ofile)
-    print('Input file is ', charts.iFile)
-    print('Output file is ', charts.oFile)
+    print('Input file is ', args.ifile)
+    print('Output file is ', args.ofile)
+    sheets = SbkSheets(args.ifile, args.ofile)
+    sheets.create_sheets()
+    charts = SbkCharts(args.ofile)
     charts.create_graphs()
 
 
