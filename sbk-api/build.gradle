@@ -30,6 +30,7 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 
 dependencies {
+    api project(":state")
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
     api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
