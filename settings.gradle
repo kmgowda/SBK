@@ -11,9 +11,6 @@
 
 rootProject.name = 'sbk'
 
-include 'state'
-include 'time'
-include 'perl'
 include 'sbk-api'
 include 'sbk-ram'
 include 'sbk-gem'
