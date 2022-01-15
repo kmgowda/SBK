@@ -86,7 +86,7 @@ class SbkCharts:
 
     def create_latency_graphs(self, wb, ws, time_unit):
         latencies = self.get_latency_columns(ws)
-        charts = [LineChart(), LineChart(), LineChart()]
+        charts = [LineChart(), LineChart(), LineChart(), LineChart()]
 
         for ch in charts:
             # set the title of the chart
@@ -101,10 +101,12 @@ class SbkCharts:
             ch.height = 25
             ch.width = 50
 
-        tmpws = [wb.create_sheet("Latencies-1"), wb.create_sheet("Latencies-2"), wb.create_sheet("Latencies-3")]
+        tmpws = [wb.create_sheet("Latencies-1"), wb.create_sheet("Latencies-2"),
+                 wb.create_sheet("Latencies-3"), wb.create_sheet("Latencies-4")]
 
         groups = [
             ["Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30", "Percentile_40", "Percentile_50"],
+            ["Percentile_50", "AvgLatency"],
             ["Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
