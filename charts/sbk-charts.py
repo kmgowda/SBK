@@ -25,35 +25,37 @@ class SbkSheets:
         self.iFile = iFile
         self.oFile = oFile
 
-    def create_sheets(self):
-        df = pandas.read_csv(self.iFile)
+    def wb_add_two_sheets(self, wb, r_name, t_name, df):
         header = df.columns.values
-        wb = xlsxwriter.Workbook(self.oFile)
-        ws1 = wb.add_worksheet("R-1")
-        ws2 = wb.add_worksheet("T-1")
+        r_ws = wb.add_worksheet(r_name)
+        t_ws = wb.add_worksheet(t_name)
         for c, h in enumerate(header):
-            ws1.set_column(c, c, len(h))
-            ws2.set_column(c, c, len(h))
-            ws1.write(0, c, h)
-            ws2.write(0, c, h)
-
-        r1 = 1
-        r2 = 1
+            r_ws.set_column(c, c, len(h))
+            t_ws.set_column(c, c, len(h))
+            r_ws.write(0, c, h)
+            t_ws.write(0, c, h)
+        r_row = 1
+        t_row = 1
         for row in df.iterrows():
             if row[1]['Type'] == 'Total':
                 for c, h in enumerate(header):
                     col_size = len(str(row[1][h])) + 1
                     if col_size > len(h):
-                        ws2.set_column(c, c, col_size)
-                    ws2.write(r2, c, row[1][h])
-                r2 += 1
+                        t_ws.set_column(c, c, col_size)
+                    t_ws.write(t_row, c, row[1][h])
+                t_row += 1
             else:
                 for c, h in enumerate(header):
                     col_size = len(str(row[1][h])) + 1
                     if col_size > len(h):
-                        ws1.set_column(c, c, col_size)
-                    ws1.write(r1, c, row[1][h])
-                r1 += 1
+                        r_ws.set_column(c, c, col_size)
+                    r_ws.write(r_row, c, row[1][h])
+                r_row += 1
+
+    def create_sheets(self):
+        df = pandas.read_csv(self.iFile)
+        wb = xlsxwriter.Workbook(self.oFile)
+        self.wb_add_two_sheets(wb, "R-1", "T-1", df)
         wb.close()
         print("xlsx file %s created" % self.oFile)
 
