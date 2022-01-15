@@ -65,9 +65,11 @@ class SbkCharts:
             } for cell in ws[1] if cell.value
         }
 
-    def get_percentile_columns(self, ws):
+    def get_latency_columns(self, ws):
         colnames = self.get_columns_from_worksheet(ws)
         ret = OrderedDict()
+        ret['AvgLatency'] = colnames['AvgLatency']
+        ret['MaxLatency'] = colnames['MaxLatency']
         for key in colnames.keys():
             if key.startswith("Percentile_"):
                 ret[key] = colnames[key]
@@ -77,8 +79,8 @@ class SbkCharts:
         colnames = self.get_columns_from_worksheet(ws)
         return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
 
-    def create_percentile_graphs(self, wb, ws, time_unit):
-        perc = self.get_percentile_columns(ws)
+    def create_latency_graphs(self, wb, ws, time_unit):
+        perc = self.get_latency_columns(ws)
         for p in perc:
             data_series = Reference(ws, min_col=perc[p]['number'], min_row=1,
                                max_col=perc[p]['number'], max_row=ws.max_row)
@@ -86,11 +88,12 @@ class SbkCharts:
             data_series.name = p
 
             chart = LineChart()
-            # adding data to the Bar chart object
+
+            # adding data
             chart.add_data(data_series, titles_from_data=True)
 
             # set the title of the chart
-            chart.title = p + " variations"
+            chart.title = p + " Variations"
 
             # set the title of the x-axis
             chart.x_axis.title = " Intervals "
@@ -98,12 +101,10 @@ class SbkCharts:
             # set the title of the y-axis
             chart.y_axis.title = " Latency Time in "+time_unit
 
-            chart.height = 40
-            chart.width = 60
+            chart.height = 20
+            chart.width = 40
 
             # add chart to the sheet
-            # the top-left corner of a chart
-            # is anchored to cell E2 .
             newws = wb.create_sheet(p)
             newws.add_chart(chart)
 
@@ -120,7 +121,7 @@ class SbkCharts:
             print(lt)
         """
         # print(self.get_columns_from_worksheet(ws1))
-        self.create_percentile_graphs(wb, ws1, self.get_time_unit(ws1))
+        self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1))
         wb.save(self.oFile)
 
 
