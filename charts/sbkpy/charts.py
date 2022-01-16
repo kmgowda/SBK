@@ -10,14 +10,10 @@
 
 # sbk_charts :  Storage Benchmark Kit - Charts
 
-import argparse
 from collections import OrderedDict
-
 import openpyxl
 from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.utils import get_column_letter
-from sbk_sheets import SbkSheets
-
 
 class SbkCharts:
     def __init__(self, file):
@@ -159,20 +155,3 @@ class SbkCharts:
         self.create_latency_compare_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
         self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
         wb.save(self.file)
-
-
-def main():
-    parser = argparse.ArgumentParser(description='sbk charts')
-    parser.add_argument('-i', '--ifile', help='Input CSV file', required=True)
-    parser.add_argument('-o', '--ofile', help='Output xlsx file', default="out.xlsx")
-    args = parser.parse_args()
-    print('Input file is ', args.ifile)
-    print('Output file is ', args.ofile)
-    sh = SbkSheets(args.ifile, args.ofile)
-    sh.create_sheets()
-    ch = SbkCharts(args.ofile)
-    ch.create_graphs()
-
-
-if __name__ == "__main__":
-    main()

@@ -8,10 +8,9 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 ##
 
-
 import argparse
-from sbkpy.sbk_charts import SbkSheets, SbkCharts
-
+from sbkpy.sheets import SbkSheets
+from sbkpy.charts import SbkCharts
 
 def main():
     parser = argparse.ArgumentParser(description='sbk charts')
