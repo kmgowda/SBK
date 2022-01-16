@@ -16,9 +16,10 @@ from collections import OrderedDict
 import openpyxl
 from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.utils import get_column_letter
-import sbk_sheets
+from sheets import SbkSheets
 
-class sbk_charts:
+
+class SbkCharts:
     def __init__(self, file):
         self.file = file
 
@@ -44,7 +45,6 @@ class sbk_charts:
         colnames = self.get_columns_from_worksheet(ws)
         return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
 
-
     def create_latency_compare_graphs(self, wb, ws, time_unit, prefix):
         latencies = self.get_latency_columns(ws)
         charts = [LineChart(), LineChart(), LineChart(), LineChart()]
@@ -60,7 +60,7 @@ class sbk_charts:
             ch.width = 50
 
         sheets = [wb.create_sheet("Latencies-1"), wb.create_sheet("Latencies-2"),
-                 wb.create_sheet("Latencies-3"), wb.create_sheet("Latencies-4")]
+                  wb.create_sheet("Latencies-3"), wb.create_sheet("Latencies-4")]
 
         groups = [
             ["Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30", "Percentile_40", "Percentile_50"],
@@ -73,20 +73,19 @@ class sbk_charts:
         for x in latencies:
             data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
                                            max_col=latencies[x]['number'], max_row=ws.max_row),
-                                 title=prefix+"-"+x)
+                                 title=prefix + "-" + x)
             for i, g in enumerate(groups):
                 if x in g:
                     charts[i].append(data_series)
         for i, ch in enumerate(charts):
             sheets[i].add_chart(ch)
 
-
     def create_latency_graphs(self, wb, ws, time_unit, prefix):
         latencies = self.get_latency_columns(ws)
         for x in latencies:
             data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
                                            max_col=latencies[x]['number'], max_row=ws.max_row),
-                                 title=prefix+"-"+x)
+                                 title=prefix + "-" + x)
             chart = LineChart()
             # adding data
             chart.append(data_series)
@@ -102,12 +101,11 @@ class sbk_charts:
             sheet = wb.create_sheet(x)
             sheet.add_chart(chart)
 
-
     def create_throughput_MB_graph(self, wb, ws, prefix):
         cols = self.get_columns_from_worksheet(ws)
         data_series = Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
                                        max_col=cols["MB/Sec"]['number'], max_row=ws.max_row),
-                             title=prefix+"-MB/Sec")
+                             title=prefix + "-MB/Sec")
         chart = LineChart()
         # adding data
         chart.append(data_series)
@@ -127,7 +125,7 @@ class sbk_charts:
         cols = self.get_columns_from_worksheet(ws)
         data_series = Series(Reference(ws, min_col=cols["Records/Sec"]['number'], min_row=2,
                                        max_col=cols["Records/Sec"]['number'], max_row=ws.max_row),
-                             title=prefix+"-Records/Sec")
+                             title=prefix + "-Records/Sec")
         chart = LineChart()
         # adding data
         chart.append(data_series)
@@ -170,10 +168,10 @@ def main():
     args = parser.parse_args()
     print('Input file is ', args.ifile)
     print('Output file is ', args.ofile)
-    sheets = sbk_sheets.sbk_sheets(args.ifile, args.ofile)
-    sheets.create_sheets()
-    charts = sbk_charts(args.ofile)
-    charts.create_graphs()
+    sh = SbkSheets(args.ifile, args.ofile)
+    sh.create_sheets()
+    ch = SbkCharts(args.ofile)
+    ch.create_graphs()
 
 
 if __name__ == "__main__":
