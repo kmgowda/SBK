@@ -10,8 +10,8 @@
 
 # SBK-sheets :  Storage Benchmark Kit - Sheets
 
-import pandas
-import xlsxwriter
+from pandas import read_csv
+from xlsxwriter import Workbook
 
 
 class SbkSheets:
@@ -47,8 +47,8 @@ class SbkSheets:
                 r_row += 1
 
     def create_sheets(self):
-        df = pandas.read_csv(self.iFile)
-        wb = xlsxwriter.Workbook(self.oFile)
+        df = read_csv(self.iFile)
+        wb = Workbook(self.oFile)
         self.wb_add_two_sheets(wb, "R1", "T1", df)
         wb.close()
         print("xlsx file %s created" % self.oFile)
