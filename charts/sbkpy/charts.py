@@ -97,7 +97,7 @@ class SbkCharts:
             sheet = wb.create_sheet(x)
             sheet.add_chart(chart)
 
-    def create_throughput_MB_graph(self, wb, ws, prefix):
+    def create_throughput_mb_graph(self, wb, ws, prefix):
         cols = self.get_columns_from_worksheet(ws)
         data_series = Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
                                        max_col=cols["MB/Sec"]['number'], max_row=ws.max_row),
@@ -150,7 +150,7 @@ class SbkCharts:
                 lt.append(cell.value)
             print(lt)
         """
-        self.create_throughput_MB_graph(wb, ws1, r_name)
+        self.create_throughput_mb_graph(wb, ws1, r_name)
         self.create_throughput_records_graph(wb, ws1, r_name)
         self.create_latency_compare_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
         self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
