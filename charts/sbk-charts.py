@@ -109,7 +109,7 @@ class SbkCharts:
         groups = [
             ["Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30", "Percentile_40", "Percentile_50"],
             ["Percentile_50", "AvgLatency"],
-            ["Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
+            ["Percentile_50", "Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
              "Percentile_99.95", "Percentile_99.90"]]
