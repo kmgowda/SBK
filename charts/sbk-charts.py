@@ -73,43 +73,41 @@ class SbkCharts:
         }
 
     def get_latency_columns(self, ws):
-        colnames = self.get_columns_from_worksheet(ws)
+        column_names = self.get_columns_from_worksheet(ws)
         ret = OrderedDict()
-        ret['AvgLatency'] = colnames['AvgLatency']
-        ret['MaxLatency'] = colnames['MaxLatency']
-        for key in colnames.keys():
+        ret['AvgLatency'] = column_names['AvgLatency']
+        ret['MaxLatency'] = column_names['MaxLatency']
+        for key in column_names.keys():
             if key.startswith("Percentile_"):
-                ret[key] = colnames[key]
+                ret[key] = column_names[key]
         return ret
 
     def get_time_unit(self, ws):
         colnames = self.get_columns_from_worksheet(ws)
         return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
 
-    def create_latency_graphs(self, wb, ws, time_unit, prefix):
+
+    def create_latency_compare_graphs(self, wb, ws, time_unit, prefix):
         latencies = self.get_latency_columns(ws)
         charts = [LineChart(), LineChart(), LineChart(), LineChart()]
 
         for ch in charts:
             # set the title of the chart
             ch.title = " Percentile Variations"
-
             # set the title of the x-axis
             ch.x_axis.title = " Intervals "
-
             # set the title of the y-axis
             ch.y_axis.title = " Latency Time in " + time_unit
-
             ch.height = 25
             ch.width = 50
 
-        tmpws = [wb.create_sheet("Latencies-1"), wb.create_sheet("Latencies-2"),
+        sheets = [wb.create_sheet("Latencies-1"), wb.create_sheet("Latencies-2"),
                  wb.create_sheet("Latencies-3"), wb.create_sheet("Latencies-4")]
 
         groups = [
             ["Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30", "Percentile_40", "Percentile_50"],
             ["Percentile_50", "AvgLatency"],
-            ["Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
+            ["Percentile_50", "Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
              "Percentile_99.95", "Percentile_99.99"]]
@@ -118,93 +116,81 @@ class SbkCharts:
             data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
                                            max_col=latencies[x]['number'], max_row=ws.max_row),
                                  title=prefix+"-"+x)
-
             for i, g in enumerate(groups):
                 if x in g:
                     charts[i].append(data_series)
+        for i, ch in enumerate(charts):
+            sheets[i].add_chart(ch)
 
+
+    def create_latency_graphs(self, wb, ws, time_unit, prefix):
+        latencies = self.get_latency_columns(ws)
+        for x in latencies:
+            data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
+                                           max_col=latencies[x]['number'], max_row=ws.max_row),
+                                 title=prefix+"-"+x)
             chart = LineChart()
-
             # adding data
             chart.append(data_series)
-
             # set the title of the chart
             chart.title = x + " Variations"
-
             # set the title of the x-axis
             chart.x_axis.title = " Intervals "
-
             # set the title of the y-axis
             chart.y_axis.title = " Latency Time in " + time_unit
-
-            chart.height = 20
-            chart.width = 40
-
+            chart.height = 25
+            chart.width = 45
             # add chart to the sheet
-            newws = wb.create_sheet(x)
-            newws.add_chart(chart)
-        for i, ch in enumerate(charts):
-            tmpws[i].add_chart(ch)
+            sheet = wb.create_sheet(x)
+            sheet.add_chart(chart)
+
 
     def create_throughput_MB_graph(self, wb, ws, prefix):
         cols = self.get_columns_from_worksheet(ws)
         data_series = Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
                                        max_col=cols["MB/Sec"]['number'], max_row=ws.max_row),
                              title=prefix+"-MB/Sec")
-
         chart = LineChart()
-
         # adding data
         chart.append(data_series)
-
         # set the title of the chart
         chart.title = " Throughput Variations in Mega Bytes / Seconds"
-
         # set the title of the x-axis
         chart.x_axis.title = "Intervals"
-
         # set the title of the y-axis
         chart.y_axis.title = "Throughput in MB/Sec"
-
         chart.height = 20
         chart.width = 40
-
         # add chart to the sheet
-        newws = wb.create_sheet("MB_Sec")
-        newws.add_chart(chart)
+        sheet = wb.create_sheet("MB_Sec")
+        sheet.add_chart(chart)
 
     def create_throughput_records_graph(self, wb, ws, prefix):
         cols = self.get_columns_from_worksheet(ws)
-
         data_series = Series(Reference(ws, min_col=cols["Records/Sec"]['number'], min_row=2,
                                        max_col=cols["Records/Sec"]['number'], max_row=ws.max_row),
                              title=prefix+"-Records/Sec")
-
         chart = LineChart()
-
         # adding data
         chart.append(data_series)
-
         # set the title of the chart
         chart.title = " Throughput Variations in Records / Second"
-
         # set the title of the x-axis
         chart.x_axis.title = " Intervals "
-
         # set the title of the y-axis
         chart.y_axis.title = "Throughput in Records/Sec"
-
         chart.height = 20
         chart.width = 40
-
         # add chart to the sheet
-        newws = wb.create_sheet("Records_Sec")
-        newws.add_chart(chart)
+        sheet = wb.create_sheet("Records_Sec")
+        sheet.add_chart(chart)
 
     def create_graphs(self):
         wb = openpyxl.load_workbook(self.file)
-        ws1 = wb["R1"]
-        ws2 = wb["T1"]
+        r_name = "R1"
+        t_name = "T1"
+        ws1 = wb[r_name]
+        ws2 = wb[t_name]
         """
         for row in ws1.iter_rows():
             lt = []
@@ -212,10 +198,10 @@ class SbkCharts:
                 lt.append(cell.value)
             print(lt)
         """
-        # print(self.get_columns_from_worksheet(ws1))
-        self.create_throughput_MB_graph(wb, ws1, "R1")
-        self.create_throughput_records_graph(wb, ws1, "R1")
-        self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1), "R1")
+        self.create_throughput_MB_graph(wb, ws1, r_name)
+        self.create_throughput_records_graph(wb, ws1, r_name)
+        self.create_latency_compare_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
+        self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
         wb.save(self.file)
 
 
