@@ -11,7 +11,7 @@
 # sbk_charts :  Storage Benchmark Kit - Charts
 
 from collections import OrderedDict
-import openpyxl
+from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.utils import get_column_letter
 
@@ -138,7 +138,7 @@ class SbkCharts:
         sheet.add_chart(chart)
 
     def create_graphs(self):
-        wb = openpyxl.load_workbook(self.file)
+        wb = load_workbook(self.file)
         r_name = "R1"
         t_name = "T1"
         ws1 = wb[r_name]
