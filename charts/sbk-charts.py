@@ -55,7 +55,7 @@ class SbkSheets:
     def create_sheets(self):
         df = pandas.read_csv(self.iFile)
         wb = xlsxwriter.Workbook(self.oFile)
-        self.wb_add_two_sheets(wb, "R-1", "T-1", df)
+        self.wb_add_two_sheets(wb, "R1", "T1", df)
         wb.close()
         print("xlsx file %s created" % self.oFile)
 
@@ -86,7 +86,7 @@ class SbkCharts:
         colnames = self.get_columns_from_worksheet(ws)
         return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
 
-    def create_latency_graphs(self, wb, ws, time_unit):
+    def create_latency_graphs(self, wb, ws, time_unit, prefix):
         latencies = self.get_latency_columns(ws)
         charts = [LineChart(), LineChart(), LineChart(), LineChart()]
 
@@ -112,11 +112,12 @@ class SbkCharts:
             ["Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
-             "Percentile_99.95", "Percentile_99.90"]]
+             "Percentile_99.95", "Percentile_99.99"]]
 
         for x in latencies:
             data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
-                                           max_col=latencies[x]['number'], max_row=ws.max_row), title=x)
+                                           max_col=latencies[x]['number'], max_row=ws.max_row),
+                                 title=prefix+"-"+x)
 
             for i, g in enumerate(groups):
                 if x in g:
@@ -145,10 +146,11 @@ class SbkCharts:
         for i, ch in enumerate(charts):
             tmpws[i].add_chart(ch)
 
-    def create_throughput_MB_graph(self, wb, ws):
+    def create_throughput_MB_graph(self, wb, ws, prefix):
         cols = self.get_columns_from_worksheet(ws)
         data_series = Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
-                                       max_col=cols["MB/Sec"]['number'], max_row=ws.max_row), title="MB/Sec")
+                                       max_col=cols["MB/Sec"]['number'], max_row=ws.max_row),
+                             title=prefix+"-MB/Sec")
 
         chart = LineChart()
 
@@ -171,11 +173,12 @@ class SbkCharts:
         newws = wb.create_sheet("MB_Sec")
         newws.add_chart(chart)
 
-    def create_throughput_records_graph(self, wb, ws):
+    def create_throughput_records_graph(self, wb, ws, prefix):
         cols = self.get_columns_from_worksheet(ws)
 
         data_series = Series(Reference(ws, min_col=cols["Records/Sec"]['number'], min_row=2,
-                                       max_col=cols["Records/Sec"]['number'], max_row=ws.max_row), title="Records/Sec")
+                                       max_col=cols["Records/Sec"]['number'], max_row=ws.max_row),
+                             title=prefix+"-Records/Sec")
 
         chart = LineChart()
 
@@ -200,8 +203,8 @@ class SbkCharts:
 
     def create_graphs(self):
         wb = openpyxl.load_workbook(self.file)
-        ws1 = wb["R-1"]
-        ws2 = wb["T-1"]
+        ws1 = wb["R1"]
+        ws2 = wb["T1"]
         """
         for row in ws1.iter_rows():
             lt = []
@@ -210,9 +213,9 @@ class SbkCharts:
             print(lt)
         """
         # print(self.get_columns_from_worksheet(ws1))
-        self.create_throughput_MB_graph(wb, ws1)
-        self.create_throughput_records_graph(wb, ws1)
-        self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1))
+        self.create_throughput_MB_graph(wb, ws1, "R1")
+        self.create_throughput_records_graph(wb, ws1, "R1")
+        self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1), "R1")
         wb.save(self.file)
 
 
