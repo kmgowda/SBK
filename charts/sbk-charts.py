@@ -10,7 +10,7 @@
 
 
 import argparse
-from sbk_charts import SbkSheets, SbkCharts
+from sbkpy.sbk_charts import SbkSheets, SbkCharts
 
 
 def main():
