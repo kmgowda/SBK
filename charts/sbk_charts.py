@@ -8,7 +8,7 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 ##
 
-# SBK-Charts :  Storage Benchmark Kit - Charts
+# sbkcharts :  Storage Benchmark Kit - Charts
 
 import argparse
 from collections import OrderedDict
@@ -16,9 +16,9 @@ from collections import OrderedDict
 import openpyxl
 from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.utils import get_column_letter
-import sbksheets
+import sbk_sheets
 
-class SbkCharts:
+class sbk_charts:
     def __init__(self, file):
         self.file = file
 
@@ -170,9 +170,9 @@ def main():
     args = parser.parse_args()
     print('Input file is ', args.ifile)
     print('Output file is ', args.ofile)
-    sheets = sbksheets.SbkSheets(args.ifile, args.ofile)
+    sheets = sbk_sheets.sbk_sheets(args.ifile, args.ofile)
     sheets.create_sheets()
-    charts = SbkCharts(args.ofile)
+    charts = sbk_charts(args.ofile)
     charts.create_graphs()
 
 

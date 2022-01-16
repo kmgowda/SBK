@@ -13,7 +13,7 @@
 import pandas
 import xlsxwriter
 
-class SbkSheets:
+class sbk_sheets:
     def __init__(self, iFile, oFile):
         self.iFile = iFile
         self.oFile = oFile
