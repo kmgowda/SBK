@@ -11,7 +11,6 @@
 package io.perl;
 
 import io.time.Time;
-import io.time.TimeUnit;
 
 final public class PerlConfig {
     final public static String NAME = "PerL";
@@ -38,7 +37,6 @@ final public class PerlConfig {
 
     final public static int HDR_SIGNIFICANT_DIGITS = 3;
 
-    public TimeUnit timeUnit;
     public int qPerWorker;
     public int idleNS;
     public int maxQs;
