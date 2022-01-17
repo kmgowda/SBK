@@ -53,8 +53,8 @@ final public class SbkBenchmark implements Benchmark {
     final private Logger logger;
     final private ExecutorService executor;
     final private ParameterOptions params;
-    final private Perl writeStats;
-    final private Perl readStats;
+    final private Perl writePerl;
+    final private Perl readPerl;
     final private int maxQs;
     final private ScheduledExecutorService timeoutExecutor;
     final private CompletableFuture<Void> retFuture;
@@ -93,14 +93,14 @@ final public class SbkBenchmark implements Benchmark {
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
 
-        writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
+        writePerl = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
                 PerlBuilder.build(params.getWritersCount(),
                         logger.getReportingIntervalSeconds() * Time.MS_PER_SEC,
                         params.getTimeoutMS(), executor, perlConfig, time,
                         logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
                         logger, logger::printTotal, logger) : null;
 
-        readStats = params.getReadersCount() > 0 ?
+        readPerl = params.getReadersCount() > 0 ?
                 PerlBuilder.build(params.getReadersCount(),
                         logger.getReportingIntervalSeconds(),
                         params.getTimeoutMS(), executor, perlConfig, time,
@@ -169,10 +169,10 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (writers.size() > 0) {
-            if (writeStats != null) {
+            if (writePerl != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, writeStats.getPerlChannel(),
+                        .map(i -> new SbkWriter(i, maxQs, params, writePerl.getPerlChannel(),
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             } else {
@@ -190,20 +190,20 @@ final public class SbkBenchmark implements Benchmark {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i, maxQs, params,
-                            readStats.getPerlChannel(), dType, time, readers.get(i),
+                            readPerl.getPerlChannel(), dType, time, readers.get(i),
                             logger, executor))
                     .collect(Collectors.toList());
         } else {
             sbkReaders = null;
         }
 
-        if (writeStats != null && !params.isWriteAndRead() && sbkWriters != null) {
-            wStatFuture = writeStats.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+        if (writePerl != null && !params.isWriteAndRead() && sbkWriters != null) {
+            wStatFuture = writePerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             wStatFuture = null;
         }
-        if (readStats != null && sbkReaders != null) {
-            rStatFuture = readStats.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+        if (readPerl != null && sbkReaders != null) {
+            rStatFuture = readPerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             rStatFuture = null;
         }
@@ -358,11 +358,11 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         state = State.END;
-        if (writeStats != null) {
-            writeStats.stop();
+        if (writePerl != null) {
+            writePerl.stop();
         }
-        if (readStats != null) {
-            readStats.stop();
+        if (readPerl != null) {
+            readPerl.stop();
         }
         readers.forEach(c -> {
             try {
