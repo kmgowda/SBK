@@ -55,7 +55,7 @@ final public class SbkBenchmark implements Benchmark {
     final private ParameterOptions params;
     final private Perl writePerl;
     final private Perl readPerl;
-    final private int maxQs;
+    final private int channelIdMax;
     final private ScheduledExecutorService timeoutExecutor;
     final private CompletableFuture<Void> retFuture;
     final private List<DataWriter<Object>> writers;
@@ -87,7 +87,7 @@ final public class SbkBenchmark implements Benchmark {
         this.logger = logger;
         this.time = time;
 
-        this.maxQs = perlConfig.maxQs > 0 ?
+        this.channelIdMax = perlConfig.maxQs > 0 ?
                 perlConfig.maxQs : Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
@@ -172,13 +172,13 @@ final public class SbkBenchmark implements Benchmark {
             if (writePerl != null) {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, writePerl.getPerlChannel(),
+                        .map(i -> new SbkWriter(i, channelIdMax, params, writePerl.getPerlChannel(),
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, maxQs, params, null,
+                        .map(i -> new SbkWriter(i, channelIdMax, params, null,
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             }
@@ -189,7 +189,7 @@ final public class SbkBenchmark implements Benchmark {
         if (readers.size() > 0) {
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i, maxQs, params,
+                    .map(i -> new SbkReader(i, channelIdMax, params,
                             readPerl.getPerlChannel(), dType, time, readers.get(i),
                             logger, executor))
                     .collect(Collectors.toList());
