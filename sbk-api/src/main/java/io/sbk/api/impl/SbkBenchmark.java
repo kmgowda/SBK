@@ -46,7 +46,6 @@ import java.util.stream.IntStream;
  */
 final public class SbkBenchmark implements Benchmark {
     final private Action action;
-    final private PerlConfig perlConfig;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
     final private Time time;
@@ -80,7 +79,6 @@ final public class SbkBenchmark implements Benchmark {
                         DataType<Object> dType, @NotNull Logger logger, Time time) throws IOException {
         this.dType = dType;
         this.action = action;
-        this.perlConfig = perlConfig;
         this.params = params;
         this.storage = storage;
         this.logger = logger;
