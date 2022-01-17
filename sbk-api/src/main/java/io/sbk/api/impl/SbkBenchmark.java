@@ -10,6 +10,7 @@
 package io.sbk.api.impl;
 
 import io.perl.Perl;
+import io.perl.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
@@ -20,26 +21,16 @@ import io.sbk.config.Config;
 import io.perl.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.logger.Logger;
-import io.perl.LatencyRecordWindow;
-import io.perl.PeriodicLogger;
-import io.perl.impl.ArrayLatencyRecorder;
-import io.perl.impl.CQueuePerl;
-import io.perl.impl.CSVExtendedLatencyRecorder;
-import io.perl.impl.HashMapLatencyRecorder;
-import io.perl.impl.HdrExtendedLatencyRecorder;
-import io.perl.impl.TotalWindowLatencyPeriodicLogger;
 import io.state.State;
 import io.sbk.system.Printer;
 import io.time.Time;
 import lombok.Synchronized;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -65,7 +56,6 @@ final public class SbkBenchmark implements Benchmark {
     final private Perl writeStats;
     final private Perl readStats;
     final private int maxQs;
-    final private double[] percentileFractions;
     final private ScheduledExecutorService timeoutExecutor;
     final private CompletableFuture<Void> retFuture;
     final private List<DataWriter<Object>> writers;
@@ -96,90 +86,31 @@ final public class SbkBenchmark implements Benchmark {
         this.storage = storage;
         this.logger = logger;
         this.time = time;
-        final double[] percentiles = logger.getPercentiles();
-        percentileFractions = new double[percentiles.length];
-
-        for (int i = 0; i < percentiles.length; i++) {
-            percentileFractions[i] = percentiles[i] / 100.0;
-        }
 
         this.maxQs = perlConfig.maxQs > 0 ?
                 perlConfig.maxQs : Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
-        executor = perlConfig.fork ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
+        executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
+
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
-                new CQueuePerl(perlConfig, params.getWritersCount(), createLatencyRecorder(),
-                logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
-                        this.time, executor) : null;
+                PerlBuilder.build(params.getWritersCount(),
+                        logger.getReportingIntervalSeconds() * Time.MS_PER_SEC,
+                        params.getTimeoutMS(), executor, perlConfig, time,
+                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                        logger, logger::printTotal, logger) : null;
 
         readStats = params.getReadersCount() > 0 ?
-                new CQueuePerl(perlConfig, params.getReadersCount(), createLatencyRecorder(),
-                logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),
-                        this.time, executor) : null;
+                PerlBuilder.build(params.getReadersCount(),
+                        logger.getReportingIntervalSeconds(),
+                        params.getTimeoutMS(), executor, perlConfig, time,
+                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                        logger, logger::printTotal, logger) : null;
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();
         readers = new ArrayList<>();
         state = State.BEGIN;
-    }
-
-    private LatencyRecordWindow createLatencyWindow() {
-        final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
-        final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
-        final LatencyRecordWindow window;
-
-        if (memSizeMB < perlConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
-            window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
-            Printer.log.info("Window Latency Store: Array, Size: " +
-                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
-        } else {
-            window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
-                    time, perlConfig.maxHashMapSizeMB);
-            Printer.log.info("Window Latency Store: HashMap, Size: " +
-                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
-        }
-        return window;
-    }
-
-    @Contract(" -> new")
-    private @NotNull PeriodicLogger createLatencyRecorder() {
-        final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
-        final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
-        final LatencyRecordWindow window;
-        final LatencyRecordWindow totalWindow;
-        final LatencyRecordWindow totalWindowExtension;
-
-        window = createLatencyWindow();
-
-        totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
-                time, perlConfig.totalMaxHashMapSizeMB);
-        Printer.log.info("Total Window Latency Store: HashMap, Size: " +
-                totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
-
-        if (perlConfig.histogram) {
-            totalWindowExtension = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
-                    percentileFractions, time, totalWindow);
-            Printer.log.info(String.format("Total Window Extension: HdrHistogram, Size: %.2f MB",
-                    (totalWindowExtension.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB));
-        } else if (perlConfig.csv) {
-            totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
-                    percentileFractions, time, totalWindow, perlConfig.csvFileSizeGB,
-                    Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
-            Printer.log.info("Total Window Extension: CSV, Size: " +
-                    totalWindowExtension.getMaxMemoryBytes() / PerlConfig.BYTES_PER_GB + " GB");
-        } else {
-            totalWindowExtension = totalWindow;
-            Printer.log.info("Total Window Extension: None, Size: 0 MB");
-        }
-
-        return new TotalWindowLatencyPeriodicLogger(window, totalWindowExtension, logger, logger::printTotal,
-                logger, time);
     }
 
     /**

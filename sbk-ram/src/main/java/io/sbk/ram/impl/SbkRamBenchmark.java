@@ -116,7 +116,6 @@ final public class SbkRamBenchmark implements Benchmark {
     @Contract(" -> new")
     private @NotNull RamPeriodicRecorder createLatencyRecorder() {
         final LatencyRecordWindow window = createLatencyWindow();
-        final RamPeriodicRecorder latencyRecorder;
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
 
