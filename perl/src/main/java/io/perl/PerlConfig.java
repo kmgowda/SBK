@@ -14,6 +14,7 @@ import io.time.Time;
 import io.time.TimeUnit;
 
 final public class PerlConfig {
+    final public static String NAME = "PerL";
     final public static String PERCENTILE_FORMAT = "0.##";
 
     final public static int LATENCY_VALUE_SIZE_BYTES = 8;
