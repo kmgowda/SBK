@@ -17,14 +17,14 @@ import io.perl.PerlChannel;
  */
 public abstract class Worker {
     public final int id;
-    public final int recordIDMax;
     public final Parameters params;
     public final PerlChannel perlChannel;
+    public final int perlIdMax;
 
-    public Worker(int workerID, int idMax, Parameters params, PerlChannel perlChannel) {
+    public Worker(int workerID, Parameters params, PerlChannel perlChannel, int idMax) {
         this.id = workerID;
-        this.recordIDMax = idMax;
         this.params = params;
         this.perlChannel = perlChannel;
+        this.perlIdMax = idMax;
     }
 }

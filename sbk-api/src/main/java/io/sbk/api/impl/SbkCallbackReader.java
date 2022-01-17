@@ -22,9 +22,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * SBK Callback reader implementation.
- * Deprecated
- * This interface is replaced by Abstract class AbstractCallbackReader and SbkReader.
+ * @deprecated This interface is replaced by Abstract class AbstractCallbackReader and SbkReader.
  */
+@Deprecated
 final public class SbkCallbackReader extends Worker implements Callback<Object>, Benchmark {
     final private DataType<Object> dataType;
     final private Time time;
@@ -35,9 +35,9 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     final private long totalRecords;
     private long beginTime;
 
-    public SbkCallbackReader(int readerId, int idMax, ParameterOptions params, PerlChannel perlChannel,
+    public SbkCallbackReader(int readerId, ParameterOptions params, PerlChannel perlChannel, int idMax,
                              DataType<Object> dataType, Time time) {
-        super(readerId, idMax, params, perlChannel);
+        super(readerId, params, perlChannel, idMax);
         this.dataType = dataType;
         this.time = time;
         this.ret = new CompletableFuture<>();
@@ -68,7 +68,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
-        final int id = (int) (cnt % recordIDMax);
+        final int id = (int) (cnt % perlIdMax);
         perlChannel.send(id, startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun)) {
             ret.complete(null);

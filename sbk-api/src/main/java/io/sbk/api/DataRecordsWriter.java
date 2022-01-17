@@ -73,12 +73,12 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
      */
     default void RecordsWriter(Worker writer, long recordsCount, DataType<T> dType, T data, int size, Time time) throws IOException {
         final Status status = new Status();
-        int id = writer.id % writer.recordIDMax;
+        int id = writer.id % writer.perlIdMax;
         long i = 0;
         while (i < recordsCount) {
             recordWrite(dType, data, size, time, status, writer.perlChannel, id);
             id += 1;
-            if (id >= writer.recordIDMax) {
+            if (id >= writer.perlIdMax) {
                 id = 0;
             }
             i += status.records;
@@ -104,7 +104,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                    Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
-        int id = writer.id % writer.recordIDMax;
+        int id = writer.id % writer.perlIdMax;
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
         while (cnt < recordsCount) {
@@ -113,7 +113,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
             while (i < loopMax) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel, id);
                 id += 1;
-                if (id >= writer.recordIDMax) {
+                if (id >= writer.perlIdMax) {
                     id = 0;
                 }
                 i += status.records;
@@ -142,13 +142,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
         long startTime = time.getCurrentTime();
-        int id = writer.id % writer.recordIDMax;
+        int id = writer.id % writer.perlIdMax;
         status.startTime = startTime;
         double msElapsed = 0;
         while (msElapsed < msToRun) {
             recordWrite(dType, data, size, time, status, writer.perlChannel, id);
             id += 1;
-            if (id >= writer.recordIDMax) {
+            if (id >= writer.perlIdMax) {
                 id = 0;
             }
             msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
@@ -174,7 +174,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                        Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
-        int id = writer.id % writer.recordIDMax;
+        int id = writer.id % writer.perlIdMax;
         int cnt = 0;
         double secondsElapsed = 0;
         status.startTime = loopStartTime;
@@ -184,7 +184,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
             while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel, id);
                 id += 1;
-                if (id >= writer.recordIDMax) {
+                if (id >= writer.perlIdMax) {
                     id = 0;
                 }
                 i += status.records;
@@ -214,7 +214,6 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                  Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
-        int id = writer.id % writer.recordIDMax;
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
         while (cnt < recordsCount) {
@@ -222,10 +221,6 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
             long i = 0;
             while (i < loopMax) {
                 writeSetTime(dType, data, size, time, status);
-                id += 1;
-                if (id >= writer.recordIDMax) {
-                    id = 0;
-                }
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
@@ -252,7 +247,6 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                      Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
-        int id = writer.id % writer.recordIDMax;
         long cnt = 0;
         double secondsElapsed = 0;
         status.startTime = loopStartTime;
@@ -261,10 +255,6 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
             long i = 0;
             while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
                 writeSetTime(dType, data, size, time, status);
-                id += 1;
-                if (id >= writer.recordIDMax) {
-                    id = 0;
-                }
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
