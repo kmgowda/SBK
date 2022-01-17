@@ -25,4 +25,11 @@ public interface Perl extends RunBenchmark {
      * @return PerlChannel to get the benchmark results.
      */
     PerlChannel getPerlChannel();
+
+    /**
+     * Get Max Identifier for PerlChannel.
+     *
+     * @return maximum identifier value per PerlChannel.
+     */
+    int getIdMax();
 }

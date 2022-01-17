@@ -55,7 +55,6 @@ final public class SbkBenchmark implements Benchmark {
     final private ParameterOptions params;
     final private Perl writePerl;
     final private Perl readPerl;
-    final private int channelIdMax;
     final private ScheduledExecutorService timeoutExecutor;
     final private CompletableFuture<Void> retFuture;
     final private List<DataWriter<Object>> writers;
@@ -86,9 +85,6 @@ final public class SbkBenchmark implements Benchmark {
         this.storage = storage;
         this.logger = logger;
         this.time = time;
-
-        this.channelIdMax = perlConfig.maxQs > 0 ?
-                perlConfig.maxQs : Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
@@ -170,15 +166,16 @@ final public class SbkBenchmark implements Benchmark {
 
         if (writers.size() > 0) {
             if (writePerl != null) {
+                final int idMax = writePerl.getIdMax();
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, channelIdMax, params, writePerl.getPerlChannel(),
+                        .map(i -> new SbkWriter(i, params, writePerl.getPerlChannel(), idMax,
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, channelIdMax, params, null,
+                        .map(i -> new SbkWriter(i,  params, null, 0,
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             }
@@ -187,10 +184,11 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (readers.size() > 0) {
+            final int idMax = readPerl.getIdMax();
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i, channelIdMax, params,
-                            readPerl.getPerlChannel(), dType, time, readers.get(i),
+                    .map(i -> new SbkReader(i,  params,
+                            readPerl.getPerlChannel(), idMax, dType, time, readers.get(i),
                             logger, executor))
                     .collect(Collectors.toList());
         } else {

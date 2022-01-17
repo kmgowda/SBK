@@ -56,12 +56,12 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
                                       RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
-        int id = reader.id % reader.recordIDMax;
+        int id = reader.id % reader.perlIdMax;
         long i = 0;
         while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
             i += status.records;
-            if (id >= reader.recordIDMax) {
+            if (id >= reader.perlIdMax) {
                 id = 0;
             }
         }
@@ -106,10 +106,10 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        int id = reader.id % reader.recordIDMax;
+        int id = reader.id % reader.perlIdMax;
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
-            if (id >= reader.recordIDMax) {
+            if (id >= reader.perlIdMax) {
                 id = 0;
             }
         }
@@ -151,7 +151,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
                                                  RateController rController, RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
-        int id = reader.id % reader.recordIDMax;
+        int id = reader.id % reader.perlIdMax;
         long i = 0;
         double secondsElapsed = 0;
         final long loopStartTime = time.getCurrentTime();
@@ -159,7 +159,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
             i += status.records;
-            if (id >= reader.recordIDMax) {
+            if (id >= reader.perlIdMax) {
                 id = 0;
             }
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);
@@ -207,14 +207,14 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        int id = reader.id % reader.recordIDMax;
+        int id = reader.id % reader.perlIdMax;
         final long loopStartTime = time.getCurrentTime();
         double secondsElapsed = 0;
         long cnt = 0;
         rController.start(reader.params.getRecordsPerSec());
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
-            if (id >= reader.recordIDMax) {
+            if (id >= reader.perlIdMax) {
                 id = 0;
             }
             cnt += status.records;

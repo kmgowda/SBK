@@ -18,6 +18,7 @@ import io.perl.TimeStamp;
 import io.state.State;
 import io.perl.PerlPrinter;
 import io.time.Time;
+import lombok.Getter;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +44,9 @@ final public class CQueuePerl implements Perl {
     final private Channel[] channels;
     final private CompletableFuture<Void> retFuture;
 
+    @Getter
+    final private int idMax;
+
     @GuardedBy("this")
     private int index;
 
@@ -63,18 +67,17 @@ final public class CQueuePerl implements Perl {
         this.executor = executor;
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
-        int maxQs;
         if (perlConfig.maxQs > 0) {
-            maxQs = perlConfig.maxQs;
+            this.idMax  = perlConfig.maxQs;
             this.channels = new CQueueChannel[1];
             this.index = 1;
         } else {
-            maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
+            this.idMax  = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
             this.channels = new CQueueChannel[maxWorkers];
             this.index = maxWorkers;
         }
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new CQueueChannel(maxQs, new OnError());
+            channels[i] = new CQueueChannel(this.idMax, new OnError());
         }
     }
 
