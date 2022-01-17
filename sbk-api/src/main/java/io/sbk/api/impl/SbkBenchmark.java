@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.perl.Perl;
-import io.perl.impl.PerlRecorder;
+import io.perl.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
@@ -56,7 +56,6 @@ final public class SbkBenchmark implements Benchmark {
     final private Perl writeStats;
     final private Perl readStats;
     final private int maxQs;
-    final private double[] percentileFractions;
     final private ScheduledExecutorService timeoutExecutor;
     final private CompletableFuture<Void> retFuture;
     final private List<DataWriter<Object>> writers;
@@ -87,12 +86,6 @@ final public class SbkBenchmark implements Benchmark {
         this.storage = storage;
         this.logger = logger;
         this.time = time;
-        final double[] percentiles = logger.getPercentiles();
-        percentileFractions = new double[percentiles.length];
-
-        for (int i = 0; i < percentiles.length; i++) {
-            percentileFractions[i] = percentiles[i] / 100.0;
-        }
 
         this.maxQs = perlConfig.maxQs > 0 ?
                 perlConfig.maxQs : Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
@@ -101,17 +94,17 @@ final public class SbkBenchmark implements Benchmark {
         executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
 
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
-                PerlRecorder.build(params.getWritersCount(),
+                PerlBuilder.build(params.getWritersCount(),
                         logger.getReportingIntervalSeconds() * Time.MS_PER_SEC,
                         params.getTimeoutMS(), executor, perlConfig, time,
-                        logger.getMinLatency(), logger.getMaxLatency(), percentileFractions,
+                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
                         logger, logger::printTotal, logger) : null;
 
         readStats = params.getReadersCount() > 0 ?
-                PerlRecorder.build(params.getReadersCount(),
-                        logger.getReportingIntervalSeconds() * Time.MS_PER_SEC,
+                PerlBuilder.build(params.getReadersCount(),
+                        logger.getReportingIntervalSeconds(),
                         params.getTimeoutMS(), executor, perlConfig, time,
-                        logger.getMinLatency(), logger.getMaxLatency(), percentileFractions,
+                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
                         logger, logger::printTotal, logger) : null;
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();

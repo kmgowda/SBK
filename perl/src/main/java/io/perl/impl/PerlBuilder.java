@@ -20,11 +20,11 @@ import io.time.Time;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
-public final class PerlRecorder {
+public final class PerlBuilder {
 
-    private static LatencyRecordWindow createLatencyWindow(PerlConfig config, Time time,
-                                                    long minLatency, long maxLatency,
-                                                    double[] percentileFractions) {
+    private static LatencyRecordWindow buildLatencyRecordWindow(PerlConfig config, Time time,
+                                                                long minLatency, long maxLatency,
+                                                                double[] percentileFractions) {
         final long latencyRange = maxLatency - minLatency;
         final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
         final LatencyRecordWindow window;
@@ -45,17 +45,21 @@ public final class PerlRecorder {
     }
 
 
-    private static PeriodicLogger createLatencyRecorder(PerlConfig config, Time time,
-                                                          long minLatency, long maxLatency,
-                                                          double[] percentileFractions,
-                                                          Print windowLogger, Print totalLogger,
-                                                          ReportLatency reportLatency) {
+    private static PeriodicLogger buildPeriodicLogger(PerlConfig config, Time time,
+                                                      long minLatency, long maxLatency,
+                                                      double[] percentiles,
+                                                      Print windowLogger, Print totalLogger,
+                                                      ReportLatency reportLatency) {
         final LatencyRecordWindow window;
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
 
-        window = createLatencyWindow(config, time,
-                minLatency, maxLatency, percentileFractions);
+        final  double[] percentileFractions = new double[percentiles.length];
+        for (int i = 0; i < percentiles.length; i++) {
+            percentileFractions[i] = percentiles[i] / 100.0;
+        }
+
+        window = buildLatencyRecordWindow(config, time, minLatency, maxLatency, percentileFractions);
 
         totalWindow = new HashMapLatencyRecorder(minLatency, maxLatency,
                 PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
@@ -85,13 +89,13 @@ public final class PerlRecorder {
                 reportLatency, time);
     }
 
-    public static Perl build(int maxWorkers, int  reportingMS, int timeoutMS,  ExecutorService executor,
-                      PerlConfig config, Time time, long minLatency, long maxLatency, double[] percentileFractions,
+    public static Perl build(int maxWorkers, int  reportingSeconds, int timeoutMS,  ExecutorService executor,
+                      PerlConfig config, Time time, long minLatency, long maxLatency, double[] percentiles,
                       Print windowLogger, Print totalLogger,
                       ReportLatency reportLatency) {
-        return new CQueuePerl(config, maxWorkers, createLatencyRecorder(config, time, minLatency, maxLatency,
-                percentileFractions, windowLogger, totalLogger, reportLatency),
-                reportingMS, timeoutMS,
+        return new CQueuePerl(config, maxWorkers, buildPeriodicLogger(config, time, minLatency, maxLatency,
+                percentiles, windowLogger, totalLogger, reportLatency),
+                reportingSeconds * Time.MS_PER_SEC, timeoutMS,
                time, executor);
     }
 }
