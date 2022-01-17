@@ -107,7 +107,7 @@ final public class SbkBenchmark implements Benchmark {
                 perlConfig.maxQs : Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
-        executor = perlConfig.fork ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
+        executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
                 new CQueuePerl(perlConfig, params.getWritersCount(), createLatencyRecorder(),
                 logger.getReportingIntervalSeconds() * Time.MS_PER_SEC, params.getTimeoutMS(),

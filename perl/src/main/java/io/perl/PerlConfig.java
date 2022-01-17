@@ -38,7 +38,6 @@ final public class PerlConfig {
     final public static int HDR_SIGNIFICANT_DIGITS = 3;
 
     public TimeUnit timeUnit;
-    public boolean fork;
     public int qPerWorker;
     public int idleNS;
     public int maxQs;

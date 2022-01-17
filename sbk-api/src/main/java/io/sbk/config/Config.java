@@ -24,4 +24,6 @@ final public class Config {
     public final static String ARG_PREFIX = "-";
     public final static String CLASS_OPTION_ARG = ARG_PREFIX + CLASS_OPTION;
     public final static String HELP_OPTION_ARG = ARG_PREFIX + HELP_OPTION;
+
+    public final static boolean FORK = true;
 }
