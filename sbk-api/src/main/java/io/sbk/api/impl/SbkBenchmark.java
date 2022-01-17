@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.perl.Perl;
-import io.perl.impl.PerlBuilder;
+import io.perl.impl.PerlRecorder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
@@ -101,14 +101,14 @@ final public class SbkBenchmark implements Benchmark {
         executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
 
         writeStats = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
-                PerlBuilder.build(params.getWritersCount(),
+                PerlRecorder.build(params.getWritersCount(),
                         logger.getReportingIntervalSeconds() * Time.MS_PER_SEC,
                         params.getTimeoutMS(), executor, perlConfig, time,
                         logger.getMinLatency(), logger.getMaxLatency(), percentileFractions,
                         logger, logger::printTotal, logger) : null;
 
         readStats = params.getReadersCount() > 0 ?
-                PerlBuilder.build(params.getReadersCount(),
+                PerlRecorder.build(params.getReadersCount(),
                         logger.getReportingIntervalSeconds() * Time.MS_PER_SEC,
                         params.getTimeoutMS(), executor, perlConfig, time,
                         logger.getMinLatency(), logger.getMaxLatency(), percentileFractions,

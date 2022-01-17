@@ -20,7 +20,7 @@ import io.time.Time;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
-public final class PerlBuilder {
+public final class PerlRecorder {
 
     private static LatencyRecordWindow createLatencyWindow(PerlConfig config, Time time,
                                                     long minLatency, long maxLatency,
