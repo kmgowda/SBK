@@ -89,7 +89,7 @@ final public class SbkBenchmark implements Benchmark {
 
         writePerl = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
                 PerlBuilder.build(params.getWritersCount(),
-                        logger.getReportingIntervalSeconds() * Time.MS_PER_SEC,
+                        logger.getReportingIntervalSeconds(),
                         params.getTimeoutMS(), executor, perlConfig, time,
                         logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
                         logger, logger::printTotal, logger) : null;
