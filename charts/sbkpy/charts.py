@@ -14,6 +14,7 @@ from collections import OrderedDict
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.utils import get_column_letter
+import sbkpy.constants as constants
 
 class SbkCharts:
     def __init__(self, file):
@@ -139,17 +140,10 @@ class SbkCharts:
 
     def create_graphs(self):
         wb = load_workbook(self.file)
-        r_name = "R1"
-        t_name = "T1"
+        r_name = constants.R_PREFIX+"1"
+        t_name = constants.T_PREFIX+"1"
         ws1 = wb[r_name]
         ws2 = wb[t_name]
-        """
-        for row in ws1.iter_rows():
-            lt = []
-            for cell in row:
-                lt.append(cell.value)
-            print(lt)
-        """
         self.create_throughput_mb_graph(wb, ws1, r_name)
         self.create_throughput_records_graph(wb, ws1, r_name)
         self.create_latency_compare_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
