@@ -10,7 +10,7 @@
 
 import argparse
 from sbkpy.sheets import SbkMultiSheets
-from sbkpy.charts import SbkCharts
+from sbkpy.charts import SbkMultiCharts
 
 def main():
     parser = argparse.ArgumentParser(description='sbk charts')
@@ -21,7 +21,7 @@ def main():
     print('Output file is ', args.ofile)
     sh = SbkMultiSheets(args.ifiles, args.ofile)
     sh.create_sheets()
-    ch = SbkCharts(args.ofile)
+    ch = SbkMultiCharts(args.ofile)
     ch.create_graphs()
 
 
