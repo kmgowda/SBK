@@ -28,19 +28,16 @@ def wb_add_two_sheets(wb, r_name, t_name, df):
     t_row = 1
     for row in df.iterrows():
         if row[1][constants.TYPE] == constants.TYPE_TOTAL:
-            for c, h in enumerate(header):
-                col_size = len(str(row[1][h])) + 1
-                if col_size > len(h):
-                    t_ws.set_column(c, c, col_size)
-                t_ws.write(t_row, c, row[1][h])
+            ws, row_num = t_ws, t_row
             t_row += 1
         else:
-            for c, h in enumerate(header):
-                col_size = len(str(row[1][h])) + 1
-                if col_size > len(h):
-                    r_ws.set_column(c, c, col_size)
-                r_ws.write(r_row, c, row[1][h])
+            ws, row_num = r_ws, r_row
             r_row += 1
+        for c, h in enumerate(header):
+            col_size = len(str(row[1][h])) + 1
+            if col_size > len(h):
+                ws.set_column(c, c, col_size)
+            ws.write(row_num, c, row[1][h])
 
 
 class SbkSheets:
