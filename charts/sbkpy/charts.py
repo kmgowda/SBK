@@ -50,8 +50,8 @@ class SbkCharts:
         return ret
 
     def get_time_unit(self, ws):
-        colnames = self.get_columns_from_worksheet(ws)
-        return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
+        names = self.get_columns_from_worksheet(ws)
+        return ws.cell(row=2, column=names['LatencyTimeUnit']['number']).value
 
     def create_line_chart(self, title, x_title, y_title, height, width):
         chart = LineChart()
@@ -68,33 +68,46 @@ class SbkCharts:
     def create_latency_line_graph(self, title):
         return self.create_line_chart(title, "Intervals", "Latency time in " + self.time_unit, 25, 50)
 
+    def get_latency_series(self, ws, ws_name):
+        latencies = self.get_latency_columns(ws)
+        data_series = OrderedDict()
+        for x in latencies:
+            data_series[x] = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
+                                                         max_col=latencies[x]['number'], max_row=ws.max_row),
+                                               title=ws_name + "-" + x)
+        return data_series
+
+    def get_throughput_mb_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
+                                max_col=cols["MB/Sec"]['number'], max_row=ws.max_row),
+                      title=ws_name + "-MB/Sec")
+
+    def get_throughput_records_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["Records/Sec"]['number'], min_row=2,
+                                max_col=cols["Records/Sec"]['number'], max_row=ws.max_row),
+                      title=ws_name + "-Records/Sec")
+
     def create_latency_compare_graphs(self, ws, prefix):
-        charts = []
-        sheets = []
+        charts, sheets = [], []
         for i in range(self.nu_lantency_charts):
             charts.append(self.create_latency_line_graph("Latency Variations"))
             sheets.append(self.wb.create_sheet("Latencies-" + str(i + 1)))
-
-        latencies = self.get_latency_columns(ws)
-        for x in latencies:
-            data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
-                                           max_col=latencies[x]['number'], max_row=ws.max_row),
-                                 title=prefix + "-" + x)
+        latency_series = self.get_latency_series(ws, prefix)
+        for x in latency_series:
             for i, g in enumerate(self.latency_groups):
                 if x in g:
-                    charts[i].append(data_series)
+                    charts[i].append(latency_series[x])
         for i, ch in enumerate(charts):
             sheets[i].add_chart(ch)
 
     def create_latency_graphs(self, ws, prefix):
-        latencies = self.get_latency_columns(ws)
-        for x in latencies:
-            data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
-                                           max_col=latencies[x]['number'], max_row=ws.max_row),
-                                 title=prefix + "-" + x)
+        latency_series = self.get_latency_series(ws, prefix)
+        for x in latency_series:
             chart = self.create_latency_line_graph(x + " Variations")
             # adding data
-            chart.append(data_series)
+            chart.append(latency_series[x])
             # add chart to the sheet
             sheet = self.wb.create_sheet(x)
             sheet.add_chart(chart)
@@ -102,14 +115,8 @@ class SbkCharts:
     def create_throughput_mb_graph(self, ws, prefix):
         chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
                                        "Intervals", "Throughput in MB/Sec", 25, 50)
-
-        cols = self.get_columns_from_worksheet(ws)
-        data_series = Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
-                                       max_col=cols["MB/Sec"]['number'], max_row=ws.max_row),
-                             title=prefix + "-MB/Sec")
         # adding data
-        chart.append(data_series)
-
+        chart.append(self.get_throughput_mb_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("MB_Sec")
         sheet.add_chart(chart)
@@ -117,12 +124,8 @@ class SbkCharts:
     def create_throughput_records_graph(self, ws, prefix):
         chart = self.create_line_chart("Throughput Variations in Records / Seconds",
                                        "Intervals", "Throughput in Records/Sec", 25, 50)
-        cols = self.get_columns_from_worksheet(ws)
-        data_series = Series(Reference(ws, min_col=cols["Records/Sec"]['number'], min_row=2,
-                                       max_col=cols["Records/Sec"]['number'], max_row=ws.max_row),
-                             title=prefix + "-Records/Sec")
         # adding data
-        chart.append(data_series)
+        chart.append(self.get_throughput_records_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("Records_Sec")
         sheet.add_chart(chart)
