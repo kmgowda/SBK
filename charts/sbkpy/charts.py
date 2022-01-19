@@ -13,7 +13,6 @@
 from collections import OrderedDict
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
-from openpyxl.utils import get_column_letter
 import sbkpy.constants as constants
 
 
@@ -170,7 +169,7 @@ class SbkMultiCharts(SbkCharts):
             if name.startswith(constants.R_PREFIX):
                 chart.append(self.get_throughput_mb_series(self.wb[name], name))
         # add chart to the sheet
-        sheet = self.wb.create_sheet("throughput_MB")
+        sheet = self.wb.create_sheet("Throughput_MB")
         sheet.add_chart(chart)
 
     def create_multi_throughput_records_graph(self):
@@ -181,7 +180,7 @@ class SbkMultiCharts(SbkCharts):
             if name.startswith(constants.R_PREFIX):
                 chart.append(self.get_throughput_records_series(self.wb[name], name))
         # add chart to the sheet
-        sheet = self.wb.create_sheet("throughput_records")
+        sheet = self.wb.create_sheet("Throughput_Records")
         sheet.add_chart(chart)
 
     def create_graphs(self):

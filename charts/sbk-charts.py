@@ -12,6 +12,7 @@ import argparse
 from sbkpy.sheets import SbkMultiSheets
 from sbkpy.charts import SbkMultiCharts
 
+
 def main():
     parser = argparse.ArgumentParser(description='sbk charts')
     parser.add_argument('-i', '--ifiles', help="Input CSV files, seperated by ','", required=True)

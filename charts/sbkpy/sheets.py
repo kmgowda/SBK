@@ -14,6 +14,7 @@ from pandas import read_csv
 from xlsxwriter import Workbook
 import sbkpy.constants as constants
 
+
 def wb_add_two_sheets(wb, r_name, t_name, df):
     header = df.columns.values
     r_ws = wb.add_worksheet(r_name)
@@ -63,6 +64,6 @@ class SbkMultiSheets(SbkSheets):
     def create_sheets(self):
         wb = Workbook(self.oFile)
         for i, file in enumerate(self.iFiles):
-            wb_add_two_sheets(wb, constants.R_PREFIX+str(i+1), constants.T_PREFIX+str(i+1), read_csv(file))
+            wb_add_two_sheets(wb, constants.R_PREFIX + str(i + 1), constants.T_PREFIX + str(i + 1), read_csv(file))
         wb.close()
         print("xlsx file %s created" % self.oFile)
