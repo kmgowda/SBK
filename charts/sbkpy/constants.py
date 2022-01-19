@@ -11,4 +11,4 @@
 R_PREFIX = "R"
 T_PREFIX = "T"
 TYPE = "Type"
-TYPE_NAME = "Total"
+TYPE_TOTAL = "Total"

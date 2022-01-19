@@ -27,7 +27,7 @@ def wb_add_two_sheets(wb, r_name, t_name, df):
     r_row = 1
     t_row = 1
     for row in df.iterrows():
-        if row[1][constants.TYPE] == constants.TYPE_NAME:
+        if row[1][constants.TYPE] == constants.TYPE_TOTAL:
             for c, h in enumerate(header):
                 col_size = len(str(row[1][h])) + 1
                 if col_size > len(h):
