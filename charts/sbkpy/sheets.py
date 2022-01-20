@@ -40,6 +40,11 @@ def wb_add_two_sheets(wb, r_name, t_name, df):
             ws.write(row_num, c, row[1][h])
 
 
+def add_sbk_logo(wb):
+    ws = wb.add_worksheet("SBK")
+    ws.insert_image("K7", "./images/sbk-logo.png",  {'x_scale': 0.5, 'y_scale': 0.5})
+
+
 class SbkSheets:
     def __init__(self, iFile, oFile):
         self.iFile = iFile
@@ -47,6 +52,7 @@ class SbkSheets:
 
     def create_sheets(self):
         wb = Workbook(self.oFile)
+        add_sbk_logo(wb)
         df = read_csv(self.iFile)
         wb_add_two_sheets(wb, constants.R_PREFIX + "1", constants.T_PREFIX + "1", df)
         wb.close()
@@ -60,6 +66,7 @@ class SbkMultiSheets(SbkSheets):
 
     def create_sheets(self):
         wb = Workbook(self.oFile)
+        add_sbk_logo(wb)
         for i, file in enumerate(self.iFiles):
             wb_add_two_sheets(wb, constants.R_PREFIX + str(i + 1), constants.T_PREFIX + str(i + 1), read_csv(file))
         wb.close()
