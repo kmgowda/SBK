@@ -13,52 +13,16 @@
 from collections import OrderedDict
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
-from openpyxl.utils import get_column_letter
+import sbkpy.constants as constants
+
 
 class SbkCharts:
     def __init__(self, file):
         self.file = file
-
-    def get_columns_from_worksheet(self, ws):
-        return {
-            cell.value: {
-                'letter': get_column_letter(cell.column),
-                'number': cell.column
-            } for cell in ws[1] if cell.value
-        }
-
-    def get_latency_columns(self, ws):
-        column_names = self.get_columns_from_worksheet(ws)
-        ret = OrderedDict()
-        ret['AvgLatency'] = column_names['AvgLatency']
-        ret['MaxLatency'] = column_names['MaxLatency']
-        for key in column_names.keys():
-            if key.startswith("Percentile_"):
-                ret[key] = column_names[key]
-        return ret
-
-    def get_time_unit(self, ws):
-        colnames = self.get_columns_from_worksheet(ws)
-        return ws.cell(row=2, column=colnames['LatencyTimeUnit']['number']).value
-
-    def create_latency_compare_graphs(self, wb, ws, time_unit, prefix):
-        latencies = self.get_latency_columns(ws)
-        charts = [LineChart(), LineChart(), LineChart(), LineChart()]
-
-        for ch in charts:
-            # set the title of the chart
-            ch.title = " Percentile Variations"
-            # set the title of the x-axis
-            ch.x_axis.title = " Intervals "
-            # set the title of the y-axis
-            ch.y_axis.title = " Latency Time in " + time_unit
-            ch.height = 25
-            ch.width = 50
-
-        sheets = [wb.create_sheet("Latencies-1"), wb.create_sheet("Latencies-2"),
-                  wb.create_sheet("Latencies-3"), wb.create_sheet("Latencies-4")]
-
-        groups = [
+        self.wb = load_workbook(self.file)
+        self.time_unit = self.get_time_unit(self.wb[constants.R_PREFIX + "1"])
+        self.n_latency_charts = 4
+        self.latency_groups = [
             ["Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30", "Percentile_40", "Percentile_50"],
             ["Percentile_50", "AvgLatency"],
             ["Percentile_50", "Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
@@ -66,92 +30,193 @@ class SbkCharts:
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
              "Percentile_99.95", "Percentile_99.99"]]
 
+    def get_columns_from_worksheet(self, ws):
+        ret = OrderedDict()
+        for cell in ws[1]:
+            if cell.value:
+                ret[cell.value] = cell.column
+        return ret
+
+    def get_latency_columns(self, ws):
+        columns = self.get_columns_from_worksheet(ws)
+        ret = OrderedDict()
+        ret['AvgLatency'] = columns['AvgLatency']
+        ret['MaxLatency'] = columns['MaxLatency']
+        for key in columns.keys():
+            if key.startswith("Percentile_"):
+                ret[key] = columns[key]
+        return ret
+
+    def get_time_unit(self, ws):
+        names = self.get_columns_from_worksheet(ws)
+        return ws.cell(row=2, column=names['LatencyTimeUnit']).value
+
+    def get_storage_name(self, ws):
+        names = self.get_columns_from_worksheet(ws)
+        return ws.cell(row=2, column=names['Storage']).value
+
+    def create_line_chart(self, title, x_title, y_title, height, width):
+        chart = LineChart()
+        # set the title of the chart
+        chart.title = title
+        # set the title of the x-axis
+        chart.x_axis.title = x_title
+        # set the title of the y-axis
+        chart.y_axis.title = y_title
+        chart.height = height
+        chart.width = width
+        return chart
+
+    def create_latency_line_graph(self, title):
+        return self.create_line_chart(title, "Intervals", "Latency time in " + self.time_unit, 25, 50)
+
+    def get_latency_series(self, ws, ws_name):
+        latencies = self.get_latency_columns(ws)
+        data_series = OrderedDict()
         for x in latencies:
-            data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
-                                           max_col=latencies[x]['number'], max_row=ws.max_row),
-                                 title=prefix + "-" + x)
-            for i, g in enumerate(groups):
+            data_series[x] = Series(Reference(ws, min_col=latencies[x], min_row=2,
+                                              max_col=latencies[x], max_row=ws.max_row),
+                                    title=ws_name + "-" + x)
+        return data_series
+
+    def get_throughput_mb_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["MB/Sec"], min_row=2,
+                                max_col=cols["MB/Sec"], max_row=ws.max_row),
+                      title=ws_name + "-MB/Sec")
+
+    def get_throughput_records_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["Records/Sec"], min_row=2,
+                                max_col=cols["Records/Sec"], max_row=ws.max_row),
+                      title=ws_name + "-Records/Sec")
+
+    def create_latency_compare_graphs(self, ws, prefix):
+        charts, sheets = [], []
+        for i in range(self.n_latency_charts):
+            charts.append(self.create_latency_line_graph("Latency Variations"))
+            sheets.append(self.wb.create_sheet("Latencies-" + prefix + "-" + str(i + 1)))
+        latency_series = self.get_latency_series(ws, prefix)
+        for x in latency_series:
+            for i, g in enumerate(self.latency_groups):
                 if x in g:
-                    charts[i].append(data_series)
+                    charts[i].append(latency_series[x])
         for i, ch in enumerate(charts):
             sheets[i].add_chart(ch)
 
-    def create_latency_graphs(self, wb, ws, time_unit, prefix):
-        latencies = self.get_latency_columns(ws)
-        for x in latencies:
-            data_series = Series(Reference(ws, min_col=latencies[x]['number'], min_row=2,
-                                           max_col=latencies[x]['number'], max_row=ws.max_row),
-                                 title=prefix + "-" + x)
-            chart = LineChart()
+    def create_latency_graphs(self, ws, prefix):
+        latency_series = self.get_latency_series(ws, prefix)
+        for x in latency_series:
+            chart = self.create_latency_line_graph(x + " Variations")
             # adding data
-            chart.append(data_series)
-            # set the title of the chart
-            chart.title = x + " Variations"
-            # set the title of the x-axis
-            chart.x_axis.title = " Intervals "
-            # set the title of the y-axis
-            chart.y_axis.title = " Latency Time in " + time_unit
-            chart.height = 25
-            chart.width = 45
+            chart.append(latency_series[x])
             # add chart to the sheet
-            sheet = wb.create_sheet(x)
+            sheet = self.wb.create_sheet(x)
             sheet.add_chart(chart)
 
-    def create_throughput_mb_graph(self, wb, ws, prefix):
-        cols = self.get_columns_from_worksheet(ws)
-        data_series = Series(Reference(ws, min_col=cols["MB/Sec"]['number'], min_row=2,
-                                       max_col=cols["MB/Sec"]['number'], max_row=ws.max_row),
-                             title=prefix + "-MB/Sec")
-        chart = LineChart()
+    def create_throughput_mb_graph(self, ws, prefix):
+        chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
+                                       "Intervals", "Throughput in MB/Sec", 25, 50)
         # adding data
-        chart.append(data_series)
-        # set the title of the chart
-        chart.title = " Throughput Variations in Mega Bytes / Seconds"
-        # set the title of the x-axis
-        chart.x_axis.title = "Intervals"
-        # set the title of the y-axis
-        chart.y_axis.title = "Throughput in MB/Sec"
-        chart.height = 20
-        chart.width = 40
+        chart.append(self.get_throughput_mb_series(ws, prefix))
         # add chart to the sheet
-        sheet = wb.create_sheet("MB_Sec")
+        sheet = self.wb.create_sheet("MB_Sec")
         sheet.add_chart(chart)
 
-    def create_throughput_records_graph(self, wb, ws, prefix):
-        cols = self.get_columns_from_worksheet(ws)
-        data_series = Series(Reference(ws, min_col=cols["Records/Sec"]['number'], min_row=2,
-                                       max_col=cols["Records/Sec"]['number'], max_row=ws.max_row),
-                             title=prefix + "-Records/Sec")
-        chart = LineChart()
+    def create_throughput_records_graph(self, ws, prefix):
+        chart = self.create_line_chart("Throughput Variations in Records / Seconds",
+                                       "Intervals", "Throughput in Records/Sec", 25, 50)
         # adding data
-        chart.append(data_series)
-        # set the title of the chart
-        chart.title = " Throughput Variations in Records / Second"
-        # set the title of the x-axis
-        chart.x_axis.title = " Intervals "
-        # set the title of the y-axis
-        chart.y_axis.title = "Throughput in Records/Sec"
-        chart.height = 20
-        chart.width = 40
+        chart.append(self.get_throughput_records_series(ws, prefix))
         # add chart to the sheet
-        sheet = wb.create_sheet("Records_Sec")
+        sheet = self.wb.create_sheet("Records_Sec")
         sheet.add_chart(chart)
 
     def create_graphs(self):
-        wb = load_workbook(self.file)
-        r_name = "R1"
-        t_name = "T1"
-        ws1 = wb[r_name]
-        ws2 = wb[t_name]
-        """
-        for row in ws1.iter_rows():
-            lt = []
-            for cell in row:
-                lt.append(cell.value)
-            print(lt)
-        """
-        self.create_throughput_mb_graph(wb, ws1, r_name)
-        self.create_throughput_records_graph(wb, ws1, r_name)
-        self.create_latency_compare_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
-        self.create_latency_graphs(wb, ws1, self.get_time_unit(ws1), r_name)
-        wb.save(self.file)
+        r_name = constants.R_PREFIX + "1"
+        t_name = constants.T_PREFIX + "1"
+        ws1 = self.wb[r_name]
+        prefix = r_name + self.get_storage_name(ws1)
+        self.create_throughput_mb_graph(ws1, prefix)
+        self.create_throughput_records_graph(ws1, prefix)
+        self.create_latency_compare_graphs(ws1, prefix)
+        self.create_latency_graphs(ws1, prefix)
+        self.wb.save(self.file)
+
+
+class SbkMultiCharts(SbkCharts):
+    def __init__(self, file):
+        super().__init__(file)
+
+    def create_all_latency_compare_graphs(self):
+        charts, sheets = [], []
+        for i in range(self.n_latency_charts):
+            charts.append(self.create_latency_line_graph("Latency Variations"))
+            sheets.append(self.wb.create_sheet("Latencies-" + str(i + 1)))
+        for name in self.wb.sheetnames:
+            if name.startswith(constants.R_PREFIX):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                latency_series = self.get_latency_series(ws, prefix)
+                for x in latency_series:
+                    for i, g in enumerate(self.latency_groups):
+                        if x in g:
+                            charts[i].append(latency_series[x])
+        for i, ch in enumerate(charts):
+            ch.width = 70
+            ch.height = 70
+            sheets[i].add_chart(ch)
+
+    def create_multi_latency_compare_graphs(self):
+        for name in self.wb.sheetnames:
+            if name.startswith(constants.R_PREFIX):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                super().create_latency_compare_graphs(ws, prefix)
+
+    def create_multi_latency_graphs(self):
+        charts = OrderedDict()
+        for name in self.wb.sheetnames:
+            if name.startswith(constants.R_PREFIX):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                latency_series = self.get_latency_series(ws, prefix)
+                for x in latency_series:
+                    if x not in charts:
+                        charts[x] = self.create_latency_line_graph(x + " Variations")
+                    charts[x].append(latency_series[x])
+        for x in charts:
+            sheet = self.wb.create_sheet(x)
+            sheet.add_chart(charts[x])
+
+    def create_multi_throughput_mb_graph(self, ):
+        chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
+                                       "Intervals", "Throughput in MB/Sec", 25, 50)
+        for name in self.wb.sheetnames:
+            if name.startswith(constants.R_PREFIX):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_mb_series(ws, prefix))
+        # add chart to the sheet
+        sheet = self.wb.create_sheet("Throughput_MB")
+        sheet.add_chart(chart)
+
+    def create_multi_throughput_records_graph(self):
+        chart = self.create_line_chart("Throughput Variations in Records / Seconds",
+                                       "Intervals", "Throughput in Records/Sec", 25, 50)
+        for name in self.wb.sheetnames:
+            if name.startswith(constants.R_PREFIX):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_records_series(ws, prefix))
+        # add chart to the sheet
+        sheet = self.wb.create_sheet("Throughput_Records")
+        sheet.add_chart(chart)
+
+    def create_graphs(self):
+        self.create_multi_throughput_mb_graph()
+        self.create_multi_throughput_records_graph()
+        self.create_all_latency_compare_graphs()
+        self.create_multi_latency_compare_graphs()
+        self.create_multi_latency_graphs()
+        self.wb.save(self.file)
