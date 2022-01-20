@@ -148,6 +148,25 @@ class SbkMultiCharts(SbkCharts):
     def __init__(self, file):
         super().__init__(file)
 
+    def create_all_latency_compare_graphs(self):
+        charts, sheets = [], []
+        for i in range(self.n_latency_charts):
+            charts.append(self.create_latency_line_graph("Latency Variations"))
+            sheets.append(self.wb.create_sheet("Latencies-" + str(i + 1)))
+        for name in self.wb.sheetnames:
+            if name.startswith(constants.R_PREFIX):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                latency_series = self.get_latency_series(ws, prefix)
+                for x in latency_series:
+                    for i, g in enumerate(self.latency_groups):
+                        if x in g:
+                            charts[i].append(latency_series[x])
+        for i, ch in enumerate(charts):
+            ch.width = 70
+            ch.height = 70
+            sheets[i].add_chart(ch)
+
     def create_multi_latency_compare_graphs(self):
         for name in self.wb.sheetnames:
             if name.startswith(constants.R_PREFIX):
@@ -197,6 +216,7 @@ class SbkMultiCharts(SbkCharts):
     def create_graphs(self):
         self.create_multi_throughput_mb_graph()
         self.create_multi_throughput_records_graph()
+        self.create_all_latency_compare_graphs()
         self.create_multi_latency_compare_graphs()
         self.create_multi_latency_graphs()
         self.wb.save(self.file)
