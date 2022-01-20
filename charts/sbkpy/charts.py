@@ -49,11 +49,11 @@ class SbkCharts:
 
     def get_time_unit(self, ws):
         names = self.get_columns_from_worksheet(ws)
-        return ws.cell(row=2, column=names['LatencyTimeUnit']).value
+        return str(ws.cell(row=2, column=names['LatencyTimeUnit']).value).upper()
 
     def get_storage_name(self, ws):
         names = self.get_columns_from_worksheet(ws)
-        return ws.cell(row=2, column=names['Storage']).value
+        return str(ws.cell(row=2, column=names['Storage']).value).upper()
 
     def create_line_chart(self, title, x_title, y_title, height, width):
         chart = LineChart()
@@ -148,6 +148,17 @@ class SbkMultiCharts(SbkCharts):
     def __init__(self, file):
         super().__init__(file)
 
+    def check_time_units(self):
+        ret = set()
+        for name in self.wb.sheetnames:
+            if name.startswith(constants.R_PREFIX):
+                ret.add(self.get_time_unit(self.wb[name]))
+        if len(ret) > 1:
+            print("ERROR: Multiple Time unit are preset in " + self.file + " " + str(ret))
+            return False
+        print("Time Unit: " + str(ret))
+        return True
+
     def create_all_latency_compare_graphs(self):
         charts, sheets = [], []
         for i in range(self.n_latency_charts):
@@ -214,9 +225,10 @@ class SbkMultiCharts(SbkCharts):
         sheet.add_chart(chart)
 
     def create_graphs(self):
-        self.create_multi_throughput_mb_graph()
-        self.create_multi_throughput_records_graph()
-        self.create_all_latency_compare_graphs()
-        self.create_multi_latency_compare_graphs()
-        self.create_multi_latency_graphs()
-        self.wb.save(self.file)
+        if self.check_time_units():
+            self.create_multi_throughput_mb_graph()
+            self.create_multi_throughput_records_graph()
+            self.create_all_latency_compare_graphs()
+            self.create_multi_latency_compare_graphs()
+            self.create_multi_latency_graphs()
+            self.wb.save(self.file)
