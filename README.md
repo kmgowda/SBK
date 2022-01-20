@@ -7,7 +7,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Storage Benchmark Kit  ![SBK](images/SBK-logo-small-1.png)
+# Storage Benchmark Kit  ![SBK](images/sbk-logo-small-1.png)
 
 [![Build Status](https://travis-ci.org/kmgowda/SBK.svg?branch=master)](https://travis-ci.org/kmgowda/SBK) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)  [![Api](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-api/javadoc/index.html) [![Version](https://img.shields.io/github/v/release/kmgowda/sbk)](https://github.com/kmgowda/SBK/releases) [![](https://jitpack.io/v/kmgowda/SBK.svg)](https://jitpack.io/#kmgowda/SBK) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4606/badge)](https://bestpractices.coreinfrastructure.org/projects/4606)
 
@@ -33,7 +33,7 @@ ___
 
 <p align="center">
     <a href="https://kmgowda.github.io/SBK/?from=SBK">
-        <img src="images/SBK-logo-wide.png" alt="Storage Benchmark Kit" width="750" height="550">
+        <img src="images/sbk-logo-wide.png" alt="Storage Benchmark Kit" width="750" height="550">
     </a>
 </p>
 
