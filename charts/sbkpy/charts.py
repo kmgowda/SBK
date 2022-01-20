@@ -153,7 +153,7 @@ class SbkMultiCharts(SbkCharts):
             if name.startswith(constants.R_PREFIX):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
-                self.create_latency_compare_graphs(ws, prefix)
+                super().create_latency_compare_graphs(ws, prefix)
 
     def create_multi_latency_graphs(self):
         charts = OrderedDict()
@@ -173,7 +173,6 @@ class SbkMultiCharts(SbkCharts):
     def create_multi_throughput_mb_graph(self, ):
         chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
                                        "Intervals", "Throughput in MB/Sec", 25, 50)
-
         for name in self.wb.sheetnames:
             if name.startswith(constants.R_PREFIX):
                 ws = self.wb[name]
@@ -186,7 +185,6 @@ class SbkMultiCharts(SbkCharts):
     def create_multi_throughput_records_graph(self):
         chart = self.create_line_chart("Throughput Variations in Records / Seconds",
                                        "Intervals", "Throughput in Records/Sec", 25, 50)
-
         for name in self.wb.sheetnames:
             if name.startswith(constants.R_PREFIX):
                 ws = self.wb[name]
