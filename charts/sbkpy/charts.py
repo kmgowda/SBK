@@ -51,6 +51,10 @@ class SbkCharts:
         names = self.get_columns_from_worksheet(ws)
         return ws.cell(row=2, column=names['LatencyTimeUnit']).value
 
+    def get_storage_name(self, ws):
+        names = self.get_columns_from_worksheet(ws)
+        return ws.cell(row=2, column=names['Storage']).value
+
     def create_line_chart(self, title, x_title, y_title, height, width):
         chart = LineChart()
         # set the title of the chart
@@ -132,10 +136,11 @@ class SbkCharts:
         r_name = constants.R_PREFIX + "1"
         t_name = constants.T_PREFIX + "1"
         ws1 = self.wb[r_name]
-        self.create_throughput_mb_graph(ws1, r_name)
-        self.create_throughput_records_graph(ws1, r_name)
-        self.create_latency_compare_graphs(ws1, r_name)
-        self.create_latency_graphs(ws1, r_name)
+        prefix = r_name + self.get_storage_name(ws1)
+        self.create_throughput_mb_graph(ws1, prefix)
+        self.create_throughput_records_graph(ws1, prefix)
+        self.create_latency_compare_graphs(ws1, prefix)
+        self.create_latency_graphs(ws1, prefix)
         self.wb.save(self.file)
 
 
@@ -146,13 +151,17 @@ class SbkMultiCharts(SbkCharts):
     def create_multi_latency_compare_graphs(self):
         for name in self.wb.sheetnames:
             if name.startswith(constants.R_PREFIX):
-                self.create_latency_compare_graphs(self.wb[name], name)
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                self.create_latency_compare_graphs(ws, prefix)
 
     def create_multi_latency_graphs(self):
         charts = OrderedDict()
         for name in self.wb.sheetnames:
             if name.startswith(constants.R_PREFIX):
-                latency_series = self.get_latency_series(self.wb[name], name)
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                latency_series = self.get_latency_series(ws, prefix)
                 for x in latency_series:
                     if x not in charts:
                         charts[x] = self.create_latency_line_graph(x + " Variations")
@@ -167,7 +176,9 @@ class SbkMultiCharts(SbkCharts):
 
         for name in self.wb.sheetnames:
             if name.startswith(constants.R_PREFIX):
-                chart.append(self.get_throughput_mb_series(self.wb[name], name))
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_mb_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("Throughput_MB")
         sheet.add_chart(chart)
@@ -178,7 +189,9 @@ class SbkMultiCharts(SbkCharts):
 
         for name in self.wb.sheetnames:
             if name.startswith(constants.R_PREFIX):
-                chart.append(self.get_throughput_records_series(self.wb[name], name))
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_records_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("Throughput_Records")
         sheet.add_chart(chart)
