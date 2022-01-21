@@ -9,7 +9,7 @@
 ##
 
 # sbk_charts :  Storage Benchmark Kit - Charts
-
+import re
 from collections import OrderedDict
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
@@ -29,6 +29,9 @@ class SbkCharts:
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
              "Percentile_99.95", "Percentile_99.99"]]
+
+    def is_rnum_sheet(self, name):
+        return re.match("^" + constants.R_PREFIX + "\d+$", name)
 
     def get_columns_from_worksheet(self, ws):
         ret = OrderedDict()
@@ -151,7 +154,7 @@ class SbkMultiCharts(SbkCharts):
     def check_time_units(self):
         ret = set()
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ret.add(self.get_time_unit(self.wb[name]))
         if len(ret) > 1:
             print("ERROR: Multiple Time unit are preset in " + self.file + " " + str(ret))
@@ -165,7 +168,7 @@ class SbkMultiCharts(SbkCharts):
             charts.append(self.create_latency_line_graph("Latency Variations"))
             sheets.append(self.wb.create_sheet("Latencies-" + str(i + 1)))
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 latency_series = self.get_latency_series(ws, prefix)
@@ -180,7 +183,7 @@ class SbkMultiCharts(SbkCharts):
 
     def create_multi_latency_compare_graphs(self):
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 super().create_latency_compare_graphs(ws, prefix)
@@ -188,7 +191,7 @@ class SbkMultiCharts(SbkCharts):
     def create_multi_latency_graphs(self):
         charts = OrderedDict()
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 latency_series = self.get_latency_series(ws, prefix)
@@ -204,7 +207,7 @@ class SbkMultiCharts(SbkCharts):
         chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
                                        "Intervals", "Throughput in MB/Sec", 25, 50)
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 chart.append(self.get_throughput_mb_series(ws, prefix))
@@ -216,7 +219,7 @@ class SbkMultiCharts(SbkCharts):
         chart = self.create_line_chart("Throughput Variations in Records / Seconds",
                                        "Intervals", "Throughput in Records/Sec", 25, 50)
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 chart.append(self.get_throughput_records_series(ws, prefix))
