@@ -9,10 +9,13 @@
 ##
 
 # sbk_charts :  Storage Benchmark Kit - Charts
-
+import re
 from collections import OrderedDict
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
+from openpyxl.styles import Font, Alignment
+from openpyxl.utils import get_column_letter
+
 import sbkpy.constants as constants
 
 
@@ -29,6 +32,9 @@ class SbkCharts:
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
              "Percentile_99.95", "Percentile_99.99"]]
+
+    def is_rnum_sheet(self, name):
+        return re.match("^" + constants.R_PREFIX + "\d+$", name)
 
     def get_columns_from_worksheet(self, ws):
         ret = OrderedDict()
@@ -49,11 +55,15 @@ class SbkCharts:
 
     def get_time_unit(self, ws):
         names = self.get_columns_from_worksheet(ws)
-        return ws.cell(row=2, column=names['LatencyTimeUnit']).value
+        return str(ws.cell(row=2, column=names['LatencyTimeUnit']).value).upper()
 
     def get_storage_name(self, ws):
         names = self.get_columns_from_worksheet(ws)
-        return ws.cell(row=2, column=names['Storage']).value
+        return str(ws.cell(row=2, column=names['Storage']).value).upper()
+
+    def get_action_name(self, ws):
+        names = self.get_columns_from_worksheet(ws)
+        return str(ws.cell(row=2, column=names['Action']).value)
 
     def create_line_chart(self, title, x_title, y_title, height, width):
         chart = LineChart()
@@ -148,13 +158,83 @@ class SbkMultiCharts(SbkCharts):
     def __init__(self, file):
         super().__init__(file)
 
+    def check_time_units(self):
+        ret = set()
+        for name in self.wb.sheetnames:
+            if self.is_rnum_sheet(name):
+                ret.add(self.get_time_unit(self.wb[name]))
+        if len(ret) > 1:
+            print("ERROR: Multiple Time unit are preset in " + self.file + " " + str(ret))
+            return False
+        print("Time Unit: " + ''.join(ret))
+        return True
+
+    def get_actions_storage_map(self):
+        ret = OrderedDict()
+        for name in self.wb.sheetnames:
+            if self.is_rnum_sheet(name):
+                action = self.get_action_name(self.wb[name])
+                if action not in ret:
+                    ret[action] = set()
+                ret[action].add(self.get_storage_name(self.wb[name]))
+        return ret
+
+    def create_summary_sheet(self):
+        BLACK = 'FF000000'
+        WHITE = 'FFFFFFFF'
+        RED = 'FFFF0000'
+        DARKRED = 'FF800000'
+        BLUE = 'FF0000FF'
+        DARKBLUE = 'FF000080'
+        GREEN = 'FF00FF00'
+        DARKGREEN = 'FF008000'
+        YELLOW = 'FFFFFF00'
+        DARKYELLOW = 'FF808000'
+
+        acts = self.get_actions_storage_map()
+        sheet = self.wb.create_sheet("Summary")
+        row = 7
+        col = 7
+        sheet.column_dimensions[get_column_letter(col)].width = 25
+        sheet.column_dimensions[get_column_letter(col + 1)].width = 50
+        cell = sheet.cell(row, col + 1)
+        cell.value = "SBK Charts"
+        cell.font = Font(size="36", bold=True, color=DARKBLUE)
+        cell.alignment = Alignment(horizontal='center')
+        row += 1
+        drivers = set()
+        for values in acts.values():
+            drivers.update(values)
+        text = "Performance Analysis of Storage Drivers :  " + ", ".join(drivers)
+        cell = sheet.cell(row, col)
+        cell.value = text
+        cell.font = Font(size="27", bold=True, color=RED)
+        row += 1
+        cell = sheet.cell(row, col)
+        cell.value = "Time Unit"
+        cell.font = Font(size="18", bold=False, color=BLUE)
+        cell = sheet.cell(row, col + 1)
+        cell.value = self.get_time_unit(self.wb[constants.R_PREFIX + "1"])
+        cell.font = Font(size="18", bold=False, color=BLACK)
+        row += 1
+        for i, key in enumerate(acts):
+            cell = sheet.cell(row + i, col)
+            cell.value = key
+            text = key
+            cell.font = Font(size="18", bold=False, color=DARKGREEN)
+            cell = sheet.cell(row + i, col + 1)
+            cell.value = ", ".join(acts[key])
+            cell.font = Font(size="18", bold=False, color=DARKRED)
+            text += " : "+cell.value
+            print(text)
+
     def create_all_latency_compare_graphs(self):
         charts, sheets = [], []
         for i in range(self.n_latency_charts):
             charts.append(self.create_latency_line_graph("Latency Variations"))
             sheets.append(self.wb.create_sheet("Latencies-" + str(i + 1)))
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 latency_series = self.get_latency_series(ws, prefix)
@@ -169,7 +249,7 @@ class SbkMultiCharts(SbkCharts):
 
     def create_multi_latency_compare_graphs(self):
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 super().create_latency_compare_graphs(ws, prefix)
@@ -177,7 +257,7 @@ class SbkMultiCharts(SbkCharts):
     def create_multi_latency_graphs(self):
         charts = OrderedDict()
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 latency_series = self.get_latency_series(ws, prefix)
@@ -193,7 +273,7 @@ class SbkMultiCharts(SbkCharts):
         chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
                                        "Intervals", "Throughput in MB/Sec", 25, 50)
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 chart.append(self.get_throughput_mb_series(ws, prefix))
@@ -205,7 +285,7 @@ class SbkMultiCharts(SbkCharts):
         chart = self.create_line_chart("Throughput Variations in Records / Seconds",
                                        "Intervals", "Throughput in Records/Sec", 25, 50)
         for name in self.wb.sheetnames:
-            if name.startswith(constants.R_PREFIX):
+            if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
                 chart.append(self.get_throughput_records_series(ws, prefix))
@@ -214,9 +294,11 @@ class SbkMultiCharts(SbkCharts):
         sheet.add_chart(chart)
 
     def create_graphs(self):
-        self.create_multi_throughput_mb_graph()
-        self.create_multi_throughput_records_graph()
-        self.create_all_latency_compare_graphs()
-        self.create_multi_latency_compare_graphs()
-        self.create_multi_latency_graphs()
-        self.wb.save(self.file)
+        if self.check_time_units():
+            self.create_summary_sheet()
+            self.create_multi_throughput_mb_graph()
+            self.create_multi_throughput_records_graph()
+            self.create_all_latency_compare_graphs()
+            self.create_multi_latency_compare_graphs()
+            self.create_multi_latency_graphs()
+            self.wb.save(self.file)
