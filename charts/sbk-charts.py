@@ -12,14 +12,16 @@ import argparse
 from sbkpy.sheets import SbkMultiSheets
 from sbkpy.charts import SbkMultiCharts
 
+SBK_BANNER_FILE = "./banner.txt"
 
 def main():
     parser = argparse.ArgumentParser(description='sbk charts')
     parser.add_argument('-i', '--ifiles', help="Input CSV files, seperated by ','", required=True)
     parser.add_argument('-o', '--ofile', help='Output xlsx file', default="out.xlsx")
     args = parser.parse_args()
-    print('Input files are ', args.ifiles)
-    print('Output file is ', args.ofile)
+    print(open(SBK_BANNER_FILE, 'r').read())
+    print('Input Files : ', args.ifiles)
+    print('Output File : ', args.ofile)
     sh = SbkMultiSheets(args.ifiles, args.ofile)
     sh.create_sheets()
     ch = SbkMultiCharts(args.ofile)

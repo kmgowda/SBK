@@ -70,4 +70,4 @@ class SbkMultiSheets(SbkSheets):
         for i, file in enumerate(self.iFiles):
             wb_add_two_sheets(wb, constants.R_PREFIX + str(i + 1), constants.T_PREFIX + str(i + 1), read_csv(file))
         wb.close()
-        print("xlsx file %s created" % self.oFile)
+        print("xlsx file : %s created" % self.oFile)
