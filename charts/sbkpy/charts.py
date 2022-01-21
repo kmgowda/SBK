@@ -166,7 +166,7 @@ class SbkMultiCharts(SbkCharts):
         if len(ret) > 1:
             print("ERROR: Multiple Time unit are preset in " + self.file + " " + str(ret))
             return False
-        print("Time Unit: " + ''.join(ret))
+        print("Time Unit : " + ''.join(ret))
         return True
 
     def get_actions_storage_map(self):
