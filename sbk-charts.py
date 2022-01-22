@@ -25,13 +25,13 @@ def main():
     configs = Properties()
     with open(SBK_GRADLE_PROP_FILE, 'rb') as config_file:
         configs.load(config_file)
-    sbkVersion = configs.get('sbkVersion').data
-    print("Sbk Charts Version : " + sbkVersion)
+    sbk_version = configs.get('sbkVersion').data
+    print("Sbk Charts Version : " + sbk_version)
     print('Input Files : ', args.ifiles)
     print('Output File : ', args.ofile)
     sh = SbkMultiSheets(args.ifiles, args.ofile)
     sh.create_sheets()
-    ch = SbkMultiCharts(sbkVersion, args.ofile)
+    ch = SbkMultiCharts(sbk_version, args.ofile)
     ch.create_graphs()
 
 
