@@ -12,7 +12,7 @@
 
 from pandas import read_csv
 from xlsxwriter import Workbook
-import sbkpy.constants as constants
+import charts.constants as constants
 
 
 def wb_add_two_sheets(wb, r_name, t_name, df):

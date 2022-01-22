@@ -16,11 +16,12 @@ from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 
-import sbkpy.constants as constants
+import charts.constants as constants
 
 
 class SbkCharts:
-    def __init__(self, file):
+    def __init__(self, version, file):
+        self.version = version
         self.file = file
         self.wb = load_workbook(self.file)
         self.time_unit = self.get_time_unit(self.wb[constants.R_PREFIX + "1"])
@@ -155,8 +156,8 @@ class SbkCharts:
 
 
 class SbkMultiCharts(SbkCharts):
-    def __init__(self, file):
-        super().__init__(file)
+    def __init__(self, version, file):
+        super().__init__(version, file)
 
     def check_time_units(self):
         ret = set()
@@ -198,8 +199,13 @@ class SbkMultiCharts(SbkCharts):
         sheet.column_dimensions[get_column_letter(col)].width = 25
         sheet.column_dimensions[get_column_letter(col + 1)].width = 50
         cell = sheet.cell(row, col + 1)
-        cell.value = "SBK Charts"
-        cell.font = Font(size="36", bold=True, color=DARKBLUE)
+        cell.value = "SBK Charts "
+        cell.font = Font(size="47", bold=True, color=DARKBLUE)
+        cell.alignment = Alignment(horizontal='center')
+        row += 1
+        cell = sheet.cell(row, col + 1)
+        cell.value = "SBK Version : " + self.version
+        cell.font = Font(size="27", bold=True, color=DARKYELLOW)
         cell.alignment = Alignment(horizontal='center')
         row += 1
         drivers = set()
