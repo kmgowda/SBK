@@ -16,7 +16,7 @@ from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 
-import sbkpy.constants as constants
+import charts.constants as constants
 
 
 class SbkCharts:

@@ -9,11 +9,11 @@
 ##
 
 import argparse
-from sbkpy.sheets import SbkMultiSheets
-from sbkpy.charts import SbkMultiCharts
-from sbkpy.constants import VERSION
+from charts.sheets import SbkMultiSheets
+from charts.charts import SbkMultiCharts
+from charts.constants import VERSION
 
-SBK_BANNER_FILE = "./banner.txt"
+SBK_BANNER_FILE = "./charts/banner.txt"
 
 
 def main():
