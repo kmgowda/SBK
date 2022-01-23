@@ -7,8 +7,8 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# SBK-Charts 
-The sbk-chars is the python application to create the xlsx file for given single or multiple CSV file containing the SBK performance 
+# SBK Charts 
+The sbk-charts is the python application to create the xlsx file for given single or multiple CSV file containing the SBK performance 
 results. The generated xlsx file contains the graphs of latency percentile variations and throughput variations.
 
 Running SBK Charts:
