@@ -2,3 +2,4 @@ XlsxWriter>=3.0.2
 pandas>=1.3.5
 openpyxl>=3.0.9
 jproperties>=2.1.1
+ordered-set>=4.0.2

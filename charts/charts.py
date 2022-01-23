@@ -11,6 +11,7 @@
 # sbk_charts :  Storage Benchmark Kit - Charts
 import re
 from collections import OrderedDict
+from ordered_set import OrderedSet
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.styles import Font, Alignment
@@ -160,7 +161,7 @@ class SbkMultiCharts(SbkCharts):
         super().__init__(version, file)
 
     def check_time_units(self):
-        ret = set()
+        ret = OrderedSet()
         for name in self.wb.sheetnames:
             if self.is_rnum_sheet(name):
                 ret.add(self.get_time_unit(self.wb[name]))
@@ -176,7 +177,7 @@ class SbkMultiCharts(SbkCharts):
             if self.is_rnum_sheet(name):
                 action = self.get_action_name(self.wb[name])
                 if action not in ret:
-                    ret[action] = set()
+                    ret[action] = OrderedSet()
                 ret[action].add(self.get_storage_name(self.wb[name]))
         return ret
 
@@ -208,7 +209,7 @@ class SbkMultiCharts(SbkCharts):
         cell.font = Font(size="27", bold=True, color=DARKYELLOW)
         cell.alignment = Alignment(horizontal='center')
         row += 1
-        drivers = set()
+        drivers = OrderedSet()
         for values in acts.values():
             drivers.update(values)
         text = "Performance Analysis of Storage Drivers :  " + ", ".join(drivers)
