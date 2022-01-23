@@ -18,15 +18,16 @@ SBK_GRADLE_PROP_FILE = "./gradle.properties"
 
 
 def sbk_charts():
-    parser = argparse.ArgumentParser(description='sbk charts')
+    parser = argparse.ArgumentParser(description='sbk charts',
+                                     epilog='Please report issues at https://github.com/kmgowda/SBK')
     parser.add_argument('-i', '--ifiles', help="Input CSV files, seperated by ','", required=True)
     parser.add_argument('-o', '--ofile', help='Output xlsx file', default="out.xlsx")
     args = parser.parse_args()
-    print(open(SBK_BANNER_FILE, 'r').read())
     configs = Properties()
     with open(SBK_GRADLE_PROP_FILE, 'rb') as config_file:
         configs.load(config_file)
     sbk_version = configs.get('sbkVersion').data
+    print(open(SBK_BANNER_FILE, 'r').read())
     print("Sbk Charts Version : " + sbk_version)
     print('Input Files : ', args.ifiles)
     print('Output File : ', args.ofile)
