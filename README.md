@@ -42,28 +42,28 @@ ___
 
 *SBK supports performance benchmarking of following storage systems*
 
-**#**|**Driver**|**#**|**Driver**
-:-----:|:-----:|:-----:|:-----:
-1|[Artemis](driver-artemis)|21|[Mariadb](driver-mariadb)
-2|[Asyncfile](driver-asyncfile)|22|[Minio](driver-minio)
-3|[Bookkeeper](driver-bookkeeper)|23|[Mongodb](driver-mongodb)
-4|[Cassandra](driver-cassandra)|24|[Mssql](driver-mssql)
-5|[Cephs3](driver-cephs3)|25|[Mysql](driver-mysql)
-6|[Concurrentq](driver-concurrentq)|26|[Nats](driver-nats)
-7|[Couchdb](driver-couchdb)|27|[NatsStream](driver-natsStream)
-8|[Csv](driver-csv)|28|[Nsq](driver-nsq)
-9|[Db2](driver-db2)|29|[Null](driver-null)
-10|[Derby](driver-derby)|30|[Openio](driver-openio)
-11|[Fdbrecord](driver-fdbrecord)|31|[Postgresql](driver-postgresql)
-12|[File](driver-file)|32|[Pravega](driver-pravega)
-13|[Filestream](driver-filestream)|33|[Pulsar](driver-pulsar)
-14|[Foundationdb](driver-foundationdb)|34|[Rabbitmq](driver-rabbitmq)
-15|[Hdfs](driver-hdfs)|35|[Redis](driver-redis)
-16|[Hive](driver-hive)|36|[Redpanda](driver-redpanda)
-17|[Ignite](driver-ignite)|37|[Rocketmq](driver-rocketmq)
-18|[Jdbc](driver-jdbc)|38|[Rocksdb](driver-rocksdb)
-19|[Kafka](driver-kafka)|39|[Seaweeds3](driver-seaweeds3)
-20|[Leveldb](driver-leveldb)|40|[Sqlite](driver-sqlite)
+| **#** |             **Driver**              | **#** |           **Driver**            |
+|:-----:|:-----------------------------------:|:-----:|:-------------------------------:|
+|   1   |      [Artemis](driver-artemis)      |  21   |    [Mariadb](driver-mariadb)    |
+|   2   |    [Asyncfile](driver-asyncfile)    |  22   |      [Minio](driver-minio)      |
+|   3   |   [Bookkeeper](driver-bookkeeper)   |  23   |    [Mongodb](driver-mongodb)    |
+|   4   |    [Cassandra](driver-cassandra)    |  24   |      [Mssql](driver-mssql)      |
+|   5   |       [Cephs3](driver-cephs3)       |  25   |      [Mysql](driver-mysql)      |
+|   6   |  [Concurrentq](driver-concurrentq)  |  26   |       [Nats](driver-nats)       |
+|   7   |      [Couchdb](driver-couchdb)      |  27   | [NatsStream](driver-natsStream) |
+|   8   |          [Csv](driver-csv)          |  28   |        [Nsq](driver-nsq)        |
+|   9   |          [Db2](driver-db2)          |  29   |       [Null](driver-null)       |
+|  10   |        [Derby](driver-derby)        |  30   |     [Openio](driver-openio)     |
+|  11   |    [Fdbrecord](driver-fdbrecord)    |  31   | [Postgresql](driver-postgresql) |
+|  12   |         [File](driver-file)         |  32   |    [Pravega](driver-pravega)    |
+|  13   |   [Filestream](driver-filestream)   |  33   |     [Pulsar](driver-pulsar)     |
+|  14   | [Foundationdb](driver-foundationdb) |  34   |   [Rabbitmq](driver-rabbitmq)   |
+|  15   |         [Hdfs](driver-hdfs)         |  35   |      [Redis](driver-redis)      |
+|  16   |         [Hive](driver-hive)         |  36   |   [Redpanda](driver-redpanda)   |
+|  17   |       [Ignite](driver-ignite)       |  37   |   [Rocketmq](driver-rocketmq)   |
+|  18   |         [Jdbc](driver-jdbc)         |  38   |    [Rocksdb](driver-rocksdb)    |
+|  19   |        [Kafka](driver-kafka)        |  39   |  [Seaweeds3](driver-seaweeds3)  |
+|  20   |      [Leveldb](driver-leveldb)      |  40   |     [Sqlite](driver-sqlite)     |
 
 *In the future, many more storage systems drivers will be plugged in* 
 
@@ -325,13 +325,13 @@ If you want to run the Grafana and prometheus as Kubernetes pods, then use [Graf
 
 ## SBK Metrics Network Ports
 
-| Network Port 	| Description                               	|
-|--------------	|-------------------------------------------	|
-| 9717         	| SBK-RAM GRPC server Port                  	|
-| 9718         	| SBK performance metrics to Prometheus     	|
-| 9719         	| SBK-RAM performance metrics to Prometheus 	|
-| 8718         	| SBK JVM/JMX metrics to Prometheus         	|
-| 8719         	| SBK-RAM JVM/JMX metrics to Prometheus     	|
+| Network Port 	 | Description                               	 |
+|----------------|---------------------------------------------|
+| 9717         	 | SBK-RAM GRPC server Port                  	 |
+| 9718         	 | SBK performance metrics to Prometheus     	 |
+| 9719         	 | SBK-RAM performance metrics to Prometheus 	 |
+| 8718         	 | SBK JVM/JMX metrics to Prometheus         	 |
+| 8719         	 | SBK-RAM JVM/JMX metrics to Prometheus     	 |
 
 
 ## SBK Execution Modes
@@ -859,6 +859,13 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
    *  check this example: [Start File system benchmarking](https://github.com/kmgowda/sbk-examples/blob/main/sbk-file/src/main/java/io.file/Main.java#L25)
    
 4. That's all! Run your main method (your java application ) with "-help" to see the benchmarking options.    
+
+
+## SBK Charts
+you can log the performance results to CSV file using option '--csvfile'.
+if you have SBK results in one or multiple CSV files,
+then you can use python application 'sbk-charts' to compare the SBK benchmarking results plot the graphs into an Excel sheet.
+refer [SBK Charts](sbk-charts.md) for further details.
 
 
 ## SBK Publications

@@ -15,6 +15,7 @@ import io.sbk.config.Config;
 import io.perl.PerlConfig;
 import io.sbk.options.InputOptions;
 import io.time.Time;
+import io.sbk.system.Printer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -77,6 +78,7 @@ public class CSVLogger extends SystemLogger {
         super.open(params, storageName, action, time);
         if (csvEnable) {
             openCSV();
+            Printer.log.info("SBK CSV Logger Started");
         }
     }
 
@@ -127,6 +129,7 @@ public class CSVLogger extends SystemLogger {
             writeToCSV(Config.NAME, TOTAL_PRINT, 0, 0,
                     (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
                     lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+            csvWriter.flush();
         }
     }
 
@@ -135,6 +138,7 @@ public class CSVLogger extends SystemLogger {
         super.close(params);
         if (csvEnable) {
             csvWriter.close();
+            Printer.log.info("SBK CSV Logger Shtudown");
         }
     }
 }
