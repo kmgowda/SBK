@@ -258,10 +258,10 @@ final public class CQueuePerl implements Perl {
     static final class CQueueChannel implements Channel {
         final private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
         final private Throw eThrow;
-        private int index;
+        private int rIndex;
 
         public CQueueChannel(int qSize, Throw eThrow) {
-            this.index = qSize;
+            this.rIndex = qSize;
             this.eThrow = eThrow;
             this.cQueues = new ConcurrentLinkedQueue[qSize];
             for (int i = 0; i < cQueues.length; i++) {
@@ -270,11 +270,11 @@ final public class CQueuePerl implements Perl {
         }
 
         public TimeStamp receive(int timeout) {
-            index += 1;
-            if (index >= cQueues.length) {
-                index = 0;
+            rIndex += 1;
+            if (rIndex >= cQueues.length) {
+                rIndex = 0;
             }
-            return cQueues[index].poll();
+            return cQueues[rIndex].poll();
         }
 
         public void sendEndTime(long endTime) {
@@ -297,19 +297,19 @@ final public class CQueuePerl implements Perl {
 
         @NotThreadSafe
         private final class CQueuePerlChannel implements PerlChannel {
-            private int i;
+            private int wIndex;
 
             public CQueuePerlChannel() {
-                this.i = 0;
+                this.wIndex = 0;
             }
 
             @Override
             public void send(long startTime, long endTime, int dataSize, int records) {
-                this.i += 1;
-                if (this.i >= cQueues.length) {
-                    this.i = 0;
+                this.wIndex += 1;
+                if (this.wIndex >= cQueues.length) {
+                    this.wIndex = 0;
                 }
-                cQueues[i].add(new TimeStamp(startTime, endTime, dataSize, records));
+                cQueues[wIndex].add(new TimeStamp(startTime, endTime, dataSize, records));
             }
 
             @Override
