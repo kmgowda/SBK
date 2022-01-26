@@ -16,6 +16,11 @@ include 'sbk-api'
 include 'sbk-ram'
 include 'sbk-gem'
 include 'sbk-gem-yal'
+
+// The 'driver-sbktemplate' is only the driver template; not for compilation
+include 'driver-sbktemplate'
+
+// The 'charts' is the python module ; not for compilation
 include 'charts'
 
 apply from: "$rootDir/settings-drivers.gradle"
