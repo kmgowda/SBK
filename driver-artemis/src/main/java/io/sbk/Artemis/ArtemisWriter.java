@@ -41,7 +41,7 @@ public class ArtemisWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time, Status status, PerlChannel record, int id) {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time, Status status, PerlChannel record) {
         final long ctime = time.getCurrentTime();
         status.startTime = ctime;
         status.bytes = size;

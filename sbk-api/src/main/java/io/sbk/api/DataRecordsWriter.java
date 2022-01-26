@@ -51,16 +51,15 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
      * @param time        time interface
      * @param status      Write status to return; {@link io.sbk.api.Status}
      * @param perlChannel to call for benchmarking
-     * @param id          Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
     void recordWrite(DataType<T> dType, T data, int size, Time time,
-                     Status status, PerlChannel perlChannel, int id) throws IOException;
+                     Status status, PerlChannel perlChannel) throws IOException;
 
 
     /**
      * Default implementation for writer benchmarking by writing given number of records.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel)}
      * sync is invoked after writing all the records.
      *
      * @param writer       Writer Descriptor
@@ -73,14 +72,9 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
      */
     default void RecordsWriter(Worker writer, long recordsCount, DataType<T> dType, T data, int size, Time time) throws IOException {
         final Status status = new Status();
-        int id = writer.id % writer.perlIdMax;
         long i = 0;
         while (i < recordsCount) {
-            recordWrite(dType, data, size, time, status, writer.perlChannel, id);
-            id += 1;
-            if (id >= writer.perlIdMax) {
-                id = 0;
-            }
+            recordWrite(dType, data, size, time, status, writer.perlChannel);
             i += status.records;
         }
         sync();
@@ -104,18 +98,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                    Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
-        int id = writer.id % writer.perlIdMax;
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
         while (cnt < recordsCount) {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
             while (i < loopMax) {
-                recordWrite(dType, data, size, time, status, writer.perlChannel, id);
-                id += 1;
-                if (id >= writer.perlIdMax) {
-                    id = 0;
-                }
+                recordWrite(dType, data, size, time, status, writer.perlChannel);
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
@@ -142,15 +131,10 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
         long startTime = time.getCurrentTime();
-        int id = writer.id % writer.perlIdMax;
         status.startTime = startTime;
         double msElapsed = 0;
         while (msElapsed < msToRun) {
-            recordWrite(dType, data, size, time, status, writer.perlChannel, id);
-            id += 1;
-            if (id >= writer.perlIdMax) {
-                id = 0;
-            }
+            recordWrite(dType, data, size, time, status, writer.perlChannel);
             msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
         }
         sync();
@@ -174,7 +158,6 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                        Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
-        int id = writer.id % writer.perlIdMax;
         int cnt = 0;
         double secondsElapsed = 0;
         status.startTime = loopStartTime;
@@ -182,11 +165,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         while (secondsElapsed < secondsToRun) {
             int i = 0;
             while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
-                recordWrite(dType, data, size, time, status, writer.perlChannel, id);
-                id += 1;
-                if (id >= writer.perlIdMax) {
-                    id = 0;
-                }
+                recordWrite(dType, data, size, time, status, writer.perlChannel);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);

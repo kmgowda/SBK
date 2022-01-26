@@ -52,11 +52,10 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
      * @param time        time interface
      * @param status      Timestamp
      * @param perlChannel to call for benchmarking
-     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    default void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    default void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         status.startTime = time.getCurrentTime();
         final T ret = read();
@@ -85,11 +84,10 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
      * @param time        time interface
      * @param status      Timestamp
      * @param perlChannel to call for benchmarking
-     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         final T ret = read();
         if (ret == null) {

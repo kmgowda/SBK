@@ -37,7 +37,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
 
     public SbkCallbackReader(int readerId, ParameterOptions params, PerlChannel perlChannel, int idMax,
                              DataType<Object> dataType, Time time) {
-        super(readerId, params, perlChannel, idMax);
+        super(readerId, params, perlChannel);
         this.dataType = dataType;
         this.time = time;
         this.ret = new CompletableFuture<>();
@@ -68,7 +68,6 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
-        final int id = (int) (cnt % perlIdMax);
         perlChannel.send(startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun)) {
             ret.complete(null);

@@ -30,11 +30,10 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
      * @param time        time interface
      * @param status      read status to return; {@link io.sbk.api.Status}
      * @param perlChannel to call for benchmarking
-     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException;
 
     /**
@@ -45,31 +44,26 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
      * @param time        time interface
      * @param status      read status to return; {@link io.sbk.api.Status}
      * @param perlChannel to call for benchmarking
-     * @param id          Identifier for recordTime
      * @throws EOFException If the End of the file occurred.
      * @throws IOException  If an exception occurred.
      */
-    void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException;
 
     default void genericRecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                       RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
-        int id = reader.id % reader.perlIdMax;
         long i = 0;
         while (i < recordsCount) {
-            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel);
             i += status.records;
-            if (id >= reader.perlIdMax) {
-                id = 0;
-            }
         }
     }
 
     /**
      * Default implementation for benchmarking reader by reading given number of records.
-     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, PerlChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, PerlChannel)}
      *
      * @param reader       Reader Descriptor
      * @param recordsCount Records count
@@ -106,18 +100,14 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        int id = reader.id % reader.perlIdMax;
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
-            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
-            if (id >= reader.perlIdMax) {
-                id = 0;
-            }
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel);
         }
     }
 
     /**
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
-     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, PerlChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordRead(DataType, int, Time, Status, PerlChannel)}
      *
      * @param reader       Reader Descriptor
      * @param secondsToRun Number of seconds to run
@@ -151,17 +141,13 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
                                                  RateController rController, RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
-        int id = reader.id % reader.perlIdMax;
         long i = 0;
         double secondsElapsed = 0;
         final long loopStartTime = time.getCurrentTime();
         rController.start(reader.params.getRecordsPerSec());
         while (i < recordsCount) {
-            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel);
             i += status.records;
-            if (id >= reader.perlIdMax) {
-                id = 0;
-            }
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);
             rController.control(i, secondsElapsed);
         }
@@ -207,16 +193,12 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        int id = reader.id % reader.perlIdMax;
         final long loopStartTime = time.getCurrentTime();
         double secondsElapsed = 0;
         long cnt = 0;
         rController.start(reader.params.getRecordsPerSec());
         while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
-            recordTime.recordRead(dType, size, time, status, reader.perlChannel, id++);
-            if (id >= reader.perlIdMax) {
-                id = 0;
-            }
+            recordTime.recordRead(dType, size, time, status, reader.perlChannel);
             cnt += status.records;
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);
             rController.control(cnt, secondsElapsed);
@@ -259,7 +241,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     interface RecordTime<T> {
 
-        void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+        void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel)
                 throws EOFException, IOException;
     }
 }

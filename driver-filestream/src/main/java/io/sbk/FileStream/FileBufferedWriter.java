@@ -32,7 +32,7 @@ public class FileBufferedWriter implements Writer<byte[]> {
     }
 
     @Override
-    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time, Status status, PerlChannel record, int id) throws IOException {
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time, Status status, PerlChannel record) throws IOException {
         status.startTime = time.getCurrentTime();
         out.write(data);
         status.endTime = time.getCurrentTime();

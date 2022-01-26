@@ -83,11 +83,10 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
      * @param time        time interface
      * @param status      Write status to return
      * @param perlChannel to call for benchmarking
-     * @param id          Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
     default void recordWrite(DataType<T> dType, T data, int size, Time time,
-                             Status status, PerlChannel perlChannel, int id) throws IOException {
+                             Status status, PerlChannel perlChannel) throws IOException {
         CompletableFuture<?> ret;
         status.bytes = size;
         status.records = 1;

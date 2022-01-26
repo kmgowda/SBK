@@ -76,7 +76,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, PerlChannel perlChannel, int id) throws IOException {
+                            Status status, PerlChannel perlChannel) throws IOException {
         final int recs = params.getRecordsPerSync();
         final LinkedList<Document> lt = new LinkedList<>();
         status.bytes = size * recs;

@@ -87,7 +87,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     }
 
     @Override
-    public void recordWrite(DataType<ByteString> dType, ByteString data, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
+    public void recordWrite(DataType<ByteString> dType, ByteString data, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final int recs = params.getRecordsPerSync();
         status.bytes = size * recs;
         status.records = recs;

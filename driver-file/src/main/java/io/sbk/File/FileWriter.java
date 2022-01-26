@@ -44,7 +44,7 @@ public class FileWriter implements Writer<ByteBuffer> {
 
     @Override
     public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Time time,
-                            Status status, PerlChannel record, int id) throws IOException {
+                            Status status, PerlChannel record) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
         status.startTime = time.getCurrentTime();
         out.write(buffer);

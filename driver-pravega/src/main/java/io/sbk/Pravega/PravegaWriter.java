@@ -43,11 +43,10 @@ public class PravegaWriter implements Writer<byte[]> {
      * @param size   size of the data
      * @param status Write status to return
      * @param record to call for benchmarking
-     * @param id     for record benchmarking
      */
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, PerlChannel record, int id) throws IOException {
+                            Status status, PerlChannel record) throws IOException {
         CompletableFuture<Void> ret;
         final long ctime = time.getCurrentTime();
         status.startTime = ctime;

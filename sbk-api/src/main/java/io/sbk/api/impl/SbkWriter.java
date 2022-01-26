@@ -45,7 +45,7 @@ final public class SbkWriter extends Worker implements RunBenchmark {
     public SbkWriter(int writerID, ParameterOptions params, PerlChannel perlChannel, int perlIdMax,
                      @NotNull DataType<Object> dType, Time time, DataWriter<Object> writer,
                      CountWriters wCount, ExecutorService executor) {
-        super(writerID, params, perlChannel, perlIdMax);
+        super(writerID, params, perlChannel);
         this.dType = dType;
         this.time = time;
         this.writer = writer;

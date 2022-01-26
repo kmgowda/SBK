@@ -56,7 +56,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
@@ -84,7 +84,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
 
 
     @Override
-    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         Transaction tx = ignite.transactions().txStart();

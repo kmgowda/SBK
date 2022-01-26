@@ -71,7 +71,7 @@ public class JdbcWriter implements Writer<String> {
 
     @Override
     public void recordWrite(DataType<String> dType, String data, int size, Time time,
-                            Status status, PerlChannel record, int id) throws IOException {
+                            Status status, PerlChannel record) throws IOException {
         status.startTime = time.getCurrentTime();
         try {
             st.executeUpdate(gerWriteQuery());

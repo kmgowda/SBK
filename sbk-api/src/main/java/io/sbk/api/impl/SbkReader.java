@@ -44,7 +44,7 @@ final public class SbkReader extends Worker implements RunBenchmark {
     public SbkReader(int readerId, ParameterOptions params, PerlChannel perlChannel, int idMax,
                      DataType<Object> dType, Time time, DataReader<Object> reader,
                      CountReaders rCount, ExecutorService executor) {
-        super(readerId, params, perlChannel, idMax);
+        super(readerId, params, perlChannel);
         this.dType = dType;
         this.time = time;
         this.reader = reader;
