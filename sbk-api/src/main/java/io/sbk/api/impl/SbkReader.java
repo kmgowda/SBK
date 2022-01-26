@@ -41,7 +41,7 @@ final public class SbkReader extends Worker implements RunBenchmark {
     final private BiConsumer perf;
 
 
-    public SbkReader(int readerId, ParameterOptions params, PerlChannel perlChannel, int idMax,
+    public SbkReader(int readerId, ParameterOptions params, PerlChannel perlChannel,
                      DataType<Object> dType, Time time, DataReader<Object> reader,
                      CountReaders rCount, ExecutorService executor) {
         super(readerId, params, perlChannel);

@@ -18,11 +18,4 @@ public non-sealed interface Perl extends RunBenchmark, GetPerlChannel {
      * stop/shutdown the Benchmark.
      */
     void stop();
-
-    /**
-     * Get Max Identifier for PerlChannel.
-     *
-     * @return maximum identifier value per PerlChannel.
-     */
-    int getMaxId();
 }
