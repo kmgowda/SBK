@@ -31,5 +31,5 @@ public interface Perl extends RunBenchmark {
      *
      * @return maximum identifier value per PerlChannel.
      */
-    int getIdMax();
+    int getMaxId();
 }

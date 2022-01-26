@@ -164,7 +164,7 @@ final public class SbkBenchmark implements Benchmark {
 
         if (writers.size() > 0) {
             if (writePerl != null) {
-                final int idMax = writePerl.getIdMax();
+                final int idMax = writePerl.getMaxId();
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, params, writePerl.getPerlChannel(), idMax,
@@ -182,7 +182,7 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (readers.size() > 0) {
-            final int idMax = readPerl.getIdMax();
+            final int idMax = readPerl.getMaxId();
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
                     .map(i -> new SbkReader(i,  params,

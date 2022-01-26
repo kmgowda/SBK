@@ -45,7 +45,7 @@ final public class CQueuePerl implements Perl {
     final private CompletableFuture<Void> retFuture;
 
     @Getter
-    final private int idMax;
+    final private int maxId;
 
     @GuardedBy("this")
     private int index;
@@ -68,16 +68,16 @@ final public class CQueuePerl implements Perl {
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         if (perlConfig.maxQs > 0) {
-            this.idMax  = perlConfig.maxQs;
+            this.maxId = perlConfig.maxQs;
             this.channels = new CQueueChannel[1];
             this.index = 1;
         } else {
-            this.idMax  = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
+            this.maxId = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
             this.channels = new CQueueChannel[maxWorkers];
             this.index = maxWorkers;
         }
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new CQueueChannel(this.idMax, new OnError());
+            channels[i] = new CQueueChannel(this.maxId, new OnError());
         }
     }
 

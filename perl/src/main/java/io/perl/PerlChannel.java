@@ -18,7 +18,7 @@ public sealed interface PerlChannel permits Channel {
     /**
      * send the benchmarking data.
      *
-     * @param id        Channel identifier, should be less than the value of Perl.getIdMax()
+     * @param id        Channel identifier, should be less than the value of Perl.getMaxId()
      * @param startTime Start time
      * @param endTime   End Time.
      * @param dataSize  size of the data in bytes.
