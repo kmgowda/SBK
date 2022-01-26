@@ -95,16 +95,16 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         ret = writeAsync(data);
         if (ret == null) {
             status.endTime = time.getCurrentTime();
-            perlChannel.send(id, status.startTime, status.endTime, size, status.records);
+            perlChannel.send(status.startTime, status.endTime, size, status.records);
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
-                perlChannel.sendException(id, ex);
+                perlChannel.sendException(ex);
                 return null;
             });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                perlChannel.send(id, beginTime, endTime, size, status.records);
+                perlChannel.send(beginTime, endTime, size, status.records);
             });
         }
     }

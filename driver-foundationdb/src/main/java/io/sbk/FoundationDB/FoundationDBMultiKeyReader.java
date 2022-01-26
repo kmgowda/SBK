@@ -91,7 +91,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += recs;
         cnt += recs;
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
@@ -123,7 +123,7 @@ public class FoundationDBMultiKeyReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += status.records;
         cnt += status.records;
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
     }
 
 }

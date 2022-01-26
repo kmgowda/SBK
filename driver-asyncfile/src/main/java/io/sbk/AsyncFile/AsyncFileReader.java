@@ -60,16 +60,16 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                         final long endTime = time.getCurrentTime();
                         if (result <= 0 && !isEOF.get()) {
                             isEOF.set(true);
-                            perlChannel.sendException(id, new EOFException());
+                            perlChannel.sendException(new EOFException());
                         } else {
-                            perlChannel.send(id, ctime, endTime, result, 1);
+                            perlChannel.send(ctime, endTime, result, 1);
                         }
                     }
 
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
                         if (!isEOF.get()) {
-                            perlChannel.sendException(id, ex);
+                            perlChannel.sendException(ex);
                         }
                     }
                 });
@@ -88,16 +88,16 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                         final long endTime = time.getCurrentTime();
                         if (result <= 0 && !isEOF.get()) {
                             isEOF.set(true);
-                            perlChannel.sendException(id, new EOFException());
+                            perlChannel.sendException(new EOFException());
                         } else {
-                            perlChannel.send(id, dType.getTime(attachment), endTime, result, 1);
+                            perlChannel.send(dType.getTime(attachment), endTime, result, 1);
                         }
                     }
 
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
                         if (!isEOF.get()) {
-                            perlChannel.sendException(id, ex);
+                            perlChannel.sendException(ex);
                         }
                     }
                 });

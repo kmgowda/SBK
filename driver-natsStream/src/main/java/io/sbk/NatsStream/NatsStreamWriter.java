@@ -56,7 +56,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
                 Printer.log.error("NAT Streaming Writer failed !");
             } else {
                 final long endTime = time.getCurrentTime();
-                record.send(id, ctime, endTime, size, 1);
+                record.send(ctime, endTime, size, 1);
             }
         };
         try {

@@ -80,7 +80,7 @@ public class JdbcWriter implements Writer<String> {
             throw new IOException(ex);
         }
         status.endTime = time.getCurrentTime();
-        record.send(id, status.startTime, status.endTime, size, 1);
+        record.send(status.startTime, status.endTime, size, 1);
     }
 
 

@@ -86,7 +86,7 @@ public class IgniteTransactionWriter implements Writer<byte[]> {
         }
         tx.commit();
         status.endTime = time.getCurrentTime();
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
         cnt += recs;
     }

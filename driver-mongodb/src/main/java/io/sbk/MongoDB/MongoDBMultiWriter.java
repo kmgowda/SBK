@@ -90,7 +90,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
         }
         databaseCollection.insertMany(lt);
         status.endTime = time.getCurrentTime();
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
         cnt += recs;
     }
 }

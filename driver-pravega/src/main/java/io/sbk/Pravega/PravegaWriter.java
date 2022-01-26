@@ -56,7 +56,7 @@ public class PravegaWriter implements Writer<byte[]> {
         ret = writeAsync(data);
         ret.thenAccept(d -> {
             final long endTime = time.getCurrentTime();
-            record.send(id, ctime, endTime, size, 1);
+            record.send(ctime, endTime, size, 1);
         });
     }
 

@@ -37,7 +37,7 @@ public class FileStreamWriter implements Writer<byte[]> {
         status.endTime = time.getCurrentTime();
         status.records = 1;
         status.bytes = size;
-        record.send(id, status.startTime, status.endTime, size, 1);
+        record.send(status.startTime, status.endTime, size, 1);
     }
 
     @Override

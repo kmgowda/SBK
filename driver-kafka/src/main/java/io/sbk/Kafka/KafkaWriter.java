@@ -44,7 +44,7 @@ public class KafkaWriter implements Writer<byte[]> {
         status.records = 1;
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = time.getCurrentTime();
-            record.send(id, ctime, endTime, size, 1);
+            record.send(ctime, endTime, size, 1);
         });
     }
 

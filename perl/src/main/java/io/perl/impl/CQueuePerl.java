@@ -304,7 +304,7 @@ final public class CQueuePerl implements Perl {
             }
 
             @Override
-            public void send(int id, long startTime, long endTime, int dataSize, int records) {
+            public void send(long startTime, long endTime, int dataSize, int records) {
                 this.i += 1;
                 if (this.i >= cQueues.length) {
                     this.i = 0;
@@ -313,7 +313,7 @@ final public class CQueuePerl implements Perl {
             }
 
             @Override
-            public void sendException(int id, Throwable ex) {
+            public void sendException(Throwable ex) {
                 eThrow.onException(ex);
             }
         }

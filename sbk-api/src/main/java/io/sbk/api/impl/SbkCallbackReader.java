@@ -69,7 +69,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
         final int id = (int) (cnt % perlIdMax);
-        perlChannel.send(id, startTime, endTime, dataSize, events);
+        perlChannel.send(startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun)) {
             ret.complete(null);
         } else if (this.totalRecords > cnt) {
