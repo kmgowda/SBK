@@ -28,6 +28,7 @@ final public class PerlConfig {
     final public static long LONG_MAX = Long.MAX_VALUE >> 2;
     final public static long TOTAL_LATENCY_MAX = Long.MAX_VALUE >> 1;
 
+    final public static int MIN_WORKERS = 1;
     final public static int MIN_Q_PER_WORKER = 1;
 
     final public static int DEFAULT_MAX_LATENCY = Time.MS_PER_MIN * 3;

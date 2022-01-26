@@ -18,7 +18,6 @@ import io.perl.TimeStamp;
 import io.state.State;
 import io.perl.PerlPrinter;
 import io.time.Time;
-import lombok.Getter;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,9 +43,6 @@ final public class CQueuePerl implements Perl {
     final private Channel[] channels;
     final private CompletableFuture<Void> retFuture;
 
-    @Getter
-    final private int maxId;
-
     @GuardedBy("this")
     private int index;
 
@@ -57,8 +53,9 @@ final public class CQueuePerl implements Perl {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerl(@NotNull PerlConfig perlConfig, int maxWorkers, PeriodicLogger periodicRecorder,
+    public CQueuePerl(@NotNull PerlConfig perlConfig, int workers, PeriodicLogger periodicRecorder,
                              int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
+        int maxQs;
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
         this.timeoutMS = timeoutMS;
@@ -68,16 +65,15 @@ final public class CQueuePerl implements Perl {
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         if (perlConfig.maxQs > 0) {
-            this.maxId = perlConfig.maxQs;
-            this.channels = new CQueueChannel[1];
+            maxQs = perlConfig.maxQs;
             this.index = 1;
         } else {
-            this.maxId = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
-            this.channels = new CQueueChannel[maxWorkers];
-            this.index = maxWorkers;
+            maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
+            this.index = Math.max(workers, PerlConfig.MIN_WORKERS);
         }
+        this.channels = new CQueueChannel[this.index];
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new CQueueChannel(this.maxId, new OnError());
+            channels[i] = new CQueueChannel(maxQs, new OnError());
         }
     }
 
