@@ -556,7 +556,6 @@ dependencies {
     api project(":sbk-ram")
     api project(":sbk-gem")
     api project(":sbk-gem-yal")
-    api project(':driver-sbktemplate')
 }
 
 apply from: "$rootDir/build-drivers.gradle"
