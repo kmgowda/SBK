@@ -78,6 +78,11 @@ allprojects {
         sbkClass = project.path.replace(":driver-", "")
     }
 
+    configurations.all {
+        exclude  group: sbkGroup, module: "driver-sbktemplate"
+        exclude  group: sbkGroup, module: "charts"
+    }
+    
     jar {
         manifest {
             attributes 'Name': sbkProjectName.toUpperCase(),
@@ -544,10 +549,6 @@ task addDriver(dependsOn: deleteDriver) {
         File outFile2 = new File("$rootDir/settings-drivers.gradle")
         outFile2.write(outText2)
     }
-}
-
-configurations.all {
-    exclude  group: sbkGroup, module: "driver-sbktemplate"
 }
 
 dependencies {
