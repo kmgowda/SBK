@@ -146,8 +146,10 @@ allprojects {
             }
 
             copy {
-                from "$rootDir/jmx-config.yml"
-                into outputDir
+                if (!project.name.equals('charts')) {
+                    from "$rootDir/jmx-config.yml"
+                    into outputDir
+                }
             }
         }
 
