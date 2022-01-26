@@ -13,7 +13,7 @@ package io.perl;
 /**
  * Interface for recording benchmarking data.
  */
-public sealed interface PerlChannel permits Channel {
+public interface PerlChannel {
 
     /**
      * send the benchmarking data.

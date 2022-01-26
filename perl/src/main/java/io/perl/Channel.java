@@ -9,7 +9,7 @@
  */
 package io.perl;
 
-public non-sealed interface Channel extends PerlChannel {
+public non-sealed interface Channel extends GetPerlChannel {
 
     /**
      * Receive the benchmarking timestamp.

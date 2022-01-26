@@ -12,19 +12,12 @@ package io.perl;
 /**
  * Interface for Periodic Latencies(PerL) Statistics.
  */
-public interface Perl extends RunBenchmark {
+public non-sealed interface Perl extends RunBenchmark, GetPerlChannel {
 
     /**
      * stop/shutdown the Benchmark.
      */
     void stop();
-
-    /**
-     * Get the PerlChannel to get the benchmark results.
-     *
-     * @return PerlChannel to get the benchmark results.
-     */
-    PerlChannel getPerlChannel();
 
     /**
      * Get Max Identifier for PerlChannel.

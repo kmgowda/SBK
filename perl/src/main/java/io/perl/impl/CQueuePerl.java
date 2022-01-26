@@ -148,13 +148,13 @@ final public class CQueuePerl implements Perl {
     @Synchronized
     public PerlChannel getPerlChannel() {
         if (channels.length == 1) {
-            return channels[0];
+            return channels[0].getPerlChannel();
         }
         index += 1;
         if (index >= channels.length) {
             index = 0;
         }
-        return channels[index];
+        return channels[index].getPerlChannel();
     }
 
     @Synchronized
@@ -287,14 +287,37 @@ final public class CQueuePerl implements Perl {
             }
         }
 
-        /* This Method is Thread Safe */
-        public void send(int id, long startTime, long endTime, int bytes, int records) {
-            cQueues[id].add(new TimeStamp(startTime, endTime, bytes, records));
+        public PerlChannel getPerlChannel() {
+                return new CQueuePerlChannel();
         }
 
         public void sendException(int id, Throwable ex) {
             eThrow.onException(ex);
         }
+
+        @NotThreadSafe
+        private final class CQueuePerlChannel implements PerlChannel {
+            private int i;
+
+            public CQueuePerlChannel() {
+                this.i = 0;
+            }
+
+            @Override
+            public void send(int id, long startTime, long endTime, int dataSize, int records) {
+                this.i += 1;
+                if (this.i >= cQueues.length) {
+                    this.i = 0;
+                }
+                cQueues[i].add(new TimeStamp(startTime, endTime, dataSize, records));
+            }
+
+            @Override
+            public void sendException(int id, Throwable ex) {
+                eThrow.onException(ex);
+            }
+        }
+
     }
 
     final private class OnError implements Throw {
