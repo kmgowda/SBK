@@ -80,7 +80,6 @@ allprojects {
 
     configurations.all {
         exclude  group: sbkGroup, module: "driver-sbktemplate"
-        exclude  group: sbkGroup, module: "charts"
     }
     
     jar {
