@@ -546,12 +546,17 @@ task addDriver(dependsOn: deleteDriver) {
     }
 }
 
+configurations.all {
+    exclude  group: sbkGroup, module: "driver-sbktemplate"
+}
+
 dependencies {
     api project(":perl")
     api project(":sbk-api")
     api project(":sbk-ram")
     api project(":sbk-gem")
     api project(":sbk-gem-yal")
+    api project(':driver-sbktemplate')
 }
 
 apply from: "$rootDir/build-drivers.gradle"
