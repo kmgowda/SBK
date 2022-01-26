@@ -16,6 +16,7 @@ include 'sbk-api'
 include 'sbk-ram'
 include 'sbk-gem'
 include 'sbk-gem-yal'
+include 'charts'
 
 apply from: "$rootDir/settings-drivers.gradle"
 
