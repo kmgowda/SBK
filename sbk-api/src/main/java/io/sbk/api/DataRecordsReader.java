@@ -79,7 +79,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     /**
      * Default implementation for benchmarking reader by reading given number of records.
-     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, PerlChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, PerlChannel)}
      *
      * @param reader       Reader Descriptor
      * @param recordsCount Records count
@@ -124,7 +124,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
 
     /**
      * Default implementation for benchmarking reader by reading events/records for specific time duration.
-     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, PerlChannel, int)}
+     * This method uses the method {@link DataRecordsReader#recordReadTime(DataType, int, Time, Status, PerlChannel)}
      *
      * @param reader       Reader Descriptor
      * @param secondsToRun Number of seconds to run

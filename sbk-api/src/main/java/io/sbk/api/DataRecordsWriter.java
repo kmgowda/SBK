@@ -82,7 +82,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
 
     /**
      * Default implementation for writer benchmarking by writing given number of records.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel)}
      * sync is invoked after writing given set of records.
      *
      * @param writer       Writer Descriptor
@@ -115,7 +115,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
 
     /**
      * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel)}
      * sync is invoked after writing records for given time.
      *
      * @param writer       Writer Descriptor
@@ -142,7 +142,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
 
     /**
      * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
-     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel, int)}
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel)}
      * sync is invoked after writing given set of records.
      *
      * @param writer       Writer Descriptor
