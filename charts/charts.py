@@ -11,11 +11,11 @@
 # sbk_charts :  Storage Benchmark Kit - Charts
 import re
 from collections import OrderedDict
-from ordered_set import OrderedSet
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
+from ordered_set import OrderedSet
 
 import charts.constants as constants
 
@@ -232,7 +232,7 @@ class SbkMultiCharts(SbkCharts):
             cell = sheet.cell(row + i, col + 1)
             cell.value = ", ".join(acts[key])
             cell.font = Font(size="18", bold=False, color=DARKRED)
-            text += " : "+cell.value
+            text += " : " + cell.value
             print(text)
 
     def create_all_latency_compare_graphs(self):
