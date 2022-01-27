@@ -12,11 +12,11 @@ package io.sbk.MongoDB;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 import org.bson.Document;
 import org.bson.types.Binary;
@@ -59,7 +59,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         byte[] result;
@@ -87,12 +87,12 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += recs;
         cnt += recs;
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
     @Override
-    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         byte[] result;
@@ -122,7 +122,7 @@ public class MongoDBMultiReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += status.records;
         cnt += status.records;
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
     }
 
 }

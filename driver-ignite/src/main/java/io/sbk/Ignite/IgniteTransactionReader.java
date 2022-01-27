@@ -10,11 +10,11 @@
 
 package io.sbk.Ignite;
 
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.transactions.Transaction;
@@ -56,7 +56,7 @@ public class IgniteTransactionReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         status.startTime = time.getCurrentTime();
@@ -79,12 +79,12 @@ public class IgniteTransactionReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += recs;
         cnt += recs;
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
     }
 
 
     @Override
-    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id)
+    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException {
         final int recs = params.getRecordsPerSync();
         Transaction tx = ignite.transactions().txStart();
@@ -109,6 +109,6 @@ public class IgniteTransactionReader implements Reader<byte[]> {
         status.endTime = time.getCurrentTime();
         key += status.records;
         cnt += status.records;
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
     }
 }

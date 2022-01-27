@@ -9,11 +9,11 @@
  */
 package io.sbk.AsyncFile;
 
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.EOFException;
@@ -50,7 +50,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordRead(DataType<ByteBuffer> dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
+    public void recordRead(DataType<ByteBuffer> dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final long ctime = time.getCurrentTime();
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
@@ -60,16 +60,16 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                         final long endTime = time.getCurrentTime();
                         if (result <= 0 && !isEOF.get()) {
                             isEOF.set(true);
-                            perlChannel.sendException(id, new EOFException());
+                            perlChannel.sendException(new EOFException());
                         } else {
-                            perlChannel.send(id, ctime, endTime, result, 1);
+                            perlChannel.send(ctime, endTime, result, 1);
                         }
                     }
 
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
                         if (!isEOF.get()) {
-                            perlChannel.sendException(id, ex);
+                            perlChannel.sendException(ex);
                         }
                     }
                 });
@@ -78,7 +78,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
 
 
     @Override
-    public void recordReadTime(DataType<ByteBuffer> dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
+    public void recordReadTime(DataType<ByteBuffer> dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
         in.read(buffer, pos, buffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
@@ -88,16 +88,16 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                         final long endTime = time.getCurrentTime();
                         if (result <= 0 && !isEOF.get()) {
                             isEOF.set(true);
-                            perlChannel.sendException(id, new EOFException());
+                            perlChannel.sendException(new EOFException());
                         } else {
-                            perlChannel.send(id, dType.getTime(attachment), endTime, result, 1);
+                            perlChannel.send(dType.getTime(attachment), endTime, result, 1);
                         }
                     }
 
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
                         if (!isEOF.get()) {
-                            perlChannel.sendException(id, ex);
+                            perlChannel.sendException(ex);
                         }
                     }
                 });

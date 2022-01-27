@@ -18,11 +18,11 @@ import io.minio.errors.InternalException;
 import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -50,7 +50,7 @@ public class MinIOWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, PerlChannel record, int id) throws IOException {
+                            Status status, PerlChannel record) throws IOException {
         status.startTime = time.getCurrentTime();
         dataStream.reset();
         try {
@@ -64,7 +64,7 @@ public class MinIOWriter implements Writer<byte[]> {
         status.endTime = time.getCurrentTime();
         status.bytes = size;
         status.records = 1;
-        record.send(id, status.startTime, status.endTime, size, 1);
+        record.send(status.startTime, status.endTime, size, 1);
     }
 
     @Override

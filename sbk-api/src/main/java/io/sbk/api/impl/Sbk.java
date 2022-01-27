@@ -9,9 +9,6 @@
  */
 package io.sbk.api.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
@@ -19,7 +16,6 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbk.config.Config;
-import io.perl.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.exception.HelpException;
 import io.sbk.logger.Logger;
@@ -45,7 +41,6 @@ import java.util.concurrent.TimeoutException;
  * Main class of SBK.
  */
 final public class Sbk {
-    final static String CONFIGFILE = "sbk.properties";
     final static String BANNERFILE = "banner.txt";
 
     /**
@@ -131,7 +126,6 @@ final public class Sbk {
         final Action action;
         final ParameterOptions params;
         final Logger logger;
-        final PerlConfig perlConfig;
         final Time time;
         final String[] nextArgs;
         final String usageLine;
@@ -148,14 +142,6 @@ final public class Sbk {
         Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + argsClassName);
         packageStore.printDrivers();
-
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        perlConfig = mapper.readValue(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE),
-                PerlConfig.class);
-
-        // No CSV backup
-        perlConfig.csv = false;
 
         logger = Objects.requireNonNullElseGet(outLogger, GrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
@@ -237,7 +223,7 @@ final public class Sbk {
         } else {
             action = Action.Writing;
         }
-        return new SbkBenchmark(action, perlConfig, params, storageDevice, dType, logger, time);
+        return new SbkBenchmark(action, params, storageDevice, dType, logger, time);
     }
 
 }

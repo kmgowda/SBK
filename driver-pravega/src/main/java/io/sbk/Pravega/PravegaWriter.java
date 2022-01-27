@@ -9,6 +9,7 @@
  */
 package io.sbk.Pravega;
 
+import io.perl.PerlChannel;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
@@ -17,7 +18,6 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.IOException;
@@ -43,11 +43,10 @@ public class PravegaWriter implements Writer<byte[]> {
      * @param size   size of the data
      * @param status Write status to return
      * @param record to call for benchmarking
-     * @param id     for record benchmarking
      */
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, PerlChannel record, int id) throws IOException {
+                            Status status, PerlChannel record) throws IOException {
         CompletableFuture<Void> ret;
         final long ctime = time.getCurrentTime();
         status.startTime = ctime;
@@ -56,7 +55,7 @@ public class PravegaWriter implements Writer<byte[]> {
         ret = writeAsync(data);
         ret.thenAccept(d -> {
             final long endTime = time.getCurrentTime();
-            record.send(id, ctime, endTime, size, 1);
+            record.send(ctime, endTime, size, 1);
         });
     }
 

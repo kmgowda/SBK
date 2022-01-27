@@ -12,11 +12,11 @@ package io.sbk.FoundationDB;
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, PerlChannel perlChannel, int id) throws IOException {
+                            Status status, PerlChannel perlChannel) throws IOException {
         final int recs = params.getRecordsPerSync();
         status.bytes = size * recs;
         status.records = recs;
@@ -101,7 +101,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
             return null;
         });
         status.endTime = time.getCurrentTime();
-        perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
         key += recs;
         cnt += recs;
     }

@@ -7,15 +7,16 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
+
 package io.perl;
 
-/**
- * Interface for Periodic Latencies(PerL) Statistics.
- */
-public non-sealed interface Perl extends RunBenchmark, GetPerlChannel {
+public sealed interface GetPerlChannel permits Channel, Perl {
 
     /**
-     * stop/shutdown the Benchmark.
+     * Get the PerlChannel to get the benchmark results.
+     *
+     * @return PerlChannel to get the benchmark results.
      */
-    void stop();
+    PerlChannel getPerlChannel();
+
 }

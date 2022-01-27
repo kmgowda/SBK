@@ -17,11 +17,6 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
 import org.jetbrains.annotations.NotNull;
 
-/*
-import io.micrometer.core.instrument.Clock;
-import io.micrometer.jmx.JmxConfig;
-import io.micrometer.jmx.JmxMeterRegistry;
- */
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;

@@ -9,11 +9,11 @@
  */
 package io.sbk.File;
 
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.IOException;
@@ -44,14 +44,14 @@ public class FileWriter implements Writer<ByteBuffer> {
 
     @Override
     public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Time time,
-                            Status status, PerlChannel record, int id) throws IOException {
+                            Status status, PerlChannel record) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
         status.startTime = time.getCurrentTime();
         out.write(buffer);
         status.endTime = time.getCurrentTime();
         status.bytes = size;
         status.records = 1;
-        record.send(id, status.startTime, status.endTime, size, 1);
+        record.send(status.startTime, status.endTime, size, 1);
     }
 
 

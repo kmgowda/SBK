@@ -10,12 +10,12 @@
 
 package io.sbk.logger.impl;
 
+import io.perl.PerlConfig;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
-import io.perl.PerlConfig;
 import io.sbk.options.InputOptions;
-import io.time.Time;
 import io.sbk.system.Printer;
+import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

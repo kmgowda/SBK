@@ -22,9 +22,9 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'com.github.spotbugs.snom', name:'spotbugs-gradle-plugin', version:spotbugsPluginVersion
-        classpath group: 'gradle.plugin.com.palantir.graal', name:'gradle-graal' , version:graalvmPluginVersion
-       // classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
+        classpath group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: spotbugsPluginVersion
+        classpath group: 'gradle.plugin.com.palantir.graal', name: 'gradle-graal', version: graalvmPluginVersion
+        // classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
         //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
 
@@ -79,9 +79,9 @@ allprojects {
     }
 
     configurations.all {
-        exclude  group: sbkGroup, module: "driver-sbktemplate"
+        exclude group: sbkGroup, module: "driver-sbktemplate"
     }
-    
+
     jar {
         manifest {
             attributes 'Name': sbkProjectName.toUpperCase(),
@@ -104,7 +104,7 @@ allprojects {
         mainClass = SbkMainClass
         applicationName = archivesBaseName
         applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + sbkClass,
-                                     '-Dsbk.appHome=SBK_APP_HOME' , '-Dsbk.jmxExport=false']
+                                     '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
 
         startScripts {
             doLast {
@@ -126,7 +126,7 @@ allprojects {
                         Matcher.quoteReplacement(
                                 "CLASSPATH=\$APP_HOME/lib/${pathingJar.archiveFileName.get()}:\$APP_HOME/lib/${jar.archiveFileName.get()}"))
 
-                if (jmxExport.matches("true") ) {
+                if (jmxExport.matches("true")) {
                     unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                             "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
                             "=$jmxPort:'\$APP_HOME'/bin/jmx-config.yml")
@@ -137,7 +137,7 @@ allprojects {
                 windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
                         Matcher.quoteReplacement(
                                 "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName.get()};%APP_HOME%\\lib\\${jar.archiveFileName.get()}"))
-                if (jmxExport.matches("true") ) {
+                if (jmxExport.matches("true")) {
                     windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                             "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
                             "=$jmxPort:'\$APP_HOME'\\bin\\jmx-config.yml")
@@ -449,11 +449,11 @@ task deleteDriver() {
         delete "$rootDir/$driverName"
 
         def inFile1 = new File("$rootDir/settings-drivers.gradle").newInputStream()
-        String outText1=""
+        String outText1 = ""
         inFile1.eachLine {
             String line = it
             if (!line.contains(driverName)) {
-                outText1 += line+"\n"
+                outText1 += line + "\n"
             }
         }
         inFile1.close()
@@ -461,11 +461,11 @@ task deleteDriver() {
         outFile1.write(outText1)
 
         def inFile2 = new File("$rootDir/build-drivers.gradle").newInputStream()
-        String outText2=""
+        String outText2 = ""
         inFile2.eachLine {
             String line = it
             if (!line.contains(driverName)) {
-                outText2 += line+"\n"
+                outText2 += line + "\n"
             }
         }
         inFile2.close()
@@ -523,26 +523,26 @@ task addDriver(dependsOn: deleteDriver) {
         delete "$driverName/src/main/java/io/sbk/SbkTemplate"
 
         def inFile1 = new File("$rootDir/build-drivers.gradle").newInputStream()
-        String outText1=""
+        String outText1 = ""
         inFile1.eachLine {
             String line = it
             if (line.contains(templateName)) {
                 outText1 += "    api project(':$driverName')\n"
             }
-            outText1 += line +"\n"
+            outText1 += line + "\n"
         }
         inFile1.close()
         File outFile1 = new File("$rootDir/build-drivers.gradle")
         outFile1.write(outText1)
 
         def inFile2 = new File("$rootDir/settings-drivers.gradle").newInputStream()
-        String outText2=""
+        String outText2 = ""
         inFile2.eachLine {
             String line = it
             if (line.contains(templateName)) {
                 outText2 += "include '$driverName'\n"
             }
-            outText2 += line +"\n"
+            outText2 += line + "\n"
         }
         inFile2.close()
         File outFile2 = new File("$rootDir/settings-drivers.gradle")

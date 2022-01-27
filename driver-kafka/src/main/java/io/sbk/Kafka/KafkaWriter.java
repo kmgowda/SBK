@@ -9,11 +9,11 @@
  */
 package io.sbk.Kafka;
 
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 import lombok.Synchronized;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -37,14 +37,14 @@ public class KafkaWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, PerlChannel record, int id) {
+                            Status status, PerlChannel record) {
         final long ctime = time.getCurrentTime();
         status.startTime = ctime;
         status.bytes = size;
         status.records = 1;
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = time.getCurrentTime();
-            record.send(id, ctime, endTime, size, 1);
+            record.send(ctime, endTime, size, 1);
         });
     }
 

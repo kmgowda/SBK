@@ -10,6 +10,7 @@
 package io.sbk.api.impl;
 
 import io.perl.Perl;
+import io.perl.PerlConfig;
 import io.perl.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
@@ -18,11 +19,10 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.config.Config;
-import io.perl.PerlConfig;
 import io.sbk.data.DataType;
 import io.sbk.logger.Logger;
-import io.state.State;
 import io.sbk.system.Printer;
+import io.state.State;
 import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
@@ -45,6 +45,7 @@ import java.util.stream.IntStream;
  * Class for performing the benchmark.
  */
 final public class SbkBenchmark implements Benchmark {
+    final private static String CONFIGFILE = "sbk.properties";
     final private Action action;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
@@ -65,17 +66,15 @@ final public class SbkBenchmark implements Benchmark {
     /**
      * Create SBK Benchmark.
      *
-     * @param action     Action
-     * @param perlConfig Configuration parameters
-     * @param params     Benchmarking input Parameters
-     * @param storage    Storage device/client/driver for benchmarking
-     * @param dType      Data Type.
-     * @param logger     output logger
-     * @param time       time interface
+     * @param action  Action
+     * @param params  Benchmarking input Parameters
+     * @param storage Storage device/client/driver for benchmarking
+     * @param dType   Data Type.
+     * @param logger  output logger
+     * @param time    time interface
      * @throws IOException If Exception occurs.
      */
-    public SbkBenchmark(Action action, PerlConfig perlConfig,
-                        ParameterOptions params, Storage<Object> storage,
+    public SbkBenchmark(Action action, ParameterOptions params, Storage<Object> storage,
                         DataType<Object> dType, @NotNull Logger logger, Time time) throws IOException {
         this.dType = dType;
         this.action = action;
@@ -87,19 +86,28 @@ final public class SbkBenchmark implements Benchmark {
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
 
-        writePerl = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
-                PerlBuilder.build(params.getWritersCount(),
-                        logger.getReportingIntervalSeconds(),
-                        params.getTimeoutMS(), executor, perlConfig, time,
-                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                        logger, logger::printTotal, logger) : null;
+        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
+            PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
+            wConfig.workers = params.getWritersCount();
+            wConfig.csv = false;
+            writePerl = PerlBuilder.build(wConfig, logger.getReportingIntervalSeconds(), params.getTimeoutMS(), time,
+                    logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                    logger, logger::printTotal, logger, executor);
+        } else {
+            writePerl = null;
+        }
 
-        readPerl = params.getReadersCount() > 0 ?
-                PerlBuilder.build(params.getReadersCount(),
-                        logger.getReportingIntervalSeconds(),
-                        params.getTimeoutMS(), executor, perlConfig, time,
-                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                        logger, logger::printTotal, logger) : null;
+        if (params.getReadersCount() > 0) {
+            PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
+            rConfig.workers = params.getReadersCount();
+            rConfig.csv = false;
+            readPerl = PerlBuilder.build(rConfig, logger.getReportingIntervalSeconds(), params.getTimeoutMS(), time,
+                    logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                    logger, logger::printTotal, logger, executor);
+        } else {
+            readPerl = null;
+        }
+
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();
@@ -164,16 +172,15 @@ final public class SbkBenchmark implements Benchmark {
 
         if (writers.size() > 0) {
             if (writePerl != null) {
-                final int idMax = writePerl.getMaxId();
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i, params, writePerl.getPerlChannel(), idMax,
+                        .map(i -> new SbkWriter(i, params, writePerl.getPerlChannel(),
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
-                        .map(i -> new SbkWriter(i,  params, null, 0,
+                        .map(i -> new SbkWriter(i, params, null,
                                 dType, time, writers.get(i), logger, executor))
                         .collect(Collectors.toList());
             }
@@ -182,11 +189,10 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (readers.size() > 0) {
-            final int idMax = readPerl.getMaxId();
             sbkReaders = IntStream.range(0, params.getReadersCount())
                     .boxed()
-                    .map(i -> new SbkReader(i,  params,
-                            readPerl.getPerlChannel(), idMax, dType, time, readers.get(i),
+                    .map(i -> new SbkReader(i, params,
+                            readPerl.getPerlChannel(), dType, time, readers.get(i),
                             logger, executor))
                     .collect(Collectors.toList());
         } else {

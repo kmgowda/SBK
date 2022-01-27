@@ -9,16 +9,15 @@
  */
 package io.perl.impl;
 
-import io.perl.PerlConfig;
 import io.perl.Channel;
-import io.perl.Perl;
 import io.perl.PeriodicLogger;
+import io.perl.Perl;
 import io.perl.PerlChannel;
+import io.perl.PerlConfig;
+import io.perl.PerlPrinter;
 import io.perl.TimeStamp;
 import io.state.State;
-import io.perl.PerlPrinter;
 import io.time.Time;
-import lombok.Getter;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,9 +43,6 @@ final public class CQueuePerl implements Perl {
     final private Channel[] channels;
     final private CompletableFuture<Void> retFuture;
 
-    @Getter
-    final private int maxId;
-
     @GuardedBy("this")
     private int index;
 
@@ -57,8 +53,9 @@ final public class CQueuePerl implements Perl {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerl(@NotNull PerlConfig perlConfig, int maxWorkers, PeriodicLogger periodicRecorder,
-                             int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
+    public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicLogger periodicRecorder,
+                      int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
+        int maxQs;
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
         this.timeoutMS = timeoutMS;
@@ -68,16 +65,15 @@ final public class CQueuePerl implements Perl {
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         if (perlConfig.maxQs > 0) {
-            this.maxId = perlConfig.maxQs;
-            this.channels = new CQueueChannel[1];
+            maxQs = perlConfig.maxQs;
             this.index = 1;
         } else {
-            this.maxId = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
-            this.channels = new CQueueChannel[maxWorkers];
-            this.index = maxWorkers;
+            maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
+            this.index = Math.max(perlConfig.workers, PerlConfig.MIN_WORKERS);
         }
+        this.channels = new CQueueChannel[this.index];
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new CQueueChannel(this.maxId, new OnError());
+            channels[i] = new CQueueChannel(maxQs, new OnError());
         }
     }
 
@@ -148,13 +144,13 @@ final public class CQueuePerl implements Perl {
     @Synchronized
     public PerlChannel getPerlChannel() {
         if (channels.length == 1) {
-            return channels[0];
+            return channels[0].getPerlChannel();
         }
         index += 1;
         if (index >= channels.length) {
             index = 0;
         }
-        return channels[index];
+        return channels[index].getPerlChannel();
     }
 
     @Synchronized
@@ -258,10 +254,10 @@ final public class CQueuePerl implements Perl {
     static final class CQueueChannel implements Channel {
         final private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
         final private Throw eThrow;
-        private int index;
+        private int rIndex;
 
         public CQueueChannel(int qSize, Throw eThrow) {
-            this.index = qSize;
+            this.rIndex = qSize;
             this.eThrow = eThrow;
             this.cQueues = new ConcurrentLinkedQueue[qSize];
             for (int i = 0; i < cQueues.length; i++) {
@@ -270,11 +266,11 @@ final public class CQueuePerl implements Perl {
         }
 
         public TimeStamp receive(int timeout) {
-            index += 1;
-            if (index >= cQueues.length) {
-                index = 0;
+            rIndex += 1;
+            if (rIndex >= cQueues.length) {
+                rIndex = 0;
             }
-            return cQueues[index].poll();
+            return cQueues[rIndex].poll();
         }
 
         public void sendEndTime(long endTime) {
@@ -287,14 +283,37 @@ final public class CQueuePerl implements Perl {
             }
         }
 
-        /* This Method is Thread Safe */
-        public void send(int id, long startTime, long endTime, int bytes, int records) {
-            cQueues[id].add(new TimeStamp(startTime, endTime, bytes, records));
+        public PerlChannel getPerlChannel() {
+            return new CQueuePerlChannel();
         }
 
         public void sendException(int id, Throwable ex) {
             eThrow.onException(ex);
         }
+
+        @NotThreadSafe
+        private final class CQueuePerlChannel implements PerlChannel {
+            private int wIndex;
+
+            public CQueuePerlChannel() {
+                this.wIndex = 0;
+            }
+
+            @Override
+            public void send(long startTime, long endTime, int dataSize, int records) {
+                this.wIndex += 1;
+                if (this.wIndex >= cQueues.length) {
+                    this.wIndex = 0;
+                }
+                cQueues[wIndex].add(new TimeStamp(startTime, endTime, dataSize, records));
+            }
+
+            @Override
+            public void sendException(Throwable ex) {
+                eThrow.onException(ex);
+            }
+        }
+
     }
 
     final private class OnError implements Throw {

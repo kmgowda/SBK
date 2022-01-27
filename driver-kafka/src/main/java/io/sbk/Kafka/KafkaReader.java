@@ -9,11 +9,11 @@
  */
 package io.sbk.Kafka;
 
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -38,7 +38,7 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
+    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         status.startTime = time.getCurrentTime();
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
         status.endTime = time.getCurrentTime();
@@ -51,12 +51,12 @@ public class KafkaReader implements Reader<byte[]> {
                 status.bytes += record.value().length;
                 status.records += 1;
             }
-            perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 
     @Override
-    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
+    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
         status.endTime = time.getCurrentTime();
         if (records.isEmpty()) {
@@ -72,7 +72,7 @@ public class KafkaReader implements Reader<byte[]> {
                     status.startTime = dType.getTime(record.value());
                 }
             }
-            perlChannel.send(id, status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
         }
     }
 

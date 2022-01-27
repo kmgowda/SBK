@@ -18,11 +18,11 @@ import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.NoResponseException;
 import io.minio.messages.Item;
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -46,7 +46,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
+    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -58,7 +58,7 @@ public class MinIOReader implements Reader<byte[]> {
                 status.bytes = (int) client.statObject(config.bucketName, item.objectName()).length();
                 inStream = client.getObject(config.bucketName, item.objectName());
                 status.endTime = time.getCurrentTime();
-                perlChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
+                perlChannel.send(status.startTime, status.endTime, status.bytes, 1);
                 inStream.close();
             }
         } catch (InvalidBucketNameException | NoSuchAlgorithmException | InsufficientDataException |
@@ -69,7 +69,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel, int id) throws IOException {
+    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -85,7 +85,7 @@ public class MinIOReader implements Reader<byte[]> {
                 ret = inStream.read(inData);
                 if (ret > 0) {
                     status.endTime = dType.getTime(inData);
-                    perlChannel.send(id, status.startTime, status.endTime, status.bytes, 1);
+                    perlChannel.send(status.startTime, status.endTime, status.bytes, 1);
                 }
                 inStream.close();
             }

@@ -17,8 +17,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import io.sbk.action.Action;
+import io.perl.LatencyRecorder;
 import io.perl.PerlConfig;
+import io.sbk.action.Action;
 import io.sbk.exception.ExceptionHandler;
 import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;
@@ -26,7 +27,6 @@ import io.sbk.grpc.LatenciesRecord;
 import io.sbk.grpc.ServiceGrpc;
 import io.sbk.logger.RamHostConfig;
 import io.sbk.options.InputOptions;
-import io.perl.LatencyRecorder;
 import io.sbk.system.Printer;
 import io.time.Time;
 

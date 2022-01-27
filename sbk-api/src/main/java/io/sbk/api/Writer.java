@@ -10,8 +10,8 @@
 
 package io.sbk.api;
 
-import io.sbk.data.DataType;
 import io.perl.PerlChannel;
+import io.sbk.data.DataType;
 import io.time.Time;
 
 import java.io.IOException;
@@ -83,11 +83,10 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
      * @param time        time interface
      * @param status      Write status to return
      * @param perlChannel to call for benchmarking
-     * @param id          Identifier for recordTime
      * @throws IOException If an exception occurred.
      */
     default void recordWrite(DataType<T> dType, T data, int size, Time time,
-                             Status status, PerlChannel perlChannel, int id) throws IOException {
+                             Status status, PerlChannel perlChannel) throws IOException {
         CompletableFuture<?> ret;
         status.bytes = size;
         status.records = 1;
@@ -95,16 +94,16 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         ret = writeAsync(data);
         if (ret == null) {
             status.endTime = time.getCurrentTime();
-            perlChannel.send(id, status.startTime, status.endTime, size, status.records);
+            perlChannel.send(status.startTime, status.endTime, size, status.records);
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
-                perlChannel.sendException(id, ex);
+                perlChannel.sendException(ex);
                 return null;
             });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                perlChannel.send(id, beginTime, endTime, size, status.records);
+                perlChannel.send(beginTime, endTime, size, status.records);
             });
         }
     }

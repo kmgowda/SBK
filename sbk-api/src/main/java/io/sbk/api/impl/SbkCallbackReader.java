@@ -9,12 +9,12 @@
  */
 package io.sbk.api.impl;
 
+import io.perl.PerlChannel;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Callback;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Worker;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * SBK Callback reader implementation.
+ *
  * @deprecated This interface is replaced by Abstract class AbstractCallbackReader and SbkReader.
  */
 @Deprecated
@@ -37,7 +38,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
 
     public SbkCallbackReader(int readerId, ParameterOptions params, PerlChannel perlChannel, int idMax,
                              DataType<Object> dataType, Time time) {
-        super(readerId, params, perlChannel, idMax);
+        super(readerId, params, perlChannel);
         this.dataType = dataType;
         this.time = time;
         this.ret = new CompletableFuture<>();
@@ -68,8 +69,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
-        final int id = (int) (cnt % perlIdMax);
-        perlChannel.send(id, startTime, endTime, dataSize, events);
+        perlChannel.send(startTime, endTime, dataSize, events);
         if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun)) {
             ret.complete(null);
         } else if (this.totalRecords > cnt) {

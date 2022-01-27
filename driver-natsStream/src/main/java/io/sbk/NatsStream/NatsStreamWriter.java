@@ -13,11 +13,11 @@ import io.nats.streaming.AckHandler;
 import io.nats.streaming.NatsStreaming;
 import io.nats.streaming.Options.Builder;
 import io.nats.streaming.StreamingConnection;
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.sbk.system.Printer;
 import io.time.Time;
 
@@ -45,7 +45,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
 
     @Override
     public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
-                            Status status, PerlChannel record, int id) {
+                            Status status, PerlChannel record) {
         final long ctime = time.getCurrentTime();
         status.startTime = ctime;
         status.bytes = size;
@@ -56,7 +56,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
                 Printer.log.error("NAT Streaming Writer failed !");
             } else {
                 final long endTime = time.getCurrentTime();
-                record.send(id, ctime, endTime, size, 1);
+                record.send(ctime, endTime, size, 1);
             }
         };
         try {

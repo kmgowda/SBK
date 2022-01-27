@@ -9,11 +9,11 @@
  */
 package io.sbk.AsyncFile;
 
+import io.perl.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
 
     @Override
     public void recordWrite(DataType<ByteBuffer> dType, ByteBuffer data, int size, Time time,
-                            Status status, PerlChannel record, int id) throws IOException {
+                            Status status, PerlChannel record) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
         final long ctime = time.getCurrentTime();
 
@@ -55,7 +55,7 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = time.getCurrentTime();
-                        record.send(id, ctime, endTime, result, 1);
+                        record.send(ctime, endTime, result, 1);
                     }
 
                     @Override
