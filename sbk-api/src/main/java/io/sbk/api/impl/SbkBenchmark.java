@@ -100,7 +100,7 @@ final public class SbkBenchmark implements Benchmark {
 
         if (params.getReadersCount() > 0) {
             PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
-            rConfig.workers = params.getWritersCount();
+            rConfig.workers = params.getReadersCount();
             rConfig.csv = false;
             readPerl = PerlBuilder.build(logger.getReportingIntervalSeconds(),
                     params.getTimeoutMS(), executor, rConfig, time,
