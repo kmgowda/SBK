@@ -89,10 +89,10 @@ public final class PerlBuilder {
                 reportLatency, time);
     }
 
-    public static Perl build(int reportingSeconds, int timeoutMS,  ExecutorService executor,
-                      PerlConfig config, Time time, long minLatency, long maxLatency, double[] percentiles,
-                      Print windowLogger, Print totalLogger,
-                      ReportLatency reportLatency) {
+    public static Perl build(PerlConfig config, int reportingSeconds, int timeoutMS,
+                      Time time, long minLatency, long maxLatency, double[] percentiles,
+                      Print windowLogger, Print totalLogger, ReportLatency reportLatency,
+                              ExecutorService executor) {
         return new CQueuePerl(config, buildPeriodicLogger(config, time, minLatency, maxLatency,
                 percentiles, windowLogger, totalLogger, reportLatency),
                 reportingSeconds * Time.MS_PER_SEC, timeoutMS,

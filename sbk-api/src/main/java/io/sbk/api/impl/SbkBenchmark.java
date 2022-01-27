@@ -90,10 +90,9 @@ final public class SbkBenchmark implements Benchmark {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             wConfig.workers = params.getWritersCount();
             wConfig.csv = false;
-            writePerl = PerlBuilder.build(logger.getReportingIntervalSeconds(),
-                    params.getTimeoutMS(), executor, wConfig, time,
+            writePerl = PerlBuilder.build(wConfig, logger.getReportingIntervalSeconds(), params.getTimeoutMS(), time,
                     logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                    logger, logger::printTotal, logger);
+                    logger, logger::printTotal, logger, executor);
         } else {
             writePerl = null;
         }
@@ -102,10 +101,9 @@ final public class SbkBenchmark implements Benchmark {
             PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             rConfig.workers = params.getReadersCount();
             rConfig.csv = false;
-            readPerl = PerlBuilder.build(logger.getReportingIntervalSeconds(),
-                    params.getTimeoutMS(), executor, rConfig, time,
+            readPerl = PerlBuilder.build(rConfig, logger.getReportingIntervalSeconds(), params.getTimeoutMS(), time,
                     logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                    logger, logger::printTotal, logger);
+                    logger, logger::printTotal, logger, executor);
         } else {
             readPerl = null;
         }
