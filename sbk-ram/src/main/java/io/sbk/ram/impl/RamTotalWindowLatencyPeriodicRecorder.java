@@ -10,13 +10,13 @@
 
 package io.sbk.ram.impl;
 
-import io.sbk.grpc.LatenciesRecord;
-import io.sbk.logger.SetRW;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
 import io.perl.Print;
 import io.perl.ReportLatencies;
 import io.perl.impl.TotalLatencyRecordWindow;
+import io.sbk.grpc.LatenciesRecord;
+import io.sbk.logger.SetRW;
 import io.sbk.ram.RamPeriodicRecorder;
 import org.jetbrains.annotations.NotNull;
 

@@ -9,14 +9,14 @@
  */
 package io.perl.impl;
 
-import io.perl.PerlConfig;
 import io.perl.Channel;
-import io.perl.Perl;
 import io.perl.PeriodicLogger;
+import io.perl.Perl;
 import io.perl.PerlChannel;
+import io.perl.PerlConfig;
+import io.perl.PerlPrinter;
 import io.perl.TimeStamp;
 import io.state.State;
-import io.perl.PerlPrinter;
 import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +54,7 @@ final public class CQueuePerl implements Perl {
 
 
     public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicLogger periodicRecorder,
-                             int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
+                      int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
         int maxQs;
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
         this.windowIntervalMS = reportingIntervalMS;
@@ -284,7 +284,7 @@ final public class CQueuePerl implements Perl {
         }
 
         public PerlChannel getPerlChannel() {
-                return new CQueuePerlChannel();
+            return new CQueuePerlChannel();
         }
 
         public void sendException(int id, Throwable ex) {

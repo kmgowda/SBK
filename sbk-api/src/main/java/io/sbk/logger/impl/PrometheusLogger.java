@@ -12,11 +12,11 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.perl.Print;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
 import io.sbk.options.InputOptions;
-import io.perl.Print;
 import io.sbk.system.Printer;
 import io.time.Time;
 

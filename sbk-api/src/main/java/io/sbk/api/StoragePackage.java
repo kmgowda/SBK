@@ -56,7 +56,7 @@ final public class StoragePackage {
     /**
      * Get the set of Available Storage classes.
      *
-     * @param packageName     Name of the package.
+     * @param packageName Name of the package.
      * @return Set of classes extends Storage class
      */
     public static Set<Class<? extends Storage>> getStorageClasses(String packageName) {

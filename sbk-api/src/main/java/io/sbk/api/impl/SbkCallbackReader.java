@@ -9,12 +9,12 @@
  */
 package io.sbk.api.impl;
 
+import io.perl.PerlChannel;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Callback;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Worker;
 import io.sbk.data.DataType;
-import io.perl.PerlChannel;
 import io.time.Time;
 
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * SBK Callback reader implementation.
+ *
  * @deprecated This interface is replaced by Abstract class AbstractCallbackReader and SbkReader.
  */
 @Deprecated

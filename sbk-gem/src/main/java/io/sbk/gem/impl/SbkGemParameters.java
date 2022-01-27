@@ -65,8 +65,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             this.localHost = GemConfig.LOCAL_HOST;
         }
         addOption("nodes", true, """
-                                        remote hostnames separated by ',';
-                                        default:""" + config.nodes);
+                remote hostnames separated by ',';
+                default:""" + config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
         addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.gempass);
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);

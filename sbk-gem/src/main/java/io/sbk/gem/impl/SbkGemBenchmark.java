@@ -16,8 +16,8 @@ import io.sbk.gem.GemBenchmark;
 import io.sbk.gem.GemParameters;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.gem.SshConnection;
-import io.state.State;
 import io.sbk.system.Printer;
+import io.state.State;
 import lombok.Synchronized;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -249,7 +249,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final String sbkCommand = sbkDir + File.separator + params.getSbkCommand() + " " + sbkArgs;
         Printer.log.info("SBK-GEM: Remote SBK command: " + sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir() + File.separator + sbkCommand +" -id "+i,
+            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir() + File.separator + sbkCommand + " -id " + i,
                     config.remoteTimeoutSeconds, sbkResults[i]);
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfArray);

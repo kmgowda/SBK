@@ -10,10 +10,10 @@
 
 package io.perl.impl;
 
-import io.perl.PerlConfig;
 import io.perl.LatencyPercentiles;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
+import io.perl.PerlConfig;
 import io.perl.ReportLatencies;
 import io.time.Time;
 

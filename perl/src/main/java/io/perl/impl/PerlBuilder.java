@@ -17,6 +17,7 @@ import io.perl.PerlPrinter;
 import io.perl.Print;
 import io.perl.ReportLatency;
 import io.time.Time;
+
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
@@ -54,7 +55,7 @@ public final class PerlBuilder {
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
 
-        final  double[] percentileFractions = new double[percentiles.length];
+        final double[] percentileFractions = new double[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
             percentileFractions[i] = percentiles[i] / 100.0;
         }
@@ -90,12 +91,12 @@ public final class PerlBuilder {
     }
 
     public static Perl build(PerlConfig config, int reportingSeconds, int timeoutMS,
-                      Time time, long minLatency, long maxLatency, double[] percentiles,
-                      Print windowLogger, Print totalLogger, ReportLatency reportLatency,
-                              ExecutorService executor) {
+                             Time time, long minLatency, long maxLatency, double[] percentiles,
+                             Print windowLogger, Print totalLogger, ReportLatency reportLatency,
+                             ExecutorService executor) {
         return new CQueuePerl(config, buildPeriodicLogger(config, time, minLatency, maxLatency,
                 percentiles, windowLogger, totalLogger, reportLatency),
                 reportingSeconds * Time.MS_PER_SEC, timeoutMS,
-               time, executor);
+                time, executor);
     }
 }

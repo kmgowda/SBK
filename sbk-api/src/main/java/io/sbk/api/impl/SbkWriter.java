@@ -10,6 +10,8 @@
 
 package io.sbk.api.impl;
 
+import io.perl.PerlChannel;
+import io.perl.RunBenchmark;
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
@@ -17,8 +19,6 @@ import io.sbk.api.RateController;
 import io.sbk.api.Worker;
 import io.sbk.data.DataType;
 import io.sbk.logger.CountWriters;
-import io.perl.RunBenchmark;
-import io.perl.PerlChannel;
 import io.sbk.system.Printer;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;

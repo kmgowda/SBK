@@ -10,13 +10,13 @@
 
 package io.perl.impl;
 
-import io.perl.PerlConfig;
 import io.perl.LatencyPercentiles;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
 import io.perl.LatencyRecorder;
-import io.perl.ReportLatencies;
+import io.perl.PerlConfig;
 import io.perl.PerlPrinter;
+import io.perl.ReportLatencies;
 import io.time.Time;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -165,7 +165,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             try {
                 CSVParser csvParser = new CSVParser(Files.newBufferedReader(Paths.get(csvFile)),
                         CSVFormat.DEFAULT.builder().
-                                setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build() );
+                                setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build());
                 for (CSVRecord csvEntry : csvParser) {
                     reportLatencies.reportLatency(Long.parseLong(csvEntry.get(0)), Long.parseLong(csvEntry.get(1)));
                 }
