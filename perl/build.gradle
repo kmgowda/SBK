@@ -37,6 +37,9 @@ dependencies {
     api group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
     api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     api group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
 }
 

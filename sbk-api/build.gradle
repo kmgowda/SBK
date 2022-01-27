@@ -37,9 +37,6 @@ dependencies {
     api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
     api group: 'io.prometheus.jmx', name: jmxAgent, version: jmxPrometheusVersion
     api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
-    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
-    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
 }
 

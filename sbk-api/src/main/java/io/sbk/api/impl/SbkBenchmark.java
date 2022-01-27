@@ -45,6 +45,7 @@ import java.util.stream.IntStream;
  * Class for performing the benchmark.
  */
 final public class SbkBenchmark implements Benchmark {
+    final static String CONFIGFILE = "sbk.properties";
     final private Action action;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
@@ -66,7 +67,6 @@ final public class SbkBenchmark implements Benchmark {
      * Create SBK Benchmark.
      *
      * @param action     Action
-     * @param perlConfig Configuration parameters
      * @param params     Benchmarking input Parameters
      * @param storage    Storage device/client/driver for benchmarking
      * @param dType      Data Type.
@@ -74,8 +74,7 @@ final public class SbkBenchmark implements Benchmark {
      * @param time       time interface
      * @throws IOException If Exception occurs.
      */
-    public SbkBenchmark(Action action, PerlConfig perlConfig,
-                        ParameterOptions params, Storage<Object> storage,
+    public SbkBenchmark(Action action, ParameterOptions params, Storage<Object> storage,
                         DataType<Object> dType, @NotNull Logger logger, Time time) throws IOException {
         this.dType = dType;
         this.action = action;
@@ -87,19 +86,30 @@ final public class SbkBenchmark implements Benchmark {
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
 
-        writePerl = params.getWritersCount() > 0 && !params.isWriteAndRead() ?
-                PerlBuilder.build(params.getWritersCount(),
-                        logger.getReportingIntervalSeconds(),
-                        params.getTimeoutMS(), executor, perlConfig, time,
-                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                        logger, logger::printTotal, logger) : null;
+        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
+            PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
+            wConfig.workers = params.getWritersCount();
+            wConfig.csv = false;
+            writePerl = PerlBuilder.build(logger.getReportingIntervalSeconds(),
+                    params.getTimeoutMS(), executor, wConfig, time,
+                    logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                    logger, logger::printTotal, logger);
+        } else {
+            writePerl = null;
+        }
 
-        readPerl = params.getReadersCount() > 0 ?
-                PerlBuilder.build(params.getReadersCount(),
-                        logger.getReportingIntervalSeconds(),
-                        params.getTimeoutMS(), executor, perlConfig, time,
-                        logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                        logger, logger::printTotal, logger) : null;
+        if (params.getReadersCount() > 0) {
+            PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
+            rConfig.workers = params.getWritersCount();
+            rConfig.csv = false;
+            readPerl = PerlBuilder.build(logger.getReportingIntervalSeconds(),
+                    params.getTimeoutMS(), executor, rConfig, time,
+                    logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
+                    logger, logger::printTotal, logger);
+        } else {
+            readPerl = null;
+        }
+
         timeoutExecutor = Executors.newScheduledThreadPool(1);
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();

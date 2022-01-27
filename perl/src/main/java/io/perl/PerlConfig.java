@@ -10,7 +10,14 @@
 
 package io.perl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.time.Time;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 final public class PerlConfig {
     final public static String NAME = "PerL";
@@ -29,7 +36,7 @@ final public class PerlConfig {
     final public static long TOTAL_LATENCY_MAX = Long.MAX_VALUE >> 1;
 
     final public static int MIN_WORKERS = 1;
-    final public static int MIN_Q_PER_WORKER = 1;
+    final public static int MIN_Q_PER_WORKER = 3;
 
     final public static int DEFAULT_MAX_LATENCY = Time.MS_PER_MIN * 3;
     final public static int MIN_IDLE_NS = Time.NS_PER_MICRO;
@@ -38,6 +45,7 @@ final public class PerlConfig {
 
     final public static int HDR_SIGNIFICANT_DIGITS = 3;
 
+    public int workers;
     public int qPerWorker;
     public int idleNS;
     public int maxQs;
@@ -47,4 +55,12 @@ final public class PerlConfig {
     public boolean histogram;
     public boolean csv;
     public int csvFileSizeGB;
+
+
+    public static PerlConfig build(InputStream in) throws IOException {
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.readValue(Objects.requireNonNull(in), PerlConfig.class);
+    }
+
 }

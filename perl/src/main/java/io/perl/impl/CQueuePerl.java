@@ -53,7 +53,7 @@ final public class CQueuePerl implements Perl {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerl(@NotNull PerlConfig perlConfig, int workers, PeriodicLogger periodicRecorder,
+    public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicLogger periodicRecorder,
                              int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
         int maxQs;
         this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
@@ -69,7 +69,7 @@ final public class CQueuePerl implements Perl {
             this.index = 1;
         } else {
             maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
-            this.index = Math.max(workers, PerlConfig.MIN_WORKERS);
+            this.index = Math.max(perlConfig.workers, PerlConfig.MIN_WORKERS);
         }
         this.channels = new CQueueChannel[this.index];
         for (int i = 0; i < channels.length; i++) {
