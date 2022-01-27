@@ -45,6 +45,8 @@ final public class PerlConfig {
 
     final public static int HDR_SIGNIFICANT_DIGITS = 3;
 
+    final private static String CONFIGFILE = "perl.properties";
+
     public int workers;
     public int qPerWorker;
     public int idleNS;
@@ -56,6 +58,10 @@ final public class PerlConfig {
     public boolean csv;
     public int csvFileSizeGB;
 
+
+    public static PerlConfig build() throws IOException {
+        return build(PerlConfig.class.getClassLoader().getResourceAsStream(CONFIGFILE));
+    }
 
     public static PerlConfig build(InputStream in) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())

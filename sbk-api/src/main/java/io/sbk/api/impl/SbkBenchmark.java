@@ -45,7 +45,7 @@ import java.util.stream.IntStream;
  * Class for performing the benchmark.
  */
 final public class SbkBenchmark implements Benchmark {
-    final static String CONFIGFILE = "sbk.properties";
+    final private static String CONFIGFILE = "sbk.properties";
     final private Action action;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
