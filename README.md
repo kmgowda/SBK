@@ -705,10 +705,17 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/kmgowda/SBK")
 
+   /*
             credentials {
                 username = project.findProperty("github.user") ?: System.getenv("GITHUB_USERNAME")
                 password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
             }
+   */   
+            credentials {
+                username = "sbk-public"
+                password = "\u0067hp_FBqmGRV6KLTcFjwnDTvozvlhs3VNja4F67B5"
+            }   
+   
        }
     }
 
