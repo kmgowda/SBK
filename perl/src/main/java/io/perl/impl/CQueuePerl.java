@@ -27,20 +27,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.LockSupport;
 
 
 /**
  * Class for Performance statistics.
  */
 final public class CQueuePerl implements Perl {
-    final private int windowIntervalMS;
-    final private int idleNS;
-    final private int timeoutMS;
-    final private Time time;
-    final private PeriodicLogger periodicRecorder;
-    final private ExecutorService executor;
+    final private PerlRecorder perlReceiver;
     final private Channel[] channels;
+    final private Time time;
+    final private ExecutorService executor;
     final private CompletableFuture<Void> retFuture;
 
     @GuardedBy("this")
@@ -56,11 +52,7 @@ final public class CQueuePerl implements Perl {
     public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicLogger periodicRecorder,
                       int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
         int maxQs;
-        this.idleNS = Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS);
-        this.windowIntervalMS = reportingIntervalMS;
-        this.timeoutMS = timeoutMS;
         this.time = time;
-        this.periodicRecorder = periodicRecorder;
         this.executor = executor;
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
@@ -75,70 +67,10 @@ final public class CQueuePerl implements Perl {
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
+        this.perlReceiver = new PerlRecorder(periodicRecorder, channels, time, reportingIntervalMS, timeoutMS,
+                Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
     }
 
-
-    private void runPerformance(final long secondsToRun, final long totalRecords) {
-        final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, timeoutMS, idleNS);
-        final long startTime = time.getCurrentTime();
-        boolean doWork = true;
-        long ctime = startTime;
-        long recordsCnt = 0;
-        boolean notFound;
-        TimeStamp t;
-        PerlPrinter.log.info("Performance Logger Started");
-        periodicRecorder.start(startTime);
-        periodicRecorder.startWindow(startTime);
-        while (doWork) {
-            notFound = true;
-            for (int i = 0; doWork && (i < channels.length); i++) {
-                t = channels[i].receive(windowIntervalMS);
-                if (t != null) {
-                    notFound = false;
-                    ctime = t.endTime;
-                    if (t.isEnd()) {
-                        doWork = false;
-                    } else {
-                        recordsCnt += t.records;
-                        periodicRecorder.record(t.startTime, t.endTime, t.bytes, t.records);
-                        if (msToRun > 0) {
-                            if (time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
-                                doWork = false;
-                            }
-                        } else if (totalRecords > 0 && recordsCnt >= totalRecords) {
-                            doWork = false;
-                        }
-                    }
-                    if (periodicRecorder.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
-                        periodicRecorder.stopWindow(ctime);
-                        periodicRecorder.startWindow(ctime);
-                        idleCounter.reset();
-                    }
-                }
-            }
-            if (doWork) {
-                if (notFound) {
-                    if (idleCounter.waitAndCheck()) {
-                        ctime = time.getCurrentTime();
-                        final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
-                        if (diffTime > windowIntervalMS) {
-                            periodicRecorder.stopWindow(ctime);
-                            periodicRecorder.startWindow(ctime);
-                            idleCounter.reset();
-                            idleCounter.setElastic(diffTime);
-                        } else {
-                            idleCounter.updateElastic(diffTime);
-                        }
-                    }
-                }
-                if (msToRun > 0 && time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
-                    doWork = false;
-                }
-            }
-        }
-        periodicRecorder.stop(ctime);
-    }
 
     @Override
     @Synchronized
@@ -189,7 +121,8 @@ final public class CQueuePerl implements Perl {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
         if (state == State.BEGIN) {
             state = State.RUN;
-            qFuture = CompletableFuture.runAsync(() -> runPerformance(secondsToRun, recordsCount), executor);
+            qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(secondsToRun, recordsCount),
+                    executor);
             qFuture.whenComplete((ret, ex) -> {
                 shutdown(ex);
             });
@@ -206,49 +139,6 @@ final public class CQueuePerl implements Perl {
         void onException(Throwable ex);
     }
 
-    /**
-     * Private class for counter implementation to reduce time.getCurrentTime() invocation.
-     */
-    @NotThreadSafe
-    final static private class ElasticWaitCounter {
-        final private int windowInterval;
-        final private int idleNS;
-        final private double countRatio;
-        final private long minIdleCount;
-        private long elasticCount;
-        private long idleCount;
-        private long totalCount;
-
-        public ElasticWaitCounter(int windowInterval, int timeoutMS, int idleNS) {
-            this.windowInterval = windowInterval;
-            this.idleNS = idleNS;
-            countRatio = (Time.NS_PER_MS * 1.0) / this.idleNS;
-            minIdleCount = (long) (countRatio * timeoutMS);
-            elasticCount = minIdleCount;
-            idleCount = 0;
-            totalCount = 0;
-        }
-
-        public boolean waitAndCheck() {
-            LockSupport.parkNanos(idleNS);
-            idleCount++;
-            totalCount++;
-            return idleCount > elasticCount;
-        }
-
-        public void reset() {
-            idleCount = 0;
-        }
-
-        public void updateElastic(long diffTime) {
-            elasticCount = Math.max((long) (countRatio * (windowInterval - diffTime)), minIdleCount);
-        }
-
-        public void setElastic(long diffTime) {
-            elasticCount = (totalCount * windowInterval) / diffTime;
-            totalCount = 0;
-        }
-    }
 
     @NotThreadSafe
     static final class CQueueChannel implements Channel {
