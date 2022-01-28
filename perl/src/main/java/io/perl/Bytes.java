@@ -10,7 +10,7 @@
 
 package io.perl;
 
-public class Bytes {
+public final class Bytes {
     final public static int BYTES_PER_KB = 1024;
     final public static int BYTES_PER_MB = BYTES_PER_KB * BYTES_PER_KB;
     final public static long BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_MB;
