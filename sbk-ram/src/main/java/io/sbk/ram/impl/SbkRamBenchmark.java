@@ -12,8 +12,9 @@ package io.sbk.ram.impl;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.perl.Bytes;
+import io.perl.LatencyConfig;
 import io.perl.LatencyRecordWindow;
-import io.perl.PerlConfig;
 import io.perl.impl.ArrayLatencyRecorder;
 import io.perl.impl.CSVExtendedLatencyRecorder;
 import io.perl.impl.HashMapLatencyRecorder;
@@ -95,20 +96,20 @@ final public class SbkRamBenchmark implements Benchmark {
 
     private @NotNull LatencyRecordWindow createLatencyWindow() {
         final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
-        final long memSizeMB = (latencyRange * PerlConfig.LATENCY_VALUE_SIZE_BYTES) / PerlConfig.BYTES_PER_MB;
+        final long memSizeMB = (latencyRange * LatencyConfig.LATENCY_VALUE_SIZE_BYTES) / Bytes.BYTES_PER_MB;
         final LatencyRecordWindow window;
 
         if (memSizeMB < ramConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
             window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time);
+                    LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions, time);
             Printer.log.info("Window Latency Store: Array, Size: " +
-                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
+                    window.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
         } else {
             window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions, time,
+                    LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions, time,
                     ramConfig.maxHashMapSizeMB);
             Printer.log.info("Window Latency Store: HashMap, Size: " +
-                    window.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
+                    window.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
         }
         return window;
     }
@@ -120,24 +121,24 @@ final public class SbkRamBenchmark implements Benchmark {
         final LatencyRecordWindow totalWindowExtension;
 
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX, percentileFractions,
+                LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions,
                 time, ramConfig.totalMaxHashMapSizeMB);
         Printer.log.info("Total Window Latency Store: HashMap, Size: " +
-                totalWindow.getMaxMemoryBytes() / PerlConfig.BYTES_PER_MB + " MB");
+                totalWindow.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
 
         if (ramConfig.histogram) {
             totalWindowExtension = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
+                    LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow);
             Printer.log.info(String.format("Total Window Extension: HdrHistogram, Size: %.2f MB",
-                    (totalWindowExtension.getMaxMemoryBytes() * 1.0) / PerlConfig.BYTES_PER_MB));
+                    (totalWindowExtension.getMaxMemoryBytes() * 1.0) / Bytes.BYTES_PER_MB));
         } else if (ramConfig.csv) {
             totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    PerlConfig.TOTAL_LATENCY_MAX, PerlConfig.LONG_MAX, PerlConfig.LONG_MAX,
+                    LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, ramConfig.csvFileSizeGB,
                     Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Extension: CSV, Size: " +
-                    totalWindowExtension.getMaxMemoryBytes() / PerlConfig.BYTES_PER_GB + " GB");
+                    totalWindowExtension.getMaxMemoryBytes() / Bytes.BYTES_PER_GB + " GB");
         } else {
             totalWindowExtension = totalWindow;
             Printer.log.info("Total Window Extension: None, Size: 0 MB");

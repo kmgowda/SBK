@@ -17,8 +17,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import io.perl.Bytes;
+import io.perl.LatencyConfig;
 import io.perl.LatencyRecorder;
-import io.perl.PerlConfig;
 import io.sbk.action.Action;
 import io.sbk.exception.ExceptionHandler;
 import io.sbk.grpc.ClientID;
@@ -77,7 +78,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
-        maxLatencyBytes = ramHostConfig.maxRecordSizeMB * PerlConfig.BYTES_PER_MB;
+        maxLatencyBytes = ramHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
         ramHostConfig.host = DISABLE_STRING;
         params.addOption("ram", true, "SBK RAM host" +
                 "; '" + DISABLE_STRING + "' disables this option, default: " + ramHostConfig.host);
@@ -150,8 +151,8 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
 
         seqNum = 0;
         latencyBytes = 0;
-        recorder = new LatencyRecorder(getMinLatency(), getMaxLatency(), PerlConfig.LONG_MAX,
-                PerlConfig.LONG_MAX, PerlConfig.LONG_MAX);
+        recorder = new LatencyRecorder(getMinLatency(), getMaxLatency(), LatencyConfig.LONG_MAX,
+                LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX);
         builder = LatenciesRecord.newBuilder();
         if (blocking) {
             stub = null;

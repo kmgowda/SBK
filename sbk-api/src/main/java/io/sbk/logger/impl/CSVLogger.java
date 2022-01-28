@@ -10,7 +10,7 @@
 
 package io.sbk.logger.impl;
 
-import io.perl.PerlConfig;
+import io.perl.Bytes;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.options.InputOptions;
@@ -86,7 +86,7 @@ public class CSVLogger extends SystemLogger {
                                  long seconds, long bytes, long records, double recsPerSec,
                                  double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                                  long slc1, long slc2, @NotNull long[] percentileValues) {
-        final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
+        final double mBytes = (bytes * 1.0) / Bytes.BYTES_PER_MB;
         StringBuilder data = new StringBuilder(
                 String.format("%16d,%s,%s,%s,%s"
                                 + ",%s,%s,%s"

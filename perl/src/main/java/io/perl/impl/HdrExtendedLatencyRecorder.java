@@ -9,11 +9,11 @@
  */
 package io.perl.impl;
 
+import io.perl.LatencyConfig;
 import io.perl.LatencyPercentiles;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
 import io.perl.LatencyRecorder;
-import io.perl.PerlConfig;
 import io.perl.PerlPrinter;
 import io.perl.ReportLatencies;
 import io.time.Time;
@@ -31,7 +31,7 @@ public final class HdrExtendedLatencyRecorder extends LatencyRecordWindow {
                                       LatencyRecordWindow latencyBuffer) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentilesFractions, time);
         this.latencyBuffer = latencyBuffer;
-        this.hdrReporter = new HdrLatencyReporter(this, highLatency, PerlConfig.HDR_SIGNIFICANT_DIGITS);
+        this.hdrReporter = new HdrLatencyReporter(this, highLatency, LatencyConfig.HDR_SIGNIFICANT_DIGITS);
     }
 
     private void checkBufferFull() {

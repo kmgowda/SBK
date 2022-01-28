@@ -67,7 +67,7 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
         final long totalLatencyRecords = this.validLatencyRecords +
                 this.lowerLatencyDiscardRecords + this.higherLatencyDiscardRecords;
         final double recsPerSec = elapsedSec > 0 ? this.totalRecords / elapsedSec : 0;
-        final double mbPerSec = elapsedSec > 0 ? (this.totalBytes / (PerlConfig.BYTES_PER_MB * 1.0)) / elapsedSec : 0;
+        final double mbPerSec = elapsedSec > 0 ? (this.totalBytes / (Bytes.BYTES_PER_MB * 1.0)) / elapsedSec : 0;
         final double avgLatency = totalLatencyRecords > 0 ? this.totalLatency / (double) totalLatencyRecords : 0;
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, this.maxLatency, this.invalidLatencyRecords,

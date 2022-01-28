@@ -10,11 +10,12 @@
 
 package io.perl.impl;
 
+import io.perl.Bytes;
+import io.perl.LatencyConfig;
 import io.perl.LatencyPercentiles;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
 import io.perl.LatencyRecorder;
-import io.perl.PerlConfig;
 import io.perl.PerlPrinter;
 import io.perl.ReportLatencies;
 import io.time.Time;
@@ -105,8 +106,8 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
         public CSVLatencyReporter(LatencyRecorder recorder, int csvFileSizeGB, String fileName) {
             this.recorder = recorder;
             this.csvFile = fileName;
-            this.maxCsvSizeBytes = csvFileSizeGB * PerlConfig.BYTES_PER_GB;
-            this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
+            this.maxCsvSizeBytes = csvFileSizeGB * Bytes.BYTES_PER_GB;
+            this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * 2;
             this.csvBytesCount = 0;
             this.csvPrinter = null;
         }

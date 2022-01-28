@@ -10,10 +10,10 @@
 
 package io.perl.impl;
 
+import io.perl.LatencyConfig;
 import io.perl.LatencyPercentiles;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
-import io.perl.PerlConfig;
 import io.perl.ReportLatencies;
 import io.time.Time;
 
@@ -34,7 +34,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         final int size = (int) Math.min(highLatency - lowLatency, Integer.MAX_VALUE);
         this.latencies = new long[size];
-        this.maxMemorySizeBytes = (long) PerlConfig.LATENCY_VALUE_SIZE_BYTES * size;
+        this.maxMemorySizeBytes = (long) LatencyConfig.LATENCY_VALUE_SIZE_BYTES * size;
         this.minIndex = size;
         this.maxIndex = 0;
     }

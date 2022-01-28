@@ -10,6 +10,7 @@
 
 package io.sbk.logger;
 
+import io.perl.LatencyConfig;
 import io.perl.PerlConfig;
 import io.perl.Print;
 import io.sbk.action.Action;
@@ -109,7 +110,7 @@ public interface PerformanceLogger extends Print {
      * @return minimum latency value.
      */
     default long getMinLatency() {
-        return PerlConfig.DEFAULT_MIN_LATENCY;
+        return LatencyConfig.DEFAULT_MIN_LATENCY;
     }
 
     /**
@@ -118,7 +119,7 @@ public interface PerformanceLogger extends Print {
      * @return Maximum latency value.
      */
     default long getMaxLatency() {
-        return PerlConfig.DEFAULT_MAX_LATENCY;
+        return LatencyConfig.DEFAULT_MAX_LATENCY;
     }
 
     /**
@@ -127,7 +128,7 @@ public interface PerformanceLogger extends Print {
      * @return array of percentile Indices.
      */
     default double[] getPercentiles() {
-        return PerlConfig.PERCENTILES;
+        return LatencyConfig.PERCENTILES;
     }
 
     /**

@@ -19,31 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-final public class PerlConfig {
+final public class PerlConfig extends LatencyConfig {
     final public static String NAME = "PerL";
-    final public static String PERCENTILE_FORMAT = "0.##";
-
-    final public static int LATENCY_VALUE_SIZE_BYTES = 8;
-    final public static int BYTES_PER_KB = 1024;
-    final public static int BYTES_PER_MB = BYTES_PER_KB * BYTES_PER_KB;
-    final public static long BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_MB;
 
     final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5;
     final public static int DEFAULT_TIMEOUT_MS = Time.MS_PER_SEC;
     final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / Time.MS_PER_SEC;
-
-    final public static long LONG_MAX = Long.MAX_VALUE >> 2;
-    final public static long TOTAL_LATENCY_MAX = Long.MAX_VALUE >> 1;
-
     final public static int MIN_WORKERS = 1;
     final public static int MIN_Q_PER_WORKER = 3;
-
-    final public static int DEFAULT_MAX_LATENCY = Time.MS_PER_MIN * 3;
     final public static int MIN_IDLE_NS = Time.NS_PER_MICRO;
-    final public static int DEFAULT_MIN_LATENCY = 0;
-    final public static double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
-
-    final public static int HDR_SIGNIFICANT_DIGITS = 3;
 
     final private static String CONFIGFILE = "perl.properties";
 
@@ -51,12 +35,6 @@ final public class PerlConfig {
     public int qPerWorker;
     public int idleNS;
     public int maxQs;
-    public int maxArraySizeMB;
-    public int maxHashMapSizeMB;
-    public int totalMaxHashMapSizeMB;
-    public boolean histogram;
-    public boolean csv;
-    public int csvFileSizeGB;
 
 
     public static PerlConfig build() throws IOException {

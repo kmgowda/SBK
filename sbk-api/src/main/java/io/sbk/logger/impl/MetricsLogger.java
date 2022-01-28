@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.perl.PerlConfig;
+import io.perl.LatencyConfig;
 import io.perl.Print;
 import io.time.Time;
 import io.time.TimeUnit;
@@ -45,7 +45,7 @@ public sealed class MetricsLogger implements Print permits RWMetricsLogger {
 
     public MetricsLogger(@NotNull String header, @NotNull String action, @NotNull double[] percentiles,
                          Time time, @NotNull TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
-        this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
+        this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
         this.metricPrefix = header.replace(" ", "_").toUpperCase() + "_"
                 + action.replace(" ", "_");
         final String metricUnit = latencyTimeUnit.name().replace(" ", "_");

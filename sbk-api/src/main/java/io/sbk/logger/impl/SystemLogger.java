@@ -13,7 +13,8 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.perl.PerlConfig;
+import io.perl.Bytes;
+import io.perl.LatencyConfig;
 import io.sbk.action.Action;
 import io.sbk.logger.Logger;
 import io.sbk.logger.LoggerConfig;
@@ -56,7 +57,7 @@ public class SystemLogger implements Logger {
     private long maxLatency;
 
     public SystemLogger() {
-        this.format = new DecimalFormat(PerlConfig.PERCENTILE_FORMAT);
+        this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
         this.writers = new AtomicInteger(0);
         this.readers = new AtomicInteger(0);
         this.maxWriters = new AtomicInteger(0);
@@ -264,7 +265,7 @@ public class SystemLogger implements Logger {
     public String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
                                     double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        final double mBytes = (bytes * 1.0) / PerlConfig.BYTES_PER_MB;
+        final double mBytes = (bytes * 1.0) / Bytes.BYTES_PER_MB;
         appendWritesAndReaders(out);
         appendPercentiles(out, (long) seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);

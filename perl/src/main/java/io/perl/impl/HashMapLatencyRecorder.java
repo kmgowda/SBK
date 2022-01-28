@@ -10,10 +10,11 @@
 
 package io.perl.impl;
 
+import io.perl.Bytes;
+import io.perl.LatencyConfig;
 import io.perl.LatencyPercentiles;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
-import io.perl.PerlConfig;
 import io.perl.ReportLatencies;
 import io.time.Time;
 
@@ -38,8 +39,8 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new HashMap<>();
         this.maxHashMapSizeMB = maxHashMapSizeMB;
-        this.maxHashMapSizeBytes = (long) maxHashMapSizeMB * PerlConfig.BYTES_PER_MB;
-        this.incBytes = PerlConfig.LATENCY_VALUE_SIZE_BYTES * 2;
+        this.maxHashMapSizeBytes = (long) maxHashMapSizeMB * Bytes.BYTES_PER_MB;
+        this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * 2;
         this.hashMapBytesCount = 0;
     }
 
