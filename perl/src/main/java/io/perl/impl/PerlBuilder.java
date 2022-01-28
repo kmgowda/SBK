@@ -25,9 +25,9 @@ import java.util.concurrent.ExecutorService;
 
 public final class PerlBuilder {
 
-    private static LatencyRecordWindow buildLatencyRecordWindow(LatencyConfig config, Time time,
-                                                                long minLatency, long maxLatency,
-                                                                double[] percentileFractions) {
+    public static LatencyRecordWindow buildLatencyRecordWindow(LatencyConfig config, Time time,
+                                                               long minLatency, long maxLatency,
+                                                               double[] percentileFractions) {
         final long latencyRange = maxLatency - minLatency;
         final long memSizeMB = (latencyRange * LatencyConfig.LATENCY_VALUE_SIZE_BYTES) / Bytes.BYTES_PER_MB;
         final LatencyRecordWindow window;

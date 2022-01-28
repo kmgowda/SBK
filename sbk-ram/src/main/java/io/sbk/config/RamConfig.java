@@ -10,18 +10,14 @@
 
 package io.sbk.config;
 
-final public class RamConfig {
+import io.perl.LatencyConfig;
+
+final public class RamConfig extends LatencyConfig {
     public final static String NAME = "sbk-ram";
     final public static String DESC = "Storage Benchmark Kit - Results Aggregation Monitor";
 
     public int port;
     public int maxConnections;
-    public int maxArraySizeMB;
-    public int maxHashMapSizeMB;
-    public int totalMaxHashMapSizeMB;
     public int maxQueues;
     public int idleMS;
-    public boolean histogram;
-    public boolean csv;
-    public int csvFileSizeGB;
 }

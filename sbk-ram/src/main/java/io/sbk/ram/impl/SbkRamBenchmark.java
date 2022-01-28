@@ -15,10 +15,10 @@ import io.grpc.ServerBuilder;
 import io.perl.Bytes;
 import io.perl.LatencyConfig;
 import io.perl.LatencyRecordWindow;
-import io.perl.impl.ArrayLatencyRecorder;
 import io.perl.impl.CSVExtendedLatencyRecorder;
 import io.perl.impl.HashMapLatencyRecorder;
 import io.perl.impl.HdrExtendedLatencyRecorder;
+import io.perl.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
 import io.sbk.config.RamConfig;
@@ -93,30 +93,10 @@ final public class SbkRamBenchmark implements Benchmark {
         state = State.BEGIN;
     }
 
-
-    private @NotNull LatencyRecordWindow createLatencyWindow() {
-        final long latencyRange = logger.getMaxLatency() - logger.getMinLatency();
-        final long memSizeMB = (latencyRange * LatencyConfig.LATENCY_VALUE_SIZE_BYTES) / Bytes.BYTES_PER_MB;
-        final LatencyRecordWindow window;
-
-        if (memSizeMB < ramConfig.maxArraySizeMB && latencyRange < Integer.MAX_VALUE) {
-            window = new ArrayLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions, time);
-            Printer.log.info("Window Latency Store: Array, Size: " +
-                    window.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
-        } else {
-            window = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                    LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions, time,
-                    ramConfig.maxHashMapSizeMB);
-            Printer.log.info("Window Latency Store: HashMap, Size: " +
-                    window.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
-        }
-        return window;
-    }
-
     @Contract(" -> new")
     private @NotNull RamPeriodicRecorder createLatencyRecorder() {
-        final LatencyRecordWindow window = createLatencyWindow();
+        final LatencyRecordWindow window = PerlBuilder.buildLatencyRecordWindow(ramConfig, time,
+                logger.getMinLatency(), logger.getMaxLatency(), percentileFractions);
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
 
