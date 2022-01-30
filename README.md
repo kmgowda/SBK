@@ -230,6 +230,7 @@ doing better. Lower SLC2 factor means higher the performance of the system. If y
 variations of SLC 2 factor that means you have an opportunity to improve the stability of the storage system too.
 
 **Performance results to CSV file**
+
 you can use option "-csvfile" to specify the csv file to log all the performance results. Further you can use [sbk 
 charts](#sbk-charts) for generating xlsx files with graphs.
 
