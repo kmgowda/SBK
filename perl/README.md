@@ -15,3 +15,92 @@ The PerL is the core of SBK framework. The PerL provides the foundation APIs for
 latency values and calculating percentiles. The APIs of PerL are used by SBK-API module to define the readers and writers 
 interfaces. The Latency store methods/classes are used by SBK-API and SBK-RAM. The PerL module can be used by any 
 application for performance benchmarking.
+
+If you want to conduct the performance benchmarking without read and write interfaces/APIs, then PerL can be used.
+The PerL provides the APIs for performance benchmarking which can used for other than storage systems. PerL can be used 
+for performance benchmarking of any software system.
+
+# How to use PerL
+
+## Ger the Perl Package
+
+### Perl Maven Central
+
+   ```
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation 'io.github.kmgowda:perl:0.96'
+    }
+   ```
+  Note that 'mavenCentral()' repository is required to fetch the SBK APIs package and its dependencies.
+ 
+### Perl Git hub package
+
+  ```
+    repositories {
+        mavenCentral()
+
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+            credentials {
+                username = "sbk-public"
+                password = "\u0067hp_FBqmGRV6KLTcFjwnDTvozvlhs3VNja4F67B5"
+            }   
+   
+       }
+    }
+
+    dependencies {
+        implementation 'sbk:perl:0.96'
+    }
+
+   ```
+
+### Perl Jit package
+
+  ```
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://jitpack.io'
+        }
+    }
+
+    dependencies {
+        implementation 'com.github.kmgowda.SBK:perl:0.96'
+    }
+   
+   ```
+
+Note that 'mavenCentral()' repository is required to fetch the SBK APIs package and its dependencies.
+
+
+## Use PerL APIs
+1. Use [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/impl/PerlBuilder.html) to create and get the Concurrent queue based Perl interface.
+   1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L93   
+   2. The created Perl interface object can be distributed among several threads.  
+
+2. Use [getPerlChannel API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/GetPerlChannel.html#getPerlChannel()) 
+   to get the perl channel.
+   1. Multiple threads can invoke this API to get the dedicated PerlChannel object.
+   2. This dedicated PerlChannel is not thread safe and it should not used distributed among multiple threads
+   3. See the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L177
+
+3. start the benchmarking using [Run API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/RunBenchmark.html) 
+   1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L203
+   
+4. you send the performance data to Perl channel using [send API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/PerlChannel.html)
+   1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L97
+   
+5. in case of any exception, you can send the [exception](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/PerlChannel.html)
+
+6. The Perl will periodically sends/prints the performance results to logger/printer which is supplied with 
+   [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/impl/PerlBuilder.html) in step 1.
+
+7. stop the benchmarking using [Stop API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/Perl.html)
+   1. see the example: https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L364
+   
