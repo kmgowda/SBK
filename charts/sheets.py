@@ -61,14 +61,14 @@ class SbkSheets:
 
 
 class SbkMultiSheets(SbkSheets):
-    def __init__(self, iFiles, oFile):
-        super().__init__(iFiles[0], oFile)
-        self.iFiles = iFiles
+    def __init__(self, iFiles_list, oFile):
+        super().__init__(iFiles_list[0], oFile)
+        self.iFilesList = iFiles_list
 
     def create_sheets(self):
         wb = Workbook(self.oFile)
         add_sbk_logo(wb)
-        for i, file in enumerate(self.iFiles):
+        for i, file in enumerate(self.iFilesList):
             wb_add_two_sheets(wb, constants.R_PREFIX + str(i + 1), constants.T_PREFIX + str(i + 1), read_csv(file))
         wb.close()
         print("xlsx file : %s created" % self.oFile)
