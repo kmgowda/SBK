@@ -31,7 +31,7 @@ def sbk_charts():
     print("Sbk Charts Version : " + sbk_version)
     print('Input Files : ', args.ifiles)
     print('Output File : ', args.ofile)
-    sh = SbkMultiSheets(args.ifiles, args.ofile)
+    sh = SbkMultiSheets(args.ifiles.split(","), args.ofile)
     sh.create_sheets()
     ch = SbkMultiCharts(sbk_version, args.ofile)
     ch.create_graphs()

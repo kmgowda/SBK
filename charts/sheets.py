@@ -62,8 +62,8 @@ class SbkSheets:
 
 class SbkMultiSheets(SbkSheets):
     def __init__(self, iFiles, oFile):
-        self.iFiles = iFiles.split(",")
-        self.oFile = oFile
+        super().__init__(iFiles[0], oFile)
+        self.iFiles = iFiles
 
     def create_sheets(self):
         wb = Workbook(self.oFile)
