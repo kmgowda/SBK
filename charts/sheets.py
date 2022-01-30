@@ -47,9 +47,9 @@ def add_sbk_logo(wb):
 
 
 class SbkSheets:
-    def __init__(self, iFile, oFile):
-        self.iFile = iFile
-        self.oFile = oFile
+    def __init__(self, i_file, o_file):
+        self.iFile = i_file
+        self.oFile = o_file
 
     def create_sheets(self):
         wb = Workbook(self.oFile)
@@ -61,9 +61,9 @@ class SbkSheets:
 
 
 class SbkMultiSheets(SbkSheets):
-    def __init__(self, iFiles_list, oFile):
-        super().__init__(iFiles_list[0], oFile)
-        self.iFilesList = iFiles_list
+    def __init__(self, i_files_list, o_file):
+        super().__init__(i_files_list[0], o_file)
+        self.iFilesList = i_files_list
 
     def create_sheets(self):
         wb = Workbook(self.oFile)
