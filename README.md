@@ -230,8 +230,8 @@ doing better. Lower SLC2 factor means higher the performance of the system. If y
 variations of SLC 2 factor that means you have an opportunity to improve the stability of the storage system too.
 
 **Performance results to CSV file**
-
-you can use option "-csvfile" to specify the csv file to log all the performance results for future analytics.
+you can use option "-csvfile" to specify the csv file to log all the performance results. Further you can use [sbk 
+charts](#sbk-charts) for generating xlsx files with graphs.
 
 ### Grafana Dashboards of SBK
 When you run the SBK, by default it starts the http server and all the output benchmark data is directed to the default port number: **9718** and **metrics** context.
