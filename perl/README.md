@@ -22,7 +22,7 @@ for performance benchmarking of any software system.
 
 # How to use PerL
 
-## Ger the Perl Package
+## Get the Perl Package
 
 ### Perl Maven Central
 
@@ -79,7 +79,7 @@ for performance benchmarking of any software system.
 Note that 'mavenCentral()' repository is required to fetch the SBK APIs package and its dependencies.
 
 
-## Use PerL APIs
+## Use PerL APIs in your application
 1. Use [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/impl/PerlBuilder.html) to create and get the Concurrent queue based Perl interface.
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L93   
    2. The created Perl interface object can be distributed among several threads.  
