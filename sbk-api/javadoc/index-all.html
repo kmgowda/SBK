@@ -81,7 +81,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#addArgs(io.sbk.options.InputOptions)" class="member-name-link">addArgs(InputOptions)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)" class="member-name-link">addArgs(InputOptions)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
+<dt><a href="io/sbk/logger/Logger.html#addArgs(io.sbk.options.InputOptions)" class="member-name-link">addArgs(InputOptions)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a></dt>
 <dd>
 <div class="block">Add the Metric type specific command line arguments.</div>
 </dd>
@@ -168,7 +168,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/grpc/ServiceGrpc.ServiceStub.html#build(io.grpc.Channel,io.grpc.CallOptions)" class="member-name-link">build(Channel, CallOptions)</a> - Method in class io.sbk.grpc.<a href="io/sbk/grpc/ServiceGrpc.ServiceStub.html" title="class in io.sbk.grpc">ServiceGrpc.ServiceStub</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/api/impl/Sbk.html#buildBenchmark(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.Logger)" class="member-name-link">buildBenchmark(String[], String, String, Logger)</a> - Static method in class io.sbk.api.impl.<a href="io/sbk/api/impl/Sbk.html" title="class in io.sbk.api.impl">Sbk</a></dt>
+<dt><a href="io/sbk/api/impl/Sbk.html#buildBenchmark(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.RWLogger)" class="member-name-link">buildBenchmark(String[], String, String, RWLogger)</a> - Static method in class io.sbk.api.impl.<a href="io/sbk/api/impl/Sbk.html" title="class in io.sbk.api.impl">Sbk</a></dt>
 <dd>
 <div class="block">Build the Benchmark Object.</div>
 </dd>
@@ -350,7 +350,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#close(io.sbk.options.InputOptions)" class="member-name-link">close(InputOptions)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#close(io.sbk.options.InputOptions)" class="member-name-link">close(InputOptions)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
+<dt><a href="io/sbk/logger/Logger.html#close(io.sbk.options.InputOptions)" class="member-name-link">close(InputOptions)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a></dt>
 <dd>
 <div class="block">Close the Logger.</div>
 </dd>
@@ -796,10 +796,6 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#getMaxLatency()" class="member-name-link">getMaxLatency()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#getMaxLatency()" class="member-name-link">getMaxLatency()</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
-<dd>
-<div class="block">Default implementation of Maximum latency.</div>
-</dd>
 <dt><a href="io/sbk/grpc/LatenciesRecord.Builder.html#getMaxReaders()" class="member-name-link">getMaxReaders()</a> - Method in class io.sbk.grpc.<a href="io/sbk/grpc/LatenciesRecord.Builder.html" title="class in io.sbk.grpc">LatenciesRecord.Builder</a></dt>
 <dd>
 <div class="block"><code>int32 maxReaders = 6;</code></div>
@@ -842,10 +838,6 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#getMinLatency()" class="member-name-link">getMinLatency()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#getMinLatency()" class="member-name-link">getMinLatency()</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
-<dd>
-<div class="block">Default implementation of minimum latency.</div>
-</dd>
 <dt><a href="io/sbk/grpc/LatenciesRecord.Builder.html#getMutableLatency()" class="member-name-link">getMutableLatency()</a> - Method in class io.sbk.grpc.<a href="io/sbk/grpc/LatenciesRecord.Builder.html" title="class in io.sbk.grpc">LatenciesRecord.Builder</a></dt>
 <dd>
 <div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
@@ -874,10 +866,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#getPercentiles()" class="member-name-link">getPercentiles()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#getPercentiles()" class="member-name-link">getPercentiles()</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
-<dd>
-<div class="block">Default implementation of percentile Indices.</div>
-</dd>
+<dt><a href="io/sbk/logger/impl/SystemLogger.html#getPrintingIntervalSeconds()" class="member-name-link">getPrintingIntervalSeconds()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/sbk/grpc/LatenciesRecord.Builder.html#getReaders()" class="member-name-link">getReaders()</a> - Method in class io.sbk.grpc.<a href="io/sbk/grpc/LatenciesRecord.Builder.html" title="class in io.sbk.grpc">LatenciesRecord.Builder</a></dt>
 <dd>
 <div class="block"><code>int32 readers = 4;</code></div>
@@ -916,12 +906,6 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/sbk/grpc/ServiceGrpc.html#getRegisterClientMethod()" class="member-name-link">getRegisterClientMethod()</a> - Static method in class io.sbk.grpc.<a href="io/sbk/grpc/ServiceGrpc.html" title="class in io.sbk.grpc">ServiceGrpc</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/impl/SystemLogger.html#getReportingIntervalSeconds()" class="member-name-link">getReportingIntervalSeconds()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#getReportingIntervalSeconds()" class="member-name-link">getReportingIntervalSeconds()</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
-<dd>
-<div class="block">Default implementation of Reporting interval.</div>
-</dd>
 <dt><a href="io/sbk/grpc/LatenciesRecord.Builder.html#getSequenceNumber()" class="member-name-link">getSequenceNumber()</a> - Method in class io.sbk.grpc.<a href="io/sbk/grpc/LatenciesRecord.Builder.html" title="class in io.sbk.grpc">LatenciesRecord.Builder</a></dt>
 <dd>
 <div class="block"><code>int64 sequenceNumber = 2;</code></div>
@@ -982,7 +966,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the time of data.</div>
 </dd>
-<dt><a href="io/sbk/api/impl/SbkUtils.html#getTime(io.sbk.logger.PerformanceLogger)" class="member-name-link">getTime(PerformanceLogger)</a> - Static method in class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkUtils.html" title="class in io.sbk.api.impl">SbkUtils</a></dt>
+<dt><a href="io/sbk/api/impl/SbkUtils.html#getTime(io.sbk.logger.Logger)" class="member-name-link">getTime(Logger)</a> - Static method in class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkUtils.html" title="class in io.sbk.api.impl">SbkUtils</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/data/impl/SbkString.html#getTime(java.lang.String)" class="member-name-link">getTime(String)</a> - Method in class io.sbk.data.impl.<a href="io/sbk/data/impl/SbkString.html" title="class in io.sbk.data.impl">SbkString</a></dt>
 <dd>
@@ -1014,10 +998,6 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#getTimeUnit()" class="member-name-link">getTimeUnit()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#getTimeUnit()" class="member-name-link">getTimeUnit()</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
-<dd>
-<div class="block">Default implementation of time Unit.</div>
-</dd>
 <dt><a href="io/sbk/grpc/Config.Builder.html#getTimeUnitValue()" class="member-name-link">getTimeUnitValue()</a> - Method in class io.sbk.grpc.<a href="io/sbk/grpc/Config.Builder.html" title="class in io.sbk.grpc">Config.Builder</a></dt>
 <dd>
 <div class="block"><code>.TimeUnitEnum timeUnit = 3;</code></div>
@@ -1482,7 +1462,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/PrometheusLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)" class="member-name-link">open(InputOptions, String, Action, Time)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusLogger.html" title="class in io.sbk.logger.impl">PrometheusLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)" class="member-name-link">open(InputOptions, String, Action, Time)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
+<dt><a href="io/sbk/logger/Logger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)" class="member-name-link">open(InputOptions, String, Action, Time)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a></dt>
 <dd>
 <div class="block">Open the Logger.</div>
 </dd>
@@ -1517,7 +1497,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/PrometheusLogger.html#parseArgs(io.sbk.options.InputOptions)" class="member-name-link">parseArgs(InputOptions)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusLogger.html" title="class in io.sbk.logger.impl">PrometheusLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)" class="member-name-link">parseArgs(InputOptions)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
+<dt><a href="io/sbk/logger/Logger.html#parseArgs(io.sbk.options.InputOptions)" class="member-name-link">parseArgs(InputOptions)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a></dt>
 <dd>
 <div class="block">Parse the Metric specific command line arguments.</div>
 </dd>
@@ -1615,10 +1595,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/LoggerConfig.html#percentiles" class="member-name-link">percentiles</a> - Variable in class io.sbk.logger.<a href="io/sbk/logger/LoggerConfig.html" title="class in io.sbk.logger">LoggerConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html" class="type-name-link" title="interface in io.sbk.logger">PerformanceLogger</a> - Interface in <a href="io/sbk/logger/package-summary.html">io.sbk.logger</a></dt>
-<dd>
-<div class="block">Interface for recoding/printing results.</div>
-</dd>
 <dt><a href="io/sbk/api/Worker.html#perlChannel" class="member-name-link">perlChannel</a> - Variable in class io.sbk.api.<a href="io/sbk/api/Worker.html" title="class in io.sbk.api">Worker</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/MetricsConfig.html#port" class="member-name-link">port</a> - Variable in class io.sbk.logger.<a href="io/sbk/logger/MetricsConfig.html" title="class in io.sbk.logger">MetricsConfig</a></dt>
@@ -1655,10 +1631,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">printTotal(double, long, long, double, double, double, long, long, long, long, long, long, long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">printTotal(double, long, long, double, double, double, long, long, long, long, long, long, long[])</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
-<dd>
-<div class="block">Print the Total Periodic performance results.</div>
-</dd>
 <dt><a href="io/sbk/logger/impl/PrometheusLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">PrometheusLogger</a> - Class in <a href="io/sbk/logger/impl/package-summary.html">io.sbk.logger.impl</a></dt>
 <dd>
 <div class="block">Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.</div>
@@ -1736,7 +1708,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">record every latency.</div>
 </dd>
-<dt><a href="io/sbk/logger/Logger.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a></dt>
+<dt><a href="io/sbk/logger/RWLogger.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></dt>
 <dd>
 <div class="block">Default method to record every event.</div>
 </dd>
@@ -1957,9 +1929,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Default Implementation run the Benchmark.</div>
 </dd>
-<dt><a href="io/sbk/api/impl/Sbk.html#run(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.Logger)" class="member-name-link">run(String[], String, String, Logger)</a> - Static method in class io.sbk.api.impl.<a href="io/sbk/api/impl/Sbk.html" title="class in io.sbk.api.impl">Sbk</a></dt>
+<dt><a href="io/sbk/api/impl/Sbk.html#run(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.RWLogger)" class="member-name-link">run(String[], String, String, RWLogger)</a> - Static method in class io.sbk.api.impl.<a href="io/sbk/api/impl/Sbk.html" title="class in io.sbk.api.impl">Sbk</a></dt>
 <dd>
 <div class="block">Run the Performance Benchmarking .</div>
+</dd>
+<dt><a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> - Interface in <a href="io/sbk/logger/package-summary.html">io.sbk.logger</a></dt>
+<dd>
+<div class="block">Interface for recoding/printing results.</div>
 </dd>
 <dt><a href="io/sbk/logger/impl/RWMetricsLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">RWMetricsLogger</a> - Class in <a href="io/sbk/logger/impl/package-summary.html">io.sbk.logger.impl</a></dt>
 <dd>
@@ -1997,7 +1973,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Class for performing the benchmark.</div>
 </dd>
-<dt><a href="io/sbk/api/impl/SbkBenchmark.html#%3Cinit%3E(io.sbk.action.Action,io.sbk.api.ParameterOptions,io.sbk.api.Storage,io.sbk.data.DataType,io.sbk.logger.Logger,io.time.Time)" class="member-name-link">SbkBenchmark(Action, ParameterOptions, Storage&lt;Object&gt;, DataType&lt;Object&gt;, Logger, Time)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkBenchmark.html" title="class in io.sbk.api.impl">SbkBenchmark</a></dt>
+<dt><a href="io/sbk/api/impl/SbkBenchmark.html#%3Cinit%3E(io.sbk.action.Action,io.sbk.api.ParameterOptions,io.sbk.api.Storage,io.sbk.data.DataType,io.sbk.logger.RWLogger,io.time.Time)" class="member-name-link">SbkBenchmark(Action, ParameterOptions, Storage&lt;Object&gt;, DataType&lt;Object&gt;, RWLogger, Time)</a> - Constructor for class io.sbk.api.impl.<a href="io/sbk/api/impl/SbkBenchmark.html" title="class in io.sbk.api.impl">SbkBenchmark</a></dt>
 <dd>
 <div class="block">Create SBK Benchmark.</div>
 </dd>
@@ -2099,7 +2075,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/sbk/logger/impl/GrpcPrometheusLogger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)" class="member-name-link">setExceptionHandler(ExceptionHandler)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcPrometheusLogger.html" title="class in io.sbk.logger.impl">GrpcPrometheusLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/PerformanceLogger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)" class="member-name-link">setExceptionHandler(ExceptionHandler)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></dt>
+<dt><a href="io/sbk/logger/Logger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)" class="member-name-link">setExceptionHandler(ExceptionHandler)</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a></dt>
 <dd>
 <div class="block">Default implementation for setting exception handler.</div>
 </dd>

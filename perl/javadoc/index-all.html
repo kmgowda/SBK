@@ -65,7 +65,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/PerlConfig.html#build()" class="member-name-link">build()</a> - Static method in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/impl/PerlBuilder.html#build(io.perl.PerlConfig,int,int,io.time.Time,long,long,double%5B%5D,io.perl.Print,io.perl.Print,io.perl.ReportLatency,java.util.concurrent.ExecutorService)" class="member-name-link">build(PerlConfig, int, int, Time, long, long, double[], Print, Print, ReportLatency, ExecutorService)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
+<dt><a href="io/perl/impl/PerlBuilder.html#build(io.time.Time,io.perl.PerlConfig,io.perl.PerformanceLogger,io.perl.ReportLatency,java.util.concurrent.ExecutorService)" class="member-name-link">build(Time, PerlConfig, PerformanceLogger, ReportLatency, ExecutorService)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/PerlConfig.html#build(java.io.InputStream)" class="member-name-link">build(InputStream)</a> - Static method in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -162,7 +162,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Class for Performance statistics.</div>
 </dd>
-<dt><a href="io/perl/impl/CQueuePerl.html#%3Cinit%3E(io.perl.PerlConfig,io.perl.PeriodicLogger,int,int,io.time.Time,java.util.concurrent.ExecutorService)" class="member-name-link">CQueuePerl(PerlConfig, PeriodicLogger, int, int, Time, ExecutorService)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/CQueuePerl.html" title="class in io.perl.impl">CQueuePerl</a></dt>
+<dt><a href="io/perl/impl/CQueuePerl.html#%3Cinit%3E(io.perl.PerlConfig,io.perl.PeriodicLogger,int,io.time.Time,java.util.concurrent.ExecutorService)" class="member-name-link">CQueuePerl(PerlConfig, PeriodicLogger, int, Time, ExecutorService)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/CQueuePerl.html" title="class in io.perl.impl">CQueuePerl</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/LatencyConfig.html#csv" class="member-name-link">csv</a> - Variable in class io.perl.<a href="io/perl/LatencyConfig.html" title="class in io.perl">LatencyConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -179,7 +179,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/LatencyConfig.html#DEFAULT_MIN_LATENCY" class="member-name-link">DEFAULT_MIN_LATENCY</a> - Static variable in class io.perl.<a href="io/perl/LatencyConfig.html" title="class in io.perl">LatencyConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/PerlConfig.html#DEFAULT_REPORTING_INTERVAL_SECONDS" class="member-name-link">DEFAULT_REPORTING_INTERVAL_SECONDS</a> - Static variable in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
+<dt><a href="io/perl/PerlConfig.html#DEFAULT_PRINTING_INTERVAL_SECONDS" class="member-name-link">DEFAULT_PRINTING_INTERVAL_SECONDS</a> - Static variable in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/PerlConfig.html#DEFAULT_RUNTIME_SECONDS" class="member-name-link">DEFAULT_RUNTIME_SECONDS</a> - Static variable in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -262,6 +262,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">get the current Time.</div>
 </dd>
+<dt><a href="io/perl/PerformanceLogger.html#getMaxLatency()" class="member-name-link">getMaxLatency()</a> - Method in interface io.perl.<a href="io/perl/PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a></dt>
+<dd>
+<div class="block">Default implementation of Maximum latency.</div>
+</dd>
 <dt><a href="io/perl/impl/ArrayLatencyRecorder.html#getMaxMemoryBytes()" class="member-name-link">getMaxMemoryBytes()</a> - Method in class io.perl.impl.<a href="io/perl/impl/ArrayLatencyRecorder.html" title="class in io.perl.impl">ArrayLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/CSVExtendedLatencyRecorder.html#getMaxMemoryBytes()" class="member-name-link">getMaxMemoryBytes()</a> - Method in class io.perl.impl.<a href="io/perl/impl/CSVExtendedLatencyRecorder.html" title="class in io.perl.impl">CSVExtendedLatencyRecorder</a></dt>
@@ -274,6 +278,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Max memory Size in Bytes.</div>
 </dd>
+<dt><a href="io/perl/PerformanceLogger.html#getMinLatency()" class="member-name-link">getMinLatency()</a> - Method in interface io.perl.<a href="io/perl/PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a></dt>
+<dd>
+<div class="block">Default implementation of minimum latency.</div>
+</dd>
+<dt><a href="io/perl/PerformanceLogger.html#getPercentiles()" class="member-name-link">getPercentiles()</a> - Method in interface io.perl.<a href="io/perl/PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a></dt>
+<dd>
+<div class="block">Default implementation of percentile Indices.</div>
+</dd>
 <dt><a href="io/perl/GetPerlChannel.html#getPerlChannel()" class="member-name-link">getPerlChannel()</a> - Method in interface io.perl.<a href="io/perl/GetPerlChannel.html" title="interface in io.perl">GetPerlChannel</a></dt>
 <dd>
 <div class="block">Get the PerlChannel to get the benchmark results.</div>
@@ -282,6 +294,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/GetPerlChannel.html" class="type-name-link" title="interface in io.perl">GetPerlChannel</a> - Interface in <a href="io/perl/package-summary.html">io.perl</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/PerformanceLogger.html#getPrintingIntervalSeconds()" class="member-name-link">getPrintingIntervalSeconds()</a> - Method in interface io.perl.<a href="io/perl/PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a></dt>
+<dd>
+<div class="block">Default implementation of Reporting interval.</div>
+</dd>
+<dt><a href="io/perl/PerformanceLogger.html#getTimeUnit()" class="member-name-link">getTimeUnit()</a> - Method in interface io.perl.<a href="io/perl/PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a></dt>
+<dd>
+<div class="block">Default implementation of time Unit.</div>
+</dd>
 <dt><a href="io/time/MicroSeconds.html#getTimeUnit()" class="member-name-link">getTimeUnit()</a> - Method in class io.time.<a href="io/time/MicroSeconds.html" title="class in io.time">MicroSeconds</a></dt>
 <dd>
 <div class="block">get the Time Unit.</div>
@@ -466,6 +486,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/LatencyConfig.html#PERCENTILES" class="member-name-link">PERCENTILES</a> - Static variable in class io.perl.<a href="io/perl/LatencyConfig.html" title="class in io.perl">LatencyConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/PerformanceLogger.html" class="type-name-link" title="interface in io.perl">PerformanceLogger</a> - Interface in <a href="io/perl/package-summary.html">io.perl</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/PeriodicLogger.html" class="type-name-link" title="interface in io.perl">PeriodicLogger</a> - Interface in <a href="io/perl/package-summary.html">io.perl</a></dt>
 <dd>
 <div class="block">Interface for recording latencies.</div>
@@ -476,7 +498,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/perl/Perl.html" class="type-name-link" title="interface in io.perl">Perl</a> - Interface in <a href="io/perl/package-summary.html">io.perl</a></dt>
 <dd>
-<div class="block">Interface for Periodic Latencies(PerL) Statistics.</div>
+<div class="block">Interface for Performance Logger(PerL) Statistics.</div>
 </dd>
 <dt><a href="io/perl/impl/PerlBuilder.html" class="type-name-link" title="class in io.perl.impl">PerlBuilder</a> - Class in <a href="io/perl/impl/package-summary.html">io.perl.impl</a></dt>
 <dd>&nbsp;</dd>
@@ -508,6 +530,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/perl/Print.html" class="type-name-link" title="interface in io.perl">Print</a> - Interface in <a href="io/perl/package-summary.html">io.perl</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">printTotal(double, long, long, double, double, double, long, long, long, long, long, long, long[])</a> - Method in interface io.perl.<a href="io/perl/PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a></dt>
+<dd>
+<div class="block">Print the Total Periodic performance results.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:Q">Q</h2>
 <dl class="index">
@@ -665,6 +691,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/perl/LatencyWindow.html#time" class="member-name-link">time</a> - Variable in class io.perl.<a href="io/perl/LatencyWindow.html" title="class in io.perl">LatencyWindow</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/time/Time.html" class="type-name-link" title="interface in io.time">Time</a> - Interface in <a href="io/time/package-summary.html">io.time</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/PerlConfig.html#timeoutMS" class="member-name-link">timeoutMS</a> - Variable in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/TimeStamp.html" class="type-name-link" title="class in io.perl">TimeStamp</a> - Class in <a href="io/perl/package-summary.html">io.perl</a></dt>
 <dd>

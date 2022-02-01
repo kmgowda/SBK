@@ -58,7 +58,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">io.sbk.logger.CountConnections
 <ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.PerformanceLogger, io.perl.ReportLatencies, io.sbk.logger.SetRW)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.Logger, io.perl.ReportLatencies, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.logger.<a href="GemLogger.html" class="type-name-link" title="interface in io.sbk.logger">GemLogger</a> (also extends io.sbk.options.<a href="../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>
@@ -72,7 +72,9 @@ loadScripts(document, 'script');</script>
 </li>
 <li class="circle">io.perl.Print
 <ul>
-<li class="circle">io.sbk.logger.PerformanceLogger
+<li class="circle">io.perl.PerformanceLogger
+<ul>
+<li class="circle">io.sbk.logger.Logger
 <ul>
 <li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.perl.ReportLatencies, io.sbk.logger.SetRW)
 <ul>
@@ -83,9 +85,11 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
+</ul>
+</li>
 <li class="circle">io.perl.ReportLatencies
 <ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.logger.SetRW)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.Logger, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.logger.<a href="GemLogger.html" class="type-name-link" title="interface in io.sbk.logger">GemLogger</a> (also extends io.sbk.options.<a href="../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>
@@ -94,7 +98,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li class="circle">io.sbk.logger.SetRW
 <ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.perl.ReportLatencies)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.Logger, io.perl.ReportLatencies)
 <ul>
 <li class="circle">io.sbk.logger.<a href="GemLogger.html" class="type-name-link" title="interface in io.sbk.logger">GemLogger</a> (also extends io.sbk.options.<a href="../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>

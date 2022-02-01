@@ -77,7 +77,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.perl.Print</code>, <code>io.perl.ReportLatency</code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code>io.perl.PerformanceLogger</code>, <code>io.perl.Print</code>, <code>io.perl.ReportLatency</code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></code></dd>
 </dl>
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
@@ -86,7 +86,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SystemLogger</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></span></div>
+implements <a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></span></div>
 <div class="block">Class for recoding/printing results on System.out.</div>
 </section>
 <section class="summary">
@@ -223,29 +223,19 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxLatency()" class="member-name-link">getMaxLatency</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Default implementation of Maximum latency.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMinLatency()" class="member-name-link">getMinLatency</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Default implementation of minimum latency.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPercentiles()" class="member-name-link">getPercentiles</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Default implementation of percentile Indices.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getReportingIntervalSeconds()" class="member-name-link">getReportingIntervalSeconds</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Default implementation of Reporting interval.</div>
-</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPrintingIntervalSeconds()" class="member-name-link">getPrintingIntervalSeconds</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.time.TimeUnit</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTimeUnit()" class="member-name-link">getTimeUnit</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Default implementation of time Unit.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementReaders()" class="member-name-link">incrementReaders</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -298,9 +288,7 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
  long&nbsp;slc1,
  long&nbsp;slc2,
  long[]&nbsp;percentileValues)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Print the Total Periodic performance results.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -309,10 +297,10 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.Logger">Methods inherited from interface&nbsp;io.sbk.logger.<a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></h3>
-<code><a href="../Logger.html#recordLatency(long,int,int,long)">recordLatency</a></code></div>
+<code><a href="../Logger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)">setExceptionHandler</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.logger.PerformanceLogger">Methods inherited from interface&nbsp;io.sbk.logger.<a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></h3>
-<code><a href="../PerformanceLogger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)">setExceptionHandler</a></code></div>
+<h3 id="methods-inherited-from-class-io.sbk.logger.RWLogger">Methods inherited from interface&nbsp;io.sbk.logger.<a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></h3>
+<code><a href="../RWLogger.html#recordLatency(long,int,int,long)">recordLatency</a></code></div>
 </section>
 </li>
 </ul>
@@ -429,11 +417,11 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <h3>addArgs</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addArgs</span><wbr><span class="parameters">(<a href="../../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
              throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#addArgs(io.sbk.options.InputOptions)">Logger</a></code></span></div>
 <div class="block">Add the Metric type specific command line arguments.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>params</code> - InputOptions object to be extended.</dd>
 <dt>Throws:</dt>
@@ -447,11 +435,11 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">parseArgs</span><wbr><span class="parameters">(@NotNull
  @NotNull <a href="../../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
                throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#parseArgs(io.sbk.options.InputOptions)">Logger</a></code></span></div>
 <div class="block">Parse the Metric specific command line arguments.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
 <dt>Throws:</dt>
@@ -468,11 +456,11 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
  @NotNull <a href="../../action/Action.html" title="enum class in io.sbk.action">Action</a>&nbsp;action,
  io.time.Time&nbsp;time)</span>
           throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">Logger</a></code></span></div>
 <div class="block">Open the Logger.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">open</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">open</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
 <dd><code>storageName</code> - The Name of the storage.</dd>
@@ -488,11 +476,11 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <h3>close</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">close</span><wbr><span class="parameters">(<a href="../../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
            throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#close(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#close(io.sbk.options.InputOptions)">Logger</a></code></span></div>
 <div class="block">Close the Logger.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#close(io.sbk.options.InputOptions)">close</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#close(io.sbk.options.InputOptions)">close</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
 <dt>Throws:</dt>
@@ -501,16 +489,12 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 </section>
 </li>
 <li>
-<section class="detail" id="getReportingIntervalSeconds()">
-<h3>getReportingIntervalSeconds</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getReportingIntervalSeconds</span>()</div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getReportingIntervalSeconds()">PerformanceLogger</a></code></span></div>
-<div class="block">Default implementation of Reporting interval.</div>
+<section class="detail" id="getPrintingIntervalSeconds()">
+<h3>getPrintingIntervalSeconds</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getPrintingIntervalSeconds</span>()</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#getReportingIntervalSeconds()">getReportingIntervalSeconds</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
-<dt>Returns:</dt>
-<dd>reporting time interval in seconds.</dd>
+<dd><code>getPrintingIntervalSeconds</code>&nbsp;in interface&nbsp;<code>io.perl.PerformanceLogger</code></dd>
 </dl>
 </section>
 </li>
@@ -518,14 +502,9 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <section class="detail" id="getTimeUnit()">
 <h3>getTimeUnit</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">io.time.TimeUnit</span>&nbsp;<span class="element-name">getTimeUnit</span>()</div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getTimeUnit()">PerformanceLogger</a></code></span></div>
-<div class="block">Default implementation of time Unit.
- Default time unit is Milliseconds.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#getTimeUnit()">getTimeUnit</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
-<dt>Returns:</dt>
-<dd>time unit.</dd>
+<dd><code>getTimeUnit</code>&nbsp;in interface&nbsp;<code>io.perl.PerformanceLogger</code></dd>
 </dl>
 </section>
 </li>
@@ -533,13 +512,9 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <section class="detail" id="getMinLatency()">
 <h3>getMinLatency</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">getMinLatency</span>()</div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getMinLatency()">PerformanceLogger</a></code></span></div>
-<div class="block">Default implementation of minimum latency.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#getMinLatency()">getMinLatency</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
-<dt>Returns:</dt>
-<dd>minimum latency value.</dd>
+<dd><code>getMinLatency</code>&nbsp;in interface&nbsp;<code>io.perl.PerformanceLogger</code></dd>
 </dl>
 </section>
 </li>
@@ -547,13 +522,9 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <section class="detail" id="getMaxLatency()">
 <h3>getMaxLatency</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">getMaxLatency</span>()</div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getMaxLatency()">PerformanceLogger</a></code></span></div>
-<div class="block">Default implementation of Maximum latency.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#getMaxLatency()">getMaxLatency</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
-<dt>Returns:</dt>
-<dd>Maximum latency value.</dd>
+<dd><code>getMaxLatency</code>&nbsp;in interface&nbsp;<code>io.perl.PerformanceLogger</code></dd>
 </dl>
 </section>
 </li>
@@ -561,13 +532,9 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
 <section class="detail" id="getPercentiles()">
 <h3>getPercentiles</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">getPercentiles</span>()</div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getPercentiles()">PerformanceLogger</a></code></span></div>
-<div class="block">Default implementation of percentile Indices.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#getPercentiles()">getPercentiles</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
-<dt>Returns:</dt>
-<dd>array of percentile Indices.</dd>
+<dd><code>getPercentiles</code>&nbsp;in interface&nbsp;<code>io.perl.PerformanceLogger</code></dd>
 </dl>
 </section>
 </li>
@@ -704,25 +671,9 @@ implements <a href="../Logger.html" title="interface in io.sbk.logger">Logger</a
  long&nbsp;slc1,
  long&nbsp;slc2,
  long[]&nbsp;percentileValues)</span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">PerformanceLogger</a></code></span></div>
-<div class="block">Print the Total Periodic performance results.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
-<dt>Parameters:</dt>
-<dd><code>seconds</code> - reporting seconds</dd>
-<dd><code>bytes</code> - number of bytes read/write</dd>
-<dd><code>records</code> - data to write.</dd>
-<dd><code>recsPerSec</code> - records per second.</dd>
-<dd><code>mbPerSec</code> - Throughput value in terms of MB (Mega Bytes) per Second.</dd>
-<dd><code>avgLatency</code> - Average Latency.</dd>
-<dd><code>maxLatency</code> - Maximum Latency.</dd>
-<dd><code>invalid</code> - Number of invalid/negative latencies</dd>
-<dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
-<dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
-<dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
-<dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
-<dd><code>percentileValues</code> - Array of percentiles.</dd>
+<dd><code>printTotal</code>&nbsp;in interface&nbsp;<code>io.perl.PerformanceLogger</code></dd>
 </dl>
 </section>
 </li>

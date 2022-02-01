@@ -105,15 +105,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../Perl.html" title="interface in io.perl">Perl</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#build(io.perl.PerlConfig,int,int,io.time.Time,long,long,double%5B%5D,io.perl.Print,io.perl.Print,io.perl.ReportLatency,java.util.concurrent.ExecutorService)" class="member-name-link">build</a><wbr>(<a href="../PerlConfig.html" title="class in io.perl">PerlConfig</a>&nbsp;config,
- int&nbsp;reportingSeconds,
- int&nbsp;timeoutMS,
- <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
- long&nbsp;minLatency,
- long&nbsp;maxLatency,
- double[]&nbsp;percentiles,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;windowLogger,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;totalLogger,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#build(io.time.Time,io.perl.PerlConfig,io.perl.PerformanceLogger,io.perl.ReportLatency,java.util.concurrent.ExecutorService)" class="member-name-link">build</a><wbr>(<a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
+ <a href="../PerlConfig.html" title="class in io.perl">PerlConfig</a>&nbsp;config,
+ <a href="../PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a>&nbsp;logger,
  <a href="../ReportLatency.html" title="interface in io.perl">ReportLatency</a>&nbsp;reportLatency,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
@@ -166,17 +160,11 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="build(io.perl.PerlConfig,int,int,io.time.Time,long,long,double[],io.perl.Print,io.perl.Print,io.perl.ReportLatency,java.util.concurrent.ExecutorService)">
+<section class="detail" id="build(io.time.Time,io.perl.PerlConfig,io.perl.PerformanceLogger,io.perl.ReportLatency,java.util.concurrent.ExecutorService)">
 <h3>build</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Perl.html" title="interface in io.perl">Perl</a></span>&nbsp;<span class="element-name">build</span><wbr><span class="parameters">(<a href="../PerlConfig.html" title="class in io.perl">PerlConfig</a>&nbsp;config,
- int&nbsp;reportingSeconds,
- int&nbsp;timeoutMS,
- <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
- long&nbsp;minLatency,
- long&nbsp;maxLatency,
- double[]&nbsp;percentiles,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;windowLogger,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;totalLogger,
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Perl.html" title="interface in io.perl">Perl</a></span>&nbsp;<span class="element-name">build</span><wbr><span class="parameters">(<a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
+ <a href="../PerlConfig.html" title="class in io.perl">PerlConfig</a>&nbsp;config,
+ <a href="../PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a>&nbsp;logger,
  <a href="../ReportLatency.html" title="interface in io.perl">ReportLatency</a>&nbsp;reportLatency,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</span></div>
 </section>

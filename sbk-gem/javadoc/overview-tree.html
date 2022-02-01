@@ -86,7 +86,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/SshConnection.html" class="type-name-link" title="class in io.sbk.gem">SshConnection</a></li>
 <li class="circle">io.sbk.gem.impl.<a href="io/sbk/gem/impl/SshResponseStream.html" class="type-name-link" title="class in io.sbk.gem.impl">SshResponseStream</a></li>
 <li class="circle">io.sbk.gem.<a href="io/sbk/gem/SshUtils.html" class="type-name-link" title="class in io.sbk.gem">SshUtils</a></li>
-<li class="circle">io.sbk.logger.impl.SystemLogger (implements io.sbk.logger.Logger)
+<li class="circle">io.sbk.logger.impl.SystemLogger (implements io.sbk.logger.RWLogger)
 <ul>
 <li class="circle">io.sbk.logger.impl.CSVLogger
 <ul>
@@ -112,7 +112,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">io.sbk.logger.CountConnections
 <ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.PerformanceLogger, io.perl.ReportLatencies, io.sbk.logger.SetRW)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.Logger, io.perl.ReportLatencies, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/GemLogger.html" class="type-name-link" title="interface in io.sbk.logger">GemLogger</a> (also extends io.sbk.options.<a href="io/sbk/options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>
@@ -151,7 +151,9 @@ loadScripts(document, 'script');</script>
 </li>
 <li class="circle">io.perl.Print
 <ul>
-<li class="circle">io.sbk.logger.PerformanceLogger
+<li class="circle">io.perl.PerformanceLogger
+<ul>
+<li class="circle">io.sbk.logger.Logger
 <ul>
 <li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.perl.ReportLatencies, io.sbk.logger.SetRW)
 <ul>
@@ -162,9 +164,11 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
+</ul>
+</li>
 <li class="circle">io.perl.ReportLatencies
 <ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.sbk.logger.SetRW)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.Logger, io.sbk.logger.SetRW)
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/GemLogger.html" class="type-name-link" title="interface in io.sbk.logger">GemLogger</a> (also extends io.sbk.options.<a href="io/sbk/options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>
@@ -173,7 +177,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li class="circle">io.sbk.logger.SetRW
 <ul>
-<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.PerformanceLogger, io.perl.ReportLatencies)
+<li class="circle">io.sbk.logger.RamLogger (also extends io.sbk.logger.CountConnections, io.sbk.logger.Logger, io.perl.ReportLatencies)
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/GemLogger.html" class="type-name-link" title="interface in io.sbk.logger">GemLogger</a> (also extends io.sbk.options.<a href="io/sbk/options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a>)</li>
 </ul>

@@ -107,18 +107,18 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="../Benchmark.html" title="interface in io.sbk.api">Benchmark</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildBenchmark(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.Logger)" class="member-name-link">buildBenchmark</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildBenchmark(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.RWLogger)" class="member-name-link">buildBenchmark</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;packageName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;applicationName,
- <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)</code></div>
+ <a href="../../logger/RWLogger.html" title="interface in io.sbk.logger">RWLogger</a>&nbsp;outRWLogger)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Build the Benchmark Object.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#run(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.Logger)" class="member-name-link">run</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#run(java.lang.String%5B%5D,java.lang.String,java.lang.String,io.sbk.logger.RWLogger)" class="member-name-link">run</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;packageName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;applicationName,
- <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)</code></div>
+ <a href="../../logger/RWLogger.html" title="interface in io.sbk.logger">RWLogger</a>&nbsp;outRWLogger)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Run the Performance Benchmarking .</div>
 </div>
@@ -154,12 +154,12 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="run(java.lang.String[],java.lang.String,java.lang.String,io.sbk.logger.Logger)">
+<section class="detail" id="run(java.lang.String[],java.lang.String,java.lang.String,io.sbk.logger.RWLogger)">
 <h3>run</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">run</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;packageName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;applicationName,
- <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)</span>
+ <a href="../../logger/RWLogger.html" title="interface in io.sbk.logger">RWLogger</a>&nbsp;outRWLogger)</span>
                 throws <span class="exceptions">org.apache.commons.cli.ParseException,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a>,
@@ -179,7 +179,7 @@ loadScripts(document, 'script');</script>
                         If you pass null to this parameter, then default package name "io.sbk" is used.</dd>
 <dd><code>applicationName</code> - name of the application. will be used in the 'help' message. if it is 'null' , name
                         'sbk' used as default.</dd>
-<dd><code>outLogger</code> - Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+<dd><code>outRWLogger</code> - Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
                         logger will be used.</dd>
 <dt>Throws:</dt>
 <dd><code>org.apache.commons.cli.ParseException</code> - If an exception occurred while parsing command line arguments.</dd>
@@ -197,14 +197,14 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="buildBenchmark(java.lang.String[],java.lang.String,java.lang.String,io.sbk.logger.Logger)">
+<section class="detail" id="buildBenchmark(java.lang.String[],java.lang.String,java.lang.String,io.sbk.logger.RWLogger)">
 <h3>buildBenchmark</h3>
 <div class="member-signature"><span class="annotations">@Contract("_, _, _, _ -&gt; new")
 @NotNull
 </span><span class="modifiers">public static</span>&nbsp;<span class="return-type">@NotNull <a href="../Benchmark.html" title="interface in io.sbk.api">Benchmark</a></span>&nbsp;<span class="element-name">buildBenchmark</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;packageName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;applicationName,
- <a href="../../logger/Logger.html" title="interface in io.sbk.logger">Logger</a>&nbsp;outLogger)</span>
+ <a href="../../logger/RWLogger.html" title="interface in io.sbk.logger">RWLogger</a>&nbsp;outRWLogger)</span>
                                          throws <span class="exceptions">org.apache.commons.cli.ParseException,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a>,
@@ -222,7 +222,7 @@ loadScripts(document, 'script');</script>
                         If you pass null to this parameter, then default package name "io.sbk" is used.</dd>
 <dd><code>applicationName</code> - name of the application. will be used in the 'help' message. if it is 'null' , name
                         'sbk' used as default.</dd>
-<dd><code>outLogger</code> - Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+<dd><code>outRWLogger</code> - Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
                         logger will be used.</dd>
 <dt>Returns:</dt>
 <dd>Benchmark interface</dd>

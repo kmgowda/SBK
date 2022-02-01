@@ -74,7 +74,11 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Superinterfaces:</dt>
-<dd><code><a href="CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code>, <code>io.perl.Print</code>, <code>io.perl.ReportLatency</code></dd>
+<dd><code>io.perl.PerformanceLogger</code>, <code>io.perl.Print</code></dd>
+</dl>
+<dl class="notes">
+<dt>All Known Subinterfaces:</dt>
+<dd><code><a href="RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></code></dd>
 </dl>
 <dl class="notes">
 <dt>All Known Implementing Classes:</dt>
@@ -82,7 +86,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">Logger</span><span class="extends-implements">
-extends <a href="PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a>, <a href="CountRW.html" title="interface in io.sbk.logger">CountRW</a>, io.perl.ReportLatency</span></div>
+extends io.perl.PerformanceLogger</span></div>
 <div class="block">Interface for recoding/printing results.</div>
 </section>
 <section class="summary">
@@ -92,32 +96,46 @@ extends <a href="PerformanceLogger.html" title="interface in io.sbk.logger">Perf
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab5" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab5', 3)" class="table-tab">Default Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button><button id="method-summary-table-tab5" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab5', 3)" class="table-tab">Default Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel">
 <div class="summary-table three-column-summary" aria-labelledby="method-summary-table-tab0">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#addArgs(io.sbk.options.InputOptions)" class="member-name-link">addArgs</a><wbr>(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Add the Metric type specific command line arguments.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#close(io.sbk.options.InputOptions)" class="member-name-link">close</a><wbr>(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Close the Logger.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)" class="member-name-link">open</a><wbr>(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;storageName,
+ <a href="../action/Action.html" title="enum class in io.sbk.action">Action</a>&nbsp;action,
+ io.time.Time&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Open the Logger.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#parseArgs(io.sbk.options.InputOptions)" class="member-name-link">parseArgs</a><wbr>(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Parse the Metric specific command line arguments.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#recordLatency(long,int,int,long)" class="member-name-link">recordLatency</a><wbr>(long&nbsp;startTime,
- int&nbsp;bytes,
- int&nbsp;events,
- long&nbsp;latency)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#setExceptionHandler(io.sbk.exception.ExceptionHandler)" class="member-name-link">setExceptionHandler</a><wbr>(<a href="../exception/ExceptionHandler.html" title="interface in io.sbk.exception">ExceptionHandler</a>&nbsp;handler)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
-<div class="block">Default method to record every event.</div>
+<div class="block">Default implementation for setting exception handler.</div>
 </div>
 </div>
 </div>
 </div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.logger.CountReaders">Methods inherited from interface&nbsp;io.sbk.logger.<a href="CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></h3>
-<code><a href="CountReaders.html#decrementReaders()">decrementReaders</a>, <a href="CountReaders.html#incrementReaders()">incrementReaders</a></code></div>
-<div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.logger.CountWriters">Methods inherited from interface&nbsp;io.sbk.logger.<a href="CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></h3>
-<code><a href="CountWriters.html#decrementWriters()">decrementWriters</a>, <a href="CountWriters.html#incrementWriters()">incrementWriters</a></code></div>
-<div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.logger.PerformanceLogger">Methods inherited from interface&nbsp;io.sbk.logger.<a href="PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></h3>
-<code><a href="PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a>, <a href="PerformanceLogger.html#close(io.sbk.options.InputOptions)">close</a>, <a href="PerformanceLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="PerformanceLogger.html#getMinLatency()">getMinLatency</a>, <a href="PerformanceLogger.html#getPercentiles()">getPercentiles</a>, <a href="PerformanceLogger.html#getReportingIntervalSeconds()">getReportingIntervalSeconds</a>, <a href="PerformanceLogger.html#getTimeUnit()">getTimeUnit</a>, <a href="PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">open</a>, <a href="PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a>, <a href="PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a>, <a href="PerformanceLogger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)">setExceptionHandler</a></code></div>
+<h3 id="methods-inherited-from-class-io.perl.PerformanceLogger">Methods inherited from interface&nbsp;io.perl.PerformanceLogger</h3>
+<code>getMaxLatency, getMinLatency, getPercentiles, getPrintingIntervalSeconds, getTimeUnit, printTotal</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.perl.Print">Methods inherited from interface&nbsp;io.perl.Print</h3>
 <code>print</code></div>
@@ -133,16 +151,76 @@ extends <a href="PerformanceLogger.html" title="interface in io.sbk.logger">Perf
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="recordLatency(long,int,int,long)">
-<h3>recordLatency</h3>
-<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">recordLatency</span><wbr><span class="parameters">(long&nbsp;startTime,
- int&nbsp;bytes,
- int&nbsp;events,
- long&nbsp;latency)</span></div>
-<div class="block">Default method to record every event.</div>
+<section class="detail" id="addArgs(io.sbk.options.InputOptions)">
+<h3>addArgs</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">addArgs</span><wbr><span class="parameters">(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
+      throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
+<div class="block">Add the Metric type specific command line arguments.</div>
 <dl class="notes">
-<dt>Specified by:</dt>
-<dd><code>recordLatency</code>&nbsp;in interface&nbsp;<code>io.perl.ReportLatency</code></dd>
+<dt>Parameters:</dt>
+<dd><code>params</code> - InputOptions object to be extended.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - If an exception occurred.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="parseArgs(io.sbk.options.InputOptions)">
+<h3>parseArgs</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">parseArgs</span><wbr><span class="parameters">(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
+        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
+<div class="block">Parse the Metric specific command line arguments.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - If an exception occurred.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">
+<h3>open</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">open</span><wbr><span class="parameters">(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;storageName,
+ <a href="../action/Action.html" title="enum class in io.sbk.action">Action</a>&nbsp;action,
+ io.time.Time&nbsp;time)</span>
+   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Open the Logger.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
+<dd><code>storageName</code> - The Name of the storage.</dd>
+<dd><code>action</code> - action to print</dd>
+<dd><code>time</code> - time interface</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - If an exception occurred.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="close(io.sbk.options.InputOptions)">
+<h3>close</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">close</span><wbr><span class="parameters">(<a href="../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
+    throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Close the Logger.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>params</code> - InputOptions object to be parsed for driver specific parameters/arguments.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - If an exception occurred.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setExceptionHandler(io.sbk.exception.ExceptionHandler)">
+<h3>setExceptionHandler</h3>
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setExceptionHandler</span><wbr><span class="parameters">(<a href="../exception/ExceptionHandler.html" title="interface in io.sbk.exception">ExceptionHandler</a>&nbsp;handler)</span></div>
+<div class="block">Default implementation for setting exception handler.
+ if the logger encounters any exception, it can report to SBK.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>handler</code> - Exception handler</dd>
 </dl>
 </section>
 </li>
