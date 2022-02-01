@@ -10,7 +10,7 @@
 package io.perl;
 
 /**
- * Interface for Periodic Latencies(PerL) Statistics.
+ * Interface for Performance Logger(PerL) Statistics.
  */
 public non-sealed interface Perl extends RunBenchmark, GetPerlChannel {
 
