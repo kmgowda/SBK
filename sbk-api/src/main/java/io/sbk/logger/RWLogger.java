@@ -14,7 +14,7 @@ import io.perl.ReportLatency;
 /**
  * Interface for recoding/printing results.
  */
-public interface RWLogger extends PerformancePrinter, CountRW, ReportLatency {
+public interface RWLogger extends Logger, CountRW, ReportLatency {
 
     /**
      * Default method to record every event.

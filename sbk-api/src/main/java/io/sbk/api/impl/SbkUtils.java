@@ -11,7 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.config.Config;
-import io.sbk.logger.PerformancePrinter;
+import io.sbk.logger.Logger;
 import io.sbk.system.Printer;
 import io.time.MicroSeconds;
 import io.time.MilliSeconds;
@@ -27,7 +27,7 @@ import java.util.List;
 
 final public class SbkUtils {
 
-    public static @NotNull Time getTime(@NotNull PerformancePrinter printer) {
+    public static @NotNull Time getTime(@NotNull Logger printer) {
         final TimeUnit timeUnit = printer.getTimeUnit();
         final Time ret = switch (timeUnit) {
             case mcs -> new MicroSeconds();

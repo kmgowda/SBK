@@ -22,7 +22,7 @@ import java.io.IOException;
 /**
  * Interface for recoding/printing results.
  */
-public interface PerformancePrinter extends PerformanceLogger {
+public interface Logger extends PerformanceLogger {
 
     /**
      * Add the Metric type specific command line arguments.
