@@ -12,11 +12,11 @@ package io.perl.impl;
 import io.perl.Bytes;
 import io.perl.LatencyConfig;
 import io.perl.LatencyRecordWindow;
+import io.perl.PerformanceLogger;
 import io.perl.PeriodicLogger;
 import io.perl.Perl;
 import io.perl.PerlConfig;
 import io.perl.PerlPrinter;
-import io.perl.Print;
 import io.perl.ReportLatency;
 import io.time.Time;
 
@@ -48,11 +48,13 @@ public final class PerlBuilder {
     }
 
 
-    private static PeriodicLogger buildPeriodicLogger(LatencyConfig config, Time time,
-                                                      long minLatency, long maxLatency,
-                                                      double[] percentiles,
-                                                      Print windowLogger, Print totalLogger,
+    private static PeriodicLogger buildPeriodicLogger(Time time,
+                                                      LatencyConfig config,
+                                                      PerformanceLogger logger,
                                                       ReportLatency reportLatency) {
+        final long minLatency = logger.getMinLatency();
+        final long maxLatency = logger.getMaxLatency();
+        final double[] percentiles = logger.getPercentiles();
         final LatencyRecordWindow window;
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
@@ -88,17 +90,13 @@ public final class PerlBuilder {
             PerlPrinter.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new TotalWindowLatencyPeriodicLogger(window, totalWindowExtension, windowLogger, totalLogger,
+        return new TotalWindowLatencyPeriodicLogger(window, totalWindowExtension, logger, logger::printTotal,
                 reportLatency, time);
     }
 
-    public static Perl build(PerlConfig config, int reportingSeconds, int timeoutMS,
-                             Time time, long minLatency, long maxLatency, double[] percentiles,
-                             Print windowLogger, Print totalLogger, ReportLatency reportLatency,
+    public static Perl build(Time time, PerlConfig config, PerformanceLogger logger, ReportLatency reportLatency,
                              ExecutorService executor) {
-        return new CQueuePerl(config, buildPeriodicLogger(config, time, minLatency, maxLatency,
-                percentiles, windowLogger, totalLogger, reportLatency),
-                reportingSeconds * Time.MS_PER_SEC, timeoutMS,
-                time, executor);
+        return new CQueuePerl(config, buildPeriodicLogger(time, config, logger, reportLatency),
+                logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, time, executor);
     }
 }

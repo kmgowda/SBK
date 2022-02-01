@@ -33,6 +33,7 @@ final public class PerlConfig extends LatencyConfig {
 
     public int workers;
     public int qPerWorker;
+    public int timeoutMS;
     public int idleNS;
     public int maxQs;
 
