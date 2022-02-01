@@ -108,10 +108,10 @@ final public class CQueuePerl implements Perl {
                 qFuture = null;
             }
             if (ex != null) {
-                PerlPrinter.log.warn("Performance Logger Shutdown with Exception:" + ex);
+                PerlPrinter.log.warn("CQueuePerl Shutdown with Exception:" + ex);
                 retFuture.completeExceptionally(ex);
             } else {
-                PerlPrinter.log.info("Performance Logger Shutdown");
+                PerlPrinter.log.info("CQueuePerl Shutdown");
                 retFuture.complete(null);
             }
         }
@@ -122,6 +122,7 @@ final public class CQueuePerl implements Perl {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
         if (state == State.BEGIN) {
             state = State.RUN;
+            PerlPrinter.log.info("CQueuePerl Start");
             qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(secondsToRun, recordsCount),
                     executor);
             qFuture.whenComplete((ret, ex) -> {
