@@ -8,61 +8,11 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.logger;
+package io.perl;
 
-import io.perl.LatencyConfig;
-import io.perl.PerlConfig;
-import io.perl.Print;
-import io.sbk.action.Action;
-import io.sbk.exception.ExceptionHandler;
-import io.sbk.options.InputOptions;
-import io.time.Time;
 import io.time.TimeUnit;
 
-import java.io.IOException;
-
-/**
- * Interface for recoding/printing results.
- */
 public interface PerformanceLogger extends Print {
-
-    /**
-     * Add the Metric type specific command line arguments.
-     *
-     * @param params InputOptions object to be extended.
-     * @throws IllegalArgumentException If an exception occurred.
-     */
-    void addArgs(final InputOptions params) throws IllegalArgumentException;
-
-    /**
-     * Parse the Metric specific command line arguments.
-     *
-     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
-     * @throws IllegalArgumentException If an exception occurred.
-     */
-    void parseArgs(final InputOptions params) throws IllegalArgumentException;
-
-
-    /**
-     * Open the Logger.
-     *
-     * @param params      InputOptions object to be parsed for driver specific parameters/arguments.
-     * @param storageName The Name of the storage.
-     * @param action      action to print
-     * @param time        time interface
-     * @throws IOException If an exception occurred.
-     */
-    void open(final InputOptions params, final String storageName, final Action action, Time time)
-            throws IOException;
-
-    /**
-     * Close the Logger.
-     *
-     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
-     * @throws IOException If an exception occurred.
-     */
-    void close(final InputOptions params) throws IOException;
-
 
     /**
      * Print the Total Periodic performance results.
@@ -90,8 +40,8 @@ public interface PerformanceLogger extends Print {
      *
      * @return reporting time interval in seconds.
      */
-    default int getReportingIntervalSeconds() {
-        return PerlConfig.DEFAULT_REPORTING_INTERVAL_SECONDS;
+    default int getPrintingIntervalSeconds() {
+        return PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS;
     }
 
     /**
@@ -130,15 +80,4 @@ public interface PerformanceLogger extends Print {
     default double[] getPercentiles() {
         return LatencyConfig.PERCENTILES;
     }
-
-    /**
-     * Default implementation for setting exception handler.
-     * if the logger encounters any exception, it can report to SBK.
-     *
-     * @param handler Exception handler
-     */
-    default void setExceptionHandler(ExceptionHandler handler) {
-
-    }
-
 }

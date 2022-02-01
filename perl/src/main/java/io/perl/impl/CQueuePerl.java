@@ -50,7 +50,7 @@ final public class CQueuePerl implements Perl {
 
 
     public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicLogger periodicRecorder,
-                      int reportingIntervalMS, int timeoutMS, Time time, ExecutorService executor) {
+                      int reportingIntervalMS, Time time, ExecutorService executor) {
         int maxQs;
         this.time = time;
         this.executor = executor;
@@ -67,7 +67,8 @@ final public class CQueuePerl implements Perl {
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
-        this.perlReceiver = new PerlRecorder(periodicRecorder, channels, time, reportingIntervalMS, timeoutMS,
+        this.perlReceiver = new PerlRecorder(periodicRecorder, channels, time, reportingIntervalMS,
+                Math.max(PerlConfig.DEFAULT_TIMEOUT_MS, perlConfig.timeoutMS),
                 Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
     }
 

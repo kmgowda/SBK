@@ -20,7 +20,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.config.Config;
 import io.sbk.data.DataType;
-import io.sbk.logger.Logger;
+import io.sbk.logger.RWLogger;
 import io.sbk.system.Printer;
 import io.state.State;
 import io.time.Time;
@@ -50,7 +50,7 @@ final public class SbkBenchmark implements Benchmark {
     final private Storage<Object> storage;
     final private DataType<Object> dType;
     final private Time time;
-    final private Logger logger;
+    final private RWLogger rwLogger;
     final private ExecutorService executor;
     final private ParameterOptions params;
     final private Perl writePerl;
@@ -70,17 +70,17 @@ final public class SbkBenchmark implements Benchmark {
      * @param params  Benchmarking input Parameters
      * @param storage Storage device/client/driver for benchmarking
      * @param dType   Data Type.
-     * @param logger  output logger
+     * @param rwLogger  output logger
      * @param time    time interface
      * @throws IOException If Exception occurs.
      */
     public SbkBenchmark(Action action, ParameterOptions params, Storage<Object> storage,
-                        DataType<Object> dType, @NotNull Logger logger, Time time) throws IOException {
+                        DataType<Object> dType, @NotNull RWLogger rwLogger, Time time) throws IOException {
         this.dType = dType;
         this.action = action;
         this.params = params;
         this.storage = storage;
-        this.logger = logger;
+        this.rwLogger = rwLogger;
         this.time = time;
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
@@ -90,9 +90,7 @@ final public class SbkBenchmark implements Benchmark {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             wConfig.workers = params.getWritersCount();
             wConfig.csv = false;
-            writePerl = PerlBuilder.build(wConfig, logger.getReportingIntervalSeconds(), params.getTimeoutMS(), time,
-                    logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                    logger, logger::printTotal, logger, executor);
+            writePerl = PerlBuilder.build(this.time, wConfig, rwLogger, rwLogger, executor);
         } else {
             writePerl = null;
         }
@@ -101,9 +99,7 @@ final public class SbkBenchmark implements Benchmark {
             PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             rConfig.workers = params.getReadersCount();
             rConfig.csv = false;
-            readPerl = PerlBuilder.build(rConfig, logger.getReportingIntervalSeconds(), params.getTimeoutMS(), time,
-                    logger.getMinLatency(), logger.getMaxLatency(), logger.getPercentiles(),
-                    logger, logger::printTotal, logger, executor);
+            readPerl = PerlBuilder.build(this.time, rConfig, rwLogger, rwLogger, executor);
         } else {
             readPerl = null;
         }
@@ -140,7 +136,7 @@ final public class SbkBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
-        logger.open(params, storage.getClass().getSimpleName(), action, time);
+        rwLogger.open(params, storage.getClass().getSimpleName(), action, time);
         storage.openStorage(params);
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
@@ -175,13 +171,13 @@ final public class SbkBenchmark implements Benchmark {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, params, writePerl.getPerlChannel(),
-                                dType, time, writers.get(i), logger, executor))
+                                dType, time, writers.get(i), rwLogger, executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, params, null,
-                                dType, time, writers.get(i), logger, executor))
+                                dType, time, writers.get(i), rwLogger, executor))
                         .collect(Collectors.toList());
             }
         } else {
@@ -193,7 +189,7 @@ final public class SbkBenchmark implements Benchmark {
                     .boxed()
                     .map(i -> new SbkReader(i, params,
                             readPerl.getPerlChannel(), dType, time, readers.get(i),
-                            logger, executor))
+                            rwLogger, executor))
                     .collect(Collectors.toList());
         } else {
             sbkReaders = null;
@@ -339,7 +335,7 @@ final public class SbkBenchmark implements Benchmark {
                 return null;
             });
         }
-        logger.setExceptionHandler(this::shutdown);
+        rwLogger.setExceptionHandler(this::shutdown);
         assert chainFuture != null;
         chainFuture.thenRunAsync(this::stop, executor);
 
@@ -382,7 +378,7 @@ final public class SbkBenchmark implements Benchmark {
         });
         try {
             storage.closeStorage(params);
-            logger.close(params);
+            rwLogger.close(params);
         } catch (IOException e) {
             e.printStackTrace();
         }

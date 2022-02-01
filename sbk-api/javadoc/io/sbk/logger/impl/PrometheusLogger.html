@@ -81,7 +81,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.perl.Print</code>, <code>io.perl.ReportLatency</code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code>io.perl.PerformanceLogger</code>, <code>io.perl.Print</code>, <code>io.perl.ReportLatency</code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></code></dd>
 </dl>
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
@@ -211,16 +211,16 @@ loadScripts(document, 'script');</script>
 <code><a href="CSVLogger.html#openCSV()">openCSV</a>, <a href="CSVLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a>, <a href="CSVLogger.html#writeToCSV(java.lang.String,java.lang.String,long,long,long,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">writeToCSV</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.impl.SystemLogger">Methods inherited from class&nbsp;io.sbk.logger.impl.<a href="SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></h3>
-<code><a href="SystemLogger.html#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">appendPercentiles</a>, <a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getReportingIntervalSeconds()">getReportingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a></code></div>
+<code><a href="SystemLogger.html#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">appendPercentiles</a>, <a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getPrintingIntervalSeconds()">getPrintingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.Logger">Methods inherited from interface&nbsp;io.sbk.logger.<a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></h3>
-<code><a href="../Logger.html#recordLatency(long,int,int,long)">recordLatency</a></code></div>
+<code><a href="../Logger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)">setExceptionHandler</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.logger.PerformanceLogger">Methods inherited from interface&nbsp;io.sbk.logger.<a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></h3>
-<code><a href="../PerformanceLogger.html#setExceptionHandler(io.sbk.exception.ExceptionHandler)">setExceptionHandler</a></code></div>
+<h3 id="methods-inherited-from-class-io.sbk.logger.RWLogger">Methods inherited from interface&nbsp;io.sbk.logger.<a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></h3>
+<code><a href="../RWLogger.html#recordLatency(long,int,int,long)">recordLatency</a></code></div>
 </section>
 </li>
 </ul>
@@ -282,11 +282,11 @@ loadScripts(document, 'script');</script>
 <h3>addArgs</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addArgs</span><wbr><span class="parameters">(<a href="../../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
              throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#addArgs(io.sbk.options.InputOptions)">Logger</a></code></span></div>
 <div class="block">Add the Metric type specific command line arguments.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Overrides:</dt>
 <dd><code><a href="CSVLogger.html#addArgs(io.sbk.options.InputOptions)">addArgs</a></code>&nbsp;in class&nbsp;<code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></code></dd>
 <dt>Parameters:</dt>
@@ -301,11 +301,11 @@ loadScripts(document, 'script');</script>
 <h3>parseArgs</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">parseArgs</span><wbr><span class="parameters">(<a href="../../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
                throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#parseArgs(io.sbk.options.InputOptions)">Logger</a></code></span></div>
 <div class="block">Parse the Metric specific command line arguments.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Overrides:</dt>
 <dd><code><a href="CSVLogger.html#parseArgs(io.sbk.options.InputOptions)">parseArgs</a></code>&nbsp;in class&nbsp;<code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></code></dd>
 <dt>Parameters:</dt>
@@ -324,11 +324,11 @@ loadScripts(document, 'script');</script>
  io.time.Time&nbsp;time)</span>
           throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">Logger</a></code></span></div>
 <div class="block">Open the Logger.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">open</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">open</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Overrides:</dt>
 <dd><code><a href="CSVLogger.html#open(io.sbk.options.InputOptions,java.lang.String,io.sbk.action.Action,io.time.Time)">open</a></code>&nbsp;in class&nbsp;<code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></code></dd>
 <dt>Parameters:</dt>
@@ -348,11 +348,11 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">close</span><wbr><span class="parameters">(<a href="../../options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>&nbsp;params)</span>
            throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#close(io.sbk.options.InputOptions)">PerformanceLogger</a></code></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Logger.html#close(io.sbk.options.InputOptions)">Logger</a></code></span></div>
 <div class="block">Close the Logger.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PerformanceLogger.html#close(io.sbk.options.InputOptions)">close</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.sbk.logger">PerformanceLogger</a></code></dd>
+<dd><code><a href="../Logger.html#close(io.sbk.options.InputOptions)">close</a></code>&nbsp;in interface&nbsp;<code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code></dd>
 <dt>Overrides:</dt>
 <dd><code><a href="CSVLogger.html#close(io.sbk.options.InputOptions)">close</a></code>&nbsp;in class&nbsp;<code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></code></dd>
 <dt>Parameters:</dt>

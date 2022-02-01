@@ -82,7 +82,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.perl.Print</code>, <code>io.perl.ReportLatencies</code>, <code>io.perl.ReportLatency</code>, <code><a href="../CountConnections.html" title="interface in io.sbk.logger">CountConnections</a></code>, <code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code>io.sbk.logger.Logger</code>, <code>io.sbk.logger.PerformanceLogger</code>, <code><a href="../RamLogger.html" title="interface in io.sbk.logger">RamLogger</a></code>, <code><a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a></code></dd>
+<dd><code>io.perl.PerformanceLogger</code>, <code>io.perl.Print</code>, <code>io.perl.ReportLatencies</code>, <code>io.perl.ReportLatency</code>, <code><a href="../CountConnections.html" title="interface in io.sbk.logger">CountConnections</a></code>, <code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code>io.sbk.logger.Logger</code>, <code><a href="../RamLogger.html" title="interface in io.sbk.logger">RamLogger</a></code>, <code>io.sbk.logger.RWLogger</code>, <code><a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">RamPrometheusLogger</span>
@@ -221,16 +221,19 @@ implements <a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>,
 <code>openCSV, writeToCSV</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.impl.SystemLogger">Methods inherited from class&nbsp;io.sbk.logger.impl.SystemLogger</h3>
-<code>appendPercentiles, appendWritesAndReaders, buildResultString, getMaxLatency, getMinLatency, getPercentiles, getReportingIntervalSeconds, getTimeUnit</code></div>
+<code>appendPercentiles, appendWritesAndReaders, buildResultString, getMaxLatency, getMinLatency, getPercentiles, getPrintingIntervalSeconds, getTimeUnit</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.Logger">Methods inherited from interface&nbsp;io.sbk.logger.Logger</h3>
-<code>recordLatency</code></div>
+<code>addArgs, close, parseArgs, setExceptionHandler</code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.sbk.logger.PerformanceLogger">Methods inherited from interface&nbsp;io.sbk.logger.PerformanceLogger</h3>
-<code>addArgs, close, getMaxLatency, getMinLatency, getPercentiles, getReportingIntervalSeconds, getTimeUnit, parseArgs, setExceptionHandler</code></div>
+<h3 id="methods-inherited-from-class-io.perl.PerformanceLogger">Methods inherited from interface&nbsp;io.perl.PerformanceLogger</h3>
+<code>getMaxLatency, getMinLatency, getPercentiles, getPrintingIntervalSeconds, getTimeUnit</code></div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-io.sbk.logger.RWLogger">Methods inherited from interface&nbsp;io.sbk.logger.RWLogger</h3>
+<code>recordLatency</code></div>
 </section>
 </li>
 </ul>
@@ -290,7 +293,7 @@ implements <a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>open</code>&nbsp;in interface&nbsp;<code>io.sbk.logger.PerformanceLogger</code></dd>
+<dd><code>open</code>&nbsp;in interface&nbsp;<code>io.sbk.logger.Logger</code></dd>
 <dt>Overrides:</dt>
 <dd><code>open</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.PrometheusLogger</code></dd>
 <dt>Throws:</dt>
@@ -365,7 +368,7 @@ implements <a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>,
  long[]&nbsp;percentileValues)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>printTotal</code>&nbsp;in interface&nbsp;<code>io.sbk.logger.PerformanceLogger</code></dd>
+<dd><code>printTotal</code>&nbsp;in interface&nbsp;<code>io.perl.PerformanceLogger</code></dd>
 <dt>Overrides:</dt>
 <dd><code>printTotal</code>&nbsp;in class&nbsp;<code>io.sbk.logger.impl.CSVLogger</code></dd>
 </dl>

@@ -7,20 +7,67 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
+
 package io.sbk.logger;
 
-import io.perl.ReportLatency;
+import io.perl.PerformanceLogger;
+import io.sbk.action.Action;
+import io.sbk.exception.ExceptionHandler;
+import io.sbk.options.InputOptions;
+import io.time.Time;
+
+
+import java.io.IOException;
 
 /**
  * Interface for recoding/printing results.
  */
-public interface Logger extends PerformanceLogger, CountRW, ReportLatency {
+public interface Logger extends PerformanceLogger {
 
     /**
-     * Default method to record every event.
+     * Add the Metric type specific command line arguments.
+     *
+     * @param params InputOptions object to be extended.
+     * @throws IllegalArgumentException If an exception occurred.
      */
-    @Override
-    default void recordLatency(long startTime, int bytes, int events, long latency) {
+    void addArgs(final InputOptions params) throws IllegalArgumentException;
+
+    /**
+     * Parse the Metric specific command line arguments.
+     *
+     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
+     * @throws IllegalArgumentException If an exception occurred.
+     */
+    void parseArgs(final InputOptions params) throws IllegalArgumentException;
+
+
+    /**
+     * Open the Logger.
+     *
+     * @param params      InputOptions object to be parsed for driver specific parameters/arguments.
+     * @param storageName The Name of the storage.
+     * @param action      action to print
+     * @param time        time interface
+     * @throws IOException If an exception occurred.
+     */
+    void open(final InputOptions params, final String storageName, final Action action, Time time)
+            throws IOException;
+
+    /**
+     * Close the Logger.
+     *
+     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
+     * @throws IOException If an exception occurred.
+     */
+    void close(final InputOptions params) throws IOException;
+
+    /**
+     * Default implementation for setting exception handler.
+     * if the logger encounters any exception, it can report to SBK.
+     *
+     * @param handler Exception handler
+     */
+    default void setExceptionHandler(ExceptionHandler handler) {
 
     }
 
