@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.micrometer.core.instrument.util.IOUtils;
-import io.perl.impl.PerlUtils;
+import io.perl.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.ParameterOptions;
@@ -214,7 +214,7 @@ final public class Sbk {
             Printer.log.error(errMsg);
             throw new InstantiationException(errMsg);
         }
-        time = PerlUtils.getTime(rwLogger);
+        time = PerlBuilder.buildTime(rwLogger);
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
                 action = Action.Write_Reading;

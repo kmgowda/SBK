@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
-import io.perl.impl.PerlUtils;
+import io.perl.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
 import io.sbk.config.RamConfig;
@@ -128,7 +128,7 @@ final public class SbkRam {
             throw ex;
         }
 
-        time = PerlUtils.getTime(logger);
+        time = PerlBuilder.buildTime(logger);
         return new SbkRamBenchmark(ramConfig, params, logger, time);
     }
 

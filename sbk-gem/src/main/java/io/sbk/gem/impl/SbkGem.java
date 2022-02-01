@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
-import io.perl.impl.PerlUtils;
+import io.perl.impl.PerlBuilder;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbk.api.impl.SbkUtils;
@@ -267,7 +267,7 @@ final public class SbkGem {
             sbkArgsBuilder.append(" ");
             sbkArgsBuilder.append(arg);
         }
-        time = PerlUtils.getTime(logger);
+        time = PerlBuilder.buildTime(logger);
         sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
         sbkArgsBuilder.append(" -minlatency ").append(logger.getMinLatency());
         sbkArgsBuilder.append(" -maxlatency ").append(logger.getMaxLatency());

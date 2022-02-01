@@ -18,12 +18,30 @@ import io.perl.Perl;
 import io.perl.PerlConfig;
 import io.perl.PerlPrinter;
 import io.perl.ReportLatency;
+import io.time.MicroSeconds;
+import io.time.MilliSeconds;
+import io.time.NanoSeconds;
 import io.time.Time;
+import io.time.TimeUnit;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
 public final class PerlBuilder {
+
+    public static @NotNull Time buildTime(@NotNull PerformanceLogger logger) {
+        final TimeUnit timeUnit = logger.getTimeUnit();
+        final Time ret = switch (timeUnit) {
+            case mcs -> new MicroSeconds();
+            case ns -> new NanoSeconds();
+            default -> new MilliSeconds();
+        };
+        PerlPrinter.log.info("Time Unit: " + ret.getTimeUnit().toString());
+        PerlPrinter.log.info("Minimum Latency: " + logger.getMinLatency() + " " + ret.getTimeUnit().name());
+        PerlPrinter.log.info("Maximum Latency: " + logger.getMaxLatency() + " " + ret.getTimeUnit().name());
+        return ret;
+    }
 
     public static LatencyRecordWindow buildLatencyRecordWindow(LatencyConfig config, Time time,
                                                                long minLatency, long maxLatency,
@@ -95,8 +113,12 @@ public final class PerlBuilder {
     }
 
     public static Perl build(Time time, PerlConfig config, PerformanceLogger logger, ReportLatency reportLatency,
-                             ExecutorService executor) {
+                             ExecutorService executor) throws IllegalArgumentException {
+        if (time.getTimeUnit() != logger.getTimeUnit()) {
+            throw new IllegalArgumentException("Time units are not matching");
+        }
         return new CQueuePerl(config, buildPeriodicLogger(time, config, logger, reportLatency),
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, time, executor);
     }
+
 }
