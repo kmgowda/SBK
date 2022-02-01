@@ -16,7 +16,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.perl.Bytes;
 import io.perl.LatencyConfig;
 import io.sbk.action.Action;
-import io.sbk.logger.Logger;
+import io.sbk.logger.RWLogger;
 import io.sbk.logger.LoggerConfig;
 import io.sbk.options.InputOptions;
 import io.sbk.system.Printer;
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for recoding/printing results on System.out.
  */
-public class SystemLogger implements Logger {
+public class SystemLogger implements RWLogger {
     private final static String LOGGER_FILE = "logger.properties";
     public final AtomicInteger writers;
     public final AtomicInteger readers;
