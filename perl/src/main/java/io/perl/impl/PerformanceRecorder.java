@@ -18,7 +18,7 @@ import io.time.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.locks.LockSupport;
 
-public final class PerlRecorder {
+public final class PerformanceRecorder {
     final private int windowIntervalMS;
     final private int idleNS;
     final private int timeoutMS;
@@ -26,8 +26,8 @@ public final class PerlRecorder {
     final private PeriodicLogger periodicRecorder;
     final private Channel[] channels;
 
-    public PerlRecorder(PeriodicLogger periodicRecorder, Channel[] channels, Time time,
-                        int reportingIntervalMS, int timeoutMS, int idleNS) {
+    public PerformanceRecorder(PeriodicLogger periodicRecorder, Channel[] channels, Time time,
+                               int reportingIntervalMS, int timeoutMS, int idleNS) {
         this.periodicRecorder = periodicRecorder;
         this.channels = channels;
         this.time = time;
@@ -45,7 +45,7 @@ public final class PerlRecorder {
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        PerlPrinter.log.info("Performance Logger Started");
+        PerlPrinter.log.info("Performance Recorder Started");
         periodicRecorder.start(startTime);
         periodicRecorder.startWindow(startTime);
         while (doWork) {
@@ -96,6 +96,7 @@ public final class PerlRecorder {
             }
         }
         periodicRecorder.stop(ctime);
+        PerlPrinter.log.info("Performance Recorder Exited");
     }
 
 
