@@ -11,7 +11,7 @@
 package io.sbk.api.impl;
 
 import io.sbk.config.Config;
-import io.sbk.logger.PerformanceLogger;
+import io.sbk.logger.PerformancePrinter;
 import io.sbk.system.Printer;
 import io.time.MicroSeconds;
 import io.time.MilliSeconds;
@@ -27,16 +27,16 @@ import java.util.List;
 
 final public class SbkUtils {
 
-    public static @NotNull Time getTime(@NotNull PerformanceLogger logger) {
-        final TimeUnit timeUnit = logger.getTimeUnit();
+    public static @NotNull Time getTime(@NotNull PerformancePrinter printer) {
+        final TimeUnit timeUnit = printer.getTimeUnit();
         final Time ret = switch (timeUnit) {
             case mcs -> new MicroSeconds();
             case ns -> new NanoSeconds();
             default -> new MilliSeconds();
         };
         Printer.log.info("Time Unit: " + ret.getTimeUnit().toString());
-        Printer.log.info("Minimum Latency: " + logger.getMinLatency() + " " + ret.getTimeUnit().name());
-        Printer.log.info("Maximum Latency: " + logger.getMaxLatency() + " " + ret.getTimeUnit().name());
+        Printer.log.info("Minimum Latency: " + printer.getMinLatency() + " " + ret.getTimeUnit().name());
+        Printer.log.info("Maximum Latency: " + printer.getMaxLatency() + " " + ret.getTimeUnit().name());
         return ret;
     }
 

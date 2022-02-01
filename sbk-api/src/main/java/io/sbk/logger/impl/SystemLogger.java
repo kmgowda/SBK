@@ -191,7 +191,7 @@ public class SystemLogger implements Logger {
     }
 
     @Override
-    public int getReportingIntervalSeconds() {
+    public int getPrintingIntervalSeconds() {
         return loggerConfig.reportingSeconds;
     }
 

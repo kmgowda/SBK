@@ -86,7 +86,7 @@ final public class SbkRamBenchmark implements Benchmark {
         queue = new LinkedBlockingQueue<>();
         latencyRecorder = createLatencyRecorder();
         benchmark = new RamBenchmark(ramConfig.maxQueues, ramConfig.idleMS, time, latencyRecorder,
-                logger.getReportingIntervalSeconds() * Time.MS_PER_SEC);
+                logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
         service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
         server = ServerBuilder.forPort(params.getRamPort()).addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();

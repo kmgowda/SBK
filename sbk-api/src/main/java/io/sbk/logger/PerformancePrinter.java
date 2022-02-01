@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * Interface for recoding/printing results.
  */
-public interface PerformanceLogger extends Print {
+public interface PerformancePrinter extends Print {
 
     /**
      * Add the Metric type specific command line arguments.
@@ -90,8 +90,8 @@ public interface PerformanceLogger extends Print {
      *
      * @return reporting time interval in seconds.
      */
-    default int getReportingIntervalSeconds() {
-        return PerlConfig.DEFAULT_REPORTING_INTERVAL_SECONDS;
+    default int getPrintingIntervalSeconds() {
+        return PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS;
     }
 
     /**

@@ -22,7 +22,7 @@ import java.util.Objects;
 final public class PerlConfig extends LatencyConfig {
     final public static String NAME = "PerL";
 
-    final public static int DEFAULT_REPORTING_INTERVAL_SECONDS = 5;
+    final public static int DEFAULT_PRINTING_INTERVAL_SECONDS = 5;
     final public static int DEFAULT_TIMEOUT_MS = Time.MS_PER_SEC;
     final public static long DEFAULT_RUNTIME_SECONDS = Long.MAX_VALUE / Time.MS_PER_SEC;
     final public static int MIN_WORKERS = 1;
