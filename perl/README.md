@@ -24,7 +24,7 @@ for performance benchmarking of any software system.
 
 ## Get the Perl Package
 
-### Perl Maven Central
+### PerL Maven Central
 
    ```
     repositories {
@@ -37,7 +37,7 @@ for performance benchmarking of any software system.
    ```
   Note that 'mavenCentral()' repository is required to fetch the SBK APIs package and its dependencies.
  
-### Perl Git hub package
+### PerL Git hub package
 
   ```
     repositories {
@@ -60,7 +60,7 @@ for performance benchmarking of any software system.
 
    ```
 
-### Perl Jit package
+### PerL Jit package
 
   ```
     repositories {
