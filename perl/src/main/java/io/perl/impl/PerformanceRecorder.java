@@ -11,6 +11,7 @@ package io.perl.impl;
 
 import io.perl.Channel;
 import io.perl.PeriodicLogger;
+import io.perl.PerlConfig;
 import io.perl.PerlPrinter;
 import io.perl.TimeStamp;
 import io.time.Time;
@@ -18,34 +19,33 @@ import io.time.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.locks.LockSupport;
 
-public final class PerlRecorder {
+public final class PerformanceRecorder {
     final private int windowIntervalMS;
     final private int idleNS;
-    final private int timeoutMS;
     final private Time time;
     final private PeriodicLogger periodicRecorder;
     final private Channel[] channels;
 
-    public PerlRecorder(PeriodicLogger periodicRecorder, Channel[] channels, Time time,
-                        int reportingIntervalMS, int timeoutMS, int idleNS) {
+    public PerformanceRecorder(PeriodicLogger periodicRecorder, Channel[] channels, Time time,
+                               int reportingIntervalMS, int idleNS) {
         this.periodicRecorder = periodicRecorder;
         this.channels = channels;
         this.time = time;
         this.windowIntervalMS = reportingIntervalMS;
-        this.timeoutMS = timeoutMS;
         this.idleNS = idleNS;
     }
 
     public void run(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, timeoutMS, idleNS);
+        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, idleNS,
+                Math.min(windowIntervalMS, PerlConfig.DEFAULT_TIMEOUT_MS));
         final long startTime = time.getCurrentTime();
         boolean doWork = true;
         long ctime = startTime;
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        PerlPrinter.log.info("Performance Logger Started");
+        PerlPrinter.log.info("Performance Recorder Started");
         periodicRecorder.start(startTime);
         periodicRecorder.startWindow(startTime);
         while (doWork) {
@@ -84,9 +84,9 @@ public final class PerlRecorder {
                             periodicRecorder.stopWindow(ctime);
                             periodicRecorder.startWindow(ctime);
                             idleCounter.reset();
-                            idleCounter.setElastic(diffTime);
+                            idleCounter.setElasticCount(diffTime);
                         } else {
-                            idleCounter.updateElastic(diffTime);
+                            idleCounter.updateElasticCount(diffTime);
                         }
                     }
                 }
@@ -96,6 +96,7 @@ public final class PerlRecorder {
             }
         }
         periodicRecorder.stop(ctime);
+        PerlPrinter.log.info("Performance Recorder Exited");
     }
 
 
@@ -112,7 +113,7 @@ public final class PerlRecorder {
         private long idleCount;
         private long totalCount;
 
-        public ElasticWaitCounter(int windowInterval, int timeoutMS, int idleNS) {
+        public ElasticWaitCounter(int windowInterval, int idleNS, int timeoutMS) {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
             countRatio = (Time.NS_PER_MS * 1.0) / this.idleNS;
@@ -133,11 +134,11 @@ public final class PerlRecorder {
             idleCount = 0;
         }
 
-        public void updateElastic(long diffTime) {
+        public void updateElasticCount(long diffTime) {
             elasticCount = Math.max((long) (countRatio * (windowInterval - diffTime)), minIdleCount);
         }
 
-        public void setElastic(long diffTime) {
+        public void setElasticCount(long diffTime) {
             elasticCount = (totalCount * windowInterval) / diffTime;
             totalCount = 0;
         }

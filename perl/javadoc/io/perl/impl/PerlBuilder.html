@@ -118,6 +118,9 @@ loadScripts(document, 'script');</script>
  long&nbsp;maxLatency,
  double[]&nbsp;percentileFractions)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="../../time/Time.html" title="interface in io.time">Time</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildTime(io.perl.PerformanceLogger)" class="member-name-link">buildTime</a><wbr>(@NotNull <a href="../PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a>&nbsp;logger)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -150,6 +153,14 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="buildTime(io.perl.PerformanceLogger)">
+<h3>buildTime</h3>
+<div class="member-signature"><span class="annotations">@NotNull
+</span><span class="modifiers">public static</span>&nbsp;<span class="return-type">@NotNull <a href="../../time/Time.html" title="interface in io.time">Time</a></span>&nbsp;<span class="element-name">buildTime</span><wbr><span class="parameters">(@NotNull
+ @NotNull <a href="../PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a>&nbsp;logger)</span></div>
+</section>
+</li>
+<li>
 <section class="detail" id="buildLatencyRecordWindow(io.perl.LatencyConfig,io.time.Time,long,long,double[])">
 <h3>buildLatencyRecordWindow</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a></span>&nbsp;<span class="element-name">buildLatencyRecordWindow</span><wbr><span class="parameters">(<a href="../LatencyConfig.html" title="class in io.perl">LatencyConfig</a>&nbsp;config,
@@ -166,7 +177,12 @@ loadScripts(document, 'script');</script>
  <a href="../PerlConfig.html" title="class in io.perl">PerlConfig</a>&nbsp;config,
  <a href="../PerformanceLogger.html" title="interface in io.perl">PerformanceLogger</a>&nbsp;logger,
  <a href="../ReportLatency.html" title="interface in io.perl">ReportLatency</a>&nbsp;reportLatency,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</span>
+                  throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
+<dl class="notes">
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code></dd>
+</dl>
 </section>
 </li>
 </ul>

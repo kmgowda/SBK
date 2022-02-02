@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
  * Class for Performance statistics.
  */
 final public class CQueuePerl implements Perl {
-    final private PerlRecorder perlReceiver;
+    final private PerformanceRecorder perlReceiver;
     final private Channel[] channels;
     final private Time time;
     final private ExecutorService executor;
@@ -67,8 +67,7 @@ final public class CQueuePerl implements Perl {
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
-        this.perlReceiver = new PerlRecorder(periodicRecorder, channels, time, reportingIntervalMS,
-                Math.max(PerlConfig.DEFAULT_TIMEOUT_MS, perlConfig.timeoutMS),
+        this.perlReceiver = new PerformanceRecorder(periodicRecorder, channels, time, reportingIntervalMS,
                 Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
     }
 
@@ -108,10 +107,10 @@ final public class CQueuePerl implements Perl {
                 qFuture = null;
             }
             if (ex != null) {
-                PerlPrinter.log.warn("Performance Logger Shutdown with Exception:" + ex);
+                PerlPrinter.log.warn("CQueuePerl Shutdown with Exception:" + ex);
                 retFuture.completeExceptionally(ex);
             } else {
-                PerlPrinter.log.info("Performance Logger Shutdown");
+                PerlPrinter.log.info("CQueuePerl Shutdown");
                 retFuture.complete(null);
             }
         }
@@ -122,6 +121,7 @@ final public class CQueuePerl implements Perl {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
         if (state == State.BEGIN) {
             state = State.RUN;
+            PerlPrinter.log.info("CQueuePerl Start");
             qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(secondsToRun, recordsCount),
                     executor);
             qFuture.whenComplete((ret, ex) -> {
