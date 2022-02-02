@@ -11,6 +11,7 @@ package io.perl.impl;
 
 import io.perl.Channel;
 import io.perl.PeriodicLogger;
+import io.perl.PerlConfig;
 import io.perl.PerlPrinter;
 import io.perl.TimeStamp;
 import io.time.Time;
@@ -21,24 +22,23 @@ import java.util.concurrent.locks.LockSupport;
 public final class PerformanceRecorder {
     final private int windowIntervalMS;
     final private int idleNS;
-    final private int timeoutMS;
     final private Time time;
     final private PeriodicLogger periodicRecorder;
     final private Channel[] channels;
 
     public PerformanceRecorder(PeriodicLogger periodicRecorder, Channel[] channels, Time time,
-                               int reportingIntervalMS, int timeoutMS, int idleNS) {
+                               int reportingIntervalMS, int idleNS) {
         this.periodicRecorder = periodicRecorder;
         this.channels = channels;
         this.time = time;
         this.windowIntervalMS = reportingIntervalMS;
-        this.timeoutMS = timeoutMS;
         this.idleNS = idleNS;
     }
 
     public void run(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, timeoutMS, idleNS);
+        final ElasticWaitCounter idleCounter = new ElasticWaitCounter(windowIntervalMS, idleNS,
+                Math.min(windowIntervalMS, PerlConfig.DEFAULT_TIMEOUT_MS));
         final long startTime = time.getCurrentTime();
         boolean doWork = true;
         long ctime = startTime;
@@ -113,7 +113,7 @@ public final class PerformanceRecorder {
         private long idleCount;
         private long totalCount;
 
-        public ElasticWaitCounter(int windowInterval, int timeoutMS, int idleNS) {
+        public ElasticWaitCounter(int windowInterval, int idleNS, int timeoutMS) {
             this.windowInterval = windowInterval;
             this.idleNS = idleNS;
             countRatio = (Time.NS_PER_MS * 1.0) / this.idleNS;
