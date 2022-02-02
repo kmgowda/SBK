@@ -114,6 +114,9 @@ public final class PerlBuilder {
 
     public static Perl build(Time time, PerlConfig config, PerformanceLogger logger, ReportLatency reportLatency,
                              ExecutorService executor) throws IllegalArgumentException {
+        if (time == null) {
+            time = buildTime(logger);
+        }
         if (time.getTimeUnit() != logger.getTimeUnit()) {
             throw new IllegalArgumentException("Time units are not matching");
         }
