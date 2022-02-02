@@ -90,7 +90,7 @@ final public class SbkBenchmark implements Benchmark {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             wConfig.workers = params.getWritersCount();
             wConfig.csv = false;
-            writePerl = PerlBuilder.build(this.time, wConfig, rwLogger, rwLogger, executor);
+            writePerl = PerlBuilder.build(wConfig, rwLogger, rwLogger, executor, this.time);
         } else {
             writePerl = null;
         }
@@ -99,7 +99,7 @@ final public class SbkBenchmark implements Benchmark {
             PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             rConfig.workers = params.getReadersCount();
             rConfig.csv = false;
-            readPerl = PerlBuilder.build(this.time, rConfig, rwLogger, rwLogger, executor);
+            readPerl = PerlBuilder.build(rConfig, rwLogger, rwLogger, executor, this.time);
         } else {
             readPerl = null;
         }

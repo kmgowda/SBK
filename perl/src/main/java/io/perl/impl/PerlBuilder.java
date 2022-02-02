@@ -112,8 +112,8 @@ public final class PerlBuilder {
                 reportLatency, time);
     }
 
-    public static Perl build(Time time, PerlConfig config, PerformanceLogger logger, ReportLatency reportLatency,
-                             ExecutorService executor) throws IllegalArgumentException {
+    public static Perl build(PerlConfig config, PerformanceLogger logger, ReportLatency reportLatency,
+                             ExecutorService executor, Time time) throws IllegalArgumentException {
         if (time == null) {
             time = buildTime(logger);
         }
