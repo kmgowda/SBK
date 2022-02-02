@@ -84,9 +84,9 @@ public final class PerformanceRecorder {
                             periodicRecorder.stopWindow(ctime);
                             periodicRecorder.startWindow(ctime);
                             idleCounter.reset();
-                            idleCounter.setElastic(diffTime);
+                            idleCounter.setElasticCount(diffTime);
                         } else {
-                            idleCounter.updateElastic(diffTime);
+                            idleCounter.updateElasticCount(diffTime);
                         }
                     }
                 }
@@ -134,11 +134,11 @@ public final class PerformanceRecorder {
             idleCount = 0;
         }
 
-        public void updateElastic(long diffTime) {
+        public void updateElasticCount(long diffTime) {
             elasticCount = Math.max((long) (countRatio * (windowInterval - diffTime)), minIdleCount);
         }
 
-        public void setElastic(long diffTime) {
+        public void setElasticCount(long diffTime) {
             elasticCount = (totalCount * windowInterval) / diffTime;
             totalCount = 0;
         }

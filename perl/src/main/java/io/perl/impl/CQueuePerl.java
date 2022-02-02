@@ -68,7 +68,7 @@ final public class CQueuePerl implements Perl {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
         this.perlReceiver = new PerformanceRecorder(periodicRecorder, channels, time, reportingIntervalMS,
-                Math.max(PerlConfig.DEFAULT_TIMEOUT_MS, perlConfig.timeoutMS),
+                Math.min(PerlConfig.DEFAULT_TIMEOUT_MS, reportingIntervalMS),
                 Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
     }
 
