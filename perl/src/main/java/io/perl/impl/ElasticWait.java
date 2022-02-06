@@ -33,6 +33,10 @@ public final class ElasticWait {
         idleCount = 0;
         totalCount = 0;
     }
+    
+    public void reset() {
+        idleCount = 0;
+    }
 
     public boolean waitAndCheck() {
         LockSupport.parkNanos(idleNS);
@@ -41,16 +45,12 @@ public final class ElasticWait {
         return idleCount > elasticCount;
     }
 
-    public void reset() {
-        idleCount = 0;
+    public void updateElastic(long elapsedInterval) {
+        elasticCount = Math.max((long) (countRatio * (windowInterval - elapsedInterval)), minIdleCount);
     }
 
-    public void updateElastic(long diffTime) {
-        elasticCount = Math.max((long) (countRatio * (windowInterval - diffTime)), minIdleCount);
-    }
-
-    public void setElastic(long diffTime) {
-        elasticCount = (totalCount * windowInterval) / diffTime;
+    public void setElastic(long currentInterval) {
+        elasticCount = (totalCount * windowInterval) / currentInterval;
         totalCount = 0;
     }
 }
