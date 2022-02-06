@@ -37,7 +37,7 @@ public final class PerformanceRecorder {
 
     public void run(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        final ElasticWait idleCounter = new ElasticWait(windowIntervalMS, idleNS,
+        final ElasticWait idleWait = new ElasticWait(windowIntervalMS, idleNS,
                 Math.min(windowIntervalMS, PerlConfig.DEFAULT_TIMEOUT_MS));
         final long startTime = time.getCurrentTime();
         boolean doWork = true;
@@ -71,22 +71,22 @@ public final class PerformanceRecorder {
                     if (periodicRecorder.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
                         periodicRecorder.stopWindow(ctime);
                         periodicRecorder.startWindow(ctime);
-                        idleCounter.reset();
+                        idleWait.reset();
                     }
                 }
             }
             if (doWork) {
                 if (notFound) {
-                    if (idleCounter.waitAndCheck()) {
+                    if (idleWait.waitAndCheck()) {
                         ctime = time.getCurrentTime();
                         final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
                         if (diffTime > windowIntervalMS) {
                             periodicRecorder.stopWindow(ctime);
                             periodicRecorder.startWindow(ctime);
-                            idleCounter.reset();
-                            idleCounter.setElastic(diffTime);
+                            idleWait.reset();
+                            idleWait.setElastic(diffTime);
                         } else {
-                            idleCounter.updateElastic(diffTime);
+                            idleWait.updateElastic(diffTime);
                         }
                     }
                 }
