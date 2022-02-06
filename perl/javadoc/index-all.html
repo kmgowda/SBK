@@ -65,7 +65,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/PerlConfig.html#build()" class="member-name-link">build()</a> - Static method in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/impl/PerlBuilder.html#build(io.time.Time,io.perl.PerlConfig,io.perl.PerformanceLogger,io.perl.ReportLatency,java.util.concurrent.ExecutorService)" class="member-name-link">build(Time, PerlConfig, PerformanceLogger, ReportLatency, ExecutorService)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
+<dt><a href="io/perl/impl/PerlBuilder.html#build(io.perl.PerlConfig,io.perl.PerformanceLogger,io.perl.ReportLatency,java.util.concurrent.ExecutorService,io.time.Time)" class="member-name-link">build(PerlConfig, PerformanceLogger, ReportLatency, ExecutorService, Time)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/PerlConfig.html#build(java.io.InputStream)" class="member-name-link">build(InputStream)</a> - Static method in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -236,6 +236,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">get the elapsed Time in seconds.</div>
 </dd>
+<dt><a href="io/perl/impl/ElasticWait.html" class="type-name-link" title="class in io.perl.impl">ElasticWait</a> - Class in <a href="io/perl/impl/package-summary.html">io.perl.impl</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/impl/ElasticWait.html#%3Cinit%3E(int,int,int)" class="member-name-link">ElasticWait(int, int, int)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/ElasticWait.html" title="class in io.perl.impl">ElasticWait</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/state/State.html#END" class="member-name-link">END</a> - Enum constant in enum class io.state.<a href="io/state/State.html" title="enum class in io.state">State</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/TimeStamp.html#endTime" class="member-name-link">endTime</a> - Variable in class io.perl.<a href="io/perl/TimeStamp.html" title="class in io.perl">TimeStamp</a></dt>
@@ -606,6 +610,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Report a latency Record.</div>
 </dd>
+<dt><a href="io/perl/impl/ElasticWait.html#reset()" class="member-name-link">reset()</a> - Method in class io.perl.impl.<a href="io/perl/impl/ElasticWait.html" title="class in io.perl.impl">ElasticWait</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/LatencyRecord.html#reset()" class="member-name-link">reset()</a> - Method in class io.perl.<a href="io/perl/LatencyRecord.html" title="class in io.perl">LatencyRecord</a></dt>
 <dd>
 <div class="block">Reset all recording variables.</div>
@@ -653,6 +659,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">send the Exception.</div>
 </dd>
+<dt><a href="io/perl/impl/ElasticWait.html#setElastic(long)" class="member-name-link">setElastic(long)</a> - Method in class io.perl.impl.<a href="io/perl/impl/ElasticWait.html" title="class in io.perl.impl">ElasticWait</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/TotalLatencyRecordWindow.html#start(long)" class="member-name-link">start(long)</a> - Method in class io.perl.impl.<a href="io/perl/impl/TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/TotalPeriodicWindow.html#start(long)" class="member-name-link">start(long)</a> - Method in interface io.perl.<a href="io/perl/TotalPeriodicWindow.html" title="interface in io.perl">TotalPeriodicWindow</a></dt>
@@ -753,6 +761,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Add the record.</div>
 </dd>
+<dt><a href="io/perl/impl/ElasticWait.html#updateElastic(long)" class="member-name-link">updateElastic(long)</a> - Method in class io.perl.impl.<a href="io/perl/impl/ElasticWait.html" title="class in io.perl.impl">ElasticWait</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:V">V</h2>
 <dl class="index">
@@ -779,6 +789,8 @@ the order they are declared.</div>
 </dl>
 <h2 class="title" id="I:W">W</h2>
 <dl class="index">
+<dt><a href="io/perl/impl/ElasticWait.html#waitAndCheck()" class="member-name-link">waitAndCheck()</a> - Method in class io.perl.impl.<a href="io/perl/impl/ElasticWait.html" title="class in io.perl.impl">ElasticWait</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/TotalLatencyRecordWindow.html#window" class="member-name-link">window</a> - Variable in class io.perl.impl.<a href="io/perl/impl/TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/TotalLatencyRecordWindow.html#windowLogger" class="member-name-link">windowLogger</a> - Variable in class io.perl.impl.<a href="io/perl/impl/TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></dt>
