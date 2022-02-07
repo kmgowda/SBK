@@ -9,7 +9,7 @@
  */
 package io.sbk.logger;
 
-import io.perl.ReportLatency;
+import io.perl.api.ReportLatency;
 
 /**
  * Interface for recoding/printing results.

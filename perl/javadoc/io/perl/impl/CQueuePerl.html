@@ -5,7 +5,7 @@
 <title>CQueuePerl (perl 0.96 API)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="declaration: package: io.perl.impl, class: CQueuePerl">
+<meta name="description" content="declaration: package: io.perl.api.impl, class: CQueuePerl">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../script-dir/jquery-ui.min.css" title="Style">
@@ -67,21 +67,21 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.impl</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.api.impl</a></div>
 <h1 title="Class CQueuePerl" class="title">Class CQueuePerl</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance">io.perl.impl.CQueuePerl</div>
+<div class="inheritance">io.perl.api.impl.CQueuePerl</div>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../GetPerlChannel.html" title="interface in io.perl">GetPerlChannel</a></code>, <code><a href="../Perl.html" title="interface in io.perl">Perl</a></code>, <code><a href="../RunBenchmark.html" title="interface in io.perl">RunBenchmark</a></code></dd>
+<dd><code><a href="../GetPerlChannel.html" title="interface in io.perl.api">GetPerlChannel</a></code>, <code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code>, <code><a href="../RunBenchmark.html" title="interface in io.perl.api">RunBenchmark</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">CQueuePerl</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="../Perl.html" title="interface in io.perl">Perl</a></span></div>
+implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></span></div>
 <div class="block">Class for Performance statistics.</div>
 </section>
 <section class="summary">
@@ -94,8 +94,8 @@ implements <a href="../Perl.html" title="interface in io.perl">Perl</a></span></
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.PerlConfig,io.perl.PeriodicLogger,int,io.time.Time,java.util.concurrent.ExecutorService)" class="member-name-link">CQueuePerl</a><wbr>(@NotNull <a href="../PerlConfig.html" title="class in io.perl">PerlConfig</a>&nbsp;perlConfig,
- <a href="../PeriodicLogger.html" title="interface in io.perl">PeriodicLogger</a>&nbsp;periodicRecorder,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.PerlConfig,io.perl.PeriodicLogger,int,io.time.Time,java.util.concurrent.ExecutorService)" class="member-name-link">CQueuePerl</a><wbr>(@NotNull <a href="../PerlConfig.html" title="class in io.perl.api">PerlConfig</a>&nbsp;perlConfig,
+ <a href="../PeriodicLogger.html" title="interface in io.perl.api">PeriodicLogger</a>&nbsp;periodicRecorder,
  int&nbsp;reportingIntervalMS,
  <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</code></div>
@@ -114,7 +114,7 @@ implements <a href="../Perl.html" title="interface in io.perl">Perl</a></span></
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../PerlChannel.html" title="interface in io.perl">PerlChannel</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPerlChannel()" class="member-name-link">getPerlChannel</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the PerlChannel to get the benchmark results.</div>
@@ -151,8 +151,8 @@ implements <a href="../Perl.html" title="interface in io.perl">Perl</a></span></
 <section class="detail" id="&lt;init&gt;(io.perl.PerlConfig,io.perl.PeriodicLogger,int,io.time.Time,java.util.concurrent.ExecutorService)">
 <h3>CQueuePerl</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CQueuePerl</span><wbr><span class="parameters">(@NotNull
- @NotNull <a href="../PerlConfig.html" title="class in io.perl">PerlConfig</a>&nbsp;perlConfig,
- <a href="../PeriodicLogger.html" title="interface in io.perl">PeriodicLogger</a>&nbsp;periodicRecorder,
+ @NotNull <a href="../PerlConfig.html" title="class in io.perl.api">PerlConfig</a>&nbsp;perlConfig,
+ <a href="../PeriodicLogger.html" title="interface in io.perl.api">PeriodicLogger</a>&nbsp;periodicRecorder,
  int&nbsp;reportingIntervalMS,
  <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</span></div>
@@ -169,12 +169,12 @@ implements <a href="../Perl.html" title="interface in io.perl">Perl</a></span></
 <li>
 <section class="detail" id="getPerlChannel()">
 <h3>getPerlChannel</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../PerlChannel.html" title="interface in io.perl">PerlChannel</a></span>&nbsp;<span class="element-name">getPerlChannel</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></span>&nbsp;<span class="element-name">getPerlChannel</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../GetPerlChannel.html#getPerlChannel()">GetPerlChannel</a></code></span></div>
 <div class="block">Get the PerlChannel to get the benchmark results.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../GetPerlChannel.html#getPerlChannel()">getPerlChannel</a></code>&nbsp;in interface&nbsp;<code><a href="../GetPerlChannel.html" title="interface in io.perl">GetPerlChannel</a></code></dd>
+<dd><code><a href="../GetPerlChannel.html#getPerlChannel()">getPerlChannel</a></code>&nbsp;in interface&nbsp;<code><a href="../GetPerlChannel.html" title="interface in io.perl.api">GetPerlChannel</a></code></dd>
 <dt>Returns:</dt>
 <dd>PerlChannel to get the benchmark results.</dd>
 </dl>
@@ -189,7 +189,7 @@ implements <a href="../Perl.html" title="interface in io.perl">Perl</a></span></
 <div class="block">Run the performance Benchmark.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../RunBenchmark.html#run(long,long)">run</a></code>&nbsp;in interface&nbsp;<code><a href="../RunBenchmark.html" title="interface in io.perl">RunBenchmark</a></code></dd>
+<dd><code><a href="../RunBenchmark.html#run(long,long)">run</a></code>&nbsp;in interface&nbsp;<code><a href="../RunBenchmark.html" title="interface in io.perl.api">RunBenchmark</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>secondsToRun</code> - Number of seconds to Run</dd>
 <dd><code>recordsCount</code> - If secondsToRun is 0, then this indicates the total number of records to benchmark or
@@ -207,7 +207,7 @@ implements <a href="../Perl.html" title="interface in io.perl">Perl</a></span></
 <div class="block">stop/shutdown the Benchmark.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../Perl.html#stop()">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl">Perl</a></code></dd>
+<dd><code><a href="../Perl.html#stop()">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></dd>
 </dl>
 </section>
 </li>

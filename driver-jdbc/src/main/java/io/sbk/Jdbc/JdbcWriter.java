@@ -9,7 +9,7 @@
  */
 package io.sbk.Jdbc;
 
-import io.perl.PerlChannel;
+import io.perl.api.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;

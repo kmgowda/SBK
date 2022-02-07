@@ -10,8 +10,8 @@
 
 package io.sbk.api.impl;
 
-import io.perl.PerlChannel;
-import io.perl.RunBenchmark;
+import io.perl.api.PerlChannel;
+import io.perl.api.RunBenchmark;
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataReader;
 import io.sbk.api.ParameterOptions;

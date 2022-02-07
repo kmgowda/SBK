@@ -9,7 +9,7 @@
  */
 package io.sbk.api.impl;
 
-import io.perl.PerlChannel;
+import io.perl.api.PerlChannel;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Callback;
 import io.sbk.api.ParameterOptions;

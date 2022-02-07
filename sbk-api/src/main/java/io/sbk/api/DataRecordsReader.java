@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-import io.perl.PerlChannel;
+import io.perl.api.PerlChannel;
 import io.sbk.data.DataType;
 import io.time.Time;
 

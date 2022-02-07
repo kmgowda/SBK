@@ -5,7 +5,7 @@
 <title>PerlConfig (perl 0.96 API)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="declaration: package: io.perl, class: PerlConfig">
+<meta name="description" content="declaration: package: io.perl.api, class: PerlConfig">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../script-dir/jquery-ui.min.css" title="Style">
@@ -67,18 +67,18 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.api</a></div>
 <h1 title="Class PerlConfig" class="title">Class PerlConfig</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance"><a href="LatencyConfig.html" title="class in io.perl">io.perl.LatencyConfig</a>
-<div class="inheritance">io.perl.PerlConfig</div>
+<div class="inheritance"><a href="LatencyConfig.html" title="class in io.perl.api">io.perl.api.LatencyConfig</a>
+<div class="inheritance">io.perl.api.PerlConfig</div>
 </div>
 </div>
 <section class="class-description" id="class-description">
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">PerlConfig</span>
-<span class="extends-implements">extends <a href="LatencyConfig.html" title="class in io.perl">LatencyConfig</a></span></div>
+<span class="extends-implements">extends <a href="LatencyConfig.html" title="class in io.perl.api">LatencyConfig</a></span></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -126,7 +126,7 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 <div class="inherited-list">
-<h3 id="fields-inherited-from-class-io.perl.LatencyConfig">Fields inherited from class&nbsp;io.perl.<a href="LatencyConfig.html" title="class in io.perl">LatencyConfig</a></h3>
+<h3 id="fields-inherited-from-class-io.perl.LatencyConfig">Fields inherited from class&nbsp;io.perl.<a href="LatencyConfig.html" title="class in io.perl.api">LatencyConfig</a></h3>
 <code><a href="LatencyConfig.html#csv">csv</a>, <a href="LatencyConfig.html#csvFileSizeGB">csvFileSizeGB</a>, <a href="LatencyConfig.html#DEFAULT_MAX_LATENCY">DEFAULT_MAX_LATENCY</a>, <a href="LatencyConfig.html#DEFAULT_MIN_LATENCY">DEFAULT_MIN_LATENCY</a>, <a href="LatencyConfig.html#HDR_SIGNIFICANT_DIGITS">HDR_SIGNIFICANT_DIGITS</a>, <a href="LatencyConfig.html#histogram">histogram</a>, <a href="LatencyConfig.html#LATENCY_VALUE_SIZE_BYTES">LATENCY_VALUE_SIZE_BYTES</a>, <a href="LatencyConfig.html#LONG_MAX">LONG_MAX</a>, <a href="LatencyConfig.html#maxArraySizeMB">maxArraySizeMB</a>, <a href="LatencyConfig.html#maxHashMapSizeMB">maxHashMapSizeMB</a>, <a href="LatencyConfig.html#PERCENTILE_FORMAT">PERCENTILE_FORMAT</a>, <a href="LatencyConfig.html#PERCENTILES">PERCENTILES</a>, <a href="LatencyConfig.html#TOTAL_LATENCY_MAX">TOTAL_LATENCY_MAX</a>, <a href="LatencyConfig.html#totalMaxHashMapSizeMB">totalMaxHashMapSizeMB</a></code></div>
 </section>
 </li>
@@ -154,10 +154,10 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="PerlConfig.html" title="class in io.perl">PerlConfig</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="PerlConfig.html" title="class in io.perl.api">PerlConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#build()" class="member-name-link">build</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="PerlConfig.html" title="class in io.perl">PerlConfig</a></code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="PerlConfig.html" title="class in io.perl.api">PerlConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#build(java.io.InputStream)" class="member-name-link">build</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;in)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
@@ -324,7 +324,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="build()">
 <h3>build</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="PerlConfig.html" title="class in io.perl">PerlConfig</a></span>&nbsp;<span class="element-name">build</span>()
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="PerlConfig.html" title="class in io.perl.api">PerlConfig</a></span>&nbsp;<span class="element-name">build</span>()
                         throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <dl class="notes">
 <dt>Throws:</dt>
@@ -335,7 +335,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="build(java.io.InputStream)">
 <h3>build</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="PerlConfig.html" title="class in io.perl">PerlConfig</a></span>&nbsp;<span class="element-name">build</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;in)</span>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="PerlConfig.html" title="class in io.perl.api">PerlConfig</a></span>&nbsp;<span class="element-name">build</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;in)</span>
                         throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <dl class="notes">
 <dt>Throws:</dt>

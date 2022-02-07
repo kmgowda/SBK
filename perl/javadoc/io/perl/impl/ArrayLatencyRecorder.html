@@ -5,7 +5,7 @@
 <title>ArrayLatencyRecorder (perl 0.96 API)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="declaration: package: io.perl.impl, class: ArrayLatencyRecorder">
+<meta name="description" content="declaration: package: io.perl.api.impl, class: ArrayLatencyRecorder">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../script-dir/jquery-ui.min.css" title="Style">
@@ -67,15 +67,15 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.impl</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.api.impl</a></div>
 <h1 title="Class ArrayLatencyRecorder" class="title">Class ArrayLatencyRecorder</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance"><a href="../LatencyRecord.html" title="class in io.perl">io.perl.LatencyRecord</a>
-<div class="inheritance"><a href="../LatencyRecorder.html" title="class in io.perl">io.perl.LatencyRecorder</a>
-<div class="inheritance"><a href="../LatencyWindow.html" title="class in io.perl">io.perl.LatencyWindow</a>
-<div class="inheritance"><a href="../LatencyRecordWindow.html" title="class in io.perl">io.perl.LatencyRecordWindow</a>
-<div class="inheritance">io.perl.impl.ArrayLatencyRecorder</div>
+<div class="inheritance"><a href="../LatencyRecord.html" title="class in io.perl.api">io.perl.api.LatencyRecord</a>
+<div class="inheritance"><a href="../LatencyRecorder.html" title="class in io.perl.api">io.perl.api.LatencyRecorder</a>
+<div class="inheritance"><a href="../LatencyWindow.html" title="class in io.perl.api">io.perl.api.LatencyWindow</a>
+<div class="inheritance"><a href="../LatencyRecordWindow.html" title="class in io.perl.api">io.perl.api.LatencyRecordWindow</a>
+<div class="inheritance">io.perl.api.impl.ArrayLatencyRecorder</div>
 </div>
 </div>
 </div>
@@ -84,12 +84,12 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../ReportLatencies.html" title="interface in io.perl">ReportLatencies</a></code>, <code><a href="../ReportLatency.html" title="interface in io.perl">ReportLatency</a></code></dd>
+<dd><code><a href="../ReportLatencies.html" title="interface in io.perl.api">ReportLatencies</a></code>, <code><a href="../ReportLatency.html" title="interface in io.perl.api">ReportLatency</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="annotations">@NotThreadSafe
 </span><span class="modifiers">public final class </span><span class="element-name type-name-label">ArrayLatencyRecorder</span>
-<span class="extends-implements">extends <a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a></span></div>
+<span class="extends-implements">extends <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></span></div>
 <div class="block">class for Performance statistics.</div>
 </section>
 <section class="summary">
@@ -99,13 +99,13 @@ loadScripts(document, 'script');</script>
 <section class="field-summary" id="field-summary">
 <h2>Field Summary</h2>
 <div class="inherited-list">
-<h3 id="fields-inherited-from-class-io.perl.LatencyWindow">Fields inherited from class&nbsp;io.perl.<a href="../LatencyWindow.html" title="class in io.perl">LatencyWindow</a></h3>
+<h3 id="fields-inherited-from-class-io.perl.LatencyWindow">Fields inherited from class&nbsp;io.perl.<a href="../LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></h3>
 <code><a href="../LatencyWindow.html#percentiles">percentiles</a>, <a href="../LatencyWindow.html#time">time</a></code></div>
 <div class="inherited-list">
-<h3 id="fields-inherited-from-class-io.perl.LatencyRecorder">Fields inherited from class&nbsp;io.perl.<a href="../LatencyRecorder.html" title="class in io.perl">LatencyRecorder</a></h3>
+<h3 id="fields-inherited-from-class-io.perl.LatencyRecorder">Fields inherited from class&nbsp;io.perl.<a href="../LatencyRecorder.html" title="class in io.perl.api">LatencyRecorder</a></h3>
 <code><a href="../LatencyRecorder.html#highLatency">highLatency</a>, <a href="../LatencyRecorder.html#lowLatency">lowLatency</a>, <a href="../LatencyRecorder.html#totalBytesMax">totalBytesMax</a>, <a href="../LatencyRecorder.html#totalLatencyMax">totalLatencyMax</a>, <a href="../LatencyRecorder.html#totalRecordsMax">totalRecordsMax</a></code></div>
 <div class="inherited-list">
-<h3 id="fields-inherited-from-class-io.perl.LatencyRecord">Fields inherited from class&nbsp;io.perl.<a href="../LatencyRecord.html" title="class in io.perl">LatencyRecord</a></h3>
+<h3 id="fields-inherited-from-class-io.perl.LatencyRecord">Fields inherited from class&nbsp;io.perl.<a href="../LatencyRecord.html" title="class in io.perl.api">LatencyRecord</a></h3>
 <code><a href="../LatencyRecord.html#higherLatencyDiscardRecords">higherLatencyDiscardRecords</a>, <a href="../LatencyRecord.html#invalidLatencyRecords">invalidLatencyRecords</a>, <a href="../LatencyRecord.html#lowerLatencyDiscardRecords">lowerLatencyDiscardRecords</a>, <a href="../LatencyRecord.html#maxLatency">maxLatency</a>, <a href="../LatencyRecord.html#totalBytes">totalBytes</a>, <a href="../LatencyRecord.html#totalLatency">totalLatency</a>, <a href="../LatencyRecord.html#totalRecords">totalRecords</a>, <a href="../LatencyRecord.html#validLatencyRecords">validLatencyRecords</a></code></div>
 </section>
 </li>
@@ -140,8 +140,8 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#copyPercentiles(io.perl.LatencyPercentiles,io.perl.ReportLatencies)" class="member-name-link">copyPercentiles</a><wbr>(<a href="../LatencyPercentiles.html" title="class in io.perl">LatencyPercentiles</a>&nbsp;percentiles,
- <a href="../ReportLatencies.html" title="interface in io.perl">ReportLatencies</a>&nbsp;copyLatencies)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#copyPercentiles(io.perl.LatencyPercentiles,io.perl.ReportLatencies)" class="member-name-link">copyPercentiles</a><wbr>(<a href="../LatencyPercentiles.html" title="class in io.perl.api">LatencyPercentiles</a>&nbsp;percentiles,
+ <a href="../ReportLatencies.html" title="interface in io.perl.api">ReportLatencies</a>&nbsp;copyLatencies)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">get the Percentiles.</div>
 </div>
@@ -170,7 +170,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Report one latency .</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportLatencyRecord(io.perl.LatencyRecord)" class="member-name-link">reportLatencyRecord</a><wbr>(<a href="../LatencyRecord.html" title="class in io.perl">LatencyRecord</a>&nbsp;record)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportLatencyRecord(io.perl.LatencyRecord)" class="member-name-link">reportLatencyRecord</a><wbr>(<a href="../LatencyRecord.html" title="class in io.perl.api">LatencyRecord</a>&nbsp;record)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Report a latency Record.</div>
 </div>
@@ -183,13 +183,13 @@ loadScripts(document, 'script');</script>
 </div>
 </div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.LatencyWindow">Methods inherited from class&nbsp;io.perl.<a href="../LatencyWindow.html" title="class in io.perl">LatencyWindow</a></h3>
-<code><a href="../LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="../LatencyWindow.html#print(long,io.logger.Print,io.perl.ReportLatencies)">print</a></code></div>
+<h3 id="methods-inherited-from-class-io.perl.LatencyWindow">Methods inherited from class&nbsp;io.perl.<a href="../LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></h3>
+<code><a href="../LatencyWindow.html#elapsedMilliSeconds(long)">elapsedMilliSeconds</a>, <a href="../LatencyWindow.html#print(long,io.perl.logger.Print,io.perl.ReportLatencies)">print</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.LatencyRecorder">Methods inherited from class&nbsp;io.perl.<a href="../LatencyRecorder.html" title="class in io.perl">LatencyRecorder</a></h3>
+<h3 id="methods-inherited-from-class-io.perl.LatencyRecorder">Methods inherited from class&nbsp;io.perl.<a href="../LatencyRecorder.html" title="class in io.perl.api">LatencyRecorder</a></h3>
 <code><a href="../LatencyRecorder.html#isOverflow()">isOverflow</a>, <a href="../LatencyRecorder.html#record(long,long,long)">record</a>, <a href="../LatencyRecorder.html#update(long,long,long,long,long,long,long,long)">update</a>, <a href="../LatencyRecorder.html#update(io.perl.LatencyRecord)">update</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.LatencyRecord">Methods inherited from class&nbsp;io.perl.<a href="../LatencyRecord.html" title="class in io.perl">LatencyRecord</a></h3>
+<h3 id="methods-inherited-from-class-io.perl.LatencyRecord">Methods inherited from class&nbsp;io.perl.<a href="../LatencyRecord.html" title="class in io.perl.api">LatencyRecord</a></h3>
 <code><a href="../LatencyRecord.html#reset()">reset</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
@@ -233,7 +233,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Reset the window.</div>
 <dl class="notes">
 <dt>Overrides:</dt>
-<dd><code><a href="../LatencyWindow.html#reset(long)">reset</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl">LatencyWindow</a></code></dd>
+<dd><code><a href="../LatencyWindow.html#reset(long)">reset</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>startTime</code> - starting time.</dd>
 </dl>
@@ -242,13 +242,13 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="copyPercentiles(io.perl.LatencyPercentiles,io.perl.ReportLatencies)">
 <h3>copyPercentiles</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">copyPercentiles</span><wbr><span class="parameters">(<a href="../LatencyPercentiles.html" title="class in io.perl">LatencyPercentiles</a>&nbsp;percentiles,
- <a href="../ReportLatencies.html" title="interface in io.perl">ReportLatencies</a>&nbsp;copyLatencies)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">copyPercentiles</span><wbr><span class="parameters">(<a href="../LatencyPercentiles.html" title="class in io.perl.api">LatencyPercentiles</a>&nbsp;percentiles,
+ <a href="../ReportLatencies.html" title="interface in io.perl.api">ReportLatencies</a>&nbsp;copyLatencies)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../LatencyWindow.html#copyPercentiles(io.perl.LatencyPercentiles,io.perl.ReportLatencies)">LatencyWindow</a></code></span></div>
 <div class="block">get the Percentiles.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../LatencyWindow.html#copyPercentiles(io.perl.LatencyPercentiles,io.perl.ReportLatencies)">copyPercentiles</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl">LatencyWindow</a></code></dd>
+<dd><code><a href="../LatencyWindow.html#copyPercentiles(io.perl.LatencyPercentiles,io.perl.ReportLatencies)">copyPercentiles</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>percentiles</code> - Copy Percentiles</dd>
 <dd><code>copyLatencies</code> - Copy Latency records.</dd>
@@ -263,7 +263,7 @@ loadScripts(document, 'script');</script>
 <div class="block">is the latency storage full.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../LatencyWindow.html#isFull()">isFull</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl">LatencyWindow</a></code></dd>
+<dd><code><a href="../LatencyWindow.html#isFull()">isFull</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></code></dd>
 <dt>Returns:</dt>
 <dd>indicate the latency storage is full or not</dd>
 </dl>
@@ -277,7 +277,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Max memory Size in Bytes.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../LatencyWindow.html#getMaxMemoryBytes()">getMaxMemoryBytes</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl">LatencyWindow</a></code></dd>
+<dd><code><a href="../LatencyWindow.html#getMaxMemoryBytes()">getMaxMemoryBytes</a></code>&nbsp;in class&nbsp;<code><a href="../LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></code></dd>
 <dt>Returns:</dt>
 <dd>Maximum window memory size in bytes</dd>
 </dl>
@@ -286,7 +286,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="reportLatencyRecord(io.perl.LatencyRecord)">
 <h3>reportLatencyRecord</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reportLatencyRecord</span><wbr><span class="parameters">(<a href="../LatencyRecord.html" title="class in io.perl">LatencyRecord</a>&nbsp;record)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reportLatencyRecord</span><wbr><span class="parameters">(<a href="../LatencyRecord.html" title="class in io.perl.api">LatencyRecord</a>&nbsp;record)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../ReportLatencies.html#reportLatencyRecord(io.perl.LatencyRecord)">ReportLatencies</a></code></span></div>
 <div class="block">Report a latency Record.</div>
 <dl class="notes">

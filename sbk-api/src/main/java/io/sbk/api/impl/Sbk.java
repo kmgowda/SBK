@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.micrometer.core.instrument.util.IOUtils;
-import io.perl.impl.PerlBuilder;
+import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.ParameterOptions;

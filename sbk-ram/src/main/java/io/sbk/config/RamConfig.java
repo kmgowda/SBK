@@ -10,7 +10,7 @@
 
 package io.sbk.config;
 
-import io.perl.LatencyConfig;
+import io.perl.api.LatencyConfig;
 
 final public class RamConfig extends LatencyConfig {
     public final static String NAME = "sbk-ram";

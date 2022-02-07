@@ -5,7 +5,7 @@
 <title>TotalLatencyRecordWindow (perl 0.96 API)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="declaration: package: io.perl.impl, class: TotalLatencyRecordWindow">
+<meta name="description" content="declaration: package: io.perl.api.impl, class: TotalLatencyRecordWindow">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../script-dir/jquery-ui.min.css" title="Style">
@@ -67,25 +67,25 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.impl</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">io.perl.api.impl</a></div>
 <h1 title="Class TotalLatencyRecordWindow" class="title">Class TotalLatencyRecordWindow</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance">io.perl.impl.TotalLatencyRecordWindow</div>
+<div class="inheritance">io.perl.api.impl.TotalLatencyRecordWindow</div>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../PeriodicWindow.html" title="interface in io.perl">PeriodicWindow</a></code>, <code><a href="../TotalPeriodicWindow.html" title="interface in io.perl">TotalPeriodicWindow</a></code></dd>
+<dd><code><a href="../PeriodicWindow.html" title="interface in io.perl.api">PeriodicWindow</a></code>, <code><a href="../TotalPeriodicWindow.html" title="interface in io.perl.api">TotalPeriodicWindow</a></code></dd>
 </dl>
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
-<dd><code><a href="TotalWindowLatencyRecorder.html" title="class in io.perl.impl">TotalWindowLatencyRecorder</a></code></dd>
+<dd><code><a href="TotalWindowLatencyRecorder.html" title="class in io.perl.api.impl">TotalWindowLatencyRecorder</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">TotalLatencyRecordWindow</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">TotalPeriodicWindow</a></span></div>
+implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl.api">TotalPeriodicWindow</a></span></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -98,16 +98,16 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code>protected final <a href="../Print.html" title="interface in io.perl">Print</a></code></div>
+<div class="col-first even-row-color"><code>protected final <a href="../Print.html" title="interface in io.perl.api">Print</a></code></div>
 <div class="col-second even-row-color"><code><a href="#totalLogger" class="member-name-link">totalLogger</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>protected final <a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a></code></div>
+<div class="col-first odd-row-color"><code>protected final <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#totalWindow" class="member-name-link">totalWindow</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>protected final <a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a></code></div>
+<div class="col-first even-row-color"><code>protected final <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></code></div>
 <div class="col-second even-row-color"><code><a href="#window" class="member-name-link">window</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>protected final <a href="../Print.html" title="interface in io.perl">Print</a></code></div>
+<div class="col-first odd-row-color"><code>protected final <a href="../Print.html" title="interface in io.perl.api">Print</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#windowLogger" class="member-name-link">windowLogger</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 </div>
@@ -121,10 +121,10 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.logger.Print,io.logger.Print)" class="member-name-link">TotalLatencyRecordWindow</a><wbr>(<a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;window,
- <a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;totalWindow,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;windowLogger,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;totalLogger)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print)" class="member-name-link">TotalLatencyRecordWindow</a><wbr>(<a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a>&nbsp;window,
+ <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a>&nbsp;totalWindow,
+ <a href="../Print.html" title="interface in io.perl.api">Print</a>&nbsp;windowLogger,
+ <a href="../Print.html" title="interface in io.perl.api">Print</a>&nbsp;totalLogger)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -191,25 +191,25 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <li>
 <section class="detail" id="window">
 <h3>window</h3>
-<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a></span>&nbsp;<span class="element-name">window</span></div>
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></span>&nbsp;<span class="element-name">window</span></div>
 </section>
 </li>
 <li>
 <section class="detail" id="totalWindow">
 <h3>totalWindow</h3>
-<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a></span>&nbsp;<span class="element-name">totalWindow</span></div>
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></span>&nbsp;<span class="element-name">totalWindow</span></div>
 </section>
 </li>
 <li>
 <section class="detail" id="windowLogger">
 <h3>windowLogger</h3>
-<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../Print.html" title="interface in io.perl">Print</a></span>&nbsp;<span class="element-name">windowLogger</span></div>
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../Print.html" title="interface in io.perl.api">Print</a></span>&nbsp;<span class="element-name">windowLogger</span></div>
 </section>
 </li>
 <li>
 <section class="detail" id="totalLogger">
 <h3>totalLogger</h3>
-<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../Print.html" title="interface in io.perl">Print</a></span>&nbsp;<span class="element-name">totalLogger</span></div>
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../Print.html" title="interface in io.perl.api">Print</a></span>&nbsp;<span class="element-name">totalLogger</span></div>
 </section>
 </li>
 </ul>
@@ -221,12 +221,12 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.logger.Print,io.logger.Print)">
+<section class="detail" id="&lt;init&gt;(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print)">
 <h3>TotalLatencyRecordWindow</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">TotalLatencyRecordWindow</span><wbr><span class="parameters">(<a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;window,
- <a href="../LatencyRecordWindow.html" title="class in io.perl">LatencyRecordWindow</a>&nbsp;totalWindow,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;windowLogger,
- <a href="../Print.html" title="interface in io.perl">Print</a>&nbsp;totalLogger)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">TotalLatencyRecordWindow</span><wbr><span class="parameters">(<a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a>&nbsp;window,
+ <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a>&nbsp;totalWindow,
+ <a href="../Print.html" title="interface in io.perl.api">Print</a>&nbsp;windowLogger,
+ <a href="../Print.html" title="interface in io.perl.api">Print</a>&nbsp;totalLogger)</span></div>
 </section>
 </li>
 </ul>
@@ -257,7 +257,7 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <div class="block">Start the Recording window.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PeriodicWindow.html#startWindow(long)">startWindow</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicWindow.html" title="interface in io.perl">PeriodicWindow</a></code></dd>
+<dd><code><a href="../PeriodicWindow.html#startWindow(long)">startWindow</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicWindow.html" title="interface in io.perl.api">PeriodicWindow</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>startTime</code> - starting time.</dd>
 </dl>
@@ -271,7 +271,7 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <div class="block">Get the current time duration of this window starting from startWindow.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PeriodicWindow.html#elapsedMilliSecondsWindow(long)">elapsedMilliSecondsWindow</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicWindow.html" title="interface in io.perl">PeriodicWindow</a></code></dd>
+<dd><code><a href="../PeriodicWindow.html#elapsedMilliSecondsWindow(long)">elapsedMilliSecondsWindow</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicWindow.html" title="interface in io.perl.api">PeriodicWindow</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>currentTime</code> - current time.</dd>
 <dt>Returns:</dt>
@@ -288,7 +288,7 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
  Results from startWindow to this method are printed /flushed.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../PeriodicWindow.html#stopWindow(long)">stopWindow</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicWindow.html" title="interface in io.perl">PeriodicWindow</a></code></dd>
+<dd><code><a href="../PeriodicWindow.html#stopWindow(long)">stopWindow</a></code>&nbsp;in interface&nbsp;<code><a href="../PeriodicWindow.html" title="interface in io.perl.api">PeriodicWindow</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>stopTime</code> - stopTime.</dd>
 </dl>
@@ -302,7 +302,7 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <div class="block">Start the Total Window.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../TotalPeriodicWindow.html#start(long)">start</a></code>&nbsp;in interface&nbsp;<code><a href="../TotalPeriodicWindow.html" title="interface in io.perl">TotalPeriodicWindow</a></code></dd>
+<dd><code><a href="../TotalPeriodicWindow.html#start(long)">start</a></code>&nbsp;in interface&nbsp;<code><a href="../TotalPeriodicWindow.html" title="interface in io.perl.api">TotalPeriodicWindow</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>startTime</code> - starting time.</dd>
 </dl>
@@ -316,7 +316,7 @@ implements <a href="../TotalPeriodicWindow.html" title="interface in io.perl">To
 <div class="block">Stop the Total Window.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../TotalPeriodicWindow.html#stop(long)">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../TotalPeriodicWindow.html" title="interface in io.perl">TotalPeriodicWindow</a></code></dd>
+<dd><code><a href="../TotalPeriodicWindow.html#stop(long)">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../TotalPeriodicWindow.html" title="interface in io.perl.api">TotalPeriodicWindow</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>endTime</code> - current time.</dd>
 </dl>

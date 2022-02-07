@@ -9,7 +9,7 @@
  */
 package io.sbk.logger.impl;
 
-import io.perl.LatencyRecord;
+import io.perl.api.LatencyRecord;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.RamLogger;

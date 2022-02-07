@@ -9,9 +9,9 @@
  */
 package io.sbk.api.impl;
 
-import io.perl.Perl;
-import io.perl.PerlConfig;
-import io.perl.impl.PerlBuilder;
+import io.perl.api.Perl;
+import io.perl.api.PerlConfig;
+import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
