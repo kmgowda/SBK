@@ -1,5 +1,5 @@
 /**
- * Copyright (c) KMG. All Rights Reserved.
+ * Copyright (c) KMG. All Rights Reserved..
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -7,30 +7,27 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
+
 package io.sbk.logger.impl;
 
-
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.perl.logger.impl.MetricsPrint;
+import io.perl.logger.impl.PrometheusMetricsServer;
 import io.sbk.logger.CountRW;
+import io.sbk.logger.MetricsConfig;
 import io.time.Time;
-import io.time.TimeUnit;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Class for recoding/printing benchmark results of Readers and Writers
- * on micrometer Composite Meter Registry.
- */
-public sealed class RWMetricsPrint extends MetricsPrint implements CountRW permits RWMetricsPrometheusServer {
+public class PrometheusRWMetricsServer extends PrometheusMetricsServer implements CountRW {
     final private AtomicInteger writers;
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;
     final private AtomicInteger maxReaders;
 
-    public RWMetricsPrint(String header, String action, double[] percentiles, Time time, TimeUnit latencyTimeUnit,
-                          CompositeMeterRegistry compositeRegistry) {
-        super(header.toUpperCase()+" "+action, percentiles, time, latencyTimeUnit, compositeRegistry);
+    public  PrometheusRWMetricsServer(String header, String action, double[] percentiles, Time time,
+                                        MetricsConfig config) throws IOException {
+        super(header.toUpperCase()+" "+action, percentiles, time,
+                config.latencyTimeUnit, config.port, config.context);
         final String writersName = metricPrefix + "_Writers";
         final String readersName = metricPrefix + "_Readers";
         final String maxWritersName = metricPrefix + "_Max_Writers";

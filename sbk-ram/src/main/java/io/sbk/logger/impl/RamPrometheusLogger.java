@@ -44,7 +44,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
     @Override
-    public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
+    public PrometheusRWMetricsServer getPrometheusMetricsServer() throws IOException {
         if (prometheusServer == null) {
             prometheusServer = new RamMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
                     percentiles, time, metricsConfig);
