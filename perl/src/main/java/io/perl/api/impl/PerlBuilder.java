@@ -13,7 +13,7 @@ import io.perl.data.Bytes;
 import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.PerformanceLogger;
-import io.perl.api.PeriodicLogger;
+import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
@@ -66,10 +66,10 @@ public final class PerlBuilder {
     }
 
 
-    private static PeriodicLogger buildPeriodicLogger(Time time,
-                                                      LatencyConfig config,
-                                                      PerformanceLogger logger,
-                                                      ReportLatency reportLatency) {
+    private static PeriodicRecorder buildPeriodicLogger(Time time,
+                                                        LatencyConfig config,
+                                                        PerformanceLogger logger,
+                                                        ReportLatency reportLatency) {
         final long minLatency = logger.getMinLatency();
         final long maxLatency = logger.getMaxLatency();
         final double[] percentiles = logger.getPercentiles();
@@ -108,7 +108,7 @@ public final class PerlBuilder {
             PerlPrinter.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new TotalWindowLatencyPeriodicLogger(window, totalWindowExtension, logger, logger::printTotal,
+        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
                 reportLatency, time);
     }
 

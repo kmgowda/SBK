@@ -10,7 +10,7 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
-import io.perl.api.PeriodicLogger;
+import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
 import io.perl.config.PerlConfig;
@@ -49,7 +49,7 @@ final public class CQueuePerl implements Perl {
     private CompletableFuture<Void> qFuture;
 
 
-    public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicLogger periodicRecorder,
+    public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicRecorder periodicRecorder,
                       int reportingIntervalMS, Time time, ExecutorService executor) {
         int maxQs;
         this.time = time;

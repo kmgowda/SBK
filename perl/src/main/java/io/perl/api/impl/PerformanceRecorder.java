@@ -10,7 +10,7 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
-import io.perl.api.PeriodicLogger;
+import io.perl.api.PeriodicRecorder;
 import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
 import io.perl.api.TimeStamp;
@@ -23,10 +23,10 @@ public final class PerformanceRecorder {
     final private int windowIntervalMS;
     final private int idleNS;
     final private Time time;
-    final private PeriodicLogger periodicRecorder;
+    final private PeriodicRecorder periodicRecorder;
     final private Channel[] channels;
 
-    public PerformanceRecorder(PeriodicLogger periodicRecorder, Channel[] channels, Time time,
+    public PerformanceRecorder(PeriodicRecorder periodicRecorder, Channel[] channels, Time time,
                                int reportingIntervalMS, int idleNS) {
         this.periodicRecorder = periodicRecorder;
         this.channels = channels;

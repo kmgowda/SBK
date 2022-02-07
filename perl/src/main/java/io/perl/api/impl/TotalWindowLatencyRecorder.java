@@ -15,7 +15,7 @@ import io.perl.logger.Print;
 import io.perl.api.ReportLatency;
 
 public sealed class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow
-        implements ReportLatency permits TotalWindowLatencyPeriodicLogger {
+        implements ReportLatency permits TotalWindowLatencyPeriodicRecorder {
 
     public TotalWindowLatencyRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                       Print windowLogger, Print totalLogger) {
