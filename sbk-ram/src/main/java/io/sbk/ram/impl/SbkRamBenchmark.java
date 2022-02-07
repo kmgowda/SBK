@@ -12,8 +12,8 @@ package io.sbk.ram.impl;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import io.perl.api.Bytes;
-import io.perl.api.LatencyConfig;
+import io.perl.data.Bytes;
+import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.api.impl.CSVExtendedLatencyRecorder;
 import io.perl.api.impl.HashMapLatencyRecorder;

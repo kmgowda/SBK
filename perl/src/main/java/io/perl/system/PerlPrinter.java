@@ -10,7 +10,7 @@
 
 package io.perl.system;
 
-import io.perl.api.PerlConfig;
+import io.perl.config.PerlConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -10,7 +10,7 @@
 
 package io.perl.logger.impl;
 
-import io.perl.api.LatencyConfig;
+import io.perl.config.LatencyConfig;
 import java.text.DecimalFormat;
 
 public abstract sealed class Metrics permits PrintMetrics {

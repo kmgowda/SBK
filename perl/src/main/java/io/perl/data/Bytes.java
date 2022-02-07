@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perl.api;
+package io.perl.data;
 
 public final class Bytes {
     final public static int BYTES_PER_KB = 1024;

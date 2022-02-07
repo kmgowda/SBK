@@ -10,6 +10,7 @@
 
 package io.perl.api;
 
+import io.perl.data.Bytes;
 import io.perl.logger.Print;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;

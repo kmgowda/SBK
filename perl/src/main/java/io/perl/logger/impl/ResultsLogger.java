@@ -9,8 +9,8 @@
  */
 package io.perl.logger.impl;
 
-import io.perl.api.Bytes;
-import io.perl.api.LatencyConfig;
+import io.perl.data.Bytes;
+import io.perl.config.LatencyConfig;
 import io.perl.logger.PerformanceLogger;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;

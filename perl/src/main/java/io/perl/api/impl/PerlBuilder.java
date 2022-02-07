@@ -9,13 +9,13 @@
  */
 package io.perl.api.impl;
 
-import io.perl.api.Bytes;
-import io.perl.api.LatencyConfig;
+import io.perl.data.Bytes;
+import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.PerformanceLogger;
 import io.perl.api.PeriodicLogger;
 import io.perl.api.Perl;
-import io.perl.api.PerlConfig;
+import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
 import io.perl.api.ReportLatency;
 import io.time.MicroSeconds;

@@ -9,7 +9,7 @@
  */
 package io.perl.api.impl;
 
-import io.perl.api.LatencyConfig;
+import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyPercentiles;
 import io.perl.api.LatencyRecord;
 import io.perl.api.LatencyRecordWindow;

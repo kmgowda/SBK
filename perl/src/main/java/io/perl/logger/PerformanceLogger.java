@@ -10,8 +10,8 @@
 
 package io.perl.logger;
 
-import io.perl.api.LatencyConfig;
-import io.perl.api.PerlConfig;
+import io.perl.config.LatencyConfig;
+import io.perl.config.PerlConfig;
 import io.time.TimeUnit;
 
 public interface PerformanceLogger extends Print {

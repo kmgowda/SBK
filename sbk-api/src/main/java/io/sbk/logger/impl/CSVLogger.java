@@ -10,7 +10,7 @@
 
 package io.sbk.logger.impl;
 
-import io.perl.api.Bytes;
+import io.perl.data.Bytes;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.options.InputOptions;

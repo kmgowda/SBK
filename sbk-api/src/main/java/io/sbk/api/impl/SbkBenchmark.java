@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.perl.api.Perl;
-import io.perl.api.PerlConfig;
+import io.perl.config.PerlConfig;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;

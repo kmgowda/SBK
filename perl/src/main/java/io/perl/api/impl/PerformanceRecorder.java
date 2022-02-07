@@ -11,7 +11,7 @@ package io.perl.api.impl;
 
 import io.perl.api.Channel;
 import io.perl.api.PeriodicLogger;
-import io.perl.api.PerlConfig;
+import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
 import io.perl.api.TimeStamp;
 import io.time.Time;
