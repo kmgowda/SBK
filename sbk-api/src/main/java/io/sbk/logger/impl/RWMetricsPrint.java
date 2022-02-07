@@ -11,7 +11,7 @@ package io.sbk.logger.impl;
 
 
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.perl.logger.impl.MetricsLogger;
+import io.perl.logger.impl.MetricsPrint;
 import io.sbk.logger.CountRW;
 import io.time.Time;
 import io.time.TimeUnit;
@@ -22,14 +22,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for recoding/printing benchmark results of Readers and Writers
  * on micrometer Composite Meter Registry.
  */
-public sealed class RWMetricsLogger extends MetricsLogger implements CountRW permits RWMetricsPrometheusServer {
+public sealed class RWMetricsPrint extends MetricsPrint implements CountRW permits RWMetricsPrometheusServer {
     final private AtomicInteger writers;
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;
     final private AtomicInteger maxReaders;
 
-    public RWMetricsLogger(String header, String action, double[] percentiles, Time time, TimeUnit latencyTimeUnit,
-                           CompositeMeterRegistry compositeRegistry) {
+    public RWMetricsPrint(String header, String action, double[] percentiles, Time time, TimeUnit latencyTimeUnit,
+                          CompositeMeterRegistry compositeRegistry) {
         super(header.toUpperCase()+" "+action, percentiles, time, latencyTimeUnit, compositeRegistry);
         final String writersName = metricPrefix + "_Writers";
         final String readersName = metricPrefix + "_Readers";
