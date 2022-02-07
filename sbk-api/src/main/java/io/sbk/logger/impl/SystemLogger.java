@@ -13,8 +13,8 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.perl.api.Bytes;
 import io.perl.api.LatencyConfig;
+import io.perl.logger.ResultsFormat;
 import io.sbk.action.Action;
 import io.sbk.logger.RWLogger;
 import io.sbk.logger.LoggerConfig;
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for recoding/printing results on System.out.
  */
-public class SystemLogger implements RWLogger {
+public class SystemLogger implements RWLogger, ResultsFormat {
     private final static String LOGGER_FILE = "logger.properties";
     public final AtomicInteger writers;
     public final AtomicInteger readers;
@@ -236,27 +236,6 @@ public class SystemLogger implements RWLogger {
         readers.decrementAndGet();
     }
 
-    public void appendResults(@NotNull StringBuilder out, long seconds, long bytes, long records, double recsPerSec,
-                              double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                              long higherDiscard, long slc1, long slc2, @NotNull long[] percentileValues) {
-        final double mBytes = (bytes * 1.0) / Bytes.BYTES_PER_MB;
-        out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
-                        + ", %8.1f %s avg latency, %7d %s max latency;"
-                        + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"
-                        + " SLC-1: %3d, SLC-2: %3d;",
-                seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitText, maxLatency,
-                timeUnitText, invalid, lowerDiscard, higherDiscard, slc1, slc2));
-        out.append(" Latency Percentiles: ");
-
-        for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); i++) {
-            if (i == 0) {
-                out.append(String.format("%7d %s %sth", percentileValues[i], timeUnitText, percentileNames[i]));
-            } else {
-                out.append(String.format(", %7d %s %sth", percentileValues[i], timeUnitText, percentileNames[i]));
-            }
-        }
-    }
-
     public void appendWritesAndReaders(@NotNull StringBuilder out) {
         out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
         out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
@@ -267,8 +246,8 @@ public class SystemLogger implements RWLogger {
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
 
         appendWritesAndReaders(out);
-        appendResults(out, (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        appendResults(out, timeUnitText, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
+                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append(".\n");
         return out.toString();
     }
