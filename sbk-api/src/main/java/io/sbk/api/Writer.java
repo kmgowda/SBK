@@ -98,7 +98,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
-                perlChannel.sendException(ex);
+                perlChannel.throwException(ex);
                 return null;
             });
             ret.thenAccept(d -> {

@@ -200,7 +200,7 @@ final public class CQueuePerl implements Perl {
             }
 
             @Override
-            public void sendException(Throwable ex) {
+            public void throwException(Throwable ex) {
                 eThrow.onException(ex);
             }
         }

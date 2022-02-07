@@ -26,9 +26,9 @@ public interface PerlChannel {
     void send(long startTime, long endTime, int dataSize, int records);
 
     /**
-     * send the Exception.
+     * throw an Exception.
      *
      * @param ex Exception
      */
-    void sendException(Throwable ex);
+    void throwException(Throwable ex);
 }
