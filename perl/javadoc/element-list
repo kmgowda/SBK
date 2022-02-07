@@ -1,5 +1,7 @@
 io.perl.api
 io.perl.api.impl
+io.perl.config
+io.perl.data
 io.perl.logger
 io.perl.logger.impl
 io.perl.system
