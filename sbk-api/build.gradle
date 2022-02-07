@@ -33,9 +33,6 @@ dependencies {
     api project(":perl")
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    api group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
-    api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
-    api group: 'io.prometheus.jmx', name: jmxAgent, version: jmxPrometheusVersion
     api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
 }

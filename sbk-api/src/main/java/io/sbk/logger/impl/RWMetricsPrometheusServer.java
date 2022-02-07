@@ -10,6 +10,7 @@
 
 package io.sbk.logger.impl;
 
+import io.perl.logger.impl.PrometheusServer;
 import io.sbk.logger.MetricsConfig;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;

@@ -11,6 +11,7 @@ package io.sbk.logger.impl;
 
 
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.perl.logger.impl.MetricsLogger;
 import io.sbk.logger.CountRW;
 import io.time.Time;
 import io.time.TimeUnit;
@@ -29,7 +30,7 @@ public sealed class RWMetricsLogger extends MetricsLogger implements CountRW per
 
     public RWMetricsLogger(String header, String action, double[] percentiles, Time time, TimeUnit latencyTimeUnit,
                            CompositeMeterRegistry compositeRegistry) {
-        super(header, action, percentiles, time, latencyTimeUnit, compositeRegistry);
+        super(header.toUpperCase()+" "+action, percentiles, time, latencyTimeUnit, compositeRegistry);
         final String writersName = metricPrefix + "_Writers";
         final String readersName = metricPrefix + "_Readers";
         final String maxWritersName = metricPrefix + "_Max_Writers";
