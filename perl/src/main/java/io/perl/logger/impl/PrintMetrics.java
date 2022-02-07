@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
-public class MetricsPrint extends Metrics implements Print {
+public sealed class PrintMetrics extends Metrics implements Print permits PrometheusMetricsServer {
     final public MeterRegistry registry;
     final private Counter bytes;
     final private Counter records;
@@ -39,7 +39,7 @@ public class MetricsPrint extends Metrics implements Print {
     final private AtomicLong slc2;
     final private Convert convert;
 
-    public MetricsPrint(@NotNull String header, @NotNull double[] percentiles,
+    public PrintMetrics(@NotNull String header, @NotNull double[] percentiles,
                         Time time, @NotNull TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
         super(header, latencyTimeUnit.name(), percentiles);
         this.registry = compositeRegistry;

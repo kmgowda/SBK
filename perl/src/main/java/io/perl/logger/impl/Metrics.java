@@ -13,7 +13,7 @@ package io.perl.logger.impl;
 import io.perl.api.LatencyConfig;
 import java.text.DecimalFormat;
 
-public abstract class Metrics {
+public abstract sealed class Metrics permits PrintMetrics {
     final protected String metricPrefix;
     final protected DecimalFormat percentileFormat;
     final protected String metricTimeUnit;

@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-public class PrometheusMetricsServer extends MetricsPrint {
+public non-sealed class PrometheusMetricsServer extends PrintMetrics {
     final private PrometheusServer server;
 
     private PrometheusMetricsServer(String header, double[] percentiles, Time time,
