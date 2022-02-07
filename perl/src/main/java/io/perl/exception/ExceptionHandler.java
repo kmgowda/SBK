@@ -8,9 +8,14 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.exception;
+package io.perl.exception;
 
 public interface ExceptionHandler {
 
+    /**
+     * throw an Exception.
+     *
+     * @param ex Exception
+     */
     void throwException(Throwable ex);
 }

@@ -10,10 +10,12 @@
 
 package io.perl.api;
 
+import io.perl.exception.ExceptionHandler;
+
 /**
  * Interface for recording benchmarking data.
  */
-public interface PerlChannel {
+public interface PerlChannel extends ExceptionHandler {
 
     /**
      * send the benchmarking data.
@@ -24,11 +26,4 @@ public interface PerlChannel {
      * @param records   number of records/events/messages.
      */
     void send(long startTime, long endTime, int dataSize, int records);
-
-    /**
-     * throw an Exception.
-     *
-     * @param ex Exception
-     */
-    void throwException(Throwable ex);
 }
