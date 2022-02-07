@@ -40,7 +40,7 @@ public class PrometheusLogger extends CSVLogger {
         prometheusServer = null;
     }
 
-    public PrometheusRWMetricsServer getPrometheusMetricsServer() throws IOException {
+    public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         return new PrometheusRWMetricsServer(Config.NAME + " " + storageName, action.name(),
                 percentiles, time, metricsConfig);
     }
@@ -90,7 +90,7 @@ public class PrometheusLogger extends CSVLogger {
             printer = super::print;
             prometheusServer = null;
         } else {
-            prometheusServer = getPrometheusMetricsServer();
+            prometheusServer = getPrometheusRWMetricsServer();
             prometheusServer.start();
             printer = this::printMetrics;
         }
