@@ -14,7 +14,7 @@ import io.perl.PeriodicLogger;
 import io.perl.Perl;
 import io.perl.PerlChannel;
 import io.perl.PerlConfig;
-import io.perl.PerlPrinter;
+import io.system.PerlPrinter;
 import io.perl.TimeStamp;
 import io.state.State;
 import io.time.Time;

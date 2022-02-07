@@ -12,7 +12,7 @@ package io.perl.impl;
 import io.perl.Channel;
 import io.perl.PeriodicLogger;
 import io.perl.PerlConfig;
-import io.perl.PerlPrinter;
+import io.system.PerlPrinter;
 import io.perl.TimeStamp;
 import io.time.Time;
 import javax.annotation.concurrent.NotThreadSafe;

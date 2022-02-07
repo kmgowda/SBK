@@ -10,7 +10,7 @@
 
 package io.sbk.logger;
 
-import io.perl.PerformanceLogger;
+import io.logger.PerformanceLogger;
 import io.sbk.action.Action;
 import io.sbk.exception.ExceptionHandler;
 import io.sbk.options.InputOptions;

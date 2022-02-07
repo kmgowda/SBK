@@ -20,6 +20,8 @@
     <allow pkg="io.state"/>
     <allow pkg="io.time"/>
     <allow pkg="io.perl"/>
+    <allow pkg="io.logger"/>
+    <allow pkg="io.system"/>
     <allow pkg="io.sbk"/>
     <allow pkg="io.pravega"/>
     <allow pkg="lombok"/>

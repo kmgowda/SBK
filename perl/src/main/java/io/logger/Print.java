@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perl;
+package io.logger;
 
 public interface Print {
     /**

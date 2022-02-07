@@ -14,7 +14,7 @@ import io.perl.LatencyPercentiles;
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
 import io.perl.LatencyRecorder;
-import io.perl.PerlPrinter;
+import io.system.PerlPrinter;
 import io.perl.ReportLatencies;
 import io.time.Time;
 import org.HdrHistogram.Histogram;

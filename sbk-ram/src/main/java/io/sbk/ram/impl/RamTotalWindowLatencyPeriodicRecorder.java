@@ -12,7 +12,7 @@ package io.sbk.ram.impl;
 
 import io.perl.LatencyRecord;
 import io.perl.LatencyRecordWindow;
-import io.perl.Print;
+import io.logger.Print;
 import io.perl.ReportLatencies;
 import io.perl.impl.TotalLatencyRecordWindow;
 import io.sbk.grpc.LatenciesRecord;

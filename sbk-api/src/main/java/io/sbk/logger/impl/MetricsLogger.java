@@ -14,7 +14,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.perl.LatencyConfig;
-import io.perl.Print;
+import io.logger.Print;
 import io.time.Time;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;

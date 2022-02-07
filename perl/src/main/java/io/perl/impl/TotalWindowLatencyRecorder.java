@@ -11,7 +11,7 @@
 package io.perl.impl;
 
 import io.perl.LatencyRecordWindow;
-import io.perl.Print;
+import io.logger.Print;
 import io.perl.ReportLatency;
 
 public sealed class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow

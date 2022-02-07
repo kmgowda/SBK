@@ -11,7 +11,7 @@
 package io.perl.impl;
 
 import io.perl.LatencyRecordWindow;
-import io.perl.Print;
+import io.logger.Print;
 import io.perl.TotalPeriodicWindow;
 
 public class TotalLatencyRecordWindow implements TotalPeriodicWindow {

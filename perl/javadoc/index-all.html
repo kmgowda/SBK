@@ -65,13 +65,13 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/PerlConfig.html#build()" class="member-name-link">build()</a> - Static method in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/impl/PerlBuilder.html#build(io.perl.PerlConfig,io.perl.PerformanceLogger,io.perl.ReportLatency,java.util.concurrent.ExecutorService,io.time.Time)" class="member-name-link">build(PerlConfig, PerformanceLogger, ReportLatency, ExecutorService, Time)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
+<dt><a href="io/perl/impl/PerlBuilder.html#build(io.perl.PerlConfig,io.logger.PerformanceLogger,io.perl.ReportLatency,java.util.concurrent.ExecutorService,io.time.Time)" class="member-name-link">build(PerlConfig, PerformanceLogger, ReportLatency, ExecutorService, Time)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/PerlConfig.html#build(java.io.InputStream)" class="member-name-link">build(InputStream)</a> - Static method in class io.perl.<a href="io/perl/PerlConfig.html" title="class in io.perl">PerlConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/PerlBuilder.html#buildLatencyRecordWindow(io.perl.LatencyConfig,io.time.Time,long,long,double%5B%5D)" class="member-name-link">buildLatencyRecordWindow(LatencyConfig, Time, long, long, double[])</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/impl/PerlBuilder.html#buildTime(io.perl.PerformanceLogger)" class="member-name-link">buildTime(PerformanceLogger)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
+<dt><a href="io/perl/impl/PerlBuilder.html#buildTime(io.logger.PerformanceLogger)" class="member-name-link">buildTime(PerformanceLogger)</a> - Static method in class io.perl.impl.<a href="io/perl/impl/PerlBuilder.html" title="class in io.perl.impl">PerlBuilder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/TimeStamp.html#bytes" class="member-name-link">bytes</a> - Variable in class io.perl.<a href="io/perl/TimeStamp.html" title="class in io.perl">TimeStamp</a></dt>
 <dd>&nbsp;</dd>
@@ -530,7 +530,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Print the Periodic performance results.</div>
 </dd>
-<dt><a href="io/perl/LatencyWindow.html#print(long,io.perl.Print,io.perl.ReportLatencies)" class="member-name-link">print(long, Print, ReportLatencies)</a> - Method in class io.perl.<a href="io/perl/LatencyWindow.html" title="class in io.perl">LatencyWindow</a></dt>
+<dt><a href="io/perl/LatencyWindow.html#print(long,io.logger.Print,io.perl.ReportLatencies)" class="member-name-link">print(long, Print, ReportLatencies)</a> - Method in class io.perl.<a href="io/perl/LatencyWindow.html" title="class in io.perl">LatencyWindow</a></dt>
 <dd>
 <div class="block">Print the window statistics.</div>
 </dd>
@@ -726,7 +726,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/TotalLatencyRecordWindow.html" class="type-name-link" title="class in io.perl.impl">TotalLatencyRecordWindow</a> - Class in <a href="io/perl/impl/package-summary.html">io.perl.impl</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/impl/TotalLatencyRecordWindow.html#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.Print,io.perl.Print)" class="member-name-link">TotalLatencyRecordWindow(LatencyRecordWindow, LatencyRecordWindow, Print, Print)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></dt>
+<dt><a href="io/perl/impl/TotalLatencyRecordWindow.html#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.logger.Print,io.logger.Print)" class="member-name-link">TotalLatencyRecordWindow(LatencyRecordWindow, LatencyRecordWindow, Print, Print)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/TotalLatencyRecordWindow.html#totalLogger" class="member-name-link">totalLogger</a> - Variable in class io.perl.impl.<a href="io/perl/impl/TotalLatencyRecordWindow.html" title="class in io.perl.impl">TotalLatencyRecordWindow</a></dt>
 <dd>&nbsp;</dd>
@@ -744,11 +744,11 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/TotalWindowLatencyPeriodicLogger.html" class="type-name-link" title="class in io.perl.impl">TotalWindowLatencyPeriodicLogger</a> - Class in <a href="io/perl/impl/package-summary.html">io.perl.impl</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/impl/TotalWindowLatencyPeriodicLogger.html#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.Print,io.perl.Print,io.perl.ReportLatency,io.time.Time)" class="member-name-link">TotalWindowLatencyPeriodicLogger(LatencyRecordWindow, LatencyRecordWindow, Print, Print, ReportLatency, Time)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/TotalWindowLatencyPeriodicLogger.html" title="class in io.perl.impl">TotalWindowLatencyPeriodicLogger</a></dt>
+<dt><a href="io/perl/impl/TotalWindowLatencyPeriodicLogger.html#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.logger.Print,io.logger.Print,io.perl.ReportLatency,io.time.Time)" class="member-name-link">TotalWindowLatencyPeriodicLogger(LatencyRecordWindow, LatencyRecordWindow, Print, Print, ReportLatency, Time)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/TotalWindowLatencyPeriodicLogger.html" title="class in io.perl.impl">TotalWindowLatencyPeriodicLogger</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/impl/TotalWindowLatencyRecorder.html" class="type-name-link" title="class in io.perl.impl">TotalWindowLatencyRecorder</a> - Class in <a href="io/perl/impl/package-summary.html">io.perl.impl</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/impl/TotalWindowLatencyRecorder.html#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.Print,io.perl.Print)" class="member-name-link">TotalWindowLatencyRecorder(LatencyRecordWindow, LatencyRecordWindow, Print, Print)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/TotalWindowLatencyRecorder.html" title="class in io.perl.impl">TotalWindowLatencyRecorder</a></dt>
+<dt><a href="io/perl/impl/TotalWindowLatencyRecorder.html#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.logger.Print,io.logger.Print)" class="member-name-link">TotalWindowLatencyRecorder(LatencyRecordWindow, LatencyRecordWindow, Print, Print)</a> - Constructor for class io.perl.impl.<a href="io/perl/impl/TotalWindowLatencyRecorder.html" title="class in io.perl.impl">TotalWindowLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:U">U</h2>

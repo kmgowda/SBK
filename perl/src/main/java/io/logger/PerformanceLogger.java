@@ -8,8 +8,10 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perl;
+package io.logger;
 
+import io.perl.LatencyConfig;
+import io.perl.PerlConfig;
 import io.time.TimeUnit;
 
 public interface PerformanceLogger extends Print {

@@ -10,6 +10,7 @@
 
 package io.perl;
 
+import io.logger.Print;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 

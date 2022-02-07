@@ -12,7 +12,7 @@ package io.perl.impl;
 
 import io.perl.LatencyRecordWindow;
 import io.perl.PeriodicLogger;
-import io.perl.Print;
+import io.logger.Print;
 import io.perl.ReportLatency;
 import io.time.Time;
 
