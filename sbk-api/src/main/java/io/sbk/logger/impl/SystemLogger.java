@@ -13,8 +13,7 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.perl.api.LatencyConfig;
-import io.perl.logger.ResultsFormat;
+import io.perl.logger.impl.ResultsLogger;
 import io.sbk.action.Action;
 import io.sbk.logger.RWLogger;
 import io.sbk.logger.LoggerConfig;
@@ -28,14 +27,13 @@ import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class for recoding/printing results on System.out.
  */
-public class SystemLogger implements RWLogger, ResultsFormat {
+public class SystemLogger extends ResultsLogger implements RWLogger {
     private final static String LOGGER_FILE = "logger.properties";
     public final AtomicInteger writers;
     public final AtomicInteger readers;
@@ -43,21 +41,18 @@ public class SystemLogger implements RWLogger, ResultsFormat {
     public final AtomicInteger maxReaders;
     public String storageName;
     public String prefix;
-    public String timeUnitText;
     public String timeUnitFullText;
     public InputOptions params;
     public double[] percentiles;
-    public String[] percentileNames;
     public Action action;
     public Time time;
-    private final DecimalFormat format;
     private LoggerConfig loggerConfig;
     private TimeUnit timeUnit;
     private long minLatency;
     private long maxLatency;
 
     public SystemLogger() {
-        this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
+        super();
         this.writers = new AtomicInteger(0);
         this.readers = new AtomicInteger(0);
         this.maxWriters = new AtomicInteger(0);
@@ -70,7 +65,7 @@ public class SystemLogger implements RWLogger, ResultsFormat {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             loggerConfig = mapper.readValue(
-                    io.sbk.logger.impl.SystemLogger.class.getClassLoader().getResourceAsStream(LOGGER_FILE),
+                    SystemLogger.class.getClassLoader().getResourceAsStream(LOGGER_FILE),
                     LoggerConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -81,11 +76,7 @@ public class SystemLogger implements RWLogger, ResultsFormat {
         for (int i = 0; i < percentilesList.length; i++) {
             percentiles[i] = Double.parseDouble(percentilesList[i].trim());
         }
-        Arrays.sort(percentiles);
-        percentileNames = new String[percentiles.length];
-        for (int i = 0; i < percentiles.length; i++) {
-            percentileNames[i] = format.format(percentiles[i]);
-        }
+        setPercentileNames(percentiles);
 
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
                 "; default: " + loggerConfig.timeUnit.name());
@@ -174,7 +165,7 @@ public class SystemLogger implements RWLogger, ResultsFormat {
         this.action = action;
         this.time = time;
         this.prefix = storageName + " " + action.name();
-        this.timeUnitText = getTimeUnit().name();
+        this.timeUnitName = getTimeUnit().name();
         this.timeUnitFullText = getTimeUnit().toString();
         for (double p : this.percentiles) {
             if (p < 0 || p > 100) {
@@ -241,12 +232,13 @@ public class SystemLogger implements RWLogger, ResultsFormat {
         out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
     }
 
+    @Override
     public String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
                                     double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
 
         appendWritesAndReaders(out);
-        appendResults(out, timeUnitText, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
+        appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append(".\n");
         return out.toString();
