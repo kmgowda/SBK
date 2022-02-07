@@ -174,7 +174,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Class for Performance statistics.</div>
 </dd>
-<dt><a href="io/perl/api/impl/CQueuePerl.html#%3Cinit%3E(io.perl.config.PerlConfig,io.perl.api.PeriodicLogger,int,io.time.Time,java.util.concurrent.ExecutorService)" class="member-name-link">CQueuePerl(PerlConfig, PeriodicLogger, int, Time, ExecutorService)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/CQueuePerl.html" title="class in io.perl.api.impl">CQueuePerl</a></dt>
+<dt><a href="io/perl/api/impl/CQueuePerl.html#%3Cinit%3E(io.perl.config.PerlConfig,io.perl.api.PeriodicRecorder,int,io.time.Time,java.util.concurrent.ExecutorService)" class="member-name-link">CQueuePerl(PerlConfig, PeriodicRecorder, int, Time, ExecutorService)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/CQueuePerl.html" title="class in io.perl.api.impl">CQueuePerl</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/config/LatencyConfig.html#csv" class="member-name-link">csv</a> - Variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -253,6 +253,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/state/State.html#END" class="member-name-link">END</a> - Enum constant in enum class io.state.<a href="io/state/State.html" title="enum class in io.state">State</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/TimeStamp.html#endTime" class="member-name-link">endTime</a> - Variable in class io.perl.api.<a href="io/perl/api/TimeStamp.html" title="class in io.perl.api">TimeStamp</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/exception/ExceptionHandler.html" class="type-name-link" title="interface in io.perl.exception">ExceptionHandler</a> - Interface in <a href="io/perl/exception/package-summary.html">io.perl.exception</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:F">F</h2>
@@ -373,6 +375,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/perl/config/package-summary.html">io.perl.config</a> - package io.perl.config</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/data/package-summary.html">io.perl.data</a> - package io.perl.data</dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/exception/package-summary.html">io.perl.exception</a> - package io.perl.exception</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/logger/package-summary.html">io.perl.logger</a> - package io.perl.logger</dt>
 <dd>&nbsp;</dd>
@@ -540,9 +544,9 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/PerformanceRecorder.html" class="type-name-link" title="class in io.perl.api.impl">PerformanceRecorder</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/api/impl/PerformanceRecorder.html#%3Cinit%3E(io.perl.api.PeriodicLogger,io.perl.api.Channel%5B%5D,io.time.Time,int,int)" class="member-name-link">PerformanceRecorder(PeriodicLogger, Channel[], Time, int, int)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/PerformanceRecorder.html" title="class in io.perl.api.impl">PerformanceRecorder</a></dt>
+<dt><a href="io/perl/api/impl/PerformanceRecorder.html#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int)" class="member-name-link">PerformanceRecorder(PeriodicRecorder, Channel[], Time, int, int)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/PerformanceRecorder.html" title="class in io.perl.api.impl">PerformanceRecorder</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/api/PeriodicLogger.html" class="type-name-link" title="interface in io.perl.api">PeriodicLogger</a> - Interface in <a href="io/perl/api/package-summary.html">io.perl.api</a></dt>
+<dt><a href="io/perl/api/PeriodicRecorder.html" class="type-name-link" title="interface in io.perl.api">PeriodicRecorder</a> - Interface in <a href="io/perl/api/package-summary.html">io.perl.api</a></dt>
 <dd>
 <div class="block">Interface for recording latencies.</div>
 </dd>
@@ -616,9 +620,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Receive the benchmarking timestamp.</div>
 </dd>
-<dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicLogger.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicLogger.html" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicLogger</a></dt>
+<dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicRecorder</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/api/PeriodicLogger.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in interface io.perl.api.<a href="io/perl/api/PeriodicLogger.html" title="interface in io.perl.api">PeriodicLogger</a></dt>
+<dt><a href="io/perl/api/PeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in interface io.perl.api.<a href="io/perl/api/PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a></dt>
 <dd>
 <div class="block">Record the Event/record.</div>
 </dd>
@@ -729,10 +733,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Send end time indication.</div>
 </dd>
-<dt><a href="io/perl/api/PerlChannel.html#sendException(java.lang.Throwable)" class="member-name-link">sendException(Throwable)</a> - Method in interface io.perl.api.<a href="io/perl/api/PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></dt>
-<dd>
-<div class="block">send the Exception.</div>
-</dd>
 <dt><a href="io/perl/api/impl/ElasticWait.html#setElastic(long)" class="member-name-link">setElastic(long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/ElasticWait.html" title="class in io.perl.api.impl">ElasticWait</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/logger/impl/ResultsLogger.html#setPercentileNames(double%5B%5D)" class="member-name-link">setPercentileNames(double[])</a> - Method in class io.perl.logger.impl.<a href="io/perl/logger/impl/ResultsLogger.html" title="class in io.perl.logger.impl">ResultsLogger</a></dt>
@@ -786,6 +786,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:T">T</h2>
 <dl class="index">
+<dt><a href="io/perl/exception/ExceptionHandler.html#throwException(java.lang.Throwable)" class="member-name-link">throwException(Throwable)</a> - Method in interface io.perl.exception.<a href="io/perl/exception/ExceptionHandler.html" title="interface in io.perl.exception">ExceptionHandler</a></dt>
+<dd>
+<div class="block">throw an Exception.</div>
+</dd>
 <dt><a href="io/perl/api/LatencyWindow.html#time" class="member-name-link">time</a> - Variable in class io.perl.api.<a href="io/perl/api/LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/time/Time.html" class="type-name-link" title="interface in io.time">Time</a> - Interface in <a href="io/time/package-summary.html">io.time</a></dt>
@@ -832,9 +836,9 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/TotalLatencyRecordWindow.html#totalWindow" class="member-name-link">totalWindow</a> - Variable in class io.perl.api.impl.<a href="io/perl/api/impl/TotalLatencyRecordWindow.html" title="class in io.perl.api.impl">TotalLatencyRecordWindow</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicLogger.html" class="type-name-link" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicLogger</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
+<dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html" class="type-name-link" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicRecorder</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicLogger.html#%3Cinit%3E(io.perl.api.LatencyRecordWindow,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print,io.perl.api.ReportLatency,io.time.Time)" class="member-name-link">TotalWindowLatencyPeriodicLogger(LatencyRecordWindow, LatencyRecordWindow, Print, Print, ReportLatency, Time)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicLogger.html" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicLogger</a></dt>
+<dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html#%3Cinit%3E(io.perl.api.LatencyRecordWindow,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print,io.perl.api.ReportLatency,io.time.Time)" class="member-name-link">TotalWindowLatencyPeriodicRecorder(LatencyRecordWindow, LatencyRecordWindow, Print, Print, ReportLatency, Time)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/TotalWindowLatencyRecorder.html" class="type-name-link" title="class in io.perl.api.impl">TotalWindowLatencyRecorder</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
 <dd>&nbsp;</dd>

@@ -54,6 +54,7 @@ loadScripts(document, 'script');</script>
 <li><a href="io/perl/api/impl/package-tree.html">io.perl.api.impl</a>, </li>
 <li><a href="io/perl/config/package-tree.html">io.perl.config</a>, </li>
 <li><a href="io/perl/data/package-tree.html">io.perl.data</a>, </li>
+<li><a href="io/perl/exception/package-tree.html">io.perl.exception</a>, </li>
 <li><a href="io/perl/logger/package-tree.html">io.perl.logger</a>, </li>
 <li><a href="io/perl/logger/impl/package-tree.html">io.perl.logger.impl</a>, </li>
 <li><a href="io/perl/system/package-tree.html">io.perl.system</a>, </li>
@@ -125,7 +126,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyRecorder.html" class="type-name-link" title="class in io.perl.api.impl">TotalWindowLatencyRecorder</a> (implements io.perl.api.<a href="io/perl/api/ReportLatency.html" title="interface in io.perl.api">ReportLatency</a>)
 <ul>
-<li class="circle">io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicLogger.html" class="type-name-link" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicLogger</a> (implements io.perl.api.<a href="io/perl/api/PeriodicLogger.html" title="interface in io.perl.api">PeriodicLogger</a>)</li>
+<li class="circle">io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html" class="type-name-link" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicRecorder</a> (implements io.perl.api.<a href="io/perl/api/PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a>)</li>
 </ul>
 </li>
 </ul>
@@ -137,6 +138,11 @@ loadScripts(document, 'script');</script>
 <section class="hierarchy">
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
+<li class="circle">io.perl.exception.<a href="io/perl/exception/ExceptionHandler.html" class="type-name-link" title="interface in io.perl.exception">ExceptionHandler</a>
+<ul>
+<li class="circle">io.perl.api.<a href="io/perl/api/PerlChannel.html" class="type-name-link" title="interface in io.perl.api">PerlChannel</a></li>
+</ul>
+</li>
 <li class="circle">io.perl.api.<a href="io/perl/api/GetPerlChannel.html" class="type-name-link" title="interface in io.perl.api">GetPerlChannel</a>
 <ul>
 <li class="circle">io.perl.api.<a href="io/perl/api/Channel.html" class="type-name-link" title="interface in io.perl.api">Channel</a></li>
@@ -147,12 +153,11 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">io.perl.api.<a href="io/perl/api/TotalPeriodicWindow.html" class="type-name-link" title="interface in io.perl.api">TotalPeriodicWindow</a>
 <ul>
-<li class="circle">io.perl.api.<a href="io/perl/api/PeriodicLogger.html" class="type-name-link" title="interface in io.perl.api">PeriodicLogger</a></li>
+<li class="circle">io.perl.api.<a href="io/perl/api/PeriodicRecorder.html" class="type-name-link" title="interface in io.perl.api">PeriodicRecorder</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="circle">io.perl.api.<a href="io/perl/api/PerlChannel.html" class="type-name-link" title="interface in io.perl.api">PerlChannel</a></li>
 <li class="circle">io.perl.logger.<a href="io/perl/logger/Print.html" class="type-name-link" title="interface in io.perl.logger">Print</a>
 <ul>
 <li class="circle">io.perl.logger.<a href="io/perl/logger/PerformanceLogger.html" class="type-name-link" title="interface in io.perl.logger">PerformanceLogger</a></li>

@@ -71,8 +71,13 @@ loadScripts(document, 'script');</script>
 <h1 title="Interface PerlChannel" class="title">Interface PerlChannel</h1>
 </div>
 <section class="class-description" id="class-description">
+<dl class="notes">
+<dt>All Superinterfaces:</dt>
+<dd><code><a href="../exception/ExceptionHandler.html" title="interface in io.perl.exception">ExceptionHandler</a></code></dd>
+</dl>
 <hr>
-<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">PerlChannel</span></div>
+<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">PerlChannel</span><span class="extends-implements">
+extends <a href="../exception/ExceptionHandler.html" title="interface in io.perl.exception">ExceptionHandler</a></span></div>
 <div class="block">Interface for recording benchmarking data.</div>
 </section>
 <section class="summary">
@@ -96,14 +101,12 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">send the benchmarking data.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#sendException(java.lang.Throwable)" class="member-name-link">sendException</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" title="class or interface in java.lang" class="external-link">Throwable</a>&nbsp;ex)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">send the Exception.</div>
 </div>
 </div>
 </div>
-</div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-io.perl.exception.ExceptionHandler">Methods inherited from interface&nbsp;io.perl.exception.<a href="../exception/ExceptionHandler.html" title="interface in io.perl.exception">ExceptionHandler</a></h3>
+<code><a href="../exception/ExceptionHandler.html#throwException(java.lang.Throwable)">throwException</a></code></div>
 </section>
 </li>
 </ul>
@@ -129,17 +132,6 @@ loadScripts(document, 'script');</script>
 <dd><code>endTime</code> - End Time.</dd>
 <dd><code>dataSize</code> - size of the data in bytes.</dd>
 <dd><code>records</code> - number of records/events/messages.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="sendException(java.lang.Throwable)">
-<h3>sendException</h3>
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">sendException</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" title="class or interface in java.lang" class="external-link">Throwable</a>&nbsp;ex)</span></div>
-<div class="block">send the Exception.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>ex</code> - Exception</dd>
 </dl>
 </section>
 </li>
