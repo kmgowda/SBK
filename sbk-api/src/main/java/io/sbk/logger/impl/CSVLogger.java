@@ -138,7 +138,7 @@ public class CSVLogger extends SystemLogger {
         super.close(params);
         if (csvEnable) {
             csvWriter.close();
-            Printer.log.info("SBK CSV Logger Shtudown");
+            Printer.log.info("SBK CSV Logger Shutdown");
         }
     }
 }
