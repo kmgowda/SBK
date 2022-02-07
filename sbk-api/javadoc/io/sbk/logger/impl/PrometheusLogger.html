@@ -72,16 +72,18 @@ loadScripts(document, 'script');</script>
 <h1 title="Class PrometheusLogger" class="title">Class PrometheusLogger</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
+<div class="inheritance">io.perl.logger.impl.ResultsLogger
 <div class="inheritance"><a href="SystemLogger.html" title="class in io.sbk.logger.impl">io.sbk.logger.impl.SystemLogger</a>
 <div class="inheritance"><a href="CSVLogger.html" title="class in io.sbk.logger.impl">io.sbk.logger.impl.CSVLogger</a>
 <div class="inheritance">io.sbk.logger.impl.PrometheusLogger</div>
 </div>
 </div>
 </div>
+</div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.perl.logger.PerformanceLogger</code>, <code>io.perl.logger.Print</code>, <code>io.perl.api.ReportLatency</code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></code></dd>
+<dd><code>io.perl.api.ReportLatency</code>, <code>io.perl.logger.PerformanceLogger</code>, <code>io.perl.logger.Print</code>, <code><a href="../CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="../CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="../Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code><a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a></code></dd>
 </dl>
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
@@ -112,7 +114,10 @@ loadScripts(document, 'script');</script>
 <code><a href="CSVLogger.html#csvEnable">csvEnable</a>, <a href="CSVLogger.html#csvFile">csvFile</a>, <a href="CSVLogger.html#csvWriter">csvWriter</a>, <a href="CSVLogger.html#DISABLE_STRING">DISABLE_STRING</a>, <a href="CSVLogger.html#REGULAR_PRINT">REGULAR_PRINT</a>, <a href="CSVLogger.html#TOTAL_PRINT">TOTAL_PRINT</a></code></div>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-io.sbk.logger.impl.SystemLogger">Fields inherited from class&nbsp;io.sbk.logger.impl.<a href="SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></h3>
-<code><a href="SystemLogger.html#action">action</a>, <a href="SystemLogger.html#maxReaders">maxReaders</a>, <a href="SystemLogger.html#maxWriters">maxWriters</a>, <a href="SystemLogger.html#params">params</a>, <a href="SystemLogger.html#percentileNames">percentileNames</a>, <a href="SystemLogger.html#percentiles">percentiles</a>, <a href="SystemLogger.html#prefix">prefix</a>, <a href="SystemLogger.html#readers">readers</a>, <a href="SystemLogger.html#storageName">storageName</a>, <a href="SystemLogger.html#time">time</a>, <a href="SystemLogger.html#timeUnitFullText">timeUnitFullText</a>, <a href="SystemLogger.html#timeUnitText">timeUnitText</a>, <a href="SystemLogger.html#writers">writers</a></code></div>
+<code><a href="SystemLogger.html#action">action</a>, <a href="SystemLogger.html#maxReaders">maxReaders</a>, <a href="SystemLogger.html#maxWriters">maxWriters</a>, <a href="SystemLogger.html#params">params</a>, <a href="SystemLogger.html#percentiles">percentiles</a>, <a href="SystemLogger.html#prefix">prefix</a>, <a href="SystemLogger.html#readers">readers</a>, <a href="SystemLogger.html#storageName">storageName</a>, <a href="SystemLogger.html#time">time</a>, <a href="SystemLogger.html#timeUnitFullText">timeUnitFullText</a>, <a href="SystemLogger.html#writers">writers</a></code></div>
+<div class="inherited-list">
+<h3 id="fields-inherited-from-class-io.perl.logger.impl.ResultsLogger">Fields inherited from class&nbsp;io.perl.logger.impl.ResultsLogger</h3>
+<code>percentileNames, timeUnitName</code></div>
 </section>
 </li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
@@ -162,8 +167,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricsConfigStream()" class="member-name-link">getMetricsConfigStream</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RWMetricsPrometheusServer.html" title="class in io.sbk.logger.impl">RWMetricsPrometheusServer</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricsPrometheusServer()" class="member-name-link">getMetricsPrometheusServer</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PrometheusRWMetricsServer.html" title="class in io.sbk.logger.impl">PrometheusRWMetricsServer</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPrometheusMetricsServer()" class="member-name-link">getPrometheusMetricsServer</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementReaders()" class="member-name-link">incrementReaders</a>()</code></div>
@@ -211,7 +216,10 @@ loadScripts(document, 'script');</script>
 <code><a href="CSVLogger.html#openCSV()">openCSV</a>, <a href="CSVLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a>, <a href="CSVLogger.html#writeToCSV(java.lang.String,java.lang.String,long,long,long,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">writeToCSV</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.impl.SystemLogger">Methods inherited from class&nbsp;io.sbk.logger.impl.<a href="SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></h3>
-<code><a href="SystemLogger.html#appendPercentiles(java.lang.StringBuilder,long,double,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">appendPercentiles</a>, <a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getPrintingIntervalSeconds()">getPrintingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a></code></div>
+<code><a href="SystemLogger.html#appendWritesAndReaders(java.lang.StringBuilder)">appendWritesAndReaders</a>, <a href="SystemLogger.html#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">buildResultString</a>, <a href="SystemLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="SystemLogger.html#getMinLatency()">getMinLatency</a>, <a href="SystemLogger.html#getPercentiles()">getPercentiles</a>, <a href="SystemLogger.html#getPrintingIntervalSeconds()">getPrintingIntervalSeconds</a>, <a href="SystemLogger.html#getTimeUnit()">getTimeUnit</a></code></div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-io.perl.logger.impl.ResultsLogger">Methods inherited from class&nbsp;io.perl.logger.impl.ResultsLogger</h3>
+<code>appendResults, setPercentileNames</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -261,9 +269,9 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="getMetricsPrometheusServer()">
-<h3>getMetricsPrometheusServer</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RWMetricsPrometheusServer.html" title="class in io.sbk.logger.impl">RWMetricsPrometheusServer</a></span>&nbsp;<span class="element-name">getMetricsPrometheusServer</span>()
+<section class="detail" id="getPrometheusMetricsServer()">
+<h3>getPrometheusMetricsServer</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="PrometheusRWMetricsServer.html" title="class in io.sbk.logger.impl">PrometheusRWMetricsServer</a></span>&nbsp;<span class="element-name">getPrometheusMetricsServer</span>()
                                                      throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <dl class="notes">
 <dt>Throws:</dt>

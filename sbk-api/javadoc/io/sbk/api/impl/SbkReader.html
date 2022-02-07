@@ -84,7 +84,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">SbkReader</span>
 <span class="extends-implements">extends <a href="../Worker.html" title="class in io.sbk.api">Worker</a>
-implements io.perl.RunBenchmark</span></div>
+implements io.perl.api.RunBenchmark</span></div>
 <div class="block">Reader Benchmarking Implementation.</div>
 </section>
 <section class="summary">
@@ -106,9 +106,9 @@ implements io.perl.RunBenchmark</span></div>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,io.sbk.api.ParameterOptions,io.perl.PerlChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataReader,io.sbk.logger.CountReaders,java.util.concurrent.ExecutorService)" class="member-name-link">SbkReader</a><wbr>(int&nbsp;readerId,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,io.sbk.api.ParameterOptions,io.perl.api.PerlChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataReader,io.sbk.logger.CountReaders,java.util.concurrent.ExecutorService)" class="member-name-link">SbkReader</a><wbr>(int&nbsp;readerId,
  <a href="../ParameterOptions.html" title="interface in io.sbk.api">ParameterOptions</a>&nbsp;params,
- io.perl.PerlChannel&nbsp;perlChannel,
+ io.perl.api.PerlChannel&nbsp;perlChannel,
  <a href="../../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;dType,
  io.time.Time&nbsp;time,
  <a href="../DataReader.html" title="interface in io.sbk.api">DataReader</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;reader,
@@ -151,11 +151,11 @@ implements io.perl.RunBenchmark</span></div>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(int,io.sbk.api.ParameterOptions,io.perl.PerlChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataReader,io.sbk.logger.CountReaders,java.util.concurrent.ExecutorService)">
+<section class="detail" id="&lt;init&gt;(int,io.sbk.api.ParameterOptions,io.perl.api.PerlChannel,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataReader,io.sbk.logger.CountReaders,java.util.concurrent.ExecutorService)">
 <h3>SbkReader</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SbkReader</span><wbr><span class="parameters">(int&nbsp;readerId,
  <a href="../ParameterOptions.html" title="interface in io.sbk.api">ParameterOptions</a>&nbsp;params,
- io.perl.PerlChannel&nbsp;perlChannel,
+ io.perl.api.PerlChannel&nbsp;perlChannel,
  <a href="../../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;dType,
  io.time.Time&nbsp;time,
  <a href="../DataReader.html" title="interface in io.sbk.api">DataReader</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;reader,
