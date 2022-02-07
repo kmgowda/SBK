@@ -42,26 +42,20 @@ final public class LatencyPercentiles {
         index = 0;
     }
 
-    public int copyLatency(long latency, long count, long startIndex, long endIndex) {
-        int ret = 0;
-
+    public void copyLatency(long latency, long count, long startIndex, long endIndex) {
         if (medianIndex >= startIndex && medianIndex < endIndex) {
             medianLatency = latency;
             medianLatencyCount = count;
-            ret++;
         }
-
         while (index < latencyIndexes.length) {
             if (latencyIndexes[index] >= startIndex && latencyIndexes[index] < endIndex) {
                 latencies[index] = latency;
                 latencyCount[index] = count;
                 index++;
-                ret++;
             } else {
                 break;
             }
         }
-        return ret;
     }
 
 }
