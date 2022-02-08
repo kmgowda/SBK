@@ -7,7 +7,9 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# PerL - Performance Logger  [![PerL](images/perl-no-background.png)(https://kmgowda.github.io/SBK/perl)]
+# PerL - Performance Logger  
+
+[![PerL](images/perl-no-background.png)](https://kmgowda.github.io/SBK/perl)
 
 [![Api](https://img.shields.io/badge/PerL-API-brightgreen)](https://kmgowda.github.io/SBK/perl/javadoc/index.html)
 
