@@ -10,7 +10,7 @@
 
 package io.sbk.api;
 
-import io.perl.PerlChannel;
+import io.perl.api.PerlChannel;
 import io.sbk.data.DataType;
 import io.time.Time;
 
@@ -71,7 +71,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
-                perlChannel.sendException(ex);
+                perlChannel.throwException(ex);
                 return null;
             });
             ret.thenAccept(d -> {

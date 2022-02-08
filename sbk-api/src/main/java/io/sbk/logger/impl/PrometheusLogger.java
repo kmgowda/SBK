@@ -12,7 +12,7 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.perl.Print;
+import io.perl.logger.Print;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
@@ -31,7 +31,7 @@ public class PrometheusLogger extends CSVLogger {
     final static String CONFIG_FILE = "metrics.properties";
     public MetricsConfig metricsConfig;
     private boolean contextDisabled;
-    private RWMetricsPrometheusServer prometheusServer;
+    private PrometheusRWMetricsServer prometheusServer;
     private Print printer;
 
 
@@ -40,8 +40,8 @@ public class PrometheusLogger extends CSVLogger {
         prometheusServer = null;
     }
 
-    public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
-        return new RWMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
+    public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
+        return new PrometheusRWMetricsServer(Config.NAME + " " + storageName, action.name(),
                 percentiles, time, metricsConfig);
     }
 
@@ -90,7 +90,7 @@ public class PrometheusLogger extends CSVLogger {
             printer = super::print;
             prometheusServer = null;
         } else {
-            prometheusServer = getMetricsPrometheusServer();
+            prometheusServer = getPrometheusRWMetricsServer();
             prometheusServer.start();
             printer = this::printMetrics;
         }

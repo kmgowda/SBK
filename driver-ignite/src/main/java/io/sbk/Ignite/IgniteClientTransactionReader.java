@@ -10,7 +10,7 @@
 
 package io.sbk.Ignite;
 
-import io.perl.PerlChannel;
+import io.perl.api.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;

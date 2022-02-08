@@ -59,24 +59,21 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" class="type-name-link external-link" title="class or interface in java.lang">Object</a>
 <ul>
-<li class="circle">io.micrometer.core.instrument.MeterRegistry
+<li class="circle">io.perl.logger.impl.Metrics
 <ul>
-<li class="circle">io.micrometer.core.instrument.composite.CompositeMeterRegistry
+<li class="circle">io.perl.logger.impl.PrintMetrics (implements io.perl.logger.Print)
 <ul>
-<li class="circle">io.sbk.logger.impl.<a href="PrometheusServer.html" class="type-name-link" title="class in io.sbk.logger.impl">PrometheusServer</a></li>
+<li class="circle">io.perl.logger.impl.PrometheusMetricsServer
+<ul>
+<li class="circle">io.sbk.logger.impl.<a href="PrometheusRWMetricsServer.html" class="type-name-link" title="class in io.sbk.logger.impl">PrometheusRWMetricsServer</a> (implements io.sbk.logger.<a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a>)</li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="circle">io.sbk.logger.impl.<a href="MetricsLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">MetricsLogger</a> (implements io.perl.Print)
-<ul>
-<li class="circle">io.sbk.logger.impl.<a href="RWMetricsLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">RWMetricsLogger</a> (implements io.sbk.logger.<a href="../CountRW.html" title="interface in io.sbk.logger">CountRW</a>)
-<ul>
-<li class="circle">io.sbk.logger.impl.<a href="RWMetricsPrometheusServer.html" class="type-name-link" title="class in io.sbk.logger.impl">RWMetricsPrometheusServer</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li class="circle">io.perl.logger.impl.ResultsLogger (implements io.perl.logger.PerformanceLogger)
+<ul>
 <li class="circle">io.sbk.logger.impl.<a href="SystemLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">SystemLogger</a> (implements io.sbk.logger.<a href="../RWLogger.html" title="interface in io.sbk.logger">RWLogger</a>)
 <ul>
 <li class="circle">io.sbk.logger.impl.<a href="CSVLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">CSVLogger</a>
@@ -89,6 +86,8 @@ loadScripts(document, 'script');</script>
 </ul>
 </li>
 <li class="circle">io.sbk.logger.impl.<a href="Sl4jResultLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">Sl4jResultLogger</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

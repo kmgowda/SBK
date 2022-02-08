@@ -71,19 +71,19 @@ loadScripts(document, 'script');</script>
 <h1 title="Class RamTotalWindowLatencyPeriodicRecorder" class="title">Class RamTotalWindowLatencyPeriodicRecorder</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance">io.perl.impl.TotalLatencyRecordWindow
+<div class="inheritance">io.perl.api.impl.TotalLatencyRecordWindow
 <div class="inheritance">io.sbk.ram.impl.RamTotalWindowLatencyPeriodicRecorder</div>
 </div>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.perl.PeriodicWindow</code>, <code>io.perl.ReportLatencies</code>, <code>io.perl.TotalPeriodicWindow</code>, <code><a href="../RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a></code></dd>
+<dd><code>io.perl.api.PeriodicWindow</code>, <code>io.perl.api.ReportLatencies</code>, <code>io.perl.api.TotalPeriodicWindow</code>, <code><a href="../RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">RamTotalWindowLatencyPeriodicRecorder</span>
-<span class="extends-implements">extends io.perl.impl.TotalLatencyRecordWindow
-implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a></span></div>
+<span class="extends-implements">extends io.perl.api.impl.TotalLatencyRecordWindow
+implements io.perl.api.ReportLatencies, <a href="../RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a></span></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -92,7 +92,7 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
 <section class="field-summary" id="field-summary">
 <h2>Field Summary</h2>
 <div class="inherited-list">
-<h3 id="fields-inherited-from-class-io.perl.impl.TotalLatencyRecordWindow">Fields inherited from class&nbsp;io.perl.impl.TotalLatencyRecordWindow</h3>
+<h3 id="fields-inherited-from-class-io.perl.api.impl.TotalLatencyRecordWindow">Fields inherited from class&nbsp;io.perl.api.impl.TotalLatencyRecordWindow</h3>
 <code>totalLogger, totalWindow, window, windowLogger</code></div>
 </section>
 </li>
@@ -104,11 +104,11 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.Print,io.perl.Print,io.perl.ReportLatencies,io.sbk.logger.SetRW)" class="member-name-link">RamTotalWindowLatencyPeriodicRecorder</a><wbr>(io.perl.LatencyRecordWindow&nbsp;window,
- io.perl.LatencyRecordWindow&nbsp;totalWindow,
- io.perl.Print&nbsp;windowLogger,
- io.perl.Print&nbsp;totalLogger,
- io.perl.ReportLatencies&nbsp;reportLatencies,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.api.LatencyRecordWindow,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print,io.perl.api.ReportLatencies,io.sbk.logger.SetRW)" class="member-name-link">RamTotalWindowLatencyPeriodicRecorder</a><wbr>(io.perl.api.LatencyRecordWindow&nbsp;window,
+ io.perl.api.LatencyRecordWindow&nbsp;totalWindow,
+ io.perl.logger.Print&nbsp;windowLogger,
+ io.perl.logger.Print&nbsp;totalLogger,
+ io.perl.api.ReportLatencies&nbsp;reportLatencies,
  <a href="../../logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a>&nbsp;setRW)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
@@ -142,7 +142,7 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
  long&nbsp;count)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportLatencyRecord(io.perl.LatencyRecord)" class="member-name-link">reportLatencyRecord</a><wbr>(io.perl.LatencyRecord&nbsp;record)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportLatencyRecord(io.perl.api.LatencyRecord)" class="member-name-link">reportLatencyRecord</a><wbr>(io.perl.api.LatencyRecord&nbsp;record)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stopWindow(long)" class="member-name-link">stopWindow</a><wbr>(long&nbsp;currentTime)</code></div>
@@ -153,16 +153,16 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
 </div>
 </div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.impl.TotalLatencyRecordWindow">Methods inherited from class&nbsp;io.perl.impl.TotalLatencyRecordWindow</h3>
+<h3 id="methods-inherited-from-class-io.perl.api.impl.TotalLatencyRecordWindow">Methods inherited from class&nbsp;io.perl.api.impl.TotalLatencyRecordWindow</h3>
 <code>checkTotalWindowFullAndReset, checkWindowFullAndReset, elapsedMilliSecondsWindow, start, startWindow, stop</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.PeriodicWindow">Methods inherited from interface&nbsp;io.perl.PeriodicWindow</h3>
+<h3 id="methods-inherited-from-class-io.perl.api.PeriodicWindow">Methods inherited from interface&nbsp;io.perl.api.PeriodicWindow</h3>
 <code>elapsedMilliSecondsWindow, startWindow</code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.TotalPeriodicWindow">Methods inherited from interface&nbsp;io.perl.TotalPeriodicWindow</h3>
+<h3 id="methods-inherited-from-class-io.perl.api.TotalPeriodicWindow">Methods inherited from interface&nbsp;io.perl.api.TotalPeriodicWindow</h3>
 <code>start, stop</code></div>
 </section>
 </li>
@@ -176,13 +176,13 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(io.perl.LatencyRecordWindow,io.perl.LatencyRecordWindow,io.perl.Print,io.perl.Print,io.perl.ReportLatencies,io.sbk.logger.SetRW)">
+<section class="detail" id="&lt;init&gt;(io.perl.api.LatencyRecordWindow,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print,io.perl.api.ReportLatencies,io.sbk.logger.SetRW)">
 <h3>RamTotalWindowLatencyPeriodicRecorder</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RamTotalWindowLatencyPeriodicRecorder</span><wbr><span class="parameters">(io.perl.LatencyRecordWindow&nbsp;window,
- io.perl.LatencyRecordWindow&nbsp;totalWindow,
- io.perl.Print&nbsp;windowLogger,
- io.perl.Print&nbsp;totalLogger,
- io.perl.ReportLatencies&nbsp;reportLatencies,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RamTotalWindowLatencyPeriodicRecorder</span><wbr><span class="parameters">(io.perl.api.LatencyRecordWindow&nbsp;window,
+ io.perl.api.LatencyRecordWindow&nbsp;totalWindow,
+ io.perl.logger.Print&nbsp;windowLogger,
+ io.perl.logger.Print&nbsp;totalLogger,
+ io.perl.api.ReportLatencies&nbsp;reportLatencies,
  <a href="../../logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a>&nbsp;setRW)</span></div>
 </section>
 </li>
@@ -195,12 +195,12 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="reportLatencyRecord(io.perl.LatencyRecord)">
+<section class="detail" id="reportLatencyRecord(io.perl.api.LatencyRecord)">
 <h3>reportLatencyRecord</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reportLatencyRecord</span><wbr><span class="parameters">(io.perl.LatencyRecord&nbsp;record)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reportLatencyRecord</span><wbr><span class="parameters">(io.perl.api.LatencyRecord&nbsp;record)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>reportLatencyRecord</code>&nbsp;in interface&nbsp;<code>io.perl.ReportLatencies</code></dd>
+<dd><code>reportLatencyRecord</code>&nbsp;in interface&nbsp;<code>io.perl.api.ReportLatencies</code></dd>
 </dl>
 </section>
 </li>
@@ -211,7 +211,7 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
  long&nbsp;count)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>reportLatency</code>&nbsp;in interface&nbsp;<code>io.perl.ReportLatencies</code></dd>
+<dd><code>reportLatency</code>&nbsp;in interface&nbsp;<code>io.perl.api.ReportLatencies</code></dd>
 </dl>
 </section>
 </li>
@@ -250,9 +250,9 @@ implements io.perl.ReportLatencies, <a href="../RamPeriodicRecorder.html" title=
 <div class="block">print the periodic Latency Results.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>stopWindow</code>&nbsp;in interface&nbsp;<code>io.perl.PeriodicWindow</code></dd>
+<dd><code>stopWindow</code>&nbsp;in interface&nbsp;<code>io.perl.api.PeriodicWindow</code></dd>
 <dt>Overrides:</dt>
-<dd><code>stopWindow</code>&nbsp;in class&nbsp;<code>io.perl.impl.TotalLatencyRecordWindow</code></dd>
+<dd><code>stopWindow</code>&nbsp;in class&nbsp;<code>io.perl.api.impl.TotalLatencyRecordWindow</code></dd>
 <dt>Parameters:</dt>
 <dd><code>currentTime</code> - current time.</dd>
 </dl>

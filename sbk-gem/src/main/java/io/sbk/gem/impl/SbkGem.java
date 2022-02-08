@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
-import io.perl.impl.PerlBuilder;
+import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbk.api.impl.SbkUtils;

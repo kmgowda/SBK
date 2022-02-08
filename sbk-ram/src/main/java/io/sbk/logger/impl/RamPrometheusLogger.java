@@ -9,7 +9,7 @@
  */
 package io.sbk.logger.impl;
 
-import io.perl.LatencyRecord;
+import io.perl.api.LatencyRecord;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.RamLogger;
@@ -44,7 +44,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
     @Override
-    public RWMetricsPrometheusServer getMetricsPrometheusServer() throws IOException {
+    public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
             prometheusServer = new RamMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
                     percentiles, time, metricsConfig);

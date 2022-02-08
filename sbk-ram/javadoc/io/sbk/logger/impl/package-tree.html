@@ -58,11 +58,13 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" class="type-name-link external-link" title="class or interface in java.lang">Object</a>
 <ul>
-<li class="circle">io.sbk.logger.impl.MetricsLogger (implements io.perl.Print)
+<li class="circle">io.perl.logger.impl.Metrics
 <ul>
-<li class="circle">io.sbk.logger.impl.RWMetricsLogger (implements io.sbk.logger.CountRW)
+<li class="circle">io.perl.logger.impl.PrintMetrics (implements io.perl.logger.Print)
 <ul>
-<li class="circle">io.sbk.logger.impl.RWMetricsPrometheusServer
+<li class="circle">io.perl.logger.impl.PrometheusMetricsServer
+<ul>
+<li class="circle">io.sbk.logger.impl.PrometheusRWMetricsServer (implements io.sbk.logger.CountRW)
 <ul>
 <li class="circle">io.sbk.logger.impl.<a href="RamMetricsPrometheusServer.html" class="type-name-link" title="class in io.sbk.logger.impl">RamMetricsPrometheusServer</a> (implements io.sbk.logger.<a href="../CountConnections.html" title="interface in io.sbk.logger">CountConnections</a>)</li>
 </ul>
@@ -71,6 +73,10 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="circle">io.perl.logger.impl.ResultsLogger (implements io.perl.logger.PerformanceLogger)
+<ul>
 <li class="circle">io.sbk.logger.impl.SystemLogger (implements io.sbk.logger.RWLogger)
 <ul>
 <li class="circle">io.sbk.logger.impl.CSVLogger
@@ -78,6 +84,8 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.sbk.logger.impl.PrometheusLogger
 <ul>
 <li class="circle">io.sbk.logger.impl.<a href="RamPrometheusLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">RamPrometheusLogger</a> (implements io.sbk.logger.<a href="../RamLogger.html" title="interface in io.sbk.logger">RamLogger</a>, io.sbk.logger.<a href="../SetRW.html" title="interface in io.sbk.logger">SetRW</a>)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

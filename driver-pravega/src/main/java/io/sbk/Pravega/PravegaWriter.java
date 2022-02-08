@@ -9,7 +9,7 @@
  */
 package io.sbk.Pravega;
 
-import io.perl.PerlChannel;
+import io.perl.api.PerlChannel;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;

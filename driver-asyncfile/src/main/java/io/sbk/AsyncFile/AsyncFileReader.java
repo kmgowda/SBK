@@ -9,7 +9,7 @@
  */
 package io.sbk.AsyncFile;
 
-import io.perl.PerlChannel;
+import io.perl.api.PerlChannel;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
@@ -60,7 +60,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                         final long endTime = time.getCurrentTime();
                         if (result <= 0 && !isEOF.get()) {
                             isEOF.set(true);
-                            perlChannel.sendException(new EOFException());
+                            perlChannel.throwException(new EOFException());
                         } else {
                             perlChannel.send(ctime, endTime, result, 1);
                         }
@@ -69,7 +69,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
                         if (!isEOF.get()) {
-                            perlChannel.sendException(ex);
+                            perlChannel.throwException(ex);
                         }
                     }
                 });
@@ -88,7 +88,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                         final long endTime = time.getCurrentTime();
                         if (result <= 0 && !isEOF.get()) {
                             isEOF.set(true);
-                            perlChannel.sendException(new EOFException());
+                            perlChannel.throwException(new EOFException());
                         } else {
                             perlChannel.send(dType.getTime(attachment), endTime, result, 1);
                         }
@@ -97,7 +97,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
                         if (!isEOF.get()) {
-                            perlChannel.sendException(ex);
+                            perlChannel.throwException(ex);
                         }
                     }
                 });

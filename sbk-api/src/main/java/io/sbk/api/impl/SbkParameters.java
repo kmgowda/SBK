@@ -9,7 +9,7 @@
  */
 package io.sbk.api.impl;
 
-import io.perl.PerlConfig;
+import io.perl.config.PerlConfig;
 import io.sbk.api.ParameterOptions;
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;

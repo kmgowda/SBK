@@ -10,11 +10,11 @@
 
 package io.sbk.ram.impl;
 
-import io.perl.LatencyRecord;
-import io.perl.LatencyRecordWindow;
-import io.perl.Print;
-import io.perl.ReportLatencies;
-import io.perl.impl.TotalLatencyRecordWindow;
+import io.perl.api.LatencyRecord;
+import io.perl.api.LatencyRecordWindow;
+import io.perl.logger.Print;
+import io.perl.api.ReportLatencies;
+import io.perl.api.impl.TotalLatencyRecordWindow;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.logger.SetRW;
 import io.sbk.ram.RamPeriodicRecorder;

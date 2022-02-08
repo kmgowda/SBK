@@ -63,16 +63,18 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" class="type-name-link external-link" title="class or interface in java.lang">Object</a>
 <ul>
-<li class="circle">io.perl.LatencyConfig
+<li class="circle">io.perl.config.LatencyConfig
 <ul>
 <li class="circle">io.sbk.config.<a href="io/sbk/config/RamConfig.html" class="type-name-link" title="class in io.sbk.config">RamConfig</a></li>
 </ul>
 </li>
-<li class="circle">io.sbk.logger.impl.MetricsLogger (implements io.perl.Print)
+<li class="circle">io.perl.logger.impl.Metrics
 <ul>
-<li class="circle">io.sbk.logger.impl.RWMetricsLogger (implements io.sbk.logger.CountRW)
+<li class="circle">io.perl.logger.impl.PrintMetrics (implements io.perl.logger.Print)
 <ul>
-<li class="circle">io.sbk.logger.impl.RWMetricsPrometheusServer
+<li class="circle">io.perl.logger.impl.PrometheusMetricsServer
+<ul>
+<li class="circle">io.sbk.logger.impl.PrometheusRWMetricsServer (implements io.sbk.logger.CountRW)
 <ul>
 <li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/RamMetricsPrometheusServer.html" class="type-name-link" title="class in io.sbk.logger.impl">RamMetricsPrometheusServer</a> (implements io.sbk.logger.<a href="io/sbk/logger/CountConnections.html" title="interface in io.sbk.logger">CountConnections</a>)</li>
 </ul>
@@ -81,20 +83,11 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
+</ul>
+</li>
 <li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/RamBenchmark.html" class="type-name-link" title="class in io.sbk.ram.impl">RamBenchmark</a> (implements io.sbk.api.Benchmark, io.sbk.ram.<a href="io/sbk/ram/RamRegistry.html" title="interface in io.sbk.ram">RamRegistry</a>)</li>
-<li class="circle">io.sbk.options.impl.SbkInputOptions (implements io.sbk.options.InputOptions)
+<li class="circle">io.perl.logger.impl.ResultsLogger (implements io.perl.logger.PerformanceLogger)
 <ul>
-<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkRamParameters.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkRamParameters</a> (implements io.sbk.ram.<a href="io/sbk/ram/RamParameterOptions.html" title="interface in io.sbk.ram">RamParameterOptions</a>)</li>
-</ul>
-</li>
-<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkRam.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkRam</a></li>
-<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkRamBenchmark.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkRamBenchmark</a> (implements io.sbk.api.Benchmark)</li>
-<li class="circle">io.sbk.main.<a href="io/sbk/main/SbkRamMain.html" class="type-name-link" title="class in io.sbk.main">SbkRamMain</a></li>
-<li class="circle">io.sbk.grpc.ServiceGrpc.ServiceImplBase (implements io.grpc.BindableService)
-<ul>
-<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkGrpcService.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkGrpcService</a></li>
-</ul>
-</li>
 <li class="circle">io.sbk.logger.impl.SystemLogger (implements io.sbk.logger.RWLogger)
 <ul>
 <li class="circle">io.sbk.logger.impl.CSVLogger
@@ -108,9 +101,24 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
-<li class="circle">io.perl.impl.TotalLatencyRecordWindow (implements io.perl.TotalPeriodicWindow)
+</ul>
+</li>
+<li class="circle">io.sbk.options.impl.SbkInputOptions (implements io.sbk.options.InputOptions)
 <ul>
-<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/RamTotalWindowLatencyPeriodicRecorder.html" class="type-name-link" title="class in io.sbk.ram.impl">RamTotalWindowLatencyPeriodicRecorder</a> (implements io.sbk.ram.<a href="io/sbk/ram/RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a>, io.perl.ReportLatencies)</li>
+<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkRamParameters.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkRamParameters</a> (implements io.sbk.ram.<a href="io/sbk/ram/RamParameterOptions.html" title="interface in io.sbk.ram">RamParameterOptions</a>)</li>
+</ul>
+</li>
+<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkRam.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkRam</a></li>
+<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkRamBenchmark.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkRamBenchmark</a> (implements io.sbk.api.Benchmark)</li>
+<li class="circle">io.sbk.main.<a href="io/sbk/main/SbkRamMain.html" class="type-name-link" title="class in io.sbk.main">SbkRamMain</a></li>
+<li class="circle">io.sbk.grpc.ServiceGrpc.ServiceImplBase (implements io.grpc.BindableService)
+<ul>
+<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/SbkGrpcService.html" class="type-name-link" title="class in io.sbk.ram.impl">SbkGrpcService</a></li>
+</ul>
+</li>
+<li class="circle">io.perl.api.impl.TotalLatencyRecordWindow (implements io.perl.api.TotalPeriodicWindow)
+<ul>
+<li class="circle">io.sbk.ram.impl.<a href="io/sbk/ram/impl/RamTotalWindowLatencyPeriodicRecorder.html" class="type-name-link" title="class in io.sbk.ram.impl">RamTotalWindowLatencyPeriodicRecorder</a> (implements io.sbk.ram.<a href="io/sbk/ram/RamPeriodicRecorder.html" title="interface in io.sbk.ram">RamPeriodicRecorder</a>, io.perl.api.ReportLatencies)</li>
 </ul>
 </li>
 </ul>
@@ -122,7 +130,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/CountConnections.html" class="type-name-link" title="interface in io.sbk.logger">CountConnections</a>
 <ul>
-<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamLogger.html" class="type-name-link" title="interface in io.sbk.logger">RamLogger</a> (also extends io.sbk.logger.Logger, io.perl.ReportLatencies, io.sbk.logger.<a href="io/sbk/logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a>)</li>
+<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamLogger.html" class="type-name-link" title="interface in io.sbk.logger">RamLogger</a> (also extends io.sbk.logger.Logger, io.perl.api.ReportLatencies, io.sbk.logger.<a href="io/sbk/logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a>)</li>
 </ul>
 </li>
 <li class="circle">io.sbk.options.InputOptions
@@ -130,22 +138,22 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.sbk.ram.<a href="io/sbk/ram/RamParameterOptions.html" class="type-name-link" title="interface in io.sbk.ram">RamParameterOptions</a> (also extends io.sbk.ram.<a href="io/sbk/ram/RamParameters.html" title="interface in io.sbk.ram">RamParameters</a>)</li>
 </ul>
 </li>
-<li class="circle">io.perl.PeriodicWindow
+<li class="circle">io.perl.api.PeriodicWindow
 <ul>
-<li class="circle">io.perl.TotalPeriodicWindow
+<li class="circle">io.perl.api.TotalPeriodicWindow
 <ul>
 <li class="circle">io.sbk.ram.<a href="io/sbk/ram/RamPeriodicRecorder.html" class="type-name-link" title="interface in io.sbk.ram">RamPeriodicRecorder</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="circle">io.perl.Print
+<li class="circle">io.perl.logger.Print
 <ul>
-<li class="circle">io.perl.PerformanceLogger
+<li class="circle">io.perl.logger.PerformanceLogger
 <ul>
 <li class="circle">io.sbk.logger.Logger
 <ul>
-<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamLogger.html" class="type-name-link" title="interface in io.sbk.logger">RamLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountConnections.html" title="interface in io.sbk.logger">CountConnections</a>, io.perl.ReportLatencies, io.sbk.logger.<a href="io/sbk/logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a>)</li>
+<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamLogger.html" class="type-name-link" title="interface in io.sbk.logger">RamLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountConnections.html" title="interface in io.sbk.logger">CountConnections</a>, io.perl.api.ReportLatencies, io.sbk.logger.<a href="io/sbk/logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a>)</li>
 </ul>
 </li>
 </ul>
@@ -158,14 +166,14 @@ loadScripts(document, 'script');</script>
 </ul>
 </li>
 <li class="circle">io.sbk.ram.<a href="io/sbk/ram/RamRegistry.html" class="type-name-link" title="interface in io.sbk.ram">RamRegistry</a></li>
-<li class="circle">io.perl.ReportLatencies
+<li class="circle">io.perl.api.ReportLatencies
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamLogger.html" class="type-name-link" title="interface in io.sbk.logger">RamLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountConnections.html" title="interface in io.sbk.logger">CountConnections</a>, io.sbk.logger.Logger, io.sbk.logger.<a href="io/sbk/logger/SetRW.html" title="interface in io.sbk.logger">SetRW</a>)</li>
 </ul>
 </li>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/SetRW.html" class="type-name-link" title="interface in io.sbk.logger">SetRW</a>
 <ul>
-<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamLogger.html" class="type-name-link" title="interface in io.sbk.logger">RamLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountConnections.html" title="interface in io.sbk.logger">CountConnections</a>, io.sbk.logger.Logger, io.perl.ReportLatencies)</li>
+<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamLogger.html" class="type-name-link" title="interface in io.sbk.logger">RamLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountConnections.html" title="interface in io.sbk.logger">CountConnections</a>, io.sbk.logger.Logger, io.perl.api.ReportLatencies)</li>
 </ul>
 </li>
 </ul>

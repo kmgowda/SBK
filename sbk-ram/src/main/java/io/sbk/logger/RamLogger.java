@@ -10,7 +10,7 @@
 
 package io.sbk.logger;
 
-import io.perl.ReportLatencies;
+import io.perl.api.ReportLatencies;
 
 public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnections {
 }

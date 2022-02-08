@@ -127,29 +127,42 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.sbk.data.impl.<a href="io/sbk/data/impl/ByteArray.html" class="type-name-link" title="class in io.sbk.data.impl">ByteArray</a> (implements io.sbk.data.<a href="io/sbk/data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;T&gt;)</li>
 <li class="circle">io.sbk.config.<a href="io/sbk/config/Config.html" class="type-name-link" title="class in io.sbk.config">Config</a></li>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/LoggerConfig.html" class="type-name-link" title="class in io.sbk.logger">LoggerConfig</a></li>
-<li class="circle">io.micrometer.core.instrument.MeterRegistry
+<li class="circle">io.perl.logger.impl.Metrics
 <ul>
-<li class="circle">io.micrometer.core.instrument.composite.CompositeMeterRegistry
+<li class="circle">io.perl.logger.impl.PrintMetrics (implements io.perl.logger.Print)
 <ul>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusServer.html" class="type-name-link" title="class in io.sbk.logger.impl">PrometheusServer</a></li>
+<li class="circle">io.perl.logger.impl.PrometheusMetricsServer
+<ul>
+<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusRWMetricsServer.html" class="type-name-link" title="class in io.sbk.logger.impl">PrometheusRWMetricsServer</a> (implements io.sbk.logger.<a href="io/sbk/logger/CountRW.html" title="interface in io.sbk.logger">CountRW</a>)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/MetricsConfig.html" class="type-name-link" title="class in io.sbk.logger">MetricsConfig</a></li>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/MetricsLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">MetricsLogger</a> (implements io.perl.Print)
-<ul>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/RWMetricsLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">RWMetricsLogger</a> (implements io.sbk.logger.<a href="io/sbk/logger/CountRW.html" title="interface in io.sbk.logger">CountRW</a>)
-<ul>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/RWMetricsPrometheusServer.html" class="type-name-link" title="class in io.sbk.logger.impl">RWMetricsPrometheusServer</a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="circle">io.sbk.data.impl.<a href="io/sbk/data/impl/NioByteBuffer.html" class="type-name-link" title="class in io.sbk.data.impl">NioByteBuffer</a> (implements io.sbk.data.<a href="io/sbk/data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;T&gt;)</li>
 <li class="circle">io.sbk.system.<a href="io/sbk/system/Printer.html" class="type-name-link" title="class in io.sbk.system">Printer</a></li>
 <li class="circle">io.sbk.data.impl.<a href="io/sbk/data/impl/ProtoBufByteString.html" class="type-name-link" title="class in io.sbk.data.impl">ProtoBufByteString</a> (implements io.sbk.data.<a href="io/sbk/data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;T&gt;)</li>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/RamHostConfig.html" class="type-name-link" title="class in io.sbk.logger">RamHostConfig</a></li>
+<li class="circle">io.perl.logger.impl.ResultsLogger (implements io.perl.logger.PerformanceLogger)
+<ul>
+<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">SystemLogger</a> (implements io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" title="interface in io.sbk.logger">RWLogger</a>)
+<ul>
+<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/CSVLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">CSVLogger</a>
+<ul>
+<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">PrometheusLogger</a>
+<ul>
+<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcPrometheusLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">GrpcPrometheusLogger</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/Sl4jResultLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">Sl4jResultLogger</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="circle">io.sbk.api.impl.<a href="io/sbk/api/impl/Sbk.html" class="type-name-link" title="class in io.sbk.api.impl">Sbk</a></li>
 <li class="circle">io.sbk.api.impl.<a href="io/sbk/api/impl/SbkBenchmark.html" class="type-name-link" title="class in io.sbk.api.impl">SbkBenchmark</a> (implements io.sbk.api.<a href="io/sbk/api/Benchmark.html" title="interface in io.sbk.api">Benchmark</a>)</li>
 <li class="circle">io.sbk.grpc.<a href="io/sbk/grpc/SbkGrpc.html" class="type-name-link" title="class in io.sbk.grpc">SbkGrpc</a></li>
@@ -171,20 +184,6 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.sbk.grpc.<a href="io/sbk/grpc/ServiceGrpc.ServiceImplBase.html" class="type-name-link" title="class in io.sbk.grpc">ServiceGrpc.ServiceImplBase</a> (implements io.grpc.BindableService)</li>
 <li class="circle">io.sbk.api.<a href="io/sbk/api/Status.html" class="type-name-link" title="class in io.sbk.api">Status</a></li>
 <li class="circle">io.sbk.api.<a href="io/sbk/api/StoragePackage.html" class="type-name-link" title="class in io.sbk.api">StoragePackage</a></li>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">SystemLogger</a> (implements io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" title="interface in io.sbk.logger">RWLogger</a>)
-<ul>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/CSVLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">CSVLogger</a>
-<ul>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">PrometheusLogger</a>
-<ul>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcPrometheusLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">GrpcPrometheusLogger</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="circle">io.sbk.logger.impl.<a href="io/sbk/logger/impl/Sl4jResultLogger.html" class="type-name-link" title="class in io.sbk.logger.impl">Sl4jResultLogger</a></li>
-</ul>
-</li>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" class="type-name-link external-link" title="class or interface in java.lang">Throwable</a> (implements java.io.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a>)
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Exception.html" class="type-name-link external-link" title="class or interface in java.lang">Exception</a>
@@ -197,8 +196,8 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.sbk.api.<a href="io/sbk/api/Worker.html" class="type-name-link" title="class in io.sbk.api">Worker</a>
 <ul>
 <li class="circle">io.sbk.api.impl.<a href="io/sbk/api/impl/SbkCallbackReader.html" class="type-name-link" title="class in io.sbk.api.impl">SbkCallbackReader</a> (implements io.sbk.api.<a href="io/sbk/api/Benchmark.html" title="interface in io.sbk.api">Benchmark</a>, io.sbk.api.<a href="io/sbk/api/Callback.html" title="interface in io.sbk.api">Callback</a>&lt;T&gt;)</li>
-<li class="circle">io.sbk.api.impl.<a href="io/sbk/api/impl/SbkReader.html" class="type-name-link" title="class in io.sbk.api.impl">SbkReader</a> (implements io.perl.RunBenchmark)</li>
-<li class="circle">io.sbk.api.impl.<a href="io/sbk/api/impl/SbkWriter.html" class="type-name-link" title="class in io.sbk.api.impl">SbkWriter</a> (implements io.perl.RunBenchmark)</li>
+<li class="circle">io.sbk.api.impl.<a href="io/sbk/api/impl/SbkReader.html" class="type-name-link" title="class in io.sbk.api.impl">SbkReader</a> (implements io.perl.api.RunBenchmark)</li>
+<li class="circle">io.sbk.api.impl.<a href="io/sbk/api/impl/SbkWriter.html" class="type-name-link" title="class in io.sbk.api.impl">SbkWriter</a> (implements io.perl.api.RunBenchmark)</li>
 </ul>
 </li>
 <li class="circle">io.sbk.config.<a href="io/sbk/config/YalConfig.html" class="type-name-link" title="class in io.sbk.config">YalConfig</a></li>
@@ -217,7 +216,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/CountRW.html" class="type-name-link" title="interface in io.sbk.logger">CountRW</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountWriters.html" title="interface in io.sbk.logger">CountWriters</a>)
 <ul>
-<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a>, io.perl.ReportLatency)</li>
+<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a>, io.perl.api.ReportLatency)</li>
 </ul>
 </li>
 </ul>
@@ -226,7 +225,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/CountRW.html" class="type-name-link" title="interface in io.sbk.logger">CountRW</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountReaders.html" title="interface in io.sbk.logger">CountReaders</a>)
 <ul>
-<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a>, io.perl.ReportLatency)</li>
+<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a>, io.perl.api.ReportLatency)</li>
 </ul>
 </li>
 </ul>
@@ -252,7 +251,6 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
-<li class="circle">io.sbk.exception.<a href="io/sbk/exception/ExceptionHandler.html" class="type-name-link" title="interface in io.sbk.exception">ExceptionHandler</a></li>
 <li class="circle">io.sbk.options.<a href="io/sbk/options/InputOptions.html" class="type-name-link" title="interface in io.sbk.options">InputOptions</a>
 <ul>
 <li class="circle">io.sbk.api.<a href="io/sbk/api/ParameterOptions.html" class="type-name-link" title="interface in io.sbk.api">ParameterOptions</a> (also extends io.sbk.api.<a href="io/sbk/api/Parameters.html" title="interface in io.sbk.api">Parameters</a>)</li>
@@ -274,13 +272,13 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.sbk.api.<a href="io/sbk/api/ParameterOptions.html" class="type-name-link" title="interface in io.sbk.api">ParameterOptions</a> (also extends io.sbk.options.<a href="io/sbk/options/InputOptions.html" title="interface in io.sbk.options">InputOptions</a>)</li>
 </ul>
 </li>
-<li class="circle">io.perl.Print
+<li class="circle">io.perl.logger.Print
 <ul>
-<li class="circle">io.perl.PerformanceLogger
+<li class="circle">io.perl.logger.PerformanceLogger
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/Logger.html" class="type-name-link" title="interface in io.sbk.logger">Logger</a>
 <ul>
-<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountRW.html" title="interface in io.sbk.logger">CountRW</a>, io.perl.ReportLatency)</li>
+<li class="circle">io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountRW.html" title="interface in io.sbk.logger">CountRW</a>, io.perl.api.ReportLatency)</li>
 </ul>
 </li>
 </ul>
@@ -288,7 +286,7 @@ loadScripts(document, 'script');</script>
 </ul>
 </li>
 <li class="circle">io.sbk.api.<a href="io/sbk/api/RateController.html" class="type-name-link" title="interface in io.sbk.api">RateController</a></li>
-<li class="circle">io.perl.ReportLatency
+<li class="circle">io.perl.api.ReportLatency
 <ul>
 <li class="circle">io.sbk.logger.<a href="io/sbk/logger/RWLogger.html" class="type-name-link" title="interface in io.sbk.logger">RWLogger</a> (also extends io.sbk.logger.<a href="io/sbk/logger/CountRW.html" title="interface in io.sbk.logger">CountRW</a>, io.sbk.logger.<a href="io/sbk/logger/Logger.html" title="interface in io.sbk.logger">Logger</a>)</li>
 </ul>

@@ -71,6 +71,7 @@ loadScripts(document, 'script');</script>
 <h1 title="Class GemRamPrometheusLogger" class="title">Class GemRamPrometheusLogger</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
+<div class="inheritance">io.perl.logger.impl.ResultsLogger
 <div class="inheritance">io.sbk.logger.impl.SystemLogger
 <div class="inheritance">io.sbk.logger.impl.CSVLogger
 <div class="inheritance">io.sbk.logger.impl.PrometheusLogger
@@ -81,10 +82,11 @@ loadScripts(document, 'script');</script>
 </div>
 </div>
 </div>
+</div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.perl.PerformanceLogger</code>, <code>io.perl.Print</code>, <code>io.perl.ReportLatencies</code>, <code>io.perl.ReportLatency</code>, <code>io.sbk.logger.CountConnections</code>, <code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code><a href="../GemLogger.html" title="interface in io.sbk.logger">GemLogger</a></code>, <code>io.sbk.logger.Logger</code>, <code>io.sbk.logger.RamLogger</code>, <code>io.sbk.logger.RWLogger</code>, <code>io.sbk.logger.SetRW</code>, <code><a href="../../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a></code></dd>
+<dd><code>io.perl.api.ReportLatencies</code>, <code>io.perl.api.ReportLatency</code>, <code>io.perl.logger.PerformanceLogger</code>, <code>io.perl.logger.Print</code>, <code>io.sbk.logger.CountConnections</code>, <code>io.sbk.logger.CountReaders</code>, <code>io.sbk.logger.CountRW</code>, <code>io.sbk.logger.CountWriters</code>, <code><a href="../GemLogger.html" title="interface in io.sbk.logger">GemLogger</a></code>, <code>io.sbk.logger.Logger</code>, <code>io.sbk.logger.RamLogger</code>, <code>io.sbk.logger.RWLogger</code>, <code>io.sbk.logger.SetRW</code>, <code><a href="../../options/GetArguments.html" title="interface in io.sbk.options">GetArguments</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">GemRamPrometheusLogger</span>
@@ -105,7 +107,10 @@ implements <a href="../GemLogger.html" title="interface in io.sbk.logger">GemLog
 <code>csvEnable, csvFile, csvWriter, DISABLE_STRING, REGULAR_PRINT, TOTAL_PRINT</code></div>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-io.sbk.logger.impl.SystemLogger">Fields inherited from class&nbsp;io.sbk.logger.impl.SystemLogger</h3>
-<code>action, maxReaders, maxWriters, params, percentileNames, percentiles, prefix, readers, storageName, time, timeUnitFullText, timeUnitText, writers</code></div>
+<code>action, maxReaders, maxWriters, params, percentiles, prefix, readers, storageName, time, timeUnitFullText, writers</code></div>
+<div class="inherited-list">
+<h3 id="fields-inherited-from-class-io.perl.logger.impl.ResultsLogger">Fields inherited from class&nbsp;io.perl.logger.impl.ResultsLogger</h3>
+<code>percentileNames, timeUnitName</code></div>
 </section>
 </li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
@@ -143,7 +148,7 @@ implements <a href="../GemLogger.html" title="interface in io.sbk.logger">GemLog
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.impl.RamPrometheusLogger">Methods inherited from class&nbsp;io.sbk.logger.impl.RamPrometheusLogger</h3>
-<code>decrementConnections, getMetricsConfigStream, getMetricsPrometheusServer, incrementConnections, open, print, printTotal, reportLatency, reportLatencyRecord, setMaxReaders, setMaxWriters, setReaders, setWriters</code></div>
+<code>decrementConnections, getMetricsConfigStream, getPrometheusRWMetricsServer, incrementConnections, open, print, printTotal, reportLatency, reportLatencyRecord, setMaxReaders, setMaxWriters, setReaders, setWriters</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.impl.PrometheusLogger">Methods inherited from class&nbsp;io.sbk.logger.impl.PrometheusLogger</h3>
 <code>addArgs, close, decrementReaders, decrementWriters, incrementReaders, incrementWriters, parseArgs</code></div>
@@ -152,7 +157,10 @@ implements <a href="../GemLogger.html" title="interface in io.sbk.logger">GemLog
 <code>openCSV, writeToCSV</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.impl.SystemLogger">Methods inherited from class&nbsp;io.sbk.logger.impl.SystemLogger</h3>
-<code>appendPercentiles, appendWritesAndReaders, buildResultString, getMaxLatency, getMinLatency, getPercentiles, getPrintingIntervalSeconds, getTimeUnit</code></div>
+<code>appendWritesAndReaders, buildResultString, getMaxLatency, getMinLatency, getPercentiles, getPrintingIntervalSeconds, getTimeUnit</code></div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-io.perl.logger.impl.ResultsLogger">Methods inherited from class&nbsp;io.perl.logger.impl.ResultsLogger</h3>
+<code>appendResults, setPercentileNames</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -163,13 +171,13 @@ implements <a href="../GemLogger.html" title="interface in io.sbk.logger">GemLog
 <h3 id="methods-inherited-from-class-io.sbk.logger.Logger">Methods inherited from interface&nbsp;io.sbk.logger.Logger</h3>
 <code>addArgs, close, open, parseArgs, setExceptionHandler</code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.PerformanceLogger">Methods inherited from interface&nbsp;io.perl.PerformanceLogger</h3>
+<h3 id="methods-inherited-from-class-io.perl.logger.PerformanceLogger">Methods inherited from interface&nbsp;io.perl.logger.PerformanceLogger</h3>
 <code>getMaxLatency, getMinLatency, getPercentiles, getPrintingIntervalSeconds, getTimeUnit, printTotal</code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.Print">Methods inherited from interface&nbsp;io.perl.Print</h3>
+<h3 id="methods-inherited-from-class-io.perl.logger.Print">Methods inherited from interface&nbsp;io.perl.logger.Print</h3>
 <code>print</code></div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-io.perl.ReportLatencies">Methods inherited from interface&nbsp;io.perl.ReportLatencies</h3>
+<h3 id="methods-inherited-from-class-io.perl.api.ReportLatencies">Methods inherited from interface&nbsp;io.perl.api.ReportLatencies</h3>
 <code>reportLatency, reportLatencyRecord</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.sbk.logger.RWLogger">Methods inherited from interface&nbsp;io.sbk.logger.RWLogger</h3>

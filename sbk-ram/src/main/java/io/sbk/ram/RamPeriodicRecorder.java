@@ -10,7 +10,7 @@
 
 package io.sbk.ram;
 
-import io.perl.TotalPeriodicWindow;
+import io.perl.api.TotalPeriodicWindow;
 import io.sbk.grpc.LatenciesRecord;
 
 /**
