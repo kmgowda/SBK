@@ -14,7 +14,6 @@ import org.gradle.internal.jvm.Jvm
 import java.util.regex.Matcher
 
 buildscript {
-    def sbkName = rootProject.name.toUpperCase()
     repositories {
         mavenLocal()
         mavenCentral()
@@ -29,9 +28,9 @@ buildscript {
         //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
 
-    println "Build JVM Version    : " + Jvm.current()
-    println "Build Gradle Version : $gradle.gradleVersion"
-    println "$sbkName Version :  $sbkVersion"
+    println "Build JVM Version      : " + Jvm.current()
+    println "Build Gradle Version   : $gradle.gradleVersion"
+    println "Build SBK Version      : $sbkVersion"
 }
 
 def SbkMainClass = "io.sbk.main.SbkMain"

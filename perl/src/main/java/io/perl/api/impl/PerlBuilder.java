@@ -16,6 +16,7 @@ import io.perl.logger.PerformanceLogger;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
+import io.perl.logger.impl.DefaultLogger;
 import io.perl.system.PerlPrinter;
 import io.perl.api.ReportLatency;
 import io.time.MicroSeconds;
@@ -25,8 +26,10 @@ import io.time.Time;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 
 public final class PerlBuilder {
 
@@ -112,15 +115,32 @@ public final class PerlBuilder {
                 reportLatency, time);
     }
 
-    public static Perl build(PerlConfig config, PerformanceLogger logger, ReportLatency reportLatency,
-                             ExecutorService executor, Time time) throws IllegalArgumentException {
+    public static Perl build(PerlConfig config, PerformanceLogger logger, ReportLatency latencyReporter,
+                             ExecutorService executor, Time time) throws IllegalArgumentException, IOException {
+        DefaultLogger dLogger = null;
+
+        if (config == null) {
+            config = PerlConfig.build();
+        }
+        if (logger == null || latencyReporter == null) {
+            dLogger = new DefaultLogger();
+        }
+        if (logger == null) {
+            logger = dLogger;
+        }
         if (time == null) {
             time = buildTime(logger);
         }
         if (time.getTimeUnit() != logger.getTimeUnit()) {
             throw new IllegalArgumentException("Time units are not matching");
         }
-        return new CQueuePerl(config, buildPeriodicLogger(time, config, logger, reportLatency),
+        if (latencyReporter == null) {
+            latencyReporter = dLogger;
+        }
+        if (executor == null) {
+            executor = new ForkJoinPool();
+        }
+        return new CQueuePerl(config, buildPeriodicLogger(time, config, logger, latencyReporter),
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, time, executor);
     }
 
