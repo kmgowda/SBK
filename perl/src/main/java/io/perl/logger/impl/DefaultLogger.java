@@ -11,8 +11,17 @@
 package io.perl.logger.impl;
 
 import io.perl.api.ReportLatency;
+import io.time.TimeUnit;
 
 public class DefaultLogger extends ResultsLogger implements ReportLatency {
+
+    public DefaultLogger(double[] percentiles, TimeUnit latencyTimeUnit) {
+        super(percentiles, latencyTimeUnit);
+    }
+
+    public DefaultLogger() {
+        super();
+    }
 
     @Override
     public void recordLatency(long startTime, int bytes, int events, long latency) {

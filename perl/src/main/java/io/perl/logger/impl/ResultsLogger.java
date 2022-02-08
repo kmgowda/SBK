@@ -23,10 +23,14 @@ public class ResultsLogger implements PerformanceLogger {
     protected String[] percentileNames;
     private final DecimalFormat format;
 
-    public ResultsLogger() {
+    public ResultsLogger(double[] percentiles, TimeUnit timeUnit) {
         this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
-        this.timeUnitName = TimeUnit.ms.name();
-        setPercentileNames(LatencyConfig.PERCENTILES);
+        this.timeUnitName = timeUnit.name();
+        setPercentileNames(percentiles);
+    }
+
+    public ResultsLogger() {
+        this(LatencyConfig.PERCENTILES, TimeUnit.ms);
     }
 
     public void setPercentileNames(double[] percentiles) {
@@ -69,13 +73,17 @@ public class ResultsLogger implements PerformanceLogger {
     }
 
     @Override
-    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentiles) {
+    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
+                      long[] percentiles) {
         System.out.print(buildResultString(new StringBuilder(), seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles));
     }
 
     @Override
-    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentiles) {
+    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                           long slc1, long slc2, long[] percentiles) {
         System.out.print(buildResultString(new StringBuilder("Total : "), seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles));
     }
