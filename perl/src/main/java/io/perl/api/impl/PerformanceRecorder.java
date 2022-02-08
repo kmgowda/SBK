@@ -37,7 +37,7 @@ public final class PerformanceRecorder {
 
     public void run(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        final ElasticWait idleWait = new ElasticWait(windowIntervalMS, idleNS,
+        final ElasticWait idleWait = new ElasticWait(idleNS, windowIntervalMS,
                 Math.min(windowIntervalMS, PerlConfig.DEFAULT_TIMEOUT_MS));
         final long startTime = time.getCurrentTime();
         boolean doWork = true;

@@ -16,7 +16,7 @@ import java.util.concurrent.locks.LockSupport;
 
 @NotThreadSafe
 public final class ElasticWait {
-    final private int windowInterval;
+    final private int windowIntervalMS;
     final private int idleNS;
     final private double countRatio;
     final private long minIdleCount;
@@ -24,11 +24,11 @@ public final class ElasticWait {
     private long idleCount;
     private long totalCount;
 
-    public ElasticWait(int windowInterval, int idleNS, int timeoutMS) {
-        this.windowInterval = windowInterval;
+    public ElasticWait(int idleNS, int windowIntervalMS, int minIntervalMS) {
+        this.windowIntervalMS = windowIntervalMS;
         this.idleNS = idleNS;
         countRatio = (Time.NS_PER_MS * 1.0) / this.idleNS;
-        minIdleCount = (long) (countRatio * timeoutMS);
+        minIdleCount = (long) (countRatio * minIntervalMS);
         elasticCount = minIdleCount;
         idleCount = 0;
         totalCount = 0;
@@ -45,12 +45,12 @@ public final class ElasticWait {
         return idleCount > elasticCount;
     }
 
-    public void updateElastic(long elapsedInterval) {
-        elasticCount = Math.max((long) (countRatio * (windowInterval - elapsedInterval)), minIdleCount);
+    public void updateElastic(long elapsedIntervalMS) {
+        elasticCount = Math.max((long) (countRatio * (windowIntervalMS - elapsedIntervalMS)), minIdleCount);
     }
 
-    public void setElastic(long currentInterval) {
-        elasticCount = (totalCount * windowInterval) / currentInterval;
+    public void setElastic(long currentIntervalMS) {
+        elasticCount = (totalCount * windowIntervalMS) / currentIntervalMS;
         totalCount = 0;
     }
 }
