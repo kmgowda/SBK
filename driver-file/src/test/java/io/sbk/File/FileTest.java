@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * Class for File System Interface.
+ * Class for File System validation.
  */
 public class FileTest {
     final String[] drivers = {"File"};
