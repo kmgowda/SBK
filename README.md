@@ -126,33 +126,37 @@ Storage Benchmark Kit
                      Available Drivers [Artemis, AsyncFile, BookKeeper,
                      Cassandra, CephS3, ConcurrentQ, CouchDB, CSV, Db2,
                      Derby, FdbRecord, File, FileStream, FoundationDB,
-                     HDFS, Hive, Ignite, Jdbc, Kafka, MariaDB, MinIO,
-                     MongoDB, MsSql, MySQL, Nats, NatsStream, Nsq, Null,
-                     OpenIO, PostgreSQL, Pravega, Pulsar, RabbitMQ, Redis,
-                     RedPanda, RocketMQ, RocksDB, SeaweedS3, SQLite]
- -context <arg>      Prometheus Metric context; 'no' disables this option;
-                     default: 9718/metrics
- -csvfile <arg>      CSV file to record results; 'no' disables this
-                     option, default: no
+                     HDFS, Hive, Ignite, Jdbc, Kafka, LevelDB, MariaDB,
+                     MinIO, MongoDB, MsSql, MySQL, Nats, NatsStream, Nsq,
+                     Null, OpenIO, PostgreSQL, Pravega, Pulsar, RabbitMQ,
+                     Redis, RedPanda, RocketMQ, RocksDB, SeaweedS3,
+                     SQLite]
+ -context <arg>      Prometheus Metric context;
+                     'no' disables this option; default: 9718/metrics
+ -csvfile <arg>      CSV file to record results;
+                     'no' disables this option, default: no
  -help               Help message
- -maxlatency <arg>   Maximum latency; use '-time' for time unit; default:
-                     180000 ms
- -minlatency <arg>   Minimum latency; use '-time' for time unit; default:
-                     0 ms
+ -id <arg>           Instance ID, default: 0
+ -maxlatency <arg>   Maximum latency;
+                     use '-time' for time unit; default:180000 ms
+ -minlatency <arg>   Minimum latency;
+                     use '-time' for time unit; default:0 ms
  -ram <arg>          SBK RAM host; 'no' disables this option, default: no
  -ramport <arg>      SBK RAM Port; default: 9717
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'seconds' not specified;
-                     otherwise, Maximum records per second by writer(s)
-                     and/or Number of records per second by reader(s)
+                     otherwise, Maximum records per second by writer(s);
+                     and/or
+                     Number of records per second by reader(s)
  -rsec <arg>         Number of seconds/step for readers, default: 0
  -rstep <arg>        Number of readers/step, default: 1
- -seconds <arg>      Number of seconds to run; if not specified, runs
-                     forever
+ -seconds <arg>      Number of seconds to run
+                     if not specified, runs forever
  -size <arg>         Size of each message (event or record)
  -sync <arg>         Each Writer calls flush/sync after writing <arg>
-                     number of of events(records) ; <arg> number of
-                     events(records) per Write or Read Transaction
+                     number of of events(records); and/or
+                     <arg> number of events(records) per Write or Read
+                     Transaction
  -throughput <arg>   If > 0, throughput in MB/s
                      If 0, writes/reads 'records'
                      If -1, get the maximum throughput (default: -1)
@@ -555,17 +559,18 @@ Storage Benchmark Kit
                         topic, default: null
  -broker <arg>          Broker URI, default: tcp://localhost:6650
  -cluster <arg>         Cluster name (optional parameter)
- -context <arg>         Prometheus Metric context; 'no' disables this
-                        option; default: 9718/metrics
- -csvfile <arg>         CSV file to record results; 'no' disables this
-                        option, default: no
+ -context <arg>         Prometheus Metric context;
+                        'no' disables this option; default: 9718/metrics
+ -csvfile <arg>         CSV file to record results;
+                        'no' disables this option, default: no
  -deduplication <arg>   Enable or Disable Deduplication; default: false
  -ensembleSize <arg>    EnsembleSize default: 1
  -help                  Help message
- -maxlatency <arg>      Maximum latency; use '-time' for time unit;
-                        default: 180000 ms
- -minlatency <arg>      Minimum latency; use '-time' for time unit;
-                        default: 0 ms
+ -id <arg>              Instance ID, default: 0
+ -maxlatency <arg>      Maximum latency;
+                        use '-time' for time unit; default:180000 ms
+ -minlatency <arg>      Minimum latency;
+                        use '-time' for time unit; default:0 ms
  -partitions <arg>      Number of partitions of the topic, default: 1
  -ram <arg>             SBK RAM host; 'no' disables this option, default:
                         no
@@ -573,16 +578,18 @@ Storage Benchmark Kit
  -readers <arg>         Number of readers
  -records <arg>         Number of records(events) if 'seconds' not
                         specified;
-                        otherwise, Maximum records per second by writer(s)
-                        and/or Number of records per second by reader(s)
+                        otherwise, Maximum records per second by
+                        writer(s); and/or
+                        Number of records per second by reader(s)
  -rsec <arg>            Number of seconds/step for readers, default: 0
  -rstep <arg>           Number of readers/step, default: 1
- -seconds <arg>         Number of seconds to run; if not specified, runs
-                        forever
+ -seconds <arg>         Number of seconds to run
+                        if not specified, runs forever
  -size <arg>            Size of each message (event or record)
  -sync <arg>            Each Writer calls flush/sync after writing <arg>
-                        number of of events(records) ; <arg> number of
-                        events(records) per Write or Read Transaction
+                        number of of events(records); and/or
+                        <arg> number of events(records) per Write or Read
+                        Transaction
  -threads <arg>         io threads per Topic, default: 1
  -throughput <arg>      If > 0, throughput in MB/s
                         If 0, writes/reads 'records'
