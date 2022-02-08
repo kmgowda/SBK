@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 
 <p align="center">
     <a href="https://kmgowda.github.io/SBK/perl?from=SBK">
-        <img src="images/perl-no-background.png" alt="Storage Benchmark Kit" width="650" height="125">
+        <img src="images/perl-no-background.png" alt="Storage Benchmark Kit" width="650" height="100">
     </a>
 </p>
 
