@@ -7,8 +7,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# PerL - Performance Logger  
-
+---
 <p align="center">
     <a href="https://kmgowda.github.io/SBK/perl?from=SBK">
         <img src="images/perl-no-background.png" alt="Storage Benchmark Kit" width="650" height="125">
@@ -16,6 +15,8 @@ You may obtain a copy of the License at
 </p>
 
 ___
+
+# PerL - Performance Logger
 
 [![Api](https://img.shields.io/badge/PerL-API-brightgreen)](https://kmgowda.github.io/SBK/perl/javadoc/index.html)
 
