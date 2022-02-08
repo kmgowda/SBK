@@ -11,6 +11,16 @@ You may obtain a copy of the License at
 
 [![Api](https://img.shields.io/badge/PerL-API-brightgreen)](https://kmgowda.github.io/SBK/perl/javadoc/index.html)
 
+
+___
+
+<p align="center">
+    <a href="https://kmgowda.github.io/SBK/perl/?from=PerL">
+        <img src="images/perl-no-background.png" alt="Performance Logger" width="250" height="250">
+    </a>
+</p>
+
+___
 The PerL is the core of SBK framework. The PerL provides the foundation APIs for performance benchmarking, storing 
 latency values and calculating percentiles. The APIs of PerL are used by SBK-API module to define the readers and writers 
 interfaces. The Latency store methods/classes are used by SBK-API and SBK-RAM. The PerL module can be used by any 
