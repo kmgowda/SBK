@@ -12,10 +12,10 @@ package io.perl.logger.impl;
 
 import io.perl.api.ReportLatency;
 
-public class DefaultLogger extends ResultsLogger implements ReportLatency {
+public final class DefaultLogger extends ResultsLogger implements ReportLatency {
 
     @Override
-    public final void recordLatency(long startTime, int bytes, int events, long latency) {
+    public void recordLatency(long startTime, int bytes, int events, long latency) {
 
     }
 }
