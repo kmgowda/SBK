@@ -9,7 +9,11 @@ You may obtain a copy of the License at
 -->
 # PerL - Performance Logger  
 
-[![PerL](images/perl-no-background.png)](https://kmgowda.github.io/SBK/perl)
+<p align="center">
+    <a href="https://kmgowda.github.io/SBK/perl?from=SBK">
+        <img src="images/perl-no-background.png" alt="Storage Benchmark Kit" width="250" height="150">
+    </a>
+</p>
 
 [![Api](https://img.shields.io/badge/PerL-API-brightgreen)](https://kmgowda.github.io/SBK/perl/javadoc/index.html)
 
