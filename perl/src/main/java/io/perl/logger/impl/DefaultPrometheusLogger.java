@@ -21,8 +21,10 @@ public class DefaultPrometheusLogger extends DefaultLogger {
     private final PrometheusMetricsServer server;
 
     public DefaultPrometheusLogger(String header, double[] percentiles, Time time,
-                                   @NotNull TimeUnit latencyTimeUnit, int port, String context) throws IOException {
-        super(percentiles, latencyTimeUnit);
+                                   @NotNull TimeUnit latencyTimeUnit,
+                                   long minLatency, long maxLatency,
+                                   int port, String context) throws IOException {
+        super(header, percentiles, latencyTimeUnit, minLatency, maxLatency);
         server = new PrometheusMetricsServer(header, percentiles, time, latencyTimeUnit, port, context);
     }
 
@@ -37,11 +39,11 @@ public class DefaultPrometheusLogger extends DefaultLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentiles) {
+                      long slc1, long slc2, long[] percentileValues) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         server.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 
 }

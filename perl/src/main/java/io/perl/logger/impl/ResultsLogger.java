@@ -9,6 +9,7 @@
  */
 package io.perl.logger.impl;
 
+import io.perl.config.PerlConfig;
 import io.perl.data.Bytes;
 import io.perl.config.LatencyConfig;
 import io.perl.logger.PerformanceLogger;
@@ -19,21 +20,32 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 public class ResultsLogger implements PerformanceLogger {
+    protected String prefix;
     protected String timeUnitName;
     protected String[] percentileNames;
+    protected TimeUnit timeUnit;
+    protected double[] percentiles;
+    protected long minLatency;
+    protected long maxLatency;
     private final DecimalFormat format;
 
-    public ResultsLogger(double[] percentiles, TimeUnit timeUnit) {
+    public ResultsLogger(String prefix, double[] percentiles, TimeUnit timeUnit, long minLatency, long maxLatency) {
         this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
+        this.prefix = prefix;
+        this.timeUnit = timeUnit;
+        this.percentiles = percentiles;
         this.timeUnitName = timeUnit.name();
+        this.minLatency = minLatency;
+        this.maxLatency = maxLatency;
         setPercentileNames(percentiles);
     }
 
     public ResultsLogger() {
-        this(LatencyConfig.PERCENTILES, TimeUnit.ms);
+        this(PerlConfig.NAME, LatencyConfig.PERCENTILES, TimeUnit.ms,
+                LatencyConfig.DEFAULT_MIN_LATENCY, LatencyConfig.DEFAULT_MAX_LATENCY);
     }
 
-    public void setPercentileNames(double[] percentiles) {
+    protected void setPercentileNames(double[] percentiles) {
         Arrays.sort(percentiles);
         percentileNames = new String[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
@@ -41,7 +53,27 @@ public class ResultsLogger implements PerformanceLogger {
         }
     }
 
-    public final void appendResults(@NotNull StringBuilder out, String timeUnitName, String[] percentileNames,
+    @Override
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    @Override
+    public long getMinLatency() {
+        return minLatency;
+    }
+
+    @Override
+    public long getMaxLatency() {
+        return maxLatency;
+    }
+
+    @Override
+    public double[] getPercentiles() {
+        return percentiles;
+    }
+
+    protected final void appendResults(@NotNull StringBuilder out, String timeUnitName, String[] percentileNames,
                        long seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                        long higherDiscard, long slc1, long slc2, @NotNull long[] percentileValues) {
@@ -63,7 +95,7 @@ public class ResultsLogger implements PerformanceLogger {
         }
     }
 
-    public String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
+    protected String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
                                     double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
@@ -72,19 +104,26 @@ public class ResultsLogger implements PerformanceLogger {
         return out.toString();
     }
 
+    protected void print(String header, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                       double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                       long slc1, long slc2, long[] percentileValues) {
+        System.out.print(buildResultString(new StringBuilder(header), seconds, bytes, records, recsPerSec, mbPerSec,
+                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+    }
+
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
-                      long[] percentiles) {
-        System.out.print(buildResultString(new StringBuilder(), seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles));
+                      long[] percentileValues) {
+        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
     }
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentiles) {
-        System.out.print(buildResultString(new StringBuilder("Total : "), seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles));
+                           long slc1, long slc2, long[] percentileValues) {
+        print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 }
