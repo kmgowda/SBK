@@ -16,7 +16,6 @@ import io.perl.logger.PerformanceLogger;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
-import io.perl.logger.impl.DefaultLogger;
 import io.perl.system.PerlPrinter;
 import io.perl.api.ReportLatency;
 import io.time.MicroSeconds;
@@ -115,27 +114,20 @@ public final class PerlBuilder {
                 reportLatency, time);
     }
 
-    public static Perl build(PerlConfig config, PerformanceLogger logger, ReportLatency latencyReporter,
-                             ExecutorService executor, Time time) throws IllegalArgumentException, IOException {
-        DefaultLogger dLogger = null;
-
+    public static Perl build(PerformanceLogger logger, ReportLatency latencyReporter, Time time,
+                             PerlConfig config, ExecutorService executor)
+                                throws IllegalArgumentException, IOException {
+        if (logger == null || latencyReporter == null) {
+            throw new IllegalArgumentException("Performance logger and ReportLatency are missing");
+        }
         if (config == null) {
             config = PerlConfig.build();
-        }
-        if (logger == null || latencyReporter == null) {
-            dLogger = new DefaultLogger();
-        }
-        if (logger == null) {
-            logger = dLogger;
         }
         if (time == null) {
             time = buildTime(logger);
         }
         if (time.getTimeUnit() != logger.getTimeUnit()) {
             throw new IllegalArgumentException("Time units are not matching");
-        }
-        if (latencyReporter == null) {
-            latencyReporter = dLogger;
         }
         if (executor == null) {
             executor = new ForkJoinPool();

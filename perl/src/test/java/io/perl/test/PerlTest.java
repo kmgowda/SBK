@@ -77,7 +77,7 @@ public class PerlTest  {
     @Test
     public void testPerlRecords() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         TestLogger logger = new TestLogger();
-        Perl perl = PerlBuilder.build(null, logger, logger, null, null);
+        Perl perl = PerlBuilder.build( logger, logger, null, null, null);
         PerlChannel[] channels = new PerlChannel[PERL_THREADS];
         for (int i = 0; i < PERL_THREADS; i++) {
             channels[i] = perl.getPerlChannel();
