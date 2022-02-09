@@ -15,8 +15,9 @@ import io.time.TimeUnit;
 
 public class DefaultLogger extends ResultsLogger implements ReportLatency {
 
-    public DefaultLogger(double[] percentiles, TimeUnit latencyTimeUnit) {
-        super(percentiles, latencyTimeUnit);
+    public DefaultLogger(String header, double[] percentiles, TimeUnit latencyTimeUnit,
+                         long minLatency, long maxLatency) {
+        super(header, percentiles, latencyTimeUnit, minLatency, maxLatency);
     }
 
     public DefaultLogger() {

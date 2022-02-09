@@ -16,7 +16,6 @@ import io.perl.logger.PerformanceLogger;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
-import io.perl.logger.impl.DefaultLogger;
 import io.perl.system.PerlPrinter;
 import io.perl.api.ReportLatency;
 import io.time.MicroSeconds;
@@ -24,6 +23,7 @@ import io.time.MilliSeconds;
 import io.time.NanoSeconds;
 import io.time.Time;
 import io.time.TimeUnit;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -46,9 +46,9 @@ public final class PerlBuilder {
         return ret;
     }
 
-    public static LatencyRecordWindow buildLatencyRecordWindow(LatencyConfig config, Time time,
-                                                               long minLatency, long maxLatency,
-                                                               double[] percentileFractions) {
+    public static @NotNull LatencyRecordWindow buildLatencyRecordWindow(@NotNull LatencyConfig config, Time time,
+                                                                        long minLatency, long maxLatency,
+                                                                        double[] percentileFractions) {
         final long latencyRange = maxLatency - minLatency;
         final long memSizeMB = (latencyRange * LatencyConfig.LATENCY_VALUE_SIZE_BYTES) / Bytes.BYTES_PER_MB;
         final LatencyRecordWindow window;
@@ -69,10 +69,11 @@ public final class PerlBuilder {
     }
 
 
-    private static PeriodicRecorder buildPeriodicLogger(Time time,
-                                                        LatencyConfig config,
-                                                        PerformanceLogger logger,
-                                                        ReportLatency reportLatency) {
+    @Contract("_, _, _, _ -> new")
+    private static @NotNull PeriodicRecorder buildPeriodicLogger(Time time,
+                                                                 LatencyConfig config,
+                                                                 @NotNull PerformanceLogger logger,
+                                                                 ReportLatency reportLatency) {
         final long minLatency = logger.getMinLatency();
         final long maxLatency = logger.getMaxLatency();
         final double[] percentiles = logger.getPercentiles();
@@ -115,27 +116,21 @@ public final class PerlBuilder {
                 reportLatency, time);
     }
 
-    public static Perl build(PerlConfig config, PerformanceLogger logger, ReportLatency latencyReporter,
-                             ExecutorService executor, Time time) throws IllegalArgumentException, IOException {
-        DefaultLogger dLogger = null;
-
+    @Contract("null, _, _, _, _ -> fail; !null, null, _, _, _ -> fail")
+    public static @NotNull Perl build(PerformanceLogger logger, ReportLatency latencyReporter, Time time,
+                                      PerlConfig config, ExecutorService executor)
+                                throws IllegalArgumentException, IOException {
+        if (logger == null || latencyReporter == null) {
+            throw new IllegalArgumentException("Performance logger and ReportLatency are missing");
+        }
         if (config == null) {
             config = PerlConfig.build();
-        }
-        if (logger == null || latencyReporter == null) {
-            dLogger = new DefaultLogger();
-        }
-        if (logger == null) {
-            logger = dLogger;
         }
         if (time == null) {
             time = buildTime(logger);
         }
         if (time.getTimeUnit() != logger.getTimeUnit()) {
             throw new IllegalArgumentException("Time units are not matching");
-        }
-        if (latencyReporter == null) {
-            latencyReporter = dLogger;
         }
         if (executor == null) {
             executor = new ForkJoinPool();

@@ -50,9 +50,9 @@ public class PerlTest  {
         @Override
         public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                          long slc1, long slc2, long[] percentiles) {
+                          long slc1, long slc2, long[] percentileValues) {
             super.print(seconds, bytes, records, recsPerSec, mbPerSec,
-                    avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles);
+                    avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
             PerlPrinter.log.info("print : receiving records " + records);
             printCnt.addAndGet(records);
         }
@@ -60,9 +60,9 @@ public class PerlTest  {
         @Override
         public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                                double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                               long higherDiscard, long slc1, long slc2, long[] percentiles) {
+                               long higherDiscard, long slc1, long slc2, long[] percentileValues) {
             super.printTotal(seconds, bytes, records, recsPerSec, mbPerSec,
-                    avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles);
+                    avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
             PerlPrinter.log.info("printTotal : receiving records " + records);
             totalPrintCnt.addAndGet(records);
         }
@@ -77,7 +77,7 @@ public class PerlTest  {
     @Test
     public void testPerlRecords() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         TestLogger logger = new TestLogger();
-        Perl perl = PerlBuilder.build(null, logger, logger, null, null);
+        Perl perl = PerlBuilder.build( logger, logger, null, null, null);
         PerlChannel[] channels = new PerlChannel[PERL_THREADS];
         for (int i = 0; i < PERL_THREADS; i++) {
             channels[i] = perl.getPerlChannel();

@@ -40,16 +40,12 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     public final AtomicInteger maxWriters;
     public final AtomicInteger maxReaders;
     public String storageName;
-    public String prefix;
     public String timeUnitFullText;
     public InputOptions params;
     public double[] percentiles;
     public Action action;
     public Time time;
     private LoggerConfig loggerConfig;
-    private TimeUnit timeUnit;
-    private long minLatency;
-    private long maxLatency;
 
     public SystemLogger() {
         super();
@@ -186,26 +182,6 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
-    }
-
-    @Override
-    public long getMinLatency() {
-        return minLatency;
-    }
-
-    @Override
-    public long getMaxLatency() {
-        return maxLatency;
-    }
-
-    @Override
-    public double[] getPercentiles() {
-        return percentiles;
-    }
-
-    @Override
     public void incrementWriters() {
         writers.incrementAndGet();
         maxWriters.incrementAndGet();
@@ -227,43 +203,18 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         readers.decrementAndGet();
     }
 
-    public void appendWritesAndReaders(@NotNull StringBuilder out) {
+    protected void appendWritesAndReaders(@NotNull StringBuilder out) {
         out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
         out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
     }
 
     @Override
-    public String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
+    protected String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
                                     double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
 
         appendWritesAndReaders(out);
-        appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
-        out.append(".\n");
-        return out.toString();
-    }
-
-    private void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                       double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                       long slc1, long slc2, long[] percentileValues) {
-        System.out.print(buildResultString(new StringBuilder(prefix), seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
-    }
-
-    @Override
-    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
-        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileValues);
-    }
-
-    @Override
-    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentileValues) {
-        print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        return super.buildResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 }
