@@ -20,10 +20,10 @@ import java.io.IOException;
 public class DefaultPrometheusLogger extends DefaultLogger {
     private final PrometheusMetricsServer server;
 
-    public DefaultPrometheusLogger(String header, double[] percentiles, Time time,
+    public DefaultPrometheusLogger(String header, double[] percentiles,
                                    @NotNull TimeUnit latencyTimeUnit,
                                    long minLatency, long maxLatency,
-                                   int port, String context) throws IOException {
+                                   Time time, int port, String context) throws IOException {
         super(header, percentiles, latencyTimeUnit, minLatency, maxLatency);
         server = new PrometheusMetricsServer(header, percentiles, time, latencyTimeUnit, port, context);
     }
