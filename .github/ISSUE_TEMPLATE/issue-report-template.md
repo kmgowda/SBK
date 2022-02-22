@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**Describe the Issue (But/Feature) **
+**Describe the Issue (Bug/Feature) **
 A clear and concise description of what the bug is.
 
 **To Reproduce**
