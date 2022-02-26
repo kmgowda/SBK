@@ -17,7 +17,9 @@ import io.perl.api.TimeStamp;
 import io.time.Time;
 import javax.annotation.concurrent.NotThreadSafe;
 
-
+/**
+ * Class for Performance Recording.
+ */
 @NotThreadSafe
 public final class PerformanceRecorder {
     final private int windowIntervalMS;

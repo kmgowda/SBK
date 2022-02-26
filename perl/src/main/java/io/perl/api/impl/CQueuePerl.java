@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutorService;
 
 
 /**
- * Class for Performance statistics.
+ * Class for Concurrent Queue based PerL.
  */
 final public class CQueuePerl implements Perl {
     final private PerformanceRecorder perlReceiver;
@@ -72,6 +72,11 @@ final public class CQueuePerl implements Perl {
     }
 
 
+    /**
+     * Get Perl channel.
+     *
+     * @return PerlChannel Interface
+     */
     @Override
     @Synchronized
     public PerlChannel getPerlChannel() {
@@ -116,6 +121,14 @@ final public class CQueuePerl implements Perl {
         }
     }
 
+    /**
+     * Run the CQ Perl.
+     *
+     * @param secondsToRun Number of seconds to Run
+     * @param recordsCount If secondsToRun is 0, then this indicates the total number of records to benchmark or
+     *                     read/write. If secondsToRun is higher than 0, then this parameter is ignored.
+     * @return
+     */
     @Override
     @Synchronized
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
@@ -131,6 +144,10 @@ final public class CQueuePerl implements Perl {
         return retFuture;
     }
 
+    /**
+     *  Stop the CQ Perl.
+     *
+     */
     @Override
     public void stop() {
         shutdown(null);
