@@ -100,7 +100,7 @@ Note that 'mavenCentral()' repository is required to fetch the SBK APIs package 
 3. start the benchmarking using [Run API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/RunBenchmark.html) 
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L203
    
-4. you send the performance data to Perl channel using [send API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/GetPerlChannel.html)
+4. you send the performance data to Perl channel using [send API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/PerlChannel.html)
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L97
    
 5. in case of any exception, you can send the [exception](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/exception/ExceptionHandler.html)
