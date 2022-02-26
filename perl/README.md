@@ -87,27 +87,27 @@ Note that 'mavenCentral()' repository is required to fetch the SBK APIs package 
 
 
 ## Use PerL APIs in your application
-1. Use [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/impl/PerlBuilder.html) to create and get the Concurrent queue based Perl interface.
+1. Use [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/impl/PerlBuilder.html) to create and get the Concurrent queue based Perl interface.
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L93   
    2. The created Perl interface object can be distributed among several threads.  
 
-2. Use [getPerlChannel API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/GetPerlChannel.html#getPerlChannel()) 
+2. Use [getPerlChannel API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/GetPerlChannel.html#getPerlChannel()) 
    to get the perl channel.
    1. Multiple threads can invoke this API to get the dedicated PerlChannel object.
    2. This dedicated PerlChannel is not thread safe and it should not used distributed among multiple threads
    3. See the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L177
 
-3. start the benchmarking using [Run API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/RunBenchmark.html) 
+3. start the benchmarking using [Run API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/RunBenchmark.html) 
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L203
    
-4. you send the performance data to Perl channel using [send API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/PerlChannel.html)
+4. you send the performance data to Perl channel using [send API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/GetPerlChannel.html)
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L97
    
-5. in case of any exception, you can send the [exception](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/PerlChannel.html)
+5. in case of any exception, you can send the [exception](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/exception/ExceptionHandler.html)
 
 6. The Perl will periodically sends/prints the performance results to logger/printer which is supplied with 
-   [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/impl/PerlBuilder.html) in step 1.
+   [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/impl/PerlBuilder.html#build(io.perl.logger.PerformanceLogger,io.perl.api.ReportLatency,io.time.Time,io.perl.config.PerlConfig,java.util.concurrent.ExecutorService)) in step 1.
 
-7. stop the benchmarking using [Stop API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/Perl.html)
+7. stop the benchmarking using [Stop API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/Perl.html)
    1. see the example: https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L364
    
