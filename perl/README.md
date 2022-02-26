@@ -89,19 +89,23 @@ Note that 'mavenCentral()' repository is required to fetch the SBK APIs package 
 ## Use PerL APIs in your application
 1. Use [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/impl/PerlBuilder.html) to create and get the Concurrent queue based Perl interface.
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L93   
-   2. The created Perl interface object can be distributed among several threads.  
+   2. see the Junit test example : https://github.com/kmgowda/SBK/blob/master/perl/src/test/java/io/perl/test/PerlTest.java#L80
+   3. The created Perl interface object can be distributed among several threads.  
 
 2. Use [getPerlChannel API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/GetPerlChannel.html#getPerlChannel()) 
    to get the perl channel.
    1. Multiple threads can invoke this API to get the dedicated PerlChannel object.
    2. This dedicated PerlChannel is not thread safe and it should not used distributed among multiple threads
    3. See the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L177
+   4. See the Junit test example : https://github. com/kmgowda/SBK/blob/master/perl/src/test/java/io/perl/test/PerlTest.java#L83 
 
 3. start the benchmarking using [Run API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/RunBenchmark.html) 
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L203
+   2. see the Junit test example : https://github.com/kmgowda/SBK/blob/master/perl/src/test/java/io/perl/test/PerlTest.java#L85
    
 4. you send the performance data to Perl channel using [send API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/PerlChannel.html)
    1. see the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/Writer.java#L97
+   2. See the Junit example to send the performance data with multiple threads : https://github.com/kmgowda/SBK/blob/master/perl/src/test/java/io/perl/test/PerlTest.java#L95
    
 5. in case of any exception, you can send the [exception](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/exception/ExceptionHandler.html)
 
