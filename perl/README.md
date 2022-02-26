@@ -95,7 +95,7 @@ Note that 'mavenCentral()' repository is required to fetch the SBK APIs package 
 2. Use [getPerlChannel API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/GetPerlChannel.html#getPerlChannel()) 
    to get the perl channel.
    1. Multiple threads can invoke this API to get the dedicated PerlChannel object.
-   2. This dedicated PerlChannel is not thread safe and it should not used distributed among multiple threads
+   2. This dedicated PerlChannel is not thread safe hence it should not be used distributed among multiple threads
    3. See the example : https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L177
    4. See the Junit test example : https://github. com/kmgowda/SBK/blob/master/perl/src/test/java/io/perl/test/PerlTest.java#L83 
 
