@@ -17,6 +17,9 @@ You may obtain a copy of the License at
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](sbk-gem)
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](sbk-gem-yal)
 
+
+[![PerL](https://img.shields.io/badge/Per-L%20-yellow)](perl)
+
 The SBK (Storage Benchmark Kit) is an open source software framework for the performance benchmarking of any storage system. If you are curious to measure the maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself is a very high-performance benchmark tool/framework.
 It massively writes the data to the storage system and reads the data from the storage system. The SBK supports multi writers and readers and also the End to End latency benchmarking.
 The latency quartiles and percentiles are calculated for complete data written/read without any sampling; hence the 
@@ -29,7 +32,7 @@ you can find the list of supported drivers below.
 The SBK supports a variety of payloads too, such as byte array, byte buffer, string, and you can add your own payload type.
 The Latency values can be measured either in milliseconds, microseconds or nanoseconds using SBK.
 
-The SBK is built on PerL (Performance Logger). The [![PerL](https://img.shields.io/badge/Per-L%20-orange)](perl) 
+The SBK is built on PerL (Performance Logger). The [![PerL](https://img.shields.io/badge/Per-L%20-yellow)](perl) 
 provides the foundation APIs for performance 
 benchmarking.
 
