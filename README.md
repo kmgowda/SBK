@@ -29,7 +29,7 @@ you can find the list of supported drivers below.
 The SBK supports a variety of payloads too, such as byte array, byte buffer, string, and you can add your own payload type.
 The Latency values can be measured either in milliseconds, microseconds or nanoseconds using SBK.
 
-The SBK is built on PerL (Performance Logger). The [!PerL(https://img.shields.io/badge/Per-L%20-orange)](./perl) 
+The SBK is built on PerL (Performance Logger). The [![PerL](https://img.shields.io/badge/Per-L%20-orange)](perl) 
 provides the foundation APIs for performance 
 benchmarking.
 
