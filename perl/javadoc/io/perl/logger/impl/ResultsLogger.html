@@ -98,12 +98,27 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>protected long</code></div>
+<div class="col-second even-row-color"><code><a href="#maxLatency" class="member-name-link">maxLatency</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>protected long</code></div>
+<div class="col-second odd-row-color"><code><a href="#minLatency" class="member-name-link">minLatency</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
 <div class="col-second even-row-color"><code><a href="#percentileNames" class="member-name-link">percentileNames</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#timeUnitName" class="member-name-link">timeUnitName</a></code></div>
+<div class="col-first odd-row-color"><code>protected double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#percentiles" class="member-name-link">percentiles</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#prefix" class="member-name-link">prefix</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>protected <a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#timeUnit" class="member-name-link">timeUnit</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#timeUnitName" class="member-name-link">timeUnitName</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -117,6 +132,12 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">ResultsLogger</a>()</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.String,double%5B%5D,io.time.TimeUnit,long,long)" class="member-name-link">ResultsLogger</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;prefix,
+ double[]&nbsp;percentiles,
+ <a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a>&nbsp;timeUnit,
+ long&nbsp;minLatency,
+ long&nbsp;maxLatency)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -131,7 +152,7 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final void</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected final void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#appendResults(java.lang.StringBuilder,java.lang.String,java.lang.String%5B%5D,long,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">appendResults</a><wbr>(@NotNull <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/StringBuilder.html" title="class or interface in java.lang" class="external-link">StringBuilder</a>&nbsp;out,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;timeUnitName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;percentileNames,
@@ -149,7 +170,7 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
  long&nbsp;slc2,
  @org.jetbrains.annotations.NotNull long[]&nbsp;percentileValues)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">buildResultString</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/StringBuilder.html" title="class or interface in java.lang" class="external-link">StringBuilder</a>&nbsp;out,
  double&nbsp;seconds,
  long&nbsp;bytes,
@@ -165,6 +186,26 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
  long&nbsp;slc2,
  long[]&nbsp;percentileValues)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxLatency()" class="member-name-link">getMaxLatency</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Default implementation of Maximum latency.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMinLatency()" class="member-name-link">getMinLatency</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Default implementation of minimum latency.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPercentiles()" class="member-name-link">getPercentiles</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Default implementation of percentile Indices.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTimeUnit()" class="member-name-link">getTimeUnit</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Default implementation of time Unit.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">print</a><wbr>(double&nbsp;seconds,
  long&nbsp;bytes,
@@ -178,12 +219,13 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
  long&nbsp;higherDiscard,
  long&nbsp;slc1,
  long&nbsp;slc2,
- long[]&nbsp;percentiles)</code></div>
+ long[]&nbsp;percentileValues)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Print the Periodic performance results.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">printTotal</a><wbr>(double&nbsp;seconds,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#print(java.lang.String,double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">print</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;header,
+ double&nbsp;seconds,
  long&nbsp;bytes,
  long&nbsp;records,
  double&nbsp;recsPerSec,
@@ -195,13 +237,28 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
  long&nbsp;higherDiscard,
  long&nbsp;slc1,
  long&nbsp;slc2,
- long[]&nbsp;percentiles)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Print the Total Periodic performance results.</div>
-</div>
+ long[]&nbsp;percentileValues)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setPercentileNames(double%5B%5D)" class="member-name-link">setPercentileNames</a><wbr>(double[]&nbsp;percentiles)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)" class="member-name-link">printTotal</a><wbr>(double&nbsp;seconds,
+ long&nbsp;bytes,
+ long&nbsp;records,
+ double&nbsp;recsPerSec,
+ double&nbsp;mbPerSec,
+ double&nbsp;avgLatency,
+ long&nbsp;maxLatency,
+ long&nbsp;invalid,
+ long&nbsp;lowerDiscard,
+ long&nbsp;higherDiscard,
+ long&nbsp;slc1,
+ long&nbsp;slc2,
+ long[]&nbsp;percentileValues)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Print the Periodic performance results.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setPercentileNames(double%5B%5D)" class="member-name-link">setPercentileNames</a><wbr>(double[]&nbsp;percentiles)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -210,7 +267,7 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.perl.logger.PerformanceLogger">Methods inherited from interface&nbsp;io.perl.logger.<a href="../PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></h3>
-<code><a href="../PerformanceLogger.html#getMaxLatency()">getMaxLatency</a>, <a href="../PerformanceLogger.html#getMinLatency()">getMinLatency</a>, <a href="../PerformanceLogger.html#getPercentiles()">getPercentiles</a>, <a href="../PerformanceLogger.html#getPrintingIntervalSeconds()">getPrintingIntervalSeconds</a>, <a href="../PerformanceLogger.html#getTimeUnit()">getTimeUnit</a></code></div>
+<code><a href="../PerformanceLogger.html#getPrintingIntervalSeconds()">getPrintingIntervalSeconds</a></code></div>
 </section>
 </li>
 </ul>
@@ -223,6 +280,12 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <h2>Field Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="prefix">
+<h3>prefix</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">prefix</span></div>
+</section>
+</li>
+<li>
 <section class="detail" id="timeUnitName">
 <h3>timeUnitName</h3>
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">timeUnitName</span></div>
@@ -234,6 +297,30 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</span>&nbsp;<span class="element-name">percentileNames</span></div>
 </section>
 </li>
+<li>
+<section class="detail" id="timeUnit">
+<h3>timeUnit</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a></span>&nbsp;<span class="element-name">timeUnit</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="percentiles">
+<h3>percentiles</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">percentiles</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="minLatency">
+<h3>minLatency</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">minLatency</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="maxLatency">
+<h3>maxLatency</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">maxLatency</span></div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -242,6 +329,16 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <section class="constructor-details" id="constructor-detail">
 <h2>Constructor Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="&lt;init&gt;(java.lang.String,double[],io.time.TimeUnit,long,long)">
+<h3>ResultsLogger</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ResultsLogger</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;prefix,
+ double[]&nbsp;percentiles,
+ <a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a>&nbsp;timeUnit,
+ long&nbsp;minLatency,
+ long&nbsp;maxLatency)</span></div>
+</section>
+</li>
 <li>
 <section class="detail" id="&lt;init&gt;()">
 <h3>ResultsLogger</h3>
@@ -259,13 +356,70 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <li>
 <section class="detail" id="setPercentileNames(double[])">
 <h3>setPercentileNames</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setPercentileNames</span><wbr><span class="parameters">(double[]&nbsp;percentiles)</span></div>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setPercentileNames</span><wbr><span class="parameters">(double[]&nbsp;percentiles)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="getTimeUnit()">
+<h3>getTimeUnit</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../../time/TimeUnit.html" title="enum class in io.time">TimeUnit</a></span>&nbsp;<span class="element-name">getTimeUnit</span>()</div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getTimeUnit()">PerformanceLogger</a></code></span></div>
+<div class="block">Default implementation of time Unit.
+ Default time unit is Milliseconds.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../PerformanceLogger.html#getTimeUnit()">getTimeUnit</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></code></dd>
+<dt>Returns:</dt>
+<dd>time unit.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getMinLatency()">
+<h3>getMinLatency</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">getMinLatency</span>()</div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getMinLatency()">PerformanceLogger</a></code></span></div>
+<div class="block">Default implementation of minimum latency.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../PerformanceLogger.html#getMinLatency()">getMinLatency</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></code></dd>
+<dt>Returns:</dt>
+<dd>minimum latency value.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getMaxLatency()">
+<h3>getMaxLatency</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">getMaxLatency</span>()</div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getMaxLatency()">PerformanceLogger</a></code></span></div>
+<div class="block">Default implementation of Maximum latency.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../PerformanceLogger.html#getMaxLatency()">getMaxLatency</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></code></dd>
+<dt>Returns:</dt>
+<dd>Maximum latency value.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getPercentiles()">
+<h3>getPercentiles</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">getPercentiles</span>()</div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#getPercentiles()">PerformanceLogger</a></code></span></div>
+<div class="block">Default implementation of percentile Indices.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../PerformanceLogger.html#getPercentiles()">getPercentiles</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></code></dd>
+<dt>Returns:</dt>
+<dd>array of percentile Indices.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="appendResults(java.lang.StringBuilder,java.lang.String,java.lang.String[],long,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <h3>appendResults</h3>
-<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendResults</span><wbr><span class="parameters">(@NotNull
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendResults</span><wbr><span class="parameters">(@NotNull
  @NotNull <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/StringBuilder.html" title="class or interface in java.lang" class="external-link">StringBuilder</a>&nbsp;out,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;timeUnitName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;percentileNames,
@@ -288,7 +442,26 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <li>
 <section class="detail" id="buildResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long[])">
 <h3>buildResultString</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">buildResultString</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/StringBuilder.html" title="class or interface in java.lang" class="external-link">StringBuilder</a>&nbsp;out,
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">buildResultString</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/StringBuilder.html" title="class or interface in java.lang" class="external-link">StringBuilder</a>&nbsp;out,
+ double&nbsp;seconds,
+ long&nbsp;bytes,
+ long&nbsp;records,
+ double&nbsp;recsPerSec,
+ double&nbsp;mbPerSec,
+ double&nbsp;avgLatency,
+ long&nbsp;maxLatency,
+ long&nbsp;invalid,
+ long&nbsp;lowerDiscard,
+ long&nbsp;higherDiscard,
+ long&nbsp;slc1,
+ long&nbsp;slc2,
+ long[]&nbsp;percentileValues)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="print(java.lang.String,double,long,long,double,double,double,long,long,long,long,long,long,long[])">
+<h3>print</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">print</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;header,
  double&nbsp;seconds,
  long&nbsp;bytes,
  long&nbsp;records,
@@ -319,7 +492,7 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
  long&nbsp;higherDiscard,
  long&nbsp;slc1,
  long&nbsp;slc2,
- long[]&nbsp;percentiles)</span></div>
+ long[]&nbsp;percentileValues)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Print.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">Print</a></code></span></div>
 <div class="block">Print the Periodic performance results.</div>
 <dl class="notes">
@@ -338,7 +511,7 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
 <dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
 <dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
-<dd><code>percentiles</code> - Array of percentiles.</dd>
+<dd><code>percentileValues</code> - Array of percentile Values.</dd>
 </dl>
 </section>
 </li>
@@ -357,26 +530,26 @@ implements <a href="../PerformanceLogger.html" title="interface in io.perl.logge
  long&nbsp;higherDiscard,
  long&nbsp;slc1,
  long&nbsp;slc2,
- long[]&nbsp;percentiles)</span></div>
+ long[]&nbsp;percentileValues)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">PerformanceLogger</a></code></span></div>
-<div class="block">Print the Total Periodic performance results.</div>
+<div class="block">Print the Periodic performance results.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../PerformanceLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long%5B%5D)">printTotal</a></code>&nbsp;in interface&nbsp;<code><a href="../PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></code></dd>
 <dt>Parameters:</dt>
-<dd><code>seconds</code> - reporting seconds</dd>
+<dd><code>seconds</code> - reporting duration in seconds</dd>
 <dd><code>bytes</code> - number of bytes read/write</dd>
 <dd><code>records</code> - data to write.</dd>
 <dd><code>recsPerSec</code> - records per second.</dd>
 <dd><code>mbPerSec</code> - Throughput value in terms of MB (Mega Bytes) per Second.</dd>
 <dd><code>avgLatency</code> - Average Latency.</dd>
 <dd><code>maxLatency</code> - Maximum Latency.</dd>
-<dd><code>invalid</code> - Number of invalid/negative latencies</dd>
+<dd><code>invalid</code> - Number of invalid/negative latencies.</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
 <dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
 <dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
-<dd><code>percentiles</code> - Array of percentiles.</dd>
+<dd><code>percentileValues</code> - Array of percentile Values.</dd>
 </dl>
 </section>
 </li>

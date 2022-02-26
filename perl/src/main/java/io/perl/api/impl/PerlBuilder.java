@@ -31,8 +31,18 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 
+
+/**
+ * Class for Building Perl, Time and Periodic Recorder.
+ */
 public final class PerlBuilder {
 
+    /**
+     * Build 'Time' object based on Performance logger.
+     *
+     * @param logger               Performance logger
+     * @return Time Object.
+     */
     public static @NotNull Time buildTime(@NotNull PerformanceLogger logger) {
         final TimeUnit timeUnit = logger.getTimeUnit();
         final Time ret = switch (timeUnit) {
@@ -46,6 +56,17 @@ public final class PerlBuilder {
         return ret;
     }
 
+
+    /**
+     * Build Latency Record Window.
+     *
+     * @param config               Latency configuration
+     * @param time                 Time
+     * @param minLatency           Minimum Latency
+     * @param maxLatency           Maximum Latency
+     * @param percentileFractions  Percentile fractions
+     * @return Latency record window.
+     */
     public static @NotNull LatencyRecordWindow buildLatencyRecordWindow(@NotNull LatencyConfig config, Time time,
                                                                         long minLatency, long maxLatency,
                                                                         double[] percentileFractions) {
@@ -68,7 +89,15 @@ public final class PerlBuilder {
         return window;
     }
 
-
+    /**
+     * Build Periodic Logger.
+     *
+     * @param time              Time interface
+     * @param config            Latency configurations
+     * @param logger            Performance Logger
+     * @param reportLatency     interface to report latencies
+     * @return  Periodic Recorder
+     */
     @Contract("_, _, _, _ -> new")
     private static @NotNull PeriodicRecorder buildPeriodicLogger(Time time,
                                                                  LatencyConfig config,
@@ -116,6 +145,19 @@ public final class PerlBuilder {
                 reportLatency, time);
     }
 
+    /**
+     * Build CQ (Concurrent Queue) based Perl.
+     *
+     * @param logger            Performance Logger
+     * @param latencyReporter   Report latencies
+     * @param time              time interface
+     * @param config            Perl configuration
+     * @param executor          Executor Service
+     * @return  Perl Object
+     * @throws IllegalArgumentException   in case logger and latency reporter are missing and time unit of 'Time' and
+     * performance logger is not matching
+     * @throws IOException   if the CQ perl creation failed.
+     */
     @Contract("null, _, _, _, _ -> fail; !null, null, _, _, _ -> fail")
     public static @NotNull Perl build(PerformanceLogger logger, ReportLatency latencyReporter, Time time,
                                       PerlConfig config, ExecutorService executor)

@@ -77,6 +77,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">PerlBuilder</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">Class for Building Perl, Time and Periodic Recorder.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -104,23 +105,29 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#build(io.perl.config.PerlConfig,io.perl.logger.PerformanceLogger,io.perl.api.ReportLatency,java.util.concurrent.ExecutorService,io.time.Time)" class="member-name-link">build</a><wbr>(<a href="../../config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a>&nbsp;config,
- <a href="../../logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a>&nbsp;logger,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#build(io.perl.logger.PerformanceLogger,io.perl.api.ReportLatency,io.time.Time,io.perl.config.PerlConfig,java.util.concurrent.ExecutorService)" class="member-name-link">build</a><wbr>(<a href="../../logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a>&nbsp;logger,
  <a href="../ReportLatency.html" title="interface in io.perl.api">ReportLatency</a>&nbsp;latencyReporter,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor,
- <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildLatencyRecordWindow(io.perl.config.LatencyConfig,io.time.Time,long,long,double%5B%5D)" class="member-name-link">buildLatencyRecordWindow</a><wbr>(<a href="../../config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a>&nbsp;config,
+ <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
+ <a href="../../config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a>&nbsp;config,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Build CQ (Concurrent Queue) based Perl.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildLatencyRecordWindow(io.perl.config.LatencyConfig,io.time.Time,long,long,double%5B%5D)" class="member-name-link">buildLatencyRecordWindow</a><wbr>(@NotNull <a href="../../config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a>&nbsp;config,
  <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
  long&nbsp;minLatency,
  long&nbsp;maxLatency,
  double[]&nbsp;percentileFractions)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Build Latency Record Window.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="../../../time/Time.html" title="interface in io.time">Time</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildTime(io.perl.logger.PerformanceLogger)" class="member-name-link">buildTime</a><wbr>(@NotNull <a href="../../logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a>&nbsp;logger)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Build 'Time' object based on Performance logger.</div>
+</div>
 </div>
 </div>
 </div>
@@ -158,32 +165,64 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="annotations">@NotNull
 </span><span class="modifiers">public static</span>&nbsp;<span class="return-type">@NotNull <a href="../../../time/Time.html" title="interface in io.time">Time</a></span>&nbsp;<span class="element-name">buildTime</span><wbr><span class="parameters">(@NotNull
  @NotNull <a href="../../logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a>&nbsp;logger)</span></div>
+<div class="block">Build 'Time' object based on Performance logger.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>logger</code> - Performance logger</dd>
+<dt>Returns:</dt>
+<dd>Time Object.</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="buildLatencyRecordWindow(io.perl.config.LatencyConfig,io.time.Time,long,long,double[])">
 <h3>buildLatencyRecordWindow</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></span>&nbsp;<span class="element-name">buildLatencyRecordWindow</span><wbr><span class="parameters">(<a href="../../config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a>&nbsp;config,
+<div class="member-signature"><span class="annotations">@NotNull
+</span><span class="modifiers">public static</span>&nbsp;<span class="return-type">@NotNull <a href="../LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></span>&nbsp;<span class="element-name">buildLatencyRecordWindow</span><wbr><span class="parameters">(@NotNull
+ @NotNull <a href="../../config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a>&nbsp;config,
  <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
  long&nbsp;minLatency,
  long&nbsp;maxLatency,
  double[]&nbsp;percentileFractions)</span></div>
+<div class="block">Build Latency Record Window.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>config</code> - Latency configuration</dd>
+<dd><code>time</code> - Time</dd>
+<dd><code>minLatency</code> - Minimum Latency</dd>
+<dd><code>maxLatency</code> - Maximum Latency</dd>
+<dd><code>percentileFractions</code> - Percentile fractions</dd>
+<dt>Returns:</dt>
+<dd>Latency record window.</dd>
+</dl>
 </section>
 </li>
 <li>
-<section class="detail" id="build(io.perl.config.PerlConfig,io.perl.logger.PerformanceLogger,io.perl.api.ReportLatency,java.util.concurrent.ExecutorService,io.time.Time)">
+<section class="detail" id="build(io.perl.logger.PerformanceLogger,io.perl.api.ReportLatency,io.time.Time,io.perl.config.PerlConfig,java.util.concurrent.ExecutorService)">
 <h3>build</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Perl.html" title="interface in io.perl.api">Perl</a></span>&nbsp;<span class="element-name">build</span><wbr><span class="parameters">(<a href="../../config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a>&nbsp;config,
- <a href="../../logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a>&nbsp;logger,
+<div class="member-signature"><span class="annotations">@Contract("null, _, _, _, _ -&gt; fail; !null, null, _, _, _ -&gt; fail")
+@NotNull
+</span><span class="modifiers">public static</span>&nbsp;<span class="return-type">@NotNull <a href="../Perl.html" title="interface in io.perl.api">Perl</a></span>&nbsp;<span class="element-name">build</span><wbr><span class="parameters">(<a href="../../logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a>&nbsp;logger,
  <a href="../ReportLatency.html" title="interface in io.perl.api">ReportLatency</a>&nbsp;latencyReporter,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor,
- <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time)</span>
-                  throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+ <a href="../../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
+ <a href="../../config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a>&nbsp;config,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link">ExecutorService</a>&nbsp;executor)</span>
+                           throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Build CQ (Concurrent Queue) based Perl.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>logger</code> - Performance Logger</dd>
+<dd><code>latencyReporter</code> - Report latencies</dd>
+<dd><code>time</code> - time interface</dd>
+<dd><code>config</code> - Perl configuration</dd>
+<dd><code>executor</code> - Executor Service</dd>
+<dt>Returns:</dt>
+<dd>Perl Object</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code></dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - in case logger and latency reporter are missing and time unit of 'Time' and
+ performance logger is not matching</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if the CQ perl creation failed.</dd>
 </dl>
 </section>
 </li>

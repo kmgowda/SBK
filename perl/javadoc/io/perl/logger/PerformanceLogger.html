@@ -77,7 +77,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <dl class="notes">
 <dt>All Known Implementing Classes:</dt>
-<dd><code><a href="impl/DefaultLogger.html" title="class in io.perl.logger.impl">DefaultLogger</a></code>, <code><a href="impl/ResultsLogger.html" title="class in io.perl.logger.impl">ResultsLogger</a></code></dd>
+<dd><code><a href="impl/DefaultLogger.html" title="class in io.perl.logger.impl">DefaultLogger</a></code>, <code><a href="impl/DefaultPrometheusLogger.html" title="class in io.perl.logger.impl">DefaultPrometheusLogger</a></code>, <code><a href="impl/ResultsLogger.html" title="class in io.perl.logger.impl">ResultsLogger</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">PerformanceLogger</span><span class="extends-implements">
@@ -134,9 +134,9 @@ extends <a href="Print.html" title="interface in io.perl.logger">Print</a></span
  long&nbsp;higherDiscard,
  long&nbsp;slc1,
  long&nbsp;slc2,
- long[]&nbsp;percentiles)</code></div>
+ long[]&nbsp;percentileValues)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Print the Total Periodic performance results.</div>
+<div class="block">Print the Periodic performance results.</div>
 </div>
 </div>
 </div>
@@ -170,23 +170,23 @@ extends <a href="Print.html" title="interface in io.perl.logger">Print</a></span
  long&nbsp;higherDiscard,
  long&nbsp;slc1,
  long&nbsp;slc2,
- long[]&nbsp;percentiles)</span></div>
-<div class="block">Print the Total Periodic performance results.</div>
+ long[]&nbsp;percentileValues)</span></div>
+<div class="block">Print the Periodic performance results.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>seconds</code> - reporting seconds</dd>
+<dd><code>seconds</code> - reporting duration in seconds</dd>
 <dd><code>bytes</code> - number of bytes read/write</dd>
 <dd><code>records</code> - data to write.</dd>
 <dd><code>recsPerSec</code> - records per second.</dd>
 <dd><code>mbPerSec</code> - Throughput value in terms of MB (Mega Bytes) per Second.</dd>
 <dd><code>avgLatency</code> - Average Latency.</dd>
 <dd><code>maxLatency</code> - Maximum Latency.</dd>
-<dd><code>invalid</code> - Number of invalid/negative latencies</dd>
+<dd><code>invalid</code> - Number of invalid/negative latencies.</dd>
 <dd><code>lowerDiscard</code> - number of discarded latencies which are less than minimum latency.</dd>
 <dd><code>higherDiscard</code> - number of discarded latencies which are higher than maximum latency.</dd>
 <dd><code>slc1</code> - Sliding Latency Coverage factor</dd>
 <dd><code>slc2</code> - Sliding Latency Coverage factor</dd>
-<dd><code>percentiles</code> - Array of percentiles.</dd>
+<dd><code>percentileValues</code> - Array of percentile Values.</dd>
 </dl>
 </section>
 </li>

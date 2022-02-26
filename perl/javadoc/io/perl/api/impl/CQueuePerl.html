@@ -82,7 +82,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">CQueuePerl</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></span></div>
-<div class="block">Class for Performance statistics.</div>
+<div class="block">Class for Concurrent Queue based PerL.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -117,18 +117,18 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPerlChannel()" class="member-name-link">getPerlChannel</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the PerlChannel to get the benchmark results.</div>
+<div class="block">Get Perl channel.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#run(long,long)" class="member-name-link">run</a><wbr>(long&nbsp;secondsToRun,
  long&nbsp;recordsCount)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Run the performance Benchmark.</div>
+<div class="block">Run the CQ Perl.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">stop/shutdown the Benchmark.</div>
+<div class="block">Stop the CQ Perl.</div>
 </div>
 </div>
 </div>
@@ -170,13 +170,12 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <section class="detail" id="getPerlChannel()">
 <h3>getPerlChannel</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></span>&nbsp;<span class="element-name">getPerlChannel</span>()</div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../GetPerlChannel.html#getPerlChannel()">GetPerlChannel</a></code></span></div>
-<div class="block">Get the PerlChannel to get the benchmark results.</div>
+<div class="block">Get Perl channel.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../GetPerlChannel.html#getPerlChannel()">getPerlChannel</a></code>&nbsp;in interface&nbsp;<code><a href="../GetPerlChannel.html" title="interface in io.perl.api">GetPerlChannel</a></code></dd>
 <dt>Returns:</dt>
-<dd>PerlChannel to get the benchmark results.</dd>
+<dd>PerlChannel Interface</dd>
 </dl>
 </section>
 </li>
@@ -185,8 +184,7 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <h3>run</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</span>&nbsp;<span class="element-name">run</span><wbr><span class="parameters">(long&nbsp;secondsToRun,
  long&nbsp;recordsCount)</span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../RunBenchmark.html#run(long,long)">RunBenchmark</a></code></span></div>
-<div class="block">Run the performance Benchmark.</div>
+<div class="block">Run the CQ Perl.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../RunBenchmark.html#run(long,long)">run</a></code>&nbsp;in interface&nbsp;<code><a href="../RunBenchmark.html" title="interface in io.perl.api">RunBenchmark</a></code></dd>
@@ -195,7 +193,6 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <dd><code>recordsCount</code> - If secondsToRun is 0, then this indicates the total number of records to benchmark or
                      read/write. If secondsToRun is higher than 0, then this parameter is ignored.</dd>
 <dt>Returns:</dt>
-<dd>CompletableFuture.</dd>
 </dl>
 </section>
 </li>
@@ -203,8 +200,7 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <section class="detail" id="stop()">
 <h3>stop</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">stop</span>()</div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../Perl.html#stop()">Perl</a></code></span></div>
-<div class="block">stop/shutdown the Benchmark.</div>
+<div class="block">Stop the CQ Perl.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Perl.html#stop()">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></dd>
