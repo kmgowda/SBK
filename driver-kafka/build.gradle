@@ -9,5 +9,5 @@ repositories {
 
 dependencies {
     api project(":sbk-api")
-    api "org.apache.kafka:kafka-clients:2.4.1"
+    api "org.apache.kafka:kafka-clients:3.0.1"
 }
