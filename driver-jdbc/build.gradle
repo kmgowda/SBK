@@ -10,7 +10,7 @@ repositories {
 dependencies {
     api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.apache.derby/derby
-    api group: 'org.apache.derby', name: 'derby', version: '10.10.2.0'
+    api group: 'org.apache.derby', name: 'derby', version: '10.15.2.0'
     // https://mvnrepository.com/artifact/org.apache.derby/derbyclient
     api group: 'org.apache.derby', name: 'derbyclient', version: '10.10.2.0'
     api group: 'org.apache.derby', name: 'derbynet', version: '10.10.2.0'
@@ -23,7 +23,7 @@ dependencies {
     api group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.2.jre8'
 
     // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
-    api group: 'org.xerial', name: 'sqlite-jdbc', version: '3.31.1'
+    api group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
 
     // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
     api group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.1'
