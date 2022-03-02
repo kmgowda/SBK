@@ -10,7 +10,7 @@ repositories {
 dependencies {
     api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.apache.derby/derby
-    api group: 'org.apache.derby', name: 'derby', version: '3.36.0.3'
+    api group: 'org.apache.derby', name: 'derby', version: '10.15.2.0'
     // https://mvnrepository.com/artifact/org.apache.derby/derbyclient
     api group: 'org.apache.derby', name: 'derbyclient', version: '10.10.2.0'
     api group: 'org.apache.derby', name: 'derbynet', version: '10.10.2.0'
