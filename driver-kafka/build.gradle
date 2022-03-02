@@ -6,8 +6,10 @@ plugins {
 repositories {
     mavenCentral()
 }
-
+task wrapper(type: Wrapper) {
+    gradleVersion = '7.4'
+}
 dependencies {
     api project(":sbk-api")
-    api "org.apache.kafka:kafka-clients:2.4.1"
+    api "org.apache.kafka:kafka-clients:3.1.0"
 }

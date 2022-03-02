@@ -137,9 +137,7 @@ final public class CQueuePerl implements Perl {
             PerlPrinter.log.info("CQueuePerl Start");
             qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(secondsToRun, recordsCount),
                     executor);
-            qFuture.whenComplete((ret, ex) -> {
-                shutdown(ex);
-            });
+            qFuture.whenComplete((ret, ex) -> shutdown(ex));
         }
         return retFuture;
     }
