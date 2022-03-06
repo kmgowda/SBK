@@ -142,3 +142,69 @@ An Example database read command is as follows:
 ```
 ./build/install/sbk/bin/sbk -class jdbc -driver org.mariadb.jdbc.Driver -url jdbc:mariadb://localhost/mysql  -table kmg -user root -password root -readers 1 -size 100 -seconds 60
 ``` 
+
+## JDBC 'Class not found issue' Work around
+
+Sometimes you will get the following class not found error when running the sbk jdbc benchmarking with mysql
+
+```
+kmg@kmgs-MBP SBK % ./build/install/sbk/bin/sbk -class jdbc  -driver com.mysql.cj.jdbc.Driver -url jdbc:mysql://localhost:3306/social -user root -password root  -table kmg_2 -size 100 -writers 1 -seconds 60
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.32.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
+2022-03-06 12:15:52 INFO Reflections took 82 ms to scan 46 urls, producing 98 keys and 218 values 
+2022-03-06 12:15:52 INFO 
+       _____   ____    _   __
+      / ____| |  _ \  | | / /
+     | (___   | |_) | | |/ /
+      \___ \  |  _ <  |   <
+      ____) | | |_) | | |\ \
+     |_____/  |____/  |_| \_\
+
+2022-03-06 12:15:52 INFO Storage Benchmark Kit
+2022-03-06 12:15:52 INFO SBK Version: 0.98
+2022-03-06 12:15:52 INFO SBK Website: https://github.com/kmgowda/SBK
+2022-03-06 12:15:52 INFO Arguments List: [-class, jdbc, -driver, com.mysql.cj.jdbc.Driver, -url, jdbc:mysql://localhost:3306/social, -user, root, -password, root, -table, kmg_2, -size, 100, -writers, 1, -seconds, 60]
+2022-03-06 12:15:52 INFO Java Runtime Version: 17+35-LTS-2724
+2022-03-06 12:15:52 INFO Storage Drivers Package: io.sbk
+2022-03-06 12:15:52 INFO sbk.applicationName: sbk
+2022-03-06 12:15:52 INFO sbk.appHome: /Users/kmg/projects/SBK/build/install/sbk
+2022-03-06 12:15:52 INFO sbk.className: 
+2022-03-06 12:15:52 INFO '-class': jdbc
+2022-03-06 12:15:52 INFO Available Storage Drivers in package 'io.sbk': 40 [Artemis, 
+AsyncFile, BookKeeper, Cassandra, CephS3, ConcurrentQ, CouchDB, CSV, Db2, Derby, 
+FdbRecord, File, FileStream, FoundationDB, HDFS, Hive, Ignite, Jdbc, Kafka, LevelDB, 
+MariaDB, MinIO, MongoDB, MsSql, MySQL, Nats, NatsStream, Nsq, Null, OpenIO, PostgreSQL, 
+Pravega, Pulsar, RabbitMQ, Redis, RedPanda, RocketMQ, RocksDB, SeaweedS3, SQLite]
+2022-03-06 12:15:52 INFO Arguments to Driver 'Jdbc' : [-driver, com.mysql.cj.jdbc.Driver, -url, jdbc:mysql://localhost:3306/social, -user, root, -password, root, -table, kmg_2, -size, 100, -writers, 1, -seconds, 60]
+2022-03-06 12:15:52 INFO Time Unit: MILLISECONDS
+2022-03-06 12:15:52 INFO Minimum Latency: 0 ms
+2022-03-06 12:15:52 INFO Maximum Latency: 180000 ms
+2022-03-06 12:15:52 INFO Window Latency Store: Array, Size: 1 MB
+2022-03-06 12:15:52 INFO Total Window Latency Store: HashMap, Size: 256 MB
+2022-03-06 12:15:52 INFO Total Window Extension: None, Size: 0 MB
+2022-03-06 12:15:52 INFO SBK Benchmark Started
+2022-03-06 12:15:52 INFO SBK PrometheusLogger Started
+Exception in thread "main" java.lang.NoClassDefFoundError: Could not initialize class org.apache.ignite.IgniteJdbcThinDriver
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.sql/java.sql.DriverManager.isDriverAllowed(DriverManager.java:558)
+	at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:678)
+	at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:190)
+	at io.sbk.Jdbc.Jdbc.openStorage(Jdbc.java:208)
+	at io.sbk.api.impl.SbkBenchmark.start(SbkBenchmark.java:140)
+	at io.sbk.api.impl.Sbk.run(Sbk.java:80)
+	at io.sbk.main.SbkMain.main(SbkMain.java:29)
+
+```
+ to fix the issue , make sure that you already have SQL Server running ; As a example, make sure that the you start the mysql docker before running the benchmark. Here is an example, to run with custom user name, password and with the write access is as follows.
+
+```
+docker run -p 3306:3306 -v /tmp:/tmp --name db --detach -e MYSQL_ROOT_PASSWORD="root" -e MYSQL_ROOT_HOST=% -e MYSQL_DATABASE=social -d mysql/mysql-server:8.0 --lower_case_table_names=1 --init-connect='GRANT CREATE USER ON *.* TO 'root'@'%';FLUSH PRIVILEGES;'
+```
+
+To fix the class no found issue, make sure that you are already running the database server.
+ 
