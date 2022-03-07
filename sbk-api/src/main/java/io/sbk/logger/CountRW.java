@@ -11,6 +11,9 @@
 package io.sbk.logger;
 
 
+/**
+ * non-sealed interface CountRW which extends CountReaders and  CountWriters.
+ */
 public non-sealed interface CountRW extends CountReaders, CountWriters {
 
 }

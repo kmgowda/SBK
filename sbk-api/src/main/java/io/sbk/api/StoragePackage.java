@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * class StoragePackage.
+ */
 @NotThreadSafe
 final public class StoragePackage {
     final private static int MAX_PRINT_WIDTH = 80;
@@ -107,6 +110,9 @@ final public class StoragePackage {
         Printer.log.info(String.valueOf(builder));
     }
 
+    /**
+     *  class StringCompareIgnoreCase.
+     */
     private static class StringCompareIgnoreCase implements Comparator<String> {
 
         @Override

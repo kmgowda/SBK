@@ -10,6 +10,9 @@
 
 package io.sbk.logger;
 
+/**
+ * Sealed interface CountReaders which permits CountRW.
+ */
 public sealed interface CountReaders permits CountRW {
 
     /**

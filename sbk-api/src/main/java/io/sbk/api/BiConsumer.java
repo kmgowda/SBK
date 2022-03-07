@@ -13,6 +13,9 @@ package io.sbk.api;
 import java.io.EOFException;
 import java.io.IOException;
 
+/**
+ *Interface BiConsumer.
+ */
 public interface BiConsumer {
 
     /**

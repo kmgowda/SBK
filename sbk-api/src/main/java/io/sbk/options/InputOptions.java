@@ -14,6 +14,9 @@ import io.sbk.exception.HelpException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+/**
+ * Interface InputOptions.
+ */
 public interface InputOptions {
 
     /**

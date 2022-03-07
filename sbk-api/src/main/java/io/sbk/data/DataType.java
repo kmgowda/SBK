@@ -13,6 +13,9 @@ package io.sbk.data;
  * Interface for Data Type operations.
  */
 public interface DataType<T> {
+    /**
+     * <code>TIME_HEADER_BYTES = 8;</code>.
+     */
     final static int TIME_HEADER_BYTES = 8;
 
     /**

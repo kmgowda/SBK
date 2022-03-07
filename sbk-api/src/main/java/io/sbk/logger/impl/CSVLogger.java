@@ -27,14 +27,40 @@ import java.nio.file.Paths;
  * Class for recoding/printing results to a CSV file called `out.csv`.
  */
 public class CSVLogger extends SystemLogger {
+    /**
+     * <code>DISABLE_STRING = "no"</code>.
+     */
     final static public String DISABLE_STRING = "no";
+
+    /**
+     * <code>REGULAR_PRINT = "Regular"</code>.
+     */
     final static public String REGULAR_PRINT = "Regular";
+
+    /**
+     * <code>TOTAL_PRINT = "Total"</code>.
+     */
     final static public String TOTAL_PRINT = "Total";
+    /**
+     * <code>csvFile = null</code>.
+     */
     public String csvFile;
+    /**
+     * <code>csvEnable = false</code>.
+     */
     public boolean csvEnable;
+    /**
+     * <code>csvWriter</code>.
+     */
     public PrintWriter csvWriter;
+    /**
+     * <code>csvRowCounter = 0</code>.
+     */
     private long csvRowCounter;
 
+    /**
+     * calls its super class SystemLogger.
+     */
     public CSVLogger() {
         super();
     }
@@ -58,6 +84,11 @@ public class CSVLogger extends SystemLogger {
         csvEnable = csvFile.compareToIgnoreCase(DISABLE_STRING) != 0;
     }
 
+    /**
+     * final public method to Open CSV.
+     *
+     * @throws IOException If an exception occurred.
+     */
     final public void openCSV() throws IOException {
         final StringBuilder headerBuilder = new StringBuilder("ID,Header,Type,Connections,MaxConnections");
         headerBuilder.append(",Storage,Action,LatencyTimeUnit");
@@ -82,6 +113,27 @@ public class CSVLogger extends SystemLogger {
         }
     }
 
+    /**
+     * final public method to write CSV.
+     *
+     * @param header            String
+     * @param type              String
+     * @param connections           long
+     * @param maxConnections        long
+     * @param seconds               long
+     * @param bytes                 long
+     * @param records               long
+     * @param recsPerSec            double
+     * @param mbPerSec              double
+     * @param avgLatency            double
+     * @param maxLatency            long
+     * @param invalid               long
+     * @param lowerDiscard          long
+     * @param higherDiscard         long
+     * @param slc1                  long
+     * @param slc2                  long
+     * @param percentileValues      NotNull long[]
+     */
     final public void writeToCSV(String header, String type, long connections, long maxConnections,
                                  long seconds, long bytes, long records, double recsPerSec,
                                  double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,

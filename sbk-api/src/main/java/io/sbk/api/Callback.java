@@ -10,6 +10,11 @@
 
 package io.sbk.api;
 
+/**
+ * Interface Callback.
+ *
+ * @param <T> Flexible parameter
+ */
 public interface Callback<T> {
 
     /**
