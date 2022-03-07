@@ -13,11 +13,20 @@ package io.sbk.exception;
 
 import lombok.Getter;
 
+/**
+ * class HelpException.
+ * extends Exception class.
+ */
 final public class HelpException extends Exception {
 
     @Getter
     private final String helpText;
 
+    /**
+     * <code>this.helpText = helpText</code>.
+     * @param helpText
+     * helpText is further passed to super class {@link Exception}.
+     */
     public HelpException(String helpText) {
         super(helpText);
         this.helpText = helpText;

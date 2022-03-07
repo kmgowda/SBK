@@ -50,6 +50,17 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
     void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws EOFException, IOException;
 
+    /**
+     * Benchmarking reader by reading given number of records.
+     *
+     * @param reader            Worker
+     * @param recordsCount       long
+     * @param dType              DataType
+     * @param time               Time
+     * @param recordTime         RecordTime
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException  If an exception occurred.
+     */
     default void genericRecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                       RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
@@ -93,6 +104,17 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         genericRecordsReader(reader, recordsCount, dType, time, this::recordReadTime);
     }
 
+    /**
+     * Benchmarking reader by reading events/records for specific time duration.
+     *
+     * @param reader             Worker
+     * @param secondsToRun       long
+     * @param dType              DataType
+     * @param time               Time
+     * @param recordTime         RecordTime
+     * @throws EOFException  If the End of the file occurred.
+     * @throws IOException   If an exception occurred.
+     */
     default void genericRecordsTimeReader(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                           RecordTime<T> recordTime) throws EOFException,
             IOException {
@@ -137,6 +159,18 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         genericRecordsTimeReader(reader, secondsToRun, dType, time, this::recordReadTime);
     }
 
+    /**
+     * Benchmarking reader with Rate controlled.
+     *
+     * @param reader        Worker
+     * @param recordsCount  long
+     * @param dType         DataType
+     * @param time          Time
+     * @param rController   RateController
+     * @param recordTime    RecordTime
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException  If an exception occurred.
+     */
     default void genericRecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                                  RateController rController, RecordTime<T> recordTime) throws EOFException, IOException {
         final Status status = new Status();
@@ -187,6 +221,18 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         genericRecordsReaderRateControl(reader, recordsCount, dType, time, rController, this::recordReadTime);
     }
 
+    /**
+     * Benchmarking reader by reading events/records with Rate Controls.
+     *
+     * @param reader             Worker
+     * @param secondsToRun       long
+     * @param dType              DataType
+     * @param time               Time
+     * @param rController        RateController
+     * @param recordTime         RecordTime
+     * @throws EOFException  If the End of the file occurred.
+     * @throws IOException  If an exception occurred.
+     */
     default void genericRecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                                      RateController rController, RecordTime<T> recordTime) throws EOFException, IOException {
         final long startTime = time.getCurrentTime();
@@ -239,8 +285,24 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         genericRecordsTimeReaderRateControl(reader, secondsToRun, dType, time, rController, this::recordReadTime);
     }
 
+    /**
+     * interface RecordTime.
+     *
+     * @param <T>  Flexible parameter
+     */
     interface RecordTime<T> {
 
+        /**
+         * Method to Read records.
+         *
+         * @param dType          DataType
+         * @param size           int
+         * @param time           Time
+         * @param status         Status
+         * @param perlChannel    PerlChannel
+         * @throws EOFException  End of File exception.
+         * @throws IOException  If an exception occurred.
+         */
         void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel)
                 throws EOFException, IOException;
     }

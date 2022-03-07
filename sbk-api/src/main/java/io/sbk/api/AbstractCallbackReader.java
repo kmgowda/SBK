@@ -60,6 +60,14 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
         complete();
     }
 
+    /**
+     * Keeps record of Benchmark if record gets completed it call complete function.
+     *
+     * @param startTime     long
+     * @param endTime       long
+     * @param dataSize      int
+     * @param events        int
+     */
     public void recordBenchmark(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
         reader.perlChannel.send(startTime, endTime, dataSize, events);

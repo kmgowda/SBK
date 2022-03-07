@@ -10,7 +10,13 @@
 
 package io.sbk.config;
 
+/**
+ * Class YalConfig.
+ */
 final public class YalConfig {
 
+    /**
+     * <code>String yamlFileName</code>.
+     */
     public String yamlFileName;
 }

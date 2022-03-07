@@ -41,6 +41,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     final static String CONFIG_FILE = "ramhost.properties";
     final static int LATENCY_MAP_BYTES = 16;
 
+    /**
+     * <code>Creating RamHostConfig ramHostConfig</code>.
+     */
     public RamHostConfig ramHostConfig;
     private boolean enable;
     private long clientID;
@@ -56,6 +59,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     private StreamObserver<com.google.protobuf.Empty> observer;
     private ExceptionHandler exceptionHandler;
 
+    /**
+     * calls its super class PrometheusLogger.
+     */
     public GrpcPrometheusLogger() {
         super();
     }
@@ -180,6 +186,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         Printer.log.info("SBK GRPC Logger Shutdown");
     }
 
+    /**
+     * Sends Latencies Records.
+     */
     public void sendLatenciesRecord() {
         builder.setClientID(clientID);
         builder.setSequenceNumber(++seqNum);

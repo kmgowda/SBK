@@ -10,6 +10,9 @@
 
 package io.sbk.api;
 
+/**
+ * Interface Parameters.
+ */
 public interface Parameters {
 
     /**

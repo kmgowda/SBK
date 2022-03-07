@@ -10,8 +10,23 @@
 
 package io.sbk.action;
 
+/**
+ * enum Action { Writing, Reading, Write_Reading}.
+ */
 public enum Action {
+    /**
+     * <code>Writing = 0</code>.
+     */
     Writing,
+
+    /**
+     * <code>Reading = 1</code>.
+     */
     Reading,
-    Write_Reading
+
+    /**
+     * <code>Write_Reading = 2</code>.
+     */
+    Write_Reading,
+
 }

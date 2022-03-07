@@ -10,6 +10,9 @@
 
 package io.sbk.logger;
 
+/**
+ * sealed interface CountWriters which permits CountRW.
+ */
 public sealed interface CountWriters permits CountRW {
 
     /**
