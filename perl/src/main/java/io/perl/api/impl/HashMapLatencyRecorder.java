@@ -34,6 +34,18 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
     final private int incBytes;
     private long hashMapBytesCount;
 
+    /**
+     * Constructor  HashMapLatencyRecorder initializing all values.
+     *
+     * @param lowLatency            long
+     * @param highLatency           long
+     * @param totalLatencyMax       long
+     * @param totalRecordsMax       long
+     * @param bytesMax              long
+     * @param percentiles           double[]
+     * @param time                  Time
+     * @param maxHashMapSizeMB      int
+     */
     public HashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                                   double[] percentiles, Time time, int maxHashMapSizeMB) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);

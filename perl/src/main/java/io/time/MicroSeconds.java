@@ -10,6 +10,9 @@
 
 package io.time;
 
+/**
+ * Class MicroSeconds.
+ */
 final public class MicroSeconds implements Time {
 
     /**

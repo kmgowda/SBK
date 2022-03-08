@@ -10,6 +10,9 @@
 
 package io.perl.api;
 
+/**
+ * Interface GetPerlChannel.
+ */
 public sealed interface GetPerlChannel permits Channel, Perl {
 
     /**

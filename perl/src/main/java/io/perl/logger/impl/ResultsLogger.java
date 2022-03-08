@@ -19,16 +19,60 @@ import org.jetbrains.annotations.NotNull;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 
+/**
+ * Class ResultsLogger.
+ */
 public class ResultsLogger implements PerformanceLogger {
+
+    /**
+     * <code>String prefix</code>.
+     */
     protected String prefix;
+
+    /**
+     * <code>String timeUnitName</code>.
+     */
     protected String timeUnitName;
+
+    /**
+     * <code>String[] percentileNames</code>.
+     */
     protected String[] percentileNames;
+
+    /**
+     * <code>TimeUnit timeUnit</code>.
+     */
     protected TimeUnit timeUnit;
+
+    /**
+     * <code>double[] percentiles</code>.
+     */
     protected double[] percentiles;
+
+    /**
+     * <code>long minLatency</code>.
+     */
     protected long minLatency;
+
+    /**
+     * <code>long maxLatency</code>.
+     */
     protected long maxLatency;
+
+    /**
+     * <code>DecimalFormat format</code>.
+     */
     private final DecimalFormat format;
 
+    /**
+     * Constructor ResultsLogger initialize all values with given parameters.
+     *
+     * @param prefix            String
+     * @param percentiles       double[]
+     * @param timeUnit          TimeUnit
+     * @param minLatency        long
+     * @param maxLatency        long
+     */
     public ResultsLogger(String prefix, double[] percentiles, TimeUnit timeUnit, long minLatency, long maxLatency) {
         this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
         this.prefix = prefix;
@@ -40,11 +84,19 @@ public class ResultsLogger implements PerformanceLogger {
         setPercentileNames(percentiles);
     }
 
+    /**
+     * Constructor ResultsLogger takes no arguments but initialize all values with default values.
+     */
     public ResultsLogger() {
         this(PerlConfig.NAME, LatencyConfig.PERCENTILES, TimeUnit.ms,
                 LatencyConfig.DEFAULT_MIN_LATENCY, LatencyConfig.DEFAULT_MAX_LATENCY);
     }
 
+    /**
+     * Method setPercentileNames collecting all names and setting it in {@link #percentileNames}.
+     *
+     * @param percentiles     double[]
+     */
     protected void setPercentileNames(double[] percentiles) {
         Arrays.sort(percentiles);
         percentileNames = new String[percentiles.length];
@@ -73,6 +125,26 @@ public class ResultsLogger implements PerformanceLogger {
         return percentiles;
     }
 
+    /**
+     * Method appendResults appends all result with new results.
+     *
+     * @param out                           NotNull StringBuilder
+     * @param timeUnitName                  String
+     * @param percentileNames               String[]
+     * @param seconds                       long
+     * @param bytes                         long
+     * @param records                       long
+     * @param recsPerSec                    double
+     * @param mbPerSec                      double
+     * @param avgLatency                    double
+     * @param maxLatency                    long
+     * @param invalid                       long
+     * @param lowerDiscard                  long
+     * @param higherDiscard                 long
+     * @param slc1                          long
+     * @param slc2                          long
+     * @param percentileValues              NotNull long[]
+     */
     protected final void appendResults(@NotNull StringBuilder out, String timeUnitName, String[] percentileNames,
                        long seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard,
@@ -95,6 +167,25 @@ public class ResultsLogger implements PerformanceLogger {
         }
     }
 
+    /**
+     * Method buildResultString builds all result and return in String format.
+     *
+     * @param out                   StringBuilder
+     * @param seconds               double
+     * @param bytes                 long
+     * @param records               long
+     * @param recsPerSec            double
+     * @param mbPerSec              double
+     * @param avgLatency            double
+     * @param maxLatency            long
+     * @param invalid               long
+     * @param lowerDiscard          long
+     * @param higherDiscard         long
+     * @param slc1                  long
+     * @param slc2                  long
+     * @param percentileValues      long[]
+     * @return returns build result in string format
+     */
     protected String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
                                     double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -104,6 +195,24 @@ public class ResultsLogger implements PerformanceLogger {
         return out.toString();
     }
 
+    /**
+     * Method to print parameters.
+     *
+     * @param header                String
+     * @param seconds               double
+     * @param bytes                 long
+     * @param records               long
+     * @param recsPerSec            double
+     * @param mbPerSec              double
+     * @param avgLatency            double
+     * @param maxLatency            long
+     * @param invalid               long
+     * @param lowerDiscard          long
+     * @param higherDiscard         long
+     * @param slc1                  long
+     * @param slc2                  long
+     * @param percentileValues      long[]
+     */
     protected void print(String header, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                        double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                        long slc1, long slc2, long[] percentileValues) {

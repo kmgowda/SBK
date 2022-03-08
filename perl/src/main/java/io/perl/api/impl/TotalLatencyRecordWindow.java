@@ -14,12 +14,39 @@ import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.Print;
 import io.perl.api.TotalPeriodicWindow;
 
+/**
+ * Class TotalLatencyRecordWindow.
+ */
 public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
+
+    /**
+     * <code>LatencyRecordWindow window</code>.
+     */
     final protected LatencyRecordWindow window;
+
+    /**
+     * <code>LatencyRecordWindow totalWindow</code>.
+     */
     final protected LatencyRecordWindow totalWindow;
+
+    /**
+     * <code>Print windowLogger</code>.
+     */
     final protected Print windowLogger;
+
+    /**
+     * <code>Print totalLogger</code>.
+     */
     final protected Print totalLogger;
 
+    /**
+     * Constructor TotalLatencyRecordWindow initialize all values.
+     *
+     * @param window            LatencyRecordWindow
+     * @param totalWindow       LatencyRecordWindow
+     * @param windowLogger      Print
+     * @param totalLogger       Print
+     */
     public TotalLatencyRecordWindow(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                     Print windowLogger, Print totalLogger) {
         this.window = window;
@@ -28,6 +55,11 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
         this.totalLogger = totalLogger;
     }
 
+    /**
+     * This method check if window is full and Stop the Recording window.
+     *
+     * @param currTime long
+     */
     public void checkWindowFullAndReset(long currTime) {
         if (window.isFull()) {
             stopWindow(currTime);
@@ -35,6 +67,11 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
         }
     }
 
+    /**
+     * This method checks if totalWindow is full and Stop the Total Window.
+     *
+     * @param currTime long
+     */
     public void checkTotalWindowFullAndReset(long currTime) {
         if (totalWindow.isFull()) {
             stop(currTime);

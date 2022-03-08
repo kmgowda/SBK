@@ -13,25 +13,63 @@ package io.perl.api;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Sealed Class LatencyRecord.
+ */
 @Slf4j
 abstract public sealed class LatencyRecord permits LatencyRecorder {
+
+    /**
+     * <code>long totalRecords</code>.
+     */
     @Getter
     protected long totalRecords;
+
+    /**
+     * <code>long validLatencyRecords</code>.
+     */
     @Getter
     protected long validLatencyRecords;
+
+    /**
+     * <code>lowerLatencyDiscardRecords</code>.
+     */
     @Getter
     protected long lowerLatencyDiscardRecords;
+
+    /**
+     * <code>long higherLatencyDiscardRecords</code>.
+     */
     @Getter
     protected long higherLatencyDiscardRecords;
+
+    /**
+     * <code>long invalidLatencyRecords</code>.
+     */
     @Getter
     protected long invalidLatencyRecords;
+
+    /**
+     * <code>long totalBytes</code>.
+     */
     @Getter
     protected long totalBytes;
+
+    /**
+     * <code>long totalLatency</code>.
+     */
     @Getter
     protected long totalLatency;
+
+    /**
+     * <code>long maxLatency</code>.
+     */
     @Getter
     protected long maxLatency;
 
+    /**
+     * Method to reset all recording variables.
+     */
     public LatencyRecord() {
         reset();
     }

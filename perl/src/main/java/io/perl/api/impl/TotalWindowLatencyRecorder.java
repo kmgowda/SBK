@@ -14,9 +14,20 @@ import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.Print;
 import io.perl.api.ReportLatency;
 
+/**
+ * Class TotalWindowLatencyRecorder.
+ */
 public sealed class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow
         implements ReportLatency permits TotalWindowLatencyPeriodicRecorder {
 
+    /**
+     * Constructor TotalWindowLatencyRecorder passing all values to its super class.
+     *
+     * @param window                LatencyRecordWindow
+     * @param totalWindow           LatencyRecordWindow
+     * @param windowLogger          Print
+     * @param totalLogger           Print
+     */
     public TotalWindowLatencyRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                       Print windowLogger, Print totalLogger) {
         super(window, totalWindow, windowLogger, totalLogger);

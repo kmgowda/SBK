@@ -9,6 +9,9 @@
  */
 package io.perl.logger;
 
+/**
+ * Interface Print.
+ */
 public interface Print {
 
     /**

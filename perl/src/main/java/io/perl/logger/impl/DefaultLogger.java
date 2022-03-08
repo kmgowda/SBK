@@ -13,13 +13,28 @@ package io.perl.logger.impl;
 import io.perl.api.ReportLatency;
 import io.time.TimeUnit;
 
+/**
+ * Class DefaultLogger.
+ */
 public class DefaultLogger extends ResultsLogger implements ReportLatency {
 
+    /**
+     * Constructor DefaultLogger pass all values to its super class.
+     *
+     * @param header                String
+     * @param percentiles           double[]
+     * @param latencyTimeUnit       TimeUnit
+     * @param minLatency            long
+     * @param maxLatency            long
+     */
     public DefaultLogger(String header, double[] percentiles, TimeUnit latencyTimeUnit,
                          long minLatency, long maxLatency) {
         super(header, percentiles, latencyTimeUnit, minLatency, maxLatency);
     }
 
+    /**
+     * Constructor DefaultLogger takes no arguments but initialize all values with default values.
+     */
     public DefaultLogger() {
         super();
     }

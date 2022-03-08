@@ -24,21 +24,86 @@ import java.util.concurrent.atomic.AtomicLong;
  * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
  */
 public sealed class PrintMetrics extends Metrics implements Print permits PrometheusMetricsServer {
+
+    /**
+     *<code>MeterRegistry registry</code>.
+     */
     final public MeterRegistry registry;
+
+    /**
+     *<code>Counter bytes</code>.
+     */
     final private Counter bytes;
+
+    /**
+     *<code>Counter records</code>.
+     */
     final private Counter records;
+
+    /**
+     *<code>Counter invalidLatencyRecords</code>.
+     */
     final private Counter invalidLatencyRecords;
+
+    /**
+     *<code>Counter lowerDiscard</code>.
+     */
     final private Counter lowerDiscard;
+
+    /**
+     *<code>Counter higherDiscard</code>.
+     */
     final private Counter higherDiscard;
+
+    /**
+     *<code>AtomicDouble mbPsec</code>.
+     */
     final private AtomicDouble mbPsec;
+
+    /**
+     *<code>AtomicDouble recsPsec</code>.
+     */
     final private AtomicDouble recsPsec;
+
+    /**
+     *<code>AtomicDouble avgLatency</code>.
+     */
     final private AtomicDouble avgLatency;
+
+    /**
+     *<code>AtomicDouble maxLatency</code>.
+     */
     final private AtomicDouble maxLatency;
+
+    /**
+     *<code>AtomicDouble[] percentileGauges</code>.
+     */
     final private AtomicDouble[] percentileGauges;
+
+    /**
+     *<code>AtomicLong slc1</code>.
+     */
     final private AtomicLong slc1;
+
+    /**
+     *<code>AtomicLong slc2</code>.
+     */
     final private AtomicLong slc2;
+
+    /**
+     * <code>Convert convert</code>.
+     */
     final private Convert convert;
 
+    /**
+     * Constructor  PrintMetrics initializing all values.
+     *
+     * @param header                NotNull String
+     * @param percentiles           NotNull double[]
+     * @param time                  Time
+     * @param latencyTimeUnit       NotNull TimeUnit
+     * @param compositeRegistry     CompositeMeterRegistry
+     */
     public PrintMetrics(@NotNull String header, @NotNull double[] percentiles,
                         Time time, @NotNull TimeUnit latencyTimeUnit, CompositeMeterRegistry compositeRegistry) {
         super(header, latencyTimeUnit.name(), percentiles);
@@ -68,6 +133,11 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         }
     }
 
+    /**
+     * This method Closes this registry, releasing any resources in the process.
+     * Once closed, this registry will no longer accept new meters
+     * and any publishing activity will cease.
+     */
     public void close() {
         registry.close();
     }

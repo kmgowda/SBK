@@ -49,6 +49,15 @@ final public class CQueuePerl implements Perl {
     private CompletableFuture<Void> qFuture;
 
 
+    /**
+     * Constructor CQueuePerl initialize all values.
+     *
+     * @param perlConfig                NotNull PerlConfig
+     * @param periodicRecorder          PeriodicRecorder
+     * @param reportingIntervalMS       int
+     * @param time                      Time
+     * @param executor                  ExecutorService
+     */
     public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicRecorder periodicRecorder,
                       int reportingIntervalMS, Time time, ExecutorService executor) {
         int maxQs;
@@ -127,7 +136,7 @@ final public class CQueuePerl implements Perl {
      * @param secondsToRun Number of seconds to Run
      * @param recordsCount If secondsToRun is 0, then this indicates the total number of records to benchmark or
      *                     read/write. If secondsToRun is higher than 0, then this parameter is ignored.
-     * @return
+     * @return CompletableFuture retFuture.
      */
     @Override
     @Synchronized

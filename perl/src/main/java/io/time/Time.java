@@ -10,15 +10,45 @@
 
 package io.time;
 
+/**
+ * Interface Time.
+ */
 public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
 
+    /**
+     * <code>NS_PER_MICRO = 1000</code>.
+     */
     int NS_PER_MICRO = 1000;
+
+    /**
+     * <code>MICROS_PER_MS = 1000</code>.
+     */
     int MICROS_PER_MS = 1000;
+
+    /**
+     * <code>MS_PER_SEC = 1000</code>.
+     */
     int MS_PER_SEC = 1000;
 
+
+    /**
+     * <code>NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS</code>.
+     */
     int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
+
+    /**
+     * <code>NS_PER_SEC = MS_PER_SEC * NS_PER_MS</code>.
+     */
     long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
+
+    /**
+     * <code>MS_PER_MIN = MS_PER_SEC * 60</code>.
+     */
     int MS_PER_MIN = MS_PER_SEC * 60;
+
+    /**
+     * <code>MICROS_PER_SEC = MICROS_PER_MS * MS_PER_SEC</code>.
+     */
     int MICROS_PER_SEC = MICROS_PER_MS * MS_PER_SEC;
 
     /**

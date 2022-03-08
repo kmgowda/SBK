@@ -22,10 +22,25 @@ import org.HdrHistogram.HistogramIterationValue;
 
 import java.util.Iterator;
 
+/**
+ * Class HdrExtendedLatencyRecorder.
+ */
 public final class HdrExtendedLatencyRecorder extends LatencyRecordWindow {
     final private LatencyRecordWindow latencyBuffer;
     final private HdrLatencyReporter hdrReporter;
 
+    /**
+     * Constructor HdrExtendedLatencyRecorder initializing all values.
+     *
+     * @param lowLatency                long
+     * @param highLatency               long
+     * @param totalLatencyMax           long
+     * @param totalRecordsMax           long
+     * @param bytesMax                  long
+     * @param percentilesFractions      double[]
+     * @param time                      Time
+     * @param latencyBuffer             LatencyRecordWindow
+     */
     public HdrExtendedLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                       long bytesMax, double[] percentilesFractions, Time time,
                                       LatencyRecordWindow latencyBuffer) {

@@ -29,6 +29,17 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     private int minIndex;
     private int maxIndex;
 
+    /**
+     * Constructor ArrayLatencyRecorder initialize all values.
+     *
+     * @param lowLatency            long
+     * @param highLatency           long
+     * @param totalLatencyMax       long
+     * @param totalRecordsMax       long
+     * @param bytesMax              long
+     * @param percentiles           double[]
+     * @param time                  Time
+     */
     public ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                 long bytesMax, double[] percentiles, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);

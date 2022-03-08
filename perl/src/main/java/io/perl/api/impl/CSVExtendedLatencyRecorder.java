@@ -29,10 +29,28 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Class CSVExtendedLatencyRecorder.
+ */
 final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
     final private LatencyRecordWindow latencyBuffer;
     final private CSVLatencyReporter csvReporter;
 
+    /**
+     * Constructor CSVExtendedLatencyRecorder pass all values to its super class
+     * and initialize {@link #latencyBuffer} and {@link #csvReporter}.
+     *
+     * @param lowLatency            long
+     * @param highLatency           long
+     * @param totalLatencyMax       long
+     * @param totalRecordsMax       long
+     * @param bytesMax              long
+     * @param percentilesFractions  double[]
+     * @param time                  Time
+     * @param latencyBuffer         LatencyRecordWindow
+     * @param csvFileSizeGB         int
+     * @param fileName              String
+     */
     public CSVExtendedLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                       long bytesMax, double[] percentilesFractions, Time time,
                                       LatencyRecordWindow latencyBuffer, int csvFileSizeGB, String fileName) {

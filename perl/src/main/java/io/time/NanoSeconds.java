@@ -10,6 +10,9 @@
 
 package io.time;
 
+/**
+ * Class NanoSeconds.
+ */
 final public class NanoSeconds implements Time {
 
     /**

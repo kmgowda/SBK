@@ -28,6 +28,15 @@ public final class PerformanceRecorder {
     final private PeriodicRecorder periodicRecorder;
     final private Channel[] channels;
 
+    /**
+     * Constructor to initialize values.
+     *
+     * @param periodicRecorder      PeriodicRecorder
+     * @param channels              Channel[]
+     * @param time                  Time
+     * @param reportingIntervalMS   int
+     * @param idleNS                int
+     */
     public PerformanceRecorder(PeriodicRecorder periodicRecorder, Channel[] channels, Time time,
                                int reportingIntervalMS, int idleNS) {
         this.periodicRecorder = periodicRecorder;
@@ -37,6 +46,12 @@ public final class PerformanceRecorder {
         this.idleNS = idleNS;
     }
 
+    /**
+     * Method run.
+     *
+     * @param secondsToRun      final long.
+     * @param totalRecords      final long.
+     */
     public void run(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
         final ElasticWait idleWait = new ElasticWait(idleNS, windowIntervalMS,

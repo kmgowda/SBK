@@ -15,13 +15,39 @@ import io.perl.logger.Print;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Sealed Class LatencyWindow.
+ */
 abstract public sealed class LatencyWindow extends LatencyRecorder permits LatencyRecordWindow {
+    /**
+     * <code>LatencyPercentiles percentiles</code>.
+     */
     final protected LatencyPercentiles percentiles;
+    /**
+     * <code>Time time</code>.
+     */
     final protected Time time;
+    /**
+     * <code>long[] slc</code>.
+     */
     final private long[] slc;
+    /**
+     * <code>long startTime</code>.
+     */
     private long startTime;
 
 
+    /**
+     * Constructor LatencyWindow to initialize values and pass Latencies to it's super class.
+     *
+     * @param lowLatency                 long
+     * @param highLatency                long
+     * @param totalLatencyMax            long
+     * @param totalRecordsMax            long
+     * @param bytesMax                   long
+     * @param percentilesFractions       double[]
+     * @param time                       Time
+     */
     public LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                          double[] percentilesFractions, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);

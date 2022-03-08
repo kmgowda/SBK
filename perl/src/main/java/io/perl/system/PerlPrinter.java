@@ -14,7 +14,13 @@ import io.perl.config.PerlConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class PerlPrinter.
+ */
 final public class PerlPrinter {
     final private static String LOGGER_NAME = PerlConfig.NAME;
+    /**
+     * <code>Logger log = LoggerFactory.getLogger(LOGGER_NAME)</code>.
+     */
     final public static Logger log = LoggerFactory.getLogger(LOGGER_NAME);
 }

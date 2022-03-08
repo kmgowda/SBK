@@ -16,10 +16,24 @@ import io.perl.logger.Print;
 import io.perl.api.ReportLatency;
 import io.time.Time;
 
+/**
+ * Class TotalWindowLatencyPeriodicRecorder.
+ */
 public final class TotalWindowLatencyPeriodicRecorder extends TotalWindowLatencyRecorder implements PeriodicRecorder {
     private final Time time;
     private final ReportLatency reportLatency;
 
+    /**
+     * Constructor TotalWindowLatencyPeriodicRecorder passing values to its super class
+     * and initializing {@link #time} and {@link #reportLatency}.
+     *
+     * @param window            LatencyRecordWindow
+     * @param totalWindow       LatencyRecordWindow
+     * @param windowLogger      Print
+     * @param totalLogger       Print
+     * @param reportLatency     ReportLatency
+     * @param time              Time
+     */
     public TotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                               Print windowLogger, Print totalLogger,
                                               ReportLatency reportLatency, Time time) {

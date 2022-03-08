@@ -14,6 +14,9 @@ import io.perl.config.LatencyConfig;
 import io.perl.config.PerlConfig;
 import io.time.TimeUnit;
 
+/**
+ * Interface PerformanceLogger.
+ */
 public interface PerformanceLogger extends Print {
 
     /**
