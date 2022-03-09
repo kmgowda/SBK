@@ -9,16 +9,56 @@
  */
 package io.perl.api;
 
+/**
+ * Class LatencyPercentiles.
+ */
 final public class LatencyPercentiles {
+
+    /**
+     * <code>public double[] fractions</code>.
+     */
     final public double[] fractions;
+
+    /**
+     * <code>public long[] latencies</code>.
+     */
     final public long[] latencies;
+
+    /**
+     * <code>public long[] latencyIndexes</code>.
+     */
     final public long[] latencyIndexes;
+
+    /**
+     * <code>public long[] latencyCount</code>.
+     */
     final public long[] latencyCount;
+
+    /**
+     * <code>long medianLatency</code>.
+     */
     public long medianLatency;
+
+    /**
+     * <code>long medianLatencyCount</code>.
+     */
     public long medianLatencyCount;
+
+    /**
+     * <code>long medianIndex</code>.
+     */
     public long medianIndex;
+
+    /**
+     * <code>int index</code>.
+     */
     private int index;
 
+    /**
+     * Constructor LatencyPercentiles initializing all values.
+     *
+     * @param percentileFractions double[]
+     */
     public LatencyPercentiles(double[] percentileFractions) {
         this.fractions = percentileFractions;
         this.latencies = new long[this.fractions.length];
@@ -30,6 +70,11 @@ final public class LatencyPercentiles {
         this.index = 0;
     }
 
+    /**
+     * This method reset all records.
+     *
+     * @param totalRecords long
+     */
     public void reset(long totalRecords) {
         for (int i = 0; i < fractions.length; i++) {
             latencyIndexes[i] = (long) (totalRecords * fractions[i]);
@@ -42,6 +87,14 @@ final public class LatencyPercentiles {
         index = 0;
     }
 
+    /**
+     * This method copy Latency.
+     *
+     * @param latency       long
+     * @param count         long
+     * @param startIndex    long
+     * @param endIndex      long
+     */
     public void copyLatency(long latency, long count, long startIndex, long endIndex) {
         if (medianIndex >= startIndex && medianIndex < endIndex) {
             medianLatency = latency;

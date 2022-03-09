@@ -17,9 +17,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
+/**
+ * Class DefaultPrometheusLogger.
+ */
 public class DefaultPrometheusLogger extends DefaultLogger {
     private final PrometheusMetricsServer server;
 
+    /**
+     * Constructor DefaultPrometheusLogger pass values to super class and initialize server.
+     *
+     * @param header                    String
+     * @param percentiles               double[]
+     * @param latencyTimeUnit           NotNull TimeUnit
+     * @param minLatency                long
+     * @param maxLatency                long
+     * @param time                      Time
+     * @param port                      int
+     * @param context                   String
+     * @throws IOException If it occurs.
+     */
     public DefaultPrometheusLogger(String header, double[] percentiles,
                                    @NotNull TimeUnit latencyTimeUnit,
                                    long minLatency, long maxLatency,
@@ -28,10 +44,23 @@ public class DefaultPrometheusLogger extends DefaultLogger {
         server = new PrometheusMetricsServer(header, percentiles, time, latencyTimeUnit, port, context);
     }
 
+    /**
+     * Starts this server in a new background thread.
+     * The background thread inherits the priority,
+     * thread group and context class loader of the caller.
+     *
+     * @throws IOException If it occurs.
+     */
     public void start() throws IOException {
         server.start();
     }
 
+    /**
+     * calls close method from it's super class and Stops this server by closing
+     * the listening socket and disallowing any new exchanges from being processed.
+     *
+     * @throws IOException If it occurs.
+     */
     public void stop() throws IOException {
         server.stop();
     }

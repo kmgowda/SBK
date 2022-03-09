@@ -22,12 +22,22 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
+/**
+ * Class PrometheusServer.
+ */
 public final class PrometheusServer extends CompositeMeterRegistry {
     final private int port;
     final private String context;
     final private PrometheusMeterRegistry prometheusRegistry;
     final private HttpServer server;
 
+    /**
+     * Constructor PrometheusServer initializing values.
+     *
+     * @param port          int
+     * @param context       String
+     * @throws IOException  If it occurs.
+     */
     public PrometheusServer(int port, String context) throws IOException {
         super();
         this.port = port;
@@ -42,11 +52,23 @@ public final class PrometheusServer extends CompositeMeterRegistry {
         this.server = createHttpServer();
     }
 
+    /**
+     * Starts this server in a new background thread.
+     * The background thread inherits the priority,
+     * thread group and context class loader of the caller.
+     *
+     * @throws IOException If it occurs
+     */
     public void start() throws IOException {
         server.start();
     }
 
 
+    /**
+     * Stops this server by closing the listening socket and disallowing any new exchanges from being processed.
+     *
+     * @throws IOException If it occurs
+     */
     public void stop() throws IOException {
         server.stop(0);
     }

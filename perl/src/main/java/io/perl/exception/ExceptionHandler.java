@@ -10,6 +10,9 @@
 
 package io.perl.exception;
 
+/**
+ * Interface ExceptionHandler.
+ */
 public interface ExceptionHandler {
 
     /**

@@ -10,17 +10,36 @@
 
 package io.time;
 
+/**
+ * enum TimeUnit {
+ *  ms { public String toString() {return "MILLISECONDS";} },
+ *  mcs { public String toString() {return "MICROSECONDS";} },
+ *  ns { public String toString() {return "NANOSECONDS";} }
+ *  }.
+ */
 public enum TimeUnit {
+
+    /**
+     * <code>ms { public String toString() {return "MILLISECONDS";} }</code>.
+     */
     ms {
         public String toString() {
             return "MILLISECONDS";
         }
     },
+
+    /**
+     * <code>mcs { public String toString() {return "MICROSECONDS";} }</code>.
+     */
     mcs {
         public String toString() {
             return "MICROSECONDS";
         }
     },
+
+    /**
+     * <code>ns { public String toString() {return "NANOSECONDS";} }</code>.
+     */
     ns {
         public String toString() {
             return "NANOSECONDS";

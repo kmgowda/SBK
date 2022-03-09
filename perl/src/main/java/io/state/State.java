@@ -10,8 +10,23 @@
 
 package io.state;
 
+/**
+ *  enum State { BEGIN, RUN, END}.
+ */
 public enum State {
+
+    /**
+     * <code>BEGIN = 0</code>.
+     */
     BEGIN,
+
+    /**
+     * <code>RUN = 1</code>.
+     */
     RUN,
+
+    /**
+     * <code>END = 2</code>.
+     */
     END
 }

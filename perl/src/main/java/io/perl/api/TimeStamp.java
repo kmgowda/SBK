@@ -14,11 +14,35 @@ package io.perl.api;
  * class for time stamp including start, end time, bytes and records.
  */
 final public class TimeStamp {
+
+    /**
+     * <code>long startTime</code>.
+     */
     final public long startTime;
+
+    /**
+     * <code>long endTime</code>.
+     */
     final public long endTime;
+
+    /**
+     * <code>int bytes</code>.
+     */
     final public int bytes;
+
+    /**
+     * <code>int records</code>.
+     */
     final public int records;
 
+    /**
+     * Constructor TimeStamp initialize all values.
+     *
+     * @param startTime long
+     * @param endTime   long
+     * @param bytes     int
+     * @param records   int
+     */
     public TimeStamp(long startTime, long endTime, int bytes, int records) {
         this.startTime = startTime;
         this.endTime = endTime;
@@ -26,14 +50,28 @@ final public class TimeStamp {
         this.records = records;
     }
 
+    /**
+     * This Constructor TimeStamp with no arguments initialize all values with 0.
+     */
     public TimeStamp() {
         this(0, 0, 0, 0);
     }
 
+    /**
+     * This Constructor TimeStamp with just one argument, initialize {@link #startTime} = -1
+     * and {@link #endTime} according to the given parameters.
+     *
+     * @param endTime long
+     */
     public TimeStamp(long endTime) {
         this(-1, endTime, 0, 0);
     }
 
+    /**
+     * Checks if it is the end.
+     *
+     * @return true if {@link #startTime} == -1.
+     */
     public boolean isEnd() {
         return this.startTime == -1;
     }

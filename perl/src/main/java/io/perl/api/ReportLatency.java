@@ -9,6 +9,9 @@
  */
 package io.perl.api;
 
+/**
+ * Interface ReportLatency.
+ */
 public interface ReportLatency {
 
 

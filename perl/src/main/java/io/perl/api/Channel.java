@@ -9,6 +9,9 @@
  */
 package io.perl.api;
 
+/**
+ * Interface Channel.
+ */
 public non-sealed interface Channel extends GetPerlChannel {
 
     /**

@@ -17,12 +17,36 @@ import javax.annotation.concurrent.NotThreadSafe;
  */
 @NotThreadSafe
 public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow {
+    /**
+     * <code>long lowLatency</code>.
+     */
     final protected long lowLatency;
+    /**
+     * <code>long highLatency</code>.
+     */
     final protected long highLatency;
+    /**
+     * <code>long totalLatencyMax</code>.
+     */
     final protected long totalLatencyMax;
+    /**
+     * <code>long totalRecordsMax</code>.
+     */
     final protected long totalRecordsMax;
+    /**
+     * <code>long totalBytesMax</code>.
+     */
     final protected long totalBytesMax;
 
+    /**
+     * Constructor LatencyRecorder initializing all values.
+     *
+     * @param baseLatency                       long
+     * @param latencyThreshold                  long
+     * @param totalLatencyMax                   long
+     * @param totalRecordsMax                   long
+     * @param totalBytesMax                     long
+     */
     public LatencyRecorder(long baseLatency, long latencyThreshold, long totalLatencyMax, long totalRecordsMax, long totalBytesMax) {
         super();
         this.lowLatency = baseLatency;
