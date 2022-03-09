@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 
+/**
+ * Class RamBenchmark.
+ */
 final public class RamBenchmark implements Benchmark, RamRegistry {
     private final int idleMS;
     private final Time time;
@@ -42,6 +45,15 @@ final public class RamBenchmark implements Benchmark, RamRegistry {
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
 
+    /**
+     * Constructor RamBenchmark initializing all values.
+     *
+     * @param maxQueue              int
+     * @param idleMS                int
+     * @param time                  Time
+     * @param window                RamPeriodicRecorder
+     * @param reportingIntervalMS   int
+     */
     public RamBenchmark(int maxQueue, int idleMS, Time time, RamPeriodicRecorder window, int reportingIntervalMS) {
         this.idleMS = idleMS;
         this.window = window;

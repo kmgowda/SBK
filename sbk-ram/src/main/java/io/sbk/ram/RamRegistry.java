@@ -12,10 +12,23 @@ package io.sbk.ram;
 
 import io.sbk.grpc.LatenciesRecord;
 
+/**
+ * Interface RamRegistry.
+ */
 public interface RamRegistry {
 
+    /**
+     * this method returns id.
+     *
+     * @return returns id
+     */
     long getID();
 
+    /**
+     * Queue the records.
+     *
+     * @param record LatenciesRecord
+     */
     void enQueue(LatenciesRecord record);
 
 }

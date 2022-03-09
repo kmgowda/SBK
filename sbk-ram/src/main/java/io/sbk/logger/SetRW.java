@@ -10,6 +10,9 @@
 
 package io.sbk.logger;
 
+/**
+ * Interface SetRW.
+ */
 public interface SetRW {
 
 

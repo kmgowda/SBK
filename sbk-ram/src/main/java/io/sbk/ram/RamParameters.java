@@ -12,6 +12,9 @@ package io.sbk.ram;
 
 import io.sbk.action.Action;
 
+/**
+ * Interface RamParameters.
+ */
 public interface RamParameters {
 
     /**

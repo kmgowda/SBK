@@ -38,6 +38,13 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
     @Getter
     private int ramPort;
 
+    /**
+     * Constructor SbkRamParameters initializing all values.
+     *
+     * @param name              String
+     * @param port              int
+     * @param maxConnections    int
+     */
     public SbkRamParameters(String name, int port, int maxConnections) {
         super(name, RamConfig.DESC);
         this.maxConnections = maxConnections;

@@ -17,8 +17,16 @@ import io.sbk.yal.YmlMap;
 
 import java.util.Map;
 
+/**
+ * Class SbkGemYmlMap.
+ */
 public final class SbkGemYmlMap extends YmlMap {
 
+    /**
+     * Passing args to its super class YmlMap.
+     *
+     * @param args JsonProperty("sbkGemArgs") Map{String, String}
+     */
     @JsonCreator
     public SbkGemYmlMap(@JsonProperty("sbkGemArgs") Map<String, String> args) {
         super(args);

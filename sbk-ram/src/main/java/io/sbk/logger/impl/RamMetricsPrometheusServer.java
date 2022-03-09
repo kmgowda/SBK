@@ -17,10 +17,24 @@ import io.time.Time;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Class RamMetricsPrometheusServer.
+ */
 public final class RamMetricsPrometheusServer extends PrometheusRWMetricsServer implements CountConnections {
     final private AtomicInteger connections;
     final private AtomicInteger maxConnections;
 
+    /**
+     * Constructor RamMetricsPrometheusServer initializing {@link #connections} and {@link #maxConnections}
+     * and calling its super class.
+     *
+     * @param header            String
+     * @param action            String
+     * @param percentiles       double[]
+     * @param time              Time
+     * @param config            MetricsConfig
+     * @throws IOException If it Occurs.
+     */
     public RamMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,
                                       MetricsConfig config) throws IOException {
         super(header, action, percentiles, time, config);
