@@ -13,8 +13,18 @@ package io.sbk.gem.impl;
 import io.sbk.config.YalConfig;
 import io.sbk.yal.impl.SbkYalParameters;
 
+/**
+ * Class SbkGemYalParameters.
+ */
 public final class SbkGemYalParameters extends SbkYalParameters {
 
+    /**
+     * Constructor SbkGemYalParameters pass all values to its super class SbkYalParameters.
+     *
+     * @param name      String
+     * @param desc      String
+     * @param config    YalConfig
+     */
     public SbkGemYalParameters(String name, String desc, YalConfig config) {
         super(name, desc, config);
     }

@@ -18,8 +18,16 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Class SbkGemYalMain.
+ */
 public final class SbkGemYalMain {
 
+    /**
+     * The main Method of sbk-gem-yal module.
+     *
+     * @param args String[]
+     */
     public static void main(final String[] args) {
         try {
             SbkGemYal.run(args, null, null, null);

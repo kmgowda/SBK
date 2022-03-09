@@ -23,6 +23,11 @@ import java.util.concurrent.TimeoutException;
  */
 public final class SbkRamMain {
 
+    /**
+     * The main method for sbk-ram module.
+     *
+     * @param args String[]
+     */
     public static void main(final String[] args) {
         try {
             SbkRam.run(args, null, null);

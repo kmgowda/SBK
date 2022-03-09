@@ -22,12 +22,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
+/**
+ * Class RamTotalWindowLatencyPeriodicRecorder.
+ */
 final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWindow
         implements ReportLatencies, RamPeriodicRecorder {
     final private ReportLatencies reportLatencies;
     final private SetRW setRW;
     final private HashMap<Long, RW> table;
 
+    /**
+     * Constructor RamTotalWindowLatencyPeriodicRecorder initialize all values and pass all values to its upper class.
+     *
+     * @param window                LatencyRecordWindow
+     * @param totalWindow           LatencyRecordWindow
+     * @param windowLogger          Print
+     * @param totalLogger           Print
+     * @param reportLatencies       ReportLatencies
+     * @param setRW                 SetRW
+     */
     public RamTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                                  Print windowLogger, Print totalLogger,
                                                  ReportLatencies reportLatencies,
@@ -62,6 +75,11 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
         checkWindowFullAndReset(currentTime);
     }
 
+    /**
+     * adds latencies record.
+     *
+     * @param record NotNull LatenciesRecord
+     */
     public void addLatenciesRecord(@NotNull LatenciesRecord record) {
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                 record.getMaxReaders(), record.getMaxWriters());
@@ -73,6 +91,11 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
         record.getLatencyMap().forEach(window::reportLatency);
     }
 
+    /**
+     * Method flush.
+     *
+     * @param currentTime   long
+     */
     public void flush(long currentTime) {
         final RW rwStore = new RW();
         sumRW(rwStore);

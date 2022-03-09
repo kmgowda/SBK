@@ -34,6 +34,9 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     private RamMetricsPrometheusServer prometheusServer;
 
 
+    /**
+     * Constructor RamPrometheusLogger calling its super calls and initializing {@link #prometheusServer} = null.
+     */
     public RamPrometheusLogger() {
         super();
         prometheusServer = null;

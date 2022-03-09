@@ -24,6 +24,9 @@ import org.jetbrains.annotations.NotNull;
 import java.security.InvalidKeyException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Class SbkGrpcService.
+ */
 final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger connections;
     private final Config config;
@@ -32,6 +35,16 @@ final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     private final RamParameters params;
 
 
+    /**
+     * Constructor SbkGrpcService initializing all values.
+     *
+     * @param params                RamParameters
+     * @param time                  Time
+     * @param minLatency            long
+     * @param maxLatency            long
+     * @param countConnections      CountConnections
+     * @param registry              RamRegistry
+     */
     public SbkGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
                           CountConnections countConnections, RamRegistry registry) {
         super();

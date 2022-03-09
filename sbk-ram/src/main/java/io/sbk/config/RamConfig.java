@@ -12,12 +12,36 @@ package io.sbk.config;
 
 import io.perl.config.LatencyConfig;
 
+/**
+ * Class RamConfig.
+ */
 final public class RamConfig extends LatencyConfig {
+
+    /**
+     * <code>String NAME = "sbk-ram"</code>.
+     */
     public final static String NAME = "sbk-ram";
+
+    /**
+     * <code>String DESC = "Storage Benchmark Kit - Results Aggregation Monitor"</code>.
+     */
     final public static String DESC = "Storage Benchmark Kit - Results Aggregation Monitor";
 
+
+    /**
+     * <code>int port</code>.
+     */
     public int port;
+    /**
+     * <code>int maxConnections</code>.
+     */
     public int maxConnections;
+    /**
+     * <code>int maxQueues</code>.
+     */
     public int maxQueues;
+    /**
+     * <code>int idleMS</code>.
+     */
     public int idleMS;
 }

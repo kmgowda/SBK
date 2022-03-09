@@ -10,6 +10,9 @@
 
 package io.sbk.logger;
 
+/**
+ * Interface CountConnections.
+ */
 public interface CountConnections {
 
     /**

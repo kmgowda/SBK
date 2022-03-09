@@ -32,6 +32,9 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Class SbkGemYal.
+ */
 public final class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
