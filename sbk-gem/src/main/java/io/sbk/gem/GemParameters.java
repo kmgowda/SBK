@@ -12,19 +12,57 @@ package io.sbk.gem;
 
 import io.sbk.api.Parameters;
 
+/**
+ * Interface GemParameters.
+ */
 public interface GemParameters extends Parameters {
 
+    /**
+     * to get ssh connections.
+     *
+     * @return SshConnection.
+     */
     SshConnection[] getConnections();
 
+    /**
+     * to get Sbk directory.
+     *
+     * @return Sbk directory.
+     */
     String getSbkDir();
 
+    /**
+     * to get sbk commands.
+     *
+     * @return Sbk commands.
+     */
     String getSbkCommand();
 
+    /**
+     * to get local host.
+     *
+     * @return the local host.
+     */
     String getLocalHost();
 
+    /**
+     * to get ram port number.
+     *
+     * @return ram port number.
+     */
     int getRamPort();
 
+    /**
+     * checks if parameters are copy.
+     *
+     * @return true or false.
+     */
     boolean isCopy();
 
+    /**
+     * checks if parameters are deleted.
+     *
+     * @return true ro false.
+     */
     boolean isDelete();
 }

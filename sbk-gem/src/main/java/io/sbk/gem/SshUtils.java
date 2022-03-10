@@ -26,8 +26,20 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Class SshUtils.
+ */
 public final class SshUtils {
 
+    /**
+     * This method is responsible for creating client sessions.
+     *
+     * @param client            SshClient
+     * @param conn              SshConnection
+     * @param timeoutSeconds    long
+     * @return session
+     * @throws IOException If it occurs
+     */
     public static ClientSession createSession(SshClient client, SshConnection conn, long timeoutSeconds)
             throws IOException {
         // Connect to the server
@@ -41,6 +53,15 @@ public final class SshUtils {
         return session;
     }
 
+    /**
+     * This method is responsible for running commands.
+     *
+     * @param session           final NotNull ClientSession
+     * @param cmd               String
+     * @param timeoutSeconds    long
+     * @param response          NotNull SshResponseStream
+     * @throws IOException If it occurs
+     */
     public static void runCommand(final @NotNull ClientSession session, String cmd, long timeoutSeconds,
                                   @NotNull SshResponseStream response) throws IOException {
         // Create the exec and channel its output/error streams
@@ -64,6 +85,14 @@ public final class SshUtils {
         }
     }
 
+    /**
+     * It copies directory of sessions.
+     *
+     * @param session   final ClientSession
+     * @param srcPath   String
+     * @param dstPath   String
+     * @throws IOException If it occurs.
+     */
     public static void copyDirectory(final ClientSession session, String srcPath,
                                      String dstPath) throws IOException {
 

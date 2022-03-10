@@ -50,6 +50,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Class SbkGem.
+ */
 final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
     final static String RAM_CONFIG_FILE = "ram.properties";
@@ -306,6 +309,12 @@ final public class SbkGem {
     }
 
 
+    /**
+     * This method prints Remote Results.
+     *
+     * @param results NotNull RemoteResponse[]
+     * @param all     boolean
+     */
     public static void printRemoteResults(@NotNull RemoteResponse[] results, boolean all) {
         final String separatorText = "-".repeat(80);
         System.out.println();

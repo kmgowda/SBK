@@ -12,6 +12,9 @@ package io.sbk.logger.impl;
 
 import io.sbk.logger.GemLogger;
 
+/**
+ * Class GemRamPrometheusLogger.
+ */
 public class GemRamPrometheusLogger extends RamPrometheusLogger implements GemLogger {
 
     @Override

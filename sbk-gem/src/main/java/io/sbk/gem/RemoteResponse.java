@@ -10,13 +10,40 @@
 
 package io.sbk.gem;
 
+/**
+ * Class RemoteResponse.
+ */
 public final class RemoteResponse {
+
+    /**
+     * <code>int returnCode</code>.
+     */
     public final int returnCode;
+
+    /**
+     * <code>String stdOutput</code>.
+     */
     public final String stdOutput;
+
+    /**
+     * <code>String errOutput</code>.
+     */
     public final String errOutput;
+
+    /**
+     * <code>String host</code>.
+     */
     public final String host;
 
 
+    /**
+     * The constructor RemoteResponse is responsible for initializing all values.
+     *
+     * @param returnCode    int
+     * @param stdOutput     String
+     * @param errOutput     String
+     * @param host          String
+     */
     public RemoteResponse(int returnCode, String stdOutput, String errOutput, String host) {
         this.returnCode = returnCode;
         this.stdOutput = stdOutput;

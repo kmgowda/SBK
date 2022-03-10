@@ -10,9 +10,22 @@
 
 package io.sbk.options;
 
+/**
+ * Interface GetArguments.
+ */
 public interface GetArguments {
 
+    /**
+     * to get options provided as arguments.
+     *
+     * @return options provided as arguments.
+     */
     String[] getOptionsArgs();
 
+    /**
+     * to get Parsed options provided as arguments.
+     *
+     * @return Parsed options provided as arguments.
+     */
     String[] getParsedArgs();
 }

@@ -37,6 +37,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Class SbkGemBenchmark.
+ */
 final public class SbkGemBenchmark implements GemBenchmark {
     private final Benchmark ramBenchmark;
     private final GemConfig config;
@@ -51,6 +54,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @GuardedBy("this")
     private State state;
 
+    /**
+     * Constructor SbkGemBenchmark is responsible for initializing all values.
+     *
+     * @param ramBenchmark  Benchmark
+     * @param config        NotNull GemConfig
+     * @param params        NotNull GemParameters
+     * @param sbkArgs       String
+     */
     public SbkGemBenchmark(Benchmark ramBenchmark, @NotNull GemConfig config, @NotNull GemParameters params, String sbkArgs) {
         this.ramBenchmark = ramBenchmark;
         this.config = config;

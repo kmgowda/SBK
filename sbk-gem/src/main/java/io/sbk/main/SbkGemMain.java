@@ -18,8 +18,16 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Class SbkGemMain.
+ */
 public final class SbkGemMain {
 
+    /**
+     * This method is the main method of Sbk-Gem module.
+     *
+     * @param args String[]
+     */
     public static void main(final String[] args) {
         try {
             SbkGem.run(args, null, null, null);
