@@ -13,6 +13,9 @@ package io.sbk.gem;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Class SshConnection.
+ */
 @Slf4j
 public final class SshConnection {
 
@@ -31,6 +34,15 @@ public final class SshConnection {
     @Getter
     private final String dir;
 
+    /**
+     * This Constructor is responsible for initializing all values.
+     *
+     * @param host          String
+     * @param userName      String
+     * @param password      String
+     * @param port          int
+     * @param dir           String
+     */
     public SshConnection(String host, String userName, String password, int port, String dir) {
         this.host = host;
         this.userName = userName;

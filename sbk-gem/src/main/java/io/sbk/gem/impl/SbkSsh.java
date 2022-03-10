@@ -23,14 +23,39 @@ import java.net.ConnectException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * Class SbkSsh.
+ */
 final public class SbkSsh {
+
+    /**
+     * <code>public SshConnection connection</code>.
+     */
     final public SshConnection connection;
+
+    /**
+     * <code>private SshClient client</code>.
+     */
     final private SshClient client;
+
+    /**
+     * <code>ExecutorService executor</code>.
+     */
     final private ExecutorService executor;
 
+
+    /**
+     * <code>ClientSession session</code>.
+     */
     @GuardedBy("this")
     private ClientSession session;
 
+    /**
+     * This Constructor initializes all values.
+     *
+     * @param conn      SshConnection
+     * @param executor  ExecutorService
+     */
     public SbkSsh(SshConnection conn, ExecutorService executor) {
         this.connection = conn;
         this.executor = executor;
@@ -51,6 +76,12 @@ final public class SbkSsh {
     }
 
 
+    /**
+     * This method Creates Sessions.
+     *
+     * @param timeoutSeconds long
+     * @return CompletableFuture
+     */
     public CompletableFuture<Void> createSessionAsync(long timeoutSeconds) {
         return CompletableFuture.runAsync(() -> creationSession(timeoutSeconds), executor);
     }
@@ -65,6 +96,15 @@ final public class SbkSsh {
     }
 
 
+    /**
+     * This method is responsible for running commands but throws ConnectException if it occurs.
+     *
+     * @param cmd               String
+     * @param timeoutSeconds    long
+     * @param response          SshResponseStream
+     * @return CompletableFuture
+     * @throws ConnectException If connection exception occurs.
+     */
     public CompletableFuture<Void> runCommandAsync(String cmd, long timeoutSeconds, SshResponseStream response)
             throws ConnectException {
         final ClientSession sshSession = getSession();
@@ -77,6 +117,14 @@ final public class SbkSsh {
         }, executor);
     }
 
+    /**
+     * It copies directory of sessions but throws ConnectException if it occurs.
+     *
+     * @param srcPath   String
+     * @param dstPath   String
+     * @return CompletableFuture
+     * @throws ConnectException If connection exception occurs.
+     */
     public CompletableFuture<Void> copyDirectoryAsync(String srcPath, String dstPath) throws ConnectException {
         final ClientSession sshSession = getSession();
         return CompletableFuture.runAsync(() -> {
@@ -98,6 +146,9 @@ final public class SbkSsh {
     }
 
 
+    /**
+     * This method is responsible for closing session and stopping the client.
+     */
     public void stop() {
         closeSession();
         client.stop();

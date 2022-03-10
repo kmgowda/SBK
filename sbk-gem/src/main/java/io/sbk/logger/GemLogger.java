@@ -12,5 +12,8 @@ package io.sbk.logger;
 
 import io.sbk.options.GetArguments;
 
+/**
+ * Interface GemLogger.
+ */
 public interface GemLogger extends RamLogger, GetArguments {
 }

@@ -30,6 +30,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Class SbkGemParameters.
+ */
 @Slf4j
 public final class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
 
@@ -53,6 +56,14 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     @Getter
     private int ramPort;
 
+    /**
+     * This Constructor is responsible for initializing all values.
+     *
+     * @param name      String
+     * @param drivers   String[]
+     * @param config    NotNull GemConfig
+     * @param ramport   int
+     */
     public SbkGemParameters(String name, String[] drivers, @NotNull GemConfig config, int ramport) {
         super(name, GemConfig.DESC, drivers);
         this.config = config;
