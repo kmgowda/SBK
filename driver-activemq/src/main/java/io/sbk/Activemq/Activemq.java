@@ -17,19 +17,22 @@ import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
-import io.sbk.data.impl.ByteArray;
+import io.sbk.data.impl.SbkString;
+import org.apache.activemq.ActiveMQConnectionFactory;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Session;
 import java.io.IOException;
 import java.util.Objects;
 
 /**
  * Class for Activemq storage driver.
  *
- * Incase if your data type in other than byte[] (Byte Array)
- * then change the datatype and getDataType.
  */
-public class Activemq implements Storage<byte[]> {
-    private final static String CONFIGFILE = "Activemq.properties";
+public class Activemq implements Storage<String> {
+    private final static String CONFIGFILE = "activemq.properties";
     private ActivemqConfig config;
 
     @Override
@@ -46,39 +49,55 @@ public class Activemq implements Storage<byte[]> {
         }
 
         // change and uncomment the below code as per your driver specific parameters
-        // params.addOption("param", true, "Activemq parameter, default param: " + config.param);
-        throw new IllegalArgumentException("The Activemq Driver not defined");
+        params.addOption("url", true, "Activemq url, default: " + config.url);
+        params.addOption("qname", true, "Activemq Queue name, default: " + config.qName);
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        // change and uncommnet the below code as per your driver specific parameters
-        // config.param = params.getOptionValue("param", config.param);
-        throw new IllegalArgumentException("The Activemq Driver not defined");
+        if (params.getReadersCount() < 1 || params.getWritersCount() < 1) {
+            throw new IllegalArgumentException("Specify both Writer or readers for Java Concurrent Linked Queue");
+        }
+        config.url = params.getOptionValue("url", config.url);
+        config.qName = params.getOptionValue("qname", config.qName);
     }
 
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
-        throw new IOException("The Activemq Driver not defined");
+        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(config.url);
+        try {
+            Connection connection = connectionFactory.createConnection();
+            connection.start();
+            config.session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            //The queue will be created automatically on the server.
+            config.dst = config.session.createQueue(config.qName);
+        } catch (JMSException ex) {
+            throw new IOException(ex);
+        }
+
     }
 
     @Override
     public void closeStorage(final ParameterOptions params) throws IOException {
-        throw new IOException("The Activemq Driver not defined");
+        try {
+            config.session.close();
+        } catch (JMSException ex) {
+            throw new IOException(ex);
+        }
     }
 
     @Override
-    public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
+    public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         return new ActivemqWriter(id, params, config);
     }
 
     @Override
-    public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
+    public DataReader<String> createReader(final int id, final ParameterOptions params) {
         return new ActivemqReader(id, params, config);
     }
 
     @Override
-    public DataType<byte[]> getDataType() {
-        return new ByteArray();
+    public DataType<String> getDataType() {
+        return new SbkString();
     }
 }

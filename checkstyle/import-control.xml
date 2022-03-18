@@ -6,6 +6,7 @@
 
     <!-- common library dependencies -->
     <allow pkg="java"/>
+    <allow pkg="javax.jms"/>
     <allow pkg="javax.management"/>
     <allow pkg="javax.annotation"/>
     <allow pkg="org.apache.commons.lang"/>

@@ -10,25 +10,44 @@
 package io.sbk.Activemq;
 
 import io.sbk.api.ParameterOptions;
+import io.sbk.api.Parameters;
 import io.sbk.api.Reader;
 
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.TextMessage;
 import java.io.IOException;
 
 /**
  * Class for Activemq Reader.
  */
-public class ActivemqReader implements Reader<byte[]> {
+public class ActivemqReader implements Reader<String> {
+    ActivemqConfig config;
+    MessageConsumer consumer;
+    Parameters params;
 
     public ActivemqReader(int readerId, ParameterOptions params, ActivemqConfig config) {
+        this.params = params;
+        this.config = config;
+        try {
+            this.consumer = config.session.createConsumer(config.dst);
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public byte[] read() throws IOException {
-        throw new IOException("The Activemq Reader Driver not defined");
+    public String read() throws IOException {
+        try {
+            TextMessage msg = (TextMessage) this.consumer.receive(params.getTimeoutMS());
+            return msg.getText();
+        } catch (JMSException e) {
+            throw  new IOException(e);
+        }
     }
 
     @Override
     public void close() throws IOException {
-        throw new IOException("The Activemq Reader Driver not defined");
+
     }
 }

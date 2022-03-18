@@ -12,30 +12,43 @@ package io.sbk.Activemq;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-
 
 /**
  * Class for Activemq Writer.
  */
-public class ActivemqWriter implements Writer<byte[]> {
+public class ActivemqWriter implements Writer<String> {
+    ActivemqConfig config;
+    MessageProducer producer;
 
     public ActivemqWriter(int writerID, ParameterOptions params, ActivemqConfig config) {
+        this.config = config;
+        try {
+           this.producer = config.session.createProducer(config.dst);
+        } catch (JMSException ex) {
+           ex.printStackTrace();
+        }
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
-        throw new IOException("The Activemq Writer Driver not defined");
+    public CompletableFuture writeAsync(String data) throws IOException {
+        try {
+            this.producer.send(config.session.createTextMessage(data));
+        } catch (JMSException ex) {
+           throw new IOException(ex);
+        }
+        return null;
     }
 
     @Override
     public void sync() throws IOException {
-        throw new IOException("The Activemq Writer Driver not defined");
+
     }
 
     @Override
     public void close() throws IOException {
-        throw new IOException("The Activemq Writer Driver not defined");
     }
 }

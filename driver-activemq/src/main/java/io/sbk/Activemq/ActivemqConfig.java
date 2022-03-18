@@ -10,9 +10,16 @@
 
 package io.sbk.Activemq;
 
+import javax.jms.Destination;
+import javax.jms.Session;
+
 /**
  * Class for Activemq storage configuration.
  */
 public class ActivemqConfig {
     // Add Activemq Storage driver configuration parameters
+    public String url;
+    public String qName;
+    public Session session;
+    public Destination dst;
 }
