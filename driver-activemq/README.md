@@ -98,3 +98,8 @@ Total : Activemq Write_Reading     1 Writers,     0 Readers,      1 Max Writers,
 2022-03-18 15:43:14 INFO SBK PrometheusLogger Shutdown
 2022-03-18 15:43:15 INFO SBK Benchmark Shutdown
 ```
+
+To write the driver for ActiveMQ following examples are referred:
+1. https://metamug.com/article/distributed-systems/jms-java-activemq-example-usage.html
+2. https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-working-java-example.html
+3. https://examples.javacodegeeks.com/enterprise-java/jms/apache-activemq-hello-world-example
