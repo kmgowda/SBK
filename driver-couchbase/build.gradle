@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(":sbk-api")
+
+    // Add your storage driver specific dependencies here
+}

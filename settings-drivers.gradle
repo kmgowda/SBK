@@ -50,5 +50,6 @@ include 'driver-db2'
 include 'driver-cephs3'
 include 'driver-openio'
 include 'driver-leveldb'
+include 'driver-couchbase'
 /* include 'driver-sbktemplate' */
 /* above line is a signature */
