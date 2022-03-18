@@ -10,9 +10,18 @@
 
 package io.sbk.Couchbase;
 
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
+
 /**
  * Class for Couchbase storage configuration.
  */
 public class CouchbaseConfig {
     // Add Couchbase Storage driver configuration parameters
+    String url;
+    String bucketName;
+    String user;
+    String pass;
+    Cluster cluster;
+    Bucket bucket;
 }

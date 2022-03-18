@@ -9,10 +9,12 @@
  */
 package io.sbk.Couchbase;
 
+import com.couchbase.client.java.json.JsonObject;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -20,22 +22,25 @@ import java.util.concurrent.CompletableFuture;
  * Class for Couchbase Writer.
  */
 public class CouchbaseWriter implements Writer<byte[]> {
+    CouchbaseConfig config;
 
     public CouchbaseWriter(int writerID, ParameterOptions params, CouchbaseConfig config) {
+        this.config = config;
     }
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
-        throw new IOException("The Couchbase Writer Driver not defined");
+        JsonObject obj = JsonObject.create().put("sbk", Arrays.toString(data));
+        config.bucket.co
     }
 
     @Override
     public void sync() throws IOException {
-        throw new IOException("The Couchbase Writer Driver not defined");
+
     }
 
     @Override
     public void close() throws IOException {
-        throw new IOException("The Couchbase Writer Driver not defined");
+
     }
 }

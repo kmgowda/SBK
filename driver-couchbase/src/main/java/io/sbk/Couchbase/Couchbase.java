@@ -9,6 +9,8 @@
  */
 package io.sbk.Couchbase;
 
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
@@ -44,27 +46,30 @@ public class Couchbase implements Storage<byte[]> {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
+        params.addOption("url", true, "url, default: " + config.url);
+        params.addOption("bucket", true, "bucket name, default: " + config.bucketName);
+        params.addOption("user", true, "user, default: " + config.user);
+        params.addOption("password", true, "password, default: " + config.user);
 
-        // change and uncomment the below code as per your driver specific parameters
-        // params.addOption("param", true, "Couchbase parameter, default param: " + config.param);
-        throw new IllegalArgumentException("The Couchbase Driver not defined");
+
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
-        // change and uncommnet the below code as per your driver specific parameters
-        // config.param = params.getOptionValue("param", config.param);
-        throw new IllegalArgumentException("The Couchbase Driver not defined");
+        config.url = params.getOptionValue("url", config.url);
+        config.bucketName = params.getOptionValue("bucket", config.bucketName);
+        config.user = params.getOptionValue("user", config.user);
+        config.pass = params.getOptionValue("pass", config.pass);
     }
 
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
-        throw new IOException("The Couchbase Driver not defined");
+        config.cluster = Cluster.connect(config.url, config.user, config.pass);
+        config.bucket = config.cluster.bucket(config.bucketName);
     }
 
     @Override
     public void closeStorage(final ParameterOptions params) throws IOException {
-        throw new IOException("The Couchbase Driver not defined");
     }
 
     @Override
