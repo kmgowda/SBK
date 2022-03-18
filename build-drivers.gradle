@@ -51,6 +51,7 @@ dependencies {
     api project(':driver-cephs3')
     api project(':driver-openio')
     api project(':driver-leveldb')
+    api project(':driver-activemq')
     /* api project(':driver-sbktemplate') */
     /* above line is a signature */
 }
