@@ -32,7 +32,7 @@ dependencies {
     api project(':driver-fdbrecord')
     api project(':driver-mongodb')
     api project(':driver-rocksdb')
-    api project(':driver-ignite')
+    //api project(':driver-ignite')
     api project(':driver-couchdb')
     api project(':driver-hive')
     api project(':driver-null')
