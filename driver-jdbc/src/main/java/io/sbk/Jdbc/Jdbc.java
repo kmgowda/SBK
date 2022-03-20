@@ -92,12 +92,8 @@ public class Jdbc implements Storage<String> {
             query = "CREATE TABLE " + config.table +
                     "(ID INTEGER PRIMARY KEY AUTOINCREMENT" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-        } else if (driverType.equalsIgnoreCase(H2_NAME)) {
-            query = "CREATE TABLE " + config.table +
-                    "(ID INTEGER PRIMARY KEY AUTOINCREMENT" +
-                    ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
-        } else {
-            // This statement works for MySQL and MariaDB too..
+        }  else {
+            // This statement works for MySQL, h2 and MariaDB too..
             query = "CREATE TABLE " + config.table +
                     "(ID BIGINT PRIMARY KEY AUTO_INCREMENT" +
                     ", DATA VARCHAR(" + params.getRecordSize() + ") NOT NULL)";
@@ -136,6 +132,8 @@ public class Jdbc implements Storage<String> {
         params.addOption("url", true, "Database url, default url: " + config.url);
         params.addOption("user", true, "User Name, default User name: " + config.user);
         params.addOption("password", true, "password, default password: " + config.password);
+        params.addOption("createdb", true,
+                "create the database for writers during JDBC connect, default: " + config.createDb);
         params.addOption("recreate", true,
                 "If the table is already existing, delete and recreate the same, default: " + config.reCreate);
     }
@@ -182,6 +180,7 @@ public class Jdbc implements Storage<String> {
         config.user = params.getOptionValue("user", config.user);
         config.password = params.getOptionValue("password", config.password);
         config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
+        config.createDb = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.createDb)));
     }
 
 
@@ -196,7 +195,7 @@ public class Jdbc implements Storage<String> {
         final Connection conn;
         final Statement st;
         final Properties props = new Properties();
-        if (params.getWritersCount() > 0) {
+        if (params.getWritersCount() > 0 && config.createDb) {
             props.put("create", "true");
         }
         if (config.user != null) {
@@ -207,6 +206,8 @@ public class Jdbc implements Storage<String> {
             props.put("password", config.password);
         }
         try {
+            Printer.log.info("JDBC Url: " + config.url);
+
             if (props.isEmpty()) {
                 conn = DriverManager.getConnection(config.url);
             } else {
