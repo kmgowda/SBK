@@ -18,5 +18,6 @@ public class JdbcConfig {
     public String password;
     public boolean reCreate;
     public boolean autoCommit;
+    public boolean createDb;
 }
 
