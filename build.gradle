@@ -9,10 +9,6 @@
  *
  */
 
-import org.gradle.internal.jvm.Jvm
-
-import java.util.regex.Matcher
-
 apply plugin: 'java-library'
 
 java {
@@ -21,6 +17,12 @@ java {
         vendor = JvmVendorSpec.ADOPTOPENJDK
     }
 }
+
+import org.gradle.internal.jvm.Jvm
+
+import java.util.regex.Matcher
+
+
 
 buildscript {
     repositories {
@@ -36,7 +38,7 @@ buildscript {
         // classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
         //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
-    
+
     println "Build JVM Version      : " + Jvm.current()
     println "Build Gradle Version   : $gradle.gradleVersion"
     println "Build SBK Version      : $sbkVersion"

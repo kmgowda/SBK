@@ -17,6 +17,18 @@ plugins.withId('java') {
   //  sourceCompatibility = JavaVersion.VERSION_17
   //  targetCompatibility = JavaVersion.VERSION_17
 
+    tasks.withType(JavaCompile).configureEach {
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
+    tasks.withType(Test).configureEach{
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
     compileJava {
         options.compilerArgs.addAll([
                 "-Xlint:deprecation",
