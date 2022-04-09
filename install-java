@@ -1,0 +1,25 @@
+#!/usr/local/bin/python3
+# Copyright (c) KMG. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+##
+
+import jdk
+
+JDK_VERSION = '17'
+
+# Obtains the platform dependent JDK download url
+download_url = jdk.get_download_url(JDK_VERSION)
+print("JDK Download URL: " + download_url)
+
+print("Detected OS: " + jdk.OS)  # Detected platform operating system
+print("CPU type: " + jdk.ARCH)  # Detected platform CPU architecture
+
+# Platform dependent install of Java JDK 11 into $HOME/.jdk/<VERSION>
+ret = jdk.install(JDK_VERSION)
+
+print("Installed JDK " + JDK_VERSION + " : " + ret)
