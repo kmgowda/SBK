@@ -7,19 +7,40 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 ##
-
+import os
 import jdk
+import threading
 
 JDK_VERSION = '17'
+JAVA_HOME_DIR = os.sep + 'Contents' + os.sep + 'Home'
 
-# Obtains the platform dependent JDK download url
-download_url = jdk.get_download_url(JDK_VERSION)
-print("JDK Download URL: " + download_url)
 
-print("Detected OS: " + jdk.OS)  # Detected platform operating system
-print("CPU type: " + jdk.ARCH)  # Detected platform CPU architecture
+def install_java(res):
+    # Platform dependent install of Java JDK 11 into $HOME/.jdk/<VERSION>
+    val = jdk.install(JDK_VERSION)
+    res.append(val)
 
-# Platform dependent install of Java JDK 11 into $HOME/.jdk/<VERSION>
-ret = jdk.install(JDK_VERSION)
 
-print("Installed JDK " + JDK_VERSION + " : " + ret)
+if __name__ == "__main__":
+    # Obtains the platform dependent JDK download url
+    download_url = jdk.get_download_url(JDK_VERSION)
+    print("JDK Download URL: " + download_url)
+    print("Detected OS: " + jdk.OS)  # Detected platform operating system
+    print("CPU type: " + jdk.ARCH)  # Detected platform CPU architecture
+    lt = []
+    th = threading.Thread(target=install_java, args=(lt,))
+    print("Downloading and installing JDK " + JDK_VERSION + " ", end="", flush=True)
+    th.start()
+    while th.is_alive():
+        print(".", end="", flush=True)
+        try:
+            th.join(1)
+        except Exception as ex:
+            print(ex)
+            break
+    print()
+    if len(lt) > 0:
+        print("Successfully Installed JDK " + JDK_VERSION + " in the path: " + lt[0])
+        print("Set JAVA_HOME environment variable to " + lt[0] + JAVA_HOME_DIR)
+    else:
+        print("JDK " + JDK_VERSION + " installation failed!")
