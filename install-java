@@ -8,6 +8,8 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 ##
 import os
+import subprocess
+
 import jdk
 import threading
 
@@ -21,7 +23,7 @@ def install_java(res):
     res.append(val)
 
 
-if __name__ == "__main__":
+def download_install_java():
     # Obtains the platform dependent JDK download url
     download_url = jdk.get_download_url(JDK_VERSION)
     print("JDK Download URL: " + download_url)
@@ -44,3 +46,34 @@ if __name__ == "__main__":
         print("Set JAVA_HOME environment variable to " + lt[0] + JAVA_HOME_DIR)
     else:
         print("JDK " + JDK_VERSION + " installation failed!")
+
+
+def get_java_version(text):
+    ret = " "
+    try:
+        out = text.split('"', 2)
+        ret = out[1].split('.')[0]
+    except Exception:
+        pass
+    return ret
+
+
+def check_java_version():
+    process = subprocess.Popen(['java', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               universal_newlines=True)
+    stdout, stderr = process.communicate()
+    val1, val2 = get_java_version(stdout), get_java_version(stderr)
+    ret = val1 >= JDK_VERSION or val2 >= JDK_VERSION
+    if ret:
+        print("stdout Java Major version: " + val1)
+        print("stderr Java Major version: " + val2)
+    return ret
+
+
+if __name__ == "__main__":
+    if check_java_version():
+        print("JDK version: " + JDK_VERSION + " or higher already found in this system. Skipping JDK "
+                                              "installation!")
+    else:
+        print("Downloading and installing JDK Version: " + JDK_VERSION)
+        download_install_java()
