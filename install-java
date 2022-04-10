@@ -14,12 +14,14 @@ import jdk
 import threading
 
 JDK_VERSION = '17'
+JDK_PATH = os.path.expanduser('~') + os.sep + 'jdk-' + JDK_VERSION
 JAVA_HOME_DIR = os.sep + 'Contents' + os.sep + 'Home'
 
 
 def install_java(res):
-    # Platform dependent install of Java JDK 11 into $HOME/.jdk/<VERSION>
-    val = jdk.install(JDK_VERSION)
+    # Platform dependent install of Java JDK 17
+    os.system('mkdir -p '+JDK_PATH)
+    val = jdk.install(JDK_VERSION, path=JDK_PATH)
     res.append(val)
 
 
