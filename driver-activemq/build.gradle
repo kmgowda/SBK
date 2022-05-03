@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(":sbk-api")
+
+    // Add your storage driver specific dependencies here
+    // https://mvnrepository.com/artifact/org.apache.activemq/activemq-client
+    implementation group: 'org.apache.activemq', name: 'activemq-client', version: '5.17.0'
+}
