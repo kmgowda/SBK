@@ -13,8 +13,10 @@ dependencies {
     api group: 'org.apache.derby', name: 'derby', version: '10.15.2.0'
 
     // https://mvnrepository.com/artifact/org.apache.derby/derbyclient
-    api group: 'org.apache.derby', name: 'derbyclient', version: '10.10.2.0'
-    api group: 'org.apache.derby', name: 'derbynet', version: '10.10.2.0'
+    api group: 'org.apache.derby', name: 'derbyclient', version: '10.15.2.0'
+    api group: 'org.apache.derby', name: 'derbynet', version: '10.15.2.0'
+    api group: 'org.apache.derby', name: 'derbytools', version: '10.15.2.0'
+
 
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
     api group: 'mysql', name: 'mysql-connector-java', version: '8.0.28'
@@ -31,9 +33,15 @@ dependencies {
     // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
     api group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.1'
 
+    /*
     // https://mvnrepository.com/artifact/org.apache.ignite/ignite-core
     api group: 'org.apache.ignite', name: 'ignite-core', version: '2.12.0'
 
     // https://mvnrepository.com/artifact/org.apache.ignite/ignite-spring
     api group: 'org.apache.ignite', name: 'ignite-spring', version: '2.12.0'
+     */
+
+    // https://mvnrepository.com/artifact/com.h2database/h2
+    api group: 'com.h2database', name: 'h2', version: '2.1.210'
+
 }

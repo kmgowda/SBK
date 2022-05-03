@@ -51,5 +51,6 @@ include 'driver-cephs3'
 include 'driver-openio'
 include 'driver-leveldb'
 include 'driver-activemq'
+include 'driver-h2'
 /* include 'driver-sbktemplate' */
 /* above line is a signature */
