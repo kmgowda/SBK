@@ -39,12 +39,20 @@ public interface InputOptions {
     Options addOption(String name, String description);
 
     /**
-     * Returns whether the named Option is a member of this Parameters.
+     * Returns whether the named Option exists.
      *
      * @param name name of the parameter option
      * @return true if the named Option is a member of this Options
      */
     boolean hasOption(String name);
+
+    /**
+     * Returns whether the named Option has the value after parsing.
+     *
+     * @param name name of the parameter option
+     * @return true if the named Option is a member of this Options
+     */
+    boolean hasOptionValue(String name);
 
     /**
      * Retrieve the Option matching the parameter name specified.

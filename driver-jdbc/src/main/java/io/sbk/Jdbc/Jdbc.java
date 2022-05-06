@@ -173,7 +173,7 @@ public class Jdbc implements Storage<String> {
             throw new IllegalArgumentException("Error: JDBC: Specify either writers or readers, both are not allowed");
         }
         config.table = params.getOptionValue("table", config.table);
-        if (params.hasOption("driver")) {
+        if (params.hasOptionValue("driver")) {
             config.driver = params.getOptionValue("driver", config.driver);
         }
         config.url = params.getOptionValue("url", config.url);

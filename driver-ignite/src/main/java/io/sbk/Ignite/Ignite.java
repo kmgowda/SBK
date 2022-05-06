@@ -63,7 +63,7 @@ public class Ignite implements Storage<byte[]> {
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.url = params.getOptionValue("url", config.url);
         config.cacheName = params.getOptionValue("cache", config.cacheName);
-        if (params.hasOption("cfile")) {
+        if (params.hasOptionValue("cfile")) {
             config.cFile = params.getOptionValue("cfile", config.cFile);
         } else {
             config.cFile = null;

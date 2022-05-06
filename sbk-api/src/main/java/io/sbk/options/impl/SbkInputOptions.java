@@ -62,6 +62,11 @@ public class SbkInputOptions implements InputOptions {
     }
 
     @Override
+    public boolean hasOption(String name) {
+        return options.hasOption(name);
+    }
+
+    @Override
     public String getHelpText() {
         final OutputStream outStream = new ByteArrayOutputStream();
         final PrintWriter helpPrinter = new PrintWriter(outStream);
@@ -78,7 +83,7 @@ public class SbkInputOptions implements InputOptions {
 
 
     @Override
-    public boolean hasOption(String name) {
+    public boolean hasOptionValue(String name) {
         return commandline != null && commandline.hasOption(name);
     }
 

@@ -129,7 +129,7 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
             recordsPerSync = Integer.MAX_VALUE;
         }
 
-        if (hasOption("seconds")) {
+        if (hasOptionValue("seconds")) {
             totalSecondsToRun = Long.parseLong(getOptionValue("seconds"));
         } else if (totalRecords > 0) {
             totalSecondsToRun = 0;
@@ -138,7 +138,7 @@ public class SbkParameters extends SbkInputOptions implements ParameterOptions {
         }
 
         final double throughput;
-        if (hasOption("throughput")) {
+        if (hasOptionValue("throughput")) {
             throughput = Double.parseDouble(getOptionValue("throughput"));
         } else {
             throughput = -1;

@@ -67,7 +67,7 @@ public class Pravega implements Storage<byte[]> {
         config.streamName = params.getOptionValue("stream", config.streamName);
         config.controllerUri = params.getOptionValue("controller", config.controllerUri);
         config.segmentCount = Integer.parseInt(params.getOptionValue("segments", Integer.toString(config.segmentCount)));
-        if (params.hasOption("recreate")) {
+        if (params.hasOptionValue("recreate")) {
             config.recreate = Boolean.parseBoolean(params.getOptionValue("recreate"));
         } else {
             config.recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
