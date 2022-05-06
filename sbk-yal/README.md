@@ -9,15 +9,14 @@ You may obtain a copy of the License at
 -->
 # SBK-YAL : YML Arguments Loader
 
-[![Api](https://img.shields.io/badge/SBK--GEM--YAL-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-gem-yal/javadoc/index.html)
+[![Api](https://img.shields.io/badge/SBK--YAL-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-yal/javadoc/index.html)
 
 The SBK-YAL (YML Arguments Loader) is a wrapper for [SBK](https://github.com/kmgowda/SBK/tree/master/sbk).
 The SBK-YAL extracts arguments from the YML file and invokes the SBK command with the same arguments as command
 line parameters. you can store the SBK arguments in a YML file and can be given as input to SBK-YAL
 application/command.
-Use this example YML file [sbk-yal.yml](https://github.com/kmgowda/SBK/blob/master/sbk-yal/sbk-yal-file-read.yml) to 
-build
-your own YML file for SBK-YAL command/application.
+Use this example YML file [sbk-yal-file-read.yml](https://github.com/kmgowda/SBK/blob/master/sbk-yal/sbk-yal-file-read.yml)
+to build your own YML file for SBK-YAL command/application.
 
 ## Build SBK-YAL
 SBK-YAL is a submodule/project of the SBK framework. If you  [build SBK](./../README.md#build-sbk), it builds
