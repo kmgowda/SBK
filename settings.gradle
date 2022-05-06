@@ -16,6 +16,7 @@ include 'sbk-api'
 include 'sbk-ram'
 include 'sbk-gem'
 include 'sbk-gem-yal'
+include 'sbk-yal'
 
 // The 'driver-sbktemplate' is only the driver template; not for compilation
 include 'driver-sbktemplate'
