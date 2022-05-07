@@ -38,13 +38,13 @@ import java.util.concurrent.TimeUnit;
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class GrpcPrometheusLogger extends PrometheusLogger {
-    final static String CONFIG_FILE = "ramhost.properties";
-    final static int LATENCY_MAP_BYTES = 16;
+    private final static String CONFIG_FILE = "ramhost.properties";
+    private final static int LATENCY_MAP_BYTES = 16;
 
     /**
      * <code>Creating RamHostConfig ramHostConfig</code>.
      */
-    protected RamHostConfig ramHostConfig;
+    private RamHostConfig ramHostConfig;
     private boolean enable;
     private long clientID;
     private long seqNum;
