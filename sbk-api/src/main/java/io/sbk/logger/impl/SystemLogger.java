@@ -35,15 +35,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SystemLogger extends ResultsLogger implements RWLogger {
     private final static String LOGGER_FILE = "logger.properties";
-    public final AtomicInteger writers;
-    public final AtomicInteger readers;
-    public final AtomicInteger maxWriters;
-    public final AtomicInteger maxReaders;
-    public String storageName;
-    public String timeUnitFullText;
-    public InputOptions params;
-    public Action action;
-    public Time time;
+    protected final AtomicInteger writers;
+    protected final AtomicInteger readers;
+    protected final AtomicInteger maxWriters;
+    protected final AtomicInteger maxReaders;
+    protected String storageName;
+    protected String timeUnitFullText;
+    protected InputOptions params;
+    protected Action action;
+    protected Time time;
     private LoggerConfig loggerConfig;
 
     public SystemLogger() {

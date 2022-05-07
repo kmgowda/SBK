@@ -44,7 +44,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     /**
      * <code>Creating RamHostConfig ramHostConfig</code>.
      */
-    public RamHostConfig ramHostConfig;
+    protected RamHostConfig ramHostConfig;
     private boolean enable;
     private long clientID;
     private long seqNum;

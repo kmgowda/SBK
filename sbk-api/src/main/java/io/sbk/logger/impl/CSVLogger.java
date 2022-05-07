@@ -44,15 +44,15 @@ public class CSVLogger extends SystemLogger {
     /**
      * <code>csvFile = null</code>.
      */
-    public String csvFile;
+    protected String csvFile;
     /**
      * <code>csvEnable = false</code>.
      */
-    public boolean csvEnable;
+    protected boolean csvEnable;
     /**
      * <code>csvWriter</code>.
      */
-    public PrintWriter csvWriter;
+    protected PrintWriter csvWriter;
     /**
      * <code>csvRowCounter = 0</code>.
      */

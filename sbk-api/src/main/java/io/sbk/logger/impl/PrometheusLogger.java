@@ -29,7 +29,7 @@ import java.io.InputStream;
  */
 public class PrometheusLogger extends CSVLogger {
     final static String CONFIG_FILE = "metrics.properties";
-    public MetricsConfig metricsConfig;
+    protected MetricsConfig metricsConfig;
     private boolean contextDisabled;
     private PrometheusRWMetricsServer prometheusServer;
     private Print printer;
