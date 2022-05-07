@@ -28,6 +28,7 @@ import io.sbk.grpc.LatenciesRecord;
 import io.sbk.grpc.ServiceGrpc;
 import io.sbk.logger.RamHostConfig;
 import io.sbk.options.InputOptions;
+import io.sbk.options.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;
 
@@ -94,7 +95,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     }
 
     @Override
-    public void parseArgs(final InputOptions params) throws IllegalArgumentException {
+    public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         ramHostConfig.host = params.getOptionValue("ram", ramHostConfig.host);
         enable = !ramHostConfig.host.equalsIgnoreCase("no");
@@ -108,7 +109,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     }
 
     @Override
-    public void open(final InputOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
+    public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
         if (!enable) {
             return;
@@ -171,7 +172,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     }
 
     @Override
-    public void close(final InputOptions params) throws IllegalArgumentException, IOException {
+    public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
         super.close(params);
         if (!enable) {
             return;

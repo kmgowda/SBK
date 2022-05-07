@@ -10,15 +10,9 @@
 
 package io.sbk.options;
 
-import io.sbk.exception.HelpException;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
-/**
- * Interface InputOptions.
- */
 public interface InputOptions {
-
     /**
      * Add the driver specific command line arguments.
      *
@@ -46,54 +40,4 @@ public interface InputOptions {
      */
     boolean hasOption(String name);
 
-    /**
-     * Returns whether the named Option has the value after parsing.
-     *
-     * @param name name of the parameter option
-     * @return true if the named Option is a member of this Options
-     */
-    boolean hasOptionValue(String name);
-
-    /**
-     * Retrieve the Option matching the parameter name specified.
-     *
-     * @param name Name of the parameter.
-     * @return parameter value
-     */
-    String getOptionValue(String name);
-
-    /**
-     * Retrieve the Option matching the parameter name specified.
-     *
-     * @param name         Name of the parameter.
-     * @param defaultValue default value if the parameter not found
-     * @return parameter value
-     */
-    String getOptionValue(String name, String defaultValue);
-
-
-    /**
-     * Get the -help output.
-     *
-     * @return formatted Help text
-     */
-    String getHelpText();
-
-    /**
-     * Print the -help output.
-     */
-    default void printHelp() {
-        System.out.println("\n" + getHelpText());
-    }
-
-
-    /**
-     * Parse the command line arguments.
-     *
-     * @param args list of command line arguments.
-     * @throws IllegalArgumentException If an exception occurred.
-     * @throws ParseException           If an exception occurred.
-     * @throws HelpException            If the 'help' option is supplied.
-     */
-    void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException;
 }

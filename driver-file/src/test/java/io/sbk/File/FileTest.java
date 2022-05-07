@@ -9,7 +9,7 @@
  */
 package io.sbk.File;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.api.InputParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Writer;
 import io.sbk.api.impl.SbkDriversParameters;
@@ -33,7 +33,7 @@ public class FileTest {
     final String[] drivers = {"File"};
     final String benchmarkName = Config.NAME + " -class file";
     private File file;
-    private ParameterOptions params;
+    private InputParameterOptions params;
 
     @Test
     public void testParseArgs() {

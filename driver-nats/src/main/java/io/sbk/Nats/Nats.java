@@ -14,6 +14,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.options.InputOptions;
 
 import java.io.IOException;
 
@@ -27,7 +28,7 @@ public class Nats implements Storage<byte[]> {
     private Options options;
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("topic", true, "Topic name");
         params.addOption("uri", true, "Server URI");
     }

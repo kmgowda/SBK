@@ -13,6 +13,7 @@ package io.sbk.api;
 import com.google.common.reflect.TypeToken;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.ByteArray;
+import io.sbk.options.InputOptions;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -28,7 +29,7 @@ public interface Storage<T> {
      * @param params Parameters object to be extended.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    void addArgs(final ParameterOptions params) throws IllegalArgumentException;
+    void addArgs(final InputOptions params) throws IllegalArgumentException;
 
     /**
      * Parse the driver specific command line arguments.

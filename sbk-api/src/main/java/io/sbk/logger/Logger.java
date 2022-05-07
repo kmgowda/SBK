@@ -14,6 +14,7 @@ import io.perl.logger.PerformanceLogger;
 import io.sbk.action.Action;
 import io.perl.exception.ExceptionHandler;
 import io.sbk.options.InputOptions;
+import io.sbk.options.ParsedOptions;
 import io.time.Time;
 
 
@@ -38,7 +39,7 @@ public interface Logger extends PerformanceLogger {
      * @param params InputOptions object to be parsed for driver specific parameters/arguments.
      * @throws IllegalArgumentException If an exception occurred.
      */
-    void parseArgs(final InputOptions params) throws IllegalArgumentException;
+    void parseArgs(final ParsedOptions params) throws IllegalArgumentException;
 
 
     /**
@@ -50,7 +51,7 @@ public interface Logger extends PerformanceLogger {
      * @param time        time interface
      * @throws IOException If an exception occurred.
      */
-    void open(final InputOptions params, final String storageName, final Action action, Time time)
+    void open(final ParsedOptions params, final String storageName, final Action action, Time time)
             throws IOException;
 
     /**
@@ -59,7 +60,7 @@ public interface Logger extends PerformanceLogger {
      * @param params InputOptions object to be parsed for driver specific parameters/arguments.
      * @throws IOException If an exception occurred.
      */
-    void close(final InputOptions params) throws IOException;
+    void close(final ParsedOptions params) throws IOException;
 
     /**
      * Default implementation for setting exception handler.

@@ -9,7 +9,7 @@
  */
 package io.sbk.BookKeeper;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.api.InputParameterOptions;
 import io.sbk.api.impl.SbkDriversParameters;
 import io.sbk.config.Config;
 import org.junit.Assert;
@@ -26,7 +26,7 @@ public class BookKeeperTest {
     private final static String CONFIGFILE = "BookKeeper.properties";
     final String[] drivers = {"BookKeeper"};
     final String benchmarkName = Config.NAME + " -class bookkeeper";
-    private ParameterOptions params;
+    private InputParameterOptions params;
     private BookKeeper bk;
 
     @Test

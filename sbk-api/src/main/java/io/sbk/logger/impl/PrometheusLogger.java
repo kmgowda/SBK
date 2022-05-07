@@ -17,6 +17,7 @@ import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
 import io.sbk.options.InputOptions;
+import io.sbk.options.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;
 
@@ -67,7 +68,7 @@ public class PrometheusLogger extends CSVLogger {
 
 
     @Override
-    public void parseArgs(final InputOptions params) throws IllegalArgumentException {
+    public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         final String parsedContext = params.getOptionValue("context", metricsConfig.port + metricsConfig.context);
         if (parsedContext.equalsIgnoreCase(DISABLE_STRING)) {
@@ -84,7 +85,7 @@ public class PrometheusLogger extends CSVLogger {
 
 
     @Override
-    public void open(final InputOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
+    public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
         if (contextDisabled) {
             printer = super::print;
@@ -98,7 +99,7 @@ public class PrometheusLogger extends CSVLogger {
     }
 
     @Override
-    public void close(final InputOptions params) throws IllegalArgumentException, IOException {
+    public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
         if (prometheusServer != null) {
             prometheusServer.stop();
         }

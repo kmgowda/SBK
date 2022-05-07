@@ -13,6 +13,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.options.InputOptions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,7 +33,7 @@ public class HDFS implements Storage<byte[]> {
     private boolean recreate;
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("fs", true, "File System Type, default: " + FSTYPE);
         params.addOption("file", true, "File name");
         params.addOption("uri", true, "URI");

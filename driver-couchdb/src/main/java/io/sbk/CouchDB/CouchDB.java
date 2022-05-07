@@ -19,6 +19,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
+import io.sbk.options.InputOptions;
 import io.sbk.system.Printer;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -43,7 +44,7 @@ public class CouchDB implements Storage<String> {
     }
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {

@@ -17,6 +17,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.options.InputOptions;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.TopicConfig;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
@@ -50,7 +51,7 @@ public class RocketMQ implements Storage<byte[]> {
     }
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("cluster", true, "Cluster name default: " + DEFAULT_CLUSTER);
         params.addOption("topic", true, "Topic name");
         params.addOption("nameserver", true, "Name Server URI");

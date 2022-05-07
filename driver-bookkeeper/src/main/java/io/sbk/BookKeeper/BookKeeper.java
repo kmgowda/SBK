@@ -13,6 +13,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.options.InputOptions;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.distributedlog.DistributedLogConfiguration;
@@ -40,7 +41,7 @@ public class BookKeeper implements Storage<byte[]> {
     private int ackQuorum;
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
         params.addOption("ensembleSize", true, "EnsembleSize (default value is in " + CONFIGFILE + " )");

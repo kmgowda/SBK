@@ -18,6 +18,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
+import io.sbk.options.InputOptions;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.Connection;
@@ -36,7 +37,7 @@ public class Activemq implements Storage<String> {
     private ActivemqConfig config;
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {

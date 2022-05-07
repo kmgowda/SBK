@@ -13,7 +13,7 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
-import io.sbk.api.ParameterOptions;
+import io.sbk.api.InputParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbk.config.Config;
@@ -125,7 +125,7 @@ final public class Sbk {
         final StoragePackage packageStore = new StoragePackage(storagePackageName);
         final Storage storageDevice;
         final Action action;
-        final ParameterOptions params;
+        final InputParameterOptions params;
         final RWLogger rwLogger;
         final Time time;
         final String[] nextArgs;
@@ -150,7 +150,7 @@ final public class Sbk {
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isEmpty(className)) {
-            final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
+            final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
             rwLogger.addArgs(helpParams);
             final String helpText = helpParams.getHelpText();
             System.out.println("\n" + helpText);
@@ -165,7 +165,7 @@ final public class Sbk {
                     | IllegalAccessException ex) {
                 Printer.log.error("Instantiation of storage class '" + className + "' from the package '" +
                         storagePackageName + "' failed!, " + "error: " + ex);
-                final ParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
+                final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
                 rwLogger.addArgs(helpParams);
                 helpParams.printHelp();
                 throw ex;

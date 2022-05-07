@@ -12,6 +12,7 @@ package io.sbk.Hive;
 import io.sbk.Jdbc.Jdbc;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
+import io.sbk.options.InputOptions;
 
 import java.io.IOException;
 
@@ -22,7 +23,7 @@ public class Hive extends Jdbc {
     private final static String CONFIGFILE = "hive.properties";
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params, CONFIGFILE);
 
     }

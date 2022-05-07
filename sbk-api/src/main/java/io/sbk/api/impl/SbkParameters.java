@@ -10,7 +10,7 @@
 package io.sbk.api.impl;
 
 import io.perl.config.PerlConfig;
-import io.sbk.api.ParameterOptions;
+import io.sbk.api.InputParameterOptions;
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
 import io.sbk.options.impl.SbkInputOptions;
@@ -22,7 +22,7 @@ import org.apache.commons.cli.ParseException;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-public class SbkParameters extends SbkInputOptions implements ParameterOptions {
+public class SbkParameters extends SbkInputOptions implements InputParameterOptions {
 
     @Getter
     final private int timeoutMS;

@@ -17,6 +17,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.options.InputOptions;
 
 import java.io.IOException;
 
@@ -31,7 +32,7 @@ public class NatsStream implements Storage<byte[]> {
     private Builder optsBuilder;
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 

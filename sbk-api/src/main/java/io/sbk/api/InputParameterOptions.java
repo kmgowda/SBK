@@ -7,13 +7,10 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
+
 package io.sbk.api;
 
-import io.sbk.options.ParsedOptions;
+import io.sbk.options.ParseInputOptions;
 
-/**
- * class for Command Line Parameters.
- */
-public interface ParameterOptions extends ParsedOptions, Parameters {
-
+public interface InputParameterOptions extends ParseInputOptions, ParameterOptions {
 }
