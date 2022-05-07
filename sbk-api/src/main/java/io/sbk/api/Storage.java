@@ -98,7 +98,8 @@ public interface Storage<T> {
         if (type.getTypeName().equals("byte")) {
             return (DataType<T>) new ByteArray();
         } else {
-            throw new IllegalArgumentException("The data type is your class which implements Benchmark interface is not byte[]" +
+            throw new IllegalArgumentException(
+                    "The data type is your class which implements Benchmark interface is not byte[]" +
                     ", Override/Implement the 'dataType' method");
         }
     }
