@@ -16,7 +16,7 @@ import io.sbk.options.GetArguments;
 /**
  * Interface GemParameterOptions.
  */
-public interface GemParameterOptions extends InputParameterOptions, GemParameters, GetArguments {
+public non-sealed interface GemParameterOptions extends InputParameterOptions, GemParameters, GetArguments {
 
 }
 

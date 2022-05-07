@@ -15,7 +15,7 @@ import io.sbk.api.Parameters;
 /**
  * Interface GemParameters.
  */
-public interface GemParameters extends Parameters {
+public sealed interface GemParameters extends Parameters permits GemParameterOptions {
 
     /**
      * to get ssh connections.
