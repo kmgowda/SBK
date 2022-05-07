@@ -17,6 +17,7 @@ import io.sbk.options.InputOptions;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 /**
  * Interface for Benchmarking.
@@ -93,7 +94,7 @@ public interface Storage<T> {
     default DataType<T> getDataType() throws IllegalArgumentException {
         final TypeToken<T> typeToken = new TypeToken<T>(getClass()) {
         };
-        final Type type = typeToken.getComponentType().getType();
+        final Type type = Objects.requireNonNull(typeToken.getComponentType()).getType();
         if (type.getTypeName().equals("byte")) {
             return (DataType<T>) new ByteArray();
         } else {
