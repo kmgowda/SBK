@@ -15,6 +15,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
+import io.sbk.options.InputOptions;
 import io.sbk.system.Printer;
 import redis.clients.jedis.Jedis;
 
@@ -31,7 +32,7 @@ public class Redis implements Storage<String> {
     private String serverUri;
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("list", true, "List /Channel name");
         params.addOption("uri", true, "Server URI");
     }

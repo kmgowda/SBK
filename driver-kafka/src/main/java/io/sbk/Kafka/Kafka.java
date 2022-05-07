@@ -16,6 +16,7 @@ import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
+import io.sbk.options.InputOptions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.IsolationLevel;
@@ -38,7 +39,7 @@ public class Kafka implements Storage<byte[]> {
     private KafkaTopicHandler topicHandler;
 
 
-    public void addArgs(final ParameterOptions params, String configFile) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params, String configFile) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
@@ -58,7 +59,7 @@ public class Kafka implements Storage<byte[]> {
     }
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         addArgs(params, CONFIGFILE);
     }
 

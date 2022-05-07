@@ -12,7 +12,7 @@ package io.sbk.options.impl;
 
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
-import io.sbk.options.InputOptions;
+import io.sbk.options.ParseInputOptions;
 import io.sbk.system.Printer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -25,7 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-public class SbkInputOptions implements InputOptions {
+public class SbkInputOptions implements ParseInputOptions {
     final private String benchmarkName;
     final private String header;
     final private String footer;

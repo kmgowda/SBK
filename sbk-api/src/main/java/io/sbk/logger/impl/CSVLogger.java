@@ -14,6 +14,7 @@ import io.perl.data.Bytes;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.options.InputOptions;
+import io.sbk.options.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +79,7 @@ public class CSVLogger extends SystemLogger {
     }
 
     @Override
-    public void parseArgs(final InputOptions params) throws IllegalArgumentException {
+    public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         csvFile = params.getOptionValue("csvfile", DISABLE_STRING);
         csvEnable = csvFile.compareToIgnoreCase(DISABLE_STRING) != 0;
@@ -105,7 +106,7 @@ public class CSVLogger extends SystemLogger {
 
 
     @Override
-    public void open(final InputOptions params, final String storageName, Action action, Time time) throws IOException {
+    public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IOException {
         super.open(params, storageName, action, time);
         if (csvEnable) {
             openCSV();
@@ -186,7 +187,7 @@ public class CSVLogger extends SystemLogger {
     }
 
     @Override
-    public void close(final InputOptions params) throws IOException {
+    public void close(final ParsedOptions params) throws IOException {
         super.close(params);
         if (csvEnable) {
             csvWriter.close();

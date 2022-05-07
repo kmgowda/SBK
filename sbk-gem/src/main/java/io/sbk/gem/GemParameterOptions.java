@@ -10,13 +10,13 @@
 
 package io.sbk.gem;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.api.InputParameterOptions;
 import io.sbk.options.GetArguments;
 
 /**
  * Interface GemParameterOptions.
  */
-public interface GemParameterOptions extends ParameterOptions, GemParameters, GetArguments {
+public interface GemParameterOptions extends InputParameterOptions, GemParameters, GetArguments {
 
 }
 

@@ -10,10 +10,10 @@
 
 package io.sbk.ram;
 
-import io.sbk.options.InputOptions;
+import io.sbk.options.ParseInputOptions;
 
 /**
  * Interface RamParameterOptions.
  */
-public interface RamParameterOptions extends InputOptions, RamParameters {
+public interface RamParameterOptions extends ParseInputOptions, RamParameters {
 }

@@ -18,6 +18,7 @@ import io.sbk.action.Action;
 import io.sbk.logger.RWLogger;
 import io.sbk.logger.LoggerConfig;
 import io.sbk.options.InputOptions;
+import io.sbk.options.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.MicroSeconds;
 import io.time.MilliSeconds;
@@ -41,7 +42,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected final AtomicInteger maxReaders;
     protected String storageName;
     protected String timeUnitFullText;
-    protected InputOptions params;
+    protected ParsedOptions params;
     protected Action action;
     protected Time time;
     private LoggerConfig loggerConfig;
@@ -101,7 +102,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
 
     @Override
-    public void parseArgs(final @NotNull InputOptions params) throws IllegalArgumentException {
+    public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         try {
             timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
         } catch (IllegalArgumentException ex) {
@@ -154,7 +155,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void open(final InputOptions params, final String storageName, @NotNull Action action, Time time) throws IOException {
+    public void open(final ParsedOptions params, final String storageName, @NotNull Action action, Time time) throws IOException {
         this.params = params;
         this.storageName = storageName;
         this.action = action;
@@ -172,7 +173,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void close(final InputOptions params) throws IOException {
+    public void close(final ParsedOptions params) throws IOException {
     }
 
     @Override

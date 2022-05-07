@@ -15,6 +15,7 @@ import io.sbk.api.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.NioByteBuffer;
+import io.sbk.options.InputOptions;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,7 +27,7 @@ public class AsyncFile implements Storage<ByteBuffer> {
     private String fileName;
 
     @Override
-    public void addArgs(final ParameterOptions params) throws IllegalArgumentException {
+    public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("file", true, "File name");
     }
 
