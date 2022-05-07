@@ -15,7 +15,7 @@ import io.sbk.logger.GemLogger;
 /**
  * Class GemRamPrometheusLogger.
  */
-public class GemRamPrometheusLogger extends RamPrometheusLogger implements GemLogger {
+public final class GemRamPrometheusLogger extends RamPrometheusLogger implements GemLogger {
 
     @Override
     public String[] getOptionsArgs() {
