@@ -12,7 +12,7 @@ package io.sbk.options;
 
 import org.apache.commons.cli.Options;
 
-public interface InputOptions {
+public sealed interface InputOptions permits ParseInputOptions {
     /**
      * Add the driver specific command line arguments.
      *

@@ -14,6 +14,6 @@ import io.sbk.options.ParsedOptions;
 /**
  * class for Command Line Parameters.
  */
-public interface ParameterOptions extends ParsedOptions, Parameters {
+public sealed interface ParameterOptions extends ParsedOptions, Parameters permits InputParameterOptions {
 
 }

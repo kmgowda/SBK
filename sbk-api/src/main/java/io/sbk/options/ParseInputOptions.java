@@ -16,7 +16,7 @@ import org.apache.commons.cli.ParseException;
 /**
  * Interface InputOptions.
  */
-public interface ParseInputOptions extends InputOptions, ParsedOptions {
+public non-sealed interface ParseInputOptions extends InputOptions, ParsedOptions {
 
     /**
      * Parse the command line arguments.

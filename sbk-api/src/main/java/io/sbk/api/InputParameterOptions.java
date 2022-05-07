@@ -12,5 +12,5 @@ package io.sbk.api;
 
 import io.sbk.options.ParseInputOptions;
 
-public interface InputParameterOptions extends ParseInputOptions, ParameterOptions {
+public non-sealed interface InputParameterOptions extends ParseInputOptions, ParameterOptions {
 }
