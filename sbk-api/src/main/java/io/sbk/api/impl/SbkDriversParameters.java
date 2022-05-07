@@ -13,7 +13,7 @@ import io.sbk.config.Config;
 
 import java.util.Arrays;
 
-public class SbkDriversParameters extends SbkParameters {
+public non-sealed class SbkDriversParameters extends SbkParameters {
     final private String[] drivers;
 
     public SbkDriversParameters(String name, String desc, String[] drivers) {

@@ -22,7 +22,8 @@ import org.apache.commons.cli.ParseException;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-public class SbkParameters extends SbkInputOptions implements InputParameterOptions {
+public sealed class SbkParameters extends SbkInputOptions implements InputParameterOptions
+        permits SbkDriversParameters {
 
     @Getter
     final private int timeoutMS;
