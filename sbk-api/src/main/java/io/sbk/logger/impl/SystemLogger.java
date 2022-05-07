@@ -42,7 +42,6 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     public String storageName;
     public String timeUnitFullText;
     public InputOptions params;
-    public double[] percentiles;
     public Action action;
     public Time time;
     private LoggerConfig loggerConfig;
