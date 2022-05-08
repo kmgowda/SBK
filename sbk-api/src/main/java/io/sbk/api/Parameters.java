@@ -51,7 +51,7 @@ public interface Parameters {
     int getRecordsPerSync();
 
     /**
-     * Number of records/events to write per Second.
+     * Number of records/events to write/read per Second.
      *
      * @return number of records per seconds.
      */
