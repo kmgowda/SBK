@@ -15,7 +15,7 @@ import io.nats.client.Nats;
 import io.nats.client.Options;
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 
 import java.io.IOException;
 import java.time.Duration;

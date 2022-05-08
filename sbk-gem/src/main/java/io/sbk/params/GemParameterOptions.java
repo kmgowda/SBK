@@ -1,5 +1,5 @@
 /**
- * Copyright (c) KMG. All Rights Reserved.
+ * Copyright (c) KMG. All Rights Reserved..
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -7,13 +7,13 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.api;
 
-import io.sbk.options.ParsedOptions;
+package io.sbk.params;
 
 /**
- * class for Command Line Parameters.
+ * Interface GemParameterOptions.
  */
-public sealed interface ParameterOptions extends ParsedOptions, Parameters permits InputParameterOptions {
+public non-sealed interface GemParameterOptions extends InputParameterOptions, GemParameters, GetArguments {
 
 }
+

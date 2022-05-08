@@ -9,7 +9,7 @@
  */
 package io.sbk.HDFS;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;

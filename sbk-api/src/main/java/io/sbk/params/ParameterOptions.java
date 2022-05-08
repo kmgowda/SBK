@@ -7,10 +7,11 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
+package io.sbk.params;
 
-package io.sbk.api;
+/**
+ * class for Command Line Parameters.
+ */
+public sealed interface ParameterOptions extends ParsedOptions, Parameters permits InputParameterOptions {
 
-import io.sbk.options.ParseInputOptions;
-
-public non-sealed interface InputParameterOptions extends ParseInputOptions, ParameterOptions {
 }

@@ -10,7 +10,7 @@
 
 package io.sbk.LevelDB;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import org.iq80.leveldb.DB;
 

@@ -12,7 +12,7 @@ package io.sbk.api.impl;
 import io.perl.api.PerlChannel;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Callback;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Worker;
 import io.sbk.data.DataType;
 import io.time.Time;

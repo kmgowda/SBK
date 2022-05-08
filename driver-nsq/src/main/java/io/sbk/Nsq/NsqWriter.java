@@ -11,7 +11,7 @@ package io.sbk.Nsq;
 
 import com.github.brainlag.nsq.NSQProducer;
 import com.github.brainlag.nsq.exceptions.NSQException;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 
 import java.io.IOException;

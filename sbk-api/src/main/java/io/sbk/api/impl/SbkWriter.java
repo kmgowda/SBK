@@ -14,7 +14,7 @@ import io.perl.api.PerlChannel;
 import io.perl.api.RunBenchmark;
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataWriter;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.RateController;
 import io.sbk.api.Worker;
 import io.sbk.data.DataType;

@@ -14,7 +14,7 @@ import com.github.brainlag.nsq.lookup.DefaultNSQLookup;
 import com.github.brainlag.nsq.lookup.NSQLookup;
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 
 import java.io.IOException;
 

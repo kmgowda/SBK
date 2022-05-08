@@ -10,7 +10,7 @@
 package io.sbk.File;
 
 import io.sbk.api.AsyncReader;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.data.DataType;
 
 import java.io.EOFException;

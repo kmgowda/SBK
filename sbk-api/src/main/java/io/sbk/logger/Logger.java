@@ -13,8 +13,8 @@ package io.sbk.logger;
 import io.perl.logger.PerformanceLogger;
 import io.sbk.action.Action;
 import io.perl.exception.ExceptionHandler;
-import io.sbk.options.InputOptions;
-import io.sbk.options.ParsedOptions;
+import io.sbk.params.InputOptions;
+import io.sbk.params.ParsedOptions;
 import io.time.Time;
 
 

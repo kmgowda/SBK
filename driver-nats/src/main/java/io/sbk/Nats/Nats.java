@@ -12,9 +12,9 @@ package io.sbk.Nats;
 import io.nats.client.Options;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
-import io.sbk.options.InputOptions;
+import io.sbk.params.InputOptions;
 
 import java.io.IOException;
 

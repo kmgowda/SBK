@@ -15,11 +15,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
-import io.sbk.options.InputOptions;
+import io.sbk.params.InputOptions;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

@@ -8,12 +8,11 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.gem.impl;
+package io.sbk.params.impl;
 
-import io.sbk.api.impl.SbkDriversParameters;
 import io.sbk.config.GemConfig;
 import io.sbk.exception.HelpException;
-import io.sbk.gem.GemParameterOptions;
+import io.sbk.params.GemParameterOptions;
 import io.sbk.gem.SshConnection;
 import io.sbk.system.Printer;
 import io.time.Time;

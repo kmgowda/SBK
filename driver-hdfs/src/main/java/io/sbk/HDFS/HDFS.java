@@ -11,9 +11,9 @@ package io.sbk.HDFS;
 
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
-import io.sbk.options.InputOptions;
+import io.sbk.params.InputOptions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

@@ -10,7 +10,7 @@
 
 package io.sbk.RocksDB;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;

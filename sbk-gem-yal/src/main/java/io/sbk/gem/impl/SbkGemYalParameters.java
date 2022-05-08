@@ -11,7 +11,7 @@
 package io.sbk.gem.impl;
 
 import io.sbk.config.YalConfig;
-import io.sbk.yal.impl.SbkYalParameters;
+import io.sbk.params.impl.SbkYalParameters;
 
 /**
  * Class SbkGemYalParameters.

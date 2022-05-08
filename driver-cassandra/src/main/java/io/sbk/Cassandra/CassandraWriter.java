@@ -10,7 +10,7 @@
 package io.sbk.Cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 
 import java.io.IOException;

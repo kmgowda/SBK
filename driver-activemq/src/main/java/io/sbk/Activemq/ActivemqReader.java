@@ -9,8 +9,8 @@
  */
 package io.sbk.Activemq;
 
-import io.sbk.api.ParameterOptions;
-import io.sbk.api.Parameters;
+import io.sbk.params.ParameterOptions;
+import io.sbk.params.Parameters;
 import io.sbk.api.Reader;
 
 import javax.jms.JMSException;

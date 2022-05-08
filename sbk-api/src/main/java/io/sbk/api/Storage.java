@@ -13,7 +13,8 @@ package io.sbk.api;
 import com.google.common.reflect.TypeToken;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.ByteArray;
-import io.sbk.options.InputOptions;
+import io.sbk.params.InputOptions;
+import io.sbk.params.ParameterOptions;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

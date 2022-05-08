@@ -17,7 +17,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 
 import java.io.IOException;
 import java.util.Collections;

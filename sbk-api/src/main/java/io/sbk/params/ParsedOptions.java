@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.options;
+package io.sbk.params;
 
 public interface ParsedOptions {
 

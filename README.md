@@ -498,19 +498,19 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       java and <driver name>Writer.java files filled with required classes definitions
    
 2. You have to implement the following methods of Benchmark Interface:
-   a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.api.ParameterOptions))]
+   a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.params.ParameterOptions))]
    * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
 
-   b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#parseArgs(io.sbk.api.ParameterOptions))]
+   b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#parseArgs(io.sbk.params.ParameterOptions))]
 
-   c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#openStorage(io.sbk.api.ParameterOptions))]
+   c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#openStorage(io.sbk.params.ParameterOptions))]
 
-   d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#closeStorage(io.sbk.api.ParameterOptions))]
+   d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#closeStorage(io.sbk.params.ParameterOptions))]
 
-   e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createWriter(int,io.sbk.api.ParameterOptions))]
+   e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createWriter(int,io.sbk.params.ParameterOptions))]
    * Create Writer will be called multiple times by SBK in case of Multi writers are specified in the command line.
 
-   f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createReader(int,io.sbk.api.ParameterOptions))]
+   f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createReader(int,io.sbk.params.ParameterOptions))]
    * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line.
 
    g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
@@ -630,19 +630,19 @@ Please report issues at https://github.com/kmgowda/SBK
     
     * you have to implement the following methods of Benchmark Interface:
         
-      a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.api.ParameterOptions))]
+      a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.params.ParameterOptions))]
       * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
         
-      b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#parseArgs(io.sbk.api.ParameterOptions))]
+      b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#parseArgs(io.sbk.params.ParameterOptions))]
         
-      c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#openStorage(io.sbk.api.ParameterOptions))]
+      c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#openStorage(io.sbk.params.ParameterOptions))]
         
-      d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#closeStorage(io.sbk.api.ParameterOptions))]
+      d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#closeStorage(io.sbk.params.ParameterOptions))]
         
-      e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createWriter(int,io.sbk.api.ParameterOptions))]
+      e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createWriter(int,io.sbk.params.ParameterOptions))]
         * Create Writer will be called multiple times by SBK in case of Multi writers are specified in the command line.   
         
-      f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createReader(int,io.sbk.api.ParameterOptions))]
+      f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createReader(int,io.sbk.params.ParameterOptions))]
         * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line. 
         
       g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]

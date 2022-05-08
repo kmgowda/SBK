@@ -10,7 +10,7 @@
 
 package io.sbk.logger;
 
-import io.sbk.options.GetArguments;
+import io.sbk.params.GetArguments;
 
 /**
  * Interface GemLogger.

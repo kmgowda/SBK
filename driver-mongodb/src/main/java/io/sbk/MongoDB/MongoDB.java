@@ -18,9 +18,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
-import io.sbk.options.InputOptions;
+import io.sbk.params.InputOptions;
 import org.bson.Document;
 
 import java.io.IOException;
