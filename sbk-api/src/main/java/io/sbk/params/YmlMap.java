@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.yal;
+package io.sbk.params;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -27,7 +27,7 @@ public abstract class YmlMap {
         this.args = args;
     }
 
-    public final static @NotNull String[] getYmlArgs(String fileName, Class<? extends YmlMap> tClass) throws IOException {
+    public static @NotNull String[] getYmlArgs(String fileName, Class<? extends YmlMap> tClass) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
 

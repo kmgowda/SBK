@@ -9,7 +9,7 @@
  */
 package io.sbk.Jdbc;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.system.Printer;
 

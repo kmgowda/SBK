@@ -26,11 +26,11 @@ import io.minio.errors.RegionConflictException;
 import io.minio.messages.Item;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.ByteArray;
-import io.sbk.options.InputOptions;
+import io.sbk.params.InputOptions;
 import io.sbk.system.Printer;
 
 import java.io.IOException;

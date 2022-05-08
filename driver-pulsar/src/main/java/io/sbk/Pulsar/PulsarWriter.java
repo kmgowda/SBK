@@ -9,7 +9,7 @@
  */
 package io.sbk.Pulsar;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 import lombok.Synchronized;
 import org.apache.pulsar.client.api.Producer;

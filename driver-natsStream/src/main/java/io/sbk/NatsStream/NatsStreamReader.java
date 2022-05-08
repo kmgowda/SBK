@@ -18,7 +18,7 @@ import io.nats.streaming.Subscription;
 import io.nats.streaming.SubscriptionOptions;
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;

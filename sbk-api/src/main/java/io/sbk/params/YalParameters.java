@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.yal;
+package io.sbk.params;
 
 public interface YalParameters {
 

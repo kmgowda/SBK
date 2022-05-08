@@ -10,7 +10,7 @@
 package io.sbk.RocketMQ;
 
 import io.perl.api.PerlChannel;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 import io.time.Time;
 import org.apache.rocketmq.client.exception.MQClientException;

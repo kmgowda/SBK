@@ -10,7 +10,7 @@
 package io.sbk.AsyncFile;
 
 import io.perl.api.PerlChannel;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import io.sbk.api.Status;
 import io.sbk.data.DataType;

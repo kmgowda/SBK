@@ -15,7 +15,7 @@ import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.ReaderConfig;
 import io.pravega.client.stream.ReinitializationRequiredException;
 import io.pravega.client.stream.impl.ByteArraySerializer;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 
 import java.io.IOException;

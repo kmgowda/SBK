@@ -16,8 +16,8 @@ import io.perl.logger.Print;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
-import io.sbk.options.InputOptions;
-import io.sbk.options.ParsedOptions;
+import io.sbk.params.InputOptions;
+import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;
 

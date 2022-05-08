@@ -10,7 +10,7 @@
 
 package io.sbk.CouchDB;
 
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 import org.ektorp.CouchDbConnector;
 

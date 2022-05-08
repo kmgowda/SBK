@@ -10,8 +10,8 @@
 package io.sbk.Db2;
 
 import io.sbk.Jdbc.Jdbc;
-import io.sbk.api.ParameterOptions;
-import io.sbk.options.InputOptions;
+import io.sbk.params.ParameterOptions;
+import io.sbk.params.InputOptions;
 
 /**
  * Class for Db2.

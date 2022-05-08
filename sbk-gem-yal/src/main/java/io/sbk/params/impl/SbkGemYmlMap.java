@@ -9,26 +9,26 @@
  */
 
 
-package io.sbk.yal.impl;
+package io.sbk.params.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.sbk.yal.YmlMap;
+import io.sbk.params.YmlMap;
 
 import java.util.Map;
 
 /**
  * Class SbkGemYmlMap.
  */
-public final class SbkYmlMap extends YmlMap {
+public final class SbkGemYmlMap extends YmlMap {
 
     /**
      * Passing args to its super class YmlMap.
      *
-     * @param args JsonProperty("sbkArgs") Map{String, String}
+     * @param args JsonProperty("sbkGemArgs") Map{String, String}
      */
     @JsonCreator
-    public SbkYmlMap(@JsonProperty("sbkArgs") Map<String, String> args) {
+    public SbkGemYmlMap(@JsonProperty("sbkGemArgs") Map<String, String> args) {
         super(args);
     }
 }

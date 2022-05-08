@@ -8,12 +8,11 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.yal.impl;
+package io.sbk.params.impl;
 
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
-import io.sbk.options.impl.SbkInputOptions;
-import io.sbk.yal.YalParameters;
+import io.sbk.params.YalParameters;
 import org.apache.commons.cli.ParseException;
 
 public class SbkYalParameters extends SbkInputOptions implements YalParameters {

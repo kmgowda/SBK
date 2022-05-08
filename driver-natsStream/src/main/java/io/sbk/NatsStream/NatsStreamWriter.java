@@ -14,7 +14,7 @@ import io.nats.streaming.NatsStreaming;
 import io.nats.streaming.Options.Builder;
 import io.nats.streaming.StreamingConnection;
 import io.perl.api.PerlChannel;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
 import io.sbk.data.DataType;

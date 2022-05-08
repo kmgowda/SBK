@@ -8,9 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram;
-
-import io.sbk.options.ParseInputOptions;
+package io.sbk.params;
 
 /**
  * Interface RamParameterOptions.

@@ -18,9 +18,9 @@ import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.logger.RWLogger;
 import io.sbk.system.Printer;
-import io.sbk.yal.YmlMap;
-import io.sbk.yal.impl.SbkYalParameters;
-import io.sbk.yal.impl.SbkYmlMap;
+import io.sbk.params.YmlMap;
+import io.sbk.params.impl.SbkYalParameters;
+import io.sbk.params.impl.SbkYmlMap;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 

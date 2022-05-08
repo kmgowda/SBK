@@ -27,8 +27,8 @@ import io.sbk.grpc.Config;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.grpc.ServiceGrpc;
 import io.sbk.logger.RamHostConfig;
-import io.sbk.options.InputOptions;
-import io.sbk.options.ParsedOptions;
+import io.sbk.params.InputOptions;
+import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;
 

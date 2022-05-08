@@ -16,7 +16,7 @@ import io.sbk.grpc.ClientID;
 import io.sbk.grpc.Config;
 import io.sbk.grpc.ServiceGrpc;
 import io.sbk.logger.CountConnections;
-import io.sbk.ram.RamParameters;
+import io.sbk.params.RamParameters;
 import io.sbk.ram.RamRegistry;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;

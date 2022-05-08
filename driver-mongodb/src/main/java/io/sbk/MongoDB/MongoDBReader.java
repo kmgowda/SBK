@@ -13,7 +13,7 @@ package io.sbk.MongoDB;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
-import io.sbk.api.ParameterOptions;
+import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import org.bson.Document;
 import org.bson.types.Binary;

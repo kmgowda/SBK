@@ -19,9 +19,9 @@ import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.logger.GemLogger;
 import io.sbk.system.Printer;
-import io.sbk.yal.YmlMap;
-import io.sbk.yal.impl.SbkGemYmlMap;
-import io.sbk.yal.impl.SbkYalParameters;
+import io.sbk.params.YmlMap;
+import io.sbk.params.impl.SbkGemYmlMap;
+import io.sbk.params.impl.SbkYalParameters;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 

@@ -11,6 +11,7 @@
 package io.sbk.api;
 
 import io.perl.api.PerlChannel;
+import io.sbk.params.Parameters;
 
 /**
  * Abstract class for Writers and Readers.

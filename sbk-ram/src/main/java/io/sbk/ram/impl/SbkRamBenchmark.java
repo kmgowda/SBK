@@ -24,7 +24,7 @@ import io.sbk.config.Config;
 import io.sbk.config.RamConfig;
 import io.sbk.grpc.LatenciesRecord;
 import io.sbk.logger.RamLogger;
-import io.sbk.ram.RamParameterOptions;
+import io.sbk.params.RamParameterOptions;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.system.Printer;
 import io.state.State;
