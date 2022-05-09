@@ -15,7 +15,7 @@ import io.sbk.action.Action;
 /**
  * Interface RamParameters.
  */
-public interface RamParameters {
+public sealed interface RamParameters permits RamParameterOptions {
 
     /**
      * Get Storage Name.

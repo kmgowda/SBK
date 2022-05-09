@@ -13,5 +13,5 @@ package io.sbk.params;
 /**
  * Interface RamParameterOptions.
  */
-public interface RamParameterOptions extends ParseInputOptions, RamParameters {
+public non-sealed interface RamParameterOptions extends ParseInputOptions, RamParameters {
 }

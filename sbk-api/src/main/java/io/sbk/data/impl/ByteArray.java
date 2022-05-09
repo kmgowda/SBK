@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * Class for processing byte[] data.
  */
-public class ByteArray implements DataType<byte[]> {
+final public class ByteArray implements DataType<byte[]> {
 
     /**
      * Create byte array data.

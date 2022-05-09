@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * Class for processing ByteBuffer data.
  */
-public class NioByteBuffer implements DataType<ByteBuffer> {
+final public class NioByteBuffer implements DataType<ByteBuffer> {
 
     /**
      * Create byte buffer.

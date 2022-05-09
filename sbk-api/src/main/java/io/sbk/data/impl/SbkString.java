@@ -17,7 +17,7 @@ import java.util.Random;
 /**
  * Class for processing byte[] data.
  */
-public class SbkString implements DataType<String> {
+final public class SbkString implements DataType<String> {
     final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
     final static String FORMAT_STRING = "%0" + TIME_HEADER_SIZE + "d";
 

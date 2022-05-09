@@ -19,7 +19,7 @@ import java.util.Random;
 /**
  * Class for processing Byte String data.
  */
-public class ProtoBufByteString implements DataType<ByteString> {
+final public class ProtoBufByteString implements DataType<ByteString> {
 
     /**
      * Create byte array data.
