@@ -25,8 +25,10 @@ It massively writes the data to the storage system and reads the data from the s
 The latency quartiles and percentiles are calculated for complete data written/read without any sampling; hence the 
 percentiles are 100% accurate.
 
-SBK can be deployed in a distributed nodes using applications [**SBK-RAM**](./sbk-ram), [**SBK-GEM**](./sbk-gem) and 
-[**SBK-GEM-YAL**](./sbk-gem-yal) 
+SBK can be deployed in a distributed nodes using applications [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
+[**SBK-GEM-YAL**](sbk-gem-yal)
+
+![SBK Eco System](images/sbk-ram.png)
 
 The design principle of SBK is the **Performance Benchmarking of _'Any Storage System'_ with _'Any Type of data payload'_ and _'Any Time Stamp'_**,
 because, the SBK is not specific to particular type of storage system,
@@ -286,8 +288,8 @@ metrics.
 
 
 ## Distributed SBK
-SBK can be deployed in a distributed clusters using [**SBK-RAM**](./sbk-ram), [**SBK-GEM**](./sbk-gem) and 
-[**SBK-GEM-YAL**](./sbk-gem-yal)
+SBK can be deployed in a distributed clusters using [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
+[**SBK-GEM-YAL**](sbk-gem-yal)
 
 ## SBK Docker Containers
 The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
