@@ -25,8 +25,8 @@ It massively writes the data to the storage system and reads the data from the s
 The latency quartiles and percentiles are calculated for complete data written/read without any sampling; hence the 
 percentiles are 100% accurate.
 
-SBK can be deployed in a distributed nodes using applications [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
-[**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggegrated 
+SBK can be deployed in  distributed nodes using applications [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
+[**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggregated 
 into one master node called SBK-RAM (SBK - Results Aggregation Monitor).
 
 ![SBK Eco System](images/sbk-ram.png)
