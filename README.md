@@ -26,7 +26,8 @@ The latency quartiles and percentiles are calculated for complete data written/r
 percentiles are 100% accurate.
 
 SBK can be deployed in a distributed nodes using applications [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
-[**SBK-GEM-YAL**](sbk-gem-yal)
+[**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggegrated 
+into one master node called SBK-RAM (SBK - Results Aggregation Monitor).
 
 ![SBK Eco System](images/sbk-ram.png)
 
@@ -289,7 +290,7 @@ metrics.
 
 ## Distributed SBK
 SBK can be deployed in a distributed clusters using [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
-[**SBK-GEM-YAL**](sbk-gem-yal)
+[**SBK-GEM-YAL**](sbk-gem-yal).
 
 ## SBK Docker Containers
 The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
