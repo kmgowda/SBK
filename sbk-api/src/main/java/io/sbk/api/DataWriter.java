@@ -87,7 +87,8 @@ public sealed interface DataWriter<T> permits DataRecordsWriter {
                                Time time, RateController rController) throws IOException;
 
     /**
-     * Write given number of records. No Writer Benchmarking is performed.
+     * Write given number of records.
+     * No Writer Benchmarking is performed But start time is included in the data written.
      *
      * @param writer       Writer Descriptor
      * @param recordsCount Records count
@@ -102,7 +103,8 @@ public sealed interface DataWriter<T> permits DataRecordsWriter {
                          RateController rController) throws IOException;
 
     /**
-     * Writing data records for specific time duration. No Writer Benchmarking is performed.
+     * Writing data records for specific time duration.
+     * No Writer Benchmarking is performed But start time is included in the data written.
      *
      * @param writer       Writer Descriptor
      * @param secondsToRun Number of seconds to Run
@@ -114,5 +116,36 @@ public sealed interface DataWriter<T> permits DataRecordsWriter {
      * @throws IOException If an exception occurred.
      */
     void RecordsWriterTimeRW(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                             Time time, RateController rController) throws IOException;
+
+
+    /**
+     * Write given number of records. No Writer Benchmarking is performed.
+     *
+     * @param writer       Writer Descriptor
+     * @param recordsCount Records count
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    void RecordsWriterRO(Worker writer, long recordsCount, DataType<T> dType, T data, int size, Time time,
+                         RateController rController) throws IOException;
+
+    /**
+     * Writing data records for specific time duration. No Writer Benchmarking is performed.
+     *
+     * @param writer       Writer Descriptor
+     * @param secondsToRun Number of seconds to Run
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    void RecordsWriterTimeRO(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
                              Time time, RateController rController) throws IOException;
 }

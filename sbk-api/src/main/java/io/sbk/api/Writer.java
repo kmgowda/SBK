@@ -48,7 +48,28 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
     }
 
     /**
-     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)})} with time
+     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)})} with start time.
+     * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
+     * then you can override this method. otherwise, use the default implementation and don't override this method.
+     * If you are intend to use your own payload, then also you can use override this method.
+     * you can write multiple records with this method.
+     *
+     * @param dType  Data Type interface
+     * @param data   data to writer
+     * @param size   size of the data
+     * @param time   time interface
+     * @param status write status to return
+     * @throws IOException If an exception occurred.
+     */
+    default CompletableFuture<?> write(DataType<T> dType, T data, int size, Time time, Status status) throws IOException {
+        status.bytes = size;
+        status.records = 1;
+        status.startTime = time.getCurrentTime();
+        return writeAsync(data);
+    }
+
+    /**
+     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)} with start time
      * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
      * then you can override this method. otherwise, use the default implementation and don't override this method.
      * If you are intend to use your own payload, then also you can use override this method.
@@ -70,9 +91,9 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
 
 
     /**
-     * Default implementation for writing data using {@link io.sbk.api.Writer#writeAsync(Object)}  )}
+     * Default implementation for writing data using {@link io.sbk.api.Writer#write(DataType, Object, int, Time, Status)}   
      * and recording the benchmark statistics.
-     * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#writeAsync(Object)}  )}
+     * If you are intend to NOT use the CompletableFuture returned by {@link io.sbk.api.Writer#write(DataType, Object, int, Time, Status)}
      * then you can override this method. otherwise, use the default implementation and don't override this method.
      * If you are intend to use your own payload, then also you can use override this method.
      * you can write multiple records with this method.
@@ -88,10 +109,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
     default void recordWrite(DataType<T> dType, T data, int size, Time time,
                              Status status, PerlChannel perlChannel) throws IOException {
         CompletableFuture<?> ret;
-        status.bytes = size;
-        status.records = 1;
-        status.startTime = time.getCurrentTime();
-        ret = writeAsync(data);
+        ret = write(dType, data, size, time, status);
         if (ret == null) {
             status.endTime = time.getCurrentTime();
             perlChannel.send(status.startTime, status.endTime, size, status.records);

@@ -29,6 +29,14 @@ public interface Parameters {
      */
     boolean isWriteAndRead();
 
+
+    /**
+     * check only if read performance benchmarking need to be conducted.
+     *
+     * @return True if both Writers and readers are supplied, but only read performance is conducted; False otherwise.
+     */
+    boolean isReadOnly();
+
     /**
      * Get the Total Number of records to read/writer.
      *

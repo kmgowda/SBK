@@ -81,14 +81,14 @@ final public class SbkWriter extends Worker implements RunBenchmark {
         final BiConsumer perfWriter;
         if (params.getTotalSecondsToRun() > 0) {
             if (params.isWriteAndRead()) {
-                perfWriter = this::RecordsWriterTimeRW;
+                perfWriter = params.isReadOnly() ? this::RecordsWriterTimeRO : this::RecordsWriterTimeRW;
             } else {
                 perfWriter = params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
                         this::RecordsWriterTimeSync : this::RecordsWriterTime;
             }
         } else {
             if (params.isWriteAndRead()) {
-                perfWriter = this::RecordsWriterRW;
+                perfWriter = params.isReadOnly() ? this::RecordsWriterRO : this::RecordsWriterRW;
             } else {
                 perfWriter = params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
                         this::RecordsWriterSync : this::RecordsWriter;
@@ -123,6 +123,14 @@ final public class SbkWriter extends Worker implements RunBenchmark {
 
     private void RecordsWriterTimeRW(long secondsToRun, long recordsCount) throws IOException {
         writer.RecordsWriterTimeRW(this, secondsToRun, dType, payload, dataSize, time, rCnt);
+    }
+
+    private void RecordsWriterRO(long secondsToRun, long recordsCount) throws IOException {
+        writer.RecordsWriterRO(this, recordsCount, dType, payload, dataSize, time, rCnt);
+    }
+
+    private void RecordsWriterTimeRO(long secondsToRun, long recordsCount) throws IOException {
+        writer.RecordsWriterTimeRO(this, secondsToRun, dType, payload, dataSize, time, rCnt);
     }
 
 }

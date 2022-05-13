@@ -79,13 +79,13 @@ final public class SbkReader extends Worker implements RunBenchmark {
     private @NotNull BiConsumer createBenchmark() {
         final BiConsumer perfReader;
         if (params.getTotalSecondsToRun() > 0) {
-            if (params.isWriteAndRead()) {
+            if (params.isWriteAndRead() && !params.isReadOnly()) {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsTimeReaderRWRateControl : this::RecordsTimeReaderRW;
             } else {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsTimeReaderRateControl : this::RecordsTimeReader;
             }
         } else {
-            if (params.isWriteAndRead()) {
+            if (params.isWriteAndRead() && !params.isReadOnly()) {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsReaderRWRateControl : this::RecordsReaderRW;
             } else {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsReaderRateControl : this::RecordsReader;

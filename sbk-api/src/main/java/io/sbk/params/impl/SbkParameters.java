@@ -64,6 +64,9 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     private boolean writeAndRead;
 
     @Getter
+    private boolean readOnly;
+
+    @Getter
     private long instanceID;
 
     public SbkParameters(String name, String desc) {
@@ -101,6 +104,10 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                 "Number of seconds/step for readers, default: 0");
         addOption("id", true,
                 "Instance ID, default: 0");
+        addOption("ro", true,
+                """
+                           Readonly Benchmarking,
+                           applicable only if both writers and readers are set, default: false""");
         addOption("help", false, "Help message");
     }
 
@@ -173,6 +180,10 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             writeAndRead = readersCount > 0;
         } else {
             writeAndRead = false;
+        }
+
+        if (writeAndRead) {
+                readOnly = Boolean.parseBoolean(getOptionValue("ro", "false"));
         }
     }
 }
