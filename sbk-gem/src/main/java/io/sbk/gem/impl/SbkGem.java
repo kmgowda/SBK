@@ -258,7 +258,11 @@ final public class SbkGem {
 
         String actionString = "r";
         if (params.isWriteAndRead()) {
-            actionString = "wr";
+            if (params.isReadOnly()) {
+                actionString = "wro";
+            } else {
+                actionString = "wr";
+            }
         } else if (params.getWritersCount() > 0) {
             actionString = "w";
         }

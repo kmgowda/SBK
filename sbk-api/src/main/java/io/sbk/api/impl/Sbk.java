@@ -219,7 +219,11 @@ final public class Sbk {
         time = PerlBuilder.buildTime(rwLogger);
         if (params.getReadersCount() > 0) {
             if (params.isWriteAndRead()) {
-                action = Action.Write_Reading;
+                if (params.isReadOnly()) {
+                    action = Action.Write_OnlyReading;
+                } else {
+                    action = Action.Write_Reading;
+                }
             } else {
                 action = Action.Reading;
             }

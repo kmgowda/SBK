@@ -49,7 +49,10 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
         this.maxConnections = maxConnections;
         this.ramPort = port;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");
-        addOption("action", true, "action [r: read, w: write, wr: write and read], default: r");
+        addOption("action", true,
+                """
+                            action [r: read, w: write, wr: write and read, wro: write but only read],
+                            default: r""");
         addOption("ramport", true, "RAM port number; default: " + ramPort);
         addOption("max", true, "Maximum number of connections; default: " + maxConnections);
     }
@@ -66,6 +69,7 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
 
         String actionString = getOptionValue("action", "r");
         action = switch (actionString.toLowerCase()) {
+            case "wro" -> Action.Write_OnlyReading;
             case "wr" -> Action.Write_Reading;
             case "w" -> Action.Writing;
             default -> Action.Reading;
