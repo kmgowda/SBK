@@ -28,9 +28,8 @@ percentiles are 100% accurate.
 SBK can be deployed in a distributed nodes using applications [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
 [**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggegrated 
 into one master node called SBK-RAM (SBK - Results Aggregation Monitor).
----
+
 ![SBK Eco System](images/sbk-ram.png)
----
 
 The design principle of SBK is the **Performance Benchmarking of _'Any Storage System'_ with _'Any Type of data payload'_ and _'Any Time Stamp'_**,
 because, the SBK is not specific to particular type of storage system,
