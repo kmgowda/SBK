@@ -12,6 +12,7 @@ package io.sbk.api.impl;
 
 import io.perl.api.PerlChannel;
 import io.perl.api.RunBenchmark;
+import io.sbk.action.Action;
 import io.sbk.api.BiConsumer;
 import io.sbk.api.DataReader;
 import io.sbk.params.ParameterOptions;
@@ -79,13 +80,13 @@ final public class SbkReader extends Worker implements RunBenchmark {
     private @NotNull BiConsumer createBenchmark() {
         final BiConsumer perfReader;
         if (params.getTotalSecondsToRun() > 0) {
-            if (params.isWriteAndRead()) {
+            if (params.getAction() == Action.Write_Reading) {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsTimeReaderRWRateControl : this::RecordsTimeReaderRW;
-            } else {
+            } else  {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsTimeReaderRateControl : this::RecordsTimeReader;
             }
         } else {
-            if (params.isWriteAndRead()) {
+            if (params.getAction() == Action.Write_Reading) {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsReaderRWRateControl : this::RecordsReaderRW;
             } else {
                 perfReader = params.getRecordsPerSec() > 0 ? this::RecordsReaderRateControl : this::RecordsReader;

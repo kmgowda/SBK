@@ -9,6 +9,7 @@
  */
 package io.sbk.Pulsar;
 
+import io.sbk.action.Action;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import org.apache.pulsar.client.api.Consumer;
@@ -30,8 +31,8 @@ public class PulsarReader implements Reader<byte[]> {
     public PulsarReader(int readerId, ParameterOptions params, String topicName,
                         String subscriptionName, PulsarClient client) throws IOException {
         this.params = params;
-        final SubscriptionInitialPosition position = params.isWriteAndRead() ? SubscriptionInitialPosition.Latest :
-                SubscriptionInitialPosition.Earliest;
+        final SubscriptionInitialPosition position = params.getAction() == Action.Write_Reading ?
+                SubscriptionInitialPosition.Latest : SubscriptionInitialPosition.Earliest;
 
         try {
             this.consumer = client.newConsumer()

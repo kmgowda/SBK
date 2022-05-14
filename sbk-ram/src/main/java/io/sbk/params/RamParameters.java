@@ -10,12 +10,10 @@
 
 package io.sbk.params;
 
-import io.sbk.action.Action;
-
 /**
  * Interface RamParameters.
  */
-public sealed interface RamParameters permits RamParameterOptions {
+public sealed interface RamParameters extends ActionParameter permits RamParameterOptions {
 
     /**
      * Get Storage Name.
@@ -23,13 +21,6 @@ public sealed interface RamParameters permits RamParameterOptions {
      * @return Name of the storage
      */
     String getStorageName();
-
-    /**
-     * Get the Action.
-     *
-     * @return action
-     */
-    Action getAction();
 
     /**
      * Get the Port number to user.
@@ -44,6 +35,5 @@ public sealed interface RamParameters permits RamParameterOptions {
      * @return Maximum allowed connections.
      */
     int getMaxConnections();
-
 
 }

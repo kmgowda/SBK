@@ -13,7 +13,7 @@ package io.sbk.params;
 /**
  * Interface Parameters.
  */
-public interface Parameters {
+public interface Parameters extends ActionParameter {
 
     /**
      * Get the execution time in seconds.
@@ -21,13 +21,6 @@ public interface Parameters {
      * @return seconds to run
      */
     long getTotalSecondsToRun();
-
-    /**
-     * Check if the both read and writes are requested.
-     *
-     * @return True if both Writers and readers are supplied; False otherwise.
-     */
-    boolean isWriteAndRead();
 
     /**
      * Get the Total Number of records to read/writer.

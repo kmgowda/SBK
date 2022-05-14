@@ -100,13 +100,13 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_Connections",
+              "expr": "SBK_ACTIVEMQ_Writing_Connections",
               "interval": "",
               "legendFormat": "Active",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_Max_Connections",
+              "expr": "SBK_ACTIVEMQ_Writing_Max_Connections",
               "interval": "",
               "legendFormat": "Max",
               "refId": "B"
@@ -180,13 +180,13 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_Connections",
+              "expr": "SBK_ACTIVEMQ_Reading_Connections",
               "interval": "",
               "legendFormat": "Active",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_Max_Connections",
+              "expr": "SBK_ACTIVEMQ_Reading_Max_Connections",
               "interval": "",
               "legendFormat": "Max",
               "refId": "B"
@@ -260,13 +260,13 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_Connections",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_Connections",
               "interval": "",
               "legendFormat": "Active",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_Max_Connections",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_Max_Connections",
               "interval": "",
               "legendFormat": "Max",
               "refId": "B"
@@ -400,13 +400,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_MBPerSec",
+              "expr": "SBK_ACTIVEMQ_Writing_MBPerSec",
               "refId": "A"
             }
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write Throughput MB/s",
+          "title": "ACTIVEMQ Write Throughput MB/s",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -488,13 +488,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_RecordsPerSec",
+              "expr": "SBK_ACTIVEMQ_Writing_RecordsPerSec",
               "refId": "A"
             }
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write Records/Sec",
+          "title": "ACTIVEMQ Write Records/Sec",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -601,19 +601,19 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write Avg and Max Latencies (Nanoseconds)",
+          "title": "ACTIVEMQ Write Avg and Max Latencies (Nanoseconds)",
           "type": "stat"
         },
         {
@@ -668,127 +668,127 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_10",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_20",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_20",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_25",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_25",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_30",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_30",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_40",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_40",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_50",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_50",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_60",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_60",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_70",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_70",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_75",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_75",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_80",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_80",
               "interval": "",
               "legendFormat": "",
               "refId": "J"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_90",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_90",
               "interval": "",
               "legendFormat": "",
               "refId": "K"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_92_5",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_92_5",
               "interval": "",
               "legendFormat": "",
               "refId": "L"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_95",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_95",
               "interval": "",
               "legendFormat": "",
               "refId": "M"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_97_5",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_97_5",
               "interval": "",
               "legendFormat": "",
               "refId": "N"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_99",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_99",
               "interval": "",
               "legendFormat": "",
               "refId": "O"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_99_25",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_99_25",
               "interval": "",
               "legendFormat": "",
               "refId": "P"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_99_5",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_99_5",
               "interval": "",
               "legendFormat": "",
               "refId": "Q"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_99_75",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_99_75",
               "interval": "",
               "legendFormat": "",
               "refId": "R"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_99_9",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "S"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_99_95",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_99_95",
               "interval": "",
               "legendFormat": "",
               "refId": "T"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ns_99_99",
+              "expr": "SBK_ACTIVEMQ_Writing_ns_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "U"
@@ -796,7 +796,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write Percentiles (Nanoseconds)",
+          "title": "ACTIVEMQ Write Percentiles (Nanoseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -891,19 +891,19 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_Writers",
+              "expr": "SBK_ACTIVEMQ_Writing_Writers",
               "interval": "",
               "legendFormat": "Active",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_Max_Writers",
+              "expr": "SBK_ACTIVEMQ_Writing_Max_Writers",
               "interval": "",
               "legendFormat": "Max",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Writers",
+          "title": "ACTIVEMQ Writers",
           "type": "stat"
         },
         {
@@ -999,11 +999,11 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_MBPerSec",
+              "expr": "SBK_ACTIVEMQ_Writing_MBPerSec",
               "refId": "A"
             }
           ],
-          "title": "RABBITMQ Write Throughput MB/s",
+          "title": "ACTIVEMQ Write Throughput MB/s",
           "type": "gauge"
         },
         {
@@ -1085,19 +1085,19 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_SLC_1",
+              "expr": "SBK_ACTIVEMQ_Writing_SLC_1",
               "interval": "",
               "legendFormat": "SLC 1",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_SLC_2",
+              "expr": "SBK_ACTIVEMQ_Writing_SLC_2",
               "interval": "",
               "legendFormat": "SLC 2",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write  Sliding Latency Coverage (SLC)",
+          "title": "ACTIVEMQ Write  Sliding Latency Coverage (SLC)",
           "type": "stat"
         },
         {
@@ -1163,11 +1163,11 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_Records_total",
+              "expr": "SBK_ACTIVEMQ_Writing_Records_total",
               "refId": "A"
             }
           ],
-          "title": "RABBITMQ Write Bytes Total",
+          "title": "ACTIVEMQ Write Bytes Total",
           "type": "stat"
         },
         {
@@ -1219,26 +1219,26 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_LowerDiscardedLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Reading_LowerDiscardedLatencyRecords_total",
               "interval": "",
               "legendFormat": "Lower",
               "queryType": "randomWalk",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_HigherDiscardLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Reading_HigherDiscardLatencyRecords_total",
               "interval": "",
               "legendFormat": "Higher",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_InvalidLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Reading_InvalidLatencyRecords_total",
               "interval": "",
               "legendFormat": "Invalid/Negative",
               "refId": "C"
             }
           ],
-          "title": "RABBITMQ Write Discarded Latencies",
+          "title": "ACTIVEMQ Write Discarded Latencies",
           "type": "stat"
         },
         {
@@ -1321,19 +1321,19 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write Avg and Max Latencies (Microseconds)",
+          "title": "ACTIVEMQ Write Avg and Max Latencies (Microseconds)",
           "type": "stat"
         },
         {
@@ -1388,55 +1388,55 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_10",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_25",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_25",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_50",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_50",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_75",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_75",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_90",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_90",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_95",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_95",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_99",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_99",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_99_9",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_mcs_99_99",
+              "expr": "SBK_ACTIVEMQ_Writing_mcs_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
@@ -1444,7 +1444,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write Percentiles (Microseconds)",
+          "title": "ACTIVEMQ Write Percentiles (Microseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1524,55 +1524,55 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_10",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_25",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_25",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_50",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_50",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_75",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_75",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_90",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_90",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_95",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_95",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_99",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_99",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_99_9",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_99_99",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
@@ -1580,7 +1580,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write Percentiles (Milliseconds)",
+          "title": "ACTIVEMQ Write Percentiles (Milliseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1715,19 +1715,19 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Writing_ms_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Writing_ms_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write Avg and Max Latencies (Milliseconds)",
+          "title": "ACTIVEMQ Write Avg and Max Latencies (Milliseconds)",
           "type": "stat"
         }
       ],
@@ -1796,13 +1796,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_MBPerSec",
+              "expr": "SBK_ACTIVEMQ_Reading_MBPerSec",
               "refId": "A"
             }
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Read Throughput MB/s",
+          "title": "ACTIVEMQ Read Throughput MB/s",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1883,13 +1883,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_RecordsPerSec",
+              "expr": "SBK_ACTIVEMQ_Reading_RecordsPerSec",
               "refId": "A"
             }
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Read Records/Sec",
+          "title": "ACTIVEMQ Read Records/Sec",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1996,19 +1996,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Read Avg and Max Latencies (Nanoseconds)",
+          "title": "ACTIVEMQ Read Avg and Max Latencies (Nanoseconds)",
           "type": "stat"
         },
         {
@@ -2062,127 +2062,127 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_10",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_20",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_20",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_25",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_25",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_30",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_30",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_40",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_40",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_50",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_50",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_60",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_60",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_70",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_70",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_75",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_75",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_80",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_80",
               "interval": "",
               "legendFormat": "",
               "refId": "J"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_90",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_90",
               "interval": "",
               "legendFormat": "",
               "refId": "K"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_92_25",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_92_25",
               "interval": "",
               "legendFormat": "",
               "refId": "L"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_95",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_95",
               "interval": "",
               "legendFormat": "",
               "refId": "M"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_97_5",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_97_5",
               "interval": "",
               "legendFormat": "",
               "refId": "N"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_99",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_99",
               "interval": "",
               "legendFormat": "",
               "refId": "O"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_99_25",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_99_25",
               "interval": "",
               "legendFormat": "",
               "refId": "P"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_99_5",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_99_5",
               "interval": "",
               "legendFormat": "",
               "refId": "Q"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_99_75",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_99_75",
               "interval": "",
               "legendFormat": "",
               "refId": "R"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_99_9",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "S"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_99_95",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_99_95",
               "interval": "",
               "legendFormat": "",
               "refId": "T"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ns_99_99",
+              "expr": "SBK_ACTIVEMQ_Reading_ns_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "U"
@@ -2190,7 +2190,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Read Percentiles (Nanoseconds)",
+          "title": "ACTIVEMQ Read Percentiles (Nanoseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2283,19 +2283,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_Readers",
+              "expr": "SBK_ACTIVEMQ_Reading_Readers",
               "interval": "",
               "legendFormat": "Active",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_Max_Readers",
+              "expr": "SBK_ACTIVEMQ_Reading_Max_Readers",
               "interval": "",
               "legendFormat": "Max",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Readers",
+          "title": "ACTIVEMQ Readers",
           "type": "stat"
         },
         {
@@ -2392,11 +2392,11 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_MBPerSec",
+              "expr": "SBK_ACTIVEMQ_Reading_MBPerSec",
               "refId": "A"
             }
           ],
-          "title": "RABBITMQ Read Throughput MB/s",
+          "title": "ACTIVEMQ Read Throughput MB/s",
           "type": "gauge"
         },
         {
@@ -2478,19 +2478,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_SLC_1",
+              "expr": "SBK_ACTIVEMQ_Reading_SLC_1",
               "interval": "",
               "legendFormat": "SLC 1",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_SLC_2",
+              "expr": "SBK_ACTIVEMQ_Reading_SLC_2",
               "interval": "",
               "legendFormat": "SLC 2",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Read  Sliding Latency Coverage (SLC)",
+          "title": "ACTIVEMQ Read  Sliding Latency Coverage (SLC)",
           "type": "stat"
         },
         {
@@ -2556,11 +2556,11 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_Bytes_total",
+              "expr": "SBK_ACTIVEMQ_Reading_Bytes_total",
               "refId": "A"
             }
           ],
-          "title": "RABBITMQ Read Bytes Total",
+          "title": "ACTIVEMQ Read Bytes Total",
           "type": "stat"
         },
         {
@@ -2613,26 +2613,26 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_LowerDiscardedLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Reading_LowerDiscardedLatencyRecords_total",
               "interval": "",
               "legendFormat": "Lower",
               "queryType": "randomWalk",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_HigherDiscardLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Reading_HigherDiscardLatencyRecords_total",
               "interval": "",
               "legendFormat": "Higher",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_InvalidLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Reading_InvalidLatencyRecords_total",
               "interval": "",
               "legendFormat": "Invalid/Negative",
               "refId": "C"
             }
           ],
-          "title": "RABBITMQ Read Discarded Latencies",
+          "title": "ACTIVEMQ Read Discarded Latencies",
           "type": "stat"
         },
         {
@@ -2714,19 +2714,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Read Avg and Max Latencies (Microseconds)",
+          "title": "ACTIVEMQ Read Avg and Max Latencies (Microseconds)",
           "type": "stat"
         },
         {
@@ -2780,55 +2780,55 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_10",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_25",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_25",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_50",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_50",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_75",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_75",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_90",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_90",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_95",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_95",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_99",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_99",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_99_9",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_mcs_99_99",
+              "expr": "SBK_ACTIVEMQ_Reading_mcs_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
@@ -2836,7 +2836,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Read Percentiles (Microseconds)",
+          "title": "ACTIVEMQ Read Percentiles (Microseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2915,55 +2915,55 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_10",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_25",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_25",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_50",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_50",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_75",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_75",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_90",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_90",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_95",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_95",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_99",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_99",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_99_9",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_99_99",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
@@ -2971,7 +2971,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Read Percentiles (Milli Seconds)",
+          "title": "ACTIVEMQ Read Percentiles (Milli Seconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3102,19 +3102,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Reading_ms_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Reading_ms_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Read Avg and Max Latencies (Milliseconds)",
+          "title": "ACTIVEMQ Read Avg and Max Latencies (Milliseconds)",
           "type": "stat"
         }
       ],
@@ -3182,7 +3182,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_MBPerSec",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_MBPerSec",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -3190,7 +3190,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write-Read Throughput MB/s ",
+          "title": "ACTIVEMQ Write-Read Throughput MB/s ",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3265,7 +3265,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_RecordsPerSec",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_RecordsPerSec",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -3273,7 +3273,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write-Read Records/Sec",
+          "title": "ACTIVEMQ Write-Read Records/Sec",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3379,19 +3379,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write-Read Avg and Max Latencies (Nanoseconds)",
+          "title": "ACTIVEMQ Write-Read Avg and Max Latencies (Nanoseconds)",
           "type": "stat"
         },
         {
@@ -3439,127 +3439,127 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_10",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_20",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_20",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_25",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_25",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_30",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_30",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_40",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_40",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_50",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_50",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_60",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_60",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_70",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_70",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_75",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_75",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_80",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_80",
               "interval": "",
               "legendFormat": "",
               "refId": "J"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_90",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_90",
               "interval": "",
               "legendFormat": "",
               "refId": "K"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_92_5",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_92_5",
               "interval": "",
               "legendFormat": "",
               "refId": "L"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_95",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_95",
               "interval": "",
               "legendFormat": "",
               "refId": "M"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_97_5",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_97_5",
               "interval": "",
               "legendFormat": "",
               "refId": "N"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_99",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_99",
               "interval": "",
               "legendFormat": "",
               "refId": "O"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_99_25",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_99_25",
               "interval": "",
               "legendFormat": "",
               "refId": "P"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_99_5",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_99_5",
               "interval": "",
               "legendFormat": "",
               "refId": "Q"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_99_75",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_99_75",
               "interval": "",
               "legendFormat": "",
               "refId": "R"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_99_9",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "S"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_99_95",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_99_95",
               "interval": "",
               "legendFormat": "",
               "refId": "T"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ns_99_99",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ns_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "U"
@@ -3567,7 +3567,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write-Read Percentiles (Nanoseconds)",
+          "title": "ACTIVEMQ Write-Read Percentiles (Nanoseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3660,13 +3660,13 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_Bytes_total",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_Bytes_total",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             }
           ],
-          "title": "RABBITMQ Write-Read Bytes Total",
+          "title": "ACTIVEMQ Write-Read Bytes Total",
           "type": "stat"
         },
         {
@@ -3763,13 +3763,13 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_MBPerSec",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_MBPerSec",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             }
           ],
-          "title": "RABBITMQ Write-Read Throughput MB/s",
+          "title": "ACTIVEMQ Write-Read Throughput MB/s",
           "type": "gauge"
         },
         {
@@ -3851,19 +3851,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_SLC_1",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_SLC_1",
               "interval": "",
               "legendFormat": "SLC 1",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_SLC_2",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_SLC_2",
               "interval": "",
               "legendFormat": "SLC 2",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write-Read Sliding Latency Coverage (SLC)",
+          "title": "ACTIVEMQ Write-Read Sliding Latency Coverage (SLC)",
           "type": "stat"
         },
         {
@@ -3928,31 +3928,31 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_Readers",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_Readers",
               "interval": "",
               "legendFormat": "Active Readers",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_Max_Readers",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_Max_Readers",
               "interval": "",
               "legendFormat": "Max Readers",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_Writers",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_Writers",
               "interval": "",
               "legendFormat": "Active Writers",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_Max_Writers",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_Max_Writers",
               "interval": "",
               "legendFormat": "Max Writers",
               "refId": "D"
             }
           ],
-          "title": "RABBITMQ Write-Read  Writers and Readers",
+          "title": "ACTIVEMQ Write-Read  Writers and Readers",
           "type": "stat"
         },
         {
@@ -4005,25 +4005,25 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_LowerDiscardedLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_LowerDiscardedLatencyRecords_total",
               "interval": "",
               "legendFormat": "Lower",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_HigherDiscardLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_HigherDiscardLatencyRecords_total",
               "interval": "",
               "legendFormat": "Higher",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_InvalidLatencyRecords_total",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_InvalidLatencyRecords_total",
               "interval": "",
               "legendFormat": "Invalid/Negative",
               "refId": "C"
             }
           ],
-          "title": "RABBITMQ Write-Read  Discarded Latencies",
+          "title": "ACTIVEMQ Write-Read  Discarded Latencies",
           "type": "stat"
         },
         {
@@ -4108,19 +4108,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write-Read Avg and Max Latencies (Microseconds)",
+          "title": "ACTIVEMQ Write-Read Avg and Max Latencies (Microseconds)",
           "type": "stat"
         },
         {
@@ -4168,55 +4168,55 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_10",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_25",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_25",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_50",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_50",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_75",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_75",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_90",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_90",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_95",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_95",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_99",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_99",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_99_9",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_mcs_99_99",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_mcs_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
@@ -4224,7 +4224,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write-Read Percentiles (Microseconds)",
+          "title": "ACTIVEMQ Write-Read Percentiles (Microseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -4297,55 +4297,55 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_10",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_10",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_25",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_25",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_50",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_50",
               "interval": "",
               "legendFormat": "",
               "refId": "C"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_75",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_75",
               "interval": "",
               "legendFormat": "",
               "refId": "D"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_90",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_90",
               "interval": "",
               "legendFormat": "",
               "refId": "E"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_95",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_95",
               "interval": "",
               "legendFormat": "",
               "refId": "F"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_99",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_99",
               "interval": "",
               "legendFormat": "",
               "refId": "G"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_99_9",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_99_9",
               "interval": "",
               "legendFormat": "",
               "refId": "H"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_99_99",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_99_99",
               "interval": "",
               "legendFormat": "",
               "refId": "I"
@@ -4353,7 +4353,7 @@
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "RABBITMQ Write-Read Percentiles (Milliseconds)",
+          "title": "ACTIVEMQ Write-Read Percentiles (Milliseconds)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -4487,19 +4487,19 @@
           "pluginVersion": "8.3.3",
           "targets": [
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_AvgLatency",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_AvgLatency",
               "interval": "",
               "legendFormat": "Average Latency",
               "refId": "A"
             },
             {
-              "expr": "SBK_RABBITMQ_Write_Reading_ms_MaxLatency",
+              "expr": "SBK_ACTIVEMQ_Write_Reading_ms_MaxLatency",
               "interval": "",
               "legendFormat": "Max Latency",
               "refId": "B"
             }
           ],
-          "title": "RABBITMQ Write-Read Avg and Max Latencies (Milliseconds)",
+          "title": "ACTIVEMQ Write-Read Avg and Max Latencies (Milliseconds)",
           "type": "stat"
         }
       ],
@@ -4575,7 +4575,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_MBPerSec",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_MBPerSec",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4583,7 +4583,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "RABBITMQ Write- Only Read Throughput MB/s ",
+      "title": "ACTIVEMQ Write- Only Read Throughput MB/s ",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -4663,7 +4663,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_RecordsPerSec",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_RecordsPerSec",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4671,7 +4671,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "RABBITMQ Write-Only Read Records/Sec",
+      "title": "ACTIVEMQ Write-Only Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -4784,7 +4784,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_AvgLatency",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -4794,13 +4794,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_RABBITMQ_Write_Reading_ns_MaxLatency",
+          "expr": "SBK_ACTIVEMQ_Write_Reading_ns_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "RABBITMQ Write-Only Read Avg and Max Latencies (Nanoseconds)",
+      "title": "ACTIVEMQ Write-Only Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -4853,7 +4853,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_10",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4864,7 +4864,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_20",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_20",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -4875,7 +4875,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_25",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_25",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -4886,7 +4886,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_30",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_30",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -4897,7 +4897,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_40",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_40",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -4908,7 +4908,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_50",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_50",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -4919,7 +4919,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_60",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_60",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -4930,7 +4930,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_70",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_70",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -4941,7 +4941,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_75",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_75",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -4952,7 +4952,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_80",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_80",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -4963,7 +4963,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_90",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_90",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -4974,7 +4974,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_92_5",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_92_5",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -4985,7 +4985,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_95",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_95",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -4996,7 +4996,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_97_5",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_97_5",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -5007,7 +5007,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_99",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_99",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -5018,7 +5018,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_99_25",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_99_25",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -5029,7 +5029,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_99_5",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_99_5",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -5040,7 +5040,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_99_75",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_99_75",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -5051,7 +5051,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_99_9",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -5062,7 +5062,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_99_95",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_99_95",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -5073,7 +5073,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ns_99_99",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ns_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
@@ -5081,7 +5081,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "RABBITMQ Write-Only Read Percentiles (Nanoseconds)",
+      "title": "ACTIVEMQ Write-Only Read Percentiles (Nanoseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -5179,13 +5179,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_Bytes_total",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_Bytes_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "RABBITMQ Write- Only Read Bytes Total",
+      "title": "ACTIVEMQ Write- Only Read Bytes Total",
       "type": "stat"
     },
     {
@@ -5287,13 +5287,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_MBPerSec",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_MBPerSec",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "RABBITMQ Write-Only Read Throughput MB/s",
+      "title": "ACTIVEMQ Write-Only Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -5380,7 +5380,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_SLC_1",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_SLC_1",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -5391,13 +5391,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_SLC_2",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_SLC_2",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "RABBITMQ Write-Only Read Sliding Latency Coverage (SLC)",
+      "title": "ACTIVEMQ Write-Only Read Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -5467,7 +5467,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_Readers",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_Readers",
           "interval": "",
           "legendFormat": "Active Readers",
           "refId": "A"
@@ -5478,7 +5478,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_Max_Readers",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_Max_Readers",
           "interval": "",
           "legendFormat": "Max Readers",
           "refId": "B"
@@ -5489,7 +5489,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_Writers",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_Writers",
           "interval": "",
           "legendFormat": "Active Writers",
           "refId": "C"
@@ -5500,13 +5500,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_Max_Writers",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_Max_Writers",
           "interval": "",
           "legendFormat": "Max Writers",
           "refId": "D"
         }
       ],
-      "title": "RABBITMQ Write-Only Read  Writers and Readers",
+      "title": "ACTIVEMQ Write-Only Read  Writers and Readers",
       "type": "stat"
     },
     {
@@ -5564,7 +5564,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_LowerDiscardedLatencyRecords_total",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_LowerDiscardedLatencyRecords_total",
           "interval": "",
           "legendFormat": "Lower",
           "refId": "A"
@@ -5575,7 +5575,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_HigherDiscardLatencyRecords_total",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_HigherDiscardLatencyRecords_total",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -5586,13 +5586,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_InvalidLatencyRecords_total",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_InvalidLatencyRecords_total",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "RABBITMQ Write-Only Read  Discarded Latencies",
+      "title": "ACTIVEMQ Write-Only Read  Discarded Latencies",
       "type": "stat"
     },
     {
@@ -5682,7 +5682,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_AvgLatency",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -5693,13 +5693,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_MaxLatency",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "RABBITMQ Write-Only Read Avg and Max Latencies (Microseconds)",
+      "title": "ACTIVEMQ Write-Only Read Avg and Max Latencies (Microseconds)",
       "type": "stat"
     },
     {
@@ -5752,7 +5752,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_10",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5763,7 +5763,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_25",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -5774,7 +5774,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_50",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -5785,7 +5785,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_75",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -5796,7 +5796,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_90",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -5807,7 +5807,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_95",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -5818,7 +5818,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_99",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_99",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -5829,7 +5829,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_99_9",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -5840,7 +5840,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_mcs_99_99",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_mcs_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -5848,7 +5848,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "RABBITMQ Write - Only Read Percentiles (Microseconds)",
+      "title": "ACTIVEMQ Write - Only Read Percentiles (Microseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -5928,7 +5928,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_10",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_10",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5939,7 +5939,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_25",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_25",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -5950,7 +5950,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_50",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_50",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -5961,7 +5961,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_75",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_75",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -5972,7 +5972,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_90",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_90",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -5983,7 +5983,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_95",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_95",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -5994,7 +5994,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_99",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_99",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -6005,7 +6005,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_99_9",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_99_9",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -6016,7 +6016,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_99_99",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_99_99",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -6024,7 +6024,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "RABBITMQ Write - Only Read Percentiles (Milliseconds)",
+      "title": "ACTIVEMQ Write - Only Read Percentiles (Milliseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -6165,7 +6165,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_AvgLatency",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_AvgLatency",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -6176,13 +6176,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_RABBITMQ_Write_OnlyReading_ms_MaxLatency",
+          "expr": "SBK_ACTIVEMQ_Write_OnlyReading_ms_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "RABBITMQ Write- Only Read Avg and Max Latencies (Milliseconds)",
+      "title": "ACTIVEMQ Write- Only Read Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     }
   ],
@@ -6221,7 +6221,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SBK RABBITMQ Benchmark",
+  "title": "SBK ACTIVEMQ Benchmark",
   "version": 1,
   "weekStart": ""
 }

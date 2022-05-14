@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
+import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbk.api.impl.SbkUtils;
@@ -246,7 +247,7 @@ final public class SbkGem {
             }
 
             int minSize = dType.getWriteReadMinSize();
-            if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
+            if (params.getAction() == Action.Write_Reading && params.getRecordSize() < minSize) {
                 String errMsg =
                         "Invalid record size: " + params.getRecordSize() +
                                 ", For both Writers and Readers, minimum data size should be " + minSize +
@@ -256,12 +257,12 @@ final public class SbkGem {
             }
         }
 
-        String actionString = "r";
-        if (params.isWriteAndRead()) {
-            actionString = "wr";
-        } else if (params.getWritersCount() > 0) {
-            actionString = "w";
-        }
+        final String actionString = switch (params.getAction()) {
+            case Writing -> "w";
+            case Write_Reading -> "wr";
+            case Write_OnlyReading -> "wro";
+            default -> "r";
+        };
 
         // remove GEM and logger parameter options
         final String[] sbkArgsList = SbkUtils.removeOptionArgsAndValues(

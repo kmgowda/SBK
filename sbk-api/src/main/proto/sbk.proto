@@ -33,6 +33,7 @@ enum ActionEnum {
   Writing = 0;
   Reading = 1;
   Write_Reading = 2;
+  Write_OnlyReading = 3;
 }
 
 message Config {

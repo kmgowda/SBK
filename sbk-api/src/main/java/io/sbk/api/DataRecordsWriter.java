@@ -15,6 +15,7 @@ import io.sbk.data.DataType;
 import io.time.Time;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Interface for Data Records Writers.
@@ -22,12 +23,17 @@ import java.io.IOException;
 public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Writer {
 
     /**
-     * Flush / Sync the  data.
+     * Write the Data and attach the start time to data.
      *
+     * @param dType  Data Type interface
+     * @param data   data to writer
+     * @param size   size of the data
+     * @param time   time interface
+     * @param status write status to return; {@link io.sbk.api.Status}
+     * @return CompletableFuture completable future. null if the write completed synchronously .
      * @throws IOException If an exception occurred.
      */
-    void sync() throws IOException;
-
+    CompletableFuture<?> write(DataType<T> dType, T data, int size, Time time, Status status) throws IOException;
 
     /**
      * Write the Data and attach the start time to data.
@@ -40,6 +46,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
      * @throws IOException If an exception occurred.
      */
     void writeSetTime(DataType<T> dType, T data, int size, Time time, Status status) throws IOException;
+
+    /**
+     * Flush / Sync the  data.
+     *
+     * @throws IOException If an exception occurred.
+     */
+    void sync() throws IOException;
 
 
     /**
@@ -234,6 +247,75 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
             long i = 0;
             while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
                 writeSetTime(dType, data, size, time, status);
+                i += status.records;
+                cnt += status.records;
+                secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
+                rController.control(cnt, secondsElapsed);
+            }
+            sync();
+        }
+    }
+
+
+    /**
+     * Default implementation for writing given number of records. No Writer Benchmarking is performed.
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#write(DataType, Object, int, Time, Status)}.
+     * sync is invoked after writing given set of records.
+     *
+     * @param writer       Writer Descriptor
+     * @param recordsCount Records Count
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriterRO(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                 Time time, RateController rController) throws IOException {
+        final Status status = new Status();
+        final long loopStartTime = time.getCurrentTime();
+        long cnt = 0;
+        rController.start(writer.params.getRecordsPerSec());
+        while (cnt < recordsCount) {
+            long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
+            long i = 0;
+            while (i < loopMax) {
+                write(dType, data, size, time, status);
+                i += status.records;
+                cnt += status.records;
+                rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Default implementation for writing data records for specific time duration. No Writer Benchmarking is performed.
+     * Write is performed using {@link io.sbk.api.DataRecordsWriter#write(DataType, Object, int, Time, Status)}.
+     * sync is invoked after writing given set of records.
+     *
+     * @param writer       Writer Descriptor
+     * @param secondsToRun Number of seconds to Run
+     * @param dType        Data Type interface
+     * @param data         data to write
+     * @param size         size of the data
+     * @param time         time interface
+     * @param rController  Rate Controller
+     * @throws IOException If an exception occurred.
+     */
+    default void RecordsWriterTimeRO(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                     Time time, RateController rController) throws IOException {
+        final Status status = new Status();
+        final long loopStartTime = time.getCurrentTime();
+        long cnt = 0;
+        double secondsElapsed = 0;
+        status.startTime = loopStartTime;
+        rController.start(writer.params.getRecordsPerSec());
+        while (secondsElapsed < secondsToRun) {
+            long i = 0;
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+                write(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);

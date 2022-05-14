@@ -10,6 +10,7 @@
 package io.sbk.params.impl;
 
 import io.perl.config.PerlConfig;
+import io.sbk.action.Action;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
@@ -61,7 +62,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     private int readersStepSeconds;
 
     @Getter
-    private boolean writeAndRead;
+    private Action action;
 
     @Getter
     private long instanceID;
@@ -69,6 +70,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     public SbkParameters(String name, String desc) {
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
+        this.action = Action.Reading;
 
         addOption("writers", true, "Number of writers");
         addOption("readers", true, "Number of readers");
@@ -101,6 +103,10 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                 "Number of seconds/step for readers, default: 0");
         addOption("id", true,
                 "Instance ID, default: 0");
+        addOption("ro", true,
+                """
+                           Readonly Benchmarking,
+                           Applicable only if both writers and readers are set; default: false""");
         addOption("help", false, "Help message");
     }
 
@@ -112,6 +118,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
+        final boolean writeReadOnly = Boolean.parseBoolean(getOptionValue("ro", "false"));
         writersCount = Integer.parseInt(getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(getOptionValue("readers", "0"));
         instanceID = Long.parseLong(getOptionValue("id", "0"));
@@ -166,13 +173,21 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             recordsPerSec = 0;
         }
 
-        if (writersCount > 0) {
+        if (workersCnt > 0) {
             if (recordSize == 0) {
                 throw new IllegalArgumentException("Error: Must specify the record 'size'");
             }
-            writeAndRead = readersCount > 0;
-        } else {
-            writeAndRead = false;
         }
+
+        if (writersCount > 0 && readersCount > 0) {
+            if (writeReadOnly) {
+                action = Action.Write_OnlyReading;
+            } else {
+                action = Action.Write_Reading;
+            }
+        } else if (writersCount > 0) {
+            action = Action.Writing;
+        }
+
     }
 }
