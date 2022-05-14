@@ -48,14 +48,9 @@ public class SbkInputOptions implements ParseInputOptions {
         options.addOption(Config.HELP_OPTION, false, "Help message");
     }
 
-    public SbkInputOptions(String name, String header, boolean stopAtNonOption) {
-        this(name, header, Config.SBK_FOOTER, stopAtNonOption);
-    }
-
     public SbkInputOptions(String name, String header) {
-        this(name, header, false);
+        this(name, header, Config.SBK_FOOTER, false);
     }
-
 
     @Override
     public Options addOption(String name, boolean hasArg, String description) {
