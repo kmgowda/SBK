@@ -35,5 +35,5 @@ public sealed interface RamParameters extends ActionParameter permits RamParamet
      * @return Maximum allowed connections.
      */
     int getMaxConnections();
-    
+
 }

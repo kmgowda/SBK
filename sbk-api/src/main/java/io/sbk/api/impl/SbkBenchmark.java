@@ -25,12 +25,14 @@ import io.sbk.system.Printer;
 import io.state.State;
 import io.time.Time;
 import lombok.Synchronized;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -133,7 +135,8 @@ final public class SbkBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
-        rwLogger.open(params, storage.getClass().getSimpleName(), params.getAction(), time);
+        rwLogger.open(params, StringUtils.capitalize(storage.getClass().getSimpleName().toLowerCase()),
+                params.getAction(), time);
         storage.openStorage(params);
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;

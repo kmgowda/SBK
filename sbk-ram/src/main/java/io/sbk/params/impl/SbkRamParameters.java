@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.lang.StringUtils;
 
 
 /**
@@ -62,10 +63,11 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
 
-        storageName = getOptionValue("class", null);
-        if (storageName == null) {
+        final String name = getOptionValue("class", null);
+        if (name == null) {
             throw new UnrecognizedOptionException("storage 'class' name is NOT supplied! ");
         }
+        storageName = StringUtils.capitalize(name);
 
         String actionString = getOptionValue("action", "r");
         action = switch (actionString.toLowerCase()) {
