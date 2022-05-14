@@ -32,22 +32,28 @@ public class SbkInputOptions implements ParseInputOptions {
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
+    final private boolean stopAtNonOption;
     private CommandLine commandline;
 
-    private SbkInputOptions(String name, String header, String footer) {
+    private SbkInputOptions(String name, String header, String footer, boolean stopAtNonOption) {
         this.options = new Options();
         this.formatter = new HelpFormatter();
         this.parser = new DefaultParser();
         this.benchmarkName = name;
         this.header = header + "\n\n";
         this.footer = footer;
+        this.stopAtNonOption = stopAtNonOption;
         this.commandline = null;
 
         options.addOption(Config.HELP_OPTION, false, "Help message");
     }
 
+    public SbkInputOptions(String name, String header, boolean stopAtNonOption) {
+        this(name, header, Config.SBK_FOOTER, stopAtNonOption);
+    }
+
     public SbkInputOptions(String name, String header) {
-        this(name, header, Config.SBK_FOOTER);
+        this(name, header, false);
     }
 
 
@@ -99,7 +105,7 @@ public class SbkInputOptions implements ParseInputOptions {
 
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
-        commandline = parser.parse(options, args, false);
+        commandline = parser.parse(options, args, stopAtNonOption);
         if (commandline.hasOption("help")) {
             throw new HelpException(getHelpText());
         }
