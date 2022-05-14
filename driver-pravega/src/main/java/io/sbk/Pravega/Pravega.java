@@ -18,6 +18,7 @@ import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.control.impl.ControllerImpl;
 import io.pravega.client.control.impl.ControllerImplConfig;
 import io.pravega.client.stream.ReaderGroup;
+import io.sbk.action.Action;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -104,7 +105,7 @@ public class Pravega implements Storage<byte[]> {
                 }
             }
             if (params.getReadersCount() > 0) {
-                readerGroup = streamHandle.createReaderGroup(!params.isWriteAndRead());
+                readerGroup = streamHandle.createReaderGroup(params.getAction() != Action.Write_Reading);
             } else {
                 readerGroup = null;
             }

@@ -12,6 +12,7 @@ package io.sbk.Kafka;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.action.Action;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -99,7 +100,7 @@ public class Kafka implements Storage<byte[]> {
         // props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, params.getTimeout());
         // Enabling the consumer to READ_COMMITTED is must, to compare between Kafka and Pravega.
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
-        if (params.isWriteAndRead()) {
+        if (params.getAction() == Action.Write_Reading) {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
             props.put(ConsumerConfig.GROUP_ID_CONFIG, config.topicName);
         } else {

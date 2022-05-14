@@ -80,19 +80,19 @@ final public class SbkWriter extends Worker implements RunBenchmark {
     private @NotNull BiConsumer createBenchmark() {
         final BiConsumer perfWriter;
         if (params.getTotalSecondsToRun() > 0) {
-            if (params.isWriteAndRead()) {
-                perfWriter = params.isReadOnly() ? this::RecordsWriterTimeRO : this::RecordsWriterTimeRW;
-            } else {
-                perfWriter = params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
+            perfWriter = switch (params.getAction()) {
+                case Write_OnlyReading -> this::RecordsWriterTimeRO;
+                case Write_Reading -> this::RecordsWriterTimeRW;
+                default -> params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
                         this::RecordsWriterTimeSync : this::RecordsWriterTime;
-            }
+            };
         } else {
-            if (params.isWriteAndRead()) {
-                perfWriter = params.isReadOnly() ? this::RecordsWriterRO : this::RecordsWriterRW;
-            } else {
-                perfWriter = params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
+            perfWriter = switch (params.getAction()) {
+                case Write_OnlyReading -> this::RecordsWriterRO;
+                case Write_Reading -> this::RecordsWriterRW;
+                default -> params.getRecordsPerSec() > 0 || params.getRecordsPerSync() < Integer.MAX_VALUE ?
                         this::RecordsWriterSync : this::RecordsWriter;
-            }
+            };
         }
         return perfWriter;
     }

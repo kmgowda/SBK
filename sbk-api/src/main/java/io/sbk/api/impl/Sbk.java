@@ -126,7 +126,6 @@ final public class Sbk {
                 Objects.requireNonNullElse(sbkClassName, "");
         final StoragePackage packageStore = new StoragePackage(storagePackageName);
         final Storage storageDevice;
-        final Action action;
         final InputParameterOptions params;
         final RWLogger rwLogger;
         final Time time;
@@ -208,7 +207,7 @@ final public class Sbk {
         }
 
         int minSize = dType.getWriteReadMinSize();
-        if (params.isWriteAndRead() && params.getRecordSize() < minSize) {
+        if (params.getAction() == Action.Write_Reading && params.getRecordSize() < minSize) {
             String errMsg =
                     "Invalid record size: " + params.getRecordSize() +
                             ", For both Writers and Readers, minimum data size should be " + minSize +
@@ -217,20 +216,8 @@ final public class Sbk {
             throw new InstantiationException(errMsg);
         }
         time = PerlBuilder.buildTime(rwLogger);
-        if (params.getReadersCount() > 0) {
-            if (params.isWriteAndRead()) {
-                if (params.isReadOnly()) {
-                    action = Action.Write_OnlyReading;
-                } else {
-                    action = Action.Write_Reading;
-                }
-            } else {
-                action = Action.Reading;
-            }
-        } else {
-            action = Action.Writing;
-        }
-        return new SbkBenchmark(action, params, storageDevice, dType, rwLogger, time);
+
+        return new SbkBenchmark(params, storageDevice, dType, rwLogger, time);
     }
 
 }

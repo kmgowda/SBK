@@ -10,6 +10,7 @@
 package io.sbk.api.impl;
 
 import io.perl.api.PerlChannel;
+import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.Callback;
 import io.sbk.params.ParameterOptions;
@@ -47,7 +48,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
         this.msToRun = params.getTotalSecondsToRun() * Time.MS_PER_SEC;
         this.totalRecords = params.getTotalRecords();
 
-        if (params.isWriteAndRead()) {
+        if (params.getAction() == Action.Write_Reading) {
             callback = this::consumeRW;
         } else {
             callback = this::consumeRead;

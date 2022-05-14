@@ -46,7 +46,6 @@ import java.util.stream.IntStream;
  */
 final public class SbkBenchmark implements Benchmark {
     final private static String CONFIGFILE = "sbk.properties";
-    final private Action action;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
     final private Time time;
@@ -66,7 +65,6 @@ final public class SbkBenchmark implements Benchmark {
     /**
      * Create SBK Benchmark.
      *
-     * @param action  Action
      * @param params  Benchmarking input Parameters
      * @param storage Storage device/client/driver for benchmarking
      * @param dType   Data Type.
@@ -74,10 +72,9 @@ final public class SbkBenchmark implements Benchmark {
      * @param time    time interface
      * @throws IOException If Exception occurs.
      */
-    public SbkBenchmark(Action action, ParameterOptions params, Storage<Object> storage,
+    public SbkBenchmark(ParameterOptions params, Storage<Object> storage,
                         DataType<Object> dType, @NotNull RWLogger rwLogger, Time time) throws IOException {
         this.dType = dType;
-        this.action = action;
         this.params = params;
         this.storage = storage;
         this.rwLogger = rwLogger;
@@ -86,7 +83,7 @@ final public class SbkBenchmark implements Benchmark {
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
         executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
 
-        if (params.getWritersCount() > 0 && !params.isWriteAndRead()) {
+        if (params.getWritersCount() > 0 && params.getAction() == Action.Writing) {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             wConfig.workers = params.getWritersCount();
             wConfig.csv = false;
@@ -136,7 +133,7 @@ final public class SbkBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
-        rwLogger.open(params, storage.getClass().getSimpleName(), action, time);
+        rwLogger.open(params, storage.getClass().getSimpleName(), params.getAction(), time);
         storage.openStorage(params);
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
@@ -195,7 +192,7 @@ final public class SbkBenchmark implements Benchmark {
             sbkReaders = null;
         }
 
-        if (writePerl != null && !params.isWriteAndRead() && sbkWriters != null) {
+        if (writePerl != null && params.getAction() == Action.Writing && sbkWriters != null) {
             wStatFuture = writePerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             wStatFuture = null;

@@ -9,6 +9,7 @@
  */
 package io.sbk.Redis;
 
+import io.sbk.action.Action;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -46,7 +47,7 @@ public class Redis implements Storage<String> {
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
         jedis = new Jedis(serverUri);
-        if (params.isWriteAndRead()) {
+        if (params.getAction() == Action.Write_Reading || params.getAction() == Action.Write_OnlyReading) {
             jedisConsumer = new Jedis(serverUri);
         }
     }
@@ -54,7 +55,7 @@ public class Redis implements Storage<String> {
     @Override
     public void closeStorage(final ParameterOptions params) throws IOException {
         jedis.close();
-        if (params.isWriteAndRead()) {
+        if (params.getAction() == Action.Write_Reading || params.getAction() == Action.Write_OnlyReading) {
             jedisConsumer.close();
         }
     }
@@ -62,7 +63,7 @@ public class Redis implements Storage<String> {
     @Override
     public DataWriter<String> createWriter(final int id, final ParameterOptions params) {
         try {
-            if (params.isWriteAndRead()) {
+            if (params.getAction() == Action.Write_Reading || params.getAction() == Action.Write_OnlyReading) {
                 Printer.log.info("Starting Redis Publisher : " + id);
                 return new RedisPublisher(id, params, jedis, listName);
             } else {
@@ -78,7 +79,7 @@ public class Redis implements Storage<String> {
     @Override
     public DataReader<String> createReader(final int id, final ParameterOptions params) {
         try {
-            if (params.isWriteAndRead()) {
+            if (params.getAction() == Action.Write_Reading || params.getAction() == Action.Write_OnlyReading) {
                 Printer.log.info("Starting Redis Consumer : " + id);
                 return new RedisConsumer(id, params, jedisConsumer, listName);
             } else {
