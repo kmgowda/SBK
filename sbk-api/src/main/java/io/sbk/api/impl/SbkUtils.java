@@ -43,13 +43,12 @@ final public class SbkUtils {
         return ret.toArray(new String[0]);
     }
 
-
-    public static String getClassName(String[] args) {
+    public static String getArgValue(String[] args, String argName) {
         if (args == null || args.length < 2) {
             return "";
         }
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals(Config.CLASS_OPTION_ARG)) {
+            if (args[i].equals(argName)) {
                 if (i + 1 < args.length) {
                     return args[i + 1];
                 } else {
@@ -58,6 +57,10 @@ final public class SbkUtils {
             }
         }
         return "";
+    }
+
+    public static String getClassName(String[] args) {
+        return getArgValue(args, Config.CLASS_OPTION_ARG);
     }
 
     public static boolean hasHelp(String[] args) {
