@@ -18,7 +18,7 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
-import io.sbk.api.impl.SbkUtils;
+import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
 import io.sbk.config.GemConfig;
 import io.sbk.config.RamConfig;

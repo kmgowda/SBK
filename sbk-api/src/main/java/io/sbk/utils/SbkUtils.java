@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.api.impl;
+package io.sbk.utils;
 
 import io.sbk.config.Config;
 import org.jetbrains.annotations.Contract;
@@ -63,16 +63,20 @@ final public class SbkUtils {
         return getArgValue(args, Config.CLASS_OPTION_ARG);
     }
 
-    public static boolean hasHelp(String[] args) {
+    public static boolean hasArg(String[] args, String argName) {
         if (args == null) {
             return false;
         }
         for (String arg : args) {
-            if (arg.equals(Config.HELP_OPTION_ARG)) {
+            if (arg.equals(argName)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static boolean hasHelp(String[] args) {
+            return hasArg(args, Config.HELP_OPTION_ARG);
     }
 
 }
