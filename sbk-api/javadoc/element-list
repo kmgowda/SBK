@@ -9,8 +9,7 @@ io.sbk.grpc
 io.sbk.logger
 io.sbk.logger.impl
 io.sbk.main
-io.sbk.options
-io.sbk.options.impl
+io.sbk.params
+io.sbk.params.impl
 io.sbk.system
-io.sbk.yal
-io.sbk.yal.impl
+io.sbk.utils
