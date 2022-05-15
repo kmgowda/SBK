@@ -101,7 +101,7 @@ public class SbkInputOptions implements ParseInputOptions {
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         commandline = parser.parse(options, args, stopAtNonOption);
-        if (commandline.hasOption("help")) {
+        if (commandline.hasOption(Config.HELP_OPTION)) {
             throw new HelpException(getHelpText());
         }
     }

@@ -16,6 +16,16 @@ package io.sbk.config;
 final public class YalConfig {
 
     /**
+     * <code>FILE_OPTION = "FILE_OPTION";</code>.
+     */
+    public final static String FILE_OPTION = "f";
+
+    /**
+     * <code>FILE_OPTION_ARG = ARG_PREFIX + FILE_OPTION;</code>.
+     */
+    public final static String FILE_OPTION_ARG = Config.ARG_PREFIX + FILE_OPTION;
+
+    /**
      * <code>String yamlFileName</code>.
      */
     public String yamlFileName;

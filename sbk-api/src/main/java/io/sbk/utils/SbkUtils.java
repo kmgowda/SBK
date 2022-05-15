@@ -16,7 +16,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 final public class SbkUtils {
 
@@ -77,6 +79,35 @@ final public class SbkUtils {
 
     public static boolean hasHelp(String[] args) {
             return hasArg(args, Config.HELP_OPTION_ARG);
+    }
+
+    public static String[] mapToArgs(Map<String, String> map) {
+        final List<String> lt = new ArrayList<>();
+        map.forEach((k, v) -> {
+            lt.add("-" + k.strip());
+            lt.add(v.replaceAll("\\n+", " ").strip());
+        });
+        return lt.toArray(new String[0]);
+    }
+
+    public static Map<String, String> argsToMap(String[] args) {
+        final Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < args.length; i += 2) {
+            final String key = args[i].strip().substring(1);
+            String val = "";
+            if (i+1 < args.length) {
+                val = args[i+1].strip();
+            }
+            map.put(key, val);
+        }
+        return map;
+    }
+
+    public static String[] mergeArgs(String[] s1, String[] s2) {
+        final Map<String, String> kv1 = argsToMap(s1);
+        final Map<String, String> kv2 = argsToMap(s2);
+        kv1.putAll(kv2);
+        return mapToArgs(kv1);
     }
 
 }

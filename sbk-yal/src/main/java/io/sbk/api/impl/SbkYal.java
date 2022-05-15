@@ -21,6 +21,7 @@ import io.sbk.system.Printer;
 import io.sbk.params.YmlMap;
 import io.sbk.params.impl.SbkYalParameters;
 import io.sbk.params.impl.SbkYmlMap;
+import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 
@@ -77,9 +78,11 @@ public final class SbkYal {
             ExecutionException, TimeoutException, HelpException, ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
         final String version = io.sbk.api.impl.SbkYal.class.getPackage().getImplementationVersion();
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName : SbkYal.NAME;
-        final String[] sbkArgs;
+        final String[] yalArgs;
         final SbkYalParameters params;
         final YalConfig yalConfig;
+        String yalFileName;
+        String[] nextArgs = new String[0];
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkYal.DESC);
@@ -96,18 +99,28 @@ public final class SbkYal {
 
         try {
             params.parseArgs(args);
+            yalFileName = params.getFileName();
         } catch (HelpException ex) {
             params.printHelp();
             throw ex;
+        } catch (ParseException | IllegalArgumentException ignored) {
+            Printer.log.warn("SBK-YAL: Overriding options are supplied!");
+            if (SbkUtils.hasHelp(args)) {
+                params.printHelp();
+                throw new HelpException(params.getHelpText());
+            }
+            final String fileName = SbkUtils.getArgValue(args, YalConfig.FILE_OPTION_ARG);
+            yalFileName = StringUtils.isNotEmpty(fileName) ? fileName : yalConfig.yamlFileName;
+            nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{YalConfig.FILE_OPTION_ARG});
         }
 
         try {
-            sbkArgs = YmlMap.getYmlArgs(params.getFileName(), SbkYmlMap.class);
+            yalArgs = YmlMap.getYmlArgs(yalFileName, SbkYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             params.printHelp();
             throw new HelpException(ex.toString());
         }
-        Sbk.run(sbkArgs, packageName, applicationName, outLogger);
+        Sbk.run(SbkUtils.mergeArgs(yalArgs, nextArgs), packageName, applicationName, outLogger);
     }
 }

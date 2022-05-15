@@ -107,7 +107,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                 """
                            Readonly Benchmarking,
                            Applicable only if both writers and readers are set; default: false""");
-        addOption("help", false, "Help message");
+        addOption(Config.HELP_OPTION, false, "Help message");
     }
 
     public SbkParameters(String name) {
