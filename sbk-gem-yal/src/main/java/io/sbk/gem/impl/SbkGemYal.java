@@ -22,6 +22,7 @@ import io.sbk.system.Printer;
 import io.sbk.params.YmlMap;
 import io.sbk.params.impl.SbkGemYmlMap;
 import io.sbk.params.impl.SbkYalParameters;
+import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 
@@ -76,6 +77,8 @@ public final class SbkGemYal {
         final String[] gemArgs;
         final SbkYalParameters params;
         final YalConfig yalConfig;
+        String yalFileName;
+        String[] nextArgs = new String[0];
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGemYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
@@ -92,18 +95,29 @@ public final class SbkGemYal {
 
         try {
             params.parseArgs(args);
+            yalFileName = params.getFileName();
         } catch (HelpException ex) {
             params.printHelp();
             throw ex;
+        } catch (ParseException | IllegalArgumentException ignored) {
+            Printer.log.warn("SBK-GEM-YAL: Overriding options are supplied!");
+            if (SbkUtils.hasHelp(args)) {
+                params.printHelp();
+                throw new HelpException(params.getHelpText());
+            }
+            final String fileName = SbkUtils.getArgValue(args, YalConfig.FILE_OPTION_ARG);
+            yalFileName = StringUtils.isNotEmpty(fileName) ? fileName : yalConfig.yamlFileName;
+            nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{YalConfig.FILE_OPTION_ARG});
         }
 
         try {
-            gemArgs = YmlMap.getYmlArgs(params.getFileName(), SbkGemYmlMap.class);
+            gemArgs = YmlMap.getYmlArgs(yalFileName, SbkGemYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             params.printHelp();
             throw new HelpException(ex.toString());
         }
-        return SbkGem.run(gemArgs, packageName, applicationName, outLogger);
+
+        return SbkGem.run(SbkUtils.mergeArgs(gemArgs, nextArgs), packageName, applicationName, outLogger);
     }
 }

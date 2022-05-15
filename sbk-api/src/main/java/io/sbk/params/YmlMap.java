@@ -12,12 +12,11 @@ package io.sbk.params;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.sbk.utils.SbkUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public abstract class YmlMap {
@@ -32,11 +31,6 @@ public abstract class YmlMap {
         mapper.findAndRegisterModules();
 
         final YmlMap yap = mapper.readValue(new File(fileName), tClass);
-        final List<String> lt = new ArrayList<>();
-        yap.args.forEach((k, v) -> {
-            lt.add("-" + k.strip());
-            lt.add(v.replaceAll("\\n+", " ").strip());
-        });
-        return lt.toArray(new String[0]);
+        return SbkUtils.mapToArgs(yap.args, true);
     }
 }

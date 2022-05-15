@@ -21,7 +21,7 @@ public class SbkYalParameters extends SbkInputOptions implements YalParameters {
     public SbkYalParameters(String name, String desc, YalConfig config) {
         super(name, desc);
         this.config = config;
-        addOption("f", true, getFileOptionDescription());
+        addOption(YalConfig.FILE_OPTION, true, getFileOptionDescription());
     }
 
     public String getFileOptionDescription() {
@@ -36,6 +36,6 @@ public class SbkYalParameters extends SbkInputOptions implements YalParameters {
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
-        config.yamlFileName = getOptionValue("f", config.yamlFileName);
+        config.yamlFileName = getOptionValue(YalConfig.FILE_OPTION, config.yamlFileName);
     }
 }
