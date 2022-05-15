@@ -2,5 +2,7 @@ io.sbk.config
 io.sbk.logger
 io.sbk.logger.impl
 io.sbk.main
+io.sbk.params
+io.sbk.params.impl
 io.sbk.ram
 io.sbk.ram.impl

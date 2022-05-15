@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.sbk.config"},{"l":"io.sbk.gem"},{"l":"io.sbk.gem.impl"},{"l":"io.sbk.logger"},{"l":"io.sbk.logger.impl"},{"l":"io.sbk.main"},{"l":"io.sbk.options"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.sbk.config"},{"l":"io.sbk.gem"},{"l":"io.sbk.gem.impl"},{"l":"io.sbk.logger"},{"l":"io.sbk.logger.impl"},{"l":"io.sbk.main"},{"l":"io.sbk.params"},{"l":"io.sbk.params.impl"}];updateSearchResults();
