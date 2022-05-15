@@ -71,7 +71,6 @@ public final class SbkYal {
             runBenchmark(args, packageName, applicationName, outLogger);
     }
 
-
     private static void runBenchmark(final String[] args, final String packageName,
                                                  final String applicationName, RWLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,

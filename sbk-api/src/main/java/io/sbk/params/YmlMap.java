@@ -31,6 +31,6 @@ public abstract class YmlMap {
         mapper.findAndRegisterModules();
 
         final YmlMap yap = mapper.readValue(new File(fileName), tClass);
-        return SbkUtils.mapToArgs(yap.args);
+        return SbkUtils.mapToArgs(yap.args, true);
     }
 }
