@@ -38,7 +38,10 @@ def wb_add_two_sheets(wb, r_name, t_name, df):
             col_size = len(str(row[1][h])) + 1
             if col_size > len(h):
                 ws.set_column(c, c, col_size)
-            ws.write(row_num, c, row[1][h])
+            try:
+                ws.write(row_num, c, row[1][h])
+            except Exception as ex:
+                pass
 
 
 def add_sbk_logo(wb):
