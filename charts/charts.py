@@ -34,9 +34,18 @@ class SbkCharts:
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
              "Percentile_99.95", "Percentile_99.99"]]
+        self.latenciesDict = {"Percentile_10": 10, "Percentile_20": 20, "Percentile_25": 25, "Percentile_30": 30,
+                              "Percentile_40": 40, "Percentile_50": 50, "Percentile_60": 60, "Percentile_70": 70,
+                              "Percentile_75": 75, "Percentile_80": 80, "Percentile_90": 90, "Percentile_92.5": 92.5,
+                              "Percentile_95": 95, "Percentile_97.5": 97.5, "Percentile_99": 99,
+                              "Percentile_99.25": 99.25, "Percentile_99.5": 99.5, "Percentile_99.75": 99.75,
+                              "Percentile_99.9": 99.9, "Percentile_99.95": 99.95, "Percentile_99.99": 99.99}
 
     def is_rnum_sheet(self, name):
         return re.match("^" + constants.R_PREFIX + "\d+$", name)
+
+    def is_tnum_sheet(self, name):
+        return re.match("^" + constants.T_PREFIX + "\d+$", name)
 
     def get_columns_from_worksheet(self, ws):
         ret = OrderedDict()
@@ -45,14 +54,20 @@ class SbkCharts:
                 ret[cell.value] = cell.column
         return ret
 
+    def get_latency_percentile_columns(self, ws):
+        columns = self.get_columns_from_worksheet(ws)
+        ret = OrderedDict()
+        for key in columns.keys():
+            if key.startswith("Percentile_"):
+                ret[key] = columns[key]
+        return ret
+
     def get_latency_columns(self, ws):
         columns = self.get_columns_from_worksheet(ws)
         ret = OrderedDict()
         ret['AvgLatency'] = columns['AvgLatency']
         ret['MaxLatency'] = columns['MaxLatency']
-        for key in columns.keys():
-            if key.startswith("Percentile_"):
-                ret[key] = columns[key]
+        ret.update(self.get_latency_percentile_columns(ws))
         return ret
 
     def get_time_unit(self, ws):
@@ -82,6 +97,7 @@ class SbkCharts:
     def create_latency_line_graph(self, title):
         return self.create_line_chart(title, "Intervals", "Latency time in " + self.time_unit, 25, 50)
 
+
     def get_latency_series(self, ws, ws_name):
         latencies = self.get_latency_columns(ws)
         data_series = OrderedDict()
@@ -89,6 +105,16 @@ class SbkCharts:
             data_series[x] = Series(Reference(ws, min_col=latencies[x], min_row=2,
                                               max_col=latencies[x], max_row=ws.max_row),
                                     title=ws_name + "-" + x)
+        return data_series
+
+    def get_latency_percentile_series(self, ws, ws_name):
+        latencies = self.get_latency_percentile_columns(ws)
+        data_series = OrderedDict()
+        min_col = latencies[next(iter(latencies))]
+        max_col = latencies[next(iter(reversed(latencies)))]
+        for r in range(2, ws.max_row+1):
+            data_series[r] = Series(Reference(ws, min_col=min_col, min_row=r, max_col=max_col, max_row=r),
+                                    title=ws_name + "_" + str(r))
         return data_series
 
     def get_throughput_mb_series(self, ws, ws_name):
@@ -126,6 +152,24 @@ class SbkCharts:
             sheet = self.wb.create_sheet(x)
             sheet.add_chart(chart)
 
+
+    def create_latency_percentile_graphs(self, ws, prefix):
+        title= "Total_percentiles"
+        latencyCols = self.get_latency_percentile_columns(ws)
+        chart = self.create_line_chart(title, "Percentiles", "Latency time in " + self.time_unit, 25, 50)
+        latency_series = self.get_latency_percentile_series(ws, prefix)
+        for x in latency_series:
+            chart.append(latency_series[x])
+
+        # Add x-axies labels
+        percentiles = Reference(ws, min_col=latencyCols[next(iter(latencyCols))], min_row=1,
+                            max_col=latencyCols[next(iter(reversed(latencyCols)))], max_row=1)
+        chart.set_categories(percentiles)
+        # add chart to the sheet
+        sheet = self.wb.create_sheet(title)
+        sheet.add_chart(chart)
+
+
     def create_throughput_mb_graph(self, ws, prefix):
         chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
                                        "Intervals", "Throughput in MB/Sec", 25, 50)
@@ -146,13 +190,16 @@ class SbkCharts:
 
     def create_graphs(self):
         r_name = constants.R_PREFIX + "1"
+        r_ws = self.wb[r_name]
+        r_prefix = r_name + self.get_storage_name(r_ws)
         t_name = constants.T_PREFIX + "1"
-        ws1 = self.wb[r_name]
-        prefix = r_name + self.get_storage_name(ws1)
-        self.create_throughput_mb_graph(ws1, prefix)
-        self.create_throughput_records_graph(ws1, prefix)
-        self.create_latency_compare_graphs(ws1, prefix)
-        self.create_latency_graphs(ws1, prefix)
+        t_ws = self.wb[t_name]
+        t_prefix = t_name + self.get_storage_name(t_ws)
+        self.create_throughput_mb_graph(r_ws, r_prefix)
+        self.create_throughput_records_graph(r_ws, r_prefix)
+        self.create_latency_compare_graphs(r_ws, r_prefix)
+        self.create_latency_graphs(r_ws, r_prefix)
+        self.create_latency_percentile_graphs(t_ws, t_prefix)
         self.wb.save(self.file)
 
 
@@ -276,6 +323,28 @@ class SbkMultiCharts(SbkCharts):
             sheet = self.wb.create_sheet(x)
             sheet.add_chart(charts[x])
 
+    def create_multi_latency_percentile_graphs(self):
+        title = "Total_percentiles"
+        chart = self.create_line_chart(title, "Percentiles", "Latency time in " + self.time_unit, 25, 50)
+        x_labels = False
+        for name in self.wb.sheetnames:
+            if self.is_tnum_sheet(name):
+                ws = self.wb[name]
+                prefix = name + "_" + self.get_storage_name(ws)
+                latency_series = self.get_latency_percentile_series(ws, prefix)
+                for x in latency_series:
+                    chart.append(latency_series[x])
+                if x_labels is False:
+                    latency_cols = self.get_latency_percentile_columns(ws)
+                    percentile_names = Reference(ws, min_col=latency_cols[next(iter(latency_cols))], min_row=1,
+                                        max_col=latency_cols[next(iter(reversed(latency_cols)))], max_row=1)
+                    chart.set_categories(percentile_names)
+                    x_labels = True
+
+        sheet = self.wb.create_sheet(title)
+        sheet.add_chart(chart)
+
+
     def create_multi_throughput_mb_graph(self, ):
         chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
                                        "Intervals", "Throughput in MB/Sec", 25, 50)
@@ -308,4 +377,5 @@ class SbkMultiCharts(SbkCharts):
             self.create_all_latency_compare_graphs()
             self.create_multi_latency_compare_graphs()
             self.create_multi_latency_graphs()
+            self.create_multi_latency_percentile_graphs()
             self.wb.save(self.file)
