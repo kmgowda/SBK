@@ -12,7 +12,7 @@
 import re
 from collections import OrderedDict
 from openpyxl import load_workbook
-from openpyxl.chart import LineChart, Reference, Series
+from openpyxl.chart import LineChart, BarChart, Reference, Series
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 from ordered_set import OrderedSet
@@ -82,8 +82,7 @@ class SbkCharts:
         names = self.get_columns_from_worksheet(ws)
         return str(ws.cell(row=2, column=names['Action']).value)
 
-    def create_line_chart(self, title, x_title, y_title, height, width):
-        chart = LineChart()
+    def __add_chart_attriuutes(self, chart, title, x_title, y_title, height, width):
         # set the title of the chart
         chart.title = title
         # set the title of the x-axis
@@ -92,6 +91,15 @@ class SbkCharts:
         chart.y_axis.title = y_title
         chart.height = height
         chart.width = width
+
+    def create_line_chart(self, title, x_title, y_title, height, width):
+        chart = LineChart()
+        self.__add_chart_attriuutes(chart, title, x_title, y_title, height, width)
+        return chart
+
+    def create_bar_chart(self, title, x_title, y_title, height, width):
+        chart = BarChart()
+        self.__add_chart_attriuutes(chart, title, x_title, y_title, height, width)
         return chart
 
     def create_latency_line_graph(self, title):
@@ -128,6 +136,24 @@ class SbkCharts:
                                 max_col=cols["Records/Sec"], max_row=ws.max_row),
                       title=ws_name + "-Records/Sec")
 
+    def get_mb_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["MB"], min_row=2,
+                                max_col=cols["MB"], max_row=ws.max_row),
+                      title=ws_name + "-MB")
+
+    def get_avg_latency_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["AvgLatency"], min_row=2,
+                                max_col=cols["AvgLatency"], max_row=ws.max_row),
+                      title=ws_name + "-AvgLatency")
+
+    def get_max_latency_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["MaxLatency"], min_row=2,
+                                max_col=cols["MaxLatency"], max_row=ws.max_row),
+                      title=ws_name + "-MaxLatency")
+
     def create_latency_compare_graphs(self, ws, prefix):
         charts, sheets = [], []
         for i in range(self.n_latency_charts):
@@ -151,7 +177,7 @@ class SbkCharts:
             sheet = self.wb.create_sheet(x)
             sheet.add_chart(chart)
 
-    def create_latency_percentile_graphs(self, ws, prefix):
+    def create_total_latency_percentile_graphs(self, ws, prefix):
         title = "Total Percentiles"
         latency_cols = self.get_latency_percentile_columns(ws)
         for i, percentile_names in enumerate(self.slc_percentile_names):
@@ -196,7 +222,7 @@ class SbkCharts:
         self.create_throughput_records_graph(r_ws, r_prefix)
         self.create_latency_compare_graphs(r_ws, r_prefix)
         self.create_latency_graphs(r_ws, r_prefix)
-        self.create_latency_percentile_graphs(t_ws, t_prefix)
+        self.create_total_latency_percentile_graphs(t_ws, t_prefix)
         self.wb.save(self.file)
 
 
@@ -320,7 +346,7 @@ class SbkMultiCharts(SbkCharts):
             sheet = self.wb.create_sheet(x)
             sheet.add_chart(charts[x])
 
-    def create_multi_latency_percentile_graphs(self):
+    def create_total_multi_latency_percentile_graphs(self):
         title = "Total Percentiles"
         for i, names_list in enumerate(self.slc_percentile_names):
             chart = self.create_line_chart(title, "Percentiles", "Latency time in " + self.time_unit, 25, 50)
@@ -365,6 +391,85 @@ class SbkMultiCharts(SbkCharts):
         sheet = self.wb.create_sheet("Throughput_Records")
         sheet.add_chart(chart)
 
+    def create_total_mb_compare_graph(self):
+        chart = None
+        for name in self.wb.sheetnames:
+            if self.is_tnum_sheet(name):
+                ws = self.wb[name]
+                if chart is None:
+                    action = self.get_action_name(ws)
+                    chart = self.create_bar_chart("Total Mega Bytes " + action, action, "MB", 25, 50)
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_mb_series(ws, prefix))
+        if chart is not None:
+            # add chart to the sheet
+            sheet = self.wb.create_sheet("Total_MB")
+            sheet.add_chart(chart)
+
+    def create_total_throughput_mb_compare_graph(self):
+        chart = None
+        for name in self.wb.sheetnames:
+            if self.is_tnum_sheet(name):
+                ws = self.wb[name]
+                if chart is None:
+                    action = self.get_action_name(ws)
+                    chart = self.create_bar_chart("Total Throughput Variations in Mega Bytes / Seconds",
+                                                  action, "Total Throughput in MB/Sec", 25, 50)
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_mb_series(ws, prefix))
+        if chart is not None:
+            # add chart to the sheet
+            sheet = self.wb.create_sheet("Total_Throughput_MB")
+            sheet.add_chart(chart)
+
+    def create_total_throughput_records_compare_graph(self):
+        chart = None
+        for name in self.wb.sheetnames:
+            if self.is_tnum_sheet(name):
+                ws = self.wb[name]
+                if chart is None:
+                    action = self.get_action_name(ws)
+                    chart = self.create_bar_chart("Total Throughput Variations in Records / Seconds",
+                                                  action, "Total Throughput in Records/Sec", 25, 50)
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_records_series(ws, prefix))
+        if chart is not None:
+            # add chart to the sheet
+            sheet = self.wb.create_sheet("Total_Throughput_Records")
+            sheet.add_chart(chart)
+
+    def create_total_avg_latency_compare_graph(self):
+        chart = None
+        for name in self.wb.sheetnames:
+            if self.is_tnum_sheet(name):
+                ws = self.wb[name]
+                if chart is None:
+                    action = self.get_action_name(ws)
+                    chart = self.create_bar_chart("Total Average Latency Comparison",
+                                                  action, "Total Average Latency", 25, 50)
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_avg_latency_series(ws, prefix))
+        if chart is not None:
+            # add chart to the sheet
+            sheet = self.wb.create_sheet("Total_Avg_Latency")
+            sheet.add_chart(chart)
+
+    def create_total_max_latency_compare_graph(self):
+        chart = None
+        for name in self.wb.sheetnames:
+            if self.is_tnum_sheet(name):
+                ws = self.wb[name]
+                if chart is None:
+                    action = self.get_action_name(ws)
+                    chart = self.create_bar_chart("Total Max Latency Comparison",
+                                                  action, "Total Max Latency", 25, 50)
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_max_latency_series(ws, prefix))
+        if chart is not None:
+            # add chart to the sheet
+            sheet = self.wb.create_sheet("Total_Max_Latency")
+            sheet.add_chart(chart)
+
     def create_graphs(self):
         if self.check_time_units():
             self.create_summary_sheet()
@@ -373,5 +478,10 @@ class SbkMultiCharts(SbkCharts):
             self.create_all_latency_compare_graphs()
             self.create_multi_latency_compare_graphs()
             self.create_multi_latency_graphs()
-            self.create_multi_latency_percentile_graphs()
+            self.create_total_multi_latency_percentile_graphs()
+            self.create_total_mb_compare_graph()
+            self.create_total_throughput_mb_compare_graph()
+            self.create_total_throughput_records_compare_graph()
+            self.create_total_avg_latency_compare_graph()
+            self.create_total_max_latency_compare_graph()
             self.wb.save(self.file)
