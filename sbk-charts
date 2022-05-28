@@ -10,7 +10,7 @@
 
 import argparse
 from charts.sheets import SbkMultiSheets
-from charts.charts import SbkMultiCharts
+from charts.multicharts import SbkMultiCharts
 from jproperties import Properties
 
 SBK_BANNER_FILE = "./charts/banner.txt"
