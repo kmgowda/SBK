@@ -45,16 +45,9 @@ benchmarking.
 
 ___
 
-<p align="center">
-    <a href="https://kmgowda.github.io/SBK/?from=SBK">
-        <img src="images/sbk-logo-wide.png" alt="Storage Benchmark Kit" width="750" height="550">
-    </a>
-</p>
-
-___
-
 [![SBK Overview Video](images/kmg-sodacode-2022.png)](https://youtu.be/8hFieAR9o_M)
 
+___
 
 *SBK supports performance benchmarking of following storage systems*
 
