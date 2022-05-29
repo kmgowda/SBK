@@ -10,6 +10,7 @@
 
 package io.sbk.gem.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.Benchmark;
 import io.sbk.config.GemConfig;
 import io.sbk.gem.GemBenchmark;
@@ -102,6 +103,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     @Override
     @Synchronized
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public CompletableFuture<RemoteResponse[]> start() throws IOException, InterruptedException, ExecutionException,
             IllegalStateException {
         if (state != State.BEGIN) {
@@ -110,7 +112,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             } else {
                 Printer.log.warn("SBK GEM Benchmark is already shutdown..");
             }
-            return retFuture;
+            return retFuture.toCompletableFuture();
         }
         state = State.RUN;
         Printer.log.info("SBK GEM Benchmark Started");
@@ -274,7 +276,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             shutdown(null);
         });
 
-        return retFuture;
+        return retFuture.toCompletableFuture();
     }
 
     private boolean remoteDirectoryDelete() throws InterruptedException, ConnectException {
