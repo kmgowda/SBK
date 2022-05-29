@@ -9,6 +9,12 @@
  *
  */
 
+/*
+   This gradle build to build the sbk-charts application is not working ,
+   due to compatibility issues between plugin version cpm.linkedin.python version 0.9.11 and
+   gradle 7+, Hence its recommend to use the sbk-charts directly with pre-installed python version 3+
+ */
+
 plugins {
     //id "com.linkedin.python-cli" version "0.9.11"
     id "com.linkedin.python" version "0.9.11"
