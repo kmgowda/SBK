@@ -11,6 +11,7 @@
 package io.sbk.api;
 
 import com.google.common.reflect.TypeToken;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.ByteArray;
 import io.sbk.params.InputOptions;
@@ -92,6 +93,7 @@ public interface Storage<T> {
      * @return Data Data interface.
      * @throws IllegalArgumentException if data type is other than byte[]
      */
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     default DataType<T> getDataType() throws IllegalArgumentException {
         final TypeToken<T> typeToken = new TypeToken<T>(getClass()) {
         };

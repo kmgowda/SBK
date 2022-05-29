@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.PerlChannel;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
@@ -37,6 +38,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     final private long totalRecords;
     private long beginTime;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkCallbackReader(int readerId, ParameterOptions params, PerlChannel perlChannel, int idMax,
                              DataType<Object> dataType, Time time) {
         super(readerId, params, perlChannel);
@@ -58,7 +60,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     @Override
     public CompletableFuture<Void> start() {
         this.beginTime = time.getCurrentTime();
-        return ret;
+        return ret.toCompletableFuture();
     }
 
     @Override

@@ -9,12 +9,14 @@
  */
 package io.sbk.params.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.config.Config;
 import java.util.Arrays;
 
 public non-sealed class SbkDriversParameters extends SbkParameters {
     final private String[] drivers;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkDriversParameters(String name, String desc, String[] drivers) {
         super(name, desc);
         this.drivers = drivers;

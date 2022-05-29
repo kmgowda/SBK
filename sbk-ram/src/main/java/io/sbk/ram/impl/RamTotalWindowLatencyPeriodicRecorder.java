@@ -10,6 +10,7 @@
 
 package io.sbk.ram.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.LatencyRecord;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.Print;
@@ -41,6 +42,7 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * @param reportLatencies       ReportLatencies
      * @param setRW                 SetRW
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public RamTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                                  Print windowLogger, Print totalLogger,
                                                  ReportLatencies reportLatencies,

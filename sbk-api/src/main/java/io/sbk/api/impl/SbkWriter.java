@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.PerlChannel;
 import io.perl.api.RunBenchmark;
 import io.sbk.api.BiConsumer;
@@ -42,6 +43,7 @@ final public class SbkWriter extends Worker implements RunBenchmark {
     final private Object payload;
     final private int dataSize;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkWriter(int writerID, ParameterOptions params, PerlChannel perlChannel,
                      @NotNull DataType<Object> dType, Time time, DataWriter<Object> writer,
                      CountWriters wCount, ExecutorService executor) {

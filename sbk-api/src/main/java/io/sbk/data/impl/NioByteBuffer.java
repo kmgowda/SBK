@@ -19,6 +19,12 @@ import java.util.Random;
  * Class for processing ByteBuffer data.
  */
 final public class NioByteBuffer implements DataType<ByteBuffer> {
+    final Random random;
+
+    public NioByteBuffer() {
+        random = new Random();
+    }
+
 
     /**
      * Create byte buffer.
@@ -40,7 +46,6 @@ final public class NioByteBuffer implements DataType<ByteBuffer> {
      */
     @Override
     public ByteBuffer create(int size) {
-        Random random = new Random();
         ByteBuffer buffer = allocate(size);
         for (int i = 0; i < size; ++i) {
             buffer.put((byte) (random.nextInt(26) + 65));

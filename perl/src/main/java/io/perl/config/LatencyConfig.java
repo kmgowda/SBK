@@ -10,11 +10,13 @@
 
 package io.perl.config;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.time.Time;
 
 /**
  * Class LatencyConfig.
  */
+@SuppressFBWarnings("MS_MUTABLE_ARRAY")
 public class LatencyConfig {
 
     /**

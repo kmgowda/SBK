@@ -109,6 +109,7 @@ public final class PerlBuilder {
         final LatencyRecordWindow window;
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
+        final Random randomNum = new Random();
 
         final double[] percentileFractions = new double[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
@@ -133,7 +134,7 @@ public final class PerlBuilder {
             totalWindowExtension = new CSVExtendedLatencyRecorder(minLatency, maxLatency,
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, config.csvFileSizeGB,
-                    PerlConfig.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
+                    PerlConfig.NAME + "-" + String.format("%06d", randomNum.nextInt(1000000)) + ".csv");
             PerlPrinter.log.info("Total Window Extension: CSV, Size: " +
                     totalWindowExtension.getMaxMemoryBytes() / Bytes.BYTES_PER_GB + " GB");
         } else {

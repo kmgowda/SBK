@@ -10,6 +10,7 @@
 
 package io.sbk.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.data.DataType;
 import io.time.Time;
 
@@ -89,6 +90,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      * @param callback     Callback interface
      * @throws IOException If an exception occurred.
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void initialize(Worker reader, long secondsToRun, long recordsCount, DataType<T> dType, Time time,
                            Callback<T> callback) throws IOException {
         this.reader = reader;

@@ -16,6 +16,7 @@ import io.perl.logger.PerformanceLogger;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 
@@ -73,11 +74,12 @@ public class ResultsLogger implements PerformanceLogger {
      * @param minLatency        long
      * @param maxLatency        long
      */
-    public ResultsLogger(String prefix, double[] percentiles, TimeUnit timeUnit, long minLatency, long maxLatency) {
+    public ResultsLogger(String prefix, @Nonnull double[] percentiles,
+                         @Nonnull TimeUnit timeUnit, long minLatency, long maxLatency) {
         this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
         this.prefix = prefix;
         this.timeUnit = timeUnit;
-        this.percentiles = percentiles;
+        this.percentiles = percentiles.clone();
         this.timeUnitName = timeUnit.name();
         this.minLatency = minLatency;
         this.maxLatency = maxLatency;
@@ -122,7 +124,11 @@ public class ResultsLogger implements PerformanceLogger {
 
     @Override
     public double[] getPercentiles() {
-        return percentiles;
+
+        if (percentiles == null) {
+            return null;
+        }
+        return percentiles.clone();
     }
 
     /**

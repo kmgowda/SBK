@@ -20,6 +20,11 @@ import java.util.Random;
 final public class SbkString implements DataType<String> {
     final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
     final static String FORMAT_STRING = "%0" + TIME_HEADER_SIZE + "d";
+    final Random random;
+
+    public SbkString() {
+        random = new Random();
+    }
 
     /**
      * Create byte array data.
@@ -40,7 +45,6 @@ final public class SbkString implements DataType<String> {
      */
     @Override
     public String create(int size) {
-        Random random = new Random();
         byte[] bytes = new byte[size];
         for (int i = 0; i < size; ++i) {
             bytes[i] = (byte) (random.nextInt(26) + 65);

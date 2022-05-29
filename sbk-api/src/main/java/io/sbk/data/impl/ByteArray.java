@@ -19,6 +19,11 @@ import java.util.Random;
  * Class for processing byte[] data.
  */
 final public class ByteArray implements DataType<byte[]> {
+    final Random random;
+
+    public ByteArray() {
+        random = new Random();
+    }
 
     /**
      * Create byte array data.
@@ -39,7 +44,6 @@ final public class ByteArray implements DataType<byte[]> {
      */
     @Override
     public byte[] create(int size) {
-        Random random = new Random();
         byte[] bytes = allocate(size);
         for (int i = 0; i < size; ++i) {
             bytes[i] = (byte) (random.nextInt(26) + 65);
