@@ -40,11 +40,6 @@ final public class LatencyPercentiles {
     public long medianLatency;
 
     /**
-     * <code>long medianLatencyCount</code>.
-     */
-    public long medianLatencyCount;
-
-    /**
      * <code>long medianIndex</code>.
      */
     public long medianIndex;
@@ -65,7 +60,6 @@ final public class LatencyPercentiles {
         this.latencyIndexes = new long[this.fractions.length];
         this.latencyCount = new long[this.fractions.length];
         this.medianLatency = 0;
-        this.medianLatencyCount = 0;
         this.medianIndex = 0;
         this.index = 0;
     }
@@ -83,7 +77,6 @@ final public class LatencyPercentiles {
         }
         medianIndex = totalRecords >> 1;
         medianLatency = 0;
-        medianLatencyCount = 0;
         index = 0;
     }
 
@@ -98,7 +91,6 @@ final public class LatencyPercentiles {
     public void copyLatency(long latency, long count, long startIndex, long endIndex) {
         if (medianIndex >= startIndex && medianIndex < endIndex) {
             medianLatency = latency;
-            medianLatencyCount = count;
         }
         while (index < latencyIndexes.length) {
             if (latencyIndexes[index] >= startIndex && latencyIndexes[index] < endIndex) {

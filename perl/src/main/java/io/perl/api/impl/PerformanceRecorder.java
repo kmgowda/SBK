@@ -15,6 +15,8 @@ import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
 import io.perl.api.TimeStamp;
 import io.time.Time;
+
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -37,10 +39,10 @@ public final class PerformanceRecorder {
      * @param reportingIntervalMS   int
      * @param idleNS                int
      */
-    public PerformanceRecorder(PeriodicRecorder periodicRecorder, Channel[] channels, Time time,
+    public PerformanceRecorder(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
                                int reportingIntervalMS, int idleNS) {
         this.periodicRecorder = periodicRecorder;
-        this.channels = channels;
+        this.channels = channels.clone();
         this.time = time;
         this.windowIntervalMS = reportingIntervalMS;
         this.idleNS = idleNS;
