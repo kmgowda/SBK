@@ -43,9 +43,11 @@ The SBK is built on PerL (Performance Logger). The [![PerL](https://img.shields.
 provides the foundation APIs for performance 
 benchmarking.
 
+
 ___
 
-**Watch the 10 minutes video on the SBK Overview**
+<h4 align="center">Watch the 10 minutes video on the SBK Overview</h4>
+
 [![SBK Overview Video](images/kmg-sodacode-2022.png)](https://youtu.be/8hFieAR9o_M)
 
 ___
