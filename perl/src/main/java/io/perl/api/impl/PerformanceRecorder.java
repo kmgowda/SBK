@@ -40,7 +40,7 @@ public final class PerformanceRecorder {
     public PerformanceRecorder(PeriodicRecorder periodicRecorder, Channel[] channels, Time time,
                                int reportingIntervalMS, int idleNS) {
         this.periodicRecorder = periodicRecorder;
-        this.channels = channels;
+        this.channels = channels.clone();
         this.time = time;
         this.windowIntervalMS = reportingIntervalMS;
         this.idleNS = idleNS;

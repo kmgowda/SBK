@@ -77,7 +77,7 @@ public class ResultsLogger implements PerformanceLogger {
         this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
         this.prefix = prefix;
         this.timeUnit = timeUnit;
-        this.percentiles = percentiles;
+        this.percentiles = percentiles.clone();
         this.timeUnitName = timeUnit.name();
         this.minLatency = minLatency;
         this.maxLatency = maxLatency;
@@ -122,7 +122,7 @@ public class ResultsLogger implements PerformanceLogger {
 
     @Override
     public double[] getPercentiles() {
-        return percentiles;
+        return percentiles.clone();
     }
 
     /**

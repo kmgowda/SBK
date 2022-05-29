@@ -48,15 +48,14 @@ public class LatencyConfig {
     final public static int DEFAULT_MIN_LATENCY = 0;
 
     /**
-     * <code>PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99}</code>.
-     */
-    final public static double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
-
-    /**
      * <code>int HDR_SIGNIFICANT_DIGITS = 3</code>.
      */
     final public static int HDR_SIGNIFICANT_DIGITS = 3;
 
+    /**
+     * <code>PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99}</code>.
+     */
+    final public static double[] PERCENTILES = {10.0, 25.0, 50.0, 75.0, 95.0, 99.0, 99.9, 99.99};
 
     /**
      * <code>int maxArraySizeMB</code>.
@@ -87,5 +86,6 @@ public class LatencyConfig {
      * <code>int csvFileSizeGB</code>.
      */
     public int csvFileSizeGB;
+
 }
 

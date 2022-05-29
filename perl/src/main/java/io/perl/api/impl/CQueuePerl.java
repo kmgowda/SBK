@@ -150,7 +150,7 @@ final public class CQueuePerl implements Perl {
                 shutdown(ex);
             });
         }
-        return retFuture;
+        return retFuture.toCompletableFuture();
     }
 
     /**

@@ -35,6 +35,14 @@
             <Bug pattern="EI_EXPOSE_REP2" />
         </Or>
     </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Class name="io.perl.config.LatencyConfig" />
+        </Or>
+        <Or>
+            <Bug pattern="MS_MUTABLE_ARRAY" />
+        </Or>
+    </Match>
     <Match> <!-- These patterns while normally bad practice, are common in tests -->
         <Class name="~.*\.*Tests?" />
         <Or>

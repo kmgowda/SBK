@@ -50,7 +50,7 @@ allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
     apply plugin: 'application'
-    // apply plugin: "com.github.spotbugs"
+    apply plugin: "com.github.spotbugs"
 
     // Disable graalvm builds
     //apply plugin: "com.palantir.graal"
