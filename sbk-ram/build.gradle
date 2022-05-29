@@ -12,7 +12,7 @@
 apply plugin: 'java-library'
 apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
-
+apply plugin: "com.github.spotbugs"
 
 buildscript {
     repositories {
@@ -30,6 +30,8 @@ buildscript {
 
 apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
+apply from: "$rootDir/gradle/spotbugs.gradle"
+
 
 application {
     mainClass = 'io.sbk.main.SbkRamMain'
