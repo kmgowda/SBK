@@ -17,12 +17,15 @@ public non-sealed class SbkDriversParameters extends SbkParameters {
 
     public SbkDriversParameters(String name, String desc, String[] drivers) {
         super(name, desc);
-        this.drivers = drivers;
 
-        if (this.drivers != null && this.drivers.length > 0) {
+        if (drivers != null && drivers.length > 0) {
+            this.drivers = drivers.clone();
             addOption(Config.CLASS_OPTION, true, "Storage Driver Class,\n Available Drivers "
                     + Arrays.toString(this.drivers));
+        } else {
+            this.drivers = new String[]{""};
         }
+
     }
 
     public SbkDriversParameters(String name, String[] drivers) {

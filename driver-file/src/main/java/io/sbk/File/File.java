@@ -12,6 +12,7 @@ package io.sbk.File;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -91,6 +92,7 @@ public class File implements Storage<ByteBuffer> {
     }
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public DataType<ByteBuffer> getDataType() {
         dType = new NioByteBuffer();
         return dType;

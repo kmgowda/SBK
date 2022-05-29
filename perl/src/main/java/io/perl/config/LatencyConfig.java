@@ -11,6 +11,7 @@
 package io.perl.config;
 
 import io.time.Time;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Class LatencyConfig.
@@ -55,6 +56,7 @@ public class LatencyConfig {
     /**
      * <code>PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99}</code>.
      */
+    @SuppressFBWarnings("MS_MUTABLE_ARRAY")
     final public static double[] PERCENTILES = {10.0, 25.0, 50.0, 75.0, 95.0, 99.0, 99.9, 99.99};
 
     /**

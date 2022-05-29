@@ -9,11 +9,13 @@
  */
 package io.sbk.ConcurrentQ;
 
+
 import io.sbk.api.Reader;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.LockSupport;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Class for File Reader.
@@ -25,6 +27,7 @@ public class CqReader implements Reader<byte[]> {
     final private static int PARK_NS = NS_PER_MS;
     private final ConcurrentLinkedQueue<byte[]> queue;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public CqReader(ConcurrentLinkedQueue queue) throws IOException {
         this.queue = queue;
     }

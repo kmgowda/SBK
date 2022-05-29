@@ -10,6 +10,7 @@
 
 package io.sbk.CouchDB;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import org.ektorp.CouchDbConnector;
@@ -27,11 +28,10 @@ public class CouchDBReader implements Reader<String> {
     final private CouchDbConnector db;
     final private ParameterOptions params;
     private long key;
-    private int cnt;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public CouchDBReader(int id, ParameterOptions params, CouchDBConfig config, CouchDbConnector db) throws IOException {
         this.key = CouchDB.generateStartKey(id);
-        this.cnt = 0;
         this.params = params;
         this.db = db;
     }

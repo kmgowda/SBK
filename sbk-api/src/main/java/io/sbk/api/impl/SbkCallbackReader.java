@@ -58,7 +58,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     @Override
     public CompletableFuture<Void> start() {
         this.beginTime = time.getCurrentTime();
-        return ret;
+        return ret.toCompletableFuture();
     }
 
     @Override

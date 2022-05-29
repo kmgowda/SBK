@@ -110,7 +110,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             } else {
                 Printer.log.warn("SBK GEM Benchmark is already shutdown..");
             }
-            return retFuture;
+            return retFuture.toCompletableFuture();
         }
         state = State.RUN;
         Printer.log.info("SBK GEM Benchmark Started");
@@ -274,7 +274,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             shutdown(null);
         });
 
-        return retFuture;
+        return retFuture.toCompletableFuture();
     }
 
     private boolean remoteDirectoryDelete() throws InterruptedException, ConnectException {

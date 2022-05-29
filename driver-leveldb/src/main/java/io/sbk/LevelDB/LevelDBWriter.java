@@ -10,6 +10,7 @@
 
 package io.sbk.LevelDB;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 import org.iq80.leveldb.DB;
@@ -24,6 +25,7 @@ public class LevelDBWriter implements Writer<byte[]> {
     final private DB db;
     private long key;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public LevelDBWriter(int id, ParameterOptions params, DB db) throws IOException {
         this.key = io.sbk.LevelDB.LevelDB.generateStartKey(id);
         this.db = db;

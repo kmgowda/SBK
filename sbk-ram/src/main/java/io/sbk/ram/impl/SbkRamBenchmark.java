@@ -99,6 +99,7 @@ final public class SbkRamBenchmark implements Benchmark {
                 logger.getMinLatency(), logger.getMaxLatency(), percentileFractions);
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
+        final Random num = new Random();
 
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions,
@@ -116,7 +117,7 @@ final public class SbkRamBenchmark implements Benchmark {
             totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, ramConfig.csvFileSizeGB,
-                    Config.NAME + "-" + String.format("%06d", new Random().nextInt(1000000)) + ".csv");
+                    Config.NAME + "-" + String.format("%06d", num.nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Extension: CSV, Size: " +
                     totalWindowExtension.getMaxMemoryBytes() / Bytes.BYTES_PER_GB + " GB");
         } else {
@@ -149,14 +150,14 @@ final public class SbkRamBenchmark implements Benchmark {
             } else {
                 Printer.log.warn("SBK Benchmark is already shutdown..");
             }
-            return retFuture;
+            return retFuture.toCompletableFuture();
         }
         state = State.RUN;
         Printer.log.info("SBK RAM Benchmark Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
         benchmark.start();
         server.start();
-        return retFuture;
+        return retFuture.toCompletableFuture();
     }
 
     /**

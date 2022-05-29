@@ -9,6 +9,7 @@
  */
 package io.sbk.FileStream;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 
@@ -31,6 +32,7 @@ public class FileBufferedReader implements Reader<byte[]> {
     }
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public byte[] read() throws EOFException, IOException {
         final int ret = in.read(readBuffer);
         if (ret < 0) {

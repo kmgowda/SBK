@@ -10,6 +10,7 @@
 
 package io.sbk.CouchDB;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 import org.ektorp.CouchDbConnector;
@@ -27,6 +28,7 @@ public class CouchDBWriter implements Writer<String> {
     final private ParameterOptions params;
     private long key;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public CouchDBWriter(int id, ParameterOptions params, CouchDBConfig config, CouchDbConnector db) throws IOException {
         this.key = CouchDB.generateStartKey(id);
         this.params = params;

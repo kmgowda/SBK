@@ -130,7 +130,7 @@ final public class SbkBenchmark implements Benchmark {
             } else {
                 Printer.log.warn("SBK Benchmark is already shutdown..");
             }
-            return retFuture;
+            return retFuture.toCompletableFuture();
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
@@ -338,7 +338,7 @@ final public class SbkBenchmark implements Benchmark {
         assert chainFuture != null;
         chainFuture.thenRunAsync(this::stop, executor);
 
-        return retFuture;
+        return retFuture.toCompletableFuture();
     }
 
     /**

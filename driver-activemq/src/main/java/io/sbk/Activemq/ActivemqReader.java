@@ -22,13 +22,11 @@ import java.io.IOException;
  * Class for Activemq Reader.
  */
 public class ActivemqReader implements Reader<String> {
-    ActivemqConfig config;
     MessageConsumer consumer;
     Parameters params;
 
     public ActivemqReader(int readerId, ParameterOptions params, ActivemqConfig config) {
         this.params = params;
-        this.config = config;
         try {
             this.consumer = config.session.createConsumer(config.dst);
         } catch (JMSException e) {

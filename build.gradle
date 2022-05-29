@@ -50,7 +50,6 @@ allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
     apply plugin: 'application'
-    apply plugin: "com.github.spotbugs"
 
     // Disable graalvm builds
     //apply plugin: "com.palantir.graal"
@@ -59,7 +58,6 @@ allprojects {
     apply from: "$rootDir/gradle/application.gradle"
     apply from: "$rootDir/gradle/checkstyle.gradle"
     apply from: "$rootDir/gradle/eclipse.gradle"
-    apply from: "$rootDir/gradle/spotbugs.gradle"
     apply from: "$rootDir/gradle/idea.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
     apply from: "$rootDir/gradle/protobuf.gradle"

@@ -33,13 +33,11 @@ public class JdbcWriter implements Writer<String> {
     final public String data;
     final private Connection conn;
     final private Statement st;
-    final private DataType<String> dType;
     final private String defaultInsertQuery;
 
     public JdbcWriter(int writerID, ParameterOptions params,
                       JdbcConfig config, DataType<String> dType) throws IOException {
         final Properties props = new Properties();
-        this.dType = dType;
         if (config.user != null) {
             props.put("user", config.user);
 

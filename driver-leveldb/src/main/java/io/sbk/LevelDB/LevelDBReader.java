@@ -10,6 +10,7 @@
 
 package io.sbk.LevelDB;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import org.iq80.leveldb.DB;
@@ -25,6 +26,7 @@ public class LevelDBReader implements Reader<byte[]> {
     final private DB db;
     private long key;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public LevelDBReader(int id, ParameterOptions params, DB db) throws IOException {
         this.key = io.sbk.LevelDB.LevelDB.generateStartKey(id);
         this.params = params;

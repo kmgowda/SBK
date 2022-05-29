@@ -9,6 +9,7 @@
  */
 package io.sbk.Artemis;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.PerlChannel;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Status;
@@ -30,6 +31,7 @@ public class ArtemisWriter implements Writer<byte[]> {
     final private ClientSession session;
     final private ClientProducer producer;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public ArtemisWriter(int writerID, ParameterOptions params,
                          String topicName, ArtemisClientConfig config, ClientSession session) throws IOException {
         this.session = session;

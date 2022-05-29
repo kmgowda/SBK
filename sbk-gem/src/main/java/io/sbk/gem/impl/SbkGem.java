@@ -78,7 +78,7 @@ final public class SbkGem {
      * @throws ExecutionException       If an exception occurred.
      * @throws TimeoutException         If an exception occurred if an I/O operation is timed out.
      */
-    public static @NotNull RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
+    public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
                                                 GemLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException {
         final GemBenchmark benchmark;

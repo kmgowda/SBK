@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -77,7 +78,7 @@ final public class StoragePackage {
     }
 
     public String[] getDrivers() {
-        return simpleNames;
+        return simpleNames.clone();
     }
 
     public @NotNull Storage<?> getStorage(String storageName) throws ClassNotFoundException, NoSuchMethodException,
@@ -113,7 +114,7 @@ final public class StoragePackage {
     /**
      *  class StringCompareIgnoreCase.
      */
-    private static class StringCompareIgnoreCase implements Comparator<String> {
+    private static class StringCompareIgnoreCase implements Comparator<String>, Serializable {
 
         @Override
         @Contract(pure = true)

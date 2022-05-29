@@ -9,6 +9,7 @@
  */
 package io.sbk.Artemis;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.AbstractCallbackReader;
 import io.sbk.api.Callback;
 import io.sbk.params.ParameterOptions;
@@ -29,6 +30,7 @@ public class ArtemisCallbackReader extends AbstractCallbackReader<byte[]> {
     private final ClientConsumer consumer;
     private final ClientSession session;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public ArtemisCallbackReader(int readerId, ParameterOptions params, String topicName,
                                  String subscriptionName, ArtemisClientConfig config, ClientSession session) throws IOException {
         this.session = session;

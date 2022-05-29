@@ -36,17 +36,21 @@ public class BookKeeper implements Storage<byte[]> {
     private String logName;
     private String uriName;
     private boolean recreate;
+    /*
     private int ensembleSize;
     private int writeQuorum;
     private int ackQuorum;
+     */
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("log", true, "Log name");
         params.addOption("uri", true, "URI");
+        /*
         params.addOption("ensembleSize", true, "EnsembleSize (default value is in " + CONFIGFILE + " )");
         params.addOption("writeQuorum", true, "WriteQuorum  (default value is in " + CONFIGFILE + " )");
         params.addOption("ackQuorum", true, "AckQuorum (default value is in " + CONFIGFILE + " )");
+         */
         params.addOption("recreate", true,
                 "If the log is already existing, delete and recreate the same (default: false)");
     }
@@ -77,9 +81,11 @@ public class BookKeeper implements Storage<byte[]> {
         } else {
             recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
         }
+        /*
         ensembleSize = Integer.parseInt(params.getOptionValue("ensembleSize", String.valueOf(conf.getEnsembleSize())));
         writeQuorum = Integer.parseInt(params.getOptionValue("writeQuorum", String.valueOf(conf.getWriteQuorumSize())));
         ackQuorum = Integer.parseInt(params.getOptionValue("ackQuorum", String.valueOf(conf.getAckQuorumSize())));
+        */
         dlogUri = URI.create(uriName);
     }
 

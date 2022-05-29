@@ -9,6 +9,7 @@
  */
 package io.sbk.ConcurrentQ;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class CqWriter implements Writer<byte[]> {
     private ConcurrentLinkedQueue<byte[]> queue;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public CqWriter(ConcurrentLinkedQueue queue) throws IOException {
         this.queue = queue;
     }

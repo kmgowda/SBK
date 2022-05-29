@@ -43,7 +43,7 @@ public class BookKeeperWriter implements Writer<byte[]> {
         LogRecord record = new LogRecord(
                 sequencer.nextId(), data);
         ret = writer.write(record);
-        return ret;
+        return ret.toCompletableFuture();
     }
 
     @Override

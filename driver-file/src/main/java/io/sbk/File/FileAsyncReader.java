@@ -9,6 +9,7 @@
  */
 package io.sbk.File;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.AsyncReader;
 import io.sbk.params.ParameterOptions;
 import io.sbk.data.DataType;
@@ -31,6 +32,7 @@ public class FileAsyncReader implements AsyncReader<ByteBuffer> {
     final private DataType<ByteBuffer> dType;
     final private ExecutorService executor;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public FileAsyncReader(int id, ParameterOptions params, DataType<ByteBuffer> dType, FileConfig config) throws IOException {
         this.in = FileChannel.open(Paths.get(config.fileName), StandardOpenOption.READ);
         this.dType = dType;

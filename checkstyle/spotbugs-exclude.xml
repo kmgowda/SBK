@@ -28,19 +28,82 @@
     </Match>
     <Match> <!-- This is intended in these and only these classes -->
         <Or>
-            <Class name="io.sbk.FdbRecord.FdbRecordLayerProto" />
+            <Class name="io.sbk.Jdbc.Jdbc" />
+        </Or>
+        <Or>
+            <Bug pattern="ODR_OPEN_DATABASE_RESOURCE" />
+        </Or>
+    </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Class name="io.sbk.data.impl.ByteArray" />
+            <Class name="io.sbk.data.impl.NioByteBuffer" />
+            <Class name="io.sbk.data.impl.ProtoBufByteString" />
+            <Class name="io.sbk.data.impl.SbkString" />
+        </Or>
+        <Or>
+            <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE" />
+        </Or>
+    </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Package name="io.sbk.grpc" />
         </Or>
         <Or>
             <Bug pattern="EI_EXPOSE_REP" />
+            <Bug pattern="EI_EXPOSE_REP2" />
+            <Bug pattern="SE_BAD_FIELD" />
+            <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+            <Bug pattern="UCF_USELESS_CONTROL_FLOW" />
+            <Bug pattern="MS_EXPOSE_REP" />
+        </Or>
+    </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Class name="io.sbk.api.AbstractCallbackReader" />
+            <Class name="io.sbk.api.impl.SbkCallbackReader" />
+            <Class name="io.sbk.api.impl.SbkReader" />
+            <Class name="io.sbk.api.impl.SbkWriter" />
+            <Class name="io.sbk.api.impl.SbkBenchmark" />
+            <Class name="io.sbk.ram.impl.RamTotalWindowLatencyPeriodicRecorder" />
+        </Or>
+        <Or>
             <Bug pattern="EI_EXPOSE_REP2" />
         </Or>
     </Match>
     <Match> <!-- This is intended in these and only these classes -->
         <Or>
-            <Class name="io.perl.config.LatencyConfig" />
+            <Class name="io.sbk.logger.impl.RamPrometheusLogger" />
         </Or>
         <Or>
-            <Bug pattern="MS_MUTABLE_ARRAY" />
+            <Bug pattern="EI_EXPOSE_REP" />
+        </Or>
+    </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Class name="io.sbk.api.Storage" />
+            <Class name="io.sbk.gem.impl.SbkGemBenchmark" />
+
+        </Or>
+        <Or>
+            <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
+        </Or>
+    </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Class name="io.sbk.api.impl.Sbk" />
+        </Or>
+        <Or>
+            <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
+        </Or>
+    </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Class name="io.sbk.FdbRecord.FdbRecordLayerProto" />
+        </Or>
+        <Or>
+            <Bug pattern="EI_EXPOSE_REP" />
+            <Bug pattern="EI_EXPOSE_REP2" />
         </Or>
     </Match>
     <Match> <!-- These patterns while normally bad practice, are common in tests -->
