@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
 import io.perl.api.impl.PerlBuilder;
@@ -73,6 +74,7 @@ final public class SbkBenchmark implements Benchmark {
      * @param time    time interface
      * @throws IOException If Exception occurs.
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkBenchmark(ParameterOptions params, Storage<Object> storage,
                         DataType<Object> dType, @NotNull RWLogger rwLogger, Time time) throws IOException {
         this.dType = dType;
@@ -130,7 +132,7 @@ final public class SbkBenchmark implements Benchmark {
             } else {
                 Printer.log.warn("SBK Benchmark is already shutdown..");
             }
-            return retFuture;
+            return retFuture.toCompletableFuture();
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
@@ -338,7 +340,7 @@ final public class SbkBenchmark implements Benchmark {
         assert chainFuture != null;
         chainFuture.thenRunAsync(this::stop, executor);
 
-        return retFuture;
+        return retFuture.toCompletableFuture();
     }
 
     /**

@@ -145,10 +145,10 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
         long startTime = time.getCurrentTime();
         status.startTime = startTime;
-        double msElapsed = 0;
+        long msElapsed = 0;
         while (msElapsed < msToRun) {
             recordWrite(dType, data, size, time, status, writer.perlChannel);
-            msElapsed = time.elapsedMilliSeconds(status.startTime, startTime);
+            msElapsed = (long) time.elapsedMilliSeconds(status.startTime, startTime);
         }
         sync();
     }
@@ -172,7 +172,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         int cnt = 0;
-        double secondsElapsed = 0;
+        long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
         while (secondsElapsed < secondsToRun) {
@@ -181,7 +181,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                 recordWrite(dType, data, size, time, status, writer.perlChannel);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
+                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
             sync();
@@ -240,7 +240,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
-        double secondsElapsed = 0;
+        long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
         while (secondsElapsed < secondsToRun) {
@@ -249,7 +249,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                 writeSetTime(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
+                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
             sync();
@@ -309,7 +309,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
-        double secondsElapsed = 0;
+        long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
         while (secondsElapsed < secondsToRun) {
@@ -318,7 +318,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                 write(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = time.elapsedSeconds(status.startTime, loopStartTime);
+                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
             sync();

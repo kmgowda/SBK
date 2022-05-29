@@ -20,6 +20,11 @@ import java.util.Random;
  * Class for processing Byte String data.
  */
 final public class ProtoBufByteString implements DataType<ByteString> {
+    final Random random;
+
+    public ProtoBufByteString() {
+        random = new Random();
+    }
 
     /**
      * Create byte array data.
@@ -40,7 +45,6 @@ final public class ProtoBufByteString implements DataType<ByteString> {
      */
     @Override
     public ByteString create(int size) {
-        Random random = new Random();
         byte[] bytes = new byte[size];
         for (int i = 0; i < size; ++i) {
             bytes[i] = (byte) (random.nextInt(26) + 65);

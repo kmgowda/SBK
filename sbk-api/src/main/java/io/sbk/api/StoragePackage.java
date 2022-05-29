@@ -10,6 +10,7 @@
 package io.sbk.api;
 
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.system.Printer;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Contract;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -29,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * class StoragePackage.
  */
 @NotThreadSafe
+@SuppressFBWarnings("EI_EXPOSE_REP")
 final public class StoragePackage {
     final private static int MAX_PRINT_WIDTH = 80;
     final private String packageName;
@@ -113,7 +116,7 @@ final public class StoragePackage {
     /**
      *  class StringCompareIgnoreCase.
      */
-    private static class StringCompareIgnoreCase implements Comparator<String> {
+    private static class StringCompareIgnoreCase implements Comparator<String>, Serializable {
 
         @Override
         @Contract(pure = true)

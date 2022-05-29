@@ -10,6 +10,7 @@
 
 package io.sbk.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.PerlChannel;
 import io.perl.api.RunBenchmark;
 import io.sbk.action.Action;
@@ -41,7 +42,7 @@ final public class SbkReader extends Worker implements RunBenchmark {
     final private RateController rCnt;
     final private BiConsumer perf;
 
-
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkReader(int readerId, ParameterOptions params, PerlChannel perlChannel,
                      DataType<Object> dType, Time time, DataReader<Object> reader,
                      CountReaders rCount, ExecutorService executor) {

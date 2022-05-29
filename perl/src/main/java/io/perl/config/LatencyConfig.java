@@ -16,7 +16,7 @@ import io.time.Time;
 /**
  * Class LatencyConfig.
  */
-@SuppressFBWarnings
+@SuppressFBWarnings("MS_MUTABLE_ARRAY")
 public class LatencyConfig {
 
     /**

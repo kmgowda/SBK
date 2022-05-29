@@ -28,7 +28,20 @@
     </Match>
     <Match> <!-- This is intended in these and only these classes -->
         <Or>
-            <Class name="io.sbk.FdbRecord.FdbRecordLayerProto" />
+            <Package name="io.sbk.grpc" />
+        </Or>
+        <Or>
+            <Bug pattern="SE_BAD_FIELD" />
+            <Bug pattern="EI_EXPOSE_REP" />
+            <Bug pattern="EI_EXPOSE_REP2" />
+            <Bug pattern="MS_EXPOSE_REP" />
+            <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+            <Bug pattern="UCF_USELESS_CONTROL_FLOW" />
+        </Or>
+    </Match>
+    <Match> <!-- This is intended in these and only these classes -->
+        <Or>
+            <Class name="io.sbk.grpc.LatenciesRecord" />
         </Or>
         <Or>
             <Bug pattern="EI_EXPOSE_REP" />

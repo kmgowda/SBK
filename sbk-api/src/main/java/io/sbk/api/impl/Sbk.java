@@ -9,6 +9,7 @@
  */
 package io.sbk.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
@@ -111,6 +112,7 @@ final public class Sbk {
      * @throws IllegalAccessException    if the exception occurs.
      */
     @Contract("_, _, _, _ -> new")
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     public static @NotNull Benchmark buildBenchmark(final String[] args, final String packageName,
                                                     final String applicationName, final RWLogger outRWLogger) throws ParseException,
             IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException,
