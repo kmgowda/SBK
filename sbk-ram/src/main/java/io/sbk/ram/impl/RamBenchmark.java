@@ -160,7 +160,7 @@ final public class RamBenchmark implements Benchmark, RamRegistry {
                 shutdown(ex);
             });
         }
-        return retFuture;
+        return retFuture.toCompletableFuture();
     }
 
     @Override

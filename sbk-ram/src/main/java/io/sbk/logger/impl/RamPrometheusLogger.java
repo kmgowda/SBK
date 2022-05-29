@@ -9,6 +9,7 @@
  */
 package io.sbk.logger.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.LatencyRecord;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
@@ -18,6 +19,7 @@ import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +49,8 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
     @Override
-    public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    public @Nonnull PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
             prometheusServer = new RamMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
                     percentiles, time, metricsConfig);
