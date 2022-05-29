@@ -1,0 +1,32 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
+plugins {
+    //id "com.linkedin.python-cli" version "0.9.11"
+    id "com.linkedin.python" version "0.9.11"
+}
+
+python {
+    srcDir = project.file('.').path
+}
+
+// define an explicit installation sequence for the dependencies.
+project.tasks.findByName('installPythonRequirements').sorted = false
+
+dependencies {
+    python 'pypi:requests:2.9.1'
+    test 'pypi:mock:1.0.1'
+}
+
+repositories {
+    // provided by LinkedIn as an example
+    pyGradlePyPi()
+}
