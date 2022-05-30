@@ -9,6 +9,7 @@
  */
 package io.sbk.Jdbc;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.PerlChannel;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Status;
@@ -36,6 +37,7 @@ public class JdbcWriter implements Writer<String> {
     final private DataType<String> dType;
     final private String defaultInsertQuery;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public JdbcWriter(int writerID, ParameterOptions params,
                       JdbcConfig config, DataType<String> dType) throws IOException {
         final Properties props = new Properties();

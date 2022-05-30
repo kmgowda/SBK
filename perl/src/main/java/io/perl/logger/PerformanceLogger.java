@@ -83,6 +83,6 @@ public interface PerformanceLogger extends Print {
      * @return array of percentile Indices.
      */
     default double[] getPercentiles() {
-        return LatencyConfig.PERCENTILES;
+        return LatencyConfig.PERCENTILES.clone();
     }
 }

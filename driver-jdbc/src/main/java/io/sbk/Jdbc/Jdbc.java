@@ -12,6 +12,7 @@ package io.sbk.Jdbc;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -186,6 +187,7 @@ public class Jdbc implements Storage<String> {
 
 
     @Override
+    @SuppressFBWarnings("ODR_OPEN_DATABASE_RESOURCE")
     public void openStorage(final ParameterOptions params) throws IOException {
         try {
             Class.forName(config.driver);
@@ -296,6 +298,7 @@ public class Jdbc implements Storage<String> {
 
 
     @Override
+    @SuppressFBWarnings("ODR_OPEN_DATABASE_RESOURCE")
     public void closeStorage(final ParameterOptions params) throws IOException {
         final Properties props = new Properties();
         props.put("shutdown", "true");

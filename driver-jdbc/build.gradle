@@ -1,6 +1,9 @@
 plugins {
     id 'java'
 }
+apply plugin: "com.github.spotbugs"
+
+apply from: "$rootDir/gradle/spotbugs.gradle"
 
 
 repositories {
