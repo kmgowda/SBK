@@ -16,7 +16,6 @@ import io.time.Time;
 /**
  * Class LatencyConfig.
  */
-@SuppressFBWarnings("MS_MUTABLE_ARRAY")
 public class LatencyConfig {
 
     /**
@@ -52,6 +51,7 @@ public class LatencyConfig {
     /**
      * <code>PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99}</code>.
      */
+    @SuppressFBWarnings("MS_MUTABLE_ARRAY")
     final public static double[] PERCENTILES = {10, 25, 50, 75, 95, 99, 99.9, 99.99};
 
     /**

@@ -9,8 +9,6 @@
  */
 package io.sbk.api;
 
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.system.Printer;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Contract;
@@ -31,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * class StoragePackage.
  */
 @NotThreadSafe
-@SuppressFBWarnings("EI_EXPOSE_REP")
 final public class StoragePackage {
     final private static int MAX_PRINT_WIDTH = 80;
     final private String packageName;
@@ -80,7 +77,7 @@ final public class StoragePackage {
     }
 
     public String[] getDrivers() {
-        return simpleNames;
+        return simpleNames.clone();
     }
 
     public @NotNull Storage<?> getStorage(String storageName) throws ClassNotFoundException, NoSuchMethodException,
