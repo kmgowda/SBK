@@ -78,6 +78,7 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("secret", true, "secret key, default password: " + config.secretKey);
         params.addOption("recreate", true,
                 "If the table is already existing, delete and recreate the same, default: " + config.reCreate);
+        params.addOption("insecure", true, "No server cert validation. default: " + config.insecure);
 
     }
 
@@ -92,6 +93,8 @@ public class MinIO implements Storage<byte[]> {
         } else {
             config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
         }
+        config.insecure = Boolean.parseBoolean(params.getOptionValue("insecure", String.valueOf(config.insecure)));
+
         dType = new ByteArray();
     }
 
@@ -100,7 +103,15 @@ public class MinIO implements Storage<byte[]> {
         try {
             // Create a minioClient with the MinIO Server name, Port, Access key and Secret key.
             mclient = new MinioClient(config.url, config.accessKey, config.secretKey);
-
+            if (config.insecure) {
+                Printer.log.info("Disabling CERT check.");
+                try {
+                    mclient.ignoreCertCheck();
+                } catch (Exception e) {
+                    Printer.log.error("ignoreCertCheck() failed.");
+                    throw new IOException(e);
+                }
+            }
             // Check if the bucket already exists.
             boolean isExist = mclient.bucketExists(config.bucketName);
             if (isExist) {
