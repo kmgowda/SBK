@@ -16,4 +16,5 @@ public class MinIOConfig {
     public String secretKey;
     public String bucketName;
     public boolean reCreate;
+    public boolean insecure;
 }
