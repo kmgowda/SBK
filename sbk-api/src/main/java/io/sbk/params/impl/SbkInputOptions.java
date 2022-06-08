@@ -60,7 +60,7 @@ public class SbkInputOptions implements ParseInputOptions {
     @Override
     final public void addOption(String name, boolean hasArg, String description) throws IllegalArgumentException {
         if (hasOption(name)) {
-            throw new IllegalArgumentException("The matching option: '" + name +"' already exists!");
+            throw new IllegalArgumentException("The matching case-insensitive option: '" + name +"' already exists!");
         }
         argNames.add(name);
         options.addOption(name, hasArg, description);
