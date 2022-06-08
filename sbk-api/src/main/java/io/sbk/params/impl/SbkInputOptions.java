@@ -58,25 +58,22 @@ public class SbkInputOptions implements ParseInputOptions {
     }
 
     @Override
-    final public Options addOption(String name, boolean hasArg, String description) throws IllegalArgumentException {
-        namesList.forEach(x -> {
-            if (x.equalsIgnoreCase(name)) {
-                throw new IllegalArgumentException("The option: '" + x +"' already exists;"+
-                        " the new option: '" + name + "' cannot be added");
-            }
-        });
+    final public void addOption(String name, boolean hasArg, String description) throws IllegalArgumentException {
+        if (hasOption(name)) {
+            throw new IllegalArgumentException("The matching option: '" + name +"' already exists");
+        }
         namesList.add(name);
-        return options.addOption(name, hasArg, description);
-    }
-
-    @Override
-    final public Options addOption(String name, String description) throws IllegalArgumentException {
-        return addOption(name, false, description);
+        options.addOption(name, hasArg, description);
     }
 
     @Override
     final public boolean hasOption(String name) {
-        return options.hasOption(name);
+        for (String x : namesList) {
+           if ( x.equalsIgnoreCase(name)) {
+               return true;
+           }
+        }
+        return false;
     }
 
     @Override
