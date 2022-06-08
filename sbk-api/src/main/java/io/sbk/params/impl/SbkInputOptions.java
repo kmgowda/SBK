@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+
 public class SbkInputOptions implements ParseInputOptions {
     final private String benchmarkName;
     final private String header;
@@ -53,22 +54,27 @@ public class SbkInputOptions implements ParseInputOptions {
     }
 
     @Override
-    public Options addOption(String name, boolean hasArg, String description) {
+    final public Options addOption(String name, boolean hasArg, String description) throws IllegalArgumentException {
+        options.getOptions().forEach( x -> {
+            if (x.getArgName() != null && x.getArgName().equalsIgnoreCase(name)) {
+                throw new IllegalArgumentException("The option: '" + name + "' already exists");
+            }
+        });
         return options.addOption(name, hasArg, description);
     }
 
     @Override
-    public Options addOption(String name, String description) {
-        return options.addOption(name, description);
+    final public Options addOption(String name, String description) throws IllegalArgumentException {
+        return addOption(name, false, description);
     }
 
     @Override
-    public boolean hasOption(String name) {
+    final public boolean hasOption(String name) {
         return options.hasOption(name);
     }
 
     @Override
-    public String getHelpText() {
+    final public String getHelpText() {
         final OutputStream outStream = new ByteArrayOutputStream();
         final PrintWriter helpPrinter = new PrintWriter(outStream);
         formatter.printHelp(helpPrinter, HelpFormatter.DEFAULT_WIDTH, benchmarkName, header, options,

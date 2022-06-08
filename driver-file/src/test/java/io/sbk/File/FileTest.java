@@ -150,6 +150,7 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("CreateWriter failed!");
         }
+        params = new SbkDriversParameters(benchmarkName, drivers);
         file = new File();
         file.getDataType();
         file.addArgs(params);
@@ -240,6 +241,7 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("Writer Failed");
         }
+        params = new SbkDriversParameters(benchmarkName, drivers);
         file = new File();
         file.getDataType();
         file.addArgs(params);
@@ -329,6 +331,7 @@ public class FileTest {
             ex.printStackTrace();
             Assert.fail("Writer Failed");
         }
+        params = new SbkDriversParameters(benchmarkName, drivers);
         file = new File();
         file.getDataType();
         file.addArgs(params);

@@ -32,16 +32,6 @@ public class BookKeeperTest {
     @Test
     public void addArgsTest() {
         params = new SbkDriversParameters(benchmarkName, drivers);
-        params.addOption("log", true, "Log name");
-        params.addOption("uri", true, "URI");
-        params.addOption("ensembleSize", true,
-                "EnsembleSize(default value is in " + CONFIGFILE + ")");
-        params.addOption("writeQuorum", true,
-                "WriteQuorum(default value is in " + CONFIGFILE + " )");
-        params.addOption("ackQuorum", true,
-                "AckQuorum(default value is in " + CONFIGFILE + " )");
-        params.addOption("recreate", true,
-                "If the log is already existing, delete and recreate the same");
         bk = new BookKeeper();
         bk.addArgs(params);
 
@@ -53,18 +43,8 @@ public class BookKeeperTest {
     @Test
     public void parseArgs() {
         params = new SbkDriversParameters(benchmarkName, drivers);
-        params.addOption("log", true, "Log name");
-        params.addOption("uri", true, "URI");
-        params.addOption("ensembleSize", true,
-                "EnsembleSize (default value is in " + CONFIGFILE + " )");
-        params.addOption("writeQuorum", true,
-                "WriteQuorum  (default value is in " + CONFIGFILE + " )");
-        params.addOption("ackQuorum", true,
-                "AckQuorum (default value is in " + CONFIGFILE + " )");
-        params.addOption("recreate", true,
-                "If the log is already exist, delete and recreate the same)");
         bk = new BookKeeper();
-
+        bk.addArgs(params);
         Exception exception = null;
         try {
             bk.parseArgs(params);
