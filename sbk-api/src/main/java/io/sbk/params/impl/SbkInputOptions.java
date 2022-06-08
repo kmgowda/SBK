@@ -24,6 +24,9 @@ import org.apache.commons.cli.ParseException;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class SbkInputOptions implements ParseInputOptions {
     final private String benchmarkName;
@@ -32,6 +35,7 @@ public class SbkInputOptions implements ParseInputOptions {
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
+    final private List<String> namesList;
     final private boolean stopAtNonOption;
     private CommandLine commandline;
 
@@ -42,10 +46,11 @@ public class SbkInputOptions implements ParseInputOptions {
         this.benchmarkName = name;
         this.header = header + "\n\n";
         this.footer = footer;
+        this.namesList = new ArrayList<>();
         this.stopAtNonOption = stopAtNonOption;
         this.commandline = null;
 
-        options.addOption(Config.HELP_OPTION, false, "Help message");
+        addOption(Config.HELP_OPTION, false, "Help message");
     }
 
     public SbkInputOptions(String name, String header) {
@@ -53,22 +58,26 @@ public class SbkInputOptions implements ParseInputOptions {
     }
 
     @Override
-    public Options addOption(String name, boolean hasArg, String description) {
-        return options.addOption(name, hasArg, description);
+    final public void addOption(String name, boolean hasArg, String description) throws IllegalArgumentException {
+        if (hasOption(name)) {
+            throw new IllegalArgumentException("The matching option: '" + name +"' already exists!");
+        }
+        namesList.add(name);
+        options.addOption(name, hasArg, description);
     }
 
     @Override
-    public Options addOption(String name, String description) {
-        return options.addOption(name, description);
+    final public boolean hasOption(String name) {
+        for (String x : namesList) {
+           if ( x.equalsIgnoreCase(name)) {
+               return true;
+           }
+        }
+        return false;
     }
 
     @Override
-    public boolean hasOption(String name) {
-        return options.hasOption(name);
-    }
-
-    @Override
-    public String getHelpText() {
+    final public String getHelpText() {
         final OutputStream outStream = new ByteArrayOutputStream();
         final PrintWriter helpPrinter = new PrintWriter(outStream);
         formatter.printHelp(helpPrinter, HelpFormatter.DEFAULT_WIDTH, benchmarkName, header, options,

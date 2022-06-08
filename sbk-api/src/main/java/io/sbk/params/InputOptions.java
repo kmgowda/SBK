@@ -10,8 +10,6 @@
 
 package io.sbk.params;
 
-import org.apache.commons.cli.Options;
-
 public sealed interface InputOptions permits ParseInputOptions {
     /**
      * Add the driver specific command line arguments.
@@ -19,18 +17,9 @@ public sealed interface InputOptions permits ParseInputOptions {
      * @param name        Name of the parameter to add.
      * @param hasArg      flag signalling if an argument is required after this option.
      * @param description Self-documenting description.
-     * @return Options return the added options
+     * @throws IllegalArgumentException if 'name' already added.
      */
-    Options addOption(String name, boolean hasArg, String description);
-
-    /**
-     * Parse the driver specific command line arguments.
-     *
-     * @param name        Name of the parameter to add.
-     * @param description Self-documenting description.
-     * @return Options return the added options
-     */
-    Options addOption(String name, String description);
+    void addOption(String name, boolean hasArg, String description) throws IllegalArgumentException;
 
     /**
      * Returns whether the named Option exists.
