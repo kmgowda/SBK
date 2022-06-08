@@ -24,8 +24,8 @@ import org.apache.commons.cli.ParseException;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 public class SbkInputOptions implements ParseInputOptions {
@@ -35,7 +35,7 @@ public class SbkInputOptions implements ParseInputOptions {
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
-    final private List<String> namesList;
+    final private Set<String> argNames;
     final private boolean stopAtNonOption;
     private CommandLine commandline;
 
@@ -46,7 +46,7 @@ public class SbkInputOptions implements ParseInputOptions {
         this.benchmarkName = name;
         this.header = header + "\n\n";
         this.footer = footer;
-        this.namesList = new ArrayList<>();
+        this.argNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         this.stopAtNonOption = stopAtNonOption;
         this.commandline = null;
 
@@ -62,18 +62,13 @@ public class SbkInputOptions implements ParseInputOptions {
         if (hasOption(name)) {
             throw new IllegalArgumentException("The matching option: '" + name +"' already exists!");
         }
-        namesList.add(name);
+        argNames.add(name);
         options.addOption(name, hasArg, description);
     }
 
     @Override
     final public boolean hasOption(String name) {
-        for (String x : namesList) {
-           if ( x.equalsIgnoreCase(name)) {
-               return true;
-           }
-        }
-        return false;
+        return argNames.contains(name);
     }
 
     @Override
@@ -110,7 +105,7 @@ public class SbkInputOptions implements ParseInputOptions {
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         commandline = parser.parse(options, args, stopAtNonOption);
-        if (commandline.hasOption(Config.HELP_OPTION)) {
+        if (hasOptionValue(Config.HELP_OPTION)) {
             throw new HelpException(getHelpText());
         }
     }
