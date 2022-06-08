@@ -24,6 +24,8 @@ import org.apache.commons.cli.ParseException;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SbkInputOptions implements ParseInputOptions {
@@ -33,6 +35,7 @@ public class SbkInputOptions implements ParseInputOptions {
     final private Options options;
     final private HelpFormatter formatter;
     final private CommandLineParser parser;
+    final private List<String> namesList;
     final private boolean stopAtNonOption;
     private CommandLine commandline;
 
@@ -43,10 +46,11 @@ public class SbkInputOptions implements ParseInputOptions {
         this.benchmarkName = name;
         this.header = header + "\n\n";
         this.footer = footer;
+        this.namesList = new ArrayList<>();
         this.stopAtNonOption = stopAtNonOption;
         this.commandline = null;
 
-        options.addOption(Config.HELP_OPTION, false, "Help message");
+        addOption(Config.HELP_OPTION, false, "Help message");
     }
 
     public SbkInputOptions(String name, String header) {
@@ -55,11 +59,13 @@ public class SbkInputOptions implements ParseInputOptions {
 
     @Override
     final public Options addOption(String name, boolean hasArg, String description) throws IllegalArgumentException {
-        options.getOptions().forEach( x -> {
-            if (x.getArgName() != null && x.getArgName().equalsIgnoreCase(name)) {
-                throw new IllegalArgumentException("The option: '" + name + "' already exists");
+        namesList.forEach(x -> {
+            if (x.equalsIgnoreCase(name)) {
+                throw new IllegalArgumentException("The option: '" + x +"' already exists;"+
+                        " the new option: '" + name + "' cannot be added");
             }
         });
+        namesList.add(name);
         return options.addOption(name, hasArg, description);
     }
 
