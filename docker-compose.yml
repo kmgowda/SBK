@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: ./dockers/sbk
     container_name: sbk-grafana
-    hostname: sbk
+    hostname: sbk-grafana
     depends_on:
       - prometheus
       - grafana
