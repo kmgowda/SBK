@@ -9,12 +9,9 @@
 ##
 
 # Building Container
-FROM gradle:7.2.0-jdk17 as GradleBuilder
+FROM gradle:7.3.0-jdk17 as SbkGradleBuilder
 MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 USER root
-
-COPY ca-certificates/* /usr/local/share/ca-certificates/
-RUN update-ca-certificates
 
 ENV APP_NAME=sbk
 ENV SBK_PROJECT=driver-rocketmq
@@ -24,10 +21,13 @@ WORKDIR /opt/sbk
 
 COPY --chown=root:root gradle ${APP_HOME}/gradle
 COPY --chown=root:root build.gradle ${APP_HOME}/build.gradle
+COPY --chown=root:root build-drivers.gradle ${APP_HOME}/build-drivers.gradle
 COPY --chown=root:root gradle.properties ${APP_HOME}/gradle.properties
 COPY --chown=root:root settings.gradle ${APP_HOME}/settings.gradle
+COPY --chown=root:root settings-drivers.gradle ${APP_HOME}/settings-drivers.gradle
 COPY --chown=root:root gradlew ${APP_HOME}/gradlew
 COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
+COPY --chown=root:root perl ${APP_HOME}/perl
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
 
 # Copy the SBK storage drivers
@@ -36,15 +36,15 @@ COPY --chown=root:root driver-rocketmq ${APP_HOME}/driver-rocketmq
 
 
 ENV GRADLE_USER_HOME=/opt/SBK
-RUN gradle  :${SBK_PROJECT}:build --no-daemon --info --stacktrace
+RUN gradle  :${SBK_PROJECT}:distTar --no-daemon --info --stacktrace
 
 # Runtime Container
-FROM openjdk:17.0-jre
+FROM openjdk:17-jdk-slim
 ENV APP_NAME=sbk
 ENV SBK_PROJECT=driver-rocketmq
 ENV APP_HOME=/opt/${APP_NAME}
 
-COPY --from=GradleBuilder ${APP_HOME}/${SBK_PROJECT}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
+COPY --from=SbkGradleBuilder ${APP_HOME}/${SBK_PROJECT}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}

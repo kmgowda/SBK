@@ -35,9 +35,7 @@ services:
       - "3000:3000"
 
   sbk:
-    build:
-      context: .
-      dockerfile: ./dockers/sbk
+    image: kmgowda/sbk
     container_name: sbk
     hostname: sbk
     depends_on:
