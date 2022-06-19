@@ -332,7 +332,7 @@ As an example, just follow the below steps to see the performance graphs
 1. In the SBK directory build the 'SBK' service of the [docker compose](docker-compose.yml) file as follows.
 
    ```
-   <SBK dir>% docker-compose build 
+   <SBK dir>% docker-compose -f ./docker-compose-sbk-grafana.yml build 
 
    ```
 

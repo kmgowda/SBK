@@ -36,7 +36,7 @@ services:
 
   sbk:
     image: kmgowda/sbk
-    container_name: sbk
+    container_name: sbk-hub
     hostname: sbk
     depends_on:
       - prometheus
