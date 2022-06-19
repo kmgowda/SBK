@@ -10,39 +10,12 @@
 
 version: '3'
 services:
-  prometheus:
-    image: prom/prometheus:v2.30.0
-    container_name: prometheus
-    hostname: prometheus
-    volumes:
-      - ./grafana/prometheus:/etc/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - '9090:9090'
-
-  grafana:
-    build: grafana
-    container_name: grafana
-    hostname: grafana
-    volumes:
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=sbk
-    depends_on:
-      - prometheus
-    ports:
-      - "3000:3000"
-
   sbk:
     build:
       context: .
       dockerfile: ./dockers/sbk
     container_name: sbk
     hostname: sbk
-    depends_on:
-      - prometheus
-      - grafana
     expose:
       - 9718
     ports:

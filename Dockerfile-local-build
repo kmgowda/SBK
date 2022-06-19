@@ -10,7 +10,7 @@
 
 # Running Container
 
-FROM openjdk:17.0-jre
+FROM openjdk:17-jdk-slim
 MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 
 USER root

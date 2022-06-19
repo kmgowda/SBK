@@ -35,8 +35,10 @@ services:
       - "3000:3000"
 
   sbk:
-    image: kmgowda/sbk
-    container_name: sbk-hub
+    build:
+      context: .
+      dockerfile: ./dockers/sbk
+    container_name: sbk-grafana
     hostname: sbk
     depends_on:
       - prometheus
