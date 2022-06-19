@@ -292,20 +292,35 @@ SBK can be deployed in a distributed clusters using [**SBK-RAM**](sbk-ram), [**S
 [**SBK-GEM-YAL**](sbk-gem-yal).
 
 ## SBK Docker Containers
-The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk)
-
-The SBK docker image pull command is 
+you can build the sbk docker image using 'docker' command as follows
 ```
-docker pull kmgowda/sbk
+docker build -f ./dockers/sbk ./ --tag <tag name>
 ```
 
-you can straightaway run the docker image too, For example
+example docker command is
 ```
-docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -seconds 60
+docker build -f ./dockers/sbk ./ --tag sbk
+```
+
+you can  run the docker image too, For example
+```
+docker run  -p 127.0.0.1:9718:9718/tcp  sbk -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  
+-readers 1 -size 100 -seconds 60
 ```
 * Note that the option **-p 127.0.0.1:9718:9718/tcp** redirects the 9718 port to local port to fetch the performance 
   metric data for Prometheus.  
 * Avoid using the **--network host** option , because this option overrides the port redirection.
+
+**Docker images for single sbk driver**
+The sbk docker image is always bigger size and its size grows whenever new driver is added; so, you can build 
+individual sbk driver docker image too ; the individual docker images are available at [dockers](dockers) folder.
+you can pick those file to build the docker image, for example to build the docker image for sbk file driver, you 
+can use the command
+
+```
+docker build -f ./dockers/sbk-file ./ --tag sbk-file 
+```
+
 
 **SBK Docker Compose**
 
