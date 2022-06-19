@@ -9,12 +9,9 @@
 ##
 
 # Building Container
-FROM gradle:6.0.1-jdk11 as GradleBuilder
+FROM gradle:7.3.0-jdk17 as SbkGradleBuilder
 MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 USER root
-
-COPY ca-certificates/* /usr/local/share/ca-certificates/
-RUN update-ca-certificates
 
 ENV APP_NAME=sbk
 ENV APP_HOME=/opt/${APP_NAME}
@@ -22,23 +19,27 @@ WORKDIR /opt/sbk
 
 COPY --chown=root:root gradle ${APP_HOME}/gradle
 COPY --chown=root:root build.gradle ${APP_HOME}/build.gradle
+COPY --chown=root:root build-drivers.gradle ${APP_HOME}/build-drivers.gradle
 COPY --chown=root:root gradle.properties ${APP_HOME}/gradle.properties
 COPY --chown=root:root settings.gradle ${APP_HOME}/settings.gradle
+COPY --chown=root:root settings-drivers.gradle ${APP_HOME}/settings-drivers.gradle
 COPY --chown=root:root gradlew ${APP_HOME}/gradlew
 COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
+COPY --chown=root:root perl ${APP_HOME}/perl
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
+
 COPY --chown=root:root sbk-ram ${APP_HOME}/sbk-ram
 
 ENV GRADLE_USER_HOME=/opt/SBK
-RUN gradle  build --no-daemon --info --stacktrace
+RUN gradle  distTar --no-daemon --info --stacktrace
 
 # Runtime Container
-FROM openjdk:11-jre
+FROM openjdk:17-jdk-slim as SbkApp
 ENV APP_NAME=sbk
 ENV RAM_APP_NAME=sbk-ram
 ENV RAM_APP_HOME=/opt/${APP_NAME}/${RAM_APP_NAME}
 
-COPY --from=GradleBuilder ${RAM_APP_HOME}/build/distributions/${RAM_APP_NAME}-*.tar /opt/${RAM_APP_NAME}.tar
+COPY --from=sbkGradleBuilder ${RAM_APP_HOME}/build/distributions/${RAM_APP_NAME}-*.tar /opt/${RAM_APP_NAME}.tar
 
 RUN tar -xvf /opt/${RAM_APP_NAME}.tar -C /opt/.
 
