@@ -36,8 +36,10 @@ buildscript {
 
 def SbkMainClass = "io.sbk.main.SbkMain"
 
-//only for root project
-apply plugin: 'com.google.cloud.tools.jib'
+gradle.rootProject {
+    //only for root project
+    apply plugin: 'com.google.cloud.tools.jib'
+}
 
 allprojects {
     repositories {
@@ -610,23 +612,27 @@ task addDriver(dependsOn: deleteDriver) {
     }
 }
 
-jib {
-    from {
-        image = 'openjdk:17-jdk'
-    }
+gradle.rootProject {
 
-    to {
-        image = "${project.name}"
-        tags = ["latest", project.version]
-    }
+    jib {
+        from {
+            image = 'openjdk:17-jdk'
+        }
 
-    container {
-        creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
-        mainClass = SbkMainClass
-        ports = ['9718/tcp']
-    }
+        to {
+            image = "${project.name}"
+            tags = ["latest", project.version]
+        }
 
+        container {
+            creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
+            mainClass = SbkMainClass
+            ports = ['9718/tcp']
+        }
+
+    }
 }
+
 
 dependencies {
     api project(":perl")
