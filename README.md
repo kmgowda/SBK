@@ -294,7 +294,7 @@ SBK can be deployed in a distributed clusters using [**SBK-RAM**](sbk-ram), [**S
 ## SBK Docker Containers
 you can build the sbk docker image using 'docker' command as follows
 ```
-docker build -f ./dockers/sbk ./ --tag <tag name>
+docker build -f ./dockers/sbk <root directory> --tag <tag name>
 ```
 
 example docker command is
