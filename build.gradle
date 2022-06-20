@@ -616,7 +616,8 @@ jib {
     }
 
     to {
-        image = "${project.name}:${project.version}"
+        image = "${project.name}"
+        tags = ["latest", project.version]
     }
 
     container {
