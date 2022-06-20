@@ -24,6 +24,7 @@ buildscript {
     dependencies {
         classpath group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: spotbugsPluginVersion
         classpath group: 'gradle.plugin.com.palantir.graal', name: 'gradle-graal', version: graalvmPluginVersion
+        classpath group: 'com.google.cloud.tools.jib', name: 'com.google.cloud.tools.jib.gradle.plugin', version: jibVersion
         // classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
         //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
@@ -34,6 +35,11 @@ buildscript {
 }
 
 def SbkMainClass = "io.sbk.main.SbkMain"
+
+gradle.rootProject {
+    //only for root project
+    apply plugin: 'com.google.cloud.tools.jib'
+}
 
 allprojects {
     repositories {
@@ -161,7 +167,6 @@ allprojects {
                 into outputDir
             }
         }
-
     }
 
     task generateDashboards(type: Copy) {
@@ -606,6 +611,28 @@ task addDriver(dependsOn: deleteDriver) {
         outFile2.write(outText2)
     }
 }
+
+gradle.rootProject {
+
+    jib {
+        from {
+            image = 'openjdk:17-jdk'
+        }
+
+        to {
+            image = "${project.name}"
+            tags = ["latest", project.version]
+        }
+
+        container {
+            creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
+            mainClass = SbkMainClass
+            ports = ['9718/tcp']
+        }
+
+    }
+}
+
 
 dependencies {
     api project(":perl")
