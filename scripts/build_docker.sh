@@ -20,4 +20,7 @@ docker build -f ${ROOT_DIR}/Dockerfile ${ROOT_DIR} --tag ${IMAGE_TAG}
 docker push ${DOCKER_REPOSITORY}/sbk:${IMAGE_TAG}
 
 # Example
+# tag the image first
+#docker tag sbk:0.991 kmgowda/sbk:0.991
+# push the image docker hub
 #docker push kmgowda/sbk:0.991

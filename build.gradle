@@ -621,6 +621,15 @@ jibBuildTar - Builds a container image to a tarball.
 jibDockerBuild - Builds a container image to a Docker daemon.
 
 example : ./gradlew jibDockerBuild
+
+To push the image to docker hub, first tag the image and the push the image
+
+to tag the image , example command :
+docker tag sbk:latest kmgowda/sbk:latest
+
+to push the image, example command:
+docker push kmgowda/sbk:latest
+
  */
 gradle.rootProject {
 
