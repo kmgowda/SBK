@@ -18,3 +18,6 @@ ROOT_DIR=$(dirname $0)/..
 docker build -f ${ROOT_DIR}/Dockerfile ${ROOT_DIR} --tag ${IMAGE_TAG}
 
 docker push ${DOCKER_REPOSITORY}/sbk:${IMAGE_TAG}
+
+# Example
+#docker push kmgowda/sbk:0.991
