@@ -612,6 +612,16 @@ task addDriver(dependsOn: deleteDriver) {
     }
 }
 
+
+/*
+Jib tasks
+---------
+jib - Builds a container image to a registry.
+jibBuildTar - Builds a container image to a tarball.
+jibDockerBuild - Builds a container image to a Docker daemon.
+
+example : ./gradlew jibDockerBuild
+ */
 gradle.rootProject {
 
     jib {
