@@ -36,7 +36,7 @@ public final class SbkGemYalParameters extends SbkYalParameters {
 
     @Override
     public String getPrintOptionDescription() {
-        return "Print SBK GEM Options Help Text";
+        return "Print SBK-GEM Options Help Text";
     }
 }
 
