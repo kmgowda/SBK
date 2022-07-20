@@ -116,6 +116,10 @@ public final class SbkGemYal {
             gemArgs = YmlMap.getYmlArgs(yalFileName, SbkGemYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
+            if (params.isPrintOption()) {
+                SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, packageName, applicationName, outLogger);
+                throw new HelpException(ex.toString());
+            }
             params.printHelp();
             throw new HelpException(ex.toString());
         }
