@@ -82,7 +82,6 @@ public final class SbkYal {
         final SbkYalParameters params;
         final YalConfig yalConfig;
         String yalFileName;
-        String[] nextArgs = new String[0];
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkYal.DESC);
@@ -96,7 +95,7 @@ public final class SbkYal {
         yalConfig = mapper.readValue(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 YalConfig.class);
         params = new SbkYalParameters(appName, SbkYal.DESC, yalConfig);
-        nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
+        String[] nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
         nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         try {
             params.parseArgs(args);

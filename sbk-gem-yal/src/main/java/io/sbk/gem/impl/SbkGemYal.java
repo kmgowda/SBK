@@ -79,7 +79,6 @@ public final class SbkGemYal {
         final SbkYalParameters params;
         final YalConfig yalConfig;
         String yalFileName;
-        String[] nextArgs = new String[0];
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGemYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
@@ -94,7 +93,7 @@ public final class SbkGemYal {
                 YalConfig.class);
         params = new SbkGemYalParameters(appName, SbkGemYal.DESC, yalConfig);
 
-        nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
+        String[] nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
         nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         try {
             params.parseArgs(args);
