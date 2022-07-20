@@ -96,11 +96,11 @@ public final class SbkYal {
         yalConfig = mapper.readValue(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 YalConfig.class);
         params = new SbkYalParameters(appName, SbkYal.DESC, yalConfig);
-
+        nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
+        nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         try {
             params.parseArgs(args);
             yalFileName = params.getFileName();
-            nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
         } catch (HelpException ex) {
             params.printHelp();
             throw ex;
@@ -110,10 +110,8 @@ public final class SbkYal {
                 params.printHelp();
                 throw new HelpException(params.getHelpText());
             }
-            nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
             final String fileName = SbkUtils.getArgValue(args, YalConfig.FILE_OPTION_ARG);
             yalFileName = StringUtils.isNotEmpty(fileName) ? fileName : yalConfig.yamlFileName;
-            nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         }
 
         try {
