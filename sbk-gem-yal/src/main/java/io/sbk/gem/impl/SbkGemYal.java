@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
+import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
@@ -93,6 +94,8 @@ public final class SbkGemYal {
                 YalConfig.class);
         params = new SbkGemYalParameters(appName, SbkGemYal.DESC, yalConfig);
 
+        nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
+        nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         try {
             params.parseArgs(args);
             yalFileName = params.getFileName();
@@ -107,7 +110,6 @@ public final class SbkGemYal {
             }
             final String fileName = SbkUtils.getArgValue(args, YalConfig.FILE_OPTION_ARG);
             yalFileName = StringUtils.isNotEmpty(fileName) ? fileName : yalConfig.yamlFileName;
-            nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{YalConfig.FILE_OPTION_ARG});
         }
 
         try {
@@ -118,6 +120,13 @@ public final class SbkGemYal {
             throw new HelpException(ex.toString());
         }
 
-        return SbkGem.run(SbkUtils.mergeArgs(gemArgs, nextArgs), packageName, applicationName, outLogger);
+        final String[] mergeArgs = SbkUtils.mergeArgs(gemArgs, nextArgs);
+        String[] sbkGemArgs = mergeArgs;
+        if (params.isPrintOption()) {
+            sbkGemArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);
+            sbkGemArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
+        }
+
+        return SbkGem.run(sbkGemArgs, packageName, applicationName, outLogger);
     }
 }
