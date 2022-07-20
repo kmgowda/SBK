@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
+import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.logger.RWLogger;
@@ -52,27 +53,27 @@ public final class SbkYal {
      *                        SbkServer is used by default.
      * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                        logger will be used.
-     * @throws ParseException               If an exception occurred while parsing command line arguments.
-     * @throws IllegalArgumentException     If an exception occurred due to invalid arguments.
-     * @throws IOException                  If an exception occurred due to write or read failures.
-     * @throws InterruptedException         If an exception occurred if the writers and readers are interrupted.
-     * @throws ExecutionException           If an exception occurred.
-     * @throws InvocationTargetException    If an exception occurred.
-     * @throws InstantiationException       If an exception occurred.
-     * @throws IllegalAccessException       If an exception occurred.
-     * @throws NoSuchMethodException        If an exception occurred.
-     * @throws ClassNotFoundException       If an exception occurred.
-     * @throws TimeoutException             If an exception occurred if an I/O operation is timed out.
-     * @throws HelpException                if '-help' is used or yaml file is missing.
+     * @throws ParseException            If an exception occurred while parsing command line arguments.
+     * @throws IllegalArgumentException  If an exception occurred due to invalid arguments.
+     * @throws IOException               If an exception occurred due to write or read failures.
+     * @throws InterruptedException      If an exception occurred if the writers and readers are interrupted.
+     * @throws ExecutionException        If an exception occurred.
+     * @throws InvocationTargetException If an exception occurred.
+     * @throws InstantiationException    If an exception occurred.
+     * @throws IllegalAccessException    If an exception occurred.
+     * @throws NoSuchMethodException     If an exception occurred.
+     * @throws ClassNotFoundException    If an exception occurred.
+     * @throws TimeoutException          If an exception occurred if an I/O operation is timed out.
+     * @throws HelpException             if '-help' is used or yaml file is missing.
      */
     public static void run(final String[] args, final String packageName, final String applicationName,
                            RWLogger outLogger) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, HelpException, ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
-            runBenchmark(args, packageName, applicationName, outLogger);
+        runBenchmark(args, packageName, applicationName, outLogger);
     }
 
     private static void runBenchmark(final String[] args, final String packageName,
-                                                 final String applicationName, RWLogger outLogger)
+                                     final String applicationName, RWLogger outLogger)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,
             ExecutionException, TimeoutException, HelpException, ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
         final String version = io.sbk.api.impl.SbkYal.class.getPackage().getImplementationVersion();
@@ -99,6 +100,7 @@ public final class SbkYal {
         try {
             params.parseArgs(args);
             yalFileName = params.getFileName();
+            nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
         } catch (HelpException ex) {
             params.printHelp();
             throw ex;
@@ -108,18 +110,29 @@ public final class SbkYal {
                 params.printHelp();
                 throw new HelpException(params.getHelpText());
             }
+            nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
             final String fileName = SbkUtils.getArgValue(args, YalConfig.FILE_OPTION_ARG);
             yalFileName = StringUtils.isNotEmpty(fileName) ? fileName : yalConfig.yamlFileName;
-            nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{YalConfig.FILE_OPTION_ARG});
+            nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         }
 
         try {
             yalArgs = YmlMap.getYmlArgs(yalFileName, SbkYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
+            if (params.isPrintOption()) {
+                Sbk.run(new String[]{Config.HELP_OPTION_ARG}, packageName, applicationName, outLogger);
+                throw new HelpException(ex.toString());
+            }
             params.printHelp();
             throw new HelpException(ex.toString());
         }
-        Sbk.run(SbkUtils.mergeArgs(yalArgs, nextArgs), packageName, applicationName, outLogger);
+        final String[] mergeArgs = SbkUtils.mergeArgs(yalArgs, nextArgs);
+        String[] sbkArgs = mergeArgs;
+        if (params.isPrintOption()) {
+            sbkArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);
+            sbkArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
+        }
+        Sbk.run(sbkArgs, packageName, applicationName, outLogger);
     }
 }
