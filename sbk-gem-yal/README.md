@@ -26,14 +26,14 @@ the SBK-GEM-YAL package too.
 The standard help output with SBK-GEM-YAL parameters as follows
 
 ```
-kmg@kmgs-MBP SBK % ./build/install/sbk/bin/sbk-gem-yal                     
+kmg@kmgs-MBP SBK % ./build/install/sbk/bin/sbk-gem-yal 
 SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
 SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
-2021-09-07 15:24:31 INFO 
+2022-07-21 11:54:24 INFO 
    _____   ____    _  __            _____   ______   __  __           __     __             _
   / ____| |  _ \  | |/ /           / ____| |  ____| |  \/  |          \ \   / /     /\     | |
  | (___   | |_) | | ' /   ______  | |  __  | |__    | \  / |  ______   \ \_/ /     /  \    | |
@@ -42,17 +42,18 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
  |_____/  |____/  |_|\_\           \_____| |______| |_|  |_|             |_|    /_/    \_\ |______|
 
 
-2021-09-07 15:24:31 INFO SBK-GEM-YML Arguments Loader
-2021-09-07 15:24:31 INFO SBK-GEM-YAL Version: 0.92
-2021-09-07 15:24:31 INFO Arguments List: []
-2021-09-07 15:24:31 INFO Java Runtime Version: 11.0.8+11
-2021-09-07 15:24:31 ERROR java.io.FileNotFoundException: ./sbk-gem.yml (No such file or directory)
+2022-07-21 11:54:24 INFO Storage Benchmark Kit-Group Execution Monitor-YML Arguments Loader
+2022-07-21 11:54:24 INFO SBK-GEM-YAL Version: 0.992
+2022-07-21 11:54:24 INFO Arguments List: []
+2022-07-21 11:54:24 INFO Java Runtime Version: 17.0.2+8
+2022-07-21 11:54:25 ERROR java.io.FileNotFoundException: ./sbk-gem.yml (No such file or directory)
 
 usage: sbk-gem-yal
-SBK-GEM-YML Arguments Loader
+Storage Benchmark Kit-Group Execution Monitor-YML Arguments Loader
 
  -f <arg>   SBK-GEM YAML file, default: ./sbk-gem.yml
  -help      Help message
+ -p         Print SBK-GEM Options Help Text
 
 Please report issues at https://github.com/kmgowda/SBK
 

@@ -26,14 +26,14 @@ the SBK-YAL package too.
 The standard help output with SBK-YAL parameters as follows
 
 ```
-kmg@kmgs-MBP SBK % ./build/install/sbk/bin/sbk-yal                                    
+kmg@kmgs-MBP SBK % ./build/install/sbk/bin/sbk-yal 
 SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.32.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-simple-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/logback-classic-1.0.13.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/Users/kmg/projects/SBK/build/install/sbk/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
 SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
-2022-05-06 14:42:45 INFO 
+2022-07-21 11:56:00 INFO 
    _____   ____    _  __          __     __             _
   / ____| |  _ \  | |/ /          \ \   / /     /\     | |
  | (___   | |_) | | ' /   ______   \ \_/ /     /  \    | |
@@ -41,17 +41,18 @@ SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
   ____) | | |_) | | . \              | |     / ____ \  | |____
  |_____/  |____/  |_|\_\             |_|    /_/    \_\ |______|
 
-2022-05-06 14:42:45 INFO Storage Benchmark Kit-YML Arguments Loader
-2022-05-06 14:42:45 INFO SBK-YAL Version: 0.99
-2022-05-06 14:42:45 INFO Arguments List: []
-2022-05-06 14:42:45 INFO Java Runtime Version: 17.0.2+8
-2022-05-06 14:42:45 ERROR java.io.FileNotFoundException: ./sbk.yml (No such file or directory)
+2022-07-21 11:56:00 INFO Storage Benchmark Kit-YML Arguments Loader
+2022-07-21 11:56:00 INFO SBK-YAL Version: 0.992
+2022-07-21 11:56:00 INFO Arguments List: []
+2022-07-21 11:56:00 INFO Java Runtime Version: 17.0.2+8
+2022-07-21 11:56:00 ERROR java.io.FileNotFoundException: ./sbk.yml (No such file or directory)
 
 usage: sbk-yal
 Storage Benchmark Kit-YML Arguments Loader
 
  -f <arg>   SBK YAML file, default: ./sbk.yml
  -help      Help message
+ -p         Print SBK Options Help Text
 
 Please report issues at https://github.com/kmgowda/SBK
 
