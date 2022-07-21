@@ -34,5 +34,9 @@ public final class SbkGemYalParameters extends SbkYalParameters {
         return "SBK-GEM YAML file, default: " + config.yamlFileName;
     }
 
+    @Override
+    public String getPrintOptionDescription() {
+        return "Print SBK-GEM Options Help Text";
+    }
 }
 

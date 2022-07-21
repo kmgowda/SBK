@@ -15,10 +15,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final public class SbkUtils {
 
@@ -30,12 +31,34 @@ final public class SbkUtils {
         if (args.length < 2) {
             return args;
         }
-        final List<String> optsList = Arrays.asList(opts);
+        final List<String> optsList =  Stream.of(opts).collect(Collectors.toList());
         final List<String> ret = new ArrayList<>(args.length);
         int i = 0;
         while (i < args.length) {
             if (optsList.contains(args[i])) {
+                optsList.remove(args[i]);
                 i += 1;
+            } else {
+                ret.add(args[i]);
+            }
+            i += 1;
+        }
+        return ret.toArray(new String[0]);
+    }
+
+    @Contract("null, _ -> new")
+    public static @NotNull String[] removeOptionArgs(String[] args, String[] opts) {
+        if (args == null) {
+            return new String[0];
+        }
+        if (args.length < 1) {
+            return args;
+        }
+        final List<String> optsList =  Stream.of(opts).collect(Collectors.toList());
+        final List<String> ret = new ArrayList<>(args.length);
+        int i = 0;
+        while (i < args.length) {
+            if (optsList.contains(args[i])) {
                 optsList.remove(args[i]);
             } else {
                 ret.add(args[i]);

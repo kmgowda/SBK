@@ -26,6 +26,16 @@ final public class YalConfig {
     public final static String FILE_OPTION_ARG = Config.ARG_PREFIX + FILE_OPTION;
 
     /**
+     * <code>PRINT_OPTION = "PRINT_OPTION";</code>.
+     */
+    public final static String PRINT_OPTION = "p";
+
+    /**
+     * <code>PRINT_OPTION_ARG = ARG_PREFIX + PRINT_OPTION;</code>.
+     */
+    public final static String PRINT_OPTION_ARG = Config.ARG_PREFIX + PRINT_OPTION;
+
+    /**
      * <code>String yamlFileName</code>.
      */
     public String yamlFileName;

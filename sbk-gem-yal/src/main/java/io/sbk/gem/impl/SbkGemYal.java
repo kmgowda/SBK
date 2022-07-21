@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
+import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
@@ -78,7 +79,6 @@ public final class SbkGemYal {
         final SbkYalParameters params;
         final YalConfig yalConfig;
         String yalFileName;
-        String[] nextArgs = new String[0];
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGemYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
@@ -93,6 +93,9 @@ public final class SbkGemYal {
                 YalConfig.class);
         params = new SbkGemYalParameters(appName, SbkGemYal.DESC, yalConfig);
 
+        final boolean isPrintOption =  SbkUtils.hasArg(args, YalConfig.PRINT_OPTION_ARG);
+        String[] nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
+        nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         try {
             params.parseArgs(args);
             yalFileName = params.getFileName();
@@ -107,17 +110,27 @@ public final class SbkGemYal {
             }
             final String fileName = SbkUtils.getArgValue(args, YalConfig.FILE_OPTION_ARG);
             yalFileName = StringUtils.isNotEmpty(fileName) ? fileName : yalConfig.yamlFileName;
-            nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{YalConfig.FILE_OPTION_ARG});
         }
 
         try {
             gemArgs = YmlMap.getYmlArgs(yalFileName, SbkGemYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
+            if (isPrintOption) {
+                SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, packageName, applicationName, outLogger);
+                throw new HelpException(ex.toString());
+            }
             params.printHelp();
             throw new HelpException(ex.toString());
         }
 
-        return SbkGem.run(SbkUtils.mergeArgs(gemArgs, nextArgs), packageName, applicationName, outLogger);
+        final String[] mergeArgs = SbkUtils.mergeArgs(gemArgs, nextArgs);
+        String[] sbkGemArgs = mergeArgs;
+        if (isPrintOption) {
+            sbkGemArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);
+            sbkGemArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
+        }
+
+        return SbkGem.run(sbkGemArgs, packageName, applicationName, outLogger);
     }
 }
