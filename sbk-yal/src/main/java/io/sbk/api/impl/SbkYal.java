@@ -95,6 +95,7 @@ public final class SbkYal {
         yalConfig = mapper.readValue(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 YalConfig.class);
         params = new SbkYalParameters(appName, SbkYal.DESC, yalConfig);
+        final boolean isPrintOption =  SbkUtils.hasArg(args, YalConfig.PRINT_OPTION_ARG);
         String[] nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
         nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         try {
@@ -117,7 +118,7 @@ public final class SbkYal {
             yalArgs = YmlMap.getYmlArgs(yalFileName, SbkYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
-            if (params.isPrintOption()) {
+            if (isPrintOption) {
                 Sbk.run(new String[]{Config.HELP_OPTION_ARG}, packageName, applicationName, outLogger);
                 throw new HelpException(ex.toString());
             }
@@ -126,7 +127,7 @@ public final class SbkYal {
         }
         final String[] mergeArgs = SbkUtils.mergeArgs(yalArgs, nextArgs);
         String[] sbkArgs = mergeArgs;
-        if (params.isPrintOption()) {
+        if (isPrintOption) {
             sbkArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);
             sbkArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
         }

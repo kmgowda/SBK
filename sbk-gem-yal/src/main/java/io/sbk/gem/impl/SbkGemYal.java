@@ -93,6 +93,7 @@ public final class SbkGemYal {
                 YalConfig.class);
         params = new SbkGemYalParameters(appName, SbkGemYal.DESC, yalConfig);
 
+        final boolean isPrintOption =  SbkUtils.hasArg(args, YalConfig.PRINT_OPTION_ARG);
         String[] nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
         nextArgs = SbkUtils.removeOptionArgsAndValues(nextArgs, new String[]{YalConfig.FILE_OPTION_ARG});
         try {
@@ -115,7 +116,7 @@ public final class SbkGemYal {
             gemArgs = YmlMap.getYmlArgs(yalFileName, SbkGemYmlMap.class);
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
-            if (params.isPrintOption()) {
+            if (isPrintOption) {
                 SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, packageName, applicationName, outLogger);
                 throw new HelpException(ex.toString());
             }
@@ -125,7 +126,7 @@ public final class SbkGemYal {
 
         final String[] mergeArgs = SbkUtils.mergeArgs(gemArgs, nextArgs);
         String[] sbkGemArgs = mergeArgs;
-        if (params.isPrintOption()) {
+        if (isPrintOption) {
             sbkGemArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);
             sbkGemArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
         }

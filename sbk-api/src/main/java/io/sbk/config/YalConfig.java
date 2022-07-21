@@ -39,5 +39,4 @@ final public class YalConfig {
      * <code>String yamlFileName</code>.
      */
     public String yamlFileName;
-    public boolean isPrintOption;
 }

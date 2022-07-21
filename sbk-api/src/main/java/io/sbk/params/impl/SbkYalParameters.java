@@ -21,7 +21,6 @@ public class SbkYalParameters extends SbkInputOptions implements YalParameters {
     public SbkYalParameters(String name, String desc, YalConfig config) {
         super(name, desc);
         this.config = config;
-        this.config.isPrintOption = false;
         addOption(YalConfig.FILE_OPTION, true, getFileOptionDescription());
         addOption(YalConfig.PRINT_OPTION, false, getPrintOptionDescription());
     }
@@ -39,14 +38,10 @@ public class SbkYalParameters extends SbkInputOptions implements YalParameters {
         return "Print SBK Options Help Text";
     }
 
-    final public boolean isPrintOption() {
-        return this.config.isPrintOption;
-    }
 
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
         config.yamlFileName = getOptionValue(YalConfig.FILE_OPTION, config.yamlFileName);
-        config.isPrintOption = hasOptionValue(YalConfig.PRINT_OPTION);
     }
 }
