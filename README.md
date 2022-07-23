@@ -321,8 +321,24 @@ can use the command
 docker build -f ./dockers/sbk-file ./ --tag sbk-file 
 ```
 
+### SBK Docker hub
+The SBK Docker images are available at [SBK Docker](https://hub.docker.com/r/kmgowda/sbk) with the [ latest tags](https://hub.docker.com/r/kmgowda/sbk/tags) 
 
-**SBK Docker Compose**
+The SBK docker image pull command is
+```
+docker pull kmgowda/sbk
+```
+
+you can straightaway run the docker image too, For example
+```
+docker run  -p 127.0.0.1:9718:9718/tcp  kmgowda/sbk:latest -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -seconds 60
+```
+* Note that the option **-p 127.0.0.1:9718:9718/tcp** redirects the 9718 port to local port to fetch the performance
+  metric data for Prometheus.
+* Avoid using the **--network host** option , because this option overrides the port redirection.
+
+
+### SBK Docker Compose
 
 The SBK docker compose consists of SBK docker image, Grafana and prometheus docker images. 
 The [grafana image](grafana) contains the dashboards which can be directly deployed for the performance analytics.
