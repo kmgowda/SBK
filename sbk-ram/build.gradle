@@ -38,8 +38,22 @@ apply from: "$rootDir/gradle/spotbugs.gradle"
 
 def SbkRamMainClass = "io.sbk.main.SbkRamMain"
 
+version = project.version
+jar {
+    manifest {
+        attributes 'Name': project.name.toUpperCase(),
+                'Specification-Title': "Storage Benchmark Kit",
+                'Specification-Version': project.version,
+                'Specification-Vendor': "KMG",
+                'Implementation-Title': project.name.toUpperCase(),
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': "KMG"
+    }
+}
+
 application {
     mainClass = SbkRamMainClass
+    applicationName = project.name
 }
 
 dependencies {
@@ -74,8 +88,6 @@ task updateDocs(dependsOn: javadoc) {
         copy {
             from "$projectDir/build/docs/javadoc"
             into "$projectDir/javadoc"
-
         }
-
     }
 }
