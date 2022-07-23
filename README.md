@@ -24,6 +24,7 @@ You may obtain a copy of the License at
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](sbk-gem)
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](sbk-gem-yal)
 
+>  **_Cloud Deployable_...  _Dockers_...  _Kubernetes_...**
 
 [![PerL](https://img.shields.io/badge/Per-L%20-yellow)](perl)
 
