@@ -10,6 +10,7 @@ You may obtain a copy of the License at
 # SBK-RAM : Results Aggregation Monitor
 
 [![Api](https://img.shields.io/badge/SBK--RAM-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-ram/javadoc/index.html)
+[![SBK-RAM Dockers](https://img.shields.io/badge/SBK--RAM-Dockers-blue)](https://hub.docker.com/r/kmgowda/sbk-ram)
 
 The SBK (Storage Benchmark Kit) - RAM (Results Aggregation Monitor) combines the performance results supplied from
 multiple SBK instances. The SBK-RAM is the GRPC Server. Multiple SBK instances can log the performance results to a
@@ -17,7 +18,7 @@ single SBM-RAM Server. The SBK-RAM determines the cumulative throughput and late
 instance reports all the latency values in bulk and SBK-RAM integrates all latency records and determines the
 performance values for the whole SBK cluster (multi SBK instances). The SBK-RAM is useful if you want to stress the
 storage server / Storage cluster with multiple storage clients (SBK instances) and analyse the throughput and
-latency percentiles for the whole storage cluster/server. SBK-RAM logs the integrated results to standard output device/logger and to the grafana through prometheus metrics.
+latency percentiles for the entire storage cluster/server. SBK-RAM logs the integrated results to standard output device/logger and to the grafana through prometheus metrics.
 
 ## Build SBK-RAM
 SBK-RAM is a submodule/project of the SBK framework. If you [build SBK](./../README.md#build-sbk), it builds the SBK-RAM server too.
@@ -194,6 +195,30 @@ analyse the SBK-RAM JVM metrics.
 
 
 ## SBK-RAM Docker Containers
+
+you can build the sbk docker image using 'docker' command as follows
+```
+docker build -f ./dockers/sbk-ram <root directory> --tag <tag name>
+```
+
+example docker command is
+```
+docker build -f ./dockers/sbk-ram ./ --tag sbk-ram
+```
+
+you can  run the docker image too, For example
+```
+docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram:latest -class file -time ns
+```
+* Note that the option **-p 127.0.0.1:9719:9719/tcp** redirects the 9719 port to local port to send the performance
+  metric data for Prometheus.
+* Another option **-p 127.0.0.1:9717:9717/tcp** redirect the port 9717 port to local port to receive the performance
+  results from SBK instances.
+* Avoid using the **--network host** option , because this option overrides the port redirection.
+
+
+### SBK-RAM docker hub
+
 The SBK-RAM Docker images are available at [SBK Docker](https://hub.docker.com/repository/docker/kmgowda/sbk-ram)
 
 The SBK docker image pull command is
@@ -212,7 +237,7 @@ docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
 
-## Running SBK-RAM Docker Compose
+###  SBK-RAM Docker Compose
 The SBK-RAM docker compose consists of SBK-RAM docker image, Grafana and prometheus docker images.
 The [grafana image](https://github.com/kmgowda/SBK/blob/master/grafana/Dockerfile) contains the [dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards) which can be directly deployed for the performance analytics.
 
