@@ -103,36 +103,6 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
                 slc[0], slc[1], this.percentiles.latencies);
     }
 
-    private void getSLCold(@NotNull LatencyPercentiles percentiles, @NotNull int[] slc) {
-        slc[0] = 0;
-        slc[1] = 0;
-        final int h = percentiles.latencies.length - 1;
-        if (h <= 0 || percentiles.latencies[h] <= 0) {
-            return;
-        }
-        final double maxVal = percentiles.latencies[h] * 1.0;
-        final double midVal = percentiles.medianLatency * 1.0;
-        int cnt1 = 0;
-        int cnt2 = 0;
-        double slcFactor1 = 0;
-        double slcFactor2 = 0;
-        for (int i = 0; i < h; i++) {
-            if (percentiles.latencies[i] < midVal) {
-                slcFactor1 += percentiles.latencies[i] / midVal;
-                cnt1++;
-            } else {
-                slcFactor2 += percentiles.latencies[i] / maxVal;
-                cnt2++;
-            }
-        }
-        if (cnt1 > 0) {
-            slc[0] = (int) ((1 - slcFactor1 / cnt1) * 100);
-        }
-        if (cnt2 > 0) {
-            slc[1] = (int) ((1 - slcFactor2 / cnt2) * 100);
-        }
-    }
-
     private void getSLC(@NotNull LatencyPercentiles percentiles, @NotNull long[] slc) {
         slc[0] = 0;
         slc[1] = 0;
