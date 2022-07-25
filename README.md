@@ -144,20 +144,19 @@ usage: sbk
 Storage Benchmark Kit
 
  -class <arg>        Storage Driver Class,
-                     Available Drivers [Artemis, AsyncFile, BookKeeper,
-                     Cassandra, CephS3, ConcurrentQ, CouchDB, CSV, Db2,
-                     Derby, FdbRecord, File, FileStream, FoundationDB,
-                     HDFS, Hive, Ignite, Jdbc, Kafka, LevelDB, MariaDB,
-                     MinIO, MongoDB, MsSql, MySQL, Nats, NatsStream, Nsq,
-                     Null, OpenIO, PostgreSQL, Pravega, Pulsar, RabbitMQ,
-                     Redis, RedPanda, RocketMQ, RocksDB, SeaweedS3,
-                     SQLite]
+                     Available Drivers [Activemq, Artemis, AsyncFile,
+                     BookKeeper, Cassandra, CephS3, ConcurrentQ, CouchDB,
+                     CSV, Db2, Derby, FdbRecord, File, FileStream,
+                     FoundationDB, H2, HDFS, Hive, Jdbc, Kafka, LevelDB,
+                     MariaDB, MinIO, MongoDB, MsSql, MySQL, Nats,
+                     NatsStream, Nsq, Null, OpenIO, PostgreSQL, Pravega,
+                     Pulsar, RabbitMQ, Redis, RedPanda, RocketMQ, RocksDB,
+                     SeaweedS3, SQLite]
  -context <arg>      Prometheus Metric context;
                      'no' disables this option; default: 9718/metrics
  -csvfile <arg>      CSV file to record results;
                      'no' disables this option, default: no
  -help               Help message
- -id <arg>           Instance ID, default: 0
  -maxlatency <arg>   Maximum latency;
                      use '-time' for time unit; default:180000 ms
  -minlatency <arg>   Minimum latency;
@@ -169,6 +168,9 @@ Storage Benchmark Kit
                      otherwise, Maximum records per second by writer(s);
                      and/or
                      Number of records per second by reader(s)
+ -ro <arg>           Readonly Benchmarking,
+                     Applicable only if both writers and readers are set;
+                     default: false
  -rsec <arg>         Number of seconds/step for readers, default: 0
  -rstep <arg>        Number of readers/step, default: 1
  -seconds <arg>      Number of seconds to run
@@ -618,7 +620,6 @@ Storage Benchmark Kit
  -deduplication <arg>   Enable or Disable Deduplication; default: false
  -ensembleSize <arg>    EnsembleSize default: 1
  -help                  Help message
- -id <arg>              Instance ID, default: 0
  -maxlatency <arg>      Maximum latency;
                         use '-time' for time unit; default:180000 ms
  -minlatency <arg>      Minimum latency;
@@ -633,6 +634,9 @@ Storage Benchmark Kit
                         otherwise, Maximum records per second by
                         writer(s); and/or
                         Number of records per second by reader(s)
+ -ro <arg>              Readonly Benchmarking,
+                        Applicable only if both writers and readers are
+                        set; default: false
  -rsec <arg>            Number of seconds/step for readers, default: 0
  -rstep <arg>           Number of readers/step, default: 1
  -seconds <arg>         Number of seconds to run
