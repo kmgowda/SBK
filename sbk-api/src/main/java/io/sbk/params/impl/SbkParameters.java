@@ -64,8 +64,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     @Getter
     private Action action;
 
-    @Getter
-    private long instanceID;
 
     public SbkParameters(String name, String desc) {
         super(name, desc);
@@ -101,8 +99,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                 "Number of readers/step, default: 1");
         addOption("rsec", true,
                 "Number of seconds/step for readers, default: 0");
-        addOption("id", true,
-                "Instance ID, default: 0");
         addOption("ro", true,
                 """
                            Readonly Benchmarking,
@@ -120,7 +116,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         final boolean writeReadOnly = Boolean.parseBoolean(getOptionValue("ro", "false"));
         writersCount = Integer.parseInt(getOptionValue("writers", "0"));
         readersCount = Integer.parseInt(getOptionValue("readers", "0"));
-        instanceID = Long.parseLong(getOptionValue("id", "0"));
 
         if (writersCount == 0 && readersCount == 0) {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");

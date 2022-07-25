@@ -103,11 +103,4 @@ public interface Parameters extends ActionParameter {
      */
     int getReadersStepSeconds();
 
-
-    /**
-     * get Instance ID.
-     *
-     * @return get the Instance id .
-     */
-    long getInstanceID();
 }
