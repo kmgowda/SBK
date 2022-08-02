@@ -37,11 +37,12 @@ public non-sealed class PrometheusMetricsServer extends PrintMetrics {
      * @param latencyTimeUnit       NotNull TimeUnit
      * @param port                  int
      * @param context               String
+     * @param tags                  String... common tags
      * @throws IOException If it occurs.
      */
     public PrometheusMetricsServer(String header, double[] percentiles, Time time,
-                                   @NotNull TimeUnit latencyTimeUnit, int port, String context) throws IOException {
-        this(header, percentiles, time, latencyTimeUnit, new PrometheusServer(port, context));
+                                   @NotNull TimeUnit latencyTimeUnit, int port, String context, String... tags) throws IOException {
+        this(header, percentiles, time, latencyTimeUnit, new PrometheusServer(port, context, tags));
     }
 
 

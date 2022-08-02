@@ -36,10 +36,16 @@ public final class PrometheusServer extends CompositeMeterRegistry {
      *
      * @param port          int
      * @param context       String
+     * @param tags          String... common tags
      * @throws IOException  If it occurs.
      */
-    public PrometheusServer(int port, String context) throws IOException {
+    public PrometheusServer(int port, String context, String... tags) throws IOException {
         super();
+        /*
+         *  The Common Tags should be added immediately after creating the registry,
+         *  and before creating any metrics such as counter, gauges
+         */
+        this.config().commonTags(tags);
         this.port = port;
         this.context = context;
         this.prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);

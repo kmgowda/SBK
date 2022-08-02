@@ -34,14 +34,15 @@ public class DefaultPrometheusLogger extends DefaultLogger {
      * @param time                      Time
      * @param port                      int
      * @param context                   String
+     * @param tags                      String... common tags
      * @throws IOException If it occurs.
      */
     public DefaultPrometheusLogger(String header, double[] percentiles,
                                    @NotNull TimeUnit latencyTimeUnit,
                                    long minLatency, long maxLatency,
-                                   Time time, int port, String context) throws IOException {
+                                   Time time, int port, String context, String... tags) throws IOException {
         super(header, percentiles, latencyTimeUnit, minLatency, maxLatency);
-        server = new PrometheusMetricsServer(header, percentiles, time, latencyTimeUnit, port, context);
+        server = new PrometheusMetricsServer(header, percentiles, time, latencyTimeUnit, port, context, tags);
     }
 
     /**

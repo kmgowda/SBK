@@ -42,7 +42,7 @@ public class PrometheusLogger extends CSVLogger {
     }
 
     public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
-        return new PrometheusRWMetricsServer(Config.NAME + " " + storageName, action.name(),
+        return new PrometheusRWMetricsServer(Config.NAME, action.name(), storageName,
                 percentiles, time, metricsConfig);
     }
 
