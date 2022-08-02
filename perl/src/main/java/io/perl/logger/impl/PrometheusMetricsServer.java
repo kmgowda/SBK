@@ -10,6 +10,7 @@
 
 package io.perl.logger.impl;
 
+import io.micrometer.core.instrument.Tag;
 import io.time.Time;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
@@ -37,11 +38,11 @@ public non-sealed class PrometheusMetricsServer extends PrintMetrics {
      * @param latencyTimeUnit       NotNull TimeUnit
      * @param port                  int
      * @param context               String
-     * @param tags                  String... common tags
+     * @param tags                  Common tags
      * @throws IOException If it occurs.
      */
     public PrometheusMetricsServer(String header, double[] percentiles, Time time,
-                                   @NotNull TimeUnit latencyTimeUnit, int port, String context, String... tags) throws IOException {
+                                   @NotNull TimeUnit latencyTimeUnit, int port, String context, Iterable<Tag> tags) throws IOException {
         this(header, percentiles, time, latencyTimeUnit, new PrometheusServer(port, context, tags));
     }
 
