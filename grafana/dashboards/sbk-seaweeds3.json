@@ -358,13 +358,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write Throughput MB/s",
+      "title": "SBK Seaweeds3 Write Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -449,13 +449,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_RecordsPerSec{class=\"Hive\"}",
+          "expr": "SBK_Writing_RecordsPerSec{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write Records/Sec",
+      "title": "SBK Seaweeds3 Write Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -568,7 +568,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -578,13 +578,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Seaweeds3 Write Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -642,7 +642,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_10{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -652,7 +652,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_20{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_20{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -662,7 +662,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_25{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -672,7 +672,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_30{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_30{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -682,7 +682,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_40{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_40{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -692,7 +692,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_50{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -702,7 +702,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_60{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_60{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -712,7 +712,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_70{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_70{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -722,7 +722,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_75{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -732,7 +732,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_80{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_80{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -742,7 +742,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_90{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -752,7 +752,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_92_5{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_92_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -762,7 +762,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_95{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -772,7 +772,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_97_5{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_97_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -782,7 +782,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -792,7 +792,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_25{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_99_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -802,7 +802,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_5{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_99_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -812,7 +812,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_75{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_99_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -822,7 +822,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_9{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -832,7 +832,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_95{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_99_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -842,7 +842,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_99{class=\"Hive\"}",
+          "expr": "SBK_Writing_ns_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
@@ -850,7 +850,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write Percentiles (Nanoseconds)",
+      "title": "SBK Seaweeds3 Write Percentiles (Nanoseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -949,7 +949,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_Writers{class=\"Hive\"}",
+          "expr": "SBK_Writing_Writers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Active",
           "refId": "A"
@@ -959,13 +959,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_Max_Writers{class=\"Hive\"}",
+          "expr": "SBK_Writing_Max_Writers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Writers",
+      "title": "SBK Seaweeds3 Writers",
       "type": "stat"
     },
     {
@@ -1066,11 +1066,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Write Throughput MB/s",
+      "title": "SBK Seaweeds3 Write Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -1156,7 +1156,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_SLC_1{class=\"Hive\"}",
+          "expr": "SBK_Writing_SLC_1{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -1166,13 +1166,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_SLC_2{class=\"Hive\"}",
+          "expr": "SBK_Writing_SLC_2{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write  Sliding Latency Coverage (SLC)",
+      "title": "SBK Seaweeds3 Write  Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -1242,11 +1242,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_Records_total{class=\"Hive\"}",
+          "expr": "SBK_Writing_Records_total{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Write Bytes Total",
+      "title": "SBK Seaweeds3 Write Bytes Total",
       "type": "stat"
     },
     {
@@ -1302,7 +1302,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -1313,7 +1313,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -1323,13 +1323,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Hive Write Discarded Latencies",
+      "title": "SBK Seaweeds3 Write Discarded Latencies",
       "type": "stat"
     },
     {
@@ -1416,7 +1416,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -1426,13 +1426,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write Avg and Max Latencies (Microseconds)",
+      "title": "SBK Seaweeds3 Write Avg and Max Latencies (Microseconds)",
       "type": "stat"
     },
     {
@@ -1490,7 +1490,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_10{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1500,7 +1500,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_25{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -1510,7 +1510,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_50{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -1520,7 +1520,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_75{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -1530,7 +1530,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_90{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -1540,7 +1540,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_95{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -1550,7 +1550,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_99{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -1560,7 +1560,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_99_9{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -1570,7 +1570,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_mcs_99_99{class=\"Hive\"}",
+          "expr": "SBK_Writing_mcs_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -1578,7 +1578,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write Percentiles (Microseconds)",
+      "title": "SBK Seaweeds3 Write Percentiles (Microseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1663,7 +1663,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_10{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1673,7 +1673,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_25{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -1683,7 +1683,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_50{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -1693,7 +1693,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_75{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -1703,7 +1703,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_90{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -1713,7 +1713,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_95{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -1723,7 +1723,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_99{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -1733,7 +1733,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_99_9{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -1743,7 +1743,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_99_99{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -1751,7 +1751,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write Percentiles (Milliseconds)",
+      "title": "SBK Seaweeds3 Write Percentiles (Milliseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1892,7 +1892,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -1902,13 +1902,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ms_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Writing_ms_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write Avg and Max Latencies (Milliseconds)",
+      "title": "SBK Seaweeds3 Write Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     },
     {
@@ -1984,13 +1984,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Reading_MBPerSec{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Read Throughput MB/s",
+      "title": "SBK Seaweeds3 Read Throughput MB/s",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2075,13 +2075,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_RecordsPerSec{class=\"Hive\"}",
+          "expr": "SBK_Reading_RecordsPerSec{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Read Records/Sec",
+      "title": "SBK Seaweeds3 Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2194,7 +2194,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -2204,13 +2204,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Seaweeds3 Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -2268,7 +2268,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_10{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -2278,7 +2278,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_20{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_20{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -2288,7 +2288,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_25{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -2298,7 +2298,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_30{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_30{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -2308,7 +2308,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_40{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_40{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -2318,7 +2318,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_50{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -2328,7 +2328,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_60{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_60{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -2338,7 +2338,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_70{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_70{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -2348,7 +2348,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_75{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -2358,7 +2358,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_80{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_80{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -2368,7 +2368,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_90{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -2378,7 +2378,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_92_25{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_92_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -2388,7 +2388,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_95{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -2398,7 +2398,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_97_5{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_97_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -2408,7 +2408,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -2418,7 +2418,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_25{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_99_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -2428,7 +2428,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_5{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_99_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -2438,7 +2438,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_75{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_99_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -2448,7 +2448,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_9{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -2458,7 +2458,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_95{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_99_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -2468,7 +2468,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_99{class=\"Hive\"}",
+          "expr": "SBK_Reading_ns_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
@@ -2476,7 +2476,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Read Percentiles (Nanoseconds)",
+      "title": "SBK Seaweeds3 Read Percentiles (Nanoseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2573,7 +2573,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_Readers{class=\"Hive\"}",
+          "expr": "SBK_Reading_Readers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Active",
           "refId": "A"
@@ -2583,13 +2583,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_Max_Readers{class=\"Hive\"}",
+          "expr": "SBK_Reading_Max_Readers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Readers",
+      "title": "SBK Seaweeds3 Readers",
       "type": "stat"
     },
     {
@@ -2690,11 +2690,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Reading_MBPerSec{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Read Throughput MB/s",
+      "title": "SBK Seaweeds3 Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -2780,7 +2780,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_SLC_1{class=\"Hive\"}",
+          "expr": "SBK_Reading_SLC_1{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -2790,13 +2790,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_SLC_2{class=\"Hive\"}",
+          "expr": "SBK_Reading_SLC_2{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Read  Sliding Latency Coverage (SLC)",
+      "title": "SBK Seaweeds3 Read  Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -2866,11 +2866,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_Bytes_total{class=\"Hive\"}",
+          "expr": "SBK_Reading_Bytes_total{class=\"Seaweeds3\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Read Bytes Total",
+      "title": "SBK Seaweeds3 Read Bytes Total",
       "type": "stat"
     },
     {
@@ -2927,7 +2927,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -2938,7 +2938,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -2948,13 +2948,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Hive Read Discarded Latencies",
+      "title": "SBK Seaweeds3 Read Discarded Latencies",
       "type": "stat"
     },
     {
@@ -3040,7 +3040,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -3050,13 +3050,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Read Avg and Max Latencies (Microseconds)",
+      "title": "SBK Seaweeds3 Read Avg and Max Latencies (Microseconds)",
       "type": "stat"
     },
     {
@@ -3114,7 +3114,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_10{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3124,7 +3124,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_25{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -3134,7 +3134,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_50{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -3144,7 +3144,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_75{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -3154,7 +3154,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_90{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -3164,7 +3164,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_95{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -3174,7 +3174,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_99{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -3184,7 +3184,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_99_9{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -3194,7 +3194,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_mcs_99_99{class=\"Hive\"}",
+          "expr": "SBK_Reading_mcs_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -3202,7 +3202,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Read Percentiles (Microseconds)",
+      "title": "SBK Seaweeds3 Read Percentiles (Microseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3287,7 +3287,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_10{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3297,7 +3297,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_25{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -3307,7 +3307,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_50{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -3317,7 +3317,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_75{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -3327,7 +3327,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_90{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -3337,7 +3337,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_95{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -3347,7 +3347,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_99{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -3357,7 +3357,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_99_9{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -3367,7 +3367,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_99_99{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -3375,7 +3375,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Read Percentiles (Milli Seconds)",
+      "title": "SBK Seaweeds3 Read Percentiles (Milli Seconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3512,7 +3512,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -3522,13 +3522,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ms_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Reading_ms_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Read Avg and Max Latencies (Milliseconds)",
+      "title": "SBK Seaweeds3 Read Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     },
     {
@@ -3603,7 +3603,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_MBPerSec{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3611,7 +3611,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Read Throughput MB/s ",
+      "title": "SBK Seaweeds3 Write-Read Throughput MB/s ",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3690,7 +3690,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_RecordsPerSec{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_RecordsPerSec{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3698,7 +3698,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Read Records/Sec",
+      "title": "SBK Seaweeds3 Write-Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -3810,7 +3810,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -3820,13 +3820,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Seaweeds3 Write-Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -3878,7 +3878,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_10{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3888,7 +3888,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_20{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_20{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -3898,7 +3898,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_25{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -3908,7 +3908,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_30{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_30{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -3918,7 +3918,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_40{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_40{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -3928,7 +3928,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_50{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -3938,7 +3938,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_60{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_60{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -3948,7 +3948,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_70{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_70{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -3958,7 +3958,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_75{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -3968,7 +3968,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_80{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_80{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -3978,7 +3978,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_90{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -3988,7 +3988,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_92_5{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_92_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -3998,7 +3998,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_95{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -4008,7 +4008,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_97_5{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_97_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -4018,7 +4018,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -4028,7 +4028,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_25{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_99_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -4038,7 +4038,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_5{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_99_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -4048,7 +4048,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_75{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_99_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -4058,7 +4058,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_9{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -4068,7 +4068,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_95{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_99_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -4078,7 +4078,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_99{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ns_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
@@ -4086,7 +4086,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Read Percentiles (Nanoseconds)",
+      "title": "SBK Seaweeds3 Write-Read Percentiles (Nanoseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -4183,13 +4183,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Bytes_total{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_Bytes_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Write-Read Bytes Total",
+      "title": "SBK Seaweeds3 Write-Read Bytes Total",
       "type": "stat"
     },
     {
@@ -4290,13 +4290,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_MBPerSec{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Write-Read Throughput MB/s",
+      "title": "SBK Seaweeds3 Write-Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -4382,7 +4382,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_SLC_1{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_SLC_1{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -4392,13 +4392,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_SLC_2{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_SLC_2{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Read Sliding Latency Coverage (SLC)",
+      "title": "SBK Seaweeds3 Write-Read Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -4467,7 +4467,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Readers{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_Readers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Active Readers",
           "refId": "A"
@@ -4477,7 +4477,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Max_Readers{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_Max_Readers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Readers",
           "refId": "B"
@@ -4487,7 +4487,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Writers{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_Writers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Active Writers",
           "refId": "C"
@@ -4497,13 +4497,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Max_Writers{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_Max_Writers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Writers",
           "refId": "D"
         }
       ],
-      "title": "SBK Hive Write-Read  Writers and Readers",
+      "title": "SBK Seaweeds3 Write-Read  Writers and Readers",
       "type": "stat"
     },
     {
@@ -4560,7 +4560,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Lower",
           "refId": "A"
@@ -4570,7 +4570,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -4580,13 +4580,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_InvalidLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_InvalidLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Hive Write-Read  Discarded Latencies",
+      "title": "SBK Seaweeds3 Write-Read  Discarded Latencies",
       "type": "stat"
     },
     {
@@ -4675,7 +4675,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -4685,13 +4685,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Read Avg and Max Latencies (Microseconds)",
+      "title": "SBK Seaweeds3 Write-Read Avg and Max Latencies (Microseconds)",
       "type": "stat"
     },
     {
@@ -4743,7 +4743,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_10{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4753,7 +4753,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_25{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -4763,7 +4763,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_50{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -4773,7 +4773,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_75{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -4783,7 +4783,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_90{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -4793,7 +4793,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_95{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -4803,7 +4803,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_99{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -4813,7 +4813,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_99_9{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -4823,7 +4823,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_mcs_99_99{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_mcs_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -4831,7 +4831,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Read Percentiles (Microseconds)",
+      "title": "SBK Seaweeds3 Write-Read Percentiles (Microseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -4910,7 +4910,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_10{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4920,7 +4920,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_25{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -4930,7 +4930,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_50{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -4940,7 +4940,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_75{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -4950,7 +4950,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_90{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -4960,7 +4960,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_95{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -4970,7 +4970,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_99{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -4980,7 +4980,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_99_9{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -4990,7 +4990,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_99_99{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -4998,7 +4998,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Read Percentiles (Milliseconds)",
+      "title": "SBK Seaweeds3 Write-Read Percentiles (Milliseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -5138,7 +5138,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -5148,13 +5148,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ms_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_Reading_ms_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Read Avg and Max Latencies (Milliseconds)",
+      "title": "SBK Seaweeds3 Write-Read Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     },
     {
@@ -5230,7 +5230,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5238,7 +5238,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Only Read Throughput MB/s ",
+      "title": "SBK Seaweeds3 Write-Only Read Throughput MB/s ",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -5318,7 +5318,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_RecordsPerSec{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_RecordsPerSec{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5326,7 +5326,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Only Read Records/Sec",
+      "title": "SBK Seaweeds3 Write-Only Read Records/Sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -5439,7 +5439,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -5449,13 +5449,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_OnlyReading_ns_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Only Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Seaweeds3 Write-Only Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -5508,7 +5508,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_10{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5519,7 +5519,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_20{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_20{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -5530,7 +5530,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_25{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -5541,7 +5541,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_30{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_30{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -5552,7 +5552,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_40{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_40{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -5563,7 +5563,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -5574,7 +5574,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_60{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_60{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -5585,7 +5585,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_70{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_70{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -5596,7 +5596,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_75{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -5607,7 +5607,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_80{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_80{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -5618,7 +5618,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_90{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -5629,7 +5629,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_92_5{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_92_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -5640,7 +5640,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_95{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -5651,7 +5651,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_97_5{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_97_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -5662,7 +5662,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -5673,7 +5673,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_25{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -5684,7 +5684,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_5{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_5{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -5695,7 +5695,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_75{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -5706,7 +5706,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_9{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -5717,7 +5717,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_95{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -5728,7 +5728,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_99{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
@@ -5736,7 +5736,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Only Read Percentiles (Nanoseconds)",
+      "title": "SBK Seaweeds3 Write-Only Read Percentiles (Nanoseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -5834,13 +5834,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Write-Only Read Bytes Total",
+      "title": "SBK Seaweeds3 Write-Only Read Bytes Total",
       "type": "stat"
     },
     {
@@ -5942,13 +5942,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Hive Write-Only Read Throughput MB/s",
+      "title": "SBK Seaweeds3 Write-Only Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -6035,7 +6035,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_SLC_1{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_SLC_1{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -6046,13 +6046,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_SLC_2{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_SLC_2{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Only Read Sliding Latency Coverage (SLC)",
+      "title": "SBK Seaweeds3 Write-Only Read Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -6122,7 +6122,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Readers{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_Readers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Active Readers",
           "refId": "A"
@@ -6133,7 +6133,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Max_Readers{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_Max_Readers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Readers",
           "refId": "B"
@@ -6144,7 +6144,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Writers{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_Writers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Active Writers",
           "refId": "C"
@@ -6155,13 +6155,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Max_Writers{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_Max_Writers{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Writers",
           "refId": "D"
         }
       ],
-      "title": "SBK Hive Write-Only Read  Writers and Readers",
+      "title": "SBK Seaweeds3 Write-Only Read  Writers and Readers",
       "type": "stat"
     },
     {
@@ -6219,7 +6219,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_LowerDiscardedLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_LowerDiscardedLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Lower",
           "refId": "A"
@@ -6230,7 +6230,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_HigherDiscardLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_HigherDiscardLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -6241,13 +6241,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_InvalidLatencyRecords_total{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_InvalidLatencyRecords_total{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Hive Write-Only Read  Discarded Latencies",
+      "title": "SBK Seaweeds3 Write-Only Read  Discarded Latencies",
       "type": "stat"
     },
     {
@@ -6337,7 +6337,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -6348,13 +6348,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Only Read Avg and Max Latencies (Microseconds)",
+      "title": "SBK Seaweeds3 Write-Only Read Avg and Max Latencies (Microseconds)",
       "type": "stat"
     },
     {
@@ -6407,7 +6407,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_10{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -6418,7 +6418,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_25{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -6429,7 +6429,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_50{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -6440,7 +6440,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_75{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -6451,7 +6451,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_90{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -6462,7 +6462,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_95{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -6473,7 +6473,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_99{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -6484,7 +6484,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_99_9{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -6495,7 +6495,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_99_99{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_mcs_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -6503,7 +6503,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Only Read Percentiles (Microseconds)",
+      "title": "SBK Seaweeds3 Write-Only Read Percentiles (Microseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -6583,7 +6583,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_10{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_10{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -6594,7 +6594,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_25{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_25{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -6605,7 +6605,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_50{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_50{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -6616,7 +6616,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_75{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_75{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -6627,7 +6627,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_90{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_90{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -6638,7 +6638,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_95{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_95{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -6649,7 +6649,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_99{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -6660,7 +6660,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_99_9{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_99_9{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -6671,7 +6671,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_99_99{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_99_99{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -6679,7 +6679,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "SBK Hive Write-Only Read Percentiles (Milliseconds)",
+      "title": "SBK Seaweeds3 Write-Only Read Percentiles (Milliseconds)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -6820,7 +6820,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_AvgLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_AvgLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -6831,13 +6831,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_MaxLatency{class=\"Hive\"}",
+          "expr": "SBK_Write_OnlyReading_ms_MaxLatency{class=\"Seaweeds3\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Hive Write-Only Read Avg and Max Latencies (Milliseconds)",
+      "title": "SBK Seaweeds3 Write-Only Read Avg and Max Latencies (Milliseconds)",
       "type": "stat"
     }
   ],
@@ -6876,7 +6876,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SBK Hive Dashboard",
+  "title": "SBK Seaweeds3 Dashboard",
   "version": 1,
   "weekStart": ""
 }

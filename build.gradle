@@ -173,7 +173,7 @@ allprojects {
         if (project.path.startsWith(":driver-")) {
             def outDir = 'build/dashboard'
             def outFile = sbkProjectName + "-" + sbkVersion + ".json"
-            def sbkClassUpperCase = sbkClass.toUpperCase()
+            def sbkClassName = sbkClass.toLowerCase().capitalize()
 
             /*
             call with parameter
@@ -187,7 +187,7 @@ allprojects {
 
             from "$rootDir/dashboard-template.json"
             into outDir
-            filter { line -> line.replaceAll('SBK@2020', sbkClassUpperCase) }
+            filter { line -> line.replaceAll('SBK@2020', sbkClassName) }
             rename 'dashboard-template.json', outFile
 
             doLast {

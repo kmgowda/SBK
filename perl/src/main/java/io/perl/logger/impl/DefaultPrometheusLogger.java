@@ -11,6 +11,7 @@
 
 package io.perl.logger.impl;
 
+import io.micrometer.core.instrument.Tag;
 import io.time.Time;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
@@ -34,14 +35,15 @@ public class DefaultPrometheusLogger extends DefaultLogger {
      * @param time                      Time
      * @param port                      int
      * @param context                   String
+     * @param tags                      Common tags
      * @throws IOException If it occurs.
      */
     public DefaultPrometheusLogger(String header, double[] percentiles,
                                    @NotNull TimeUnit latencyTimeUnit,
                                    long minLatency, long maxLatency,
-                                   Time time, int port, String context) throws IOException {
+                                   Time time, int port, String context, Iterable<Tag> tags) throws IOException {
         super(header, percentiles, latencyTimeUnit, minLatency, maxLatency);
-        server = new PrometheusMetricsServer(header, percentiles, time, latencyTimeUnit, port, context);
+        server = new PrometheusMetricsServer(header, percentiles, time, latencyTimeUnit, port, context, tags);
     }
 
     /**

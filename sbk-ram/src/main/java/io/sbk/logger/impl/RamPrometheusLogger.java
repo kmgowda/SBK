@@ -52,7 +52,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public @Nonnull PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
-            prometheusServer = new RamMetricsPrometheusServer(Config.NAME + " " + storageName, action.name(),
+            prometheusServer = new RamMetricsPrometheusServer(Config.NAME, action.name(), storageName,
                     percentiles, time, metricsConfig);
         }
         return prometheusServer;

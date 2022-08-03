@@ -30,14 +30,15 @@ public final class RamMetricsPrometheusServer extends PrometheusRWMetricsServer 
      *
      * @param header            String
      * @param action            String
+     * @param storageName       storageName
      * @param percentiles       double[]
      * @param time              Time
      * @param config            MetricsConfig
      * @throws IOException If it Occurs.
      */
-    public RamMetricsPrometheusServer(String header, String action, double[] percentiles, Time time,
-                                      MetricsConfig config) throws IOException {
-        super(header, action, percentiles, time, config);
+    public RamMetricsPrometheusServer(String header, String action, String storageName,
+                                      double[] percentiles, Time time, MetricsConfig config) throws IOException {
+        super(header, action, storageName, percentiles, time, config);
         final String name = metricPrefix + "_Connections";
         final String maxName = metricPrefix + "_Max_Connections";
         this.connections = this.registry.gauge(name, new AtomicInteger());

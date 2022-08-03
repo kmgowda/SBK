@@ -10,7 +10,9 @@
 
 package io.sbk.logger.impl;
 
+import io.micrometer.core.instrument.Tags;
 import io.perl.logger.impl.PrometheusMetricsServer;
+import io.sbk.config.Config;
 import io.sbk.logger.CountRW;
 import io.sbk.logger.MetricsConfig;
 import io.time.Time;
@@ -24,10 +26,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
     final private AtomicInteger maxWriters;
     final private AtomicInteger maxReaders;
 
-    public  PrometheusRWMetricsServer(String header, String action, double[] percentiles, Time time,
+    public  PrometheusRWMetricsServer(String header, String action, String className, double[] percentiles, Time time,
                                         MetricsConfig config) throws IOException {
         super(header.toUpperCase()+" "+action, percentiles, time,
-                config.latencyTimeUnit, config.port, config.context);
+                config.latencyTimeUnit, config.port, config.context, Tags.of(Config.CLASS_OPTION, className));
         final String writersName = metricPrefix + "_Writers";
         final String readersName = metricPrefix + "_Readers";
         final String maxWritersName = metricPrefix + "_Max_Writers";
