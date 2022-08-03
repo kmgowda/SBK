@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -21,12 +24,16 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "iteration": 1652455935440,
+  "iteration": 1659507547429,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -51,8 +58,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#6ED0E0",
@@ -131,8 +137,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#6ED0E0",
@@ -211,8 +216,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#6ED0E0",
@@ -281,6 +285,10 @@
     },
     {
       "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1736,6 +1744,10 @@
     },
     {
       "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1931,8 +1943,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -2234,8 +2245,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -2313,8 +2323,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -2413,8 +2422,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -2507,8 +2515,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -2576,8 +2583,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2649,8 +2655,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -3013,8 +3018,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -3122,7 +3126,11 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -3130,1389 +3138,1392 @@
         "y": 3
       },
       "id": 56,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "MBs"
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 5
-          },
-          "hiddenSeries": false,
-          "id": 61,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.3.3",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_MBPerSec",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Write-Read Throughput MB/s ",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:175",
-              "format": "MBs",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:176",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 8,
-            "y": 5
-          },
-          "hiddenSeries": false,
-          "id": 36,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.3.3",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_RecordsPerSec",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Write-Read Records/Sec",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "iops",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 10000000
-                  }
-                ]
-              },
-              "unit": "ns"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 5
-          },
-          "id": 52,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_ns_AvgLatency",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_MaxLatency",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Write-Read Avg and Max Latencies (Nanoseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 16
-          },
-          "hiddenSeries": false,
-          "id": 54,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.3.3",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_ns_10",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_20",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_30",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_40",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_60",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_70",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_80",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "J"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "K"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_92_5",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "L"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "M"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_97_5",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "N"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "O"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_99_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "P"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_99_5",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "Q"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_99_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "R"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "S"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_99_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "T"
-            },
-            {
-              "expr": "SBK_Write_Reading_ns_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "U"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Write-Read Percentiles (Nanoseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:240",
-              "format": "ns",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:241",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 1073741824
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 10737418240
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 10737418240
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1099511627776
-                  }
-                ]
-              },
-              "unit": "decbytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 3,
-            "x": 8,
-            "y": 16
-          },
-          "id": 30,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_Bytes_total",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "title": "SBK Write-Read Bytes Total",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "max": 500,
-              "min": 0,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 200
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 300
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 400
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 600
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 700
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 800
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 900
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "MBs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 11,
-            "y": 16
-          },
-          "id": 32,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": true,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_MBPerSec",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "title": "SBK Write-Read Throughput MB/s",
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 100
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 10000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 100000000
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 16
-          },
-          "id": 75,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_SLC_1",
-              "interval": "",
-              "legendFormat": "SLC 1",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_SLC_2",
-              "interval": "",
-              "legendFormat": "SLC 2",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Write-Read Sliding Latency Coverage (SLC)",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 8,
-            "y": 21
-          },
-          "id": 40,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_Readers",
-              "interval": "",
-              "legendFormat": "Active Readers",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_Max_Readers",
-              "interval": "",
-              "legendFormat": "Max Readers",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_Write_Reading_Writers",
-              "interval": "",
-              "legendFormat": "Active Writers",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_Write_Reading_Max_Writers",
-              "interval": "",
-              "legendFormat": "Max Writers",
-              "refId": "D"
-            }
-          ],
-          "title": "SBK Write-Read  Writers and Readers",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 11,
-            "y": 22
-          },
-          "id": 42,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Lower",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Higher",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_Write_Reading_InvalidLatencyRecords_total",
-              "interval": "",
-              "legendFormat": "Invalid/Negative",
-              "refId": "C"
-            }
-          ],
-          "title": "SBK Write-Read  Discarded Latencies",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 10000000
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 100000000
-                  }
-                ]
-              },
-              "unit": "µs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 27
-          },
-          "id": 51,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_mcs_AvgLatency",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_MaxLatency",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Write-Read Avg and Max Latencies (Microseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 8,
-            "y": 27
-          },
-          "hiddenSeries": false,
-          "id": 53,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.3.3",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_mcs_10",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_Write_Reading_mcs_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Write-Read Percentiles (Microseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "µs",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 27
-          },
-          "hiddenSeries": false,
-          "id": 34,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.3.3",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_ms_10",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_25",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_50",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_75",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_90",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_95",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_99_9",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_99_99",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Write-Read Percentiles (Milliseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "ms",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 1
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 5
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 10
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 20
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 30
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 40
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 60
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 70
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 80
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 90
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 100
-                  },
-                  {
-                    "color": "#0A437C",
-                    "value": 200
-                  },
-                  {
-                    "color": "#6D1F62",
-                    "value": 500
-                  },
-                  {
-                    "color": "#584477",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 38
-          },
-          "id": 38,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_ms_AvgLatency",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_ms_MaxLatency",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Write-Read Avg and Max Latencies (Milliseconds)",
-          "type": "stat"
-        }
-      ],
+      "panels": [],
       "title": "Write-Read Performance Benchmarking (End to End Latencies)",
       "type": "row"
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 0,
+        "y": 4
+      },
+      "hiddenSeries": false,
+      "id": 61,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_MBPerSec",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Write-Read Throughput MB/s ",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:175",
+          "format": "MBs",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:176",
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 8,
+        "y": 4
+      },
+      "hiddenSeries": false,
+      "id": 36,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_RecordsPerSec",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Write-Read Records/Sec",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "iops",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 1000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 10000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 100000
+              },
+              {
+                "color": "#705DA0",
+                "value": 1000000
+              },
+              {
+                "color": "#508642",
+                "value": 10000000
+              }
+            ]
+          },
+          "unit": "ns"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 4
+      },
+      "id": 52,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_ns_AvgLatency",
+          "interval": "",
+          "legendFormat": "Average Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_MaxLatency",
+          "interval": "",
+          "legendFormat": "Max Latency",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Write-Read Avg and Max Latencies (Nanoseconds)",
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 0,
+        "y": 15
+      },
+      "hiddenSeries": false,
+      "id": 54,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_ns_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_20",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_30",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_40",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_60",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_70",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_80",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "J"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "K"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_92_5",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "L"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "M"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_97_5",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "N"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "O"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_99_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "P"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_99_5",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "Q"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_99_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "R"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "S"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_99_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "T"
+        },
+        {
+          "expr": "SBK_Write_Reading_ns_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "U"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Write-Read Percentiles (Nanoseconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:240",
+          "format": "ns",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:241",
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 1073741824
+              },
+              {
+                "color": "#EF843C",
+                "value": 10737418240
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10737418240
+              },
+              {
+                "color": "#E24D42",
+                "value": 1099511627776
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 8,
+        "y": 15
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_Bytes_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Write-Read Bytes Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "max": 500,
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 200
+              },
+              {
+                "color": "#1F78C1",
+                "value": 300
+              },
+              {
+                "color": "#BA43A9",
+                "value": 400
+              },
+              {
+                "color": "#705DA0",
+                "value": 500
+              },
+              {
+                "color": "#508642",
+                "value": 600
+              },
+              {
+                "color": "#CCA300",
+                "value": 700
+              },
+              {
+                "color": "#447EBC",
+                "value": 800
+              },
+              {
+                "color": "#C15C17",
+                "value": 900
+              },
+              {
+                "color": "#890F02",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 11,
+        "y": 15
+      },
+      "id": 32,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_MBPerSec",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Write-Read Throughput MB/s",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 500
+              },
+              {
+                "color": "#EF843C",
+                "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
+      "id": 75,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_SLC_1",
+          "interval": "",
+          "legendFormat": "SLC 1",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_SLC_2",
+          "interval": "",
+          "legendFormat": "SLC 2",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Write-Read Sliding Latency Coverage (SLC)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 8,
+        "y": 20
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_Readers",
+          "interval": "",
+          "legendFormat": "Active Readers",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_Max_Readers",
+          "interval": "",
+          "legendFormat": "Max Readers",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_Write_Reading_Writers",
+          "interval": "",
+          "legendFormat": "Active Writers",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_Write_Reading_Max_Writers",
+          "interval": "",
+          "legendFormat": "Max Writers",
+          "refId": "D"
+        }
+      ],
+      "title": "SBK Write-Read  Writers and Readers",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 11,
+        "y": 21
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Lower",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Higher",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_Write_Reading_InvalidLatencyRecords_total",
+          "interval": "",
+          "legendFormat": "Invalid/Negative",
+          "refId": "C"
+        }
+      ],
+      "title": "SBK Write-Read  Discarded Latencies",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 1000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 10000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 100000
+              },
+              {
+                "color": "#705DA0",
+                "value": 1000000
+              },
+              {
+                "color": "#508642",
+                "value": 10000000
+              },
+              {
+                "color": "#CCA300",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "µs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 0,
+        "y": 26
+      },
+      "id": 51,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_mcs_AvgLatency",
+          "interval": "",
+          "legendFormat": "Average Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_MaxLatency",
+          "interval": "",
+          "legendFormat": "Max Latency",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Write-Read Avg and Max Latencies (Microseconds)",
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 8,
+        "y": 26
+      },
+      "hiddenSeries": false,
+      "id": 53,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_mcs_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_Write_Reading_mcs_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Write-Read Percentiles (Microseconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "µs",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 26
+      },
+      "hiddenSeries": false,
+      "id": 34,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_ms_10",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_25",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_50",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_75",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_90",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_95",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_99_9",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_99_99",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Write-Read Percentiles (Milliseconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 1
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 5
+              },
+              {
+                "color": "#EF843C",
+                "value": 10
+              },
+              {
+                "color": "#E24D42",
+                "value": 20
+              },
+              {
+                "color": "#1F78C1",
+                "value": 30
+              },
+              {
+                "color": "#BA43A9",
+                "value": 40
+              },
+              {
+                "color": "#705DA0",
+                "value": 50
+              },
+              {
+                "color": "#508642",
+                "value": 60
+              },
+              {
+                "color": "#CCA300",
+                "value": 70
+              },
+              {
+                "color": "#447EBC",
+                "value": 80
+              },
+              {
+                "color": "#C15C17",
+                "value": 90
+              },
+              {
+                "color": "#890F02",
+                "value": 100
+              },
+              {
+                "color": "#0A437C",
+                "value": 200
+              },
+              {
+                "color": "#6D1F62",
+                "value": 500
+              },
+              {
+                "color": "#584477",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 0,
+        "y": 37
+      },
+      "id": 38,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.1",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_ms_AvgLatency",
+          "interval": "",
+          "legendFormat": "Average Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_ms_MaxLatency",
+          "interval": "",
+          "legendFormat": "Max Latency",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Write-Read Avg and Max Latencies (Milliseconds)",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 48
       },
       "id": 77,
       "panels": [],
@@ -4540,7 +4551,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 5
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 79,
@@ -4560,7 +4571,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4628,7 +4639,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 5
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 81,
@@ -4648,7 +4659,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4759,7 +4770,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 5
+        "y": 49
       },
       "id": 83,
       "options": {
@@ -4776,7 +4787,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -4794,7 +4805,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_MaxLatency",
+          "expr": "SBK_Write_OnlyReading_ns_MaxLatency",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
@@ -4818,7 +4829,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 16
+        "y": 60
       },
       "hiddenSeries": false,
       "id": 85,
@@ -4838,7 +4849,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5154,7 +5165,7 @@
         "h": 5,
         "w": 3,
         "x": 8,
-        "y": 16
+        "y": 60
       },
       "id": 87,
       "options": {
@@ -5171,7 +5182,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -5264,7 +5275,7 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 16
+        "y": 60
       },
       "id": 89,
       "options": {
@@ -5279,7 +5290,7 @@
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -5355,7 +5366,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 16
+        "y": 60
       },
       "id": 95,
       "options": {
@@ -5372,7 +5383,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -5442,7 +5453,7 @@
         "h": 6,
         "w": 3,
         "x": 8,
-        "y": 21
+        "y": 65
       },
       "id": 91,
       "options": {
@@ -5459,7 +5470,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -5539,7 +5550,7 @@
         "h": 5,
         "w": 5,
         "x": 11,
-        "y": 22
+        "y": 66
       },
       "id": 93,
       "options": {
@@ -5556,7 +5567,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -5657,7 +5668,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 27
+        "y": 71
       },
       "id": 97,
       "options": {
@@ -5674,7 +5685,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -5717,7 +5728,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 27
+        "y": 71
       },
       "hiddenSeries": false,
       "id": 99,
@@ -5737,7 +5748,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5893,7 +5904,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 27
+        "y": 71
       },
       "hiddenSeries": false,
       "id": 101,
@@ -5913,7 +5924,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -6140,7 +6151,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 38
+        "y": 82
       },
       "id": 103,
       "options": {
@@ -6157,7 +6168,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.3.3",
+      "pluginVersion": "8.5.1",
       "targets": [
         {
           "datasource": {
@@ -6187,7 +6198,7 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 34,
+  "schemaVersion": 36,
   "style": "dark",
   "tags": [
     "SBK"
