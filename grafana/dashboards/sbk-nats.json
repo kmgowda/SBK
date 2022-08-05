@@ -24,7 +24,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "iteration": 1659506436007,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -88,7 +87,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 1
       },
@@ -107,7 +106,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Writing_Connections",
@@ -168,8 +167,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 8,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 1
       },
       "id": 68,
@@ -187,7 +186,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Reading_Connections",
@@ -248,8 +247,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 12,
         "y": 1
       },
       "id": 69,
@@ -267,7 +266,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_Connections",
@@ -284,601 +283,6 @@
       ],
       "title": "Write-Readers Connections",
       "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
-      },
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 6
-      },
-      "id": 60,
-      "panels": [],
-      "title": "Write Performance Benchmarking",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "unit": "MBs"
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 0,
-        "y": 7
-      },
-      "hiddenSeries": false,
-      "id": 62,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_MBPerSec{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Write Throughput MB/s",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:274",
-          "format": "MBs",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:275",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 8,
-        "y": 7
-      },
-      "hiddenSeries": false,
-      "id": 6,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_RecordsPerSec{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Write Records/Sec",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:185",
-          "format": "wps",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:186",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 100
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 500
-              },
-              {
-                "color": "#EF843C",
-                "value": 1000
-              },
-              {
-                "color": "#E24D42",
-                "value": 10000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 100000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 1000000
-              },
-              {
-                "color": "#705DA0",
-                "value": 10000000
-              },
-              {
-                "color": "#508642",
-                "value": 100000000
-              }
-            ]
-          },
-          "unit": "ns"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 16,
-        "y": 7
-      },
-      "id": 48,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_AvgLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_MaxLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Write Avg and Max Latencies (Nanoseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 16
-      },
-      "hiddenSeries": false,
-      "id": 50,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_10{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_20{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_30{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_40{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_50{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_60{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_70{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_80{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "J"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_90{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "K"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_92_5{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "L"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "M"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_97_5{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "N"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "O"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_99_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "P"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_99_5{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "Q"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_99_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "R"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_99_9{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "S"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_99_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "T"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ns_99_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "U"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Write Percentiles (Nanoseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:127",
-          "format": "ns",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:128",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
     },
     {
       "datasource": {
@@ -922,12 +326,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 8,
-        "y": 16
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 1
       },
-      "id": 2,
+      "id": 105,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -942,14 +346,14 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_Writers{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_Connections",
           "interval": "",
           "legendFormat": "Active",
           "refId": "A"
@@ -959,960 +363,17 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_Max_Writers{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_Max_Connections",
           "interval": "",
           "legendFormat": "Max",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Writers",
+      "title": "Write-OnlyRead Connections",
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "max": 500,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 200
-              },
-              {
-                "color": "#1F78C1",
-                "value": 300
-              },
-              {
-                "color": "#BA43A9",
-                "value": 400
-              },
-              {
-                "color": "#705DA0",
-                "value": 500
-              },
-              {
-                "color": "#508642",
-                "value": 600
-              },
-              {
-                "color": "#CCA300",
-                "value": 700
-              },
-              {
-                "color": "#447EBC",
-                "value": 800
-              },
-              {
-                "color": "#C15C17",
-                "value": 900
-              },
-              {
-                "color": "#890F02",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "MBs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 11,
-        "y": 16
-      },
-      "id": 4,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_MBPerSec{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "SBK Nats Write Throughput MB/s",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 100
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 500
-              },
-              {
-                "color": "#EF843C",
-                "value": 1000
-              },
-              {
-                "color": "#E24D42",
-                "value": 10000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 100000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 1000000
-              },
-              {
-                "color": "#705DA0",
-                "value": 10000000
-              },
-              {
-                "color": "#508642",
-                "value": 100000000
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 16
-      },
-      "id": 71,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_SLC_1{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "SLC 1",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_SLC_2{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "SLC 2",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Write  Sliding Latency Coverage (SLC)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1073741824
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 10737418240
-              },
-              {
-                "color": "#EF843C",
-                "value": 107374182400
-              },
-              {
-                "color": "#E24D42",
-                "value": 1099511627776
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 3,
-        "x": 8,
-        "y": 20
-      },
-      "id": 8,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_Records_total{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "SBK Nats Write Bytes Total",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 11,
-        "y": 22
-      },
-      "id": 28,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Lower",
-          "queryType": "randomWalk",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Higher",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Invalid/Negative",
-          "refId": "C"
-        }
-      ],
-      "title": "SBK Nats Write Discarded Latencies",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "max": 0,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 500
-              },
-              {
-                "color": "#1F78C1",
-                "value": 1000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 10000
-              },
-              {
-                "color": "#705DA0",
-                "value": 100000
-              },
-              {
-                "color": "#508642",
-                "value": 1000000
-              }
-            ]
-          },
-          "unit": "µs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 0,
-        "y": 27
-      },
-      "id": 47,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_AvgLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_MaxLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Write Avg and Max Latencies (Microseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 8,
-        "y": 27
-      },
-      "hiddenSeries": false,
-      "id": 49,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_10{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_50{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_90{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_99_9{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_mcs_99_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Write Percentiles (Microseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:256",
-          "format": "µs",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:257",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 16,
-        "y": 27
-      },
-      "hiddenSeries": false,
-      "id": 10,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_10{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_50{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_90{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_99_9{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_99_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Write Percentiles (Milliseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:281",
-          "format": "ms",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:282",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 5
-              },
-              {
-                "color": "#EF843C",
-                "value": 10
-              },
-              {
-                "color": "#E24D42",
-                "value": 20
-              },
-              {
-                "color": "#1F78C1",
-                "value": 30
-              },
-              {
-                "color": "#BA43A9",
-                "value": 40
-              },
-              {
-                "color": "#705DA0",
-                "value": 50
-              },
-              {
-                "color": "#508642",
-                "value": 60
-              },
-              {
-                "color": "#CCA300",
-                "value": 70
-              },
-              {
-                "color": "#447EBC",
-                "value": 80
-              },
-              {
-                "color": "#C15C17",
-                "value": 90
-              },
-              {
-                "color": "#890F02",
-                "value": 100
-              },
-              {
-                "color": "#0A437C",
-                "value": 200
-              },
-              {
-                "color": "#6D1F62",
-                "value": 500
-              },
-              {
-                "color": "#584477",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 0,
-        "y": 37
-      },
-      "id": 12,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_AvgLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_ms_MaxLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Write Avg and Max Latencies (Milliseconds)",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
+      "collapsed": true,
       "datasource": {
         "type": "datasource",
         "uid": "grafana"
@@ -1921,1617 +382,3245 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 6
+      },
+      "id": 60,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "unit": "MBs"
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 0,
+            "y": 7
+          },
+          "hiddenSeries": false,
+          "id": 62,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_MBPerSec{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Write Throughput MB/s",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:274",
+              "format": "MBs",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:275",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 8,
+            "y": 7
+          },
+          "hiddenSeries": false,
+          "id": 6,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_RecordsPerSec{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Write Records/Sec",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:185",
+              "format": "wps",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:186",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 100
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 10000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 100000000
+                  }
+                ]
+              },
+              "unit": "ns"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 16,
+            "y": 7
+          },
+          "id": 48,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_AvgLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_MaxLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Write Avg and Max Latencies (Nanoseconds)",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 50,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_10{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_20{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_30{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_40{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_50{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_60{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_70{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_80{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "J"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_90{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "K"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_92_5{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "L"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "M"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_97_5{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "N"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "O"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_99_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "P"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_99_5{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "Q"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_99_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "R"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_99_9{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "S"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_99_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "T"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ns_99_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "U"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Write Percentiles (Nanoseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:127",
+              "format": "ns",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:128",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 0,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 10
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 8,
+            "y": 16
+          },
+          "id": 2,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_Writers{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Active",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_Max_Writers{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Writers",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "max": 500,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 200
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 300
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 400
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 600
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 700
+                  },
+                  {
+                    "color": "#447EBC",
+                    "value": 800
+                  },
+                  {
+                    "color": "#C15C17",
+                    "value": 900
+                  },
+                  {
+                    "color": "#890F02",
+                    "value": 1000
+                  }
+                ]
+              },
+              "unit": "MBs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 5,
+            "x": 11,
+            "y": 16
+          },
+          "id": 4,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": true,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_MBPerSec{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "SBK Nats Write Throughput MB/s",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 100
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 10000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 100000000
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 16
+          },
+          "id": 71,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_SLC_1{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "SLC 1",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_SLC_2{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "SLC 2",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Write  Sliding Latency Coverage (SLC)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 1073741824
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 10737418240
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 107374182400
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1099511627776
+                  }
+                ]
+              },
+              "unit": "decbytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 3,
+            "x": 8,
+            "y": 20
+          },
+          "id": 8,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_Records_total{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "SBK Nats Write Bytes Total",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 11,
+            "y": 22
+          },
+          "id": 28,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Lower",
+              "queryType": "randomWalk",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Higher",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Invalid/Negative",
+              "refId": "C"
+            }
+          ],
+          "title": "SBK Nats Write Discarded Latencies",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "max": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 1000000
+                  }
+                ]
+              },
+              "unit": "µs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 8,
+            "x": 0,
+            "y": 27
+          },
+          "id": 47,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_AvgLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_MaxLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Write Avg and Max Latencies (Microseconds)",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 10,
+            "w": 8,
+            "x": 8,
+            "y": 27
+          },
+          "hiddenSeries": false,
+          "id": 49,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_10{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_50{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_90{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_99_9{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_mcs_99_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Write Percentiles (Microseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:256",
+              "format": "µs",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:257",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 10,
+            "w": 8,
+            "x": 16,
+            "y": 27
+          },
+          "hiddenSeries": false,
+          "id": 10,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_10{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_50{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_90{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_99_9{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_99_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Write Percentiles (Milliseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:281",
+              "format": "ms",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:282",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 1
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 5
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 10
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 20
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 30
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 40
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 60
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 70
+                  },
+                  {
+                    "color": "#447EBC",
+                    "value": 80
+                  },
+                  {
+                    "color": "#C15C17",
+                    "value": 90
+                  },
+                  {
+                    "color": "#890F02",
+                    "value": 100
+                  },
+                  {
+                    "color": "#0A437C",
+                    "value": 200
+                  },
+                  {
+                    "color": "#6D1F62",
+                    "value": 500
+                  },
+                  {
+                    "color": "#584477",
+                    "value": 1000
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 8,
+            "x": 0,
+            "y": 37
+          },
+          "id": 12,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_AvgLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Writing_ms_MaxLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Write Avg and Max Latencies (Milliseconds)",
+          "type": "stat"
+        }
+      ],
+      "title": "Write Performance Benchmarking",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
       },
       "id": 58,
-      "panels": [],
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "unit": "MBs"
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 63,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_MBPerSec{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Read Throughput MB/s",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:323",
+              "format": "MBs",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:324",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 8,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 20,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_RecordsPerSec{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Read Records/Sec",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:329",
+              "format": "rps",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:330",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 10000000
+                  }
+                ]
+              },
+              "unit": "ns"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 8
+          },
+          "id": 44,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_AvgLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_MaxLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Read Avg and Max Latencies (Nanoseconds)",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 19
+          },
+          "hiddenSeries": false,
+          "id": 46,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_10{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_20{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_30{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_40{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_50{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_60{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_70{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_80{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "J"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_90{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "K"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_92_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "L"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "M"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_97_5{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "N"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "O"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_99_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "P"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_99_5{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "Q"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_99_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "R"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_99_9{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "S"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_99_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "T"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_99_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "U"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Read Percentiles (Nanoseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:152",
+              "format": "ns",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:153",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 500
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 3,
+            "x": 8,
+            "y": 19
+          },
+          "id": 14,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_Readers{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Active",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_Max_Readers{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Readers",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "max": 500,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 200
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 300
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 400
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 600
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 700
+                  },
+                  {
+                    "color": "#447EBC",
+                    "value": 800
+                  },
+                  {
+                    "color": "#C15C17",
+                    "value": 900
+                  },
+                  {
+                    "color": "#890F02",
+                    "value": 1000
+                  }
+                ]
+              },
+              "unit": "MBs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 5,
+            "x": 11,
+            "y": 19
+          },
+          "id": 18,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": true,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_MBPerSec{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "SBK Nats Read Throughput MB/s",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 100
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 500
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 10000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 100000000
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 19
+          },
+          "id": 73,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_SLC_1{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "SLC 1",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_SLC_2{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "SLC 2",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Read  Sliding Latency Coverage (SLC)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 1073741824
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 10737418240
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 107374182400
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1099511627776
+                  }
+                ]
+              },
+              "unit": "decbytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 8,
+            "y": 24
+          },
+          "id": 16,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_Bytes_total{class=\"Nats\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "SBK Nats Read Bytes Total",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 11,
+            "y": 25
+          },
+          "id": 26,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Lower",
+              "queryType": "randomWalk",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Higher",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Invalid/Negative",
+              "refId": "C"
+            }
+          ],
+          "title": "SBK Nats Read Discarded Latencies",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 100
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 1000
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 10000
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 100000
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 1000000
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 10000000
+                  }
+                ]
+              },
+              "unit": "µs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 30
+          },
+          "id": 43,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_AvgLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_MaxLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Read Avg and Max Latencies (Microseconds)",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 8,
+            "y": 30
+          },
+          "hiddenSeries": false,
+          "id": 45,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_10{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_50{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_90{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_99_9{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_mcs_99_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Read Percentiles (Microseconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:400",
+              "format": "µs",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:401",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 16,
+            "y": 30
+          },
+          "hiddenSeries": false,
+          "id": 22,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.0.6",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_10{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_25{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_50{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_75{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_90{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_95{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_99_9{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_99_99{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "I"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "SBK Nats Read Percentiles (Milli Seconds)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:425",
+              "format": "ms",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:426",
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 1
+                  },
+                  {
+                    "color": "#6ED0E0",
+                    "value": 5
+                  },
+                  {
+                    "color": "#EF843C",
+                    "value": 10
+                  },
+                  {
+                    "color": "#E24D42",
+                    "value": 20
+                  },
+                  {
+                    "color": "#1F78C1",
+                    "value": 30
+                  },
+                  {
+                    "color": "#BA43A9",
+                    "value": 40
+                  },
+                  {
+                    "color": "#705DA0",
+                    "value": 50
+                  },
+                  {
+                    "color": "#508642",
+                    "value": 60
+                  },
+                  {
+                    "color": "#CCA300",
+                    "value": 70
+                  },
+                  {
+                    "color": "#447EBC",
+                    "value": 80
+                  },
+                  {
+                    "color": "#C15C17",
+                    "value": 90
+                  },
+                  {
+                    "color": "#890F02",
+                    "value": 100
+                  },
+                  {
+                    "color": "#0A437C",
+                    "value": 500
+                  },
+                  {
+                    "color": "#6D1F62",
+                    "value": 1000
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 8,
+            "x": 0,
+            "y": 41
+          },
+          "id": 24,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.6",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_AvgLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Average Latency",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ms_MaxLatency{class=\"Nats\"}",
+              "interval": "",
+              "legendFormat": "Max Latency",
+              "refId": "B"
+            }
+          ],
+          "title": "SBK Nats Read Avg and Max Latencies (Milliseconds)",
+          "type": "stat"
+        }
+      ],
       "title": "Read Performance Benchmarking",
       "type": "row"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "unit": "MBs"
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 48
-      },
-      "hiddenSeries": false,
-      "id": 63,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_MBPerSec{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Read Throughput MB/s",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:323",
-          "format": "MBs",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:324",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 8,
-        "y": 48
-      },
-      "hiddenSeries": false,
-      "id": 20,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_RecordsPerSec{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Read Records/Sec",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:329",
-          "format": "rps",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:330",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 1000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 10000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 100000
-              },
-              {
-                "color": "#705DA0",
-                "value": 1000000
-              },
-              {
-                "color": "#508642",
-                "value": 10000000
-              }
-            ]
-          },
-          "unit": "ns"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 48
-      },
-      "id": 44,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_AvgLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_MaxLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Read Avg and Max Latencies (Nanoseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 59
-      },
-      "hiddenSeries": false,
-      "id": 46,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_10{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_20{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_30{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_40{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_50{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_60{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_70{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_80{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "J"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_90{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "K"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_92_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "L"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "M"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_97_5{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "N"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "O"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_99_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "P"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_99_5{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "Q"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_99_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "R"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_99_9{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "S"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_99_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "T"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ns_99_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "U"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Read Percentiles (Nanoseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:152",
-          "format": "ns",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:153",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 500
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 8,
-        "y": 59
-      },
-      "id": 14,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_Readers{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Active",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_Max_Readers{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Max",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Readers",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "max": 500,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 200
-              },
-              {
-                "color": "#1F78C1",
-                "value": 300
-              },
-              {
-                "color": "#BA43A9",
-                "value": 400
-              },
-              {
-                "color": "#705DA0",
-                "value": 500
-              },
-              {
-                "color": "#508642",
-                "value": 600
-              },
-              {
-                "color": "#CCA300",
-                "value": 700
-              },
-              {
-                "color": "#447EBC",
-                "value": 800
-              },
-              {
-                "color": "#C15C17",
-                "value": 900
-              },
-              {
-                "color": "#890F02",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "MBs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 11,
-        "y": 59
-      },
-      "id": 18,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_MBPerSec{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "SBK Nats Read Throughput MB/s",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 100
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 500
-              },
-              {
-                "color": "#EF843C",
-                "value": 1000
-              },
-              {
-                "color": "#E24D42",
-                "value": 10000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 100000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 1000000
-              },
-              {
-                "color": "#705DA0",
-                "value": 10000000
-              },
-              {
-                "color": "#508642",
-                "value": 100000000
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 59
-      },
-      "id": 73,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_SLC_1{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "SLC 1",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_SLC_2{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "SLC 2",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Read  Sliding Latency Coverage (SLC)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1073741824
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 10737418240
-              },
-              {
-                "color": "#EF843C",
-                "value": 107374182400
-              },
-              {
-                "color": "#E24D42",
-                "value": 1099511627776
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 8,
-        "y": 64
-      },
-      "id": 16,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_Bytes_total{class=\"Nats\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "SBK Nats Read Bytes Total",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 11,
-        "y": 65
-      },
-      "id": 26,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Lower",
-          "queryType": "randomWalk",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Higher",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Invalid/Negative",
-          "refId": "C"
-        }
-      ],
-      "title": "SBK Nats Read Discarded Latencies",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 1000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 10000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 100000
-              },
-              {
-                "color": "#705DA0",
-                "value": 1000000
-              },
-              {
-                "color": "#508642",
-                "value": 10000000
-              }
-            ]
-          },
-          "unit": "µs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 70
-      },
-      "id": 43,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_AvgLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_MaxLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Read Avg and Max Latencies (Microseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 8,
-        "y": 70
-      },
-      "hiddenSeries": false,
-      "id": 45,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_10{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_50{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_90{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_99_9{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_mcs_99_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Read Percentiles (Microseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:400",
-          "format": "µs",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:401",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 70
-      },
-      "hiddenSeries": false,
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_10{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_25{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_50{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_75{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_90{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_95{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_99_9{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_99_99{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Nats Read Percentiles (Milli Seconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:425",
-          "format": "ms",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:426",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [],
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 5
-              },
-              {
-                "color": "#EF843C",
-                "value": 10
-              },
-              {
-                "color": "#E24D42",
-                "value": 20
-              },
-              {
-                "color": "#1F78C1",
-                "value": 30
-              },
-              {
-                "color": "#BA43A9",
-                "value": 40
-              },
-              {
-                "color": "#705DA0",
-                "value": 50
-              },
-              {
-                "color": "#508642",
-                "value": 60
-              },
-              {
-                "color": "#CCA300",
-                "value": 70
-              },
-              {
-                "color": "#447EBC",
-                "value": 80
-              },
-              {
-                "color": "#C15C17",
-                "value": 90
-              },
-              {
-                "color": "#890F02",
-                "value": 100
-              },
-              {
-                "color": "#0A437C",
-                "value": 500
-              },
-              {
-                "color": "#6D1F62",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 81
-      },
-      "id": 24,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_AvgLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_ms_MaxLatency{class=\"Nats\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Nats Read Avg and Max Latencies (Milliseconds)",
-      "type": "stat"
-    },
-    {
       "collapsed": false,
       "datasource": {
         "type": "datasource",
@@ -3541,7 +3630,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 92
+        "y": 8
       },
       "id": 56,
       "panels": [],
@@ -3569,7 +3658,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 93
+        "y": 9
       },
       "hiddenSeries": false,
       "id": 61,
@@ -3589,7 +3678,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -3656,7 +3745,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 93
+        "y": 9
       },
       "hiddenSeries": false,
       "id": 36,
@@ -3676,7 +3765,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -3786,7 +3875,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 93
+        "y": 9
       },
       "id": 52,
       "options": {
@@ -3803,7 +3892,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -3844,7 +3933,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 104
+        "y": 20
       },
       "hiddenSeries": false,
       "id": 54,
@@ -3864,7 +3953,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4159,7 +4248,7 @@
         "h": 5,
         "w": 3,
         "x": 8,
-        "y": 104
+        "y": 20
       },
       "id": 30,
       "options": {
@@ -4176,7 +4265,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -4268,7 +4357,7 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 104
+        "y": 20
       },
       "id": 32,
       "options": {
@@ -4283,7 +4372,7 @@
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -4358,7 +4447,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 104
+        "y": 20
       },
       "id": 75,
       "options": {
@@ -4375,7 +4464,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -4443,7 +4532,7 @@
         "h": 6,
         "w": 3,
         "x": 8,
-        "y": 109
+        "y": 25
       },
       "id": 40,
       "options": {
@@ -4460,7 +4549,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -4536,7 +4625,7 @@
         "h": 5,
         "w": 5,
         "x": 11,
-        "y": 110
+        "y": 26
       },
       "id": 42,
       "options": {
@@ -4553,7 +4642,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -4651,7 +4740,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 115
+        "y": 31
       },
       "id": 51,
       "options": {
@@ -4668,7 +4757,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -4709,7 +4798,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 115
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 53,
@@ -4729,7 +4818,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4876,7 +4965,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 115
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 34,
@@ -4896,7 +4985,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5114,7 +5203,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 126
+        "y": 42
       },
       "id": 38,
       "options": {
@@ -5131,7 +5220,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5167,7 +5256,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 137
+        "y": 53
       },
       "id": 77,
       "panels": [],
@@ -5195,7 +5284,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 138
+        "y": 54
       },
       "hiddenSeries": false,
       "id": 79,
@@ -5283,7 +5372,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 138
+        "y": 54
       },
       "hiddenSeries": false,
       "id": 81,
@@ -5369,8 +5458,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -5414,7 +5502,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 138
+        "y": 54
       },
       "id": 83,
       "options": {
@@ -5473,7 +5561,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 149
+        "y": 65
       },
       "hiddenSeries": false,
       "id": 85,
@@ -5780,8 +5868,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -5809,7 +5896,7 @@
         "h": 5,
         "w": 3,
         "x": 8,
-        "y": 149
+        "y": 65
       },
       "id": 87,
       "options": {
@@ -5858,8 +5945,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -5919,7 +6005,7 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 149
+        "y": 65
       },
       "id": 89,
       "options": {
@@ -5965,8 +6051,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -6010,7 +6095,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 149
+        "y": 65
       },
       "id": 95,
       "options": {
@@ -6068,8 +6153,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -6097,7 +6181,7 @@
         "h": 6,
         "w": 3,
         "x": 8,
-        "y": 154
+        "y": 70
       },
       "id": 91,
       "options": {
@@ -6177,8 +6261,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -6194,7 +6277,7 @@
         "h": 5,
         "w": 5,
         "x": 11,
-        "y": 155
+        "y": 71
       },
       "id": 93,
       "options": {
@@ -6263,8 +6346,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -6312,7 +6394,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 160
+        "y": 76
       },
       "id": 97,
       "options": {
@@ -6372,7 +6454,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 160
+        "y": 76
       },
       "hiddenSeries": false,
       "id": 99,
@@ -6548,7 +6630,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 160
+        "y": 76
       },
       "hiddenSeries": false,
       "id": 101,
@@ -6722,8 +6804,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -6795,7 +6876,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 171
+        "y": 87
       },
       "id": 103,
       "options": {
