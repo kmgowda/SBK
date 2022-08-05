@@ -14,14 +14,29 @@ import io.perl.api.ReportLatency;
 /**
  * Interface for recoding/printing results.
  */
-public interface RWLogger extends Logger, CountRW, ReportLatency {
+public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsLogger, ReadRequestsLogger {
 
     /**
-     * Default method to record every event.
+     * Default method to record latency of every/multiple event(s).
      */
     @Override
     default void recordLatency(long startTime, int bytes, int events, long latency) {
 
     }
 
+    /**
+     * Default method to record every/multiple write event(s).
+     */
+    @Override
+    default void recordWriteRequests(int writerId, long startTime, int bytes, int events) {
+
+    }
+
+    /**
+     * Default method to record every/multiple read event(s).
+     */
+    @Override
+    default void recordReadRequests(int readerId, long startTime, int bytes, int events) {
+
+    }
 }
