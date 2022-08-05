@@ -24,12 +24,11 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "iteration": 1659507547429,
   "links": [],
   "liveNow": false,
   "panels": [
     {
-      "collapsed": true,
+      "collapsed": false,
       "datasource": {
         "type": "datasource",
         "uid": "grafana"
@@ -41,247 +40,337 @@
         "y": 0
       },
       "id": 65,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "decimals": 0,
-              "links": [],
-              "mappings": [],
-              "min": 0,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 10
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 8,
-            "x": 0,
-            "y": 2
-          },
-          "id": 67,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Writing_Connections",
-              "interval": "",
-              "legendFormat": "Active",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Writing_Max_Connections",
-              "interval": "",
-              "legendFormat": "Max",
-              "refId": "B"
-            }
-          ],
-          "title": "Writers Connections",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "decimals": 0,
-              "links": [],
-              "mappings": [],
-              "min": 0,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 10
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 8,
-            "x": 8,
-            "y": 2
-          },
-          "id": 68,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Reading_Connections",
-              "interval": "",
-              "legendFormat": "Active",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Reading_Max_Connections",
-              "interval": "",
-              "legendFormat": "Max",
-              "refId": "B"
-            }
-          ],
-          "title": "Readers Connections",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "decimals": 0,
-              "links": [],
-              "mappings": [],
-              "min": 0,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 10
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 8,
-            "x": 16,
-            "y": 2
-          },
-          "id": 69,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "expr": "SBK_Write_Reading_Connections",
-              "interval": "",
-              "legendFormat": "Active",
-              "refId": "A"
-            },
-            {
-              "expr": "SBK_Write_Reading_Max_Connections",
-              "interval": "",
-              "legendFormat": "Max",
-              "refId": "B"
-            }
-          ],
-          "title": "Write-Readers Connections",
-          "type": "stat"
-        }
-      ],
+      "panels": [],
       "title": "SBK Connections",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 67,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "expr": "SBK_Writing_Connections",
+          "interval": "",
+          "legendFormat": "Active",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Writing_Max_Connections",
+          "interval": "",
+          "legendFormat": "Max",
+          "refId": "B"
+        }
+      ],
+      "title": "Writers Connections",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "id": 68,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "expr": "SBK_Reading_Connections",
+          "interval": "",
+          "legendFormat": "Active",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Reading_Max_Connections",
+          "interval": "",
+          "legendFormat": "Max",
+          "refId": "B"
+        }
+      ],
+      "title": "Readers Connections",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "id": 69,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "expr": "SBK_Write_Reading_Connections",
+          "interval": "",
+          "legendFormat": "Active",
+          "refId": "A"
+        },
+        {
+          "expr": "SBK_Write_Reading_Max_Connections",
+          "interval": "",
+          "legendFormat": "Max",
+          "refId": "B"
+        }
+      ],
+      "title": "Write-Readers Connections",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 105,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_OnlyReading_Connections",
+          "interval": "",
+          "legendFormat": "Active",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_OnlyReading_Max_Connections",
+          "interval": "",
+          "legendFormat": "Max",
+          "refId": "B"
+        }
+      ],
+      "title": "Write-OnlyRead Connections",
+      "type": "stat"
     },
     {
       "collapsed": true,
@@ -293,7 +382,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 6
       },
       "id": 60,
       "panels": [
@@ -308,66 +397,7 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 200
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 300
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 400
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 600
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 700
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 800
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 900
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 1000
-                  }
-                ]
-              },
               "unit": "MBs"
             },
             "overrides": []
@@ -398,7 +428,7 @@
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -455,7 +485,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -486,7 +515,7 @@
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -537,7 +566,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": [],
               "mappings": [],
               "noValue": "0",
@@ -545,7 +573,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#EAB839",
@@ -606,7 +635,7 @@
             },
             "textMode": "auto"
           },
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "targets": [
             {
               "expr": "SBK_Writing_ns_AvgLatency",
@@ -635,7 +664,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -666,7 +694,7 @@
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -841,7 +869,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "decimals": 0,
               "links": [],
               "mappings": [],
@@ -851,7 +878,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#6ED0E0",
@@ -896,7 +924,7 @@
             },
             "textMode": "value_and_name"
           },
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "targets": [
             {
               "expr": "SBK_Writing_Writers",
@@ -921,7 +949,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": [],
               "mappings": [],
               "max": 500,
@@ -930,7 +957,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#EAB839",
@@ -994,6 +1022,7 @@
           },
           "id": 4,
           "options": {
+            "orientation": "auto",
             "reduceOptions": {
               "calcs": [
                 "last"
@@ -1004,7 +1033,7 @@
             "showThresholdLabels": true,
             "showThresholdMarkers": true
           },
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "targets": [
             {
               "expr": "SBK_Writing_MBPerSec",
@@ -1021,7 +1050,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": [],
               "mappings": [],
               "noValue": "0",
@@ -1029,7 +1057,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#EAB839",
@@ -1090,7 +1119,7 @@
             },
             "textMode": "auto"
           },
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "targets": [
             {
               "expr": "SBK_Writing_SLC_1",
@@ -1115,7 +1144,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": [],
               "mappings": [],
               "noValue": "0",
@@ -1123,7 +1151,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#EAB839",
@@ -1168,7 +1197,7 @@
             },
             "textMode": "value"
           },
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "targets": [
             {
               "expr": "SBK_Writing_Records_total",
@@ -1185,14 +1214,14 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "mappings": [],
               "noValue": "0",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1224,7 +1253,7 @@
             },
             "textMode": "value_and_name"
           },
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "targets": [
             {
               "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total",
@@ -1256,7 +1285,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": [],
               "mappings": [],
               "max": 0,
@@ -1265,7 +1293,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#EAB839",
@@ -1326,7 +1355,7 @@
             },
             "textMode": "auto"
           },
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "targets": [
             {
               "expr": "SBK_Writing_mcs_AvgLatency",
@@ -1355,7 +1384,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1386,7 +1414,7 @@
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -1491,7 +1519,6 @@
           },
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1522,7 +1549,7 @@
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.3.7",
+          "pluginVersion": "9.0.6",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -1752,7 +1779,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 7
       },
       "id": 58,
       "panels": [
@@ -3135,7 +3162,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 8
       },
       "id": 56,
       "panels": [],
@@ -3163,7 +3190,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 4
+        "y": 9
       },
       "hiddenSeries": false,
       "id": 61,
@@ -3183,7 +3210,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -3246,7 +3273,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 4
+        "y": 9
       },
       "hiddenSeries": false,
       "id": 36,
@@ -3266,7 +3293,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -3370,7 +3397,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 4
+        "y": 9
       },
       "id": 52,
       "options": {
@@ -3387,7 +3414,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_ns_AvgLatency",
@@ -3420,7 +3447,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 15
+        "y": 20
       },
       "hiddenSeries": false,
       "id": 54,
@@ -3440,7 +3467,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -3651,7 +3678,7 @@
         "h": 5,
         "w": 3,
         "x": 8,
-        "y": 15
+        "y": 20
       },
       "id": 30,
       "options": {
@@ -3668,7 +3695,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_Bytes_total",
@@ -3756,7 +3783,7 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 15
+        "y": 20
       },
       "id": 32,
       "options": {
@@ -3771,7 +3798,7 @@
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_MBPerSec",
@@ -3842,7 +3869,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 15
+        "y": 20
       },
       "id": 75,
       "options": {
@@ -3859,7 +3886,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_SLC_1",
@@ -3919,7 +3946,7 @@
         "h": 6,
         "w": 3,
         "x": 8,
-        "y": 20
+        "y": 25
       },
       "id": 40,
       "options": {
@@ -3936,7 +3963,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_Readers",
@@ -3996,7 +4023,7 @@
         "h": 5,
         "w": 5,
         "x": 11,
-        "y": 21
+        "y": 26
       },
       "id": 42,
       "options": {
@@ -4013,7 +4040,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total",
@@ -4099,7 +4126,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 26
+        "y": 31
       },
       "id": 51,
       "options": {
@@ -4116,7 +4143,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_mcs_AvgLatency",
@@ -4149,7 +4176,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 26
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 53,
@@ -4169,7 +4196,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4278,7 +4305,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 26
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 34,
@@ -4298,7 +4325,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4478,7 +4505,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 37
+        "y": 42
       },
       "id": 38,
       "options": {
@@ -4495,7 +4522,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "expr": "SBK_Write_Reading_ms_AvgLatency",
@@ -4523,7 +4550,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 53
       },
       "id": 77,
       "panels": [],
@@ -4551,7 +4578,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 49
+        "y": 54
       },
       "hiddenSeries": false,
       "id": 79,
@@ -4571,7 +4598,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4639,7 +4666,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 49
+        "y": 54
       },
       "hiddenSeries": false,
       "id": 81,
@@ -4659,7 +4686,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -4770,7 +4797,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 49
+        "y": 54
       },
       "id": 83,
       "options": {
@@ -4787,7 +4814,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -4829,7 +4856,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 60
+        "y": 65
       },
       "hiddenSeries": false,
       "id": 85,
@@ -4849,7 +4876,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5165,7 +5192,7 @@
         "h": 5,
         "w": 3,
         "x": 8,
-        "y": 60
+        "y": 65
       },
       "id": 87,
       "options": {
@@ -5182,7 +5209,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5275,7 +5302,7 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 60
+        "y": 65
       },
       "id": 89,
       "options": {
@@ -5290,7 +5317,7 @@
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5366,7 +5393,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 60
+        "y": 65
       },
       "id": 95,
       "options": {
@@ -5383,7 +5410,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5453,7 +5480,7 @@
         "h": 6,
         "w": 3,
         "x": 8,
-        "y": 65
+        "y": 70
       },
       "id": 91,
       "options": {
@@ -5470,7 +5497,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5550,7 +5577,7 @@
         "h": 5,
         "w": 5,
         "x": 11,
-        "y": 66
+        "y": 71
       },
       "id": 93,
       "options": {
@@ -5567,7 +5594,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5668,7 +5695,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 71
+        "y": 76
       },
       "id": 97,
       "options": {
@@ -5685,7 +5712,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5728,7 +5755,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 71
+        "y": 76
       },
       "hiddenSeries": false,
       "id": 99,
@@ -5748,7 +5775,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5904,7 +5931,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 71
+        "y": 76
       },
       "hiddenSeries": false,
       "id": 101,
@@ -5924,7 +5951,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -6151,7 +6178,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 82
+        "y": 87
       },
       "id": 103,
       "options": {
@@ -6168,7 +6195,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
