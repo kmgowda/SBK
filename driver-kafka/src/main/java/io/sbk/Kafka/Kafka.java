@@ -54,7 +54,7 @@ public class Kafka implements Storage<byte[]> {
         params.addOption("topic", true, "Topic name, default: " + config.topicName);
         params.addOption("partitions", true, "partitions, default: " + config.partitions);
         params.addOption("replica", true, "Replication factor, default: " + config.replica);
-        params.addOption("sync", true, "Minimum in-sync Replicas, default: " + config.sync);
+        params.addOption("insync", true, "Minimum in-sync Replicas, default: " + config.sync);
         params.addOption("create", true,
                 "Create (recreate) the topic, valid only for writers, default: " + config.create);
     }
