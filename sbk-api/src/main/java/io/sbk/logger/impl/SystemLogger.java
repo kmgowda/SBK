@@ -13,6 +13,7 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.perl.data.Bytes;
 import io.perl.logger.impl.ResultsLogger;
 import io.sbk.action.Action;
 import io.sbk.logger.RWLogger;
@@ -30,6 +31,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * Class for recoding/printing results on System.out.
@@ -40,12 +43,27 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected final AtomicInteger readers;
     protected final AtomicInteger maxWriters;
     protected final AtomicInteger maxReaders;
+    protected final AtomicLong writeBytes;
+    protected final AtomicLong writeRequests;
+    protected final AtomicLong readBytes;
+    protected final AtomicLong readRequests;
     protected String storageName;
     protected String timeUnitFullText;
     protected ParsedOptions params;
     protected Action action;
     protected Time time;
+    protected int writersCount;
+    protected int readersCount;
+    protected AtomicLongArray writeBytesArray;
+    protected AtomicLongArray writeRequestsArray;
+    protected AtomicLongArray readBytesArray;
+    protected AtomicLongArray readRequestsArray;
+
+
     private LoggerConfig loggerConfig;
+    private boolean isRequestWrites;
+    private boolean isRequestReads;
+
 
     public SystemLogger() {
         super();
@@ -53,6 +71,16 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.readers = new AtomicInteger(0);
         this.maxWriters = new AtomicInteger(0);
         this.maxReaders = new AtomicInteger(0);
+        this.writeBytes = new AtomicLong(0);
+        this.writeRequests = new AtomicLong(0);
+        this.readBytes = new AtomicLong(0);
+        this.readRequests = new AtomicLong(0);
+        this.isRequestWrites = false;
+        this.isRequestReads = false;
+        this.readBytesArray = null;
+        this.readRequestsArray = null;
+        this.writeBytesArray = null;
+        this.writeRequestsArray = null;
     }
 
     @Override
@@ -86,8 +114,20 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                         Maximum latency;
                         use '-time' for time unit; default:""" + loggerConfig.maxLatency
                         + " " + loggerConfig.timeUnit.name());
+        params.addOption("wq", true, "Benchmark Write Requests; default: "+ isRequestWrites);
+        params.addOption("rq", true, "Benchmark Reade Requests; default: "+ isRequestReads);
     }
 
+
+    @Override
+    public boolean requestWrites() {
+        return isRequestWrites;
+    }
+
+    @Override
+    public boolean requestReads() {
+        return isRequestReads;
+    }
 
     private String getTimeUnitNames() {
         StringBuilder ret = new StringBuilder("[");
@@ -152,6 +192,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         }
         minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));
         maxLatency = Long.parseLong(params.getOptionValue("maxlatency", Long.toString(maxLatency)));
+        writersCount = Integer.parseInt(params.getOptionValue("writers", "0"));
+        readersCount = Integer.parseInt(params.getOptionValue("readers", "0"));
+        isRequestWrites = Boolean.parseBoolean(params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
+        isRequestReads = Boolean.parseBoolean(params.getOptionValue("rq", Boolean.toString(isRequestReads)));
     }
 
     @Override
@@ -170,6 +214,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 throw new IllegalArgumentException();
             }
         }
+        this.writeBytesArray = new AtomicLongArray(writersCount);
+        this.writeRequestsArray = new AtomicLongArray(writersCount);
+        this.readBytesArray = new AtomicLongArray(readersCount);
+        this.readRequestsArray = new AtomicLongArray(readersCount);
     }
 
     @Override
@@ -203,6 +251,61 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         readers.decrementAndGet();
     }
 
+
+    @Override
+    public void recordWriteRequests(int writerId, long startTime, int bytes, int events) {
+        writeRequestsArray.addAndGet(writerId, events);
+        writeBytesArray.addAndGet(writerId, bytes);
+    }
+
+
+    @Override
+    public void recordReadRequests(int readerId, long startTime, int bytes, int events) {
+        readRequestsArray.addAndGet(readerId, events);
+        readBytesArray.addAndGet(readerId, bytes);
+    }
+
+
+    protected void appendWriteAndReadRequests(@NotNull StringBuilder out, double seconds, boolean isTotal) {
+        long writeRequestsSum = 0;
+        long writeBytesSum = 0;
+        long readRequestsSum = 0;
+        long readBytesSum = 0;
+        for (int i = 0; i < writersCount; i++) {
+            writeRequestsSum += writeRequestsArray.getAndSet(i, 0);
+            writeBytesSum += writeBytesArray.getAndSet(i, 0);
+        }
+        for (int i = 0; i < readersCount; i++) {
+            readRequestsSum += readRequestsArray.getAndSet(i, 0);
+            readBytesSum += readBytesArray.getAndSet(i, 0);
+        }
+        if (isTotal) {
+            writeRequestsSum += writeRequests.getAndSet(0);
+            writeBytesSum += writeBytes.getAndSet(0);
+            readRequestsSum += readRequests.getAndSet(0);
+            readBytesSum += readBytes.getAndSet(0);
+        } else {
+            writeRequests.addAndGet(writeRequestsSum);
+            writeBytes.addAndGet(writeBytesSum);
+            readBytes.addAndGet(readBytesSum);
+            readRequests.addAndGet(readRequestsSum);
+        }
+
+        final double wMB = writeBytesSum / (Bytes.BYTES_PER_MB * 1.0);
+        final double rMB = readBytesSum /  (Bytes.BYTES_PER_MB * 1.0);
+        final double wRequestsThroughput = writeRequestsSum / seconds;
+        final double wMegaBytesThroughput = wMB / seconds;
+        final double rRequestsThroughput = readRequestsSum / seconds;
+        final double rMegaBytesThroughput = rMB / seconds;
+
+        out.append(String.format(" %11.1f Write Requests MB, %16d Write Request records,"+
+                        "%11.1f write request records/sec, %8.2f Write Requests MB/sec",
+                wMB, writeRequestsSum, wRequestsThroughput, wMegaBytesThroughput));
+        out.append(String.format(" %11.1f Read Requests MB, %16d Read Request records,"+
+                        "%11.1f Read request records/sec, %8.2f Read Requests MB/sec",
+                rMB, readRequestsSum, rRequestsThroughput, rMegaBytesThroughput));
+    }
+
     protected void appendWritesAndReaders(@NotNull StringBuilder out) {
         out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
         out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
@@ -212,9 +315,33 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
                                     double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
                                     long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-
         appendWritesAndReaders(out);
-        return super.buildResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        appendWriteAndReadRequests(out, seconds, false);
+        appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
+                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        out.append(".\n\n");
+        return out.toString();
     }
+
+    protected String buildTotalResultString(StringBuilder out, double seconds, long bytes, long records,
+                                          double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
+                                            long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
+                                            long[] percentileValues) {
+        appendWritesAndReaders(out);
+        appendWriteAndReadRequests(out, seconds, true);
+        appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
+                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        out.append(".\n\n");
+        return out.toString();
+    }
+
+    @Override
+    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                           long slc1, long slc2, long[] percentileValues) {
+        System.out.print(buildTotalResultString(new StringBuilder("Total: "+ prefix), seconds, bytes, records, recsPerSec,
+                mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+
+    }
+
 }
