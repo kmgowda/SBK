@@ -49,20 +49,21 @@ public class PerlTest  {
 
         @Override
         public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                          double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                          double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                           long slc1, long slc2, long[] percentileValues) {
             super.print(seconds, bytes, records, recsPerSec, mbPerSec,
-                    avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                    avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
             PerlPrinter.log.info("print : receiving records " + records);
             printCnt.addAndGet(records);
         }
 
         @Override
         public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                               double avgLatency, long maxLatency, long invalid, long lowerDiscard,
+                               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                                long higherDiscard, long slc1, long slc2, long[] percentileValues) {
             super.printTotal(seconds, bytes, records, recsPerSec, mbPerSec,
-                    avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                    avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
+                    percentileValues);
             PerlPrinter.log.info("printTotal : receiving records " + records);
             totalPrintCnt.addAndGet(records);
         }

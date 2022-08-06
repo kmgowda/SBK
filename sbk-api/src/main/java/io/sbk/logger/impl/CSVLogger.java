@@ -161,9 +161,9 @@ public class CSVLogger extends SystemLogger {
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                      long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                       long slc1, long slc2, long[] percentileValues) {
-        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
             writeToCSV(Config.NAME, REGULAR_PRINT, 0, 0,
@@ -174,9 +174,9 @@ public class CSVLogger extends SystemLogger {
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentileValues) {
-        super.printTotal(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+                           double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        super.printTotal(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
             writeToCSV(Config.NAME, TOTAL_PRINT, 0, 0,

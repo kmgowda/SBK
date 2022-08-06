@@ -142,8 +142,7 @@ public final class PerlBuilder {
             PerlPrinter.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
-                reportLatency, time);
+        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal, reportLatency, time);
     }
 
     /**

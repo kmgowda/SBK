@@ -238,9 +238,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                      long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                       long slc1, long slc2, long[] percentileValues) {
-        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         if (latencyBytes > 0) {
             sendLatenciesRecord();

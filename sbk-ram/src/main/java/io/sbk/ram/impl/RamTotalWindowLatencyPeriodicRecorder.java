@@ -88,7 +88,8 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
 
         window.update(record.getTotalRecords(), record.getTotalLatency(), record.getTotalBytes(),
                 record.getInvalidLatencyRecords(), record.getLowerLatencyDiscardRecords(),
-                record.getHigherLatencyDiscardRecords(), record.getValidLatencyRecords(), record.getMaxLatency());
+                record.getHigherLatencyDiscardRecords(), record.getValidLatencyRecords(),
+                record.getMinLatency(), record.getMaxLatency());
 
         record.getLatencyMap().forEach(window::reportLatency);
     }

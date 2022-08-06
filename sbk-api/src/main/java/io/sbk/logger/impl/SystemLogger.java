@@ -313,34 +313,36 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
     @Override
     protected String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
-                                    double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                                    long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                                    double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
+                                       long lowerDiscard, long higherDiscard, long slc1, long slc2,
+                                       long[] percentileValues) {
         appendWritesAndReaders(out);
         appendWriteAndReadRequests(out, seconds, false);
         appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append(".\n\n");
         return out.toString();
     }
 
     protected String buildTotalResultString(StringBuilder out, double seconds, long bytes, long records,
-                                          double recsPerSec, double mbPerSec, double avgLatency, long maxLatency,
-                                            long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
-                                            long[] percentileValues) {
+                                          double recsPerSec, double mbPerSec, double avgLatency,
+                                            long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         appendWritesAndReaders(out);
         appendWriteAndReadRequests(out, seconds, true);
         appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append(".\n\n");
         return out.toString();
     }
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentileValues) {
+                           double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         System.out.print(buildTotalResultString(new StringBuilder("Total: "+ prefix), seconds, bytes, records, recsPerSec,
-                mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+                mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
+                percentileValues));
 
     }
 

@@ -49,6 +49,12 @@ public abstract sealed class Metrics permits PrintMetrics {
      * <code>String avgLatencyName</code>.
      */
     final protected String avgLatencyName;
+
+    /**
+     * <code>String minLatencyName</code>.
+     */
+    final protected String minLatencyName;
+
     /**
      * <code>String maxLatencyName</code>.
      */
@@ -94,6 +100,7 @@ public abstract sealed class Metrics permits PrintMetrics {
         mbPsecName = metricPrefix + "_MBPerSec";
         recsPsecName = metricPrefix + "_RecordsPerSec";
         avgLatencyName = metricPrefix + "_" + metricTimeUnit + "_AvgLatency";
+        minLatencyName = metricPrefix+"_"+metricTimeUnit+"_MinLatency";
         maxLatencyName = metricPrefix + "_" + metricTimeUnit + "_MaxLatency";
         invalidLatencyRecordsName = metricPrefix + "_InvalidLatencyRecords";
         lowerDiscardName = metricPrefix + "_LowerDiscardedLatencyRecords";

@@ -62,6 +62,12 @@ abstract public sealed class LatencyRecord permits LatencyRecorder {
     protected long totalLatency;
 
     /**
+     * <code>long minLatency</code>.
+     */
+    @Getter
+    protected long minLatency;
+
+    /**
      * <code>long maxLatency</code>.
      */
     @Getter
@@ -84,6 +90,7 @@ abstract public sealed class LatencyRecord permits LatencyRecorder {
         this.higherLatencyDiscardRecords = 0;
         this.invalidLatencyRecords = 0;
         this.totalBytes = 0;
+        this.minLatency = Long.MAX_VALUE;
         this.maxLatency = 0;
         this.totalLatency = 0;
     }

@@ -63,7 +63,8 @@ message LatenciesRecord {
   int64 invalidLatencyRecords = 11;
   int64 totalBytes = 12;
   int64 totalLatency = 13;
-  int64 maxLatency = 14;
-  map<int64, int64 > latency = 15;
+  int64 minLatency = 14;
+  int64 maxLatency = 15;
+  map<int64, int64 > latency = 16;
 }
 
