@@ -23,7 +23,6 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
     default void recordLatency(long startTime, int bytes, int events, long latency) {
 
     }
-
     /**
      * Default method to record every/multiple write event(s).
      */
@@ -39,4 +38,13 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
     default void recordReadRequests(int readerId, long startTime, int bytes, int events) {
 
     }
+
+    default boolean requestWrites() {
+        return false;
+    }
+
+    default boolean requestReads() {
+        return false;
+    }
+    
 }
