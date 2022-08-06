@@ -194,7 +194,7 @@ final public class SbkBenchmark implements Benchmark {
                     .boxed()
                     .map(i -> new SbkReader(i, params,
                             readPerl.getPerlChannel(), dType, time, readers.get(i),
-                            rwLogger, executor))
+                            rwLogger, readRequestsLogger, executor))
                     .collect(Collectors.toList());
         } else {
             sbkReaders = null;

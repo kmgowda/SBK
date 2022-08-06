@@ -12,6 +12,7 @@ package io.sbk.api;
 
 import io.perl.api.PerlChannel;
 import io.sbk.data.DataType;
+import io.sbk.logger.ReadRequestsLogger;
 import io.time.Time;
 
 import java.io.EOFException;
@@ -70,6 +71,44 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
         }
     }
 
+
+    /**
+     * Default implementation for Reading data using {@link Reader#read()}
+     * and recording the benchmark statistics.
+     * The end time of the status parameter {@link Status#endTime} of this method determines
+     * the terminating condition for time based reader performance benchmarking.
+     * If you are intend to not use {@link Reader#read()} then you can override this method.
+     * If you are intend to read multiple records then you can override this method.
+     * otherwise, use the default implementation and don't override this method.
+     *
+     * @param dType       dataType
+     * @param size        size of the data in bytes
+     * @param time        time interface
+     * @param status      Timestamp
+     * @param perlChannel to call for benchmarking
+     * @param id          reader id
+     * @param logger      Read Request logger
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException  If an exception occurred.
+     */
+    default void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id,
+                            ReadRequestsLogger logger)
+            throws EOFException, IOException {
+        status.startTime = time.getCurrentTime();
+        logger.recordReadRequests(id, status.startTime, size, 1);
+        final T ret = read();
+        if (ret == null) {
+            status.records = 0;
+            status.endTime = status.startTime;
+        } else {
+            status.endTime = time.getCurrentTime();
+            status.bytes = dType.length(ret);
+            status.records = 1;
+            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+        }
+    }
+
+
     /**
      * Default implementation for Reading data using {@link Reader#read()}, extracting start time from data
      * and recording the benchmark statistics.
@@ -100,6 +139,33 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
             status.records = 1;
             perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
         }
+    }
+
+
+    /**
+     * Default implementation for Reading data using {@link Reader#read()}, extracting start time from data
+     * and recording the benchmark statistics.
+     * The end time of the status parameter {@link Status#endTime} of this method determines
+     * the terminating condition for time based reader performance benchmarking.
+     * If you are intend to not use {@link Reader#read()} then you can override this method.
+     * If you are intend to read multiple records then you can override this method.
+     * otherwise, use the default implementation and don't override this method.
+     *
+     * @param dType       dataType
+     * @param size        size of the data in bytes
+     * @param time        time interface
+     * @param status      Timestamp
+     * @param perlChannel to call for benchmarking
+     * @param id          Reader id
+     * @param logger      log read requests
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException  If an exception occurred.
+     */
+    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel,
+                                int id, ReadRequestsLogger logger)
+            throws EOFException, IOException {
+        logger.recordReadRequests(id, time.getCurrentTime(), size, 1);
+        recordReadTime(dType, size, time, status, perlChannel);
     }
 
 }
