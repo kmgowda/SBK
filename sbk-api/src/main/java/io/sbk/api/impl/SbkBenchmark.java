@@ -17,6 +17,8 @@ import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
+import io.sbk.logger.ReadRequestsLogger;
+import io.sbk.logger.WriteRequestsLogger;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.config.Config;
@@ -139,6 +141,8 @@ final public class SbkBenchmark implements Benchmark {
         rwLogger.open(params, StringUtils.capitalize(storage.getClass().getSimpleName().toLowerCase()),
                 params.getAction(), time);
         storage.openStorage(params);
+        final WriteRequestsLogger writeRequestsLogger = rwLogger.requestWrites() ? rwLogger : null;
+        final ReadRequestsLogger readRequestsLogger = rwLogger.requestReads() ? rwLogger : null;
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
         final List<CompletableFuture<Void>> writeFutures;
@@ -172,13 +176,13 @@ final public class SbkBenchmark implements Benchmark {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, params, writePerl.getPerlChannel(),
-                                dType, time, writers.get(i), rwLogger, executor))
+                                dType, time, writers.get(i), rwLogger, writeRequestsLogger, executor))
                         .collect(Collectors.toList());
             } else {
                 sbkWriters = IntStream.range(0, params.getWritersCount())
                         .boxed()
                         .map(i -> new SbkWriter(i, params, null,
-                                dType, time, writers.get(i), rwLogger, executor))
+                                dType, time, writers.get(i), rwLogger, writeRequestsLogger, executor))
                         .collect(Collectors.toList());
             }
         } else {
