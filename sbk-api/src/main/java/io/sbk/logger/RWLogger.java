@@ -14,7 +14,7 @@ import io.perl.api.ReportLatency;
 /**
  * Interface for recoding/printing results.
  */
-public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsLogger, ReadRequestsLogger {
+public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsLogger, ReadRequestsLogger, RWPrint {
 
     /**
      * Default method to record latency of every/multiple event(s).
@@ -56,4 +56,12 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
         return 0;
     }
 
+
+    void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+               double writeRequestsMB, double writeRequestsMbPerSec, long writeRequests,
+               double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+               long readRequests, double readRequestsPerSec, double seconds, long bytes,
+               long records, double recsPerSec, double mbPerSec,
+               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+               long higherDiscard, long slc1, long slc2, long[] percentileValues);
 }

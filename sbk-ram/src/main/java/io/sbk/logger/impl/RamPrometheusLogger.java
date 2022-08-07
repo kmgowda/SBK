@@ -91,7 +91,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
             prometheusServer.decrementConnections();
         }
     }
-    
+
     @Override
     public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
         if (isRequestWrites) {
@@ -108,23 +108,39 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
 
-    private void print(String ramPrefix, String prefix, double seconds, long bytes, long records, double recsPerSec,
+    private void print(String ramPrefix, String prefix, int writers, int maxWriters, int readers, int maxReaders,
+                       double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
+                       double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+                       long readRequests, double readRequestsPerSec,
+                       double seconds, long bytes, long records, double recsPerSec,
                        double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
                        long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder(ramPrefix);
         out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
-        System.out.print(buildResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
-                minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+        appendWritesAndReaders(out, writers, maxWriters, readers, maxReaders);
+        appendWriteAndReadRequests(out, writeRequestsMB, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
+                readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec);
+        appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
+                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        out.append(".\n\n");
+        System.out.println(out);
+
     }
 
-
-    @Override
-    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
-        print(SBK_RAM_PREFIX, prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+    public void print(String prefix, int writers, int maxWriters, int readers, int maxReaders,
+                      double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
+                      double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long records, double recsPerSec, double mbPerSec,
+                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        print(SBK_RAM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
+                writeRequestsMB, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
+                readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+
         if (prometheusServer != null) {
             prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
                     maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
@@ -136,15 +152,18 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         }
     }
 
-    @Override
-    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+    public void printTotal(String prefix, int writers, int maxWriters, int readers, int maxReaders,
+                           double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
+                           double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+                           long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                           long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        StringBuilder out = new StringBuilder("Total : " + SBK_RAM_PREFIX);
-        out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
-        out.append(prefix);
-        System.out.print(buildTotalResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
-                minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+        print("Total : " + SBK_RAM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
+                writeRequestsMB, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
+                readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
         if (csvEnable) {
             writeToCSV(SBK_RAM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),

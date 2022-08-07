@@ -159,12 +159,19 @@ public class CSVLogger extends SystemLogger {
         csvWriter.println(data);
     }
 
+
     @Override
-    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
-        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+    public void print(int writers, int maxWriters, int readers, int maxReaders,
+                      double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
+                      double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long records, double recsPerSec, double mbPerSec,
+                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        super.print(writers, maxWriters, readers, maxReaders, writeRequestsMB, writeRequestsMbPerSec, writesRequests,
+                writeRequestsPerSec, readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
             writeToCSV(Config.NAME, REGULAR_PRINT, 0, 0,
                     (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
@@ -172,12 +179,17 @@ public class CSVLogger extends SystemLogger {
         }
     }
 
-    @Override
-    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+                           double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
+                           double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+                           long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                           long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        super.printTotal(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        super.printTotal(writers, maxWriters, readers, maxReaders, writeRequestsMB, writeRequestsMbPerSec,
+                writesRequests, writeRequestsPerSec, readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
             writeToCSV(Config.NAME, TOTAL_PRINT, 0, 0,
                     (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
