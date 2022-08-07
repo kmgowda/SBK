@@ -142,14 +142,14 @@ public class PrometheusLogger extends CSVLogger {
     }
 
     private void printMetrics(int writers, int maxWriters, int readers, int maxReaders,
-                              double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
-                              double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+                              long writeRequestBytes, double writeRequestsMbPerSec, long writesRequests,
+                              double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
                               long readRequests, double readRequestsPerSec, double seconds, long bytes,
                               long records, double recsPerSec, double mbPerSec,
                               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                               long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        super.print(writers, maxWriters, readers, maxReaders, writeRequestsMB, writeRequestsMbPerSec, writesRequests,
-                writeRequestsPerSec, readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+        super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
+                writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
@@ -158,14 +158,14 @@ public class PrometheusLogger extends CSVLogger {
 
     @Override
     public void print(int writers, int maxWriters, int readers, int maxReaders,
-                      double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
-                      double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writesRequests,
+                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
                       long readRequests, double readRequestsPerSec, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        printer.print(writers, maxWriters, readers, maxReaders, writeRequestsMB, writeRequestsMbPerSec, writesRequests,
-                writeRequestsPerSec, readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+        printer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
+                writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
     }
