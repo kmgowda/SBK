@@ -15,5 +15,6 @@ import io.perl.api.ReportLatencies;
 /**
  * Interface RamLogger.
  */
-public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnections {
+public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnections, WriteRequestsLogger,
+        ReadRequestsLogger {
 }

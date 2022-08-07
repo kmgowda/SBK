@@ -192,8 +192,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         }
         minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));
         maxLatency = Long.parseLong(params.getOptionValue("maxlatency", Long.toString(maxLatency)));
-        writersCount = Integer.parseInt(params.getOptionValue("writers", "0"));
-        readersCount = Integer.parseInt(params.getOptionValue("readers", "0"));
+        writersCount = Integer.parseInt(params.getOptionValue("writers", "1"));
+        readersCount = Integer.parseInt(params.getOptionValue("readers", "1"));
         isRequestWrites = Boolean.parseBoolean(params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
         isRequestReads = Boolean.parseBoolean(params.getOptionValue("rq", Boolean.toString(isRequestReads)));
     }
@@ -271,24 +271,34 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         long writeBytesSum = 0;
         long readRequestsSum = 0;
         long readBytesSum = 0;
-        for (int i = 0; i < writersCount; i++) {
-            writeRequestsSum += writeRequestsArray.getAndSet(i, 0);
-            writeBytesSum += writeBytesArray.getAndSet(i, 0);
+
+        if (isRequestWrites) {
+            for (int i = 0; i < writersCount; i++) {
+                writeRequestsSum += writeRequestsArray.getAndSet(i, 0);
+                writeBytesSum += writeBytesArray.getAndSet(i, 0);
+            }
+
+            if (isTotal) {
+                writeRequestsSum += writeRequests.getAndSet(0);
+                writeBytesSum += writeBytes.getAndSet(0);
+            } else {
+                writeRequests.addAndGet(writeRequestsSum);
+                writeBytes.addAndGet(writeBytesSum);
+            }
         }
-        for (int i = 0; i < readersCount; i++) {
-            readRequestsSum += readRequestsArray.getAndSet(i, 0);
-            readBytesSum += readBytesArray.getAndSet(i, 0);
-        }
-        if (isTotal) {
-            writeRequestsSum += writeRequests.getAndSet(0);
-            writeBytesSum += writeBytes.getAndSet(0);
-            readRequestsSum += readRequests.getAndSet(0);
-            readBytesSum += readBytes.getAndSet(0);
-        } else {
-            writeRequests.addAndGet(writeRequestsSum);
-            writeBytes.addAndGet(writeBytesSum);
-            readBytes.addAndGet(readBytesSum);
-            readRequests.addAndGet(readRequestsSum);
+
+        if (isRequestReads) {
+            for (int i = 0; i < readersCount; i++) {
+                readRequestsSum += readRequestsArray.getAndSet(i, 0);
+                readBytesSum += readBytesArray.getAndSet(i, 0);
+            }
+            if (isTotal) {
+                readRequestsSum += readRequests.getAndSet(0);
+                readBytesSum += readBytes.getAndSet(0);
+            } else {
+                readBytes.addAndGet(readBytesSum);
+                readRequests.addAndGet(readRequestsSum);
+            }
         }
 
         final double wMB = writeBytesSum / (Bytes.BYTES_PER_MB * 1.0);

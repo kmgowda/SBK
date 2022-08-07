@@ -17,7 +17,9 @@ import io.perl.logger.Print;
 import io.perl.api.ReportLatencies;
 import io.perl.api.impl.TotalLatencyRecordWindow;
 import io.sbk.grpc.LatenciesRecord;
+import io.sbk.logger.ReadRequestsLogger;
 import io.sbk.logger.SetRW;
+import io.sbk.logger.WriteRequestsLogger;
 import io.sbk.ram.RamPeriodicRecorder;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +32,9 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
         implements ReportLatencies, RamPeriodicRecorder {
     final private ReportLatencies reportLatencies;
     final private SetRW setRW;
+
+    final private WriteRequestsLogger wRequestLogger;
+    final private ReadRequestsLogger rRequestLogger;
     final private HashMap<Long, RW> table;
 
     /**
@@ -41,15 +46,21 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * @param totalLogger           Print
      * @param reportLatencies       ReportLatencies
      * @param setRW                 SetRW
+     * @param wLogger               Write Requests Logger
+     * @param rLogger               Read Requests Logger
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public RamTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                                  Print windowLogger, Print totalLogger,
                                                  ReportLatencies reportLatencies,
-                                                 SetRW setRW) {
+                                                 SetRW setRW,
+                                                 WriteRequestsLogger wLogger,
+                                                 ReadRequestsLogger rLogger) {
         super(window, totalWindow, windowLogger, totalLogger);
         this.reportLatencies = reportLatencies;
         this.setRW = setRW;
+        this.wRequestLogger = wLogger;
+        this.rRequestLogger = rLogger;
         this.table = new HashMap<>();
     }
 
@@ -85,6 +96,10 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
     public void addLatenciesRecord(@NotNull LatenciesRecord record) {
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                 record.getMaxReaders(), record.getMaxWriters());
+        wRequestLogger.recordWriteRequests(0, 0, record.getWriteRequestBytes(),
+                record.getWriteRequestRecords());
+        rRequestLogger.recordReadRequests(0, 0, record.getReadRequestBytes(),
+                record.getReadRequestRecords());
 
         window.update(record.getTotalRecords(), record.getTotalLatency(), record.getTotalBytes(),
                 record.getInvalidLatencyRecords(), record.getLowerLatencyDiscardRecords(),

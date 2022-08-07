@@ -126,7 +126,7 @@ final public class SbkRamBenchmark implements Benchmark {
         }
 
         return new RamTotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
-                logger, logger);
+                logger, logger, logger, logger);
     }
 
     /**
