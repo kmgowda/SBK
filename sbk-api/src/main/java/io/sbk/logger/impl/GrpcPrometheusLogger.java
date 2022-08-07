@@ -125,10 +125,10 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         if (!enable) {
             return;
         }
-        this.ramWriteBytesArray = new AtomicLongArray(writersCount);
-        this.ramWriteRequestsArray = new AtomicLongArray(writersCount);
-        this.ramReadBytesArray = new AtomicLongArray(readersCount);
-        this.ramReadRequestsArray = new AtomicLongArray(readersCount);
+        this.ramWriteBytesArray = new AtomicLongArray(maxWriterRequestIds);
+        this.ramWriteRequestsArray = new AtomicLongArray(maxWriterRequestIds);
+        this.ramReadBytesArray = new AtomicLongArray(maxReaderRequestIds);
+        this.ramReadRequestsArray = new AtomicLongArray(maxReaderRequestIds);
         channel = ManagedChannelBuilder.forTarget(ramHostConfig.host + ":" + ramHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
@@ -210,11 +210,11 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         long writeBytesSum = 0;
         long readRequestsSum = 0;
         long readBytesSum = 0;
-        for (int i = 0; i < writersCount; i++) {
+        for (int i = 0; i < maxWriterRequestIds; i++) {
             writeRequestsSum += ramWriteRequestsArray.getAndSet(i, 0);
             writeBytesSum += ramWriteBytesArray.getAndSet(i, 0);
         }
-        for (int i = 0; i < readersCount; i++) {
+        for (int i = 0; i < maxReaderRequestIds; i++) {
             readRequestsSum += ramReadRequestsArray.getAndSet(i, 0);
             readBytesSum += ramReadBytesArray.getAndSet(i, 0);
         }

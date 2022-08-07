@@ -54,8 +54,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected Time time;
     protected boolean isRequestWrites;
     protected boolean isRequestReads;
-    protected int writersCount;
-    protected int readersCount;
+    protected int maxWriterRequestIds;
+    protected int maxReaderRequestIds;
     protected AtomicLongArray writeBytesArray;
     protected AtomicLongArray writeRequestsArray;
     protected AtomicLongArray readBytesArray;
@@ -82,6 +82,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.readRequestsArray = null;
         this.writeBytesArray = null;
         this.writeRequestsArray = null;
+        this.maxReaderRequestIds = 0;
+        this.maxWriterRequestIds = 0;
     }
 
     @Override
@@ -122,12 +124,12 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
     @Override
     public int getMaxWriterIDs() {
-        return writersCount;
+        return maxWriterRequestIds;
     }
 
     @Override
     public int getMaxReaderIDs() {
-        return readersCount;
+        return maxReaderRequestIds;
     }
 
     private String getTimeUnitNames() {
@@ -193,10 +195,15 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         }
         minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));
         maxLatency = Long.parseLong(params.getOptionValue("maxlatency", Long.toString(maxLatency)));
-        writersCount = Integer.parseInt(params.getOptionValue("writers", "1"));
-        readersCount = Integer.parseInt(params.getOptionValue("readers", "1"));
         isRequestWrites = Boolean.parseBoolean(params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
         isRequestReads = Boolean.parseBoolean(params.getOptionValue("rq", Boolean.toString(isRequestReads)));
+        if (isRequestWrites) {
+            maxWriterRequestIds = Integer.parseInt(params.getOptionValue("writers", "0"));
+        }
+        if (isRequestReads) {
+            maxReaderRequestIds = Integer.parseInt(params.getOptionValue("readers", "0"));
+        }
+
     }
 
     @Override
@@ -215,10 +222,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 throw new IllegalArgumentException();
             }
         }
-        this.writeBytesArray = new AtomicLongArray(writersCount);
-        this.writeRequestsArray = new AtomicLongArray(writersCount);
-        this.readBytesArray = new AtomicLongArray(readersCount);
-        this.readRequestsArray = new AtomicLongArray(readersCount);
+        this.writeBytesArray = new AtomicLongArray(maxWriterRequestIds);
+        this.writeRequestsArray = new AtomicLongArray(maxWriterRequestIds);
+        this.readBytesArray = new AtomicLongArray(maxReaderRequestIds);
+        this.readRequestsArray = new AtomicLongArray(maxReaderRequestIds);
     }
 
     @Override
@@ -274,7 +281,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         long readBytesSum = 0;
 
         if (isRequestWrites) {
-            for (int i = 0; i < writersCount; i++) {
+            for (int i = 0; i < maxWriterRequestIds; i++) {
                 writeRequestsSum += writeRequestsArray.getAndSet(i, 0);
                 writeBytesSum += writeBytesArray.getAndSet(i, 0);
             }
@@ -289,7 +296,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         }
 
         if (isRequestReads) {
-            for (int i = 0; i < readersCount; i++) {
+            for (int i = 0; i < maxReaderRequestIds; i++) {
                 readRequestsSum += readRequestsArray.getAndSet(i, 0);
                 readBytesSum += readBytesArray.getAndSet(i, 0);
             }

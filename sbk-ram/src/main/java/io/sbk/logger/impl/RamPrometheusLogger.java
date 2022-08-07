@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
     final static String CONFIG_FILE = "ram-metrics.properties";
     final static String SBK_RAM_PREFIX = "Sbk-Ram";
+    final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
     private RamMetricsPrometheusServer prometheusServer;
@@ -58,6 +59,12 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         return prometheusServer;
     }
 
+    @Override
+    public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
+        super.parseArgs(params);
+        this.maxReaderRequestIds = MAX_REQUEST_RW_IDS;
+        this.maxWriterRequestIds = MAX_REQUEST_RW_IDS;
+    }
 
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
@@ -82,6 +89,21 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         connections.decrementAndGet();
         if (prometheusServer != null) {
             prometheusServer.decrementConnections();
+        }
+    }
+    
+    @Override
+    public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
+        if (isRequestWrites) {
+            super.recordWriteRequests(writerId % maxWriterRequestIds, startTime, bytes, events);
+        }
+    }
+
+
+    @Override
+    public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
+        if (isRequestReads) {
+            super.recordReadRequests(readerId % maxReaderRequestIds, startTime, bytes, events);
         }
     }
 
