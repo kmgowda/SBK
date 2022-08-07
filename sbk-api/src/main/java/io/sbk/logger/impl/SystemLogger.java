@@ -52,6 +52,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected ParsedOptions params;
     protected Action action;
     protected Time time;
+    protected boolean isRequestWrites;
+    protected boolean isRequestReads;
     protected int writersCount;
     protected int readersCount;
     protected AtomicLongArray writeBytesArray;
@@ -61,8 +63,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
 
     private LoggerConfig loggerConfig;
-    private boolean isRequestWrites;
-    private boolean isRequestReads;
+
 
 
     public SystemLogger() {
