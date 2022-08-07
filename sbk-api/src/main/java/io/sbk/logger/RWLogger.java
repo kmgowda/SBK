@@ -28,7 +28,7 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
      * Default method to record every/multiple write event(s).
      */
     @Override
-    default void recordWriteRequests(int writerId, long startTime, int bytes, int events) {
+    default void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
 
     }
 
@@ -36,7 +36,7 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
      * Default method to record every/multiple read event(s).
      */
     @Override
-    default void recordReadRequests(int readerId, long startTime, int bytes, int events) {
+    default void recordReadRequests(int readerId, long startTime, long bytes, long events) {
 
     }
 

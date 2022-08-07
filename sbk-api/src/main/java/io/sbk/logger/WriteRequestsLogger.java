@@ -11,5 +11,5 @@ package io.sbk.logger;
 
 public interface WriteRequestsLogger {
 
-    void recordWriteRequests(int writerId, long startTime, int bytes, int events);
+    void recordWriteRequests(int writerId, long startTime, long bytes, long events);
 }

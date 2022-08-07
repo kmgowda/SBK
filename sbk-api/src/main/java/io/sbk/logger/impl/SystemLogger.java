@@ -253,14 +253,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
 
     @Override
-    public void recordWriteRequests(int writerId, long startTime, int bytes, int events) {
+    public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
         writeRequestsArray.addAndGet(writerId, events);
         writeBytesArray.addAndGet(writerId, bytes);
     }
 
 
     @Override
-    public void recordReadRequests(int readerId, long startTime, int bytes, int events) {
+    public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
         readRequestsArray.addAndGet(readerId, events);
         readBytesArray.addAndGet(readerId, bytes);
     }
