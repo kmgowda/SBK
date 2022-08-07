@@ -118,8 +118,12 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        print("Total : " + SBK_RAM_PREFIX, prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
-                minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        StringBuilder out = new StringBuilder("Total : " + SBK_RAM_PREFIX);
+        out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
+        out.append(prefix);
+        System.out.print(buildTotalResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
+                minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+
         if (csvEnable) {
             writeToCSV(SBK_RAM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),
                     (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,

@@ -18,6 +18,8 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
+import io.sbk.logger.RamLogger;
+import io.sbk.logger.impl.RamPrometheusLogger;
 import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
 import io.sbk.config.GemConfig;
@@ -303,9 +305,13 @@ final public class SbkGem {
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
         Printer.log.info("Arguments to  SBK-RAM: " + Arrays.toString(ramArgs));
 
+        final RamLogger ramLogger = new RamPrometheusLogger();
+
         ramParams = new SbkRamParameters(appName, params.getRamPort(), params.getConnections().length);
+        ramLogger.addArgs(ramParams);
         try {
             ramParams.parseArgs(ramArgs);
+            ramLogger.parseArgs(ramParams);
         } catch (UnrecognizedOptionException ex) {
             Printer.log.error(ex.toString());
             ramParams.printHelp();
