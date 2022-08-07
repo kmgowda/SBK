@@ -380,14 +380,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     @Override
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
-                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
+                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                       long readRequests, double readRequestsPerSec, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         print(prefix, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
-                readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }

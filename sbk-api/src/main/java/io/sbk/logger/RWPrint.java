@@ -23,7 +23,7 @@ public interface RWPrint {
      * @param writeRequests         Write Requests
      * @param writeRequestsPerSec   Write Requests/sec
      * @param readRequestBytes      Read requests Bytes
-     * @param readRequestsMBPerSec  Read requests MB/sec
+     * @param readRequestsMbPerSec  Read requests MB/sec
      * @param readRequests          Read requests
      * @param readRequestsPerSec    Read Requests/sec
      * @param seconds               reporting duration in seconds
@@ -43,7 +43,7 @@ public interface RWPrint {
      */
     void print(int writers, int maxWriters, int readers, int maxReaders,
                long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
-               double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
+               double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                long readRequests, double readRequestsPerSec, double seconds, long bytes,
                long records, double recsPerSec, double mbPerSec,
                double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,

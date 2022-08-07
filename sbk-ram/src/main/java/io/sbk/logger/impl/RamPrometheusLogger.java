@@ -186,34 +186,20 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     @Override
     public void setWriters(int val) {
         writers.set(val);
-        if (prometheusServer != null) {
-            prometheusServer.setWriters(val);
-        }
     }
 
     @Override
     public void setMaxWriters(int val) {
         maxWriters.set(val);
-        if (prometheusServer != null) {
-            prometheusServer.setMaxWriters(val);
-        }
-
     }
 
     @Override
     public void setReaders(int val) {
         readers.set(val);
-        if (prometheusServer != null) {
-            prometheusServer.setReaders(val);
-        }
-
     }
 
     @Override
     public void setMaxReaders(int val) {
         maxReaders.set(val);
-        if (prometheusServer != null) {
-            prometheusServer.setMaxReaders(val);
-        }
     }
 }
