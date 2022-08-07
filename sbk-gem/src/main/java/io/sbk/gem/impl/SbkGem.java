@@ -278,8 +278,8 @@ final public class SbkGem {
         sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
         sbkArgsBuilder.append(" -minlatency ").append(logger.getMinLatency());
         sbkArgsBuilder.append(" -maxlatency ").append(logger.getMaxLatency());
-        sbkArgsBuilder.append(" -wq ").append(logger.requestWrites());
-        sbkArgsBuilder.append(" -rq ").append(logger.requestReads());
+        sbkArgsBuilder.append(" -wq ").append(logger.getMaxWriterIDs() > 0);
+        sbkArgsBuilder.append(" -rq ").append(logger.getMaxReaderIDs() > 0);
         sbkArgsBuilder.append(" -context no");
         sbkArgsBuilder.append(" -ram ").append(params.getLocalHost());
         sbkArgsBuilder.append(" -ramport ").append(params.getRamPort());
@@ -296,9 +296,9 @@ final public class SbkGem {
         ramArgsList.add("-action");
         ramArgsList.add(actionString);
         ramArgsList.add("-wq");
-        ramArgsList.add(String.valueOf(logger.requestWrites()));
+        ramArgsList.add(String.valueOf(logger.getMaxWriterIDs() > 0));
         ramArgsList.add("-rq");
-        ramArgsList.add(String.valueOf(logger.requestReads()));
+        ramArgsList.add(String.valueOf(logger.getMaxReaderIDs() > 0));
         ramArgsList.add("-max");
         ramArgsList.add(Integer.toString(params.getConnections().length));
 

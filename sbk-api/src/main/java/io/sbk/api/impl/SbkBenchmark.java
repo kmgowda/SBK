@@ -141,8 +141,8 @@ final public class SbkBenchmark implements Benchmark {
         rwLogger.open(params, StringUtils.capitalize(storage.getClass().getSimpleName().toLowerCase()),
                 params.getAction(), time);
         storage.openStorage(params);
-        final WriteRequestsLogger writeRequestsLogger = rwLogger.requestWrites() ? rwLogger : null;
-        final ReadRequestsLogger readRequestsLogger = rwLogger.requestReads() ? rwLogger : null;
+        final WriteRequestsLogger writeRequestsLogger = rwLogger.getMaxWriterIDs() > 0 ? rwLogger : null;
+        final ReadRequestsLogger readRequestsLogger = rwLogger.getMaxReaderIDs() > 0 ? rwLogger : null;
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
         final List<CompletableFuture<Void>> writeFutures;

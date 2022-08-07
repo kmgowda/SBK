@@ -121,13 +121,13 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
 
     @Override
-    public boolean requestWrites() {
-        return isRequestWrites;
+    public int getMaxWriterIDs() {
+        return writersCount;
     }
 
     @Override
-    public boolean requestReads() {
-        return isRequestReads;
+    public int getMaxReaderIDs() {
+        return readersCount;
     }
 
     private String getTimeUnitNames() {
