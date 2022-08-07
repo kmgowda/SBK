@@ -13,6 +13,7 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.perl.data.Bytes;
 import io.perl.logger.impl.ResultsLogger;
 import io.sbk.action.Action;
 import io.sbk.logger.RWLogger;
@@ -30,6 +31,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * Class for recoding/printing results on System.out.
@@ -40,12 +43,28 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected final AtomicInteger readers;
     protected final AtomicInteger maxWriters;
     protected final AtomicInteger maxReaders;
+    protected final AtomicLong writeBytes;
+    protected final AtomicLong writeRequests;
+    protected final AtomicLong readBytes;
+    protected final AtomicLong readRequests;
     protected String storageName;
     protected String timeUnitFullText;
     protected ParsedOptions params;
     protected Action action;
     protected Time time;
+    protected boolean isRequestWrites;
+    protected boolean isRequestReads;
+    protected int maxWriterRequestIds;
+    protected int maxReaderRequestIds;
+    protected AtomicLongArray writeBytesArray;
+    protected AtomicLongArray writeRequestsArray;
+    protected AtomicLongArray readBytesArray;
+    protected AtomicLongArray readRequestsArray;
+
+
     private LoggerConfig loggerConfig;
+
+
 
     public SystemLogger() {
         super();
@@ -53,6 +72,18 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.readers = new AtomicInteger(0);
         this.maxWriters = new AtomicInteger(0);
         this.maxReaders = new AtomicInteger(0);
+        this.writeBytes = new AtomicLong(0);
+        this.writeRequests = new AtomicLong(0);
+        this.readBytes = new AtomicLong(0);
+        this.readRequests = new AtomicLong(0);
+        this.isRequestWrites = false;
+        this.isRequestReads = false;
+        this.readBytesArray = null;
+        this.readRequestsArray = null;
+        this.writeBytesArray = null;
+        this.writeRequestsArray = null;
+        this.maxReaderRequestIds = 0;
+        this.maxWriterRequestIds = 0;
     }
 
     @Override
@@ -86,8 +117,20 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                         Maximum latency;
                         use '-time' for time unit; default:""" + loggerConfig.maxLatency
                         + " " + loggerConfig.timeUnit.name());
+        params.addOption("wq", true, "Benchmark Write Requests; default: "+ isRequestWrites);
+        params.addOption("rq", true, "Benchmark Reade Requests; default: "+ isRequestReads);
     }
 
+
+    @Override
+    public int getMaxWriterIDs() {
+        return maxWriterRequestIds;
+    }
+
+    @Override
+    public int getMaxReaderIDs() {
+        return maxReaderRequestIds;
+    }
 
     private String getTimeUnitNames() {
         StringBuilder ret = new StringBuilder("[");
@@ -152,6 +195,15 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         }
         minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));
         maxLatency = Long.parseLong(params.getOptionValue("maxlatency", Long.toString(maxLatency)));
+        isRequestWrites = Boolean.parseBoolean(params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
+        isRequestReads = Boolean.parseBoolean(params.getOptionValue("rq", Boolean.toString(isRequestReads)));
+        if (isRequestWrites) {
+            maxWriterRequestIds = Integer.parseInt(params.getOptionValue("writers", "0"));
+        }
+        if (isRequestReads) {
+            maxReaderRequestIds = Integer.parseInt(params.getOptionValue("readers", "0"));
+        }
+
     }
 
     @Override
@@ -170,6 +222,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 throw new IllegalArgumentException();
             }
         }
+        this.writeBytesArray = new AtomicLongArray(maxWriterRequestIds);
+        this.writeRequestsArray = new AtomicLongArray(maxWriterRequestIds);
+        this.readBytesArray = new AtomicLongArray(maxReaderRequestIds);
+        this.readRequestsArray = new AtomicLongArray(maxReaderRequestIds);
     }
 
     @Override
@@ -203,18 +259,174 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         readers.decrementAndGet();
     }
 
-    protected void appendWritesAndReaders(@NotNull StringBuilder out) {
-        out.append(String.format(" %5d Writers, %5d Readers, ", writers.get(), readers.get()));
-        out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters.get(), maxReaders.get()));
+
+    @Override
+    public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
+        writeRequestsArray.addAndGet(writerId, events);
+        writeBytesArray.addAndGet(writerId, bytes);
+    }
+
+
+    @Override
+    public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
+        readRequestsArray.addAndGet(readerId, events);
+        readBytesArray.addAndGet(readerId, bytes);
+    }
+
+
+    protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,
+                                          int readers, int maxReaders ) {
+        out.append(String.format(" %5d Writers, %5d Readers, ", writers, readers));
+        out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters, maxReaders));
+    }
+
+    protected final void appendWriteAndReadRequests(@NotNull StringBuilder out, double writeRequestsBytes,
+                                              double writeRequestsMbPerSec, long writesRequests,
+                                              double writeRequestsPerSec, double readRequestsBytes,
+                                              double readRequestsMbPerSec, long readRequests,
+                                              double readRequestsPerSec) {
+        out.append(String.format(" %11.1f Write Requests MB, %8.2f Write Requests MB/sec ,"+
+                        " %16d Write Request records, %11.1f write request records/sec",
+                writeRequestsBytes / (Bytes.BYTES_PER_MB * 1.0), writeRequestsMbPerSec,
+                writesRequests, writeRequestsPerSec));
+        out.append(String.format(" %11.1f Read Requests MB, %8.2f Read Requests MB/sec ,"+
+                        " %16d Read Request records, %11.1f Read request records/sec",
+                readRequestsBytes / (Bytes.BYTES_PER_MB * 1.0), readRequestsMbPerSec,
+                readRequests, readRequestsPerSec));
+    }
+
+    private record ReadWriteRequests(long readRequests, long readRequestBytes, long writeRequests, long writeRequestBytes) {
+    }
+
+    protected final ReadWriteRequests getReadAndWriteRequests() {
+        long writeRequestsSum = 0;
+        long writeBytesSum = 0;
+        long readRequestsSum = 0;
+        long readBytesSum = 0;
+
+        if (isRequestWrites) {
+            for (int i = 0; i < maxWriterRequestIds; i++) {
+                writeRequestsSum += writeRequestsArray.getAndSet(i, 0);
+                writeBytesSum += writeBytesArray.getAndSet(i, 0);
+            }
+        }
+
+        if (isRequestReads) {
+            for (int i = 0; i < maxReaderRequestIds; i++) {
+                readRequestsSum += readRequestsArray.getAndSet(i, 0);
+                readBytesSum += readBytesArray.getAndSet(i, 0);
+            }
+           }
+        return new ReadWriteRequests(readRequestsSum, readBytesSum, writeRequestsSum, writeBytesSum);
+    }
+
+    private static class ReadWriteRequestsPerformance {
+        public final double writeRequestsPerSec;
+        public final double writeRequestsMbPerSec;
+        public final double readRequestsPerSec;
+        public final double readRequestsMBPerSec;
+
+        public ReadWriteRequestsPerformance( double seconds, ReadWriteRequests req) {
+            final double writeRequestsMB = req.writeRequestBytes / (Bytes.BYTES_PER_MB * 1.0);
+            final double readRequestsMB = req.readRequestBytes /  (Bytes.BYTES_PER_MB * 1.0);
+
+            writeRequestsPerSec = req.writeRequests / seconds;
+            writeRequestsMbPerSec = writeRequestsMB / seconds;
+            readRequestsPerSec = req.readRequests / seconds;
+            readRequestsMBPerSec = readRequestsMB / seconds;
+        }
     }
 
     @Override
-    protected String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
-                                    double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                                    long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+    public final void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                         double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        final ReadWriteRequests req = getReadAndWriteRequests();
+        final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, req);
+        if (isRequestWrites) {
+            writeRequests.addAndGet(req.writeRequests);
+            writeBytes.addAndGet(req.writeRequestBytes);
+        }
+        if (isRequestReads) {
+            readRequests.addAndGet(req.readRequests);
+            readBytes.addAndGet(req.readRequestBytes);
+        }
 
-        appendWritesAndReaders(out);
-        return super.buildResultString(out, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
+        print(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
+                req.writeRequestBytes, perf.writeRequestsMbPerSec, req.writeRequests, perf.writeRequestsPerSec,
+                req.readRequestBytes, perf.readRequestsMBPerSec, req.readRequests, perf.readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
+
+
+    protected void print(String prefix, int writers, int maxWriters, int readers, int maxReaders,
+                         long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                         double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
+                         long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                         long records, double recsPerSec, double mbPerSec,
+                         double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                         long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        StringBuilder out = new StringBuilder(prefix);
+        appendWritesAndReaders(out, writers, maxWriters, readers, maxReaders);
+        appendWriteAndReadRequests(out, writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
+                readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec);
+        appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
+                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        out.append(".\n\n");
+        System.out.println(out);
+    }
+
+    @Override
+    public void print(int writers, int maxWriters, int readers, int maxReaders,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
+                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long records, double recsPerSec, double mbPerSec,
+                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        print(prefix, writers, maxWriters, readers, maxReaders,
+                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+    }
+
+
+    @Override
+    public final void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        final ReadWriteRequests req = getReadAndWriteRequests();
+        if (isRequestWrites) {
+            writeRequests.addAndGet(req.writeRequests);
+            writeBytes.addAndGet(req.writeRequestBytes);
+        }
+        if (isRequestReads) {
+            readRequests.addAndGet(req.readRequests);
+            readBytes.addAndGet(req.readRequestBytes);
+        }
+        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequests.getAndSet(0),
+                readBytes.getAndSet(0), writeRequests.getAndSet(0), writeBytes.getAndSet(0));
+        final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, reqFinal);
+        printTotal(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
+                reqFinal.writeRequestBytes, perf.writeRequestsMbPerSec, reqFinal.writeRequests, perf.writeRequestsPerSec,
+                reqFinal.readRequestBytes, perf.readRequestsMBPerSec, reqFinal.readRequests, perf.readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+    }
+
+    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+                           long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                           double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
+                           long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                           long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+       print("Total " + prefix, writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
+               writeRequests, writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests,
+               readRequestsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+               invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+    }
+
 }

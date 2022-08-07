@@ -143,6 +143,7 @@ public class ResultsLogger implements PerformanceLogger {
      * @param recsPerSec                    double
      * @param mbPerSec                      double
      * @param avgLatency                    double
+     * @param minLatency                    long
      * @param maxLatency                    long
      * @param invalid                       long
      * @param lowerDiscard                  long
@@ -153,15 +154,15 @@ public class ResultsLogger implements PerformanceLogger {
      */
     protected final void appendResults(@NotNull StringBuilder out, String timeUnitName, String[] percentileNames,
                        long seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                       double avgLatency, long maxLatency, long invalid, long lowerDiscard,
+                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                        long higherDiscard, long slc1, long slc2, @NotNull long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / Bytes.BYTES_PER_MB;
         out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
-                        + ", %8.1f %s avg latency, %7d %s max latency;"
+                        + ", %8.1f %s avg latency, %7d %s min latency, %7d %s max latency;"
                         + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"
                         + " SLC-1: %3d, SLC-2: %3d;",
-                seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitName, maxLatency,
-                timeUnitName, invalid, lowerDiscard, higherDiscard, slc1, slc2));
+                seconds, mBytes, records, recsPerSec, mbPerSec, avgLatency, timeUnitName,
+                minLatency, timeUnitName, maxLatency, timeUnitName, invalid, lowerDiscard, higherDiscard, slc1, slc2));
         out.append(" Latency Percentiles: ");
 
         for (int i = 0; i < Math.min(percentileNames.length, percentileValues.length); i++) {
@@ -183,6 +184,7 @@ public class ResultsLogger implements PerformanceLogger {
      * @param recsPerSec            double
      * @param mbPerSec              double
      * @param avgLatency            double
+     * @param minLatency            long
      * @param maxLatency            long
      * @param invalid               long
      * @param lowerDiscard          long
@@ -193,10 +195,10 @@ public class ResultsLogger implements PerformanceLogger {
      * @return returns build result in string format
      */
     protected String buildResultString(StringBuilder out, double seconds, long bytes, long records, double recsPerSec,
-                                    double mbPerSec, double avgLatency, long maxLatency, long invalid, long lowerDiscard,
-                                    long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                                    double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
+                                       long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append(".\n");
         return out.toString();
     }
@@ -211,6 +213,7 @@ public class ResultsLogger implements PerformanceLogger {
      * @param recsPerSec            double
      * @param mbPerSec              double
      * @param avgLatency            double
+     * @param minLatency            long
      * @param maxLatency            long
      * @param invalid               long
      * @param lowerDiscard          long
@@ -220,25 +223,26 @@ public class ResultsLogger implements PerformanceLogger {
      * @param percentileValues      long[]
      */
     protected void print(String header, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                       double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                       long slc1, long slc2, long[] percentileValues) {
+                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                         long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         System.out.print(buildResultString(new StringBuilder(header), seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
+                percentileValues));
     }
 
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
+                      long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
                       long[] percentileValues) {
-        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileValues);
+        print(prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
+                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                           double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentileValues) {
-        print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                           double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        print("Total : " + prefix, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 }

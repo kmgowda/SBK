@@ -7,14 +7,11 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-
 package io.sbk.logger;
 
-import io.perl.api.ReportLatencies;
+public interface ReadRequestsLogger {
 
-/**
- * Interface RamLogger.
- */
-public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnections, WriteRequestsLogger,
-        ReadRequestsLogger {
+    void recordReadRequests(int readerId, long startTime, long bytes, long events);
+
+    int getMaxReaderIDs();
 }

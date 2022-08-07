@@ -28,6 +28,7 @@ public interface PerformanceLogger extends Print {
      * @param recsPerSec            records per second.
      * @param mbPerSec              Throughput value in terms of MB (Mega Bytes) per Second.
      * @param avgLatency            Average Latency.
+     * @param minLatency            Minimum Latency.
      * @param maxLatency            Maximum Latency.
      * @param invalid               Number of invalid/negative latencies.
      * @param lowerDiscard          number of discarded latencies which are less than minimum latency.
@@ -37,7 +38,7 @@ public interface PerformanceLogger extends Print {
      * @param percentileValues      Array of percentile Values.
      */
     void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                    long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                    long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                     long slc1, long slc2, long[] percentileValues);
 
     /**

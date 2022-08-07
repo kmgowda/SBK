@@ -34,6 +34,7 @@ import io.time.Time;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
@@ -53,6 +54,12 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     private int maxLatencyBytes;
     private boolean blocking;
     private LatencyRecorder recorder;
+
+    private AtomicLongArray ramWriteBytesArray;
+    private AtomicLongArray ramWriteRequestsArray;
+    private AtomicLongArray ramReadBytesArray;
+    private AtomicLongArray ramReadRequestsArray;
+
     private ManagedChannel channel;
     private ServiceGrpc.ServiceStub stub;
     private ServiceGrpc.ServiceBlockingStub blockingStub;
@@ -65,6 +72,10 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
      */
     public GrpcPrometheusLogger() {
         super();
+        this.ramWriteBytesArray = null;
+        this.ramWriteRequestsArray = null;
+        this.ramReadBytesArray = null;
+        this.ramReadRequestsArray = null;
     }
 
     @Override
@@ -114,6 +125,10 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         if (!enable) {
             return;
         }
+        this.ramWriteBytesArray = new AtomicLongArray(maxWriterRequestIds);
+        this.ramWriteRequestsArray = new AtomicLongArray(maxWriterRequestIds);
+        this.ramReadBytesArray = new AtomicLongArray(maxReaderRequestIds);
+        this.ramReadRequestsArray = new AtomicLongArray(maxReaderRequestIds);
         channel = ManagedChannelBuilder.forTarget(ramHostConfig.host + ":" + ramHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
@@ -191,6 +206,22 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
      * Sends Latencies Records.
      */
     public void sendLatenciesRecord() {
+        long writeRequestsSum = 0;
+        long writeBytesSum = 0;
+        long readRequestsSum = 0;
+        long readBytesSum = 0;
+        for (int i = 0; i < maxWriterRequestIds; i++) {
+            writeRequestsSum += ramWriteRequestsArray.getAndSet(i, 0);
+            writeBytesSum += ramWriteBytesArray.getAndSet(i, 0);
+        }
+        for (int i = 0; i < maxReaderRequestIds; i++) {
+            readRequestsSum += ramReadRequestsArray.getAndSet(i, 0);
+            readBytesSum += ramReadBytesArray.getAndSet(i, 0);
+        }
+        builder.setWriteRequestBytes(writeBytesSum);
+        builder.setWriteRequestRecords(writeRequestsSum);
+        builder.setReadRequestBytes(readBytesSum);
+        builder.setReadRequestRecords(readRequestsSum);
         builder.setClientID(clientID);
         builder.setSequenceNumber(++seqNum);
         builder.setMaxReaders(maxReaders.get());
@@ -205,6 +236,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         builder.setHigherLatencyDiscardRecords(recorder.getHigherLatencyDiscardRecords());
         builder.setLowerLatencyDiscardRecords(recorder.getLowerLatencyDiscardRecords());
         builder.setValidLatencyRecords(recorder.getValidLatencyRecords());
+
         if (stub != null) {
             stub.addLatenciesRecord(builder.build(), observer);
         } else {
@@ -213,6 +245,24 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         recorder.reset();
         builder.clear();
         latencyBytes = 0;
+    }
+
+    @Override
+    public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
+        super.recordWriteRequests(writerId, startTime, bytes, events);
+        if (enable) {
+            ramWriteRequestsArray.addAndGet(writerId, events);
+            ramWriteBytesArray.addAndGet(writerId, bytes);
+        }
+    }
+
+    @Override
+    public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
+        super.recordReadRequests(readerId, startTime, bytes, events);
+        if (enable) {
+            ramReadRequestsArray.addAndGet(readerId, events);
+            ramReadBytesArray.addAndGet(readerId, bytes);
+        }
     }
 
     /**
@@ -237,10 +287,16 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     }
 
     @Override
-    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
-        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid, lowerDiscard,
+    public void print(int writers, int maxWriters, int readers, int maxReaders,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
+                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long records, double recsPerSec, double mbPerSec,
+                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writeRequests,
+                writeRequestsPerSec, readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         if (latencyBytes > 0) {
             sendLatenciesRecord();

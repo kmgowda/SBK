@@ -10,21 +10,32 @@
 
 package io.sbk.logger.impl;
 
+import com.google.common.util.concurrent.AtomicDouble;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Tags;
 import io.perl.logger.impl.PrometheusMetricsServer;
 import io.sbk.config.Config;
-import io.sbk.logger.CountRW;
 import io.sbk.logger.MetricsConfig;
+import io.sbk.logger.RWPrint;
 import io.time.Time;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PrometheusRWMetricsServer extends PrometheusMetricsServer implements CountRW {
+
+public class PrometheusRWMetricsServer extends PrometheusMetricsServer implements RWPrint {
     final private AtomicInteger writers;
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;
     final private AtomicInteger maxReaders;
+
+    final private Counter writeRequestBytes;
+    final private Counter readRequestBytes;
+    final private Counter writeRequests;
+    final private Counter readRequests;
+    final private AtomicDouble writeRequestsMbPerSec;
+    final private AtomicDouble writeRequestsPerSec;
+    final private AtomicDouble readRequestsMbPerSec;
+    final private AtomicDouble readRequestsPerSec;
 
     public  PrometheusRWMetricsServer(String header, String action, String className, double[] percentiles, Time time,
                                         MetricsConfig config) throws IOException {
@@ -34,46 +45,52 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         final String readersName = metricPrefix + "_Readers";
         final String maxWritersName = metricPrefix + "_Max_Writers";
         final String maxReadersName = metricPrefix + "_Max_Readers";
+        final String writeRequestBytesName = metricPrefix + "_Write_RequestBytes";
+        final String writeRequestsName = metricPrefix + "_Write_Requests";
+        final String writeRequestsMbPerSecName = metricPrefix + "_Write_RequestBytes_MBPerSec";
+        final String writeRequestsPerSecName =  metricPrefix + "_Write_Requests_MBPerSec";
+        final String readRequestBytesName = metricPrefix + "_Read_RequestBytes";
+        final String readRequestsName = metricPrefix + "_Read_Requests";
+        final String readRequestsMbPerSecName = metricPrefix + "_Read_RequestBytes_MBPerSec";
+        final String readRequestsPerSecName =  metricPrefix + "_Read_Requests_MBPerSec";
+
         this.writers = this.registry.gauge(writersName, new AtomicInteger());
         this.readers = this.registry.gauge(readersName, new AtomicInteger());
         this.maxWriters = this.registry.gauge(maxWritersName, new AtomicInteger());
         this.maxReaders = this.registry.gauge(maxReadersName, new AtomicInteger());
+        this.writeRequestBytes = this.registry.counter(writeRequestBytesName);
+        this.writeRequests = this.registry.counter(writeRequestsName);
+        this.writeRequestsMbPerSec = this.registry.gauge(writeRequestsMbPerSecName, new AtomicDouble());
+        this.writeRequestsPerSec = this.registry.gauge(writeRequestsPerSecName, new AtomicDouble());
+        this.readRequestBytes = this.registry.counter(readRequestBytesName);
+        this.readRequests = this.registry.counter(readRequestsName);
+        this.readRequestsMbPerSec = this.registry.gauge(readRequestsMbPerSecName, new AtomicDouble());
+        this.readRequestsPerSec = this.registry.gauge(readRequestsPerSecName, new AtomicDouble());
+
     }
 
-    public void incrementWriters() {
-        writers.incrementAndGet();
-        maxWriters.incrementAndGet();
-    }
 
-    public void decrementWriters() {
-        writers.decrementAndGet();
-    }
+    @Override
+    public void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
+                      double writeRequestsMbPerSec, long writeRequests, double writeRequestsPerSec,
+                      long readRequestBytes, double readRequestsMbPerSec, long readRequests,
+                      double readRequestsPerSec, double seconds, long bytes, long records, double recsPerSec,
+                      double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
+                      long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        this.writers.set(writers);
+        this.maxWriters.set(maxWriters);
+        this.readers.set(readers);
+        this.maxReaders.set(maxReaders);
+        this.writeRequestBytes.increment(writeRequestBytes);
+        this.writeRequests.increment(writeRequests);
+        this.writeRequestsMbPerSec.set(writeRequestsMbPerSec);
+        this.writeRequestsPerSec.set(writeRequestsPerSec);
+        this.readRequestBytes.increment(readRequestBytes);
+        this.readRequests.increment(readRequests);
+        this.readRequestsMbPerSec.set(readRequestsMbPerSec);
+        this.readRequestsPerSec.set(readRequestsPerSec);
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                                higherDiscard, slc1, slc2, percentileValues);
 
-    public void setWriters(int val) {
-        writers.set(val);
-        maxWriters.set(Math.max(writers.get(), maxWriters.get()));
     }
-
-    public void setMaxWriters(int val) {
-        maxWriters.set(val);
-    }
-
-    public void incrementReaders() {
-        readers.incrementAndGet();
-        maxReaders.incrementAndGet();
-    }
-
-    public void decrementReaders() {
-        readers.decrementAndGet();
-    }
-
-    public void setReaders(int val) {
-        readers.set(val);
-        maxReaders.set(Math.max(readers.get(), maxReaders.get()));
-    }
-
-    public void setMaxReaders(int val) {
-        maxReaders.set(val);
-    }
-
 }
