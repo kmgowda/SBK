@@ -43,6 +43,7 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
     /**
      * Default method to indicate to record write requests or not.
      */
+    @Override
     default boolean requestWrites() {
         return false;
     }
@@ -50,6 +51,7 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
     /**
      * Default method to indicate to record read requests or not.
      */
+    @Override
     default boolean requestReads() {
         return false;
     }

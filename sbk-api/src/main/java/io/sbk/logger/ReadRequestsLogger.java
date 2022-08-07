@@ -12,4 +12,6 @@ package io.sbk.logger;
 public interface ReadRequestsLogger {
 
     void recordReadRequests(int readerId, long startTime, long bytes, long events);
+    
+    boolean requestReads();
 }

@@ -12,4 +12,6 @@ package io.sbk.logger;
 public interface WriteRequestsLogger {
 
     void recordWriteRequests(int writerId, long startTime, long bytes, long events);
+
+    boolean requestWrites();
 }
