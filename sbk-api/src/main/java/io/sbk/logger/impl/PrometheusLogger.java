@@ -118,8 +118,10 @@ public class PrometheusLogger extends CSVLogger {
                 writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
-        prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
+                writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
     }
 
     @Override

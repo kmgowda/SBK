@@ -89,6 +89,8 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readRequests.increment(readRequests);
         this.readRequestsMbPerSec.set(readRequestsMbPerSec);
         this.readRequestsPerSec.set(readRequestsPerSec);
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                                higherDiscard, slc1, slc2, percentileValues);
 
     }
 }
