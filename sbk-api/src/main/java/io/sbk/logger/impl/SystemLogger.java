@@ -355,7 +355,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
             readBytes.addAndGet(req.readBytes);
         }
 
-        print(prefix, writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
+        print(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
                 perf.writeRequestsMB, perf.writeRequestsMbPerSec, perf.writeRequests, perf.writeRequestsPerSec,
                 perf.readRequestsMB, perf.readRequestsMBPerSec, perf.readRequests, perf.readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
