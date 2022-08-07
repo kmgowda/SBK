@@ -295,6 +295,8 @@ final public class SbkGem {
         ramArgsList.add(className);
         ramArgsList.add("-action");
         ramArgsList.add(actionString);
+        ramArgsList.add("-time");
+        ramArgsList.add(time.getTimeUnit().name());
         ramArgsList.add("-wq");
         ramArgsList.add(String.valueOf(logger.getMaxWriterIDs() > 0));
         ramArgsList.add("-rq");
