@@ -35,7 +35,7 @@ percentiles are 100% accurate.
 
 SBK can be deployed in  distributed nodes using applications [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
 [**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggregated 
-into one master node called SBK-RAM (SBK - Results Aggregation Monitor).
+into one master node called SBM (Storage Benchmark Monitor).
 
 ![SBK Eco System](images/sbk-ram.png)
 
@@ -297,7 +297,7 @@ metrics.
 
 
 ## Distributed SBK
-SBK can be deployed in a distributed clusters using [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
+SBK can be deployed in a distributed clusters using [**SBM**](sbm), [**SBK-GEM**](sbk-gem) and 
 [**SBK-GEM-YAL**](sbk-gem-yal).
 
 ## SBK Docker Containers
@@ -386,11 +386,11 @@ If you want to run the Grafana and prometheus as Kubernetes pods, then use [Graf
 
 | Network Port 	 | Description                               	 |
 |----------------|---------------------------------------------|
-| 9717         	 | SBK-RAM GRPC server Port                  	 |
+| 9717         	 | SBM GRPC server Port                  	     |
 | 9718         	 | SBK performance metrics to Prometheus     	 |
-| 9719         	 | SBK-RAM performance metrics to Prometheus 	 |
+| 9719         	 | SBM performance metrics to Prometheus 	     |
 | 8718         	 | SBK JVM/JMX metrics to Prometheus         	 |
-| 8719         	 | SBK-RAM JVM/JMX metrics to Prometheus     	 |
+| 8719         	 | SBM JVM/JMX metrics to Prometheus       	   |
 
 
 ## SBK Execution Modes

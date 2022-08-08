@@ -7,27 +7,27 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# SBK-RAM : Results Aggregation Monitor
+# SBM : Storage Benchmark Monitor
 
-[![Api](https://img.shields.io/badge/SBK--RAM-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-ram/javadoc/index.html)
-[![SBK-RAM Dockers](https://img.shields.io/badge/SBK--RAM-Dockers-blue)](https://hub.docker.com/r/kmgowda/sbk-ram)
+[![Api](https://img.shields.io/badge/SBK--RAM-API-brightgreen)](https://kmgowda.github.io/SBK/sbm/javadoc/index.html)
+[![SBM Dockers](https://img.shields.io/badge/SBK--RAM-Dockers-blue)](https://hub.docker.com/r/kmgowda/sbm)
 
-The SBK (Storage Benchmark Kit) - RAM (Results Aggregation Monitor) combines the performance results supplied from
-multiple SBK instances. The SBK-RAM is the GRPC Server. Multiple SBK instances can log the performance results to a
-single SBM-RAM Server. The SBK-RAM determines the cumulative throughput and latency percentile values. Each SBK
-instance reports all the latency values in bulk and SBK-RAM integrates all latency records and determines the
-performance values for the whole SBK cluster (multi SBK instances). The SBK-RAM is useful if you want to stress the
+The SBM(Storage Benchmark Kit)  combines the performance results supplied from
+multiple SBK instances. The SBM is the GRPC Server. Multiple SBK instances can log the performance results to a
+single SBM Server. The SBM determines the cumulative throughput and latency percentile values. Each SBK
+instance reports all the latency values in bulk and SBM integrates all latency records and determines the
+performance values for the whole SBK cluster (multi SBK instances). The SBM is useful if you want to stress the
 storage server / Storage cluster with multiple storage clients (SBK instances) and analyse the throughput and
-latency percentiles for the entire storage cluster/server. SBK-RAM logs the integrated results to standard output device/logger and to the grafana through prometheus metrics.
+latency percentiles for the entire storage cluster/server. SBM logs the integrated results to standard output device/logger and to the grafana through prometheus metrics.
 
-## Build SBK-RAM
-SBK-RAM is a submodule/project of the SBK framework. If you [build SBK](./../README.md#build-sbk), it builds the SBK-RAM server too.
+## Build SBM
+SBM is a submodule/project of the SBK framework. If you [build SBK](./../README.md#build-sbk), it builds the SBM server too.
 
-## Running SBK-RAM locally
-The standard help output with SBK-RAM parameters as follows
+## Running SBM locally
+The standard help output with SBM parameters as follows
 
 ```
-kmg@kmgs-MBP SBK % ./sbk-ram/build/install/sbk-ram/bin/sbk-ram -help 
+kmg@kmgs-MBP SBK % ./sbm/build/install/sbm/bin/sbm -help 
 2021-07-08 16:58:10 INFO 
     _____   ____    _  __           _____               __  __
    / ____| |  _ \  | |/ /          |  __ \      /\     |  \/  |
@@ -37,11 +37,11 @@ kmg@kmgs-MBP SBK % ./sbk-ram/build/install/sbk-ram/bin/sbk-ram -help
   |_____/  |____/  |_|\_\          |_|  \_\ /_/    \_\ |_|  |_|
 
 2021-07-08 16:58:10 INFO Storage Benchmark Kit - Results Aggregation Monitor
-2021-07-08 16:58:10 INFO SBK-RAM Version: 0.892
+2021-07-08 16:58:10 INFO SBM Version: 0.892
 2021-07-08 16:58:10 INFO Arguments List: [-help]
 2021-07-08 16:58:10 INFO Java Runtime Version: 11.0.8+11
 
-usage: sbk-ram
+usage: sbm
 Storage Benchmark Kit - Results Aggregation Monitor
 
  -action <arg>    action [r: read, w: write, wr: write and read], default:
@@ -58,10 +58,10 @@ Storage Benchmark Kit - Results Aggregation Monitor
 Please report issues at https://github.com/kmgowda/SBK
 
 ```
-An Example output of SBK-RAM with 2 SBK file system benchmarking instances are as follows:
+An Example output of SBM with 2 SBK file system benchmarking instances are as follows:
 
 ```
-kmg@kmgs-MBP SBK % ./sbk-ram/build/install/sbk-ram/bin/sbk-ram -class file -time ns
+kmg@kmgs-MBP SBK % ./sbm/build/install/sbm/bin/sbm -class file -time ns
 2021-07-10 20:19:35 INFO 
     _____   ____    _  __           _____               __  __
    / ____| |  _ \  | |/ /          |  __ \      /\     |  \/  |
@@ -71,7 +71,7 @@ kmg@kmgs-MBP SBK % ./sbk-ram/build/install/sbk-ram/bin/sbk-ram -class file -time
   |_____/  |____/  |_|\_\          |_|  \_\ /_/    \_\ |_|  |_|
 
 2021-07-10 20:19:35 INFO Storage Benchmark Kit - Results Aggregation Monitor
-2021-07-10 20:19:35 INFO SBK-RAM Version: 0.90
+2021-07-10 20:19:35 INFO SBM Version: 0.90
 2021-07-10 20:19:35 INFO Arguments List: [-class, file, -time, ns]
 2021-07-10 20:19:35 INFO Java Runtime Version: 11.0.8+11
 2021-07-10 20:19:35 INFO Time Unit: NANOSECONDS
@@ -107,8 +107,8 @@ Sbk-Ram     0 Connections,     2 Max Connections: file Reading     0 Writers,   
 
 ```
 
-Note that the SBK-RAM indicates the number of active connections and maximum connections in a session.
-while running an SBK instance make sure that you supply the RAM Host address (IP address). Optionally you supply the
+Note that the SBM indicates the number of active connections and maximum connections in a session.
+while running an SBK instance make sure that you supply the SBM Host address (IP address). Optionally you supply the
 port number too , the default port number is **9717**.
 
 A sample SBK instance execution output is as follows:
@@ -168,47 +168,48 @@ Total : File Reading     0 Writers,     0 Readers,      0 Max Writers,     1 Max
 
 ```
 
-Note that option **-ram** is used to supply the SBK-RAM host ; In the above example, its localhost and default port is 9717.
+Note that option **-sbm** is used to supply the SBM host ; In the above example, its localhost and default port is 9717.
 
-### SBK-RAM Grafana Dashboards
-when you run the SBK-RAM, by default it starts the http server and all the output benchmark data is directed to the default port number: **9719** and **metrics** context.
+### SBM Grafana Dashboards
+when you run the SBM, by default it starts the http server and all the output benchmark data is directed to the default port number: **9719** and **metrics** context.
 If you want to change the port number and context, you can use the command line argument **-context** to change the same.
 you have to run the prometheus monitoring system (server [default port number is 9090] cum client) which pulls/fetches the benchmark data from the local/remote http server.
-If you want to include additional SBK-RAM nodes/instances to fetch the performance data or from port number other than **9719**, you need to extend or update [ram-targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/ram-targets.json)
+If you want to include additional SBM nodes/instances to fetch the performance data or from port number other than 
+**9719**, you need to extend or update [sbm-targets.json](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/sbm-targets.json)
 In case, if you are fetching metrics/benchmark data from remote http server , or from the context other than **metrics** then you need to change the [default prometheus server configuration](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus/prometheus.yml) too.
 Run the grafana server (cum a client) to fetch the benchmark data from prometheus.
 For example, if you are running a local grafana server then by default it fetches the data from the prometheus server at the local port 9090.
 You can access the local grafana server at localhost:3000 in your browser using **admin/admin** as default username / password.
-You can import the grafana dashboards to fetch the SBK and SBK-RAM benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
+You can import the grafana dashboards to fetch the SBK and SBM benchmark data of the existing supported storage drivers from [grafana dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards).
 
-The SBK-RAM (Server side) and SBK (client side) can use the same dashboard for a selected storage driver/device. for SBK-RAM , these grafana dashboards shows the number of active and maximum connections.
+The SBM (Server side) and SBK (client side) can use the same dashboard for a selected storage driver/device. for SBM , these grafana dashboards shows the number of active and maximum connections.
 The sample output of 2 SBK instances of file system benchmark data with grafana is below
 
-[![SBK-RAM file system Dashboard](images/sbk-ram-file-grafana.png)](https://github.com/kmgowda/SBK/tree/master/sbk-ram/images/sbk-ram-file-grafana.png)
+[![SBM file system Dashboard](images/sbm-file-grafana.png)](https://github.com/kmgowda/SBK/tree/master/sbm/images/sbm-file-grafana.png)
 
-### SBK-RAM JMX Exporter and Grafana
+### SBM JMX Exporter and Grafana
 The SBK can start the java agent to export the JVM metrics to Grafana via Prometheus. you just have build with
 parameter **-PjmxExport=true** while building SBK. Refer : [build SBK with JMX](./../README.md#SBK with JMX exporter and Grafana)
-All the SBK-RAM JVM metrics will be available at http://localhost:8719/metrics The network port **8719** to used to 
-expose the metrics.  use [SBK-RAM-JMX grafana dashboard](./../grafana/dashboards/sbk-ram-jmx-metrics.json) to 
-analyse the SBK-RAM JVM metrics.
+All the SBM JVM metrics will be available at http://localhost:8719/metrics The network port **8719** to used to 
+expose the metrics.  use [SBM-JMX grafana dashboard](./../grafana/dashboards/sbm-jmx-metrics.json) to 
+analyse the SBM JVM metrics.
 
 
-## SBK-RAM Docker Containers
+## SBM Docker Containers
 
 you can build the sbk docker image using 'docker' command as follows
 ```
-docker build -f ./dockers/sbk-ram <root directory> --tag <tag name>
+docker build -f ./dockers/sbm <root directory> --tag <tag name>
 ```
 
 example docker command is
 ```
-docker build -f ./dockers/sbk-ram ./ --tag sbk-ram
+docker build -f ./dockers/sbm ./ --tag sbm
 ```
 
 you can  run the docker image too, For example
 ```
-docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram:latest -class file -time ns
+docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbm:latest -class file -time ns
 ```
 * Note that the option **-p 127.0.0.1:9719:9719/tcp** redirects the 9719 port to local port to send the performance
   metric data for Prometheus.
@@ -217,18 +218,18 @@ docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
 
-### SBK-RAM docker hub
+### SBM docker hub
 
-The SBK-RAM Docker images are available at [SBK Docker](https://hub.docker.com/repository/docker/kmgowda/sbk-ram)
+The SBM Docker images are available at [SBK Docker](https://hub.docker.com/repository/docker/kmgowda/sbm)
 
 The SBK docker image pull command is
 ```
-docker pull kmgowda/sbk-ram
+docker pull kmgowda/sbm
 ```
 
 you can straightaway run the docker image too, For example
 ```
-docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram:latest -class file -time ns
+docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbm:latest -class file -time ns
 ```
 * Note that the option **-p 127.0.0.1:9719:9719/tcp** redirects the 9719 port to local port to send the performance
   metric data for Prometheus.
@@ -237,32 +238,33 @@ docker run -p 127.0.0.1:9717:9717/tcp -p 127.0.0.1:9719:9719/tcp kmgowda/sbk-ram
 * Avoid using the **--network host** option , because this option overrides the port redirection.
 
 
-###  SBK-RAM Docker Compose
-The SBK-RAM docker compose consists of SBK-RAM docker image, Grafana and prometheus docker images.
+###  SBM Docker Compose
+The SBM docker compose consists of SBM docker image, Grafana and prometheus docker images.
 The [grafana image](https://github.com/kmgowda/SBK/blob/master/grafana/Dockerfile) contains the [dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards) which can be directly deployed for the performance analytics.
 
 As an example, just follow the below steps to see the performance graphs
 
-1. In the sbk-ram directory build the 'sbk-ram' service of the [docker compose](https://github.com/kmgowda/SBK/blob/master/sbk-ram/docker-compose.yml) file as follows.
+1. In the sbm directory build the 'sbm' service of the [docker compose](https://github.
+   com/kmgowda/SBK/blob/master/sbm/docker-compose.yml) file as follows.
 
  ```
  <SBK dir>% docker-compose build
 
  ```
 
-2. Run the 'sbk-ram' service as follows.
+2. Run the 'sbm' service as follows.
 
  ```
- <SBK dir>% docker-compose run -p 127.0.0.1:9717:9717/tcp sbk-ram -class file -time ns
+ <SBK dir>% docker-compose run -p 127.0.0.1:9717:9717/tcp sbm -class file -time ns
 
  ```
-Note that , 9717 is the exposed port from sbk-ram container to receive the benchmark results from remote SBK
+Note that , 9717 is the exposed port from sbm container to receive the benchmark results from remote SBK
 instances via localhost.
 The option **-class** is the same as in SBK command/application. you should use the same storage class and time unit in SBK instances too.
 
 1. login to [grafana localhost port 3000](http://localhost:3000) with username **admin** and password **sbk**
 1. go to dashboard menu and pick the dashboard of the storage device on which you are running the performance benchmarking.
    in the above example, you can choose the [File system dashboard](https://github.com/kmgowda/SBK/blob/master/grafana/dashboards/sbk-file.json).
-1. The SBK-RAM docker compose runs the SBK-RAM image as a docker container.
+1. The SBM docker compose runs the SBM image as a docker container.
    In case, if you are running SBK as an application, and you want to see the SBK performance graphs using Grafana,
    then use [Grafana Docker compose](https://github.com/kmgowda/SBK/tree/master/grafana)
