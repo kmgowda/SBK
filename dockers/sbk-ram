@@ -37,9 +37,9 @@ RUN gradle  distTar --no-daemon --info --stacktrace
 FROM openjdk:17-jdk-slim as SbkApp
 ENV APP_NAME=sbk
 ENV SBM_APP_NAME=sbm
-ENV RAM_APP_HOME=/opt/${APP_NAME}/${SBM_APP_NAME}
+ENV SBM_APP_HOME=/opt/${APP_NAME}/${SBM_APP_NAME}
 
-COPY --from=sbkGradleBuilder ${RAM_APP_HOME}/build/distributions/${SBM_APP_NAME}-*.tar /opt/${SBM_APP_NAME}.tar
+COPY --from=sbkGradleBuilder ${SBM_APP_HOME}/build/distributions/${SBM_APP_NAME}-*.tar /opt/${SBM_APP_NAME}.tar
 
 RUN tar -xvf /opt/${SBM_APP_NAME}.tar -C /opt/.
 
