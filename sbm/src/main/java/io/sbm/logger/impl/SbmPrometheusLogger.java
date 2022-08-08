@@ -95,7 +95,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
     @Override
-    public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
+    public final void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
         if (isRequestWrites) {
             super.recordWriteRequests(writerId % maxWriterRequestIds, startTime, bytes, events);
         }
@@ -103,7 +103,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
 
     @Override
-    public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
+    public final void recordReadRequests(int readerId, long startTime, long bytes, long events) {
         if (isRequestReads) {
             super.recordReadRequests(readerId % maxReaderRequestIds, startTime, bytes, events);
         }
@@ -177,32 +177,32 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
 
     @Override
-    public void reportLatencyRecord(LatencyRecord record) {
+    public final void reportLatencyRecord(LatencyRecord record) {
 
     }
 
     @Override
-    public void reportLatency(long latency, long count) {
+    public final void reportLatency(long latency, long count) {
 
     }
 
     @Override
-    public void setWriters(int val) {
+    public final void setWriters(int val) {
         writers.set(val);
     }
 
     @Override
-    public void setMaxWriters(int val) {
+    public final void setMaxWriters(int val) {
         maxWriters.set(Math.max(maxWriters.get(), val));
     }
 
     @Override
-    public void setReaders(int val) {
+    public final void setReaders(int val) {
         readers.set(val);
     }
 
     @Override
-    public void setMaxReaders(int val) {
+    public final void setMaxReaders(int val) {
         maxReaders.set(Math.max(maxReaders.get(), val));
     }
 }
