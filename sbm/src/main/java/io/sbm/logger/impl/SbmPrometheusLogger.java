@@ -131,14 +131,14 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     @Override
     public void print(int writers, int maxWriters, int readers, int maxReaders,
-                      long writeRequestBytes, double writeRequestsMbPerSec, long writesRequests,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
                       double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                       long readRequests, double readRequestsPerSec, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         print(SBM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
-                writeRequestBytes, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
+                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
                 readRequests, readRequestsMbPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
@@ -149,7 +149,9 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         }
         if (csvEnable) {
             writeToCSV(SBM_PREFIX, REGULAR_PRINT, connections.get(), maxConnections.get(),
-                    (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
+                    writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writeRequests,
+                    writeRequestsPerSec, readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                    seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                     lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
     }
@@ -157,20 +159,22 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     @Override
     public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
-                           double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
+                           double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                            long readRequests, double readRequestsPerSec, double seconds, long bytes,
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         print("Total : " + SBM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
-                readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
         if (csvEnable) {
             writeToCSV(SBM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),
-                    (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
+                    writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writeRequests,
+                    writeRequestsPerSec, readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                    seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                     lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
     }
