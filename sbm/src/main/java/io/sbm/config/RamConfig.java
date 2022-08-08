@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.config;
+package io.sbm.config;
 
 import io.perl.config.LatencyConfig;
 

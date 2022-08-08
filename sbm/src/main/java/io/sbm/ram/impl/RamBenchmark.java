@@ -8,12 +8,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram.impl;
+package io.sbm.ram.impl;
 
 import io.sbk.api.Benchmark;
+import io.sbm.ram.RamPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
-import io.sbk.ram.RamPeriodicRecorder;
-import io.sbk.ram.RamRegistry;
+import io.sbm.ram.RamRegistry;
 import io.sbk.system.Printer;
 import io.state.State;
 import io.time.Time;

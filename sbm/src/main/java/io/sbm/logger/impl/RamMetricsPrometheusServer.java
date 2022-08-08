@@ -8,10 +8,11 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.logger.impl;
+package io.sbm.logger.impl;
 
-import io.sbk.logger.CountConnections;
+import io.sbm.logger.CountConnections;
 import io.sbk.logger.MetricsConfig;
+import io.sbk.logger.impl.PrometheusRWMetricsServer;
 import io.time.Time;
 
 import java.io.IOException;

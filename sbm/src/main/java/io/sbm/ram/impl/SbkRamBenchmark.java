@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.ram.impl;
+package io.sbm.ram.impl;
 
 
 import io.grpc.Server;
@@ -21,11 +21,11 @@ import io.perl.api.impl.HdrExtendedLatencyRecorder;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
-import io.sbk.config.RamConfig;
+import io.sbm.config.RamConfig;
+import io.sbm.logger.RamLogger;
+import io.sbm.ram.RamPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
-import io.sbk.logger.RamLogger;
-import io.sbk.params.RamParameterOptions;
-import io.sbk.ram.RamPeriodicRecorder;
+import io.sbm.params.RamParameterOptions;
 import io.sbk.system.Printer;
 import io.state.State;
 import io.time.Time;

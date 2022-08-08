@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram;
+package io.sbm.ram;
 
 import io.perl.api.TotalPeriodicWindow;
 import io.sbp.grpc.LatenciesRecord;

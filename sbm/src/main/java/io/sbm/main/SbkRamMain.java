@@ -8,9 +8,9 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.main;
+package io.sbm.main;
 
-import io.sbk.ram.impl.SbkRam;
+import io.sbm.ram.impl.SbkRam;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 

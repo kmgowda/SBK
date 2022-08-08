@@ -8,13 +8,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.logger;
+package io.sbm.params;
 
-import io.perl.api.ReportLatencies;
+import io.sbk.params.ParseInputOptions;
 
 /**
- * Interface RamLogger.
+ * Interface RamParameterOptions.
  */
-public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnections, WriteRequestsLogger,
-        ReadRequestsLogger {
+public non-sealed interface RamParameterOptions extends ParseInputOptions, RamParameters {
 }

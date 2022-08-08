@@ -7,14 +7,16 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.logger.impl;
+package io.sbm.logger.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.LatencyRecord;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
-import io.sbk.logger.RamLogger;
-import io.sbk.logger.SetRW;
+import io.sbm.logger.RamLogger;
+import io.sbm.logger.SetRW;
+import io.sbk.logger.impl.PrometheusLogger;
+import io.sbk.logger.impl.PrometheusRWMetricsServer;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;

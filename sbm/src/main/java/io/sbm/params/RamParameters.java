@@ -8,7 +8,9 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.params;
+package io.sbm.params;
+
+import io.sbk.params.ActionParameter;
 
 /**
  * Interface RamParameters.

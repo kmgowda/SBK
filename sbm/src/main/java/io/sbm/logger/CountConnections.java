@@ -8,10 +8,20 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.params;
+package io.sbm.logger;
 
 /**
- * Interface RamParameterOptions.
+ * Interface CountConnections.
  */
-public non-sealed interface RamParameterOptions extends ParseInputOptions, RamParameters {
+public interface CountConnections {
+
+    /**
+     * Increment.
+     */
+    void incrementConnections();
+
+    /**
+     * Decrement.
+     */
+    void decrementConnections();
 }

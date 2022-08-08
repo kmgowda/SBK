@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.ram.impl;
+package io.sbm.ram.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,12 +16,12 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
-import io.sbk.config.RamConfig;
+import io.sbm.config.RamConfig;
 import io.sbk.exception.HelpException;
-import io.sbk.logger.RamLogger;
-import io.sbk.logger.impl.RamPrometheusLogger;
-import io.sbk.params.RamParameterOptions;
-import io.sbk.params.impl.SbkRamParameters;
+import io.sbm.logger.RamLogger;
+import io.sbm.logger.impl.RamPrometheusLogger;
+import io.sbm.params.RamParameterOptions;
+import io.sbm.params.impl.SbkRamParameters;
 import io.sbk.system.Printer;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
@@ -95,10 +95,10 @@ final public class SbkRam {
         final RamLogger logger;
         final RamConfig ramConfig;
         final Time time;
-        final String version = io.sbk.ram.impl.SbkRam.class.getPackage().getImplementationVersion();
+        final String version = SbkRam.class.getPackage().getImplementationVersion();
         final String appName = Objects.requireNonNullElse(applicationName, RamConfig.NAME);
 
-        Printer.log.info(IOUtils.toString(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
+        Printer.log.info(IOUtils.toString(SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(RamConfig.DESC);
         Printer.log.info(RamConfig.NAME.toUpperCase() + " Version: " + version);
         Printer.log.info(RamConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
@@ -108,7 +108,7 @@ final public class SbkRam {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        ramConfig = mapper.readValue(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+        ramConfig = mapper.readValue(SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 RamConfig.class);
 
         // disable CSV

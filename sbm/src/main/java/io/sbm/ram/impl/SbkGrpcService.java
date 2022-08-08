@@ -8,16 +8,16 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.ram.impl;
+package io.sbm.ram.impl;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.ServiceGrpc;
-import io.sbk.logger.CountConnections;
-import io.sbk.params.RamParameters;
-import io.sbk.ram.RamRegistry;
+import io.sbm.logger.CountConnections;
+import io.sbm.params.RamParameters;
+import io.sbm.ram.RamRegistry;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 

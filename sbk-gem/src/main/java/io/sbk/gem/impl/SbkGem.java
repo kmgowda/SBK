@@ -18,12 +18,12 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
-import io.sbk.logger.RamLogger;
-import io.sbk.logger.impl.RamPrometheusLogger;
+import io.sbm.logger.RamLogger;
+import io.sbm.logger.impl.RamPrometheusLogger;
 import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
 import io.sbk.config.GemConfig;
-import io.sbk.config.RamConfig;
+import io.sbm.config.RamConfig;
 import io.sbk.data.DataType;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.GemBenchmark;
@@ -31,10 +31,11 @@ import io.sbk.params.GemParameterOptions;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.logger.GemLogger;
 import io.sbk.logger.impl.GemRamPrometheusLogger;
-import io.sbk.params.RamParameterOptions;
+import io.sbm.params.RamParameterOptions;
 import io.sbk.params.impl.SbkGemParameters;
-import io.sbk.ram.impl.SbkRamBenchmark;
-import io.sbk.params.impl.SbkRamParameters;
+import io.sbm.ram.impl.SbkRam;
+import io.sbm.ram.impl.SbkRamBenchmark;
+import io.sbm.params.impl.SbkRamParameters;
 import io.sbk.system.Printer;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
@@ -158,7 +159,7 @@ final public class SbkGem {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        ramConfig = mapper.readValue(io.sbk.ram.impl.SbkRam.class.getClassLoader().getResourceAsStream(RAM_CONFIG_FILE),
+        ramConfig = mapper.readValue(SbkRam.class.getClassLoader().getResourceAsStream(RAM_CONFIG_FILE),
                 RamConfig.class);
         gemConfig = mapper.readValue(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);

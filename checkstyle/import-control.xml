@@ -23,6 +23,7 @@
     <allow pkg="io.perl"/>
     <allow pkg="io.sbp"/>
     <allow pkg="io.sbk"/>
+    <allow pkg="io.sbm"/>
     <allow pkg="io.pravega"/>
     <allow pkg="lombok"/>
     <allow pkg="ch.qos.logback"/>

@@ -8,20 +8,27 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbk.logger;
+package io.sbm.ram;
+
+import io.sbp.grpc.LatenciesRecord;
 
 /**
- * Interface CountConnections.
+ * Interface RamRegistry.
  */
-public interface CountConnections {
+public interface RamRegistry {
 
     /**
-     * Increment.
+     * this method returns id.
+     *
+     * @return returns id
      */
-    void incrementConnections();
+    long getID();
 
     /**
-     * Decrement.
+     * Queue the records.
+     *
+     * @param record LatenciesRecord
      */
-    void decrementConnections();
+    void enQueue(LatenciesRecord record);
+
 }
