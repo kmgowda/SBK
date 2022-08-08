@@ -14,12 +14,13 @@ rootProject.name = 'sbk'
 include 'perl'
 include 'sbp'
 include 'sbk-api'
-include 'sbk-ram'
+include 'sbm'
+include 'sbk-yal'
 include 'sbk-gem'
 include 'sbk-gem-yal'
-include 'sbk-yal'
 
-// The 'driver-sbktemplate' is only the driver template; not for compilation
+
+// The 'driver-sbktemplate' is only the driver template; not for usage
 include 'driver-sbktemplate'
 
 apply from: "$rootDir/settings-drivers.gradle"

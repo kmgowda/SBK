@@ -26,7 +26,7 @@ import io.sbp.grpc.ClientID;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.LatenciesRecord;
 import io.sbp.grpc.ServiceGrpc;
-import io.sbk.logger.RamHostConfig;
+import io.sbk.logger.SbmHostConfig;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
@@ -40,13 +40,13 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class GrpcPrometheusLogger extends PrometheusLogger {
-    private final static String CONFIG_FILE = "ramhost.properties";
+    private final static String CONFIG_FILE = "sbmhost.properties";
     private final static int LATENCY_MAP_BYTES = 16;
 
     /**
      * <code>Creating RamHostConfig ramHostConfig</code>.
      */
-    private RamHostConfig ramHostConfig;
+    private SbmHostConfig sbmHostConfig;
     private boolean enable;
     private long clientID;
     private long seqNum;
@@ -89,31 +89,31 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            ramHostConfig = mapper.readValue(
+            sbmHostConfig = mapper.readValue(
                     GrpcPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                    RamHostConfig.class);
+                    SbmHostConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
-        maxLatencyBytes = ramHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
-        ramHostConfig.host = DISABLE_STRING;
-        params.addOption("ram", true, "SBK RAM host" +
-                "; '" + DISABLE_STRING + "' disables this option, default: " + ramHostConfig.host);
-        params.addOption("ramport", true, "SBK RAM Port" +
-                "; default: " + ramHostConfig.port);
-        //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
+        maxLatencyBytes = sbmHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
+        sbmHostConfig.host = DISABLE_STRING;
+        params.addOption("sbm", true, "SBM host" +
+                "; '" + DISABLE_STRING + "' disables this option, default: " + sbmHostConfig.host);
+        params.addOption("sbmport", true, "SBM Port" +
+                "; default: " + sbmHostConfig.port);
+        //params.addOption("blocking", true, "blocking calls to SBM; default: false");
     }
 
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        ramHostConfig.host = params.getOptionValue("ram", ramHostConfig.host);
-        enable = !ramHostConfig.host.equalsIgnoreCase("no");
+        sbmHostConfig.host = params.getOptionValue("sbm", sbmHostConfig.host);
+        enable = !sbmHostConfig.host.equalsIgnoreCase("no");
         if (!enable) {
             return;
         }
-        ramHostConfig.port = Integer.parseInt(params.getOptionValue("ramport", Integer.toString(ramHostConfig.port)));
+        sbmHostConfig.port = Integer.parseInt(params.getOptionValue("sbmport", Integer.toString(sbmHostConfig.port)));
         //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
         blocking = false;
         exceptionHandler = null;
@@ -129,7 +129,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         this.ramWriteRequestsArray = new AtomicLongArray(maxWriterRequestIds);
         this.ramReadBytesArray = new AtomicLongArray(maxReaderRequestIds);
         this.ramReadRequestsArray = new AtomicLongArray(maxReaderRequestIds);
-        channel = ManagedChannelBuilder.forTarget(ramHostConfig.host + ":" + ramHostConfig.port).usePlaintext().build();
+        channel = ManagedChannelBuilder.forTarget(sbmHostConfig.host + ":" + sbmHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
         try {
@@ -139,23 +139,23 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
             throw new IOException("GRPC GetConfig failed");
         }
         if (!config.getStorageName().equalsIgnoreCase(storageName)) {
-            throw new IllegalArgumentException("SBK RAM storage name : " + config.getStorageName()
+            throw new IllegalArgumentException("SBM storage name : " + config.getStorageName()
                     + " ,Supplied storage name: " + storageName + " are not same!");
         }
         if (!config.getAction().name().equalsIgnoreCase(action.name())) {
-            throw new IllegalArgumentException("SBK RAM action: " + config.getAction().name()
+            throw new IllegalArgumentException("SBM action: " + config.getAction().name()
                     + " ,Supplied action : " + action.name() + " are not same!");
         }
         if (!config.getTimeUnit().name().equalsIgnoreCase(time.getTimeUnit().name())) {
-            throw new IllegalArgumentException("SBK RAM Time Unit: " + config.getTimeUnit().name()
+            throw new IllegalArgumentException("SBM Time Unit: " + config.getTimeUnit().name()
                     + " ,Supplied Time Unit : " + time.getTimeUnit().name() + " are not same!");
         }
         if (config.getMinLatency() != getMinLatency()) {
-            Printer.log.warn("SBK RAM , min latency : " + config.getMinLatency()
+            Printer.log.warn("SBM , min latency : " + config.getMinLatency()
                     + ", local min latency: " + getMinLatency() + " are not same!");
         }
         if (config.getMaxLatency() != getMaxLatency()) {
-            Printer.log.warn("SBK RAM , min latency : " + config.getMaxLatency()
+            Printer.log.warn("SBM, min latency : " + config.getMaxLatency()
                     + ", local min latency: " + getMaxLatency() + " are not same!");
         }
         try {
@@ -166,7 +166,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         }
 
         if (clientID < 0) {
-            String errMsg = "Invalid client id: " + clientID + " received from SBK RAM";
+            String errMsg = "Invalid client id: " + clientID + " received from SBM Server";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }

@@ -28,7 +28,7 @@ COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
 COPY --chown=root:root perl ${APP_HOME}/perl
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
 
-COPY --chown=root:root sbk-ram ${APP_HOME}/sbk-ram
+COPY --chown=root:root sbm ${APP_HOME}/sbm
 
 ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  distTar --no-daemon --info --stacktrace
@@ -36,15 +36,15 @@ RUN gradle  distTar --no-daemon --info --stacktrace
 # Runtime Container
 FROM openjdk:17-jdk-slim as SbkApp
 ENV APP_NAME=sbk
-ENV RAM_APP_NAME=sbk-ram
-ENV RAM_APP_HOME=/opt/${APP_NAME}/${RAM_APP_NAME}
+ENV SBM_APP_NAME=sbm
+ENV SBM_APP_HOME=/opt/${APP_NAME}/${SBM_APP_NAME}
 
-COPY --from=sbkGradleBuilder ${RAM_APP_HOME}/build/distributions/${RAM_APP_NAME}-*.tar /opt/${RAM_APP_NAME}.tar
+COPY --from=sbkGradleBuilder ${SBM_APP_HOME}/build/distributions/${SBM_APP_NAME}-*.tar /opt/${SBM_APP_NAME}.tar
 
-RUN tar -xvf /opt/${RAM_APP_NAME}.tar -C /opt/.
+RUN tar -xvf /opt/${SBM_APP_NAME}.tar -C /opt/.
 
-RUN mv /opt/${RAM_APP_NAME}-* /opt/${RAM_APP_NAME}
+RUN mv /opt/${SBM_APP_NAME}-* /opt/${SBM_APP_NAME}
 
 EXPOSE 9719 9717
 
-ENTRYPOINT ["/opt/sbk-ram/bin/sbk-ram"]
+ENTRYPOINT ["/opt/sbm/bin/sbm"]

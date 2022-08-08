@@ -20,7 +20,7 @@ You may obtain a copy of the License at
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
 [![SBK-YAL](https://img.shields.io/badge/SBK-YAL-orange)](sbk-yal)
-[![SBK-RAM](https://img.shields.io/badge/SBK-RAM-orange)](sbk-ram)
+[![SBM](https://img.shields.io/badge/SBK-%20SBM-orange)](sbm)
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM-orange)](sbk-gem)
 [![SBK-GEM](https://img.shields.io/badge/SBK-GEM--YAL-orange)](sbk-gem-yal)
 
@@ -33,11 +33,11 @@ It massively writes the data to the storage system and reads the data from the s
 The latency quartiles and percentiles are calculated for complete data written/read without any sampling; hence the 
 percentiles are 100% accurate.
 
-SBK can be deployed in  distributed nodes using applications [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
+SBK can be deployed in  distributed nodes using applications [**SBM**](sbm), [**SBK-GEM**](sbk-gem) and 
 [**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggregated 
-into one master node called SBK-RAM (SBK - Results Aggregation Monitor).
+into one master node called SBM (Storage Benchmark Monitor).
 
-![SBK Eco System](images/sbk-ram.png)
+![SBK Eco System](images/sbm.png)
 
 The design principle of SBK is the **Performance Benchmarking of _'Any Storage System'_ with _'Any Type of data payload'_ and _'Any Time Stamp'_**,
 because, the SBK is not specific to particular type of storage system,
@@ -297,7 +297,7 @@ metrics.
 
 
 ## Distributed SBK
-SBK can be deployed in a distributed clusters using [**SBK-RAM**](sbk-ram), [**SBK-GEM**](sbk-gem) and 
+SBK can be deployed in a distributed clusters using [**SBM**](sbm), [**SBK-GEM**](sbk-gem) and 
 [**SBK-GEM-YAL**](sbk-gem-yal).
 
 ## SBK Docker Containers
@@ -386,11 +386,11 @@ If you want to run the Grafana and prometheus as Kubernetes pods, then use [Graf
 
 | Network Port 	 | Description                               	 |
 |----------------|---------------------------------------------|
-| 9717         	 | SBK-RAM GRPC server Port                  	 |
+| 9717         	 | SBM GRPC server Port                  	     |
 | 9718         	 | SBK performance metrics to Prometheus     	 |
-| 9719         	 | SBK-RAM performance metrics to Prometheus 	 |
+| 9719         	 | SBM performance metrics to Prometheus 	     |
 | 8718         	 | SBK JVM/JMX metrics to Prometheus         	 |
-| 8719         	 | SBK-RAM JVM/JMX metrics to Prometheus     	 |
+| 8719         	 | SBM JVM/JMX metrics to Prometheus       	   |
 
 
 ## SBK Execution Modes

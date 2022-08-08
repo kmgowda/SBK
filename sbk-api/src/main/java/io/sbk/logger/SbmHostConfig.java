@@ -1,5 +1,5 @@
 /**
- * Copyright (c) KMG. All Rights Reserved..
+ * Copyright (c) KMG. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -10,11 +10,8 @@
 
 package io.sbk.logger;
 
-import io.sbk.params.GetArguments;
-import io.sbm.logger.RamLogger;
-
-/**
- * Interface GemLogger.
- */
-public interface GemLogger extends RamLogger, GetArguments {
+public final class SbmHostConfig {
+    public String host;
+    public int port;
+    public int maxRecordSizeMB;
 }

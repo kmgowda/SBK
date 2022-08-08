@@ -38,17 +38,17 @@ scrape_configs:
       - files:
         - 'targets.json'
 
-  - job_name: 'sbk-ram'
+  - job_name: 'sbm'
     file_sd_configs:
       - files:
-          - 'ram-targets.json'
+          - 'sbm-targets.json'
 
   - job_name: 'sbk-jmx'
     file_sd_configs:
       - files:
           - 'jmx-targets.json'
 
-  - job_name: 'sbk-ram-jmx'
+  - job_name: 'sbm-jmx'
     file_sd_configs:
       - files:
-          - 'ram-jmx-targets.json'
+          - 'sbm-jmx-targets.json'
