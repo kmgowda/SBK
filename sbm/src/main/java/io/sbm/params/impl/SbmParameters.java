@@ -40,7 +40,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
     private int port;
 
     /**
-     * Constructor SbkRamParameters initializing all values.
+     * Constructor SbmParameters initializing all values.
      *
      * @param name              String
      * @param port              int
