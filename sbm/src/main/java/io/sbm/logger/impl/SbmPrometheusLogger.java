@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
     final static String CONFIG_FILE = "sbm-metrics.properties";
-    final static String SBM_PREFIX = "Sbm";
+    final static String SBM_PREFIX = "SBM";
     final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
