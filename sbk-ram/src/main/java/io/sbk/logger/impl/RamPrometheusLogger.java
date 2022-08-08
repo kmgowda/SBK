@@ -191,7 +191,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     @Override
     public void setMaxWriters(int val) {
-        maxWriters.set(val);
+        maxWriters.set(Math.max(maxWriters.get(), val));
     }
 
     @Override
@@ -201,6 +201,6 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     @Override
     public void setMaxReaders(int val) {
-        maxReaders.set(val);
+        maxReaders.set(Math.max(maxReaders.get(), val));
     }
 }
