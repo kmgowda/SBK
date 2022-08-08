@@ -11,7 +11,7 @@
 package io.sbk.ram.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbk.grpc.LatenciesRecord;
+import io.sbp.grpc.LatenciesRecord;
 import io.sbk.ram.RamPeriodicRecorder;
 import io.sbk.ram.RamRegistry;
 import io.sbk.system.Printer;

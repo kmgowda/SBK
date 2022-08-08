@@ -12,9 +12,9 @@ package io.sbk.ram.impl;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
-import io.sbk.grpc.ClientID;
-import io.sbk.grpc.Config;
-import io.sbk.grpc.ServiceGrpc;
+import io.sbp.grpc.ClientID;
+import io.sbp.grpc.Config;
+import io.sbp.grpc.ServiceGrpc;
 import io.sbk.logger.CountConnections;
 import io.sbk.params.RamParameters;
 import io.sbk.ram.RamRegistry;
@@ -63,7 +63,7 @@ final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
 
     @Override
     public void getConfig(com.google.protobuf.Empty request,
-                          io.grpc.stub.StreamObserver<io.sbk.grpc.Config> responseObserver) {
+                          io.grpc.stub.StreamObserver<io.sbp.grpc.Config> responseObserver) {
         if (connections.get() < params.getMaxConnections()) {
             responseObserver.onNext(config);
             responseObserver.onCompleted();
@@ -74,8 +74,8 @@ final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public void registerClient(io.sbk.grpc.Config request,
-                               @NotNull io.grpc.stub.StreamObserver<io.sbk.grpc.ClientID> responseObserver) {
+    public void registerClient(io.sbp.grpc.Config request,
+                               @NotNull io.grpc.stub.StreamObserver<io.sbp.grpc.ClientID> responseObserver) {
         responseObserver.onNext(ClientID.newBuilder().setId(registry.getID()).build());
         responseObserver.onCompleted();
         countConnections.incrementConnections();
@@ -84,7 +84,7 @@ final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
 
 
     @Override
-    public void addLatenciesRecord(io.sbk.grpc.LatenciesRecord request,
+    public void addLatenciesRecord(io.sbp.grpc.LatenciesRecord request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         try {
             registry.enQueue(request);
@@ -101,7 +101,7 @@ final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public void closeClient(io.sbk.grpc.ClientID request,
+    public void closeClient(io.sbp.grpc.ClientID request,
                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         countConnections.decrementConnections();
         connections.decrementAndGet();

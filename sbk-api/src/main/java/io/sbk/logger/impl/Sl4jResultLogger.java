@@ -25,11 +25,36 @@ public class Sl4jResultLogger extends SystemLogger {
     }
 
     @Override
-    protected void print(String prefix, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                         long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        log.info(buildResultString(new StringBuilder(prefix), seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
-                minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues));
+    public void print(int writers, int maxWriters, int readers, int maxReaders,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
+                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long records, double recsPerSec, double mbPerSec,
+                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        StringBuilder out = new StringBuilder(prefix);
+        appendResultString(out, writers, maxWriters, readers, maxReaders,
+                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        log.info(out.toString());
     }
 
+    @Override
+    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+                           long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                           double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
+                           long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                           long records, double recsPerSec, double mbPerSec,
+                           double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        StringBuilder out = new StringBuilder("Total " + prefix);
+        appendResultString(out, writers, maxWriters, readers, maxReaders,
+                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+        log.info(out.toString());
+    }
 }

@@ -11,8 +11,8 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.sbk.grpc";
-option java_outer_classname = "SbkGrpc";
+option java_package = "io.sbp.grpc";
+option java_outer_classname = "SbpGrpc";
 
 import "google/protobuf/empty.proto";
 

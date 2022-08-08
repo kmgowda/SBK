@@ -10,7 +10,7 @@
 
 package io.sbk.ram;
 
-import io.sbk.grpc.LatenciesRecord;
+import io.sbp.grpc.LatenciesRecord;
 
 /**
  * Interface RamRegistry.

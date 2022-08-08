@@ -108,36 +108,36 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
 
-    private void print(String ramPrefix, String prefix, int writers, int maxWriters, int readers, int maxReaders,
-                       double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
-                       double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
-                       long readRequests, double readRequestsPerSec,
-                       double seconds, long bytes, long records, double recsPerSec,
-                       double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
-                       long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+    public void print(String ramPrefix, String prefix, int writers, int maxWriters, int readers, int maxReaders,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
+                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long records, double recsPerSec, double mbPerSec,
+                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder(ramPrefix);
         out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
-        appendWritesAndReaders(out, writers, maxWriters, readers, maxReaders);
-        appendWriteAndReadRequests(out, writeRequestsMB, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
-                readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec);
-        appendResults(out, timeUnitName, percentileNames, (long) seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
-        out.append(".\n\n");
+        appendResultString(out, writers, maxWriters, readers, maxReaders,
+                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
 
     }
 
-    public void print(String prefix, int writers, int maxWriters, int readers, int maxReaders,
-                      double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
-                      double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+    @Override
+    public void print(int writers, int maxWriters, int readers, int maxReaders,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writesRequests,
+                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                       long readRequests, double readRequestsPerSec, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         print(SBK_RAM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
-                writeRequestsMB, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
-                readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                writeRequestBytes, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
+                readRequests, readRequestsMbPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
@@ -152,16 +152,17 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         }
     }
 
-    public void printTotal(String prefix, int writers, int maxWriters, int readers, int maxReaders,
-                           double writeRequestsMB, double writeRequestsMbPerSec, long writesRequests,
-                           double writeRequestsPerSec, double readRequestsMB, double readRequestsMBPerSec,
+    @Override
+    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+                           long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                           double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
                            long readRequests, double readRequestsPerSec, double seconds, long bytes,
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         print("Total : " + SBK_RAM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
-                writeRequestsMB, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
-                readRequestsMB, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
+                readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
@@ -190,7 +191,7 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     @Override
     public void setMaxWriters(int val) {
-        maxWriters.set(val);
+        maxWriters.set(Math.max(maxWriters.get(), val));
     }
 
     @Override
@@ -200,6 +201,6 @@ public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     @Override
     public void setMaxReaders(int val) {
-        maxReaders.set(val);
+        maxReaders.set(Math.max(maxReaders.get(), val));
     }
 }

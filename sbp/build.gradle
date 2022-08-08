@@ -12,7 +12,6 @@
 apply plugin: 'java-library'
 apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
-apply plugin: "com.github.spotbugs"
 
 buildscript {
     repositories {
@@ -32,21 +31,16 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 dependencies {
-    api project(":perl")
-    api project(":sbp")
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
-    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
 }
 
 
 generateJavadoc {
     // follow the package path , it should not be folder path.
     // but dont use . (dot) in the path
-    exclude 'io/sbk/grpc/ServiceGrpc.java'
-    exclude 'io/sbk/grpc/LatenciesRecordOrBuilder.java'
-    exclude 'io/sbk/grpc/LatenciesRecord.java'
+    exclude 'io/sbp/grpc/ServiceGrpc.java'
+    exclude 'io/sbp/grpc/LatenciesRecordOrBuilder.java'
+    exclude 'io/sbp/grpc/LatenciesRecord.java'
 }
 
 task updateDocs(dependsOn: javadoc) {

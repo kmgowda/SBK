@@ -22,7 +22,7 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
 import io.sbk.config.RamConfig;
-import io.sbk.grpc.LatenciesRecord;
+import io.sbp.grpc.LatenciesRecord;
 import io.sbk.logger.RamLogger;
 import io.sbk.params.RamParameterOptions;
 import io.sbk.ram.RamPeriodicRecorder;
