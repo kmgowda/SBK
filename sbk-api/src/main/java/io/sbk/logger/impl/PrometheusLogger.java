@@ -28,7 +28,7 @@ import java.io.InputStream;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class PrometheusLogger extends CSVLogger {
+public abstract class PrometheusLogger extends CSVLogger {
     final private static String CONFIG_FILE = "metrics.properties";
     protected MetricsConfig metricsConfig;
     private boolean contextDisabled;
