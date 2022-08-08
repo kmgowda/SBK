@@ -29,7 +29,7 @@ public sealed interface RamParameters extends ActionParameter permits RamParamet
      *
      * @return port number.
      */
-    int getRamPort();
+    int getPort();
 
     /**
      * get Max Connections.

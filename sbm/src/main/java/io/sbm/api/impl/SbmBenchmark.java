@@ -88,7 +88,7 @@ final public class SbmBenchmark implements Benchmark {
         benchmark = new RamBenchmark(sbmConfig.maxQueues, sbmConfig.idleMS, time, latencyRecorder,
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
         service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
-        server = ServerBuilder.forPort(params.getRamPort()).addService(service).directExecutor().build();
+        server = ServerBuilder.forPort(params.getPort()).addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
         state = State.BEGIN;
     }

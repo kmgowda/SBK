@@ -37,7 +37,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
     private int maxConnections;
 
     @Getter
-    private int ramPort;
+    private int port;
 
     /**
      * Constructor SbkRamParameters initializing all values.
@@ -49,13 +49,13 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
     public SbmParameters(String name, int port, int maxConnections) {
         super(name, SbmConfig.DESC);
         this.maxConnections = maxConnections;
-        this.ramPort = port;
+        this.port = port;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");
         addOption("action", true,
                 """
                             action [r: read, w: write, wr: write and read, wro: write but only read],
                             default: r""");
-        addOption("ramport", true, "RAM port number; default: " + ramPort);
+        addOption("port", true, "SBM port number; default: " + this.port);
         addOption("max", true, "Maximum number of connections; default: " + maxConnections);
     }
 
@@ -78,7 +78,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
             default -> Action.Reading;
         };
         maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
-        ramPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(ramPort)));
+        port = Integer.parseInt(getOptionValue("port", Integer.toString(port)));
     }
 
 }
