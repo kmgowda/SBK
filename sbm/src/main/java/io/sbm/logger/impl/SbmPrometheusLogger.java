@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
     final static String CONFIG_FILE = "sbm-metrics.properties";
-    final static String SBK_RAM_PREFIX = "Sbm";
+    final static String SBM_PREFIX = "Sbm";
     final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
@@ -137,7 +137,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        print(SBK_RAM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
+        print(SBM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec,
                 readRequests, readRequestsMbPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
@@ -148,7 +148,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                     maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
         if (csvEnable) {
-            writeToCSV(SBK_RAM_PREFIX, REGULAR_PRINT, connections.get(), maxConnections.get(),
+            writeToCSV(SBM_PREFIX, REGULAR_PRINT, connections.get(), maxConnections.get(),
                     (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
                     lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
@@ -162,14 +162,14 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        print("Total : " + SBK_RAM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
+        print("Total : " + SBM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
                 readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
         if (csvEnable) {
-            writeToCSV(SBK_RAM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),
+            writeToCSV(SBM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),
                     (long) seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency, invalid,
                     lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }

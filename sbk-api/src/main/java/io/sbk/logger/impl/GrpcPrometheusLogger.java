@@ -102,7 +102,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                 "; '" + DISABLE_STRING + "' disables this option, default: " + sbmHostConfig.host);
         params.addOption("sbmport", true, "SBM Port" +
                 "; default: " + sbmHostConfig.port);
-        //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
+        //params.addOption("blocking", true, "blocking calls to SBM; default: false");
     }
 
     @Override
@@ -139,23 +139,23 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
             throw new IOException("GRPC GetConfig failed");
         }
         if (!config.getStorageName().equalsIgnoreCase(storageName)) {
-            throw new IllegalArgumentException("SBK RAM storage name : " + config.getStorageName()
+            throw new IllegalArgumentException("SBM storage name : " + config.getStorageName()
                     + " ,Supplied storage name: " + storageName + " are not same!");
         }
         if (!config.getAction().name().equalsIgnoreCase(action.name())) {
-            throw new IllegalArgumentException("SBK RAM action: " + config.getAction().name()
+            throw new IllegalArgumentException("SBM action: " + config.getAction().name()
                     + " ,Supplied action : " + action.name() + " are not same!");
         }
         if (!config.getTimeUnit().name().equalsIgnoreCase(time.getTimeUnit().name())) {
-            throw new IllegalArgumentException("SBK RAM Time Unit: " + config.getTimeUnit().name()
+            throw new IllegalArgumentException("SBM Time Unit: " + config.getTimeUnit().name()
                     + " ,Supplied Time Unit : " + time.getTimeUnit().name() + " are not same!");
         }
         if (config.getMinLatency() != getMinLatency()) {
-            Printer.log.warn("SBK RAM , min latency : " + config.getMinLatency()
+            Printer.log.warn("SBM , min latency : " + config.getMinLatency()
                     + ", local min latency: " + getMinLatency() + " are not same!");
         }
         if (config.getMaxLatency() != getMaxLatency()) {
-            Printer.log.warn("SBK RAM , min latency : " + config.getMaxLatency()
+            Printer.log.warn("SBM, min latency : " + config.getMaxLatency()
                     + ", local min latency: " + getMaxLatency() + " are not same!");
         }
         try {
@@ -166,7 +166,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         }
 
         if (clientID < 0) {
-            String errMsg = "Invalid client id: " + clientID + " received from SBK RAM";
+            String errMsg = "Invalid client id: " + clientID + " received from SBM Server";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }

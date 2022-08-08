@@ -85,8 +85,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
         addOption("copy", true, "Copy the SBK package to remote hosts; default: " + config.copy);
         addOption("delete", true, "Delete SBK package after benchmark; default: " + config.delete);
-        addOption("localhost", true, "this local RAM host name, default: " + localHost);
-        addOption("sbmPort", true, "RAM port number; default: " + this.sbmPort);
+        addOption("localhost", true, "this local SBM host name, default: " + localHost);
+        addOption("sbmPort", true, "SBM port number; default: " + this.sbmPort);
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
                 "-copy", "-delete", "-localhost", "-sbmPort"};
         this.parsedArgs = null;

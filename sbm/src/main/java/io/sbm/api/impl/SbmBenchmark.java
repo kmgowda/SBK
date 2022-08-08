@@ -153,7 +153,7 @@ final public class SbmBenchmark implements Benchmark {
             return retFuture.toCompletableFuture();
         }
         state = State.RUN;
-        Printer.log.info("SBK RAM Benchmark Started");
+        Printer.log.info("SBM Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
         benchmark.start();
         server.start();
@@ -177,7 +177,7 @@ final public class SbmBenchmark implements Benchmark {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Printer.log.info("SBK RAM Benchmark Shutdown");
+            Printer.log.info("SBM Shutdown");
             retFuture.complete(null);
         }
     }

@@ -46,9 +46,9 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
     String getLocalHost();
 
     /**
-     * to get ram port number.
+     * to get SBM port number.
      *
-     * @return ram port number.
+     * @return SBM port number.
      */
     int getSbmPort();
 

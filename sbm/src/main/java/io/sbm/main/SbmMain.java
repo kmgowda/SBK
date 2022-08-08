@@ -24,7 +24,7 @@ import java.util.concurrent.TimeoutException;
 public final class SbmMain {
 
     /**
-     * The main method for sbk-ram module.
+     * The main method for SBM module.
      *
      * @param args String[]
      */

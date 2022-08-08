@@ -306,7 +306,7 @@ final public class SbkGem {
         ramArgsList.add(Integer.toString(params.getConnections().length));
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
-        Printer.log.info("Arguments to  SBK-RAM: " + Arrays.toString(ramArgs));
+        Printer.log.info("Arguments to SBM: " + Arrays.toString(ramArgs));
 
         final RamLogger ramLogger = new SbmPrometheusLogger();
 
@@ -320,7 +320,7 @@ final public class SbkGem {
             ramParams.printHelp();
             throw ex;
         }
-        Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification Success..");
+        Printer.log.info("SBK-GEM: Arguments to SBM command verification Success..");
         return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, logger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }
