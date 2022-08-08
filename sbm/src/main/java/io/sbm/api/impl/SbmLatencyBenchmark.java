@@ -11,9 +11,9 @@
 package io.sbm.api.impl;
 
 import io.sbk.api.Benchmark;
-import io.sbm.api.RamPeriodicRecorder;
+import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
-import io.sbm.api.RamRegistry;
+import io.sbm.api.SbmRegistry;
 import io.sbk.system.Printer;
 import io.state.State;
 import io.time.Time;
@@ -30,11 +30,11 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Class RamBenchmark.
  */
-final public class RamBenchmark implements Benchmark, RamRegistry {
+final public class SbmLatencyBenchmark implements Benchmark, SbmRegistry {
     private final int idleMS;
     private final Time time;
     private final int reportingIntervalMS;
-    private final RamPeriodicRecorder window;
+    private final SbmPeriodicRecorder window;
     private final ConcurrentLinkedQueue<LatenciesRecord>[] cQueues;
     private final AtomicLong counter;
     private final CompletableFuture<Void> retFuture;
@@ -54,7 +54,7 @@ final public class RamBenchmark implements Benchmark, RamRegistry {
      * @param window                RamPeriodicRecorder
      * @param reportingIntervalMS   int
      */
-    public RamBenchmark(int maxQueue, int idleMS, Time time, RamPeriodicRecorder window, int reportingIntervalMS) {
+    public SbmLatencyBenchmark(int maxQueue, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS) {
         this.idleMS = idleMS;
         this.window = window;
         this.time = time;

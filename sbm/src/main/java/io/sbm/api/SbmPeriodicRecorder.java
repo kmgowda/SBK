@@ -10,25 +10,20 @@
 
 package io.sbm.api;
 
+import io.perl.api.TotalPeriodicWindow;
 import io.sbp.grpc.LatenciesRecord;
 
 /**
- * Interface RamRegistry.
+ * Interface for recording latencies.
  */
-public interface RamRegistry {
+public interface SbmPeriodicRecorder extends TotalPeriodicWindow {
 
     /**
-     * this method returns id.
+     * Record the Event/record.
      *
-     * @return returns id
+     * @param currentTime Current Time
+     * @param record      Latencies Record
      */
-    long getID();
-
-    /**
-     * Queue the records.
-     *
-     * @param record LatenciesRecord
-     */
-    void enQueue(LatenciesRecord record);
+    void record(long currentTime, LatenciesRecord record);
 
 }

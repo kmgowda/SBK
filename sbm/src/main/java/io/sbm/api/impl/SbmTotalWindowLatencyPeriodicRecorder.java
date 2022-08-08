@@ -16,7 +16,7 @@ import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.Print;
 import io.perl.api.ReportLatencies;
 import io.perl.api.impl.TotalLatencyRecordWindow;
-import io.sbm.api.RamPeriodicRecorder;
+import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
 import io.sbk.logger.ReadRequestsLogger;
 import io.sbm.logger.SetRW;
@@ -28,8 +28,8 @@ import java.util.HashMap;
 /**
  * Class RamTotalWindowLatencyPeriodicRecorder.
  */
-final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWindow
-        implements ReportLatencies, RamPeriodicRecorder {
+final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRecordWindow
+        implements ReportLatencies, SbmPeriodicRecorder {
     final private ReportLatencies reportLatencies;
     final private SetRW setRW;
 
@@ -50,7 +50,7 @@ final public class RamTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * @param rLogger               Read Requests Logger
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
-    public RamTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
+    public SbmTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                                  Print windowLogger, Print totalLogger,
                                                  ReportLatencies reportLatencies,
                                                  SetRW setRW,

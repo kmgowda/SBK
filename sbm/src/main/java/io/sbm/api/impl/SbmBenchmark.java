@@ -23,7 +23,7 @@ import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
 import io.sbm.config.SbmConfig;
 import io.sbm.logger.RamLogger;
-import io.sbm.api.RamPeriodicRecorder;
+import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.system.Printer;
@@ -50,10 +50,10 @@ final public class SbmBenchmark implements Benchmark {
     final private RamLogger logger;
     final private RamParameterOptions params;
     final private LinkedBlockingQueue<LatenciesRecord> queue;
-    final private RamPeriodicRecorder latencyRecorder;
+    final private SbmPeriodicRecorder latencyRecorder;
     final private Server server;
     final private SbmGrpcService service;
-    final private RamBenchmark benchmark;
+    final private SbmLatencyBenchmark benchmark;
     final private double[] percentileFractions;
     final private CompletableFuture<Void> retFuture;
 
@@ -85,7 +85,7 @@ final public class SbmBenchmark implements Benchmark {
 
         queue = new LinkedBlockingQueue<>();
         latencyRecorder = createLatencyRecorder();
-        benchmark = new RamBenchmark(sbmConfig.maxQueues, sbmConfig.idleMS, time, latencyRecorder,
+        benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, sbmConfig.idleMS, time, latencyRecorder,
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
         service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
         server = ServerBuilder.forPort(params.getPort()).addService(service).directExecutor().build();
@@ -94,7 +94,7 @@ final public class SbmBenchmark implements Benchmark {
     }
 
     @Contract(" -> new")
-    private @NotNull RamPeriodicRecorder createLatencyRecorder() {
+    private @NotNull SbmPeriodicRecorder createLatencyRecorder() {
         final LatencyRecordWindow window = PerlBuilder.buildLatencyRecordWindow(sbmConfig, time,
                 logger.getMinLatency(), logger.getMaxLatency(), percentileFractions);
         final LatencyRecordWindow totalWindow;
@@ -125,7 +125,7 @@ final public class SbmBenchmark implements Benchmark {
             Printer.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new RamTotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
+        return new SbmTotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
                 logger, logger, logger, logger);
     }
 

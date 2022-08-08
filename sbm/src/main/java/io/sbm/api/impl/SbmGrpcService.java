@@ -17,7 +17,7 @@ import io.sbp.grpc.Config;
 import io.sbp.grpc.ServiceGrpc;
 import io.sbm.logger.CountConnections;
 import io.sbm.params.RamParameters;
-import io.sbm.api.RamRegistry;
+import io.sbm.api.SbmRegistry;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +31,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger connections;
     private final Config config;
     private final CountConnections countConnections;
-    private final RamRegistry registry;
+    private final SbmRegistry registry;
     private final RamParameters params;
 
 
@@ -46,7 +46,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      * @param registry              RamRegistry
      */
     public SbmGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
-                          CountConnections countConnections, RamRegistry registry) {
+                          CountConnections countConnections, SbmRegistry registry) {
         super();
         connections = new AtomicInteger(0);
         Config.Builder builder = Config.newBuilder();
