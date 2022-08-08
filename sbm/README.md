@@ -9,16 +9,17 @@ You may obtain a copy of the License at
 -->
 # SBM : Storage Benchmark Monitor
 
-[![Api](https://img.shields.io/badge/SBK--RAM-API-brightgreen)](https://kmgowda.github.io/SBK/sbm/javadoc/index.html)
-[![SBM Dockers](https://img.shields.io/badge/SBK--RAM-Dockers-blue)](https://hub.docker.com/r/kmgowda/sbm)
+[![Api](https://img.shields.io/badge/SBM-API-brightgreen)](https://kmgowda.github.io/SBK/sbm/javadoc/index.html)
+[![SBM Dockers](https://img.shields.io/badge/SBM-Dockers-blue)](https://hub.docker.com/r/kmgowda/sbm)
 
-The SBM(Storage Benchmark Kit)  combines the performance results supplied from
+The SBM(Storage Benchmark Monitor)  combines the performance results supplied from
 multiple SBK instances. The SBM is the GRPC Server. Multiple SBK instances can log the performance results to a
 single SBM Server. The SBM determines the cumulative throughput and latency percentile values. Each SBK
 instance reports all the latency values in bulk and SBM integrates all latency records and determines the
 performance values for the whole SBK cluster (multi SBK instances). The SBM is useful if you want to stress the
 storage server / Storage cluster with multiple storage clients (SBK instances) and analyse the throughput and
 latency percentiles for the entire storage cluster/server. SBM logs the integrated results to standard output device/logger and to the grafana through prometheus metrics.
+SBM is also called as SBK-RAM: Results Aggregation monitor.
 
 ## Build SBM
 SBM is a submodule/project of the SBK framework. If you [build SBK](./../README.md#build-sbk), it builds the SBM server too.
