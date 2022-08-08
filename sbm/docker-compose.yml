@@ -34,12 +34,12 @@ services:
     ports:
       - "3000:3000"
 
-  sbk-ram:
+  sbm:
     build:
       context: ./..
-      dockerfile: ./dockers/sbk-ram
-    container_name: sbk-ram
-    hostname: sbk-ram
+      dockerfile: ./dockers/sbm
+    container_name: sbm
+    hostname: sbm
     depends_on:
       - prometheus
       - grafana
