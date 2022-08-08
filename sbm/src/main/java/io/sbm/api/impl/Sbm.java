@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbm.ram.impl;
+package io.sbm.api.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,12 +16,12 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
-import io.sbm.config.RamConfig;
+import io.sbm.config.SbmConfig;
 import io.sbk.exception.HelpException;
 import io.sbm.logger.RamLogger;
 import io.sbm.logger.impl.RamPrometheusLogger;
 import io.sbm.params.RamParameterOptions;
-import io.sbm.params.impl.SbkRamParameters;
+import io.sbm.params.impl.SbmParameters;
 import io.sbk.system.Printer;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK Server.
  */
-final public class SbkRam {
+final public class Sbm {
     final static String CONFIG_FILE = "ram.properties";
     final static String BANNER_FILE = "ram-banner.txt";
 
@@ -93,29 +93,29 @@ final public class SbkRam {
             IOException, HelpException {
         final RamParameterOptions params;
         final RamLogger logger;
-        final RamConfig ramConfig;
+        final SbmConfig sbmConfig;
         final Time time;
-        final String version = SbkRam.class.getPackage().getImplementationVersion();
-        final String appName = Objects.requireNonNullElse(applicationName, RamConfig.NAME);
+        final String version = Sbm.class.getPackage().getImplementationVersion();
+        final String appName = Objects.requireNonNullElse(applicationName, SbmConfig.NAME);
 
-        Printer.log.info(IOUtils.toString(SbkRam.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
-        Printer.log.info(RamConfig.DESC);
-        Printer.log.info(RamConfig.NAME.toUpperCase() + " Version: " + version);
-        Printer.log.info(RamConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
+        Printer.log.info(IOUtils.toString(Sbm.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
+        Printer.log.info(SbmConfig.DESC);
+        Printer.log.info(SbmConfig.NAME.toUpperCase() + " Version: " + version);
+        Printer.log.info(SbmConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        ramConfig = mapper.readValue(SbkRam.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                RamConfig.class);
+        sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+                SbmConfig.class);
 
         // disable CSV
-        ramConfig.csv = false;
+        sbmConfig.csv = false;
         logger = Objects.requireNonNullElseGet(outLogger, RamPrometheusLogger::new);
 
-        params = new SbkRamParameters(appName, ramConfig.port, ramConfig.maxConnections);
+        params = new SbmParameters(appName, sbmConfig.port, sbmConfig.maxConnections);
         logger.addArgs(params);
         try {
             params.parseArgs(args);
@@ -130,7 +130,7 @@ final public class SbkRam {
         }
 
         time = PerlBuilder.buildTime(logger);
-        return new SbkRamBenchmark(ramConfig, params, logger, time);
+        return new SbmBenchmark(sbmConfig, params, logger, time);
     }
 
 

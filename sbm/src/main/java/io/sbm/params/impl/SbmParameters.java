@@ -10,7 +10,7 @@
 package io.sbm.params.impl;
 
 import io.sbk.action.Action;
-import io.sbm.config.RamConfig;
+import io.sbm.config.SbmConfig;
 import io.sbk.exception.HelpException;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.params.impl.SbkInputOptions;
@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
  * Class for processing command Line arguments/parameters.
  */
 @Slf4j
-final public class SbkRamParameters extends SbkInputOptions implements RamParameterOptions {
+final public class SbmParameters extends SbkInputOptions implements RamParameterOptions {
 
     @Getter
     private String storageName;
@@ -46,8 +46,8 @@ final public class SbkRamParameters extends SbkInputOptions implements RamParame
      * @param port              int
      * @param maxConnections    int
      */
-    public SbkRamParameters(String name, int port, int maxConnections) {
-        super(name, RamConfig.DESC);
+    public SbmParameters(String name, int port, int maxConnections) {
+        super(name, SbmConfig.DESC);
         this.maxConnections = maxConnections;
         this.ramPort = port;
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");

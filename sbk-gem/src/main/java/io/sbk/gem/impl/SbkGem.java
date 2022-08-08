@@ -23,7 +23,7 @@ import io.sbm.logger.impl.RamPrometheusLogger;
 import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
 import io.sbk.config.GemConfig;
-import io.sbm.config.RamConfig;
+import io.sbm.config.SbmConfig;
 import io.sbk.data.DataType;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.GemBenchmark;
@@ -33,9 +33,9 @@ import io.sbk.logger.GemLogger;
 import io.sbk.logger.impl.GemRamPrometheusLogger;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.params.impl.SbkGemParameters;
-import io.sbm.ram.impl.SbkRam;
-import io.sbm.ram.impl.SbkRamBenchmark;
-import io.sbm.params.impl.SbkRamParameters;
+import io.sbm.api.impl.Sbm;
+import io.sbm.api.impl.SbmBenchmark;
+import io.sbm.params.impl.SbmParameters;
 import io.sbk.system.Printer;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
@@ -124,7 +124,7 @@ final public class SbkGem {
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
         final GemLogger logger;
-        final RamConfig ramConfig;
+        final SbmConfig sbmConfig;
         final Time time;
         final String version = io.sbk.gem.impl.SbkGem.class.getPackage().getImplementationVersion();
         final String sbkGemAppName = System.getProperty(GemConfig.SBK_GEM_APP_NAME);
@@ -159,8 +159,8 @@ final public class SbkGem {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        ramConfig = mapper.readValue(SbkRam.class.getClassLoader().getResourceAsStream(RAM_CONFIG_FILE),
-                RamConfig.class);
+        sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(RAM_CONFIG_FILE),
+                SbmConfig.class);
         gemConfig = mapper.readValue(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
@@ -197,7 +197,7 @@ final public class SbkGem {
                 appName;
         storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
 
-        params = new SbkGemParameters(usageLine, storageDrivers, gemConfig, ramConfig.port);
+        params = new SbkGemParameters(usageLine, storageDrivers, gemConfig, sbmConfig.port);
         logger.addArgs(params);
         if (storageDevice != null) {
             storageDevice.addArgs(params);
@@ -290,7 +290,7 @@ final public class SbkGem {
         Printer.log.info("Arguments to remote SBK command: " + sbkArgsBuilder);
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
-        ramConfig.maxConnections = params.getConnections().length;
+        sbmConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
         ramArgsList.add(Config.CLASS_OPTION_ARG);
         ramArgsList.add(className);
@@ -310,7 +310,7 @@ final public class SbkGem {
 
         final RamLogger ramLogger = new RamPrometheusLogger();
 
-        ramParams = new SbkRamParameters(appName, params.getRamPort(), params.getConnections().length);
+        ramParams = new SbmParameters(appName, params.getRamPort(), params.getConnections().length);
         ramLogger.addArgs(ramParams);
         try {
             ramParams.parseArgs(ramArgs);
@@ -321,7 +321,7 @@ final public class SbkGem {
             throw ex;
         }
         Printer.log.info("SBK-GEM: Arguments to SBK-RAM command verification Success..");
-        return new SbkGemBenchmark(new SbkRamBenchmark(ramConfig, ramParams, logger, time), gemConfig, params,
+        return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, logger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }
 

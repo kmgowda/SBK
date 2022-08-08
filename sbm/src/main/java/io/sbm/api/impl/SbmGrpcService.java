@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbm.ram.impl;
+package io.sbm.api.impl;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;
@@ -17,7 +17,7 @@ import io.sbp.grpc.Config;
 import io.sbp.grpc.ServiceGrpc;
 import io.sbm.logger.CountConnections;
 import io.sbm.params.RamParameters;
-import io.sbm.ram.RamRegistry;
+import io.sbm.api.RamRegistry;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class SbkGrpcService.
  */
-final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
+final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger connections;
     private final Config config;
     private final CountConnections countConnections;
@@ -45,7 +45,7 @@ final public class SbkGrpcService extends ServiceGrpc.ServiceImplBase {
      * @param countConnections      CountConnections
      * @param registry              RamRegistry
      */
-    public SbkGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
+    public SbmGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
                           CountConnections countConnections, RamRegistry registry) {
         super();
         connections = new AtomicInteger(0);

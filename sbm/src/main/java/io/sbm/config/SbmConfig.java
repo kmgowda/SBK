@@ -15,17 +15,17 @@ import io.perl.config.LatencyConfig;
 /**
  * Class RamConfig.
  */
-final public class RamConfig extends LatencyConfig {
+final public class SbmConfig extends LatencyConfig {
 
     /**
-     * <code>String NAME = "sbk-ram"</code>.
+     * <code>String NAME = "sbm"</code>.
      */
-    public final static String NAME = "sbk-ram";
+    public final static String NAME = "sbm";
 
     /**
-     * <code>String DESC = "Storage Benchmark Kit - Results Aggregation Monitor"</code>.
+     * <code>String DESC = "Storage Benchmark Monitorr"</code>.
      */
-    final public static String DESC = "Storage Benchmark Kit - Results Aggregation Monitor";
+    final public static String DESC = "Storage Benchmark Monitor";
 
 
     /**

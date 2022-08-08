@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbm.ram.impl;
+package io.sbm.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.LatencyRecord;
@@ -16,7 +16,7 @@ import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.Print;
 import io.perl.api.ReportLatencies;
 import io.perl.api.impl.TotalLatencyRecordWindow;
-import io.sbm.ram.RamPeriodicRecorder;
+import io.sbm.api.RamPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
 import io.sbk.logger.ReadRequestsLogger;
 import io.sbm.logger.SetRW;

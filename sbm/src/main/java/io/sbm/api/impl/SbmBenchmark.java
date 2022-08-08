@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbm.ram.impl;
+package io.sbm.api.impl;
 
 
 import io.grpc.Server;
@@ -21,9 +21,9 @@ import io.perl.api.impl.HdrExtendedLatencyRecorder;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
-import io.sbm.config.RamConfig;
+import io.sbm.config.SbmConfig;
 import io.sbm.logger.RamLogger;
-import io.sbm.ram.RamPeriodicRecorder;
+import io.sbm.api.RamPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.system.Printer;
@@ -44,15 +44,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Class for performing the benchmark.
  */
-final public class SbkRamBenchmark implements Benchmark {
-    final RamConfig ramConfig;
+final public class SbmBenchmark implements Benchmark {
+    final SbmConfig sbmConfig;
     final private Time time;
     final private RamLogger logger;
     final private RamParameterOptions params;
     final private LinkedBlockingQueue<LatenciesRecord> queue;
     final private RamPeriodicRecorder latencyRecorder;
     final private Server server;
-    final private SbkGrpcService service;
+    final private SbmGrpcService service;
     final private RamBenchmark benchmark;
     final private double[] percentileFractions;
     final private CompletableFuture<Void> retFuture;
@@ -64,15 +64,15 @@ final public class SbkRamBenchmark implements Benchmark {
     /**
      * Create SBK Server Benchmark.
      *
-     * @param ramConfig Configuration parameters
+     * @param sbmConfig Configuration parameters
      * @param params    Benchmarking input Parameters
      * @param logger    output logger
      * @param time      time interface
      * @throws IOException If Exception occurs.
      */
-    public SbkRamBenchmark(RamConfig ramConfig, RamParameterOptions params,
-                           @NotNull RamLogger logger, Time time) throws IOException {
-        this.ramConfig = ramConfig;
+    public SbmBenchmark(SbmConfig sbmConfig, RamParameterOptions params,
+                        @NotNull RamLogger logger, Time time) throws IOException {
+        this.sbmConfig = sbmConfig;
         this.params = params;
         this.logger = logger;
         this.time = time;
@@ -85,9 +85,9 @@ final public class SbkRamBenchmark implements Benchmark {
 
         queue = new LinkedBlockingQueue<>();
         latencyRecorder = createLatencyRecorder();
-        benchmark = new RamBenchmark(ramConfig.maxQueues, ramConfig.idleMS, time, latencyRecorder,
+        benchmark = new RamBenchmark(sbmConfig.maxQueues, sbmConfig.idleMS, time, latencyRecorder,
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
-        service = new SbkGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
+        service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
         server = ServerBuilder.forPort(params.getRamPort()).addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
         state = State.BEGIN;
@@ -95,7 +95,7 @@ final public class SbkRamBenchmark implements Benchmark {
 
     @Contract(" -> new")
     private @NotNull RamPeriodicRecorder createLatencyRecorder() {
-        final LatencyRecordWindow window = PerlBuilder.buildLatencyRecordWindow(ramConfig, time,
+        final LatencyRecordWindow window = PerlBuilder.buildLatencyRecordWindow(sbmConfig, time,
                 logger.getMinLatency(), logger.getMaxLatency(), percentileFractions);
         final LatencyRecordWindow totalWindow;
         final LatencyRecordWindow totalWindowExtension;
@@ -103,20 +103,20 @@ final public class SbkRamBenchmark implements Benchmark {
 
         totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions,
-                time, ramConfig.totalMaxHashMapSizeMB);
+                time, sbmConfig.totalMaxHashMapSizeMB);
         Printer.log.info("Total Window Latency Store: HashMap, Size: " +
                 totalWindow.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
 
-        if (ramConfig.histogram) {
+        if (sbmConfig.histogram) {
             totalWindowExtension = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow);
             Printer.log.info(String.format("Total Window Extension: HdrHistogram, Size: %.2f MB",
                     (totalWindowExtension.getMaxMemoryBytes() * 1.0) / Bytes.BYTES_PER_MB));
-        } else if (ramConfig.csv) {
+        } else if (sbmConfig.csv) {
             totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
-                    percentileFractions, time, totalWindow, ramConfig.csvFileSizeGB,
+                    percentileFractions, time, totalWindow, sbmConfig.csvFileSizeGB,
                     Config.NAME + "-" + String.format("%06d", random.nextInt(1000000)) + ".csv");
             Printer.log.info("Total Window Extension: CSV, Size: " +
                     totalWindowExtension.getMaxMemoryBytes() / Bytes.BYTES_PER_GB + " GB");

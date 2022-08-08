@@ -36,7 +36,7 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 
-def SbkRamMainClass = "io.sbk.main.SbkRamMain"
+def SbkRamMainClass = "io.sbk.main.sbmMain"
 
 version = project.version
 jar {

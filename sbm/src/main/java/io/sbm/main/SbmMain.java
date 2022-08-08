@@ -10,7 +10,7 @@
 
 package io.sbm.main;
 
-import io.sbm.ram.impl.SbkRam;
+import io.sbm.api.impl.Sbm;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK Server.
  */
-public final class SbkRamMain {
+public final class SbmMain {
 
     /**
      * The main method for sbk-ram module.
@@ -30,7 +30,7 @@ public final class SbkRamMain {
      */
     public static void main(final String[] args) {
         try {
-            SbkRam.run(args, null, null);
+            Sbm.run(args, null, null);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException |

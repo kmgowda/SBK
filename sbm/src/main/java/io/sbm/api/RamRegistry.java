@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbm.ram;
+package io.sbm.api;
 
 import io.sbp.grpc.LatenciesRecord;
 
