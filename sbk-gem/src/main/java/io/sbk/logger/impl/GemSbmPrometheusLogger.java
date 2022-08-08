@@ -11,12 +11,12 @@
 package io.sbk.logger.impl;
 
 import io.sbk.logger.GemLogger;
-import io.sbm.logger.impl.RamPrometheusLogger;
+import io.sbm.logger.impl.SbmPrometheusLogger;
 
 /**
  * Class GemRamPrometheusLogger.
  */
-public final class GemRamPrometheusLogger extends RamPrometheusLogger implements GemLogger {
+public final class GemSbmPrometheusLogger extends SbmPrometheusLogger implements GemLogger {
 
     @Override
     public String[] getOptionsArgs() {

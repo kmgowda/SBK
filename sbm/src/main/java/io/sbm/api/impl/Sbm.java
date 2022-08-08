@@ -19,7 +19,7 @@ import io.sbk.config.Config;
 import io.sbm.config.SbmConfig;
 import io.sbk.exception.HelpException;
 import io.sbm.logger.RamLogger;
-import io.sbm.logger.impl.RamPrometheusLogger;
+import io.sbm.logger.impl.SbmPrometheusLogger;
 import io.sbm.params.RamParameterOptions;
 import io.sbm.params.impl.SbmParameters;
 import io.sbk.system.Printer;
@@ -113,7 +113,7 @@ final public class Sbm {
 
         // disable CSV
         sbmConfig.csv = false;
-        logger = Objects.requireNonNullElseGet(outLogger, RamPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, SbmPrometheusLogger::new);
 
         params = new SbmParameters(appName, sbmConfig.port, sbmConfig.maxConnections);
         logger.addArgs(params);

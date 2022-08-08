@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class RamMetricsPrometheusServer.
  */
-public final class RamMetricsPrometheusServer extends PrometheusRWMetricsServer implements CountConnections {
+public final class SbmMetricsPrometheusServer extends PrometheusRWMetricsServer implements CountConnections {
     final private AtomicInteger connections;
     final private AtomicInteger maxConnections;
 
@@ -37,7 +37,7 @@ public final class RamMetricsPrometheusServer extends PrometheusRWMetricsServer 
      * @param config            MetricsConfig
      * @throws IOException If it Occurs.
      */
-    public RamMetricsPrometheusServer(String header, String action, String storageName,
+    public SbmMetricsPrometheusServer(String header, String action, String storageName,
                                       double[] percentiles, Time time, MetricsConfig config) throws IOException {
         super(header, action, storageName, percentiles, time, config);
         final String name = metricPrefix + "_Connections";

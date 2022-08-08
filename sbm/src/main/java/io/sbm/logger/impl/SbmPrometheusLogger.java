@@ -30,32 +30,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class RamPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
+public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
     final static String CONFIG_FILE = "ram-metrics.properties";
     final static String SBK_RAM_PREFIX = "Sbk-Ram";
     final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
-    private RamMetricsPrometheusServer prometheusServer;
+    private SbmMetricsPrometheusServer prometheusServer;
 
 
     /**
      * Constructor RamPrometheusLogger calling its super calls and initializing {@link #prometheusServer} = null.
      */
-    public RamPrometheusLogger() {
+    public SbmPrometheusLogger() {
         super();
         prometheusServer = null;
     }
 
     public InputStream getMetricsConfigStream() {
-        return RamPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        return SbmPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
     @Override
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public @Nonnull PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
-            prometheusServer = new RamMetricsPrometheusServer(Config.NAME, action.name(), storageName,
+            prometheusServer = new SbmMetricsPrometheusServer(Config.NAME, action.name(), storageName,
                     percentiles, time, metricsConfig);
         }
         return prometheusServer;

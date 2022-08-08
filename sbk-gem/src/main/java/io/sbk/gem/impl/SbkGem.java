@@ -19,7 +19,7 @@ import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
 import io.sbm.logger.RamLogger;
-import io.sbm.logger.impl.RamPrometheusLogger;
+import io.sbm.logger.impl.SbmPrometheusLogger;
 import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
 import io.sbk.config.GemConfig;
@@ -30,7 +30,7 @@ import io.sbk.gem.GemBenchmark;
 import io.sbk.params.GemParameterOptions;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.logger.GemLogger;
-import io.sbk.logger.impl.GemRamPrometheusLogger;
+import io.sbk.logger.impl.GemSbmPrometheusLogger;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.params.impl.SbkGemParameters;
 import io.sbm.api.impl.Sbm;
@@ -177,7 +177,7 @@ final public class SbkGem {
             gemConfig.remoteDir += "-" + version;
         }
 
-        logger = Objects.requireNonNullElseGet(outLogger, GemRamPrometheusLogger::new);
+        logger = Objects.requireNonNullElseGet(outLogger, GemSbmPrometheusLogger::new);
 
         if (StringUtils.isEmpty(className)) {
             storageDevice = null;
@@ -308,7 +308,7 @@ final public class SbkGem {
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
         Printer.log.info("Arguments to  SBK-RAM: " + Arrays.toString(ramArgs));
 
-        final RamLogger ramLogger = new RamPrometheusLogger();
+        final RamLogger ramLogger = new SbmPrometheusLogger();
 
         ramParams = new SbmParameters(appName, params.getSbmPort(), params.getConnections().length);
         ramLogger.addArgs(ramParams);
