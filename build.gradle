@@ -658,7 +658,7 @@ dependencies {
     api project(":sbp")
     api project(":sbk-api")
     api project(":sbk-yal")
-    api project(":sbk-ram")
+    api project(":sbm")
     api project(":sbk-gem")
     api project(":sbk-gem-yal")
 }
