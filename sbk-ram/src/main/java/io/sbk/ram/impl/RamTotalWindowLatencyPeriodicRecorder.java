@@ -16,7 +16,7 @@ import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.Print;
 import io.perl.api.ReportLatencies;
 import io.perl.api.impl.TotalLatencyRecordWindow;
-import io.sbk.grpc.LatenciesRecord;
+import io.sbp.grpc.LatenciesRecord;
 import io.sbk.logger.ReadRequestsLogger;
 import io.sbk.logger.SetRW;
 import io.sbk.logger.WriteRequestsLogger;
