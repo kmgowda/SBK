@@ -283,7 +283,7 @@ final public class SbkGem {
         sbkArgsBuilder.append(" -rq ").append(logger.getMaxReaderIDs() > 0);
         sbkArgsBuilder.append(" -context no");
         sbkArgsBuilder.append(" -ram ").append(params.getLocalHost());
-        sbkArgsBuilder.append(" -ramport ").append(params.getRamPort());
+        sbkArgsBuilder.append(" -ramport ").append(params.getSbmPort());
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());
@@ -310,7 +310,7 @@ final public class SbkGem {
 
         final RamLogger ramLogger = new RamPrometheusLogger();
 
-        ramParams = new SbmParameters(appName, params.getRamPort(), params.getConnections().length);
+        ramParams = new SbmParameters(appName, params.getSbmPort(), params.getConnections().length);
         ramLogger.addArgs(ramParams);
         try {
             ramParams.parseArgs(ramArgs);

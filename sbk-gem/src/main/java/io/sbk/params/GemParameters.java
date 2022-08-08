@@ -50,7 +50,7 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
      *
      * @return ram port number.
      */
-    int getRamPort();
+    int getSbmPort();
 
     /**
      * checks if parameters are copy.
