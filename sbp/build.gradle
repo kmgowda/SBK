@@ -32,12 +32,7 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 dependencies {
-    api project(":perl")
-    api project(":sbp")
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
-    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
 }
 
 
