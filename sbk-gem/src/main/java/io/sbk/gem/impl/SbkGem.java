@@ -282,8 +282,8 @@ final public class SbkGem {
         sbkArgsBuilder.append(" -wq ").append(logger.getMaxWriterIDs() > 0);
         sbkArgsBuilder.append(" -rq ").append(logger.getMaxReaderIDs() > 0);
         sbkArgsBuilder.append(" -context no");
-        sbkArgsBuilder.append(" -ram ").append(params.getLocalHost());
-        sbkArgsBuilder.append(" -ramport ").append(params.getSbmPort());
+        sbkArgsBuilder.append(" -sbm ").append(params.getLocalHost());
+        sbkArgsBuilder.append(" -sbmport ").append(params.getSbmPort());
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());

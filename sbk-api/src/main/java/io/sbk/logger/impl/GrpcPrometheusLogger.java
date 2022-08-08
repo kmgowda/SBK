@@ -98,9 +98,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         }
         maxLatencyBytes = ramHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
         ramHostConfig.host = DISABLE_STRING;
-        params.addOption("ram", true, "SBK RAM host" +
+        params.addOption("sbm", true, "SBM host" +
                 "; '" + DISABLE_STRING + "' disables this option, default: " + ramHostConfig.host);
-        params.addOption("ramport", true, "SBK RAM Port" +
+        params.addOption("sbmport", true, "SBM Port" +
                 "; default: " + ramHostConfig.port);
         //params.addOption("blocking", true, "blocking calls to SBK RAM; default: false");
     }
@@ -108,12 +108,12 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        ramHostConfig.host = params.getOptionValue("ram", ramHostConfig.host);
+        ramHostConfig.host = params.getOptionValue("sbm", ramHostConfig.host);
         enable = !ramHostConfig.host.equalsIgnoreCase("no");
         if (!enable) {
             return;
         }
-        ramHostConfig.port = Integer.parseInt(params.getOptionValue("ramport", Integer.toString(ramHostConfig.port)));
+        ramHostConfig.port = Integer.parseInt(params.getOptionValue("sbmport", Integer.toString(ramHostConfig.port)));
         //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
         blocking = false;
         exceptionHandler = null;
