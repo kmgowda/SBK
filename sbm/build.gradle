@@ -36,7 +36,7 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 
-def SbkRamMainClass = "io.sbm.main.SbmMain"
+def SbmMainClass = "io.sbm.main.SbmMain"
 
 version = project.version
 jar {
@@ -52,7 +52,7 @@ jar {
 }
 
 application {
-    mainClass = SbkRamMainClass
+    mainClass = SbmMainClass
     applicationName = project.name
 }
 
@@ -75,7 +75,7 @@ jib {
 
     container {
         creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
-        mainClass = SbkRamMainClass
+        mainClass = SbmMainClass
         ports = ['9717/tcp', '9719/tcp']
     }
 
