@@ -60,7 +60,7 @@ import java.util.concurrent.TimeoutException;
  */
 final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
-    final static String RAM_CONFIG_FILE = "ram.properties";
+    final static String SBM_CONFIG_FILE = "sbm.properties";
     final static String BANNER_FILE = "gem-banner.txt";
 
     /**
@@ -159,7 +159,7 @@ final public class SbkGem {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(RAM_CONFIG_FILE),
+        sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(SBM_CONFIG_FILE),
                 SbmConfig.class);
         gemConfig = mapper.readValue(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);

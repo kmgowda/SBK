@@ -31,8 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
-    final static String CONFIG_FILE = "ram-metrics.properties";
-    final static String SBK_RAM_PREFIX = "Sbk-Ram";
+    final static String CONFIG_FILE = "sbm-metrics.properties";
+    final static String SBK_RAM_PREFIX = "Sbm";
     final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;

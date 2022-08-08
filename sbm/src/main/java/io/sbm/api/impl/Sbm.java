@@ -38,8 +38,8 @@ import java.util.concurrent.TimeoutException;
  * Main class of SBK Server.
  */
 final public class Sbm {
-    final static String CONFIG_FILE = "ram.properties";
-    final static String BANNER_FILE = "ram-banner.txt";
+    final static String CONFIG_FILE = "sbm.properties";
+    final static String BANNER_FILE = "sbm-banner.txt";
 
     /**
      * Run the Performance Benchmarking .
