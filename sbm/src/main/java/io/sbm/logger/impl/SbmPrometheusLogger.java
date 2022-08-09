@@ -118,7 +118,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder(ramPrefix);
-        out.append(String.format(" %5d Connections, %5d Max Connections: ", connections.get(), maxConnections.get()));
+        out.append(String.format(" %5d connections, %5d max connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
