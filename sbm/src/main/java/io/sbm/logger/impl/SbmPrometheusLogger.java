@@ -111,9 +111,9 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
 
     public void print(String ramPrefix, String prefix, int writers, int maxWriters, int readers, int maxReaders,
-                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequestRecords,
                       double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
-                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long readRequestRecords, double readRequestsPerSec, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -121,8 +121,8 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         out.append(String.format(" %5d connections, %5d max connections: ", connections.get(), maxConnections.get()));
         out.append(prefix);
         appendResultString(out, writers, maxWriters, readers, maxReaders,
-                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
-                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                writeRequestBytes, writeRequestsMbPerSec, writeRequestRecords, writeRequestsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
@@ -139,7 +139,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         print(SBM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
-                readRequestRecords, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
+                readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
