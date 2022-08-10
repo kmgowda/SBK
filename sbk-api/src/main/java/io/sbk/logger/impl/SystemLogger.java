@@ -207,7 +207,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void open(final ParsedOptions params, final String storageName, @NotNull Action action, Time time) throws IOException {
+    public void open(final ParsedOptions params, final String storageName, final Action action, Time time) throws IOException {
         this.params = params;
         this.storageName = storageName;
         this.action = action;
