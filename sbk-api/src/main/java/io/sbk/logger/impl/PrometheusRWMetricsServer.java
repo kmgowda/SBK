@@ -72,9 +72,9 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
 
     @Override
     public void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
-                      double writeRequestsMbPerSec, long writeRequests, double writeRequestsPerSec,
-                      long readRequestBytes, double readRequestsMbPerSec, long readRequests,
-                      double readRequestsPerSec, double seconds, long bytes, long records, double recsPerSec,
+                      double writeRequestMbPerSec, long writeRequestRecords, double writeRequestRecordsPerSec,
+                      long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
+                      double readRequestsRecordsPerSec, double seconds, long bytes, long records, double recsPerSec,
                       double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
                       long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         this.writers.set(writers);
@@ -82,13 +82,13 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readers.set(readers);
         this.maxReaders.set(maxReaders);
         this.writeRequestBytes.increment(writeRequestBytes);
-        this.writeRequests.increment(writeRequests);
-        this.writeRequestsMbPerSec.set(writeRequestsMbPerSec);
-        this.writeRequestsPerSec.set(writeRequestsPerSec);
+        this.writeRequests.increment(writeRequestRecords);
+        this.writeRequestsMbPerSec.set(writeRequestMbPerSec);
+        this.writeRequestsPerSec.set(writeRequestRecordsPerSec);
         this.readRequestBytes.increment(readRequestBytes);
-        this.readRequests.increment(readRequests);
-        this.readRequestsMbPerSec.set(readRequestsMbPerSec);
-        this.readRequestsPerSec.set(readRequestsPerSec);
+        this.readRequests.increment(readRequestRecords);
+        this.readRequestsMbPerSec.set(readRequestMbPerSec);
+        this.readRequestsPerSec.set(readRequestsRecordsPerSec);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                                 higherDiscard, slc1, slc2, percentileValues);
 

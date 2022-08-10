@@ -207,7 +207,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void open(final ParsedOptions params, final String storageName, @NotNull Action action, Time time) throws IOException {
+    public void open(final ParsedOptions params, final String storageName, final Action action, Time time) throws IOException {
         this.params = params;
         this.storageName = storageName;
         this.action = action;
@@ -276,48 +276,49 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
     protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,
                                           int readers, int maxReaders ) {
-        out.append(String.format(" %5d Writers, %5d Readers, ", writers, readers));
-        out.append(String.format(" %5d Max Writers, %5d Max Readers, ", maxWriters, maxReaders));
+        out.append(String.format(" %5d writers, %5d readers, ", writers, readers));
+        out.append(String.format(" %5d max Writers, %5d max Readers, ", maxWriters, maxReaders));
     }
 
-    protected final void appendWriteAndReadRequests(@NotNull StringBuilder out, long writeRequestsBytes,
-                                              double writeRequestsMbPerSec, long writesRequests,
-                                              double writeRequestsPerSec, long readRequestsBytes,
-                                              double readRequestsMbPerSec, long readRequests,
-                                              double readRequestsPerSec) {
-        out.append(String.format(" %11.1f Write Requests MB, %8.2f Write Requests MB/sec ,"+
-                        " %16d Write Request records, %11.1f write request records/sec",
-                (writeRequestsBytes * 1.0) / Bytes.BYTES_PER_MB, writeRequestsMbPerSec,
-                writesRequests, writeRequestsPerSec));
-        out.append(String.format(" %11.1f Read Requests MB, %8.2f Read Requests MB/sec ,"+
-                        " %16d Read Request records, %11.1f Read request records/sec",
-                (readRequestsBytes * 1.0) / Bytes.BYTES_PER_MB, readRequestsMbPerSec,
-                readRequests, readRequestsPerSec));
+    protected final void appendWriteAndReadRequests(@NotNull StringBuilder out, long writeRequestBytes,
+                                              double writeRequestMbPerSec, long writesRequestRecords,
+                                              double writeRequestRecordsPerSec, long readRequestBytes,
+                                              double readRequestMbPerSec, long readRequestRecords,
+                                              double readRequestRecordsPerSec) {
+        out.append(String.format(" %11.1f write request MB, %16d write request records, "+
+                        "%11.1f write request records/sec, %8.2f write request MB/sec,",
+                (writeRequestBytes * 1.0) / Bytes.BYTES_PER_MB, writesRequestRecords,
+                writeRequestRecordsPerSec, writeRequestMbPerSec));
+        out.append(String.format(" %11.1f read request MB,  %16d read request records, "+
+                        "%11.1f read request records/sec, %8.2f read request MB/sec,",
+                (readRequestBytes * 1.0) / Bytes.BYTES_PER_MB, readRequestRecords,
+                 readRequestRecordsPerSec, readRequestMbPerSec));
     }
 
-    private record ReadWriteRequests(long readRequests, long readRequestBytes, long writeRequests, long writeRequestBytes) {
+    private record ReadWriteRequests(long readRequestRecords, long readRequestBytes,
+                                     long writeRequestRecords, long writeRequestBytes) {
     }
 
     protected final ReadWriteRequests getReadAndWriteRequests() {
-        long writeRequestsSum = 0;
+        long writeRequestRecordssSum = 0;
         long writeBytesSum = 0;
-        long readRequestsSum = 0;
+        long readRequestRecordsSum = 0;
         long readBytesSum = 0;
 
         if (isRequestWrites) {
             for (int i = 0; i < maxWriterRequestIds; i++) {
-                writeRequestsSum += writeRequestsArray.getAndSet(i, 0);
+                writeRequestRecordssSum += writeRequestsArray.getAndSet(i, 0);
                 writeBytesSum += writeBytesArray.getAndSet(i, 0);
             }
         }
 
         if (isRequestReads) {
             for (int i = 0; i < maxReaderRequestIds; i++) {
-                readRequestsSum += readRequestsArray.getAndSet(i, 0);
+                readRequestRecordsSum += readRequestsArray.getAndSet(i, 0);
                 readBytesSum += readBytesArray.getAndSet(i, 0);
             }
            }
-        return new ReadWriteRequests(readRequestsSum, readBytesSum, writeRequestsSum, writeBytesSum);
+        return new ReadWriteRequests(readRequestRecordsSum, readBytesSum, writeRequestRecordssSum, writeBytesSum);
     }
 
     private static class ReadWriteRequestsPerformance {
@@ -327,27 +328,27 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         public final double readRequestsMBPerSec;
 
         public ReadWriteRequestsPerformance( double seconds, ReadWriteRequests req) {
-            final double writeRequestsMB = req.writeRequestBytes / (Bytes.BYTES_PER_MB * 1.0);
-            final double readRequestsMB = req.readRequestBytes /  (Bytes.BYTES_PER_MB * 1.0);
+            final double writeRequestMB = req.writeRequestBytes / (Bytes.BYTES_PER_MB * 1.0);
+            final double readRequestMB = req.readRequestBytes /  (Bytes.BYTES_PER_MB * 1.0);
 
-            writeRequestsPerSec = req.writeRequests / seconds;
-            writeRequestsMbPerSec = writeRequestsMB / seconds;
-            readRequestsPerSec = req.readRequests / seconds;
-            readRequestsMBPerSec = readRequestsMB / seconds;
+            writeRequestsPerSec = req.writeRequestRecords / seconds;
+            writeRequestsMbPerSec = writeRequestMB / seconds;
+            readRequestsPerSec = req.readRequestRecords / seconds;
+            readRequestsMBPerSec = readRequestMB / seconds;
         }
     }
 
 
     protected final void appendResultString(StringBuilder out, int writers, int maxWriters, int readers, int maxReaders,
-                                            long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
-                                            double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
-                                            long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMBPerSec,
+                                            long readRequestRecords, double readRequestRecordsPerSec, double seconds, long bytes,
                                             long records, double recsPerSec, double mbPerSec,
                                             double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                                             long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         appendWritesAndReaders(out, writers, maxWriters, readers, maxReaders);
-        appendWriteAndReadRequests(out, writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
-                readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec);
+        appendWriteAndReadRequests(out, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
+                readRequestBytes, readRequestMBPerSec, readRequestRecords, readRequestRecordsPerSec);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append("\n");
@@ -360,17 +361,17 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, req);
         if (isRequestWrites) {
-            writeRequests.addAndGet(req.writeRequests);
+            writeRequests.addAndGet(req.writeRequestRecords);
             writeBytes.addAndGet(req.writeRequestBytes);
         }
         if (isRequestReads) {
-            readRequests.addAndGet(req.readRequests);
+            readRequests.addAndGet(req.readRequestRecords);
             readBytes.addAndGet(req.readRequestBytes);
         }
 
         print(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
-                req.writeRequestBytes, perf.writeRequestsMbPerSec, req.writeRequests, perf.writeRequestsPerSec,
-                req.readRequestBytes, perf.readRequestsMBPerSec, req.readRequests, perf.readRequestsPerSec,
+                req.writeRequestBytes, perf.writeRequestsMbPerSec, req.writeRequestRecords, perf.writeRequestsPerSec,
+                req.readRequestBytes, perf.readRequestsMBPerSec, req.readRequestRecords, perf.readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
@@ -378,16 +379,16 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
     @Override
     public void print(int writers, int maxWriters, int readers, int maxReaders,
-                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
-                      double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
-                      long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                      long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                      double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
+                      long readRequestRecords, double readRequestsRecordsPerSec, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder(prefix);
         appendResultString(out, writers, maxWriters, readers, maxReaders,
-                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
-                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
+                readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
@@ -400,34 +401,34 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         if (isRequestWrites) {
-            writeRequests.addAndGet(req.writeRequests);
+            writeRequests.addAndGet(req.writeRequestRecords);
             writeBytes.addAndGet(req.writeRequestBytes);
         }
         if (isRequestReads) {
-            readRequests.addAndGet(req.readRequests);
+            readRequests.addAndGet(req.readRequestRecords);
             readBytes.addAndGet(req.readRequestBytes);
         }
         final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequests.getAndSet(0),
                 readBytes.getAndSet(0), writeRequests.getAndSet(0), writeBytes.getAndSet(0));
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, reqFinal);
         printTotal(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
-                reqFinal.writeRequestBytes, perf.writeRequestsMbPerSec, reqFinal.writeRequests, perf.writeRequestsPerSec,
-                reqFinal.readRequestBytes, perf.readRequestsMBPerSec, reqFinal.readRequests, perf.readRequestsPerSec,
+                reqFinal.writeRequestBytes, perf.writeRequestsMbPerSec, reqFinal.writeRequestRecords, perf.writeRequestsPerSec,
+                reqFinal.readRequestBytes, perf.readRequestsMBPerSec, reqFinal.readRequestRecords, perf.readRequestsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 
     public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
-                           long writeRequestBytes, double writeRequestsMbPerSec, long writeRequests,
-                           double writeRequestsPerSec, long readRequestBytes, double readRequestsMbPerSec,
-                           long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                           long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                           double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
+                           long readRequestRecords, double readRequestRecordsPerSec, double seconds, long bytes,
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder("Total " + prefix);
         appendResultString(out, writers, maxWriters, readers, maxReaders,
-                writeRequestBytes, writeRequestsMbPerSec, writeRequests, writeRequestsPerSec,
-                readRequestBytes, readRequestsMbPerSec, readRequests, readRequestsPerSec,
+                writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
+                readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
