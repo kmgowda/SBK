@@ -298,6 +298,12 @@ final public class SbkGem {
         ramArgsList.add(actionString);
         ramArgsList.add("-time");
         ramArgsList.add(time.getTimeUnit().name());
+        ramArgsList.add("-minlatency");
+        ramArgsList.add(String.valueOf(logger.getMinLatency()));
+        ramArgsList.add("-maxlatency");
+        ramArgsList.add(String.valueOf(logger.getMaxLatency()));
+        ramArgsList.add("-port");
+        ramArgsList.add(String.valueOf(params.getSbmPort()));
         ramArgsList.add("-wq");
         ramArgsList.add(String.valueOf(logger.getMaxWriterIDs() > 0));
         ramArgsList.add("-rq");
