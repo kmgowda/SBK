@@ -87,7 +87,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
+        "w": 12,
         "x": 0,
         "y": 1
       },
@@ -104,24 +104,191 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "pluginVersion": "9.0.6",
       "targets": [
         {
-          "expr": "SBK_Writing_Connections",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Connections",
           "interval": "",
           "legendFormat": "Active",
           "refId": "A"
-        },
-        {
-          "expr": "SBK_Writing_Max_Connections",
-          "interval": "",
-          "legendFormat": "Max",
-          "refId": "B"
         }
       ],
-      "title": "Writers Connections",
+      "title": "Active Connections",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 68,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Max_Connections",
+          "interval": "",
+          "legendFormat": "Active",
+          "refId": "A"
+        }
+      ],
+      "title": "Max Connections",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 107,
+      "panels": [],
+      "title": "SBK Readers and Writers",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 7
+      },
+      "id": 109,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Readers",
+          "interval": "",
+          "legendFormat": "Active",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Readers",
       "type": "stat"
     },
     {
@@ -169,9 +336,9 @@
         "h": 5,
         "w": 6,
         "x": 6,
-        "y": 1
+        "y": 7
       },
-      "id": 68,
+      "id": 111,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -184,24 +351,24 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "pluginVersion": "9.0.6",
       "targets": [
         {
-          "expr": "SBK_Reading_Connections",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "SBK_Max_Readers",
           "interval": "",
-          "legendFormat": "Active",
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "A"
-        },
-        {
-          "expr": "SBK_Reading_Max_Connections",
-          "interval": "",
-          "legendFormat": "Max",
-          "refId": "B"
         }
       ],
-      "title": "Readers Connections",
+      "title": "Max Readers",
       "type": "stat"
     },
     {
@@ -249,9 +416,9 @@
         "h": 5,
         "w": 6,
         "x": 12,
-        "y": 1
+        "y": 7
       },
-      "id": 69,
+      "id": 113,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -264,24 +431,22 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "pluginVersion": "9.0.6",
       "targets": [
         {
-          "expr": "SBK_Write_Reading_Connections",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writers",
           "interval": "",
           "legendFormat": "Active",
           "refId": "A"
-        },
-        {
-          "expr": "SBK_Write_Reading_Max_Connections",
-          "interval": "",
-          "legendFormat": "Max",
-          "refId": "B"
         }
       ],
-      "title": "Write-Readers Connections",
+      "title": "Active Writers",
       "type": "stat"
     },
     {
@@ -329,9 +494,920 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 1
+        "y": 7
       },
-      "id": 105,
+      "id": 115,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Max_Writers",
+          "interval": "",
+          "legendFormat": "Active",
+          "refId": "A"
+        }
+      ],
+      "title": "Max Writers",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 60,
+      "panels": [],
+      "title": "Write Performance Benchmarking",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 13
+      },
+      "hiddenSeries": false,
+      "id": 62,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "9.0.6",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_MBPerSec{class=\"Hdfs\"}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "legendFormat": "",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Hdfs Write Throughput MB/s",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:274",
+          "format": "MBs",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:275",
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 13
+      },
+      "hiddenSeries": false,
+      "id": 6,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "9.0.6",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_RecordsPerSec{class=\"Hdfs\"}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "builder",
+          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "legendFormat": "",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Hdfs Write Records/Sec",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:185",
+          "format": "wps",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:186",
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 500
+              },
+              {
+                "color": "#EF843C",
+                "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "ns"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 13
+      },
+      "id": 48,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_AvgLatency{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "Average Latency",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_MaxLatency{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "Max Latency",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Hdfs Write Avg and Max Latencies (Nanoseconds)",
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 13,
+        "w": 8,
+        "x": 0,
+        "y": 23
+      },
+      "hiddenSeries": false,
+      "id": 50,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "9.0.6",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_5{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "V"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_10{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_20{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_25{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_30{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_40{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_50{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_60{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_70{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "H"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_75{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_80{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "J"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_90{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "K"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_92_5{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "L"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_95{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "M"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_97_5{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "N"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_99{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "O"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_99_25{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "P"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_99_5{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "Q"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_99_75{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "R"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_99_9{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "S"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_99_95{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "T"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_ns_99_99{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "U"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "SBK Hdfs Write Percentiles (Nanoseconds)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:127",
+          "format": "ns",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:128",
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "mappings": [],
+          "max": 500,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 50
+              },
+              {
+                "color": "#EF843C",
+                "value": 100
+              },
+              {
+                "color": "#E24D42",
+                "value": 200
+              },
+              {
+                "color": "#1F78C1",
+                "value": 300
+              },
+              {
+                "color": "#BA43A9",
+                "value": 400
+              },
+              {
+                "color": "#705DA0",
+                "value": 500
+              },
+              {
+                "color": "#508642",
+                "value": 600
+              },
+              {
+                "color": "#CCA300",
+                "value": 700
+              },
+              {
+                "color": "#447EBC",
+                "value": 800
+              },
+              {
+                "color": "#C15C17",
+                "value": 900
+              },
+              {
+                "color": "#890F02",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 23
+      },
+      "id": 4,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_MBPerSec{class=\"Hdfs\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Hdfs Write Throughput MB/s",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 500
+              },
+              {
+                "color": "#EF843C",
+                "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 23
+      },
+      "id": 71,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_SLC_1{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "SLC 1",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_SLC_2{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "SLC 2",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Hdfs Write  Sliding Latency Coverage (SLC)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 1073741824
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 10737418240
+              },
+              {
+                "color": "#EF843C",
+                "value": 107374182400
+              },
+              {
+                "color": "#E24D42",
+                "value": 1099511627776
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 30
+      },
+      "id": 8,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -353,9 +1429,10 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_OnlyReading_Connections",
-          "interval": "",
-          "legendFormat": "Active",
+          "editorMode": "code",
+          "expr": "SBK_Writing_Bytes_total{class=\"Hdfs\"}",
+          "legendFormat": "Write Bytes",
+          "range": true,
           "refId": "A"
         },
         {
@@ -363,13 +1440,98 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_OnlyReading_Max_Connections",
-          "interval": "",
-          "legendFormat": "Max",
+          "editorMode": "code",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Hdfs\"}",
+          "hide": false,
+          "legendFormat": "Write Request Bytes",
+          "range": true,
           "refId": "B"
         }
       ],
-      "title": "Write-OnlyRead Connections",
+      "title": "SBK Hdfs Write Bytes Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 30
+      },
+      "id": 28,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "Lower",
+          "queryType": "randomWalk",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "Higher",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Hdfs\"}",
+          "interval": "",
+          "legendFormat": "Invalid/Negative",
+          "refId": "C"
+        }
+      ],
+      "title": "SBK Hdfs Write Discarded Latencies",
       "type": "stat"
     },
     {
@@ -382,1634 +1544,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
-      },
-      "id": 60,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "unit": "MBs"
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 0,
-            "y": 7
-          },
-          "hiddenSeries": false,
-          "id": 62,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_MBPerSec{class=\"Hdfs\"}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Hdfs Write Throughput MB/s",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:274",
-              "format": "MBs",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:275",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 8,
-            "y": 7
-          },
-          "hiddenSeries": false,
-          "id": 6,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_RecordsPerSec{class=\"Hdfs\"}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Hdfs Write Records/Sec",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:185",
-              "format": "wps",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:186",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 100
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 10000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 100000000
-                  }
-                ]
-              },
-              "unit": "ns"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 16,
-            "y": 7
-          },
-          "id": 48,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_AvgLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_MaxLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Write Avg and Max Latencies (Nanoseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 16
-          },
-          "hiddenSeries": false,
-          "id": 50,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_10{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_20{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_25{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_30{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_40{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_50{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_60{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_70{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_75{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_80{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "J"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_90{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "K"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_92_5{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "L"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_95{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "M"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_97_5{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "N"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "O"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_99_25{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "P"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_99_5{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "Q"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_99_75{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "R"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_99_9{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "S"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_99_95{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "T"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ns_99_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "U"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Hdfs Write Percentiles (Nanoseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:127",
-              "format": "ns",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:128",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "decimals": 0,
-              "links": [],
-              "mappings": [],
-              "min": 0,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 10
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 4,
-            "w": 3,
-            "x": 8,
-            "y": 16
-          },
-          "id": 2,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_Writers{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Active",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_Max_Writers{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Max",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Writers",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "max": 500,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 200
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 300
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 400
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 600
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 700
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 800
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 900
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "MBs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 11,
-            "y": 16
-          },
-          "id": 4,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": true,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_MBPerSec{class=\"Hdfs\"}",
-              "refId": "A"
-            }
-          ],
-          "title": "SBK Hdfs Write Throughput MB/s",
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 100
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 500
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 10000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 100000000
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 16
-          },
-          "id": 71,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_SLC_1{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "SLC 1",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_SLC_2{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "SLC 2",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Write  Sliding Latency Coverage (SLC)",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 1073741824
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 10737418240
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 107374182400
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1099511627776
-                  }
-                ]
-              },
-              "unit": "decbytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 3,
-            "x": 8,
-            "y": 20
-          },
-          "id": 8,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_Records_total{class=\"Hdfs\"}",
-              "refId": "A"
-            }
-          ],
-          "title": "SBK Hdfs Write Bytes Total",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 11,
-            "y": 22
-          },
-          "id": 28,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Lower",
-              "queryType": "randomWalk",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Higher",
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Invalid/Negative",
-              "refId": "C"
-            }
-          ],
-          "title": "SBK Hdfs Write Discarded Latencies",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "max": 0,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 1000000
-                  }
-                ]
-              },
-              "unit": "µs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 8,
-            "x": 0,
-            "y": 27
-          },
-          "id": 47,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_AvgLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_MaxLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Write Avg and Max Latencies (Microseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 10,
-            "w": 8,
-            "x": 8,
-            "y": 27
-          },
-          "hiddenSeries": false,
-          "id": 49,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_10{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_25{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_50{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_75{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_90{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_95{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_99_9{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_mcs_99_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Hdfs Write Percentiles (Microseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:256",
-              "format": "µs",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:257",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 10,
-            "w": 8,
-            "x": 16,
-            "y": 27
-          },
-          "hiddenSeries": false,
-          "id": 10,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_10{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_25{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_50{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_75{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_90{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_95{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_99_9{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_99_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Hdfs Write Percentiles (Milliseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:281",
-              "format": "ms",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:282",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 1
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 5
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 10
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 20
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 30
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 40
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 60
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 70
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 80
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 90
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 100
-                  },
-                  {
-                    "color": "#0A437C",
-                    "value": 200
-                  },
-                  {
-                    "color": "#6D1F62",
-                    "value": 500
-                  },
-                  {
-                    "color": "#584477",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 8,
-            "x": 0,
-            "y": 37
-          },
-          "id": 12,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_AvgLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Writing_ms_MaxLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Write Avg and Max Latencies (Milliseconds)",
-          "type": "stat"
-        }
-      ],
-      "title": "Write Performance Benchmarking",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
-      },
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 7
+        "y": 36
       },
       "id": 58,
       "panels": [
@@ -2032,10 +1567,10 @@
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 11,
+            "h": 13,
             "w": 8,
             "x": 0,
-            "y": 8
+            "y": 37
           },
           "hiddenSeries": false,
           "id": 63,
@@ -2071,6 +1606,18 @@
               },
               "expr": "SBK_Reading_MBPerSec{class=\"Hdfs\"}",
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "editorMode": "code",
+              "expr": "SBK_Read_Request_MBPerSec{class=\"Hdfs\"}",
+              "hide": false,
+              "legendFormat": "",
+              "range": true,
+              "refId": "B"
             }
           ],
           "thresholds": [],
@@ -2123,10 +1670,10 @@
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 11,
+            "h": 13,
             "w": 8,
             "x": 8,
-            "y": 8
+            "y": 37
           },
           "hiddenSeries": false,
           "id": 20,
@@ -2162,6 +1709,15 @@
               },
               "expr": "SBK_Reading_RecordsPerSec{class=\"Hdfs\"}",
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Read_Request_RecordsPerSec{class=\"Hdfs\"}",
+              "hide": false,
+              "refId": "B"
             }
           ],
           "thresholds": [],
@@ -2252,10 +1808,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 11,
+            "h": 13,
             "w": 8,
             "x": 16,
-            "y": 8
+            "y": 37
           },
           "id": 44,
           "options": {
@@ -2316,10 +1872,10 @@
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 11,
+            "h": 13,
             "w": 8,
             "x": 0,
-            "y": 19
+            "y": 50
           },
           "hiddenSeries": false,
           "id": 46,
@@ -2348,6 +1904,15 @@
           "stack": false,
           "steppedLine": false,
           "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "expr": "SBK_Reading_ns_5{class=\"Hdfs\"}",
+              "hide": false,
+              "refId": "V"
+            },
             {
               "datasource": {
                 "type": "prometheus",
@@ -2600,92 +2165,6 @@
             "defaults": {
               "links": [],
               "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 500
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 3,
-            "x": 8,
-            "y": 19
-          },
-          "id": 14,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_Readers{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Active",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_Max_Readers{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Max",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Readers",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
               "max": 500,
               "noValue": "0",
               "thresholds": {
@@ -2750,10 +2229,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 11,
-            "y": 19
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 50
           },
           "id": 18,
           "options": {
@@ -2838,10 +2317,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 11,
+            "h": 7,
             "w": 8,
             "x": 16,
-            "y": 19
+            "y": 50
           },
           "id": 73,
           "options": {
@@ -2925,9 +2404,9 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 3,
+            "w": 8,
             "x": 8,
-            "y": 24
+            "y": 57
           },
           "id": 16,
           "options": {
@@ -2942,7 +2421,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value"
+            "textMode": "value_and_name"
           },
           "pluginVersion": "9.0.6",
           "targets": [
@@ -2951,8 +2430,23 @@
                 "type": "prometheus",
                 "uid": "PBFA97CFB590B2093"
               },
+              "editorMode": "code",
               "expr": "SBK_Reading_Bytes_total{class=\"Hdfs\"}",
+              "legendFormat": "Read Bytes",
+              "range": true,
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "editorMode": "code",
+              "expr": "SBK_Read_Request_Bytes_total{class=\"Hdfs\"}",
+              "hide": false,
+              "legendFormat": "Read Request Bytes",
+              "range": true,
+              "refId": "B"
             }
           ],
           "title": "SBK Hdfs Read Bytes Total",
@@ -2985,10 +2479,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 11,
-            "y": 25
+            "h": 6,
+            "w": 8,
+            "x": 16,
+            "y": 57
           },
           "id": 26,
           "options": {
@@ -3041,580 +2535,6 @@
           ],
           "title": "SBK Hdfs Read Discarded Latencies",
           "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 10
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 100
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 1000
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 10000
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 100000
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 1000000
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 10000000
-                  }
-                ]
-              },
-              "unit": "µs"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 30
-          },
-          "id": 43,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_AvgLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_MaxLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Read Avg and Max Latencies (Microseconds)",
-          "type": "stat"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 8,
-            "y": 30
-          },
-          "hiddenSeries": false,
-          "id": 45,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_10{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_25{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_50{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_75{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_90{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_95{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_99_9{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_mcs_99_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Hdfs Read Percentiles (Microseconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:400",
-              "format": "µs",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:401",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 16,
-            "y": 30
-          },
-          "hiddenSeries": false,
-          "id": 22,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_10{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_25{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_50{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_75{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_90{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_95{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "F"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_99_9{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "H"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_99_99{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "I"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "SBK Hdfs Read Percentiles (Milli Seconds)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:425",
-              "format": "ms",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:426",
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": [],
-              "mappings": [],
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 1
-                  },
-                  {
-                    "color": "#6ED0E0",
-                    "value": 5
-                  },
-                  {
-                    "color": "#EF843C",
-                    "value": 10
-                  },
-                  {
-                    "color": "#E24D42",
-                    "value": 20
-                  },
-                  {
-                    "color": "#1F78C1",
-                    "value": 30
-                  },
-                  {
-                    "color": "#BA43A9",
-                    "value": 40
-                  },
-                  {
-                    "color": "#705DA0",
-                    "value": 50
-                  },
-                  {
-                    "color": "#508642",
-                    "value": 60
-                  },
-                  {
-                    "color": "#CCA300",
-                    "value": 70
-                  },
-                  {
-                    "color": "#447EBC",
-                    "value": 80
-                  },
-                  {
-                    "color": "#C15C17",
-                    "value": 90
-                  },
-                  {
-                    "color": "#890F02",
-                    "value": 100
-                  },
-                  {
-                    "color": "#0A437C",
-                    "value": 500
-                  },
-                  {
-                    "color": "#6D1F62",
-                    "value": 1000
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 8,
-            "x": 0,
-            "y": 41
-          },
-          "id": 24,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.0.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_AvgLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Average Latency",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
-              },
-              "expr": "SBK_Reading_ms_MaxLatency{class=\"Hdfs\"}",
-              "interval": "",
-              "legendFormat": "Max Latency",
-              "refId": "B"
-            }
-          ],
-          "title": "SBK Hdfs Read Avg and Max Latencies (Milliseconds)",
-          "type": "stat"
         }
       ],
       "title": "Read Performance Benchmarking",
@@ -3630,7 +2550,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 37
       },
       "id": 56,
       "panels": [],
@@ -3658,7 +2578,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 9
+        "y": 38
       },
       "hiddenSeries": false,
       "id": 61,
@@ -3696,6 +2616,24 @@
           "interval": "",
           "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Request_Bytes_MBPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "C"
         }
       ],
       "thresholds": [],
@@ -3745,7 +2683,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 9
+        "y": 38
       },
       "hiddenSeries": false,
       "id": 36,
@@ -3783,6 +2721,24 @@
           "interval": "",
           "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "C"
         }
       ],
       "thresholds": [],
@@ -3875,7 +2831,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 9
+        "y": 38
       },
       "id": 52,
       "options": {
@@ -3930,10 +2886,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 11,
+        "h": 13,
         "w": 8,
         "x": 0,
-        "y": 20
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 54,
@@ -3962,6 +2918,15 @@
       "stack": false,
       "steppedLine": false,
       "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Reading_ns_5{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "V"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -4210,82 +3175,6 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1073741824
-              },
-              {
-                "color": "#EF843C",
-                "value": 10737418240
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 10737418240
-              },
-              {
-                "color": "#E24D42",
-                "value": 1099511627776
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 8,
-        "y": 20
-      },
-      "id": 30,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.0.6",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_Bytes_total{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "SBK Hdfs Write-Read Bytes Total",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -4354,10 +3243,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 11,
-        "y": 20
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 49
       },
       "id": 32,
       "options": {
@@ -4444,10 +3333,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 11,
+        "h": 7,
         "w": 8,
         "x": 16,
-        "y": 20
+        "y": 49
       },
       "id": 75,
       "options": {
@@ -4497,6 +3386,7 @@
       },
       "fieldConfig": {
         "defaults": {
+          "links": [],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -4508,38 +3398,38 @@
               },
               {
                 "color": "#EAB839",
-                "value": 10
+                "value": 1073741824
               },
               {
                 "color": "#6ED0E0",
-                "value": 50
+                "value": 10737418240
               },
               {
                 "color": "#EF843C",
-                "value": 100
+                "value": 107374182400
               },
               {
                 "color": "#E24D42",
-                "value": 500
+                "value": 1099511627776
               }
             ]
           },
-          "unit": "none"
+          "unit": "decbytes"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 6,
-        "w": 3,
+        "w": 8,
         "x": 8,
-        "y": 25
+        "y": 56
       },
-      "id": 40,
+      "id": 117,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -4556,9 +3446,10 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Readers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Active Readers",
+          "editorMode": "code",
+          "expr": "SBK_Write_Reading_Bytes_total{class=\"Hdfs\"}",
+          "legendFormat": "Write Reading Bytes",
+          "range": true,
           "refId": "A"
         },
         {
@@ -4566,9 +3457,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Max_Readers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Readers",
+          "editorMode": "code",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Hdfs\"}",
+          "hide": false,
+          "legendFormat": "Read Request Bytes",
+          "range": true,
           "refId": "B"
         },
         {
@@ -4576,23 +3469,15 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_Writers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Active Writers",
+          "editorMode": "code",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Hdfs\"}",
+          "hide": false,
+          "legendFormat": "Write Request Bytes",
+          "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_Max_Writers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Writers",
-          "refId": "D"
         }
       ],
-      "title": "SBK Hdfs Write-Read  Writers and Readers",
+      "title": "SBK Hdfs Write Read Bytes Total",
       "type": "stat"
     },
     {
@@ -4622,10 +3507,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 11,
-        "y": 26
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 56
       },
       "id": 42,
       "options": {
@@ -4679,574 +3564,6 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 1000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 10000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 100000
-              },
-              {
-                "color": "#705DA0",
-                "value": 1000000
-              },
-              {
-                "color": "#508642",
-                "value": 10000000
-              },
-              {
-                "color": "#CCA300",
-                "value": 100000000
-              }
-            ]
-          },
-          "unit": "µs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 31
-      },
-      "id": 51,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.0.6",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_AvgLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_MaxLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Hdfs Write-Read Avg and Max Latencies (Microseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 8,
-        "y": 31
-      },
-      "hiddenSeries": false,
-      "id": 53,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "9.0.6",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_10{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_25{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_50{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_75{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_90{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_95{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_99_9{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_mcs_99_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Hdfs Write-Read Percentiles (Microseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:564",
-          "format": "µs",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:565",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 31
-      },
-      "hiddenSeries": false,
-      "id": 34,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "9.0.6",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_10{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_25{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_50{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_75{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_90{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_95{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_99_9{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_99_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Hdfs Write-Read Percentiles (Milliseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:589",
-          "format": "ms",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:590",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 1
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 5
-              },
-              {
-                "color": "#EF843C",
-                "value": 10
-              },
-              {
-                "color": "#E24D42",
-                "value": 20
-              },
-              {
-                "color": "#1F78C1",
-                "value": 30
-              },
-              {
-                "color": "#BA43A9",
-                "value": 40
-              },
-              {
-                "color": "#705DA0",
-                "value": 50
-              },
-              {
-                "color": "#508642",
-                "value": 60
-              },
-              {
-                "color": "#CCA300",
-                "value": 70
-              },
-              {
-                "color": "#447EBC",
-                "value": 80
-              },
-              {
-                "color": "#C15C17",
-                "value": 90
-              },
-              {
-                "color": "#890F02",
-                "value": 100
-              },
-              {
-                "color": "#0A437C",
-                "value": 200
-              },
-              {
-                "color": "#6D1F62",
-                "value": 500
-              },
-              {
-                "color": "#584477",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 42
-      },
-      "id": 38,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.0.6",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_AvgLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Write_Reading_ms_MaxLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Hdfs Write-Read Avg and Max Latencies (Milliseconds)",
-      "type": "stat"
-    },
-    {
       "collapsed": false,
       "datasource": {
         "type": "datasource",
@@ -5256,7 +3573,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 62
       },
       "id": 77,
       "panels": [],
@@ -5281,10 +3598,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 11,
+        "h": 13,
         "w": 8,
         "x": 0,
-        "y": 54
+        "y": 63
       },
       "hiddenSeries": false,
       "id": 79,
@@ -5304,7 +3621,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5323,6 +3640,24 @@
           "interval": "",
           "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Request_MBPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "C"
         }
       ],
       "thresholds": [],
@@ -5369,10 +3704,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 11,
+        "h": 13,
         "w": 8,
         "x": 8,
-        "y": 54
+        "y": 63
       },
       "hiddenSeries": false,
       "id": 81,
@@ -5392,7 +3727,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5411,6 +3746,24 @@
           "interval": "",
           "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "C"
         }
       ],
       "thresholds": [],
@@ -5458,7 +3811,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -5499,10 +3853,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 11,
+        "h": 13,
         "w": 8,
         "x": 16,
-        "y": 54
+        "y": 63
       },
       "id": 83,
       "options": {
@@ -5519,7 +3873,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -5558,10 +3912,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 11,
+        "h": 13,
         "w": 8,
         "x": 0,
-        "y": 65
+        "y": 76
       },
       "hiddenSeries": false,
       "id": 85,
@@ -5581,7 +3935,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -5590,6 +3944,15 @@
       "stack": false,
       "steppedLine": false,
       "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_OnlyReading_ns_5{class=\"Hdfs\"}",
+          "hide": false,
+          "refId": "V"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -5859,82 +4222,6 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "#EAB839",
-                "value": 1073741824
-              },
-              {
-                "color": "#EF843C",
-                "value": 10737418240
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 10737418240
-              },
-              {
-                "color": "#E24D42",
-                "value": 1099511627776
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 8,
-        "y": 65
-      },
-      "id": 87,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "SBK Hdfs Write-Only Read Bytes Total",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -5945,7 +4232,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -6002,10 +4290,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 11,
-        "y": 65
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 76
       },
       "id": 89,
       "options": {
@@ -6020,7 +4308,7 @@
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -6051,7 +4339,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -6092,10 +4381,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 11,
+        "h": 7,
         "w": 8,
         "x": 16,
-        "y": 65
+        "y": 76
       },
       "id": 95,
       "options": {
@@ -6112,7 +4401,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -6147,48 +4436,50 @@
       },
       "fieldConfig": {
         "defaults": {
+          "links": [],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
-                "value": 10
+                "value": 1073741824
               },
               {
                 "color": "#6ED0E0",
-                "value": 50
+                "value": 10737418240
               },
               {
                 "color": "#EF843C",
-                "value": 100
+                "value": 107374182400
               },
               {
                 "color": "#E24D42",
-                "value": 500
+                "value": 1099511627776
               }
             ]
           },
-          "unit": "none"
+          "unit": "decbytes"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 6,
-        "w": 3,
+        "w": 8,
         "x": 8,
-        "y": 70
+        "y": 83
       },
-      "id": 91,
+      "id": 119,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -6198,17 +4489,17 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Readers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Active Readers",
+          "editorMode": "code",
+          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Hdfs\"}",
+          "legendFormat": "Write Only Reading Bytes",
+          "range": true,
           "refId": "A"
         },
         {
@@ -6216,10 +4507,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Max_Readers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Readers",
+          "editorMode": "code",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Hdfs\"}",
+          "hide": false,
+          "legendFormat": "Read Request Bytes",
+          "range": true,
           "refId": "B"
         },
         {
@@ -6227,25 +4519,15 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Writers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Active Writers",
+          "editorMode": "code",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Hdfs\"}",
+          "hide": false,
+          "legendFormat": "Write Request Bytes",
+          "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_Max_Writers{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Writers",
-          "refId": "D"
         }
       ],
-      "title": "SBK Hdfs Write-Only Read  Writers and Readers",
+      "title": "SBK Hdfs Write-Only Read Bytes Total",
       "type": "stat"
     },
     {
@@ -6261,7 +4543,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -6274,10 +4557,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 11,
-        "y": 71
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 83
       },
       "id": 93,
       "options": {
@@ -6294,7 +4577,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "8.5.1",
+      "pluginVersion": "9.0.6",
       "targets": [
         {
           "datasource": {
@@ -6332,594 +4615,6 @@
       ],
       "title": "SBK Hdfs Write-Only Read  Discarded Latencies",
       "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 50
-              },
-              {
-                "color": "#EF843C",
-                "value": 100
-              },
-              {
-                "color": "#E24D42",
-                "value": 1000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 10000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 100000
-              },
-              {
-                "color": "#705DA0",
-                "value": 1000000
-              },
-              {
-                "color": "#508642",
-                "value": 10000000
-              },
-              {
-                "color": "#CCA300",
-                "value": 100000000
-              }
-            ]
-          },
-          "unit": "µs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 76
-      },
-      "id": 97,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_AvgLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_MaxLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Hdfs Write-Only Read Avg and Max Latencies (Microseconds)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 8,
-        "y": 76
-      },
-      "hiddenSeries": false,
-      "id": 99,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_10{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_25{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_50{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_75{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_90{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_95{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_99_9{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_mcs_99_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Hdfs Write-Only Read Percentiles (Microseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:334",
-          "format": "µs",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:335",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 76
-      },
-      "hiddenSeries": false,
-      "id": 101,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_10{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_25{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_50{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_75{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_90{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_95{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_99_9{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_99_99{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "I"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "SBK Hdfs Write-Only Read Percentiles (Milliseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:359",
-          "format": "ms",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:360",
-          "format": "short",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "#EAB839",
-                "value": 1
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 5
-              },
-              {
-                "color": "#EF843C",
-                "value": 10
-              },
-              {
-                "color": "#E24D42",
-                "value": 20
-              },
-              {
-                "color": "#1F78C1",
-                "value": 30
-              },
-              {
-                "color": "#BA43A9",
-                "value": 40
-              },
-              {
-                "color": "#705DA0",
-                "value": 50
-              },
-              {
-                "color": "#508642",
-                "value": 60
-              },
-              {
-                "color": "#CCA300",
-                "value": 70
-              },
-              {
-                "color": "#447EBC",
-                "value": 80
-              },
-              {
-                "color": "#C15C17",
-                "value": 90
-              },
-              {
-                "color": "#890F02",
-                "value": 100
-              },
-              {
-                "color": "#0A437C",
-                "value": 200
-              },
-              {
-                "color": "#6D1F62",
-                "value": 500
-              },
-              {
-                "color": "#584477",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 0,
-        "y": 87
-      },
-      "id": 103,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_AvgLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Average Latency",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ms_MaxLatency{class=\"Hdfs\"}",
-          "interval": "",
-          "legendFormat": "Max Latency",
-          "refId": "B"
-        }
-      ],
-      "title": "SBK Hdfs Write-Only Read Avg and Max Latencies (Milliseconds)",
-      "type": "stat"
     }
   ],
   "refresh": "5s",
@@ -6952,7 +4647,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
