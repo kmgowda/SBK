@@ -63,7 +63,7 @@ final public class SbmLatencyBenchmark implements Benchmark, SbmRegistry {
         for (int i = 0; i < cQueues.length; i++) {
             cQueues[i] = new ConcurrentLinkedQueue<>();
         }
-        this.counter = new AtomicLong(0);
+        this.counter = new AtomicLong(BASE_CLIENT_ID_VALUE);
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         this.qFuture = null;
@@ -106,7 +106,7 @@ final public class SbmLatencyBenchmark implements Benchmark, SbmRegistry {
 
     @Override
     public long getID() {
-        return counter.incrementAndGet();
+        return counter.getAndIncrement();
     }
 
     @Override

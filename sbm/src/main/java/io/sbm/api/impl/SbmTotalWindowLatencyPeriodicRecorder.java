@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
+import static io.sbm.api.SbmRegistry.BASE_CLIENT_ID_VALUE;
+
 /**
  * Class RamTotalWindowLatencyPeriodicRecorder.
  */
@@ -94,11 +96,12 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * @param record NotNull LatenciesRecord
      */
     public void addLatenciesRecord(@NotNull LatenciesRecord record) {
+        final int id = (int) (record.getClientID() - BASE_CLIENT_ID_VALUE);
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                 record.getMaxReaders(), record.getMaxWriters());
-        wRequestLogger.recordWriteRequests(0, 0, record.getWriteRequestBytes(),
+        wRequestLogger.recordWriteRequests(id, 0, record.getWriteRequestBytes(),
                 record.getWriteRequestRecords());
-        rRequestLogger.recordReadRequests(0, 0, record.getReadRequestBytes(),
+        rRequestLogger.recordReadRequests(id, 0, record.getReadRequestBytes(),
                 record.getReadRequestRecords());
 
         window.update(record.getTotalRecords(), record.getTotalLatency(), record.getTotalBytes(),

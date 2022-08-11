@@ -16,6 +16,7 @@ import io.sbp.grpc.LatenciesRecord;
  * Interface RamRegistry.
  */
 public interface SbmRegistry {
+     final static long BASE_CLIENT_ID_VALUE = 1;
 
     /**
      * this method returns id.
