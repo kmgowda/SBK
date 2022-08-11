@@ -27,7 +27,6 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;
     final private AtomicInteger maxReaders;
-
     final private Counter writeRequestBytes;
     final private Counter readRequestBytes;
     final private Counter writeRequestRecords;
@@ -41,37 +40,38 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
                                         MetricsConfig config) throws IOException {
         super(header.toUpperCase()+" "+action, percentiles, time,
                 config.latencyTimeUnit, config.port, config.context, Tags.of(Config.CLASS_OPTION, className));
-        final String writersName = metricPrefix + "_Writers";
-        final String readersName = metricPrefix + "_Readers";
-        final String maxWritersName = metricPrefix + "_Max_Writers";
-        final String maxReadersName = metricPrefix + "_Max_Readers";
-        final String writeRequestBytesName = metricPrefix + "_Write_RequestBytes";
-        final String writeRequestsName = metricPrefix + "_Write_Requests";
-        final String writeRequestsMbPerSecName = metricPrefix + "_Write_RequestBytes_MBPerSec";
-        final String writeRequestsPerSecName =  metricPrefix + "_Write_Requests_MBPerSec";
-        final String readRequestBytesName = metricPrefix + "_Read_RequestBytes";
-        final String readRequestsName = metricPrefix + "_Read_Requests";
-        final String readRequestsMbPerSecName = metricPrefix + "_Read_RequestBytes_MBPerSec";
-        final String readRequestsPerSecName =  metricPrefix + "_Read_Requests_MBPerSec";
+        final String prefix =   header.toUpperCase().replace(" ", "_");
+        final String writersName = prefix + "_Writers";
+        final String readersName = prefix + "_Readers";
+        final String maxWritersName = prefix + "_Max_Writers";
+        final String maxReadersName = prefix + "_Max_Readers";
+        final String writeRequestBytesName = prefix + "_Write_Request_Bytes";
+        final String writeRequestRecordsName = prefix + "_Write_Request_Records";
+        final String writeRequestsMbPerSecName = prefix + "_Write_Request_Bytes_MBPerSec";
+        final String writeRequestRecordsPerSecName =  prefix + "_Write_Request_RecordsPerSec";
+        final String readRequestBytesName = prefix + "_Read_Request_Bytes";
+        final String readRequestRecordsName = prefix + "_Read_Request_Records";
+        final String readRequestsMbPerSecName = prefix + "_Read_Request_MBPerSec";
+        final String readRequestRecordsPerSecName =  prefix + "_Read_Request_RecordsPerSec";
 
         this.writers = this.registry.gauge(writersName, new AtomicInteger());
         this.readers = this.registry.gauge(readersName, new AtomicInteger());
         this.maxWriters = this.registry.gauge(maxWritersName, new AtomicInteger());
         this.maxReaders = this.registry.gauge(maxReadersName, new AtomicInteger());
         this.writeRequestBytes = this.registry.counter(writeRequestBytesName);
-        this.writeRequestRecords = this.registry.counter(writeRequestsName);
+        this.writeRequestRecords = this.registry.counter(writeRequestRecordsName);
         this.writeRequestsMbPerSec = this.registry.gauge(writeRequestsMbPerSecName, new AtomicDouble());
-        this.writeRequestRecordsPerSec = this.registry.gauge(writeRequestsPerSecName, new AtomicDouble());
+        this.writeRequestRecordsPerSec = this.registry.gauge(writeRequestRecordsPerSecName, new AtomicDouble());
         this.readRequestBytes = this.registry.counter(readRequestBytesName);
-        this.readRequestRecords = this.registry.counter(readRequestsName);
+        this.readRequestRecords = this.registry.counter(readRequestRecordsName);
         this.readRequestsMbPerSec = this.registry.gauge(readRequestsMbPerSecName, new AtomicDouble());
-        this.readRequestRecordsPerSec = this.registry.gauge(readRequestsPerSecName, new AtomicDouble());
+        this.readRequestRecordsPerSec = this.registry.gauge(readRequestRecordsPerSecName, new AtomicDouble());
 
     }
 
 
     @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
+    public final void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
                       double writeRequestMbPerSec, long writeRequestRecords, double writeRequestRecordsPerSec,
                       long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
                       double readRequestsRecordsPerSec, double seconds, long bytes, long records, double recsPerSec,
@@ -91,6 +91,5 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readRequestRecordsPerSec.set(readRequestsRecordsPerSec);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                                 higherDiscard, slc1, slc2, percentileValues);
-
     }
 }
