@@ -117,9 +117,6 @@ public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow 
      * @return is valid latency record or not
      */
     final public boolean record(long bytes, long events, long latency) {
-        if (events <= 0) {
-            return false;
-        }
         this.totalBytes += bytes;
         this.totalRecords += events;
         if (latency < 0) {
