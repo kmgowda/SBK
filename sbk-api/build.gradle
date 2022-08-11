@@ -40,15 +40,6 @@ dependencies {
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
 }
 
-
-generateJavadoc {
-    // follow the package path , it should not be folder path.
-    // but dont use . (dot) in the path
-    exclude 'io/sbk/grpc/ServiceGrpc.java'
-    exclude 'io/sbk/grpc/LatenciesRecordOrBuilder.java'
-    exclude 'io/sbk/grpc/LatenciesRecord.java'
-}
-
 task updateDocs(dependsOn: javadoc) {
     doLast {
         println "Update $projectDir Javadocs"
