@@ -57,14 +57,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected int maxWriterRequestIds;
     protected int maxReaderRequestIds;
     protected AtomicLongArray writeBytesArray;
-    protected AtomicLongArray writeRequestsArray;
+    protected AtomicLongArray writeRequestRecordsArray;
     protected AtomicLongArray readBytesArray;
-    protected AtomicLongArray readRequestsArray;
-
-
+    protected AtomicLongArray readRequestRecordsArray;
     private LoggerConfig loggerConfig;
-
-
 
     public SystemLogger() {
         super();
@@ -79,9 +75,9 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.isRequestWrites = false;
         this.isRequestReads = false;
         this.readBytesArray = null;
-        this.readRequestsArray = null;
+        this.readRequestRecordsArray = null;
         this.writeBytesArray = null;
-        this.writeRequestsArray = null;
+        this.writeRequestRecordsArray = null;
         this.maxReaderRequestIds = 0;
         this.maxWriterRequestIds = 0;
     }
@@ -223,9 +219,9 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
             }
         }
         this.writeBytesArray = new AtomicLongArray(maxWriterRequestIds);
-        this.writeRequestsArray = new AtomicLongArray(maxWriterRequestIds);
+        this.writeRequestRecordsArray = new AtomicLongArray(maxWriterRequestIds);
         this.readBytesArray = new AtomicLongArray(maxReaderRequestIds);
-        this.readRequestsArray = new AtomicLongArray(maxReaderRequestIds);
+        this.readRequestRecordsArray = new AtomicLongArray(maxReaderRequestIds);
     }
 
     @Override
@@ -262,14 +258,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
     @Override
     public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
-        writeRequestsArray.addAndGet(writerId, events);
+        writeRequestRecordsArray.addAndGet(writerId, events);
         writeBytesArray.addAndGet(writerId, bytes);
     }
 
 
     @Override
     public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
-        readRequestsArray.addAndGet(readerId, events);
+        readRequestRecordsArray.addAndGet(readerId, events);
         readBytesArray.addAndGet(readerId, bytes);
     }
 
@@ -307,14 +303,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
         if (isRequestWrites) {
             for (int i = 0; i < maxWriterRequestIds; i++) {
-                writeRequestRecordssSum += writeRequestsArray.getAndSet(i, 0);
+                writeRequestRecordssSum += writeRequestRecordsArray.getAndSet(i, 0);
                 writeBytesSum += writeBytesArray.getAndSet(i, 0);
             }
         }
 
         if (isRequestReads) {
             for (int i = 0; i < maxReaderRequestIds; i++) {
-                readRequestRecordsSum += readRequestsArray.getAndSet(i, 0);
+                readRequestRecordsSum += readRequestRecordsArray.getAndSet(i, 0);
                 readBytesSum += readBytesArray.getAndSet(i, 0);
             }
            }

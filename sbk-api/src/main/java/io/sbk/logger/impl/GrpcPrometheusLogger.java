@@ -56,9 +56,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     private LatencyRecorder recorder;
 
     private AtomicLongArray ramWriteBytesArray;
-    private AtomicLongArray ramWriteRequestsArray;
+    private AtomicLongArray ramWriteRequestRecordsArray;
     private AtomicLongArray ramReadBytesArray;
-    private AtomicLongArray ramReadRequestsArray;
+    private AtomicLongArray ramReadRequestRecordsArray;
 
     private ManagedChannel channel;
     private ServiceGrpc.ServiceStub stub;
@@ -73,9 +73,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     public GrpcPrometheusLogger() {
         super();
         this.ramWriteBytesArray = null;
-        this.ramWriteRequestsArray = null;
+        this.ramWriteRequestRecordsArray = null;
         this.ramReadBytesArray = null;
-        this.ramReadRequestsArray = null;
+        this.ramReadRequestRecordsArray = null;
     }
 
     @Override
@@ -126,9 +126,9 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
             return;
         }
         this.ramWriteBytesArray = new AtomicLongArray(maxWriterRequestIds);
-        this.ramWriteRequestsArray = new AtomicLongArray(maxWriterRequestIds);
+        this.ramWriteRequestRecordsArray = new AtomicLongArray(maxWriterRequestIds);
         this.ramReadBytesArray = new AtomicLongArray(maxReaderRequestIds);
-        this.ramReadRequestsArray = new AtomicLongArray(maxReaderRequestIds);
+        this.ramReadRequestRecordsArray = new AtomicLongArray(maxReaderRequestIds);
         channel = ManagedChannelBuilder.forTarget(sbmHostConfig.host + ":" + sbmHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         Config config;
@@ -211,11 +211,11 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         long readRequestsSum = 0;
         long readBytesSum = 0;
         for (int i = 0; i < maxWriterRequestIds; i++) {
-            writeRequestsSum += ramWriteRequestsArray.getAndSet(i, 0);
+            writeRequestsSum += ramWriteRequestRecordsArray.getAndSet(i, 0);
             writeBytesSum += ramWriteBytesArray.getAndSet(i, 0);
         }
         for (int i = 0; i < maxReaderRequestIds; i++) {
-            readRequestsSum += ramReadRequestsArray.getAndSet(i, 0);
+            readRequestsSum += ramReadRequestRecordsArray.getAndSet(i, 0);
             readBytesSum += ramReadBytesArray.getAndSet(i, 0);
         }
         builder.setWriteRequestBytes(writeBytesSum);
@@ -251,7 +251,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
         super.recordWriteRequests(writerId, startTime, bytes, events);
         if (enable) {
-            ramWriteRequestsArray.addAndGet(writerId, events);
+            ramWriteRequestRecordsArray.addAndGet(writerId, events);
             ramWriteBytesArray.addAndGet(writerId, bytes);
         }
     }
@@ -260,7 +260,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
         super.recordReadRequests(readerId, startTime, bytes, events);
         if (enable) {
-            ramReadRequestsArray.addAndGet(readerId, events);
+            ramReadRequestRecordsArray.addAndGet(readerId, events);
             ramReadBytesArray.addAndGet(readerId, bytes);
         }
     }
