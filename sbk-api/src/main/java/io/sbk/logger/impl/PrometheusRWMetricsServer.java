@@ -30,12 +30,12 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
 
     final private Counter writeRequestBytes;
     final private Counter readRequestBytes;
-    final private Counter writeRequests;
-    final private Counter readRequests;
+    final private Counter writeRequestRecords;
+    final private Counter readRequestRecords;
     final private AtomicDouble writeRequestsMbPerSec;
-    final private AtomicDouble writeRequestsPerSec;
+    final private AtomicDouble writeRequestRecordsPerSec;
     final private AtomicDouble readRequestsMbPerSec;
-    final private AtomicDouble readRequestsPerSec;
+    final private AtomicDouble readRequestRecordsPerSec;
 
     public  PrometheusRWMetricsServer(String header, String action, String className, double[] percentiles, Time time,
                                         MetricsConfig config) throws IOException {
@@ -59,13 +59,13 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.maxWriters = this.registry.gauge(maxWritersName, new AtomicInteger());
         this.maxReaders = this.registry.gauge(maxReadersName, new AtomicInteger());
         this.writeRequestBytes = this.registry.counter(writeRequestBytesName);
-        this.writeRequests = this.registry.counter(writeRequestsName);
+        this.writeRequestRecords = this.registry.counter(writeRequestsName);
         this.writeRequestsMbPerSec = this.registry.gauge(writeRequestsMbPerSecName, new AtomicDouble());
-        this.writeRequestsPerSec = this.registry.gauge(writeRequestsPerSecName, new AtomicDouble());
+        this.writeRequestRecordsPerSec = this.registry.gauge(writeRequestsPerSecName, new AtomicDouble());
         this.readRequestBytes = this.registry.counter(readRequestBytesName);
-        this.readRequests = this.registry.counter(readRequestsName);
+        this.readRequestRecords = this.registry.counter(readRequestsName);
         this.readRequestsMbPerSec = this.registry.gauge(readRequestsMbPerSecName, new AtomicDouble());
-        this.readRequestsPerSec = this.registry.gauge(readRequestsPerSecName, new AtomicDouble());
+        this.readRequestRecordsPerSec = this.registry.gauge(readRequestsPerSecName, new AtomicDouble());
 
     }
 
@@ -82,13 +82,13 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readers.set(readers);
         this.maxReaders.set(maxReaders);
         this.writeRequestBytes.increment(writeRequestBytes);
-        this.writeRequests.increment(writeRequestRecords);
+        this.writeRequestRecords.increment(writeRequestRecords);
         this.writeRequestsMbPerSec.set(writeRequestMbPerSec);
-        this.writeRequestsPerSec.set(writeRequestRecordsPerSec);
+        this.writeRequestRecordsPerSec.set(writeRequestRecordsPerSec);
         this.readRequestBytes.increment(readRequestBytes);
-        this.readRequests.increment(readRequestRecords);
+        this.readRequestRecords.increment(readRequestRecords);
         this.readRequestsMbPerSec.set(readRequestMbPerSec);
-        this.readRequestsPerSec.set(readRequestsRecordsPerSec);
+        this.readRequestRecordsPerSec.set(readRequestsRecordsPerSec);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                                 higherDiscard, slc1, slc2, percentileValues);
 
