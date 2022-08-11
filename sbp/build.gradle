@@ -26,6 +26,7 @@ buildscript {
     }
 }
 
+apply from: "$rootDir/gradle/protobuf.gradle"
 apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"

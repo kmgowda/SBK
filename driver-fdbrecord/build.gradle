@@ -1,6 +1,7 @@
 apply plugin: 'java-library'
 apply plugin: "com.google.protobuf"
 
+
 buildscript {
     repositories {
         mavenCentral()
@@ -10,6 +11,9 @@ buildscript {
         classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
     }
 }
+
+apply from: "$rootDir/gradle/protobuf.gradle"
+
 
 repositories {
     mavenCentral()
