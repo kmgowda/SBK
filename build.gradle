@@ -67,13 +67,9 @@ allprojects {
     apply from: "$rootDir/gradle/idea.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
 
-
-    def sbkProjectName = rootProject.name + project.path.replace(":", "-")
-    sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-", rootProject.name + "-")
-    sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
-    sbkProjectName = sbkProjectName.replace("--", "-")
-    if (sbkProjectName == rootProject.name + "-") {
-        sbkProjectName = rootProject.name
+    def sbkProjectName = project.name
+    if (sbkProjectName.startsWith("driver-")) {
+        sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
     }
     archivesBaseName = sbkProjectName
     version = sbkVersion
