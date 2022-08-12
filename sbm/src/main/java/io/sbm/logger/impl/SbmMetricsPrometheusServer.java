@@ -40,8 +40,8 @@ public final class SbmMetricsPrometheusServer extends PrometheusRWMetricsServer 
     public SbmMetricsPrometheusServer(String header, String action, String storageName,
                                       double[] percentiles, Time time, MetricsConfig config) throws IOException {
         super(header, action, storageName, percentiles, time, config);
-        final String name = metricPrefix + "_Connections";
-        final String maxName = metricPrefix + "_Max_Connections";
+        final String name = rwMetricPrefix + "_Connections";
+        final String maxName = rwMetricPrefix + "_Max_Connections";
         this.connections = this.registry.gauge(name, new AtomicInteger());
         this.maxConnections = this.registry.gauge(maxName, new AtomicInteger());
     }

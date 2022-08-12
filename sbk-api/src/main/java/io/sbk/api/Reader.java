@@ -164,9 +164,19 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
     default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel,
                                 int id, ReadRequestsLogger logger)
             throws EOFException, IOException {
-        logger.recordReadRequests(id, time.getCurrentTime(), size, 1);
-        recordReadTime(dType, size, time, status, perlChannel);
+        status.startTime = time.getCurrentTime();
+        logger.recordReadRequests(id,  status.startTime, size, 1);
+        final T ret = read();
+        if (ret == null) {
+            status.endTime = time.getCurrentTime();
+            status.records = 0;
+        } else {
+            status.startTime = dType.getTime(ret);
+            status.endTime = time.getCurrentTime();
+            status.bytes = dType.length(ret);
+            status.records = 1;
+            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+        }
     }
-
 }
 
