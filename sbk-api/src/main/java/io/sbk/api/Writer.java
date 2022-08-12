@@ -27,7 +27,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
      * Asynchronously Writes the data .
      *
      * @param data data to write
-     * @return CompletableFuture completable future. null if the write completed synchronously .
+     * @return CompletableFuture completable future. null if write completed synchronously .
      * @throws IOException If an exception occurred.
      */
     CompletableFuture<?> writeAsync(T data) throws IOException;
