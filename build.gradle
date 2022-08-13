@@ -68,16 +68,15 @@ allprojects {
     apply from: "$rootDir/gradle/jacoco.gradle"
 
     def sbkProjectName = project.name
+    def sbkClass = project.name
     if (sbkProjectName.startsWith("driver-")) {
         sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
+        sbkClass = sbkClass.replace("driver-", "")
     }
+    
     archivesBaseName = sbkProjectName
     version = sbkVersion
 
-    def sbkClass = ""
-    if (project.path.startsWith(":driver-")) {
-        sbkClass = project.path.replace(":driver-", "")
-    }
 
     configurations.all {
         exclude group: sbkGroup, module: "driver-sbktemplate"
