@@ -155,9 +155,20 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                     + ", local min latency: " + getMinLatency() + " are not same!");
         }
         if (config.getMaxLatency() != getMaxLatency()) {
-            Printer.log.warn("SBM, min latency : " + config.getMaxLatency()
-                    + ", local min latency: " + getMaxLatency() + " are not same!");
+            Printer.log.warn("SBM, max latency : " + config.getMaxLatency()
+                    + ", local max latency: " + getMaxLatency() + " are not same!");
         }
+        if (config.getIsReadRequests() !=  isRequestReads) {
+            Printer.log.warn("SBM, read request: " + config.getIsReadRequests()
+                    + ", local read request: " + isRequestReads + " are not same!" +
+                    ", set the option -rq to "+ config.getIsReadRequests());
+        }
+        if (config.getIsWriteRequests() !=  isRequestWrites) {
+            Printer.log.warn("SBM, write request: " + config.getIsWriteRequests()
+                    + ", local write request: " + isRequestWrites + " are not same!" +
+                    ", set the option -wq to "+config.getIsWriteRequests());
+        }
+
         try {
             clientID = blockingStub.registerClient(config).getId();
         } catch (StatusRuntimeException ex) {

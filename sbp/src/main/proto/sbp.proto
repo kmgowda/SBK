@@ -42,6 +42,8 @@ message Config {
   TimeUnitEnum timeUnit = 3;
   int64 minLatency = 4;
   int64 maxLatency = 5;
+  bool isWriteRequests = 6;
+  bool isReadRequests = 7;
 }
 
 message ClientID {

@@ -67,21 +67,14 @@ allprojects {
     apply from: "$rootDir/gradle/idea.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
 
-
-    def sbkProjectName = rootProject.name + project.path.replace(":", "-")
-    sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-", rootProject.name + "-")
-    sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
-    sbkProjectName = sbkProjectName.replace("--", "-")
-    if (sbkProjectName == rootProject.name + "-") {
-        sbkProjectName = rootProject.name
+    def sbkProjectName = project.name
+    def sbkClass = project.name
+    if (sbkProjectName.startsWith("driver-")) {
+        sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
+        sbkClass = sbkClass.replace("driver-", "")
     }
     archivesBaseName = sbkProjectName
     version = sbkVersion
-
-    def sbkClass = ""
-    if (project.path.startsWith(":driver-")) {
-        sbkClass = project.path.replace(":driver-", "")
-    }
 
     configurations.all {
         exclude group: sbkGroup, module: "driver-sbktemplate"
@@ -197,7 +190,7 @@ allprojects {
     }
 
     task generateDockerfiles() {
-        def driversToSkip = ["sbk-api", "state", "time", "perl"]
+        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem"]
         def buffer = ""
         def outDir = 'build/dockers'
         def outFile = sbkProjectName + "-" + sbkVersion
