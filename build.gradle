@@ -73,10 +73,8 @@ allprojects {
         sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
         sbkClass = sbkClass.replace("driver-", "")
     }
-    
     archivesBaseName = sbkProjectName
     version = sbkVersion
-
 
     configurations.all {
         exclude group: sbkGroup, module: "driver-sbktemplate"
@@ -192,7 +190,7 @@ allprojects {
     }
 
     task generateDockerfiles() {
-        def driversToSkip = ["sbk-api", "state", "time", "perl"]
+        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem"]
         def buffer = ""
         def outDir = 'build/dockers'
         def outFile = sbkProjectName + "-" + sbkVersion
