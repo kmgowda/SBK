@@ -40,10 +40,10 @@ final public class TimeStamp {
      *
      * @param startTime long
      * @param endTime   long
-     * @param bytes     int
      * @param records   int
+     * @param bytes     int
      */
-    public TimeStamp(long startTime, long endTime, int bytes, int records) {
+    public TimeStamp(long startTime, long endTime, int records, int bytes) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.bytes = bytes;
