@@ -45,7 +45,7 @@ public final class TotalWindowLatencyPeriodicRecorder extends TotalWindowLatency
     @Override
     public void record(long startTime, long endTime, int bytes, int events) {
         final long latency = time.elapsed(endTime, startTime);
-        this.reportLatency.recordLatency(startTime, bytes, events, latency);
-        recordLatency(startTime, bytes, events, latency);
+        this.reportLatency.recordLatency(startTime, events, bytes, latency);
+        recordLatency(startTime, events, bytes, latency);
     }
 }

@@ -69,7 +69,7 @@ public class PerlTest  {
         }
 
         @Override
-        public void recordLatency(long startTime, int bytes, int events, long latency) {
+        public void recordLatency(long startTime, int events, int bytes, long latency) {
             PerlPrinter.log.info("recordLatency : receiving records " + events);
             latencyReporterCnt.addAndGet(events);
         }
