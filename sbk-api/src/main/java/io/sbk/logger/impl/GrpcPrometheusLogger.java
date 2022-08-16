@@ -288,7 +288,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         if (latencyBytes >= maxLatencyBytes) {
             sendLatenciesRecord();
         }
-        if (recorder.record(bytes, events, latency)) {
+        if (recorder.record(events, bytes, latency)) {
             final Long cnt = builder.getLatencyMap().getOrDefault(latency, 0L);
             builder.putLatency(latency, cnt + events);
             if (cnt == 0) {
