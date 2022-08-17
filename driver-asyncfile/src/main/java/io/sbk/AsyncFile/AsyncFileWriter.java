@@ -55,7 +55,7 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         final long endTime = time.getCurrentTime();
-                        record.send(ctime, endTime, result, 1);
+                        record.send(ctime, endTime, 1, result);
                     }
 
                     @Override

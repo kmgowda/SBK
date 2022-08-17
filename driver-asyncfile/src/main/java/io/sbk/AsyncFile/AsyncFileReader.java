@@ -62,7 +62,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                             isEOF.set(true);
                             perlChannel.throwException(new EOFException());
                         } else {
-                            perlChannel.send(ctime, endTime, result, 1);
+                            perlChannel.send(ctime, endTime, 1, result);
                         }
                     }
 
@@ -90,7 +90,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
                             isEOF.set(true);
                             perlChannel.throwException(new EOFException());
                         } else {
-                            perlChannel.send(dType.getTime(attachment), endTime, result, 1);
+                            perlChannel.send(dType.getTime(attachment), endTime, 1, result);
                         }
                     }
 

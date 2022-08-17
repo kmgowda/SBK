@@ -51,7 +51,7 @@ public class KafkaReader implements Reader<byte[]> {
                 status.bytes += record.value().length;
                 status.records += 1;
             }
-            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         }
     }
 
@@ -72,7 +72,7 @@ public class KafkaReader implements Reader<byte[]> {
                     status.startTime = dType.getTime(record.value());
                 }
             }
-            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         }
     }
 

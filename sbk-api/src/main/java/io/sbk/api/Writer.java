@@ -165,7 +165,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         ret = write(dType, data, size, time, status);
         if (ret == null) {
             status.endTime = time.getCurrentTime();
-            perlChannel.send(status.startTime, status.endTime, size, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, size);
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
@@ -174,7 +174,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
             });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                perlChannel.send(beginTime, endTime, size, status.records);
+                perlChannel.send(beginTime, endTime, status.records, size);
             });
         }
     }
@@ -205,7 +205,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         ret = write(dType, data, size, time, status, id, logger);
         if (ret == null) {
             status.endTime = time.getCurrentTime();
-            perlChannel.send(status.startTime, status.endTime, size, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, size);
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
@@ -214,7 +214,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
             });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                perlChannel.send(beginTime, endTime, size, status.records);
+                perlChannel.send(beginTime, endTime, status.records, size);
             });
         }
     }

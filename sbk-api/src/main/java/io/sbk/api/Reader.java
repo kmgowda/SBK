@@ -67,7 +67,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
             status.endTime = time.getCurrentTime();
             status.bytes = dType.length(ret);
             status.records = 1;
-            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         }
     }
 
@@ -104,7 +104,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
             status.endTime = time.getCurrentTime();
             status.bytes = dType.length(ret);
             status.records = 1;
-            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         }
     }
 
@@ -137,7 +137,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
             status.endTime = time.getCurrentTime();
             status.bytes = dType.length(ret);
             status.records = 1;
-            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         }
     }
 
@@ -175,7 +175,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
             status.endTime = time.getCurrentTime();
             status.bytes = dType.length(ret);
             status.records = 1;
-            perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+            perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         }
     }
 }
