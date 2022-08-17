@@ -101,7 +101,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
             return null;
         });
         status.endTime = time.getCurrentTime();
-        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         key += recs;
         cnt += recs;
     }

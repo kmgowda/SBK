@@ -104,7 +104,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
             return null;
         });
         status.endTime = time.getCurrentTime();
-        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
         key += recs;
         cnt += recs;
     }

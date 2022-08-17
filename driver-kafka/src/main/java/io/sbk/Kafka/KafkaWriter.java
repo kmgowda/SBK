@@ -45,7 +45,7 @@ public class KafkaWriter implements Writer<byte[]> {
         status.records = 1;
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = time.getCurrentTime();
-            record.send(ctime, endTime, size, 1);
+            record.send(ctime, endTime, 1, size);
         });
     }
 
@@ -60,7 +60,7 @@ public class KafkaWriter implements Writer<byte[]> {
         logger.recordWriteRequests(id, status.startTime, status.bytes, status.records);
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = time.getCurrentTime();
-            perlChannel.send(ctime, endTime, size, 1);
+            perlChannel.send(ctime, endTime, 1, size);
         });
     }
 
