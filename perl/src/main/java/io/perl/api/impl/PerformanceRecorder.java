@@ -78,7 +78,7 @@ public final class PerformanceRecorder {
                         doWork = false;
                     } else {
                         recordsCnt += t.records;
-                        periodicRecorder.record(t.startTime, t.endTime, t.bytes, t.records);
+                        periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                         if (msToRun > 0) {
                             if (time.elapsedMilliSeconds(ctime, startTime) >= msToRun) {
                                 doWork = false;
