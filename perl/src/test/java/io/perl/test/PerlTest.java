@@ -68,7 +68,7 @@ public class PerlTest  {
         }
 
         @Override
-        public void recordLatency(long startTime, int bytes, int events, long latency) {
+        public void recordLatency(long startTime, int events, int bytes, long latency) {
             PerlPrinter.log.info("recordLatency : receiving records " + events);
             latencyReporterCnt.addAndGet(events);
         }
@@ -93,7 +93,7 @@ public class PerlTest  {
             int finalCh = ch++;
             int finalRecords = records;
             CompletableFuture.runAsync(() -> channels[finalCh].send(finalCh, PERL_THREADS + finalCh,
-                    PERL_RECORD_SIZE, Math.min(finalRecords, PERL_RECORDS_PER_THREAD)));
+                    Math.min(finalRecords, PERL_RECORDS_PER_THREAD), PERL_RECORD_SIZE));
             records -= PERL_RECORDS_PER_THREAD;
         }
         ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);

@@ -40,7 +40,7 @@ public class DefaultLogger extends ResultsLogger implements ReportLatency {
     }
 
     @Override
-    public void recordLatency(long startTime, int bytes, int events, long latency) {
+    public void recordLatency(long startTime, int events, int bytes, long latency) {
 
     }
 }

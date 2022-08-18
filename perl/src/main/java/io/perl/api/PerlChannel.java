@@ -22,8 +22,8 @@ public interface PerlChannel extends ExceptionHandler {
      *
      * @param startTime Start time
      * @param endTime   End Time.
-     * @param dataSize  size of the data in bytes.
      * @param records   number of records/events/messages.
+     * @param bytes     size of the data in bytes.
      */
-    void send(long startTime, long endTime, int dataSize, int records);
+    void send(long startTime, long endTime, int records, int bytes);
 }

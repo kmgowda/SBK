@@ -20,7 +20,7 @@ public interface RWLogger extends Logger, CountRW, ReportLatency {
      * Default method to record every event.
      */
     @Override
-    default void recordLatency(long startTime, int bytes, int events, long latency) {
+    default void recordLatency(long startTime, int events, int bytes, long latency) {
 
     }
 

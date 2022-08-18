@@ -217,12 +217,12 @@ final public class CQueuePerl implements Perl {
             }
 
             @Override
-            public void send(long startTime, long endTime, int dataSize, int records) {
+            public void send(long startTime, long endTime, int records, int bytes) {
                 this.wIndex += 1;
                 if (this.wIndex >= cQueues.length) {
                     this.wIndex = 0;
                 }
-                cQueues[wIndex].add(new TimeStamp(startTime, endTime, dataSize, records));
+                cQueues[wIndex].add(new TimeStamp(startTime, endTime, records, bytes));
             }
 
             @Override

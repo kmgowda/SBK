@@ -98,7 +98,7 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         status.endTime = time.getCurrentTime();
         key += recs;
         cnt += recs;
-        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
     }
 
 
@@ -136,6 +136,6 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
         status.endTime = time.getCurrentTime();
         key += status.records;
         cnt += status.records;
-        perlChannel.send(status.startTime, status.endTime, status.bytes, status.records);
+        perlChannel.send(status.startTime, status.endTime, status.records, status.bytes);
     }
 }
