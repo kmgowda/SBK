@@ -34,8 +34,8 @@ public sealed class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow
     }
 
     @Override
-    public void recordLatency(long startTime, int bytes, int events, long latency) {
-        window.recordLatency(startTime, bytes, events, latency);
+    public void recordLatency(long startTime, int events, int bytes, long latency) {
+        window.recordLatency(startTime, events, bytes, latency);
         checkWindowFullAndReset(startTime);
     }
 }

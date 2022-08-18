@@ -86,8 +86,8 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
     }
 
     @Override
-    public void recordLatency(long startTime, int bytes, int events, long latency) {
-        latencyBuffer.recordLatency(startTime, bytes, events, latency);
+    public void recordLatency(long startTime, int events, int bytes, long latency) {
+        latencyBuffer.recordLatency(startTime, events, bytes, latency);
         checkBufferFull();
     }
 

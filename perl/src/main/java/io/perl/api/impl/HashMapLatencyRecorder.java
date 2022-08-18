@@ -119,12 +119,12 @@ final public class HashMapLatencyRecorder extends LatencyRecordWindow {
      * Record the latency.
      *
      * @param startTime start time.
-     * @param bytes     number of bytes.
      * @param events    number of events(records).
+     * @param bytes     number of bytes.
      * @param latency   latency value in milliseconds.
      */
     @Override
-    public void recordLatency(long startTime, int bytes, int events, long latency) {
+    public void recordLatency(long startTime, int events, int bytes, long latency) {
         if (record(events, bytes, latency)) {
             reportLatency(latency, events);
         }
