@@ -222,7 +222,7 @@ final public class CQueuePerl implements Perl {
                 if (this.wIndex >= cQueues.length) {
                     this.wIndex = 0;
                 }
-                cQueues[wIndex].add(new TimeStamp(startTime, endTime, dataSize, records));
+                cQueues[wIndex].add(new TimeStamp(startTime, endTime, records, dataSize));
             }
 
             @Override

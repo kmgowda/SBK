@@ -26,24 +26,25 @@ final public class TimeStamp {
     final public long endTime;
 
     /**
+     * <code>int records</code>.
+     */
+    final public int records;
+
+    /**
      * <code>int bytes</code>.
      */
     final public int bytes;
 
-    /**
-     * <code>int records</code>.
-     */
-    final public int records;
 
     /**
      * Constructor TimeStamp initialize all values.
      *
      * @param startTime long
      * @param endTime   long
-     * @param bytes     int
      * @param records   int
+     * @param bytes     int
      */
-    public TimeStamp(long startTime, long endTime, int bytes, int records) {
+    public TimeStamp(long startTime, long endTime, int records, int bytes) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.bytes = bytes;
