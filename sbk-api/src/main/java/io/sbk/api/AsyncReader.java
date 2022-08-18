@@ -76,7 +76,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                perlChannel.send(beginTime, endTime, dType.length(d), status.records);
+                perlChannel.send(beginTime, endTime, status.records, dType.length(d));
             });
         }
     }
@@ -110,7 +110,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         } else {
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
-                perlChannel.send(dType.getTime(d), endTime, dType.length(d), status.records);
+                perlChannel.send(dType.getTime(d), endTime, status.records, dType.length(d));
             });
         }
     }

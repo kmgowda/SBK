@@ -71,7 +71,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void recordBenchmark(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.incrementAndGet();
-        reader.perlChannel.send(startTime, endTime, dataSize, events);
+        reader.perlChannel.send(startTime, endTime, events, dataSize);
         if (this.msToRun > 0 && ((endTime - beginTime) >= this.msToRun)) {
             complete();
         } else if (this.recordsCount > cnt) {
