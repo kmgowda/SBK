@@ -108,18 +108,18 @@ public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow 
     /**
      * Record the latency and return if the latency is valid or not.
      *
-     * @param bytes   number of bytes.
      * @param events  number of events(records).
+     * @param bytes   number of bytes.
      * @param latency latency value in milliseconds.
      * @return is valid latency record or not
      */
-    final public boolean record(long bytes, long events, long latency) {
+    final public boolean record(long events, long bytes, long latency) {
         this.totalBytes += bytes;
         this.totalRecords += events;
-        this.maxLatency = Math.max(this.maxLatency, latency);
         if (latency < 0) {
             this.invalidLatencyRecords += events;
         } else {
+            this.maxLatency = Math.max(this.maxLatency, latency);
             this.totalLatency += latency * events;
             if (latency < this.lowLatency) {
                 this.lowerLatencyDiscardRecords += events;

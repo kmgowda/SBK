@@ -118,7 +118,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
      */
     @Override
     public void recordLatency(long startTime, int bytes, int events, long latency) {
-        if (record(bytes, events, latency)) {
+        if (record(events, bytes, latency)) {
             reportLatency(latency, events);
         }
     }
