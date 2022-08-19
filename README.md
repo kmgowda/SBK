@@ -784,7 +784,7 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
     }
 
     dependencies {
-        implementation 'sbk:sbk-api:0.952'
+        implementation "io.github.kmgowda.sbk:sbk-api:1.0"
     }
 
    ```
@@ -842,7 +842,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
     }
 
     dependencies {
-        implementation 'com.github.kmgowda.SBK:sbk-api:0.952'
+        implementation "com.github.kmgowda.SBK:sbk-api:1.0"
     }
    
    ```
@@ -893,7 +893,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     }
 
     dependencies {
-        implementation 'io.github.kmgowda:sbk-api:0.952'
+        implementation "io.github.kmgowda.sbk:sbk-api:1.0"
     }
    ```
    few points to remember here  
