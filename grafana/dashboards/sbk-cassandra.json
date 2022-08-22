@@ -5034,5 +5034,6 @@
   "timepicker": {},
   "timezone": "",
   "title": "SBK Cassandra Dashboard",
+  "version": 1,
   "weekStart": ""
 }
