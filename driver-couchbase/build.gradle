@@ -10,6 +10,4 @@ dependencies {
     api project(":sbk-api")
 
     // Add your storage driver specific dependencies here
-    api group: 'com.couchbase.client', name: 'java-client', version: '3.3.3'
-
 }
