@@ -68,4 +68,5 @@
     <allow pkg="org.iq80.leveldb" />
     <allow pkg="org.jetbrains" />
     <allow pkg="edu.umd.cs.findbugs" />
+    <allow pkg="com.couchbase" />
 </import-control>
