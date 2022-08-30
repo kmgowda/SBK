@@ -633,7 +633,7 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 <SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
 
-usage: sbk -class pulsar
+usage: sbk -class Pulsar
 Storage Benchmark Kit
 
  -ackQuorum <arg>       AckQuorum default: 1
@@ -653,9 +653,6 @@ Storage Benchmark Kit
  -minlatency <arg>      Minimum latency;
                         use '-time' for time unit; default:0 ms
  -partitions <arg>      Number of partitions of the topic, default: 1
- -ram <arg>             SBK RAM host; 'no' disables this option, default:
-                        no
- -ramport <arg>         SBK RAM Port; default: 9717
  -readers <arg>         Number of readers
  -records <arg>         Number of records(events) if 'seconds' not
                         specified;
@@ -665,8 +662,11 @@ Storage Benchmark Kit
  -ro <arg>              Readonly Benchmarking,
                         Applicable only if both writers and readers are
                         set; default: false
+ -rq <arg>              Benchmark Reade Requests; default: false
  -rsec <arg>            Number of seconds/step for readers, default: 0
  -rstep <arg>           Number of readers/step, default: 1
+ -sbm <arg>             SBM host; 'no' disables this option, default: no
+ -sbmport <arg>         SBM Port; default: 9717
  -seconds <arg>         Number of seconds to run
                         if not specified, runs forever
  -size <arg>            Size of each message (event or record)
@@ -681,6 +681,7 @@ Storage Benchmark Kit
  -time <arg>            Latency Time Unit [ms:MILLISECONDS,
                         mcs:MICROSECONDS, ns:NANOSECONDS]; default: ms
  -topic <arg>           Topic name, default : test
+ -wq <arg>              Benchmark Write Requests; default: false
  -writeQuorum <arg>     WriteQuorum default: 1
  -writers <arg>         Number of writers
  -wsec <arg>            Number of seconds/step for writers, default: 0
