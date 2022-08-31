@@ -38,8 +38,8 @@ SBK can be deployed in  distributed nodes using applications [**SBM**](sbm), [**
 into one master node called SBM (Storage Benchmark Monitor).
 
 <p align="center">
-    <a href="https://www.jetbrains.com/?from=SBK">
-        <img src="images/sbm.png" alt="Jet Brains" width="300" height="400">
+    <a href="images/sbm.png">
+        <img src="images/sbm.png" alt="SBK Eco System" width="900" height="700">
     </a>
 </p>
 
