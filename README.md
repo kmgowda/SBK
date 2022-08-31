@@ -37,7 +37,11 @@ SBK can be deployed in  distributed nodes using applications [**SBM**](sbm), [**
 [**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggregated 
 into one master node called SBM (Storage Benchmark Monitor).
 
-![SBK Eco System](images/sbm.png)
+<p align="center">
+    <a href="https://www.jetbrains.com/?from=SBK">
+        <img src="images/sbm.png" alt="Jet Brains" width="300" height="400">
+    </a>
+</p>
 
 The design principle of SBK is the **Performance Benchmarking of _'Any Storage System'_ with _'Any Type of data payload'_ and _'Any Time Stamp'_**,
 because, the SBK is not specific to particular type of storage system,
