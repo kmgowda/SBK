@@ -24,7 +24,6 @@ import io.sbk.config.Config;
 import io.sbm.config.SbmConfig;
 import io.sbm.logger.RamLogger;
 import io.sbm.api.SbmPeriodicRecorder;
-import io.sbp.grpc.LatenciesRecord;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.system.Printer;
 import io.state.State;
@@ -32,13 +31,11 @@ import io.time.Time;
 import lombok.Synchronized;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
@@ -49,7 +46,6 @@ final public class SbmBenchmark implements Benchmark {
     final private Time time;
     final private RamLogger logger;
     final private RamParameterOptions params;
-    final private LinkedBlockingQueue<LatenciesRecord> queue;
     final private SbmPeriodicRecorder latencyRecorder;
     final private Server server;
     final private SbmGrpcService service;
@@ -83,7 +79,6 @@ final public class SbmBenchmark implements Benchmark {
             percentileFractions[i] = percentiles[i] / 100.0;
         }
 
-        queue = new LinkedBlockingQueue<>();
         latencyRecorder = createLatencyRecorder();
         benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, sbmConfig.idleMS, time, latencyRecorder,
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
