@@ -10,6 +10,7 @@
 
 package io.sbm.api.impl;
 
+import io.perl.api.ConcurrentLinkedQueueArray;
 import io.sbk.api.Benchmark;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
@@ -30,12 +31,12 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Class RamBenchmark.
  */
-final public class SbmLatencyBenchmark implements Benchmark, SbmRegistry {
+final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<LatenciesRecord> implements Benchmark,
+        SbmRegistry {
     private final int idleMS;
     private final Time time;
     private final int reportingIntervalMS;
     private final SbmPeriodicRecorder window;
-    private final ConcurrentLinkedQueue<LatenciesRecord>[] cQueues;
     private final AtomicLong counter;
     private final CompletableFuture<Void> retFuture;
 
@@ -55,14 +56,11 @@ final public class SbmLatencyBenchmark implements Benchmark, SbmRegistry {
      * @param reportingIntervalMS   int
      */
     public SbmLatencyBenchmark(int maxQueue, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS) {
+        super(maxQueue);
         this.idleMS = idleMS;
         this.window = window;
         this.time = time;
         this.reportingIntervalMS = reportingIntervalMS;
-        this.cQueues = new ConcurrentLinkedQueue[maxQueue];
-        for (int i = 0; i < cQueues.length; i++) {
-            cQueues[i] = new ConcurrentLinkedQueue<>();
-        }
         this.counter = new AtomicLong(BASE_CLIENT_ID_VALUE);
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
@@ -112,7 +110,7 @@ final public class SbmLatencyBenchmark implements Benchmark, SbmRegistry {
     @Override
     public void enQueue(@NotNull LatenciesRecord record) {
         final int index = (int) (record.getClientID() % cQueues.length);
-        cQueues[index].add(record);
+        add(index, record);
     }
 
     @Synchronized
@@ -122,11 +120,9 @@ final public class SbmLatencyBenchmark implements Benchmark, SbmRegistry {
             if (qFuture != null) {
                 if (!qFuture.isDone()) {
                     try {
-                        cQueues[0].add(LatenciesRecord.newBuilder().setSequenceNumber(-1).build());
+                        add(0, LatenciesRecord.newBuilder().setSequenceNumber(-1).build());
                         qFuture.get();
-                        for (ConcurrentLinkedQueue<LatenciesRecord> queue : cQueues) {
-                            queue.clear();
-                        }
+                        clear();
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                     }

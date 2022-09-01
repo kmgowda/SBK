@@ -10,6 +10,7 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
+import io.perl.api.ConcurrentLinkedQueueArray;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
@@ -24,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -168,18 +168,14 @@ final public class CQueuePerl implements Perl {
 
 
     @NotThreadSafe
-    static final class CQueueChannel implements Channel {
-        final private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
+    static final class CQueueChannel extends ConcurrentLinkedQueueArray<TimeStamp> implements Channel {
         final private Throw eThrow;
         private int rIndex;
 
         public CQueueChannel(int qSize, Throw eThrow) {
+            super(qSize);
             this.rIndex = qSize;
             this.eThrow = eThrow;
-            this.cQueues = new ConcurrentLinkedQueue[qSize];
-            for (int i = 0; i < cQueues.length; i++) {
-                cQueues[i] = new ConcurrentLinkedQueue<>();
-            }
         }
 
         public TimeStamp receive(int timeout) {
@@ -187,19 +183,14 @@ final public class CQueuePerl implements Perl {
             if (rIndex >= cQueues.length) {
                 rIndex = 0;
             }
-            return cQueues[rIndex].poll();
+            return poll(rIndex);
         }
 
         public void sendEndTime(long endTime) {
-            cQueues[0].add(new TimeStamp(endTime));
+            add(0, new TimeStamp(endTime));
         }
 
-        public void clear() {
-            for (ConcurrentLinkedQueue<TimeStamp> q : cQueues) {
-                q.clear();
-            }
-        }
-
+        @Override
         public PerlChannel getPerlChannel() {
             return new CQueuePerlChannel();
         }
