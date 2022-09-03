@@ -8,6 +8,12 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+/*
+ * SBP : Storage Benchmark Protocol
+ * This protocol used between SBM an SBK to consolidate the Performance benchmarking results from multiple SBKs to
+ * single SBM.
+ */
+
 syntax = "proto3";
 
 option java_multiple_files = true;
