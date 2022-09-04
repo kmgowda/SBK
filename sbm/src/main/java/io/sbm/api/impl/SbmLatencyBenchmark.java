@@ -10,7 +10,7 @@
 
 package io.sbm.api.impl;
 
-import io.perl.api.ConcurrentLinkedQueueArray;
+import io.perl.api.impl.ConcurrentLinkedQueueArray;
 import io.sbk.api.Benchmark;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;
@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -33,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<LatenciesRecord> implements Benchmark,
         SbmRegistry {
+    private final int maxQs;
     private final int idleMS;
     private final Time time;
     private final int reportingIntervalMS;
@@ -49,14 +49,15 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Latenc
     /**
      * Constructor RamBenchmark initializing all values.
      *
-     * @param maxQueue              int
+     * @param maxQs              int
      * @param idleMS                int
      * @param time                  Time
      * @param window                RamPeriodicRecorder
      * @param reportingIntervalMS   int
      */
-    public SbmLatencyBenchmark(int maxQueue, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS) {
-        super(maxQueue);
+    public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS) {
+        super(maxQs);
+        this.maxQs = maxQs;
         this.idleMS = idleMS;
         this.window = window;
         this.time = time;
@@ -77,8 +78,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Latenc
         window.startWindow(currentTime);
         while (doWork) {
             notFound = true;
-            for (ConcurrentLinkedQueue<LatenciesRecord> queue : cQueues) {
-                record = queue.poll();
+            for (int qIndex = 0; qIndex < maxQs; qIndex++) {
+                record = poll(qIndex);
                 if (record != null) {
                     notFound = false;
                     if (record.getSequenceNumber() > 0) {
@@ -109,7 +110,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Latenc
 
     @Override
     public void enQueue(@NotNull LatenciesRecord record) {
-        final int index = (int) (record.getClientID() % cQueues.length);
+        final int index = (int) (record.getClientID() % maxQs);
         add(index, record);
     }
 
