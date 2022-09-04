@@ -8,11 +8,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.perl.api;
+package io.perl.api.impl;
 
+import io.perl.api.QueueArray;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ConcurrentLinkedQueueArray<T> {
+public class ConcurrentLinkedQueueArray<T> implements QueueArray<T> {
     final private ConcurrentLinkedQueue<T>[] cQueues;
 
     public ConcurrentLinkedQueueArray(int size) {
@@ -22,18 +23,22 @@ public class ConcurrentLinkedQueueArray<T> {
         }
     }
 
+    @Override
     final public T poll(int index) {
         return this.cQueues[index].poll();
     }
 
+    @Override
     final public boolean add(int index, T data) {
         return this.cQueues[index].add(data);
     }
 
+    @Override
     final public void clear(int index) {
         this.cQueues[index].clear();
     }
 
+    @Override
     final public void clear() {
         for (ConcurrentLinkedQueue<T> q : cQueues) {
             q.clear();

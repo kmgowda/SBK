@@ -10,7 +10,7 @@
 
 package io.sbm.api.impl;
 
-import io.perl.api.ConcurrentLinkedQueueArray;
+import io.perl.api.impl.ConcurrentLinkedQueueArray;
 import io.sbk.api.Benchmark;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.LatenciesRecord;

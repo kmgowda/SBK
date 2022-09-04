@@ -10,7 +10,6 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
-import io.perl.api.ConcurrentLinkedQueueArray;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
