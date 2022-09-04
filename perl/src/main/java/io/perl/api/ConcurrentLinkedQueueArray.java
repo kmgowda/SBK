@@ -13,7 +13,7 @@ package io.perl.api;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ConcurrentLinkedQueueArray<T> {
-    final protected ConcurrentLinkedQueue<T>[] cQueues;
+    final private ConcurrentLinkedQueue<T>[] cQueues;
 
     public ConcurrentLinkedQueueArray(int size) {
         this.cQueues = new ConcurrentLinkedQueue[size];
@@ -22,19 +22,19 @@ public class ConcurrentLinkedQueueArray<T> {
         }
     }
 
-    public T poll(int index) {
+    final public T poll(int index) {
         return this.cQueues[index].poll();
     }
 
-    public boolean add(int index, T data) {
+    final public boolean add(int index, T data) {
         return this.cQueues[index].add(data);
     }
 
-    public void clear(int index) {
+    final public void clear(int index) {
         this.cQueues[index].clear();
     }
 
-    public void clear() {
+    final public void clear() {
         for (ConcurrentLinkedQueue<T> q : cQueues) {
             q.clear();
         }

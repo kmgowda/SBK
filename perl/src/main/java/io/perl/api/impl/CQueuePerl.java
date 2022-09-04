@@ -169,18 +169,20 @@ final public class CQueuePerl implements Perl {
 
     @NotThreadSafe
     static final class CQueueChannel extends ConcurrentLinkedQueueArray<TimeStamp> implements Channel {
+        final private  int maxQs;
         final private Throw eThrow;
         private int rIndex;
 
-        public CQueueChannel(int qSize, Throw eThrow) {
-            super(qSize);
-            this.rIndex = qSize;
+        public CQueueChannel(int maxQs, Throw eThrow) {
+            super(maxQs);
+            this.rIndex = maxQs;
+            this.maxQs = maxQs;
             this.eThrow = eThrow;
         }
 
         public TimeStamp receive(int timeout) {
             rIndex += 1;
-            if (rIndex >= cQueues.length) {
+            if (rIndex >= maxQs) {
                 rIndex = 0;
             }
             return poll(rIndex);
@@ -210,10 +212,10 @@ final public class CQueuePerl implements Perl {
             @Override
             public void send(long startTime, long endTime, int records, int bytes) {
                 this.wIndex += 1;
-                if (this.wIndex >= cQueues.length) {
+                if (this.wIndex >= maxQs) {
                     this.wIndex = 0;
                 }
-                cQueues[wIndex].add(new TimeStamp(startTime, endTime, records, bytes));
+                add(this.wIndex, new TimeStamp(startTime, endTime, records, bytes));
             }
 
             @Override
