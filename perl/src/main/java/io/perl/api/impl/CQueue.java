@@ -41,10 +41,10 @@ final public class CQueue<T> implements Queue<T> {
         }
         Node<T> prev = prevHead;
         prevHead = first;
-        if (prev != null && prev != prevHead) {
+        head.set(first.next);
+        if (prev != null && prev != first) {
             prev.next = null;
         }
-        head.set(first.next);
         return first.item;
     }
 
