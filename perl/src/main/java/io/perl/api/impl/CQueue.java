@@ -14,7 +14,7 @@ import io.perl.api.Queue;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class CQueue<T> implements Queue<T> {
+final public class CQueue<T> implements Queue<T> {
     final private  Node<T> nullNode;
     final private  AtomicReference<Node<T>> head;
     final private  AtomicReference<Node<T>> tail;
