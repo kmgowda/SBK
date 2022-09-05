@@ -11,7 +11,6 @@
 package io.perl.api.impl;
 
 import io.perl.api.Queue;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 final public class CQueue<T> implements Queue<T> {
@@ -52,24 +51,24 @@ final public class CQueue<T> implements Queue<T> {
     @Override
     public boolean add(T data) {
         Node<T> node = new Node<>(data);
-        Node<T> prev = tail.getAndSet(node);
-        if (prev == null) {
+        Node<T> cur = tail.getAndSet(node);
+        if (cur == null) {
             head.set(node);
         } else {
-            prev.next = node;
+            cur.next = node;
         }
         return true;
     }
 
     @Override
     public void clear() {
-        Node<T> prev = prevHead;
+        Node<T> prevFirst = prevHead;
         Node<T> first = head.getAndSet(null);
         tail.set(null);
         Node<T> cur;
-        while ( prev != null ) {
-            cur = prev;
-            prev = prev.next;
+        while ( prevFirst != null ) {
+            cur = prevFirst;
+            prevFirst = prevFirst.next;
             cur.next = null;
         }
         while ( first != null ) {
