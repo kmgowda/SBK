@@ -33,12 +33,8 @@ public class CQueue<T> implements Queue<T> {
         if (first == nullNode) {
             return null;
         }
-        if (first == null) {
-            if (prevHead == null) {
-                return null;
-            } else {
-                first = prevHead.next;
-            }
+        if (first == null && prevHead != null) {
+            first = prevHead.next;
         }
         if (first == null) {
             head.set(null);
