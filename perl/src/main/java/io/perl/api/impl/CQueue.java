@@ -12,54 +12,70 @@ package io.perl.api.impl;
 
 import io.perl.api.Queue;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CQueue<T> implements Queue<T> {
+    final private  Node<T> nullNode;
     final private  AtomicReference<Node<T>> head;
     final private  AtomicReference<Node<T>> tail;
-
-    private CQueue(AtomicReference<Node<T>> head, AtomicReference<Node<T>> tail) {
-        this.head = head;
-        this.tail = tail;
-    }
+    private Node<T> prevHead;
 
     public CQueue() {
-        this(new AtomicReference<>(null), new AtomicReference<>(null));
+        this.nullNode = new Node<>(null);
+        this.head = new AtomicReference<>(this.nullNode);
+        this.tail = new AtomicReference<>(null);
+        this.prevHead = null;
     }
 
     @Override
     public T poll() {
-        while (true) {
-            Node<T> first = head.get();
-            if (first == null) {
+        Node<T> first = head.getAndSet(nullNode);
+        if (first == nullNode) {
+            return null;
+        }
+        if (first == null) {
+            if (prevHead == null) {
                 return null;
             } else {
-                head.set(first.next);
-                if (first.ins.compareAndSet(true, false)) {
-                    first.next = null;
-                    return first.item;
-                }
+                first = prevHead.next;
             }
         }
+        if (first == null) {
+            head.set(null);
+            return null;
+        }
+        Node<T> prev = prevHead;
+        prevHead = first;
+        if (prev != null && prev != prevHead) {
+            prev.next = null;
+        }
+        head.set(first.next);
+        return first.item;
     }
 
     @Override
     public boolean add(T data) {
         Node<T> node = new Node<>(data);
         Node<T> prev = tail.getAndSet(node);
-        if (prev != null) {
+        if (prev == null) {
+            head.set(node);
+        } else {
             prev.next = node;
         }
-        head.compareAndSet(null, node);
         return true;
     }
 
     @Override
     public void clear() {
-        tail.getAndSet(null);
+        Node<T> prev = prevHead;
         Node<T> first = head.getAndSet(null);
+        tail.set(null);
         Node<T> cur;
+        while ( prev != null ) {
+            cur = prev;
+            prev = prev.next;
+            cur.next = null;
+        }
         while ( first != null ) {
             cur = first;
             first = first.next;
@@ -69,12 +85,9 @@ public class CQueue<T> implements Queue<T> {
 
     static final class Node<T> {
         final public T item;
-        final public AtomicBoolean ins;
         public volatile Node<T> next;
-
         Node(T item) {
             this.item = item;
-            this.ins = new AtomicBoolean(true);
             this.next = null;
         }
     }
