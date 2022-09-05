@@ -39,7 +39,7 @@ final public class CQueue<T> implements Queue<T> {
             head.set(null);
             return null;
         }
-        Node<T> prev = prevHead;
+        final Node<T> prev = prevHead;
         prevHead = first;
         head.set(first.next);
         if (prev != null && prev != first) {
@@ -50,8 +50,8 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public boolean add(T data) {
-        Node<T> node = new Node<>(data);
-        Node<T> cur = tail.getAndSet(node);
+        final Node<T> node = new Node<>(data);
+        final Node<T> cur = tail.getAndSet(node);
         if (cur == null) {
             head.set(node);
         } else {
