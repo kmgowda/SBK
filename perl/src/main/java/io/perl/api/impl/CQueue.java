@@ -20,22 +20,22 @@ final public class CQueue<T> implements Queue<T> {
 
     public CQueue() {
         this.firstNode = new Node<>(null);
-        this.head = new AtomicReference<>(null);
-        this.tail = new AtomicReference<>(null);
+        this.head = new AtomicReference<>(firstNode);
+        this.tail = new AtomicReference<>(firstNode);
     }
 
     @Override
     public T poll() {
-        final Node<T> first = head.getAndSet(null);
-        if (first == null) {
-            return null;
-        }
+        final Node<T> first = head.get();
         if (first.next == null) {
-            head.set(first);
             return null;
         }
         head.set(first.next);
         final Node<T> cur = first.next;
+        /*
+            The below code helps JVM garbage collector to recycle;
+            without the below code, out of memory issues are observed
+         */
         first.next = null;
         return cur.item;
     }
@@ -44,20 +44,19 @@ final public class CQueue<T> implements Queue<T> {
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
         final Node<T> cur = tail.getAndSet(node);
-        if (cur == null) {
-            firstNode.next = node;
-            head.set(firstNode);
-        } else {
-            cur.next = node;
-        }
+        cur.next = node;
         return true;
     }
 
     @Override
     public void clear() {
-        Node<T> first = head.getAndSet(null);
-        tail.set(null);
+        Node<T> first = head.getAndSet(firstNode);
+        tail.set(firstNode);
         Node<T> cur;
+        /*
+           The below code helps JVM garbage collector to recycle;
+           without the below code, out of memory issues are observed
+        */
         while ( first != null ) {
             cur = first;
             first = first.next;
