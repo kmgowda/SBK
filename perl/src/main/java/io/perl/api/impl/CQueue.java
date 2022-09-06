@@ -13,6 +13,11 @@ package io.perl.api.impl;
 import io.perl.api.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
+/*
+ * Concurrent Queue Implementation using Atomic References.
+ * DON'T USE THIS CLASS.
+ * Use Java native 'ConcurrentLinkedQueue', because the ConcurrentLinkedQueue does better Garbage collection.
+ */
 final public class CQueue<T> implements Queue<T> {
     final private Node<T> firstNode;
     final private  AtomicReference<Node<T>> head;
