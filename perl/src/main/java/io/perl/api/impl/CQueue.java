@@ -17,7 +17,7 @@ final public class CQueue<T> implements Queue<T> {
     final private  Node<T> nullNode;
     final private  AtomicReference<Node<T>> head;
     final private  AtomicReference<Node<T>> tail;
-    private Node<T> prevHead;
+    private volatile Node<T> prevHead;
 
     public CQueue() {
         this.nullNode = new Node<>(null);
@@ -62,8 +62,9 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public void clear() {
+        Node<T> first = head.getAndSet(nullNode);
         Node<T> prevFirst = prevHead;
-        Node<T> first = head.getAndSet(null);
+        prevHead = null;
         tail.set(null);
         Node<T> cur;
         while ( prevFirst != null ) {
@@ -71,7 +72,7 @@ final public class CQueue<T> implements Queue<T> {
             prevFirst = prevFirst.next;
             cur.next = null;
         }
-        while ( first != null ) {
+        while ( first != null && first != nullNode) {
             cur = first;
             first = first.next;
             cur.next = null;
