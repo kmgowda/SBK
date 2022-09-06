@@ -64,7 +64,7 @@ final public class CQueue<T> implements Queue<T> {
         }
     }
 
-    static final class Node<T> {
+    static final private class Node<T> {
         final public T item;
         public volatile Node<T> next;
         Node(T item) {
