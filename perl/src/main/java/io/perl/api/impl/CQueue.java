@@ -14,65 +14,50 @@ import io.perl.api.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
 final public class CQueue<T> implements Queue<T> {
-    final private  Node<T> nullNode;
+    final private Node<T> firstNode;
     final private  AtomicReference<Node<T>> head;
     final private  AtomicReference<Node<T>> tail;
-    private volatile Node<T> prevHead;
 
     public CQueue() {
-        this.nullNode = new Node<>(null);
-        this.head = new AtomicReference<>(this.nullNode);
-        this.tail = new AtomicReference<>(null);
-        this.prevHead = null;
+        this.firstNode = new Node<>(null);
+        this.head = new AtomicReference<>(firstNode);
+        this.tail = new AtomicReference<>(firstNode);
     }
 
     @Override
     public T poll() {
-        Node<T> first = head.getAndSet(nullNode);
-        if (first == nullNode) {
+        final Node<T> first = head.get();
+        if (first.next == null) {
             return null;
         }
-        if (first == null && prevHead != null) {
-            first = prevHead.next;
-        }
-        if (first == null) {
-            head.set(null);
-            return null;
-        }
-        final Node<T> prev = prevHead;
-        prevHead = first;
         head.set(first.next);
-        if (prev != null && prev != first) {
-            prev.next = null;
-        }
-        return first.item;
+        final Node<T> cur = first.next;
+        /*
+            The below code helps JVM garbage collector to recycle;
+            without the below code, out of memory issues are observed
+         */
+        first.next = null;
+        return cur.item;
     }
 
     @Override
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
         final Node<T> cur = tail.getAndSet(node);
-        if (cur == null) {
-            head.set(node);
-        } else {
-            cur.next = node;
-        }
+        cur.next = node;
         return true;
     }
 
     @Override
     public void clear() {
-        Node<T> first = head.getAndSet(nullNode);
-        Node<T> prevFirst = prevHead;
-        prevHead = null;
-        tail.set(null);
+        Node<T> first = head.getAndSet(firstNode);
+        tail.set(firstNode);
         Node<T> cur;
-        while ( prevFirst != null ) {
-            cur = prevFirst;
-            prevFirst = prevFirst.next;
-            cur.next = null;
-        }
-        while ( first != null && first != nullNode) {
+        /*
+           The below code helps JVM garbage collector to recycle;
+           without the below code, out of memory issues are observed
+        */
+        while ( first != null ) {
             cur = first;
             first = first.next;
             cur.next = null;
