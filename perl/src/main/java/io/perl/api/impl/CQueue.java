@@ -14,38 +14,30 @@ import io.perl.api.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
 final public class CQueue<T> implements Queue<T> {
-    final private  Node<T> nullNode;
+    final private Node<T> firstNode;
     final private  AtomicReference<Node<T>> head;
     final private  AtomicReference<Node<T>> tail;
-    private volatile Node<T> prevHead;
 
     public CQueue() {
-        this.nullNode = new Node<>(null);
-        this.head = new AtomicReference<>(this.nullNode);
+        this.firstNode = new Node<>(null);
+        this.head = new AtomicReference<>(null);
         this.tail = new AtomicReference<>(null);
-        this.prevHead = null;
     }
 
     @Override
     public T poll() {
-        Node<T> first = head.getAndSet(nullNode);
-        if (first == nullNode) {
-            return null;
-        }
-        if (first == null && prevHead != null) {
-            first = prevHead.next;
-        }
+        final Node<T> first = head.getAndSet(null);
         if (first == null) {
-            head.set(null);
             return null;
         }
-        final Node<T> prev = prevHead;
-        prevHead = first;
-        head.set(first.next);
-        if (prev != null && prev != first) {
-            prev.next = null;
+        if (first.next == null) {
+            head.set(first);
+            return null;
         }
-        return first.item;
+        head.set(first.next);
+        final Node<T> cur = first.next;
+        first.next = null;
+        return cur.item;
     }
 
     @Override
@@ -53,7 +45,8 @@ final public class CQueue<T> implements Queue<T> {
         final Node<T> node = new Node<>(data);
         final Node<T> cur = tail.getAndSet(node);
         if (cur == null) {
-            head.set(node);
+            firstNode.next = node;
+            head.set(firstNode);
         } else {
             cur.next = node;
         }
@@ -62,17 +55,10 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public void clear() {
-        Node<T> first = head.getAndSet(nullNode);
-        Node<T> prevFirst = prevHead;
-        prevHead = null;
+        Node<T> first = head.getAndSet(null);
         tail.set(null);
         Node<T> cur;
-        while ( prevFirst != null ) {
-            cur = prevFirst;
-            prevFirst = prevFirst.next;
-            cur.next = null;
-        }
-        while ( first != null && first != nullNode) {
+        while ( first != null ) {
             cur = first;
             first = first.next;
             cur.next = null;
