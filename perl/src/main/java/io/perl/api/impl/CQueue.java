@@ -33,7 +33,7 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public T poll() {
-        final Node<T> cur = (Node<T>) NEXT.getAndSet(HEAD.get(this), null);
+        final Node<T> cur = (Node<T>) NEXT.getAndSet(head, null);
         if (cur == null) {
             return null;
         }
