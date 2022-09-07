@@ -167,7 +167,7 @@ final public class CQueuePerl implements Perl {
 
 
     @NotThreadSafe
-    static final class CQueueChannel extends ConcurrentLinkedQueueArray<TimeStamp> implements Channel {
+    static final class CQueueChannel extends CQueueArray<TimeStamp> implements Channel {
         final private  int maxQs;
         final private Throw eThrow;
         private int rIndex;

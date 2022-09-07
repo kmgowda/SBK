@@ -11,7 +11,9 @@
 package io.perl.api.impl;
 
 import io.perl.api.Queue;
-import java.util.concurrent.atomic.AtomicReference;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 
 /*
  * Concurrent Queue Implementation using Atomic References.
@@ -20,53 +22,73 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 final public class CQueue<T> implements Queue<T> {
     final private Node<T> firstNode;
-    final private  AtomicReference<Node<T>> head;
-    final private  AtomicReference<Node<T>> tail;
+    private volatile Node<T> head;
+    private volatile Node<T> tail;
 
     public CQueue() {
         this.firstNode = new Node<>(null);
-        this.head = new AtomicReference<>(firstNode);
-        this.tail = new AtomicReference<>(firstNode);
+        this.head = firstNode;
+        this.tail = firstNode;
     }
 
     @Override
     public T poll() {
-        final Node<T> first = head.get();
-        final Node<T> cur = first.next.getAndSet(null);
+        final Node<T> first = (Node<T>) HEAD.get(this);
+        final Node<T> cur = (Node<T>) NEXT.get(first);
         if (cur == null) {
             return null;
         }
-        head.set(cur);
+        HEAD.set(this, cur);
+        first.next = null;
         return cur.item;
     }
 
     @Override
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
-        final Node<T> cur = tail.getAndSet(node);
-        cur.next.set(node);
+        final Node<T> cur = (Node<T>) TAIL.getAndSet(this, node);
+        cur.next = node;
         return true;
     }
 
     @Override
     public void clear() {
-        Node<T> first = head.getAndSet(firstNode);
-        tail.set(firstNode);
+        Object first = HEAD.getAndSet(this, firstNode);
+        TAIL.set(this,firstNode);
         /*
            The below code helps JVM garbage collector to recycle;
            without the below code, out of memory issues are observed
         */
         while ( first != null ) {
-            first = first.next.getAndSet(null);
+            first = NEXT.getAndSet(first, null);
         }
     }
 
     static final private class Node<T> {
         final public T item;
-        final public AtomicReference<Node<T>> next;
+        public Node<T> next;
         Node(T item) {
             this.item = item;
-            this.next = new AtomicReference<>(null);
+            this.next = null;
+        }
+
+    }
+
+    private static final VarHandle HEAD;
+    private static final VarHandle TAIL;
+    static final VarHandle ITEM;
+    static final VarHandle NEXT;
+    static {
+        try {
+            MethodHandles.Lookup l = MethodHandles.lookup();
+            HEAD = l.findVarHandle(CQueue.class, "head", CQueue.Node.class);
+            TAIL = l.findVarHandle(CQueue.class, "tail", CQueue.Node.class);
+            ITEM = l.findVarHandle(CQueue.Node.class, "item", Object.class);
+            NEXT = l.findVarHandle(CQueue.Node.class, "next", CQueue.Node.class);
+        } catch (ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
+
+
 }
