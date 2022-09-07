@@ -21,9 +21,34 @@ import java.lang.invoke.VarHandle;
  * Use Java native 'ConcurrentLinkedQueue', because the ConcurrentLinkedQueue does better Garbage collection.
  */
 final public class CQueue<T> implements Queue<T> {
+
+    static final private class Node<T> {
+        public final T item;
+        public volatile Node<T> next;
+        Node(T item) {
+            this.item = item;
+            this.next = null;
+        }
+    }
+
+    private static final VarHandle HEAD;
+    private static final VarHandle TAIL;
+    private static final VarHandle NEXT;
+
     final private Node<T> firstNode;
     private volatile Node<T> head;
     private volatile Node<T> tail;
+
+    static {
+        try {
+            MethodHandles.Lookup l = MethodHandles.lookup();
+            HEAD = l.findVarHandle(CQueue.class, "head", CQueue.Node.class);
+            TAIL = l.findVarHandle(CQueue.class, "tail", CQueue.Node.class);
+            NEXT = l.findVarHandle(CQueue.Node.class, "next", CQueue.Node.class);
+        } catch (ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     public CQueue() {
         this.firstNode = new Node<>(null);
@@ -45,7 +70,7 @@ final public class CQueue<T> implements Queue<T> {
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
         final Node<T> cur = (Node<T>) TAIL.getAndSet(this, node);
-        cur.next = node;
+        NEXT.set(cur, node);
         return true;
     }
 
@@ -62,28 +87,5 @@ final public class CQueue<T> implements Queue<T> {
         }
     }
 
-    static final private class Node<T> {
-        public final T item;
-        public volatile Node<T> next;
-        Node(T item) {
-            this.item = item;
-            this.next = null;
-        }
-
-    }
-
-    private static final VarHandle HEAD;
-    private static final VarHandle TAIL;
-    private static final VarHandle NEXT;
-    static {
-        try {
-            MethodHandles.Lookup l = MethodHandles.lookup();
-            HEAD = l.findVarHandle(CQueue.class, "head", CQueue.Node.class);
-            TAIL = l.findVarHandle(CQueue.class, "tail", CQueue.Node.class);
-            NEXT = l.findVarHandle(CQueue.Node.class, "next", CQueue.Node.class);
-        } catch (ReflectiveOperationException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
 
 }
