@@ -52,7 +52,7 @@ final public class CQueue<T> implements Queue<T> {
     @Override
     public void clear() {
         Object first = HEAD.getAndSet(this, firstNode);
-        TAIL.set(this,firstNode);
+        TAIL.set(this, firstNode);
         /*
            The below code helps JVM garbage collector to recycle;
            without the below code, out of memory issues are observed
