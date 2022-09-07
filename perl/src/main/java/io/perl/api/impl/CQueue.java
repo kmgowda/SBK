@@ -32,16 +32,11 @@ final public class CQueue<T> implements Queue<T> {
     @Override
     public T poll() {
         final Node<T> first = head.get();
-        if (first.next == null) {
+        final Node<T> cur = first.next.getAndSet(null);
+        if (cur == null) {
             return null;
         }
-        head.set(first.next);
-        final Node<T> cur = first.next;
-        /*
-            The below code helps JVM garbage collector to recycle;
-            without the below code, out of memory issues are observed
-         */
-        first.next = null;
+        head.set(cur);
         return cur.item;
     }
 
@@ -49,7 +44,7 @@ final public class CQueue<T> implements Queue<T> {
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
         final Node<T> cur = tail.getAndSet(node);
-        cur.next = node;
+        cur.next.set(node);
         return true;
     }
 
@@ -57,24 +52,21 @@ final public class CQueue<T> implements Queue<T> {
     public void clear() {
         Node<T> first = head.getAndSet(firstNode);
         tail.set(firstNode);
-        Node<T> cur;
         /*
            The below code helps JVM garbage collector to recycle;
            without the below code, out of memory issues are observed
         */
         while ( first != null ) {
-            cur = first;
-            first = first.next;
-            cur.next = null;
+            first = first.next.getAndSet(null);
         }
     }
 
     static final private class Node<T> {
         final public T item;
-        public volatile Node<T> next;
+        final public AtomicReference<Node<T>> next;
         Node(T item) {
             this.item = item;
-            this.next = null;
+            this.next = new AtomicReference<>(null);
         }
     }
 }
