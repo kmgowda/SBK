@@ -16,7 +16,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 /*
- * Concurrent Queue Implementation using Atomic References.
+ * Concurrent Queue Implementation using VarHandle References.
  * DON'T USE THIS CLASS.
  * Use Java native 'ConcurrentLinkedQueue', because the ConcurrentLinkedQueue does better Garbage collection.
  */
@@ -33,13 +33,11 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public T poll() {
-        final Node<T> first = (Node<T>) HEAD.get(this);
-        final Node<T> cur = (Node<T>) NEXT.get(first);
+        final Node<T> cur = (Node<T>) NEXT.getAndSet(HEAD.get(this), null);
         if (cur == null) {
             return null;
         }
         HEAD.set(this, cur);
-        first.next = null;
         return cur.item;
     }
 
@@ -65,8 +63,8 @@ final public class CQueue<T> implements Queue<T> {
     }
 
     static final private class Node<T> {
-        final public T item;
-        public Node<T> next;
+        public final T item;
+        public volatile Node<T> next;
         Node(T item) {
             this.item = item;
             this.next = null;
@@ -76,19 +74,16 @@ final public class CQueue<T> implements Queue<T> {
 
     private static final VarHandle HEAD;
     private static final VarHandle TAIL;
-    static final VarHandle ITEM;
-    static final VarHandle NEXT;
+    private static final VarHandle NEXT;
     static {
         try {
             MethodHandles.Lookup l = MethodHandles.lookup();
             HEAD = l.findVarHandle(CQueue.class, "head", CQueue.Node.class);
             TAIL = l.findVarHandle(CQueue.class, "tail", CQueue.Node.class);
-            ITEM = l.findVarHandle(CQueue.Node.class, "item", Object.class);
             NEXT = l.findVarHandle(CQueue.Node.class, "next", CQueue.Node.class);
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
-
 
 }
