@@ -60,7 +60,7 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public T poll() {
-        final Node<T> cur = (Node<T>) NEXT.getAndSet(head, null);
+        final Object cur = NEXT.getAndSet(head, null);
         if (cur == null) {
             return null;
         }
@@ -71,7 +71,7 @@ final public class CQueue<T> implements Queue<T> {
     @Override
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
-        final Node<T> cur = (Node<T>) TAIL.getAndSet(this, node);
+        final Object cur = TAIL.getAndSet(this, node);
         NEXT.set(cur, node);
         return true;
     }
