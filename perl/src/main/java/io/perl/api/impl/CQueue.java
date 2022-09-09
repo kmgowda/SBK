@@ -23,7 +23,7 @@ import java.lang.invoke.VarHandle;
 final public class CQueue<T> implements Queue<T> {
 
     static final private class Node<T> {
-        public final T item;
+        public volatile T item;
         public volatile Node<T> next;
         Node(T item) {
             this.item = item;
@@ -33,6 +33,7 @@ final public class CQueue<T> implements Queue<T> {
 
     private static final VarHandle HEAD;
     private static final VarHandle TAIL;
+    private static final VarHandle ITEM;
     private static final VarHandle NEXT;
 
     final private Node<T> firstNode;
@@ -44,6 +45,7 @@ final public class CQueue<T> implements Queue<T> {
             MethodHandles.Lookup l = MethodHandles.lookup();
             HEAD = l.findVarHandle(CQueue.class, "head", CQueue.Node.class);
             TAIL = l.findVarHandle(CQueue.class, "tail", CQueue.Node.class);
+            ITEM = l.findVarHandle(Node.class, "item", Object.class);
             NEXT = l.findVarHandle(CQueue.Node.class, "next", CQueue.Node.class);
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
@@ -63,7 +65,7 @@ final public class CQueue<T> implements Queue<T> {
             return null;
         }
         HEAD.set(this, cur);
-        return cur.item;
+        return (T) ITEM.getAndSet(cur, null);
     }
 
     @Override
