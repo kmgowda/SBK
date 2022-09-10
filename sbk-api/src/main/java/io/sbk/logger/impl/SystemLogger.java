@@ -28,16 +28,17 @@ import io.time.Time;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Class for recoding/printing results on System.out.
  */
+@NotThreadSafe
 public class SystemLogger extends ResultsLogger implements RWLogger {
     private final static String LOGGER_FILE = "logger.properties";
     private final static VarHandle VAR_HANDLE_ARRAY;
@@ -45,10 +46,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected final AtomicInteger readers;
     protected final AtomicInteger maxWriters;
     protected final AtomicInteger maxReaders;
-    protected final AtomicLong writeBytes;
-    protected final AtomicLong writeRequests;
-    protected final AtomicLong readBytes;
-    protected final AtomicLong readRequests;
+    protected long writeBytes;
+    protected long writeRequests;
+    protected long readBytes;
+    protected long readRequests;
     protected String storageName;
     protected String timeUnitFullText;
     protected ParsedOptions params;
@@ -79,10 +80,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.readers = new AtomicInteger(0);
         this.maxWriters = new AtomicInteger(0);
         this.maxReaders = new AtomicInteger(0);
-        this.writeBytes = new AtomicLong(0);
-        this.writeRequests = new AtomicLong(0);
-        this.readBytes = new AtomicLong(0);
-        this.readRequests = new AtomicLong(0);
+        this.writeBytes = 0;
+        this.writeRequests = 0;
+        this.readBytes = 0;
+        this.readRequests = 0;
         this.isRequestWrites = false;
         this.isRequestReads = false;
         this.readBytesArray = null;
@@ -368,12 +369,12 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, req);
         if (isRequestWrites) {
-            writeRequests.addAndGet(req.writeRequestRecords);
-            writeBytes.addAndGet(req.writeRequestBytes);
+            writeRequests += req.writeRequestRecords;
+            writeBytes += req.writeRequestBytes;
         }
         if (isRequestReads) {
-            readRequests.addAndGet(req.readRequestRecords);
-            readBytes.addAndGet(req.readRequestBytes);
+            readRequests += req.readRequestRecords;
+            readBytes += req.readRequestBytes;
         }
 
         print(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
@@ -408,15 +409,15 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         if (isRequestWrites) {
-            writeRequests.addAndGet(req.writeRequestRecords);
-            writeBytes.addAndGet(req.writeRequestBytes);
+            writeRequests += req.writeRequestRecords;
+            writeBytes += req.writeRequestBytes;
         }
         if (isRequestReads) {
-            readRequests.addAndGet(req.readRequestRecords);
-            readBytes.addAndGet(req.readRequestBytes);
+            readRequests += req.readRequestRecords;
+            readBytes += req.readRequestBytes;
         }
-        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequests.getAndSet(0),
-                readBytes.getAndSet(0), writeRequests.getAndSet(0), writeBytes.getAndSet(0));
+        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequests, readBytes, writeRequests, writeBytes);
+        readRequests = readBytes = writeRequests = writeBytes = 0;
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, reqFinal);
         printTotal(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
                 reqFinal.writeRequestBytes, perf.writeRequestsMbPerSec, reqFinal.writeRequestRecords, perf.writeRequestsPerSec,
