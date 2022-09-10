@@ -60,12 +60,12 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public T poll() {
-        final Object cur = NEXT.getAndSet(head, null);
+        final Object cur = NEXT.getAndSetRelease(head, null);
         if (cur == null) {
             return null;
         }
         HEAD.set(this, cur);
-        return (T) ITEM.getAndSet(cur, null);
+        return (T) ITEM.getAndSetRelease(cur, null);
     }
 
     @Override
