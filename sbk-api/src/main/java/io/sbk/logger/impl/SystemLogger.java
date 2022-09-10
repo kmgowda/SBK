@@ -29,16 +29,18 @@ import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * Class for recoding/printing results on System.out.
  */
 public class SystemLogger extends ResultsLogger implements RWLogger {
     private final static String LOGGER_FILE = "logger.properties";
+    private final static VarHandle VAR_HANDLE_ARRAY;
     protected final AtomicInteger writers;
     protected final AtomicInteger readers;
     protected final AtomicInteger maxWriters;
@@ -56,11 +58,20 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected boolean isRequestReads;
     protected int maxWriterRequestIds;
     protected int maxReaderRequestIds;
-    protected AtomicLongArray writeBytesArray;
-    protected AtomicLongArray writeRequestRecordsArray;
-    protected AtomicLongArray readBytesArray;
-    protected AtomicLongArray readRequestRecordsArray;
+    protected volatile long[] writeBytesArray;
+    protected volatile long[] writeRequestRecordsArray;
+    protected volatile long[] readBytesArray;
+    protected volatile long[] readRequestRecordsArray;
     private LoggerConfig loggerConfig;
+
+    static {
+        try {
+            VAR_HANDLE_ARRAY = MethodHandles.arrayElementVarHandle( long[].class);
+        } catch (IllegalArgumentException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
 
     public SystemLogger() {
         super();
@@ -218,10 +229,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 throw new IllegalArgumentException();
             }
         }
-        this.writeBytesArray = new AtomicLongArray(maxWriterRequestIds);
-        this.writeRequestRecordsArray = new AtomicLongArray(maxWriterRequestIds);
-        this.readBytesArray = new AtomicLongArray(maxReaderRequestIds);
-        this.readRequestRecordsArray = new AtomicLongArray(maxReaderRequestIds);
+        this.writeBytesArray = new long[maxWriterRequestIds];
+        this.writeRequestRecordsArray = new long[maxWriterRequestIds];
+        this.readBytesArray = new long[maxReaderRequestIds];
+        this.readRequestRecordsArray = new long[maxReaderRequestIds];
     }
 
     @Override
@@ -258,15 +269,15 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
     @Override
     public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
-        writeRequestRecordsArray.addAndGet(writerId, events);
-        writeBytesArray.addAndGet(writerId, bytes);
+        VAR_HANDLE_ARRAY.getAndAdd(writeRequestRecordsArray, writerId, events);
+        VAR_HANDLE_ARRAY.getAndAdd(writeBytesArray, writerId, bytes);
     }
 
 
     @Override
     public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
-        readRequestRecordsArray.addAndGet(readerId, events);
-        readBytesArray.addAndGet(readerId, bytes);
+        VAR_HANDLE_ARRAY.getAndAdd(readRequestRecordsArray, readerId, events);
+        VAR_HANDLE_ARRAY.getAndAdd(readBytesArray, readerId, bytes);
     }
 
 
@@ -303,15 +314,15 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
         if (isRequestWrites) {
             for (int i = 0; i < maxWriterRequestIds; i++) {
-                writeRequestRecordssSum += writeRequestRecordsArray.getAndSet(i, 0);
-                writeBytesSum += writeBytesArray.getAndSet(i, 0);
+                writeRequestRecordssSum +=   (long) VAR_HANDLE_ARRAY.getAndSet(writeRequestRecordsArray, i, 0);
+                writeBytesSum += (long) VAR_HANDLE_ARRAY.getAndSet(writeBytesArray, i, 0);
             }
         }
 
         if (isRequestReads) {
             for (int i = 0; i < maxReaderRequestIds; i++) {
-                readRequestRecordsSum += readRequestRecordsArray.getAndSet(i, 0);
-                readBytesSum += readBytesArray.getAndSet(i, 0);
+                readRequestRecordsSum += (long) VAR_HANDLE_ARRAY.getAndSet(readRequestRecordsArray, i, 0);
+                readBytesSum += (long) VAR_HANDLE_ARRAY.getAndSet(readBytesArray, i, 0);
             }
            }
         return new ReadWriteRequests(readRequestRecordsSum, readBytesSum, writeRequestRecordssSum, writeBytesSum);
