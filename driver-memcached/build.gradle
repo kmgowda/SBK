@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(":sbk-api")
+
+    // https://mvnrepository.com/artifact/com.googlecode.xmemcached/xmemcached
+    implementation group: 'com.googlecode.xmemcached', name: 'xmemcached', version: '2.4.7'
+}
