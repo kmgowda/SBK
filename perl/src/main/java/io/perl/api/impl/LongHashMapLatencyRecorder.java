@@ -10,7 +10,6 @@
 
 package io.perl.api.impl;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.LatencyPercentiles;
 import io.perl.api.LatencyRecord;
 import io.perl.api.LatencyRecordWindow;
@@ -18,25 +17,19 @@ import io.perl.api.ReportLatencies;
 import io.perl.config.LatencyConfig;
 import io.perl.data.Bytes;
 import io.time.Time;
+import org.eclipse.collections.api.iterator.MutableLongIterator;
+import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
 
-import javax.annotation.concurrent.NotThreadSafe;
-import java.util.Iterator;
-import java.util.Map;
 
-/**
- * class for Map based Performance statistics.
- */
-@NotThreadSafe
-public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashMapLatencyRecorder {
-    final private Map<Long, Long> latencies;
+final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
+    final private LongLongHashMap latencies;
     final private long maxMapSizeBytes;
     final private int incBytes;
     private long mapBytesCount;
 
     /**
-     * Constructor  MapLatencyRecorder initializing all values.
+     * Constructor  LongHashMapLatencyRecorder initializing all values.
      *
-     * @param map                   Map Object
      * @param lowLatency            long
      * @param highLatency           long
      * @param totalLatencyMax       long
@@ -46,12 +39,11 @@ public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashM
      * @param time                  Time
      * @param maxMapSizeMB      int
      */
-    @SuppressFBWarnings("EI_EXPOSE_REP2")
-    public MapLatencyRecorder(Map<Long, Long> map, long lowLatency, long highLatency, long totalLatencyMax,
+    public LongHashMapLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax,
                               long totalRecordsMax, long bytesMax, double[] percentiles,
                               Time time, int maxMapSizeMB) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
-        this.latencies = map;
+        this.latencies = new LongLongHashMap();
         this.maxMapSizeBytes = (long) maxMapSizeMB * Bytes.BYTES_PER_MB;
         this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * 2;
         this.mapBytesCount = 0;
@@ -82,7 +74,7 @@ public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashM
             copyLatencies.reportLatencyRecord(this);
         }
         percentiles.reset(validLatencyRecords);
-        Iterator<Long> keys = latencies.keySet().stream().sorted().iterator();
+        MutableLongIterator keys = latencies.keySet().toSortedList().longIterator();
         long curIndex = 0;
         while (keys.hasNext()) {
             final long latency = keys.next();
@@ -109,11 +101,11 @@ public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashM
     @Override
     public void reportLatency(long latency, long count) {
         Long val = latencies.get(latency);
-        if (val == null) {
+        if (val == 0) {
             mapBytesCount += incBytes;
             latencies.put(latency,  count);
         } else {
-            latencies.replace(latency, val + count);
+            latencies.addToValue(latency,  count);
         }
     }
 

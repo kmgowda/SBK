@@ -46,6 +46,7 @@ dependencies {
     api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
     api group: 'io.prometheus.jmx', name: jmxAgent, version: jmxPrometheusVersion
     api group: 'com.google.guava', name: 'guava', version: guavaVersion
+    implementation group: 'org.eclipse.collections', name: 'eclipse-collections', version: eclipseCollectionVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
 }
 
