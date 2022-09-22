@@ -100,11 +100,13 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
 
     @Override
     public void reportLatency(long latency, long count) {
-        long val = latencies.get(latency);
+        Long val = latencies.get(latency);
         if (val == 0) {
             mapBytesCount += incBytes;
+            latencies.put(latency,  count);
+        } else {
+            latencies.addToValue(latency,  count);
         }
-        latencies.put(latency, val + count);
     }
 
     /**
