@@ -110,10 +110,11 @@ public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashM
     public void reportLatency(long latency, long count) {
         Long val = latencies.get(latency);
         if (val == null) {
-            val = 0L;
             mapBytesCount += incBytes;
+            latencies.put(latency,  count);
+        } else {
+            latencies.replace(latency, val + count);
         }
-        latencies.put(latency, val + count);
     }
 
     /**
