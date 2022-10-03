@@ -12,10 +12,10 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.perl.logger.Print;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
+import io.sbk.logger.RWPrint;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
@@ -28,12 +28,12 @@ import java.io.InputStream;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class PrometheusLogger extends CSVLogger {
+public abstract class PrometheusLogger extends CSVLogger {
     final private static String CONFIG_FILE = "metrics.properties";
     protected MetricsConfig metricsConfig;
     private boolean contextDisabled;
     private PrometheusRWMetricsServer prometheusServer;
-    private Print printer;
+    private RWPrint printer;
 
 
     public PrometheusLogger() {
@@ -107,54 +107,34 @@ public class PrometheusLogger extends CSVLogger {
         Printer.log.info("SBK PrometheusLogger Shutdown");
     }
 
-    @Override
-    public void incrementWriters() {
-        super.incrementWriters();
-        if (prometheusServer != null) {
-            prometheusServer.incrementWriters();
-        }
+    private void printMetrics(int writers, int maxWriters, int readers, int maxReaders,
+                              long writeRequestBytes, double writeRequestsMbPerSec, long writesRequests,
+                              double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
+                              long readRequests, double readRequestsPerSec, double seconds, long bytes,
+                              long records, double recsPerSec, double mbPerSec,
+                              double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                              long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
+                writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
+        prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
+                writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
     }
 
     @Override
-    public void decrementWriters() {
-        super.decrementWriters();
-        if (prometheusServer != null) {
-            prometheusServer.decrementWriters();
-        }
-    }
-
-
-    @Override
-    public void incrementReaders() {
-        super.incrementReaders();
-        if (prometheusServer != null) {
-            prometheusServer.incrementReaders();
-        }
-
-    }
-
-    @Override
-    public void decrementReaders() {
-        super.decrementReaders();
-        if (prometheusServer != null) {
-            prometheusServer.decrementReaders();
-        }
-    }
-
-    private void printMetrics(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                              double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                              long slc1, long slc2, long[] percentileValues) {
-        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
-        prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
-    }
-
-    @Override
-    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
-        printer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+    public void print(int writers, int maxWriters, int readers, int maxReaders,
+                      long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                      double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
+                      long readRequestRecords, double readRequestsRecordsPerSec, double seconds, long bytes,
+                      long records, double recsPerSec, double mbPerSec,
+                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        printer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
+                writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
     }
 }

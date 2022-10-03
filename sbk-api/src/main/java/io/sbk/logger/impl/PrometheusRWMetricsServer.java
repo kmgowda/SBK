@@ -10,70 +10,89 @@
 
 package io.sbk.logger.impl;
 
+import com.google.common.util.concurrent.AtomicDouble;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Tags;
 import io.perl.logger.impl.PrometheusMetricsServer;
 import io.sbk.config.Config;
-import io.sbk.logger.CountRW;
 import io.sbk.logger.MetricsConfig;
+import io.sbk.logger.RWPrint;
 import io.time.Time;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PrometheusRWMetricsServer extends PrometheusMetricsServer implements CountRW {
+
+public class PrometheusRWMetricsServer extends PrometheusMetricsServer implements RWPrint {
+    final private static String ACTION_TEXT = "action";
+    final protected String rwMetricPrefix;
     final private AtomicInteger writers;
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;
     final private AtomicInteger maxReaders;
+    final private Counter writeRequestBytes;
+    final private Counter readRequestBytes;
+    final private Counter writeRequestRecords;
+    final private Counter readRequestRecords;
+    final private AtomicDouble writeRequestsMbPerSec;
+    final private AtomicDouble writeRequestRecordsPerSec;
+    final private AtomicDouble readRequestsMbPerSec;
+    final private AtomicDouble readRequestRecordsPerSec;
 
     public  PrometheusRWMetricsServer(String header, String action, String className, double[] percentiles, Time time,
                                         MetricsConfig config) throws IOException {
         super(header.toUpperCase()+" "+action, percentiles, time,
-                config.latencyTimeUnit, config.port, config.context, Tags.of(Config.CLASS_OPTION, className));
-        final String writersName = metricPrefix + "_Writers";
-        final String readersName = metricPrefix + "_Readers";
-        final String maxWritersName = metricPrefix + "_Max_Writers";
-        final String maxReadersName = metricPrefix + "_Max_Readers";
+                config.latencyTimeUnit, config.port, config.context,
+                Tags.of(Config.CLASS_OPTION, className, ACTION_TEXT, action));
+        rwMetricPrefix =   header.toUpperCase().replace(" ", "_");
+        final String writersName = rwMetricPrefix + "_Writers";
+        final String readersName = rwMetricPrefix + "_Readers";
+        final String maxWritersName = rwMetricPrefix + "_Max_Writers";
+        final String maxReadersName = rwMetricPrefix + "_Max_Readers";
+        final String writeRequestBytesName = rwMetricPrefix + "_Write_Request_Bytes";
+        final String writeRequestRecordsName = rwMetricPrefix + "_Write_Request_Records";
+        final String writeRequestsMbPerSecName = rwMetricPrefix + "_Write_Request_Bytes_MBPerSec";
+        final String writeRequestRecordsPerSecName =  rwMetricPrefix + "_Write_Request_RecordsPerSec";
+        final String readRequestBytesName = rwMetricPrefix + "_Read_Request_Bytes";
+        final String readRequestRecordsName = rwMetricPrefix + "_Read_Request_Records";
+        final String readRequestsMbPerSecName = rwMetricPrefix + "_Read_Request_MBPerSec";
+        final String readRequestRecordsPerSecName =  rwMetricPrefix + "_Read_Request_RecordsPerSec";
+
         this.writers = this.registry.gauge(writersName, new AtomicInteger());
         this.readers = this.registry.gauge(readersName, new AtomicInteger());
         this.maxWriters = this.registry.gauge(maxWritersName, new AtomicInteger());
         this.maxReaders = this.registry.gauge(maxReadersName, new AtomicInteger());
+        this.writeRequestBytes = this.registry.counter(writeRequestBytesName);
+        this.writeRequestRecords = this.registry.counter(writeRequestRecordsName);
+        this.writeRequestsMbPerSec = this.registry.gauge(writeRequestsMbPerSecName, new AtomicDouble());
+        this.writeRequestRecordsPerSec = this.registry.gauge(writeRequestRecordsPerSecName, new AtomicDouble());
+        this.readRequestBytes = this.registry.counter(readRequestBytesName);
+        this.readRequestRecords = this.registry.counter(readRequestRecordsName);
+        this.readRequestsMbPerSec = this.registry.gauge(readRequestsMbPerSecName, new AtomicDouble());
+        this.readRequestRecordsPerSec = this.registry.gauge(readRequestRecordsPerSecName, new AtomicDouble());
+
     }
 
-    public void incrementWriters() {
-        writers.incrementAndGet();
-        maxWriters.incrementAndGet();
-    }
 
-    public void decrementWriters() {
-        writers.decrementAndGet();
+    @Override
+    public final void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
+                      double writeRequestMbPerSec, long writeRequestRecords, double writeRequestRecordsPerSec,
+                      long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
+                      double readRequestsRecordsPerSec, double seconds, long bytes, long records, double recsPerSec,
+                      double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
+                      long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+        this.writers.set(writers);
+        this.maxWriters.set(maxWriters);
+        this.readers.set(readers);
+        this.maxReaders.set(maxReaders);
+        this.writeRequestBytes.increment(writeRequestBytes);
+        this.writeRequestRecords.increment(writeRequestRecords);
+        this.writeRequestsMbPerSec.set(writeRequestMbPerSec);
+        this.writeRequestRecordsPerSec.set(writeRequestRecordsPerSec);
+        this.readRequestBytes.increment(readRequestBytes);
+        this.readRequestRecords.increment(readRequestRecords);
+        this.readRequestsMbPerSec.set(readRequestMbPerSec);
+        this.readRequestRecordsPerSec.set(readRequestsRecordsPerSec);
+        super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                                higherDiscard, slc1, slc2, percentileValues);
     }
-
-    public void setWriters(int val) {
-        writers.set(val);
-        maxWriters.set(Math.max(writers.get(), maxWriters.get()));
-    }
-
-    public void setMaxWriters(int val) {
-        maxWriters.set(val);
-    }
-
-    public void incrementReaders() {
-        readers.incrementAndGet();
-        maxReaders.incrementAndGet();
-    }
-
-    public void decrementReaders() {
-        readers.decrementAndGet();
-    }
-
-    public void setReaders(int val) {
-        readers.set(val);
-        maxReaders.set(Math.max(readers.get(), maxReaders.get()));
-    }
-
-    public void setMaxReaders(int val) {
-        maxReaders.set(val);
-    }
-
 }

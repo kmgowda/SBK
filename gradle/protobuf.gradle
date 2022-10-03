@@ -14,14 +14,16 @@ plugins.withId('com.google.protobuf') {
             artifact = "com.google.protobuf:protoc:${protobufProtocVersion}"
         }
         plugins {
-            grpc {
+            grpc_java {
                 artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
             }
         }
         generatedFilesBaseDir = "$projectDir/src/generated"
         generateProtoTasks {
             all()*.plugins {
-                grpc {}
+                grpc_java {
+                    outputSubDir = "java"
+                }
             }
         }
     }
@@ -32,7 +34,6 @@ plugins.withId('com.google.protobuf') {
 
     sourceSets {
         main.java.srcDirs "${protobuf.generatedFilesBaseDir}/main/java"
-        main.java.srcDirs "${protobuf.generatedFilesBaseDir}/main/grpc"
     }
 
     dependencies {
@@ -45,7 +46,6 @@ plugins.withId('com.google.protobuf') {
     idea {
         module {
             sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/java")
-            sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/grpc")
         }
     }
 

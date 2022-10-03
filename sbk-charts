@@ -9,18 +9,19 @@
 ##
 
 import argparse
+import os
 from charts.sheets import SbkMultiSheets
 from charts.multicharts import SbkMultiCharts
 from jproperties import Properties
 
-SBK_BANNER_FILE = "./charts/banner.txt"
-SBK_GRADLE_PROP_FILE = "./gradle.properties"
+SBK_BANNER_FILE = os.path.join(os.path.curdir, 'charts', 'banner.txt')
+SBK_GRADLE_PROP_FILE = os.path.join(os.path.curdir, 'gradle.properties')
 
 
 def sbk_charts():
     parser = argparse.ArgumentParser(description='sbk charts',
                                      epilog='Please report issues at https://github.com/kmgowda/SBK')
-    parser.add_argument('-i', '--ifiles', help="Input CSV files, seperated by ','", required=True)
+    parser.add_argument('-i', '--ifiles', help="Input CSV files, separated by ','", required=True)
     parser.add_argument('-o', '--ofile', help='Output xlsx file', default="out.xlsx")
     args = parser.parse_args()
     configs = Properties()

@@ -73,6 +73,11 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
     /**
      *<code>AtomicDouble maxLatency</code>.
      */
+    final private AtomicDouble minLatency;
+
+    /**
+     *<code>AtomicDouble maxLatency</code>.
+     */
     final private AtomicDouble maxLatency;
 
     /**
@@ -116,6 +121,7 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         this.mbPsec = this.registry.gauge(mbPsecName, new AtomicDouble());
         this.recsPsec = this.registry.gauge(recsPsecName, new AtomicDouble());
         this.avgLatency = this.registry.gauge(avgLatencyName, new AtomicDouble());
+        this.minLatency = this.registry.gauge(minLatencyName, new AtomicDouble());
         this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicDouble());
         this.slc1 = this.registry.gauge(slc1Name, new AtomicLong());
         this.slc2 = this.registry.gauge(slc2Name, new AtomicLong());
@@ -144,7 +150,7 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
 
     @Override
     final public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                            double avgLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                             long slc1, long slc2, long[] percentileValues) {
         this.bytes.increment(bytes);
         this.records.increment(records);
@@ -156,6 +162,7 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         this.slc1.set(slc1);
         this.slc2.set(slc2);
         this.avgLatency.set(convert.apply(avgLatency));
+        this.minLatency.set(convert.apply((double) minLatency));
         this.maxLatency.set(convert.apply((double) maxLatency));
         for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
             this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));

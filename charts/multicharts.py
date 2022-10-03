@@ -167,6 +167,8 @@ class SbkMultiCharts(SbkCharts):
             if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_write_request_mb_series(ws, prefix))
+                chart.append(self.get_throughput_read_request_mb_series(ws, prefix))
                 chart.append(self.get_throughput_mb_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("Throughput_MB")
@@ -179,6 +181,8 @@ class SbkMultiCharts(SbkCharts):
             if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_write_request_records_series(ws, prefix))
+                chart.append(self.get_throughput_read_request_records_series(ws, prefix))
                 chart.append(self.get_throughput_records_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("Throughput_Records")
@@ -193,6 +197,8 @@ class SbkMultiCharts(SbkCharts):
                     action = self.get_action_name(ws)
                     chart = self.create_bar_chart("Total Mega Bytes " + action, action, "MB", 25, 50)
                 prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_write_request_mb_series(ws, prefix))
+                chart.append(self.get_read_request_mb_series(ws, prefix))
                 chart.append(self.get_mb_series(ws, prefix))
         if chart is not None:
             # add chart to the sheet
@@ -209,6 +215,8 @@ class SbkMultiCharts(SbkCharts):
                     chart = self.create_bar_chart("Total Throughput Variations in Mega Bytes / Seconds",
                                                   action, "Total Throughput in MB/Sec", 25, 50)
                 prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_write_request_mb_series(ws, prefix))
+                chart.append(self.get_throughput_read_request_mb_series(ws, prefix))
                 chart.append(self.get_throughput_mb_series(ws, prefix))
         if chart is not None:
             # add chart to the sheet
@@ -225,6 +233,8 @@ class SbkMultiCharts(SbkCharts):
                     chart = self.create_bar_chart("Total Throughput Variations in Records / Seconds",
                                                   action, "Total Throughput in Records/Sec", 25, 50)
                 prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_throughput_write_request_records_series(ws, prefix))
+                chart.append(self.get_throughput_read_request_records_series(ws, prefix))
                 chart.append(self.get_throughput_records_series(ws, prefix))
         if chart is not None:
             # add chart to the sheet
@@ -245,6 +255,22 @@ class SbkMultiCharts(SbkCharts):
         if chart is not None:
             # add chart to the sheet
             sheet = self.wb.create_sheet("Total_Avg_Latency")
+            sheet.add_chart(chart)
+
+    def create_total_min_latency_compare_graph(self):
+        chart = None
+        for name in self.wb.sheetnames:
+            if self.is_tnum_sheet(name):
+                ws = self.wb[name]
+                if chart is None:
+                    action = self.get_action_name(ws)
+                    chart = self.create_bar_chart("Total Min Latency Comparison",
+                                                  action, "Total Min Latency", 25, 50)
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_min_latency_series(ws, prefix))
+        if chart is not None:
+            # add chart to the sheet
+            sheet = self.wb.create_sheet("Total_Min_Latency")
             sheet.add_chart(chart)
 
     def create_total_max_latency_compare_graph(self):
@@ -275,6 +301,7 @@ class SbkMultiCharts(SbkCharts):
             self.create_total_mb_compare_graph()
             self.create_total_throughput_mb_compare_graph()
             self.create_total_throughput_records_compare_graph()
+            self.create_total_min_latency_compare_graph()
             self.create_total_avg_latency_compare_graph()
             self.create_total_max_latency_compare_graph()
             self.wb.save(self.file)

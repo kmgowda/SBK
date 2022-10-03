@@ -16,13 +16,13 @@ package io.sbk.api;
 final public class Status {
     public long startTime;
     public long endTime;
-    public int bytes;
     public int records;
+    public int bytes;
 
     public Status() {
         this.startTime = 0;
         this.endTime = 0;
-        this.bytes = 0;
         this.records = 0;
+        this.bytes = 0;
     }
 }

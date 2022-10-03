@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -168,38 +167,31 @@ final public class CQueuePerl implements Perl {
 
 
     @NotThreadSafe
-    static final class CQueueChannel implements Channel {
-        final private ConcurrentLinkedQueue<TimeStamp>[] cQueues;
+    static final class CQueueChannel extends ConcurrentLinkedQueueArray<TimeStamp> implements Channel {
+        final private  int maxQs;
         final private Throw eThrow;
         private int rIndex;
 
-        public CQueueChannel(int qSize, Throw eThrow) {
-            this.rIndex = qSize;
+        public CQueueChannel(int maxQs, Throw eThrow) {
+            super(maxQs);
+            this.rIndex = maxQs;
+            this.maxQs = maxQs;
             this.eThrow = eThrow;
-            this.cQueues = new ConcurrentLinkedQueue[qSize];
-            for (int i = 0; i < cQueues.length; i++) {
-                cQueues[i] = new ConcurrentLinkedQueue<>();
-            }
         }
 
         public TimeStamp receive(int timeout) {
             rIndex += 1;
-            if (rIndex >= cQueues.length) {
+            if (rIndex >= maxQs) {
                 rIndex = 0;
             }
-            return cQueues[rIndex].poll();
+            return poll(rIndex);
         }
 
         public void sendEndTime(long endTime) {
-            cQueues[0].add(new TimeStamp(endTime));
+            add(0, new TimeStamp(endTime));
         }
 
-        public void clear() {
-            for (ConcurrentLinkedQueue<TimeStamp> q : cQueues) {
-                q.clear();
-            }
-        }
-
+        @Override
         public PerlChannel getPerlChannel() {
             return new CQueuePerlChannel();
         }
@@ -219,10 +211,10 @@ final public class CQueuePerl implements Perl {
             @Override
             public void send(long startTime, long endTime, int records, int bytes) {
                 this.wIndex += 1;
-                if (this.wIndex >= cQueues.length) {
+                if (this.wIndex >= maxQs) {
                     this.wIndex = 0;
                 }
-                cQueues[wIndex].add(new TimeStamp(startTime, endTime, records, bytes));
+                add(this.wIndex, new TimeStamp(startTime, endTime, records, bytes));
             }
 
             @Override
