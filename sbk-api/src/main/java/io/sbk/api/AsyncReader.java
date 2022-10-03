@@ -157,6 +157,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
                 perlChannel.send(dType.getTime(d), endTime, status.records, dType.length(d));
+
             });
         }
     }

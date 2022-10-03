@@ -26,14 +26,15 @@ final public class TimeStamp {
     final public long endTime;
 
     /**
+     * <code>int records</code>.
+     */
+    final public int records;
+
+    /**
      * <code>int bytes</code>.
      */
     final public int bytes;
 
-    /**
-     * <code>int records</code>.
-     */
-    final public int records;
 
     /**
      * Constructor TimeStamp initialize all values.

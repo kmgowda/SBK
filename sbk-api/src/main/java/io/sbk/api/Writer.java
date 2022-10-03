@@ -166,6 +166,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         if (ret == null) {
             status.endTime = time.getCurrentTime();
             perlChannel.send(status.startTime, status.endTime, status.records, size);
+
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {

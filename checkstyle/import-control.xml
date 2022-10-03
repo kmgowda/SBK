@@ -71,4 +71,5 @@
     <allow pkg="org.jetbrains" />
     <allow pkg="edu.umd.cs.findbugs" />
     <allow pkg="org.eclipse" />
+    <allow pkg="com.couchbase" />
 </import-control>
