@@ -1,0 +1,48 @@
+##
+# Copyright (c) KMG. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+##
+
+version: '3'
+services:
+  prometheus:
+    image: prom/prometheus:v2.30.0
+    container_name: prometheus
+    hostname: prometheus
+    volumes:
+      - ./../grafana/prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - '9090:9090'
+
+  grafana:
+    build: ./../grafana
+    container_name: grafana
+    hostname: grafana
+    volumes:
+      - ./../grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=sbk
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+
+  sbm:
+    build:
+      context: ./..
+      dockerfile: ./dockers/sbm
+    container_name: sbm
+    hostname: sbm
+    depends_on:
+      - prometheus
+      - grafana
+    ports:
+      - '9717:9717'
+      - '9719:9719'

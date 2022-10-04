@@ -10,6 +10,7 @@
 package io.sbk.Kafka;
 
 import io.perl.api.PerlChannel;
+import io.sbk.logger.WriteRequestsLogger;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Status;
 import io.sbk.api.Writer;
@@ -45,6 +46,21 @@ public class KafkaWriter implements Writer<byte[]> {
         producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
             final long endTime = time.getCurrentTime();
             record.send(ctime, endTime, 1, size);
+        });
+    }
+
+    @Override
+    public void recordWrite(DataType<byte[]> dType, byte[] data, int size, Time time,
+                             Status status, PerlChannel perlChannel,
+                             int id, WriteRequestsLogger logger) throws IOException {
+        final long ctime = time.getCurrentTime();
+        status.startTime = ctime;
+        status.bytes = size;
+        status.records = 1;
+        logger.recordWriteRequests(id, status.startTime, status.bytes, status.records);
+        producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
+            final long endTime = time.getCurrentTime();
+            perlChannel.send(ctime, endTime, 1, size);
         });
     }
 

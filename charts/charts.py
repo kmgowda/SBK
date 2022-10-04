@@ -23,16 +23,18 @@ class SbkCharts:
         self.file = file
         self.wb = load_workbook(self.file)
         self.time_unit = self.get_time_unit(self.wb[constants.R_PREFIX + "1"])
-        self.n_latency_charts = 4
+        self.n_latency_charts = 5
         self.latency_groups = [
-            ["Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30", "Percentile_40", "Percentile_50"],
+            ["MinLatency", "Percentile_5"],
+            ["Percentile_5", "Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30",
+             "Percentile_40", "Percentile_50"],
             ["Percentile_50", "AvgLatency"],
             ["Percentile_50", "Percentile_60", "Percentile_70", "Percentile_75", "Percentile_80", "Percentile_90"],
             ["Percentile_92.5", "Percentile_95", "Percentile_97.5", "Percentile_99",
              "Percentile_99.25", "Percentile_99.5", "Percentile_99.75", "Percentile_99.9",
              "Percentile_99.95", "Percentile_99.99"]]
-        self.slc_percentile_names = [["Percentile_10", "Percentile_20", "Percentile_25", "Percentile_30",
-                                      "Percentile_40", "Percentile_50"],
+        self.slc_percentile_names = [["Percentile_5", "Percentile_10", "Percentile_20", "Percentile_25",
+                                      "Percentile_30", "Percentile_40", "Percentile_50"],
                                      ["Percentile_50", "Percentile_60", "Percentile_70", "Percentile_75",
                                       "Percentile_80", "Percentile_90", "Percentile_92.5", "Percentile_95",
                                       "Percentile_97.5", "Percentile_99", "Percentile_99.25", "Percentile_99.5",
@@ -63,6 +65,7 @@ class SbkCharts:
         columns = self.get_columns_from_worksheet(ws)
         ret = OrderedDict()
         ret['AvgLatency'] = columns['AvgLatency']
+        ret['MinLatency'] = columns['MinLatency']
         ret['MaxLatency'] = columns['MaxLatency']
         ret.update(self.get_latency_percentile_columns(ws))
         return ret
@@ -127,11 +130,35 @@ class SbkCharts:
                                 max_col=cols["MB/Sec"], max_row=ws.max_row),
                       title=ws_name + "-MB/Sec")
 
+    def get_throughput_write_request_mb_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["WriteRequestMB/Sec"], min_row=2,
+                                max_col=cols["WriteRequestMB/Sec"], max_row=ws.max_row),
+                      title=ws_name + "-WriteRequestMB/Sec")
+
+    def get_throughput_read_request_mb_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["ReadRequestMB/Sec"], min_row=2,
+                                max_col=cols["ReadRequestMB/Sec"], max_row=ws.max_row),
+                      title=ws_name + "-ReadRequestMB/Sec")
+
     def get_throughput_records_series(self, ws, ws_name):
         cols = self.get_columns_from_worksheet(ws)
         return Series(Reference(ws, min_col=cols["Records/Sec"], min_row=2,
                                 max_col=cols["Records/Sec"], max_row=ws.max_row),
                       title=ws_name + "-Records/Sec")
+
+    def get_throughput_write_request_records_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["WriteRequestRecords/Sec"], min_row=2,
+                                max_col=cols["WriteRequestRecords/Sec"], max_row=ws.max_row),
+                      title=ws_name + "-WriteRequestRecords/Sec")
+
+    def get_throughput_read_request_records_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["ReadRequestRecords/Sec"], min_row=2,
+                                max_col=cols["ReadRequestRecords/Sec"], max_row=ws.max_row),
+                      title=ws_name + "-ReadRequestRecords/Sec")
 
     def get_mb_series(self, ws, ws_name):
         cols = self.get_columns_from_worksheet(ws)
@@ -139,11 +166,29 @@ class SbkCharts:
                                 max_col=cols["MB"], max_row=ws.max_row),
                       title=ws_name + "-MB")
 
+    def get_write_request_mb_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["WriteRequestMB"], min_row=2,
+                                max_col=cols["WriteRequestMB"], max_row=ws.max_row),
+                      title=ws_name + "-WriteRequestMB")
+
+    def get_read_request_mb_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["ReadRequestMB"], min_row=2,
+                                max_col=cols["ReadRequestMB"], max_row=ws.max_row),
+                      title=ws_name + "-ReadRequestMB")
+
     def get_avg_latency_series(self, ws, ws_name):
         cols = self.get_columns_from_worksheet(ws)
         return Series(Reference(ws, min_col=cols["AvgLatency"], min_row=2,
                                 max_col=cols["AvgLatency"], max_row=ws.max_row),
                       title=ws_name + "-AvgLatency")
+
+    def get_min_latency_series(self, ws, ws_name):
+        cols = self.get_columns_from_worksheet(ws)
+        return Series(Reference(ws, min_col=cols["MinLatency"], min_row=2,
+                                max_col=cols["MinLatency"], max_row=ws.max_row),
+                      title=ws_name + "-MinLatency")
 
     def get_max_latency_series(self, ws, ws_name):
         cols = self.get_columns_from_worksheet(ws)
@@ -194,6 +239,8 @@ class SbkCharts:
         chart = self.create_line_chart("Throughput Variations in Mega Bytes / Seconds",
                                        "Intervals", "Throughput in MB/Sec", 25, 50)
         # adding data
+        chart.append(self.get_throughput_write_request_mb_series(ws, prefix))
+        chart.append(self.get_throughput_read_request_mb_series(ws, prefix))
         chart.append(self.get_throughput_mb_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("MB_Sec")
@@ -203,6 +250,8 @@ class SbkCharts:
         chart = self.create_line_chart("Throughput Variations in Records / Seconds",
                                        "Intervals", "Throughput in Records/Sec", 25, 50)
         # adding data
+        chart.append(self.get_throughput_write_request_records_series(ws, prefix))
+        chart.append(self.get_throughput_read_request_records_series(ws, prefix))
         chart.append(self.get_throughput_records_series(ws, prefix))
         # add chart to the sheet
         sheet = self.wb.create_sheet("Records_Sec")

@@ -21,7 +21,9 @@
     <allow pkg="io.state"/>
     <allow pkg="io.time"/>
     <allow pkg="io.perl"/>
+    <allow pkg="io.sbp"/>
     <allow pkg="io.sbk"/>
+    <allow pkg="io.sbm"/>
     <allow pkg="io.pravega"/>
     <allow pkg="lombok"/>
     <allow pkg="ch.qos.logback"/>
@@ -68,5 +70,7 @@
     <allow pkg="org.iq80.leveldb" />
     <allow pkg="org.jetbrains" />
     <allow pkg="edu.umd.cs.findbugs" />
+    <allow pkg="org.eclipse" />
     <allow pkg="com.couchbase" />
+    <allow pkg="net.rubyeye" />
 </import-control>

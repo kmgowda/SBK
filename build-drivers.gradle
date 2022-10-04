@@ -54,6 +54,7 @@ dependencies {
     api project(':driver-activemq')
     api project(':driver-h2')
     api project(':driver-couchbase')
+    api project(':driver-memcached')
     /* api project(':driver-sbktemplate') */
     /* above line is a signature */
 }

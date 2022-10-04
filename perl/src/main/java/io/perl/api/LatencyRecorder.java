@@ -77,12 +77,13 @@ public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow 
      * @param lowerLatencyDiscardRecords  lower discarded latency records
      * @param higherLatencyDiscardRecords higher discarded latency records
      * @param validLatencyRecords         valid latency records
+     * @param minLatency                  Min latency
      * @param maxLatency                  Max latency
      */
     final public void update(long totalRecords, long totalLatency, long totalBytes,
                              long invalidLatencyRecords, long lowerLatencyDiscardRecords,
                              long higherLatencyDiscardRecords, long validLatencyRecords,
-                             long maxLatency) {
+                             long minLatency, long maxLatency) {
         this.totalRecords += totalRecords;
         this.totalLatency += totalLatency;
         this.totalBytes += totalBytes;
@@ -90,6 +91,7 @@ public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow 
         this.lowerLatencyDiscardRecords += lowerLatencyDiscardRecords;
         this.higherLatencyDiscardRecords += higherLatencyDiscardRecords;
         this.validLatencyRecords += validLatencyRecords;
+        this.minLatency = Math.min(this.minLatency, minLatency);
         this.maxLatency = Math.max(this.maxLatency, maxLatency);
     }
 
@@ -102,7 +104,8 @@ public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow 
     final public void update(LatencyRecord record) {
         update(record.totalRecords, record.totalLatency, record.totalBytes,
                 record.invalidLatencyRecords, record.lowerLatencyDiscardRecords,
-                record.higherLatencyDiscardRecords, record.validLatencyRecords, record.maxLatency);
+                record.higherLatencyDiscardRecords, record.validLatencyRecords,
+                record.minLatency, record.maxLatency);
     }
 
     /**
@@ -119,6 +122,7 @@ public sealed class LatencyRecorder extends LatencyRecord permits LatencyWindow 
         if (latency < 0) {
             this.invalidLatencyRecords += events;
         } else {
+            this.minLatency = Math.min(this.minLatency, latency);
             this.maxLatency = Math.max(this.maxLatency, latency);
             this.totalLatency += latency * events;
             if (latency < this.lowLatency) {

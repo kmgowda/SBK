@@ -42,7 +42,7 @@ import java.util.concurrent.TimeoutException;
  * Class SbkGemBenchmark.
  */
 final public class SbkGemBenchmark implements GemBenchmark {
-    private final Benchmark ramBenchmark;
+    private final Benchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
     private final String sbkArgs;
@@ -58,13 +58,13 @@ final public class SbkGemBenchmark implements GemBenchmark {
     /**
      * Constructor SbkGemBenchmark is responsible for initializing all values.
      *
-     * @param ramBenchmark  Benchmark
+     * @param sbmBenchmark  Benchmark
      * @param config        NotNull GemConfig
      * @param params        NotNull GemParameters
      * @param sbkArgs       String
      */
-    public SbkGemBenchmark(Benchmark ramBenchmark, @NotNull GemConfig config, @NotNull GemParameters params, String sbkArgs) {
-        this.ramBenchmark = ramBenchmark;
+    public SbkGemBenchmark(Benchmark sbmBenchmark, @NotNull GemConfig config, @NotNull GemParameters params, String sbkArgs) {
+        this.sbmBenchmark = sbmBenchmark;
         this.config = config;
         this.config.remoteTimeoutSeconds = Long.MAX_VALUE;
         this.params = params;
@@ -253,8 +253,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
         } //end of copy
 
-        // start SBK RAM
-        ramBenchmark.start();
+        // start SBM
+        sbmBenchmark.start();
 
         // Start remote SBK instances
         final SshResponseStream[] sbkResults = createMultiSshResponseStream(nodes.length, true);
@@ -343,7 +343,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             for (SbkSsh node : nodes) {
                 node.stop();
             }
-            ramBenchmark.stop();
+            sbmBenchmark.stop();
             if (ex != null) {
                 Printer.log.warn("SBK GEM Benchmark Shutdown with Exception " + ex);
                 retFuture.completeExceptionally(ex);

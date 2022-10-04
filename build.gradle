@@ -66,22 +66,15 @@ allprojects {
     apply from: "$rootDir/gradle/eclipse.gradle"
     apply from: "$rootDir/gradle/idea.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
-    apply from: "$rootDir/gradle/protobuf.gradle"
 
-    def sbkProjectName = rootProject.name + project.path.replace(":", "-")
-    sbkProjectName = sbkProjectName.replace(rootProject.name + "-" + rootProject.name + "-", rootProject.name + "-")
-    sbkProjectName = sbkProjectName.replace(rootProject.name + "-driver-", rootProject.name + "-")
-    sbkProjectName = sbkProjectName.replace("--", "-")
-    if (sbkProjectName == rootProject.name + "-") {
-        sbkProjectName = rootProject.name
+    def sbkProjectName = project.name
+    def sbkClass = project.name
+    if (sbkProjectName.startsWith("driver-")) {
+        sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
+        sbkClass = sbkClass.replace("driver-", "")
     }
     archivesBaseName = sbkProjectName
     version = sbkVersion
-
-    def sbkClass = ""
-    if (project.path.startsWith(":driver-")) {
-        sbkClass = project.path.replace(":driver-", "")
-    }
 
     configurations.all {
         exclude group: sbkGroup, module: "driver-sbktemplate"
@@ -108,12 +101,16 @@ allprojects {
     application {
         mainClass = SbkMainClass
         applicationName = archivesBaseName
+        def className = sbkClass
+        if (sbkClass.equalsIgnoreCase(rootProject.name)) {
+            className = ""
+        }
 
-        applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + sbkClass,
+        applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + className,
                                      '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
 
         /*
-        applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + sbkClass,
+        applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + className,
                                      '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false',
                                      '--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED',
                                      '--add-exports=java.base/sun.nio.ch=ALL-UNNAMED',
@@ -127,7 +124,7 @@ allprojects {
         startScripts {
             doLast {
 
-                def jmxPort = jmxSbkRamPort
+                def jmxPort = jmxSbmPort
 
                 if (project.path.startsWith(":driver-") || project.name == rootProject.name ||
                         project.name.startsWith('sbk-api')) {
@@ -197,7 +194,7 @@ allprojects {
     }
 
     task generateDockerfiles() {
-        def driversToSkip = ["sbk-api", "state", "time", "perl"]
+        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem"]
         def buffer = ""
         def outDir = 'build/dockers'
         def outFile = sbkProjectName + "-" + sbkVersion
@@ -371,7 +368,7 @@ task SbkYal(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbkRamPort:'\$APP_HOME'/bin/jmx-config.yml")
+                        "=$jmxSbmPort:'\$APP_HOME'/bin/jmx-config.yml")
             }
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             //make sure that we enclose $APP_HOME within ' ' character set
@@ -382,7 +379,7 @@ task SbkYal(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbkRamPort:'\$APP_HOME'\\bin\\jmx-config.yml")
+                        "=$jmxSbmPort:'\$APP_HOME'\\bin\\jmx-config.yml")
             }
         }
     }
@@ -409,7 +406,7 @@ task SbkGem(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbkRamPort:'\$APP_HOME'/bin/jmx-config.yml")
+                        "=$jmxSbmPort:'\$APP_HOME'/bin/jmx-config.yml")
             }
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             //make sure that we enclose $APP_HOME within ' ' character set
@@ -420,7 +417,7 @@ task SbkGem(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbkRamPort:'\$APP_HOME'\\bin\\jmx-config.yml")
+                        "=$jmxSbmPort:'\$APP_HOME'\\bin\\jmx-config.yml")
             }
         }
     }
@@ -447,7 +444,7 @@ task SbkGemYal(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbkRamPort:'\$APP_HOME'/bin/jmx-config.yml")
+                        "=$jmxSbmPort:'\$APP_HOME'/bin/jmx-config.yml")
             }
             windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
             //make sure that we enclose $APP_HOME within ' ' character set
@@ -458,7 +455,7 @@ task SbkGemYal(type: CreateStartScripts) {
             if (jmxExport.matches("true")) {
                 windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
                         "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbkRamPort:'\$APP_HOME'\\bin\\jmx-config.yml")
+                        "=$jmxSbmPort:'\$APP_HOME'\\bin\\jmx-config.yml")
             }
         }
     }
@@ -655,9 +652,10 @@ gradle.rootProject {
 
 dependencies {
     api project(":perl")
+    api project(":sbp")
     api project(":sbk-api")
     api project(":sbk-yal")
-    api project(":sbk-ram")
+    api project(":sbm")
     api project(":sbk-gem")
     api project(":sbk-gem-yal")
 }

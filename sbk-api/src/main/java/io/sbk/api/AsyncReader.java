@@ -12,6 +12,7 @@ package io.sbk.api;
 
 import io.perl.api.PerlChannel;
 import io.sbk.data.DataType;
+import io.sbk.logger.ReadRequestsLogger;
 import io.time.Time;
 
 import java.io.EOFException;
@@ -82,6 +83,51 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
     }
 
     /**
+     * Default implementation for Reading data using {@link AsyncReader#readAsync(int)} ()}
+     * and recording the benchmark statistics.
+     * The end time of the status parameter {@link Status#endTime} of this method determines
+     * the terminating condition for time based reader performance benchmarking.
+     * If you are intend to not use {@link AsyncReader#readAsync(int)} ()} then you can override this method.
+     * If you are intend to read multiple records then you can override this method.
+     * otherwise, use the default implementation and don't override this method.
+     *
+     * @param dType       dataType
+     * @param size        size of the data in bytes
+     * @param time        time interface
+     * @param status      Timestamp
+     * @param perlChannel to call for benchmarking
+     * @param id          reader id
+     * @param logger      Read Request logger
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException  If an exception occurred.
+     */
+    default void recordRead(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id,
+                            ReadRequestsLogger logger)
+            throws EOFException, IOException {
+        status.startTime = time.getCurrentTime();
+        status.records = 1;
+        status.bytes = size;
+        status.endTime = status.startTime;
+        logger.recordReadRequests(id, status.startTime, status.bytes, status.records);
+        final CompletableFuture<T> ret = readAsync(size);
+        if (ret == null) {
+            throw new IOException();
+        } else {
+            final long beginTime = status.startTime;
+            ret.exceptionally(ex -> {
+                perlChannel.throwException(ex);
+                return null;
+            });
+            ret.thenAccept(d -> {
+                final long endTime = time.getCurrentTime();
+                perlChannel.send(beginTime, endTime, status.records, dType.length(d));
+            });
+        }
+    }
+
+
+
+    /**
      * Default implementation for Reading data using {@link Reader#read()}, extracting start time from data
      * and recording the benchmark statistics.
      * The end time of the status parameter {@link Status#endTime} of this method determines
@@ -104,6 +150,45 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         status.records = 1;
         status.bytes = size;
         status.endTime = status.startTime;
+        final CompletableFuture<T> ret = readAsync(size);
+        if (ret == null) {
+            throw new IOException();
+        } else {
+            ret.thenAccept(d -> {
+                final long endTime = time.getCurrentTime();
+                perlChannel.send(dType.getTime(d), endTime, status.records, dType.length(d));
+
+            });
+        }
+    }
+
+    /**
+     * Default implementation for Reading data using {@link Reader#read()}, extracting start time from data
+     * and recording the benchmark statistics.
+     * The end time of the status parameter {@link Status#endTime} of this method determines
+     * the terminating condition for time based reader performance benchmarking.
+     * If you are intend to not use {@link Reader#read()} then you can override this method.
+     * If you are intend to read multiple records then you can override this method.
+     * otherwise, use the default implementation and don't override this method.
+     *
+     * @param dType       dataType
+     * @param size        size of the data in bytes
+     * @param time        time interface
+     * @param status      Timestamp
+     * @param perlChannel to call for benchmarking
+     * @param id          reader id
+     * @param logger      Read Request logger
+     * @throws EOFException If the End of the file occurred.
+     * @throws IOException  If an exception occurred.
+     */
+    default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel, int id,
+                                ReadRequestsLogger logger)
+            throws EOFException, IOException {
+        status.startTime = time.getCurrentTime();
+        status.records = 1;
+        status.bytes = size;
+        status.endTime = status.startTime;
+        logger.recordReadRequests(id, status.startTime, status.bytes, status.records);
         final CompletableFuture<T> ret = readAsync(size);
         if (ret == null) {
             throw new IOException();

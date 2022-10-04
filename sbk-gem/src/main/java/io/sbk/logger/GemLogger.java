@@ -11,6 +11,7 @@
 package io.sbk.logger;
 
 import io.sbk.params.GetArguments;
+import io.sbm.logger.RamLogger;
 
 /**
  * Interface GemLogger.
