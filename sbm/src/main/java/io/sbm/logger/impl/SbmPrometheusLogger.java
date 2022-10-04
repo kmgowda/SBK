@@ -144,8 +144,11 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
         if (prometheusServer != null) {
-            prometheusServer.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
-                    maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+            prometheusServer.print(writers, maxWriters, readers, maxReaders,
+                    writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
+                    readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
+                    seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                    invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
         if (csvEnable) {
             writeToCSV(SBM_PREFIX, REGULAR_PRINT, connections.get(), maxConnections.get(),
