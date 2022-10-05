@@ -28,7 +28,7 @@
     </Match>
     <Match> <!-- This is intended in these and only these classes -->
         <Or>
-            <Package name="io.sbk.grpc" />
+            <Package name="io.sbp.grpc" />
         </Or>
         <Or>
             <Bug pattern="SE_BAD_FIELD" />
