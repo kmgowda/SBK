@@ -45,7 +45,7 @@ plugins.withId('java') {
 
     task javadocJar(type: Jar) {
         archiveClassifier = 'javadoc'
-        exclude "**/generated/**"
+      //  exclude "**/generated/**"
         from generateJavadoc
     }
     artifacts { archives javadocJar }
