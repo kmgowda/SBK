@@ -12,7 +12,6 @@
 rootProject.name = 'sbk'
 
 include 'perl'
-include 'sbp'
 include 'sbk-api'
 include 'sbm'
 include 'sbk-yal'

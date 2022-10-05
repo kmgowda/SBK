@@ -652,7 +652,6 @@ gradle.rootProject {
 
 dependencies {
     api project(":perl")
-    api project(":sbp")
     api project(":sbk-api")
     api project(":sbk-yal")
     api project(":sbm")
