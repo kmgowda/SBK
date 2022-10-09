@@ -28,13 +28,10 @@ COPY --chown=root:root gradlew ${APP_HOME}/gradlew
 COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
 COPY --chown=root:root perl ${APP_HOME}/perl
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
-COPY --chown=root:root sbk-yal ${APP_HOME}/sbk-yal
-COPY --chown=root:root sbm ${APP_HOME}/sbm
-COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
-COPY --chown=root:root sbk-gem ${APP_HOME}/sbk-gem
-
 
 # Copy the SBK storage drivers
+COPY --chown=root:root sbk-yal ${APP_HOME}/sbk-yal
+COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
 COPY --chown=root:root driver-concurrentq ${APP_HOME}/driver-concurrentq
 COPY --chown=root:root driver-file ${APP_HOME}/driver-file
 COPY --chown=root:root driver-filestream ${APP_HOME}/driver-filestream
@@ -76,6 +73,8 @@ COPY --chown=root:root driver-redis ${APP_HOME}/driver-redis
 COPY --chown=root:root driver-cassandra ${APP_HOME}/driver-cassandra
 COPY --chown=root:root driver-leveldb ${APP_HOME}/driver-leveldb
 COPY --chown=root:root driver-activemq ${APP_HOME}/driver-activemq
+COPY --chown=root:root driver-couchbase ${APP_HOME}/driver-couchbase
+COPY --chown=root:root driver-memcached ${APP_HOME}/driver-memcached
 
 
 
