@@ -29,6 +29,10 @@ COPY --chown=root:root gradlew ${APP_HOME}/gradlew
 COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
 COPY --chown=root:root perl ${APP_HOME}/perl
 COPY --chown=root:root sbk-api ${APP_HOME}/sbk-api
+COPY --chown=root:root sbk-yal ${APP_HOME}/sbk-yal
+COPY --chown=root:root sbm ${APP_HOME}/sbm
+COPY --chown=root:root sbk-gem ${APP_HOME}/sbk-gem
+COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
 
 # Copy the SBK storage drivers
 COPY --chown=root:root driver-file ${APP_HOME}/driver-file
