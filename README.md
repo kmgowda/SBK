@@ -275,7 +275,7 @@ Total Pulsar Writing     1 writers,     0 readers,      1 max Writers,     0 max
 
 ```
 
-**Sliding Latency Coverage (SLC)  factors**
+**Sliding Latency Coverage (SLC) factors**
 
 The SBK yields latency data points in the form of quartiles and percentiles. For the performance analysis, these 
 quartiles and percentile latencies can be combined into two factors : Sliding Latency Coverage 1 (SLC 1)
