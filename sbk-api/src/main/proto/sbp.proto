@@ -43,13 +43,15 @@ enum ActionEnum {
 }
 
 message Config {
-  string storageName = 1;
-  ActionEnum action = 2;
-  TimeUnitEnum timeUnit = 3;
-  int64 minLatency = 4;
-  int64 maxLatency = 5;
-  bool isWriteRequests = 6;
-  bool isReadRequests = 7;
+  int32 majorVersion = 1;
+  int32 minorVersion = 2;
+  string storageName = 3;
+  ActionEnum action = 4;
+  TimeUnitEnum timeUnit = 5;
+  int64 minLatency = 6;
+  int64 maxLatency = 7;
+  bool isWriteRequests = 8;
+  bool isReadRequests = 9;
 }
 
 message ClientID {
