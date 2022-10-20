@@ -37,6 +37,8 @@ import io.sbm.api.impl.Sbm;
 import io.sbm.api.impl.SbmBenchmark;
 import io.sbm.params.impl.SbmParameters;
 import io.sbk.system.Printer;
+import io.sbp.config.SbpVersion;
+import io.sbp.main.Sbp;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -138,6 +140,7 @@ final public class SbkGem {
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
         final String storagePackageName = StringUtils.isNotEmpty(packageName) ? packageName : Config.SBK_PACKAGE_NAME;
         final StoragePackage packageStore = new StoragePackage(storagePackageName);
+        final SbpVersion sbpVersion = Sbp.getVersion();
         final Storage storageDevice;
         final String usageLine;
         final String[] storageDrivers;
@@ -149,6 +152,7 @@ final public class SbkGem {
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: " + storagePackageName);
         Printer.log.info(Config.SBK_APP_NAME + ": " + Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));

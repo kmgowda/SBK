@@ -10,6 +10,7 @@
  */
 
 apply plugin: 'java-library'
+apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
 apply plugin: "com.github.spotbugs"
 
@@ -21,6 +22,7 @@ buildscript {
         }
     }
     dependencies {
+        classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
         classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
     }
 }
@@ -31,12 +33,20 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 dependencies {
-    api project(":perl")
-    api project(":sbp")
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
+    api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
+}
+
+generateJavadoc {
+    // follow the package path , it should not be folder path.
+    // but dont use . (dot) in the path
+    exclude 'io/sbp/grpc/ServiceGrpc.java'
+    exclude 'io/sbp/grpc/LatenciesRecordOrBuilder.java'
+    exclude 'io/sbp/grpc/LatenciesRecord.java'
 }
 
 task updateDocs(dependsOn: javadoc) {
