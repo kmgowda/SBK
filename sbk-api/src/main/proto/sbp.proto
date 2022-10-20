@@ -23,6 +23,7 @@ option java_outer_classname = "SbpGrpc";
 import "google/protobuf/empty.proto";
 
 service Service {
+  rpc getVersion (google.protobuf.Empty) returns (Version) {}
   rpc getConfig (google.protobuf.Empty) returns (Config) {}
   rpc registerClient (Config) returns (ClientID) {}
   rpc addLatenciesRecord (LatenciesRecord) returns (google.protobuf.Empty) {}
@@ -42,16 +43,19 @@ enum ActionEnum {
   Write_OnlyReading = 3;
 }
 
+message Version {
+  int32 major = 1;
+  int32 minor = 2;
+}
+
 message Config {
-  int32 majorVersion = 1;
-  int32 minorVersion = 2;
-  string storageName = 3;
-  ActionEnum action = 4;
-  TimeUnitEnum timeUnit = 5;
-  int64 minLatency = 6;
-  int64 maxLatency = 7;
-  bool isWriteRequests = 8;
-  bool isReadRequests = 9;
+  string storageName = 1;
+  ActionEnum action = 2;
+  TimeUnitEnum timeUnit = 3;
+  int64 minLatency = 4;
+  int64 maxLatency = 5;
+  bool isWriteRequests = 6;
+  bool isReadRequests = 7;
 }
 
 message ClientID {
