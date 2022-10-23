@@ -21,9 +21,11 @@ option java_package = "io.sbp.grpc";
 option java_outer_classname = "SbpGrpc";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 service Service {
   rpc getVersion (google.protobuf.Empty) returns (Version) {}
+  rpc isVersionSupported (Version) returns (google.protobuf.BoolValue) {}
   rpc getConfig (google.protobuf.Empty) returns (Config) {}
   rpc registerClient (Config) returns (ClientID) {}
   rpc addLatenciesRecord (LatenciesRecord) returns (google.protobuf.Empty) {}
