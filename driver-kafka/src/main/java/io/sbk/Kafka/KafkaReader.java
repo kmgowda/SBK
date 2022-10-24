@@ -31,10 +31,11 @@ public class KafkaReader implements Reader<byte[]> {
     final private KafkaConsumer<byte[], byte[]> consumer;
     final private Duration timeoutDuration;
 
-    public KafkaReader(int id, ParameterOptions params, String topicName, Properties consumerProps) throws IOException {
+    public KafkaReader(int id, ParameterOptions params, String topicName, Properties consumerProps,
+                       int timeoutMS) throws IOException {
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.consumer.subscribe(Arrays.asList(topicName));
-        this.timeoutDuration = Duration.ofMillis(params.getTimeoutMS());
+        this.timeoutDuration = Duration.ofMillis(timeoutMS);
     }
 
     @Override

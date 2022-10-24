@@ -12,9 +12,15 @@ package io.sbk.Kafka;
 public class KafkaConfig {
     public String brokerUri;
     public String topicName;
+    public int pollTimeoutMS;
     public int partitions;
     public short replica;
     public short sync;
     public boolean create;
     public boolean idempotence;
+    public int lingerMS;
+    public int batchSize;
+    public boolean autoCommit;
+    public int maxPartitionFetchBytes;
+
 }

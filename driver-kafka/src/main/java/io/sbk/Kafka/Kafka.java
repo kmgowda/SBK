@@ -85,6 +85,8 @@ public class Kafka implements Storage<byte[]> {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         // Enabling the producer IDEMPOTENCE is must, to compare between Kafka and Pravega.
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, config.idempotence);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, config.lingerMS);
+        props.put(ProducerConfig.BATCH_SIZE_CONFIG, config.batchSize);
         return props;
     }
 
@@ -99,7 +101,10 @@ public class Kafka implements Storage<byte[]> {
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Integer.MAX_VALUE);
         // props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, params.getTimeout());
         // Enabling the consumer to READ_COMMITTED is must, to compare between Kafka and Pravega.
-        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG,
+                IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, config.autoCommit);
+        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, config.maxPartitionFetchBytes);
         if (params.getAction() == Action.Write_Reading) {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
             props.put(ConsumerConfig.GROUP_ID_CONFIG, config.topicName);
@@ -142,7 +147,7 @@ public class Kafka implements Storage<byte[]> {
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         try {
-            return new KafkaReader(id, params, config.topicName, consumerConfig);
+            return new KafkaReader(id, params, config.topicName, consumerConfig, config.pollTimeoutMS);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
