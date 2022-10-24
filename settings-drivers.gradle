@@ -54,5 +54,6 @@ include 'driver-activemq'
 include 'driver-h2'
 include 'driver-couchbase'
 include 'driver-memcached'
+include 'driver-dynamodb'
 /* include 'driver-sbktemplate' */
 /* above line is a signature */
