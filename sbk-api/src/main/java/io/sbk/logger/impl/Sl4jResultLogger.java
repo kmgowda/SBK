@@ -38,8 +38,10 @@ public class Sl4jResultLogger extends SystemLogger {
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes, seconds, bytes,
+                records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
         log.info(out.toString());
     }
 
@@ -56,8 +58,10 @@ public class Sl4jResultLogger extends SystemLogger {
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes, seconds, bytes,
+                records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
         log.info(out.toString());
     }
 

@@ -356,12 +356,18 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
 
     protected final void appendResultString(StringBuilder out, int writers, int maxWriters, int readers, int maxReaders,
-                                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-                                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMBPerSec,
-                                            long readRequestRecords, double readRequestRecordsPerSec, double seconds, long bytes,
+                                            long writeRequestBytes, double writeRequestMbPerSec,
+                                            long writeRequestRecords, double writeRequestRecordsPerSec,
+                                            long readRequestBytes, double readRequestMBPerSec,
+                                            long readRequestRecords, double readRequestRecordsPerSec,
+                                            long writeResponsePendingRecords, long writeResponsePendingBytes,
+                                            long readResponsePendingBytes, long readResponsePendingRecords,
+                                            long writeReadPendingRecords, long writeReadPendingBytes,
+                                            double seconds, long bytes,
                                             long records, double recsPerSec, double mbPerSec,
-                                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                                            double avgLatency, long minLatency, long maxLatency, long invalid,
+                                            long lowerDiscard, long higherDiscard, long slc1, long slc2,
+                                            long[] percentileValues) {
         appendWritesAndReaders(out, writers, maxWriters, readers, maxReaders);
         appendWriteAndReadRequests(out, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMBPerSec, readRequestRecords, readRequestRecordsPerSec);
@@ -424,8 +430,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes, seconds, bytes,
+                records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
     }
 
@@ -489,8 +497,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes, seconds, bytes,
+                records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
     }
 
