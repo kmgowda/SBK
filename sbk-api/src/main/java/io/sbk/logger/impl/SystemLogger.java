@@ -311,6 +311,20 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                  readRequestRecordsPerSec, readRequestMbPerSec));
     }
 
+    protected final void appendWriteAndReadRequestsPending(@NotNull StringBuilder out,
+                                                           long writeResponsePendingRecords,
+                                                           long writeResponsePendingBytes,
+                                                           long readResponsePendingBytes,
+                                                           long readResponsePendingRecords,
+                                                           long writeReadPendingRecords, long writeReadPendingBytes) {
+        out.append(String.format(" %8.2f write response pending MB, %11d write response pending records, ",
+                (writeResponsePendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeResponsePendingRecords));
+        out.append(String.format(" %8.2f read response pending MB, %11d read response pending records, ",
+                (readResponsePendingBytes * 1.0) / Bytes.BYTES_PER_MB, readResponsePendingRecords));
+        out.append(String.format(" %8.2f write read request pending MB, %11d write read request pending records, ",
+                (writeReadPendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeReadPendingRecords));
+    }
+
     private record ReadWriteRequests(long readRequestRecords, long readRequestBytes,
                                      long writeRequestRecords, long writeRequestBytes) {
     }
@@ -369,8 +383,11 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                                             long lowerDiscard, long higherDiscard, long slc1, long slc2,
                                             long[] percentileValues) {
         appendWritesAndReaders(out, writers, maxWriters, readers, maxReaders);
-        appendWriteAndReadRequests(out, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
-                readRequestBytes, readRequestMBPerSec, readRequestRecords, readRequestRecordsPerSec);
+        appendWriteAndReadRequests(out, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
+                writeRequestRecordsPerSec, readRequestBytes, readRequestMBPerSec, readRequestRecords,
+                readRequestRecordsPerSec);
+        appendWriteAndReadRequestsPending(out, writeResponsePendingRecords, writeResponsePendingBytes,
+                readResponsePendingBytes, readResponsePendingRecords, writeReadPendingRecords, writeReadPendingBytes);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append("\n");
