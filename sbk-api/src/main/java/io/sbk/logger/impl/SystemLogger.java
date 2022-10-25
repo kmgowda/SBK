@@ -293,7 +293,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,
                                           int readers, int maxReaders ) {
         out.append(String.format(" %5d writers, %5d readers, ", writers, readers));
-        out.append(String.format(" %5d max Writers, %5d max Readers, ", maxWriters, maxReaders));
+        out.append(String.format(" %5d max writers, %5d max readers, ", maxWriters, maxReaders));
     }
 
     protected final void appendWriteAndReadRequests(@NotNull StringBuilder out, long writeRequestBytes,
