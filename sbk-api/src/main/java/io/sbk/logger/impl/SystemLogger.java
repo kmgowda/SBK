@@ -50,6 +50,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected long writeRequestRecords;
     protected long readRequestBytes;
     protected long readRequestRecords;
+    protected long writeResponsePendingRecords;
+    protected long writeResponsePendingBytes;
+    protected long readResponsePendingRecords;
+    protected long readResponsePendingBytes;
     protected String storageName;
     protected String timeUnitFullText;
     protected ParsedOptions params;
@@ -84,6 +88,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.writeRequestRecords = 0;
         this.readRequestBytes = 0;
         this.readRequestRecords = 0;
+        this.writeResponsePendingRecords = 0;
+        this.writeResponsePendingBytes = 0;
+        this.readResponsePendingRecords = 0;
+        this.readResponsePendingBytes = 0;
         this.isRequestWrites = false;
         this.isRequestReads = false;
         this.readBytesArray = null;
@@ -368,20 +376,37 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                             long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, req);
+        final long writeReadPendingRecords;
+        final long writeReadPendingBytes;
+
         if (isRequestWrites) {
             writeRequestRecords += req.writeRequestRecords;
             writeRequestBytes += req.writeRequestBytes;
+            writeResponsePendingRecords += (req.writeRequestRecords - records);
+            writeResponsePendingBytes += (req.writeRequestBytes - bytes);
         }
         if (isRequestReads) {
             readRequestRecords += req.readRequestRecords;
             readRequestBytes += req.readRequestBytes;
+            readResponsePendingRecords += (req.readRequestRecords - records);
+            readResponsePendingBytes += (req.readRequestBytes - bytes);
+        }
+
+        if (isRequestWrites && isRequestReads) {
+            writeReadPendingRecords = writeRequestRecords - readRequestRecords;
+            writeReadPendingBytes = writeRequestBytes - readRequestBytes;
+        } else {
+            writeReadPendingRecords = 0;
+            writeReadPendingBytes = 0;
         }
 
         print(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
                 req.writeRequestBytes, perf.writeRequestsMbPerSec, req.writeRequestRecords, perf.writeRequestsPerSec,
                 req.readRequestBytes, perf.readRequestsMBPerSec, req.readRequestRecords, perf.readRequestsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
+                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
 
 
@@ -389,8 +414,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, double seconds, long bytes,
-                      long records, double recsPerSec, double mbPerSec,
+                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                      long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
+                      long writeReadPendingRecords, long writeReadPendingBytes,
+                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder(prefix);
@@ -408,29 +435,54 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         final ReadWriteRequests req = getReadAndWriteRequests();
+        final long writeReadPendingRecords;
+        final long writeReadPendingBytes;
+
         if (isRequestWrites) {
             writeRequestRecords += req.writeRequestRecords;
             writeRequestBytes += req.writeRequestBytes;
+            writeResponsePendingRecords = writeRequestRecords - records;
+            writeResponsePendingBytes = writeRequestBytes - bytes;
         }
         if (isRequestReads) {
             readRequestRecords += req.readRequestRecords;
             readRequestBytes += req.readRequestBytes;
+            readResponsePendingRecords = readRequestRecords - records;
+            readResponsePendingBytes = readRequestBytes - bytes;
         }
-        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequestRecords, readRequestBytes, writeRequestRecords, writeRequestBytes);
-        readRequestRecords = readRequestBytes = writeRequestRecords = writeRequestBytes = 0;
+        if (isRequestWrites && isRequestReads) {
+            writeReadPendingRecords = writeRequestRecords - readRequestRecords;
+            writeReadPendingBytes = writeRequestBytes - readRequestBytes;
+        } else {
+            writeReadPendingRecords = 0;
+            writeReadPendingBytes = 0;
+        }
+
+        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequestRecords, readRequestBytes,
+                writeRequestRecords, writeRequestBytes);
+
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, reqFinal);
         printTotal(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
-                reqFinal.writeRequestBytes, perf.writeRequestsMbPerSec, reqFinal.writeRequestRecords, perf.writeRequestsPerSec,
-                reqFinal.readRequestBytes, perf.readRequestsMBPerSec, reqFinal.readRequestRecords, perf.readRequestsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                reqFinal.writeRequestBytes, perf.writeRequestsMbPerSec, reqFinal.writeRequestRecords,
+                perf.writeRequestsPerSec, reqFinal.readRequestBytes, perf.readRequestsMBPerSec,
+                reqFinal.readRequestRecords, perf.readRequestsPerSec, writeResponsePendingRecords,
+                writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
+                writeReadPendingRecords, writeReadPendingBytes,
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
+                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+
+        readRequestRecords = readRequestBytes = writeRequestRecords = writeRequestBytes = 0;
+        writeResponsePendingRecords = writeResponsePendingBytes = 0;
+        readResponsePendingRecords = readResponsePendingBytes = 0;
     }
 
     public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
-                           long readRequestRecords, double readRequestRecordsPerSec, double seconds, long bytes,
-                           long records, double recsPerSec, double mbPerSec,
+                           long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
+                           long writeResponsePendingBytes, long readResponsePendingRecords,
+                           long readResponsePendingBytes, long writeReadPendingRecords, long writeReadPendingBytes,
+                           double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         StringBuilder out = new StringBuilder("Total " + prefix);

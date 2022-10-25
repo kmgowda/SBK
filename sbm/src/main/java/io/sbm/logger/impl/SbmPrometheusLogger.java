@@ -133,7 +133,9 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, double seconds, long bytes,
+                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                      long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
+                      long writeReadPendingRecords, long writeReadPendingBytes, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -147,13 +149,16 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
             prometheusServer.print(writers, maxWriters, readers, maxReaders,
                     writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                     readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
+                    writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                    readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
         if (csvEnable) {
             writeToCSV(SBM_PREFIX, REGULAR_PRINT, connections.get(), maxConnections.get(),
-                    writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
-                    writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
+                    writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                    writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
+                    readRequestRecords, readRequestsRecordsPerSec,
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                     lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
@@ -163,7 +168,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
-                           long readRequestRecords, double readRequestRecordsPerSec, double seconds, long bytes,
+                           long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords, long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes, long writeReadPendingRecords, long writeReadPendingBytes, double seconds, long bytes,
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -175,10 +180,11 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
         if (csvEnable) {
             writeToCSV(SBM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),
-                    writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
-                    writeRequestRecordsPerSec, readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,
-                    seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                    lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                    writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                    writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestsMbPerSec,
+                    readRequestRecords, readRequestRecordsPerSec, seconds, bytes, records, recsPerSec, mbPerSec,
+                    avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
+                    percentileValues);
         }
     }
 

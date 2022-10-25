@@ -75,11 +75,11 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
 
     @Override
     public final void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
-                      double writeRequestMbPerSec, long writeRequestRecords, double writeRequestRecordsPerSec,
-                      long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
-                      double readRequestsRecordsPerSec, double seconds, long bytes, long records, double recsPerSec,
-                      double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
-                      long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                            double writeRequestMbPerSec, long writeRequestRecords, double writeRequestRecordsPerSec,
+                            long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
+                            double readRequestsRecordsPerSec, long writeResponsePendingRecords, long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes, long writeReadPendingRecords, long writeReadPendingBytes, double seconds, long bytes, long records, double recsPerSec,
+                            double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
+                            long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         this.writers.set(writers);
         this.maxWriters.set(maxWriters);
         this.readers.set(readers);
