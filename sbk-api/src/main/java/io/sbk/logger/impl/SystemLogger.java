@@ -46,10 +46,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected final AtomicInteger readers;
     protected final AtomicInteger maxWriters;
     protected final AtomicInteger maxReaders;
-    protected long writeBytes;
-    protected long writeRequests;
-    protected long readBytes;
-    protected long readRequests;
+    protected long writeRequestBytes;
+    protected long writeRequestRecords;
+    protected long readRequestBytes;
+    protected long readRequestRecords;
     protected String storageName;
     protected String timeUnitFullText;
     protected ParsedOptions params;
@@ -80,10 +80,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.readers = new AtomicInteger(0);
         this.maxWriters = new AtomicInteger(0);
         this.maxReaders = new AtomicInteger(0);
-        this.writeBytes = 0;
-        this.writeRequests = 0;
-        this.readBytes = 0;
-        this.readRequests = 0;
+        this.writeRequestBytes = 0;
+        this.writeRequestRecords = 0;
+        this.readRequestBytes = 0;
+        this.readRequestRecords = 0;
         this.isRequestWrites = false;
         this.isRequestReads = false;
         this.readBytesArray = null;
@@ -369,12 +369,12 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, req);
         if (isRequestWrites) {
-            writeRequests += req.writeRequestRecords;
-            writeBytes += req.writeRequestBytes;
+            writeRequestRecords += req.writeRequestRecords;
+            writeRequestBytes += req.writeRequestBytes;
         }
         if (isRequestReads) {
-            readRequests += req.readRequestRecords;
-            readBytes += req.readRequestBytes;
+            readRequestRecords += req.readRequestRecords;
+            readRequestBytes += req.readRequestBytes;
         }
 
         print(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
@@ -409,15 +409,15 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         if (isRequestWrites) {
-            writeRequests += req.writeRequestRecords;
-            writeBytes += req.writeRequestBytes;
+            writeRequestRecords += req.writeRequestRecords;
+            writeRequestBytes += req.writeRequestBytes;
         }
         if (isRequestReads) {
-            readRequests += req.readRequestRecords;
-            readBytes += req.readRequestBytes;
+            readRequestRecords += req.readRequestRecords;
+            readRequestBytes += req.readRequestBytes;
         }
-        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequests, readBytes, writeRequests, writeBytes);
-        readRequests = readBytes = writeRequests = writeBytes = 0;
+        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequestRecords, readRequestBytes, writeRequestRecords, writeRequestBytes);
+        readRequestRecords = readRequestBytes = writeRequestRecords = writeRequestBytes = 0;
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, reqFinal);
         printTotal(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
                 reqFinal.writeRequestBytes, perf.writeRequestsMbPerSec, reqFinal.writeRequestRecords, perf.writeRequestsPerSec,
