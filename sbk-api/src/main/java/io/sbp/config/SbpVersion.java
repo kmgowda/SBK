@@ -11,6 +11,12 @@
 package io.sbp.config;
 
 final public class SbpVersion {
+    public final static int INVALID_VERSION = -1;
     public int major;
     public int minor;
+
+    public  SbpVersion() {
+        major = INVALID_VERSION;
+        minor = INVALID_VERSION;
+    }
 }

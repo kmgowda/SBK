@@ -22,6 +22,8 @@ import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecorder;
 import io.sbk.action.Action;
 import io.perl.exception.ExceptionHandler;
+import io.sbp.api.Sbp;
+import io.sbp.config.SbpVersion;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.LatenciesRecord;
@@ -30,6 +32,7 @@ import io.sbk.logger.SbmHostConfig;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
+import io.sbp.grpc.Version;
 import io.time.Time;
 
 import java.io.IOException;
@@ -131,6 +134,22 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         this.ramReadRequestRecordsArray = new AtomicLongArray(maxReaderRequestIds);
         channel = ManagedChannelBuilder.forTarget(sbmHostConfig.host + ":" + sbmHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
+        try {
+            Version sbmSbpVersion = blockingStub.getVersion(Empty.newBuilder().build());
+            SbpVersion version = Sbp.getVersion();
+            if (version.major != sbmSbpVersion.getMajor()) {
+                throw new IllegalArgumentException("SBM SBP Major Version: " + sbmSbpVersion.getMajor() +
+                        ", SBK SBP Major Version: " + version.major + " are not same!");
+            } else {
+                Printer.log.info("SBK SBP Version Major: " + version.major+", Minor: " + version.minor);
+                Printer.log.info("SBM SBP Version Major: " + sbmSbpVersion.getMajor() +
+                        ", Minor: "+sbmSbpVersion.getMinor());
+            }
+        } catch (StatusRuntimeException ex) {
+            ex.printStackTrace();
+            throw new IOException("GRPC get SBP Version failed");
+        }
+
         Config config;
         try {
             config = blockingStub.getConfig(Empty.newBuilder().build());
