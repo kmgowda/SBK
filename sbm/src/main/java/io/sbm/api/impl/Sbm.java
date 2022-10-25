@@ -23,6 +23,8 @@ import io.sbm.logger.impl.SbmPrometheusLogger;
 import io.sbm.params.RamParameterOptions;
 import io.sbm.params.impl.SbmParameters;
 import io.sbk.system.Printer;
+import io.sbp.api.Sbp;
+import io.sbp.config.SbpVersion;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -97,6 +99,7 @@ final public class Sbm {
         final Time time;
         final String version = Sbm.class.getPackage().getImplementationVersion();
         final String appName = Objects.requireNonNullElse(applicationName, SbmConfig.NAME);
+        final SbpVersion sbpVersion = Sbp.getVersion();
 
         Printer.log.info(IOUtils.toString(Sbm.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbmConfig.DESC);
@@ -104,6 +107,7 @@ final public class Sbm {
         Printer.log.info(SbmConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
