@@ -10,17 +10,22 @@
 
 package io.sbm.api.impl;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
+import io.sbp.api.Sbp;
+import io.sbp.config.SbpVersion;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.ServiceGrpc;
 import io.sbm.logger.CountConnections;
 import io.sbm.params.RamParameters;
 import io.sbm.api.SbmRegistry;
+import io.sbp.grpc.Version;
 import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -62,13 +67,52 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
+    public void getVersion(com.google.protobuf.Empty request,
+                           io.grpc.stub.StreamObserver<io.sbp.grpc.Version> responseObserver) {
+        try {
+            final SbpVersion version = Sbp.getVersion();
+            final Version.Builder outVersion = Version.newBuilder();
+            outVersion.setMajor(version.major);
+            outVersion.setMinor(version.minor);
+            responseObserver.onNext(outVersion.build());
+            responseObserver.onCompleted();
+        } catch (IOException e) {
+            Status retError = Status.UNAVAILABLE.
+                    withDescription("SBM, Could not get SBP version");
+            responseObserver.onError(retError.asRuntimeException());
+        }
+    }
+
+    @Override
+    public void isVersionSupported(io.sbp.grpc.Version request,
+                                   io.grpc.stub.StreamObserver<com.google.protobuf.BoolValue> responseObserver) {
+        try {
+            final SbpVersion version = Sbp.getVersion();
+            if (version.major == request.getMajor()) {
+                responseObserver.onNext(BoolValue.of(true));
+                responseObserver.onCompleted();
+            } else {
+                Status retError = Status.INVALID_ARGUMENT.
+                        withDescription("SBM, SBP Version mismatch, received Major version: "+request.getMajor() +
+                                ", Expected Major version: "+version.major);
+                responseObserver.onNext(BoolValue.of(false));
+                responseObserver.onError(retError.asRuntimeException());
+            }
+        } catch (IOException e) {
+            Status retError = Status.UNAVAILABLE.
+                    withDescription("SBM, Could not get SBP version");
+            responseObserver.onError(retError.asRuntimeException());
+        }
+    }
+
+    @Override
     public void getConfig(com.google.protobuf.Empty request,
                           io.grpc.stub.StreamObserver<io.sbp.grpc.Config> responseObserver) {
         if (connections.get() < params.getMaxConnections()) {
             responseObserver.onNext(config);
             responseObserver.onCompleted();
         } else {
-            Status retError = Status.RESOURCE_EXHAUSTED.withDescription("SBK GRPC Server, Maximum clients Exceeded");
+            Status retError = Status.RESOURCE_EXHAUSTED.withDescription("SBM, Maximum clients Exceeded");
             responseObserver.onError(retError.asRuntimeException());
         }
     }
