@@ -30,7 +30,7 @@ public class Sl4jResultLogger extends SystemLogger {
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                      long writeReadPendingRecords, long writeReadPendingBytes,
+                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -39,7 +39,7 @@ public class Sl4jResultLogger extends SystemLogger {
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes, seconds, bytes,
+                readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes, seconds, bytes,
                 records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         log.info(out.toString());

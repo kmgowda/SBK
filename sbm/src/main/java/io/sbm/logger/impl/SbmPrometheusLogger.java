@@ -139,7 +139,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                      long writeReadPendingRecords, long writeReadPendingBytes, double seconds, long bytes,
+                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -147,7 +147,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
+                readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
@@ -156,7 +156,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                     writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                     readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                     writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                    readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
+                    readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }

@@ -103,7 +103,7 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
                             long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
                             double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                             long writeResponsePendingBytes, long readResponsePendingRecords,
-                            long readResponsePendingBytes, long writeReadPendingRecords, long writeReadPendingBytes,
+                            long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                             double seconds, long bytes, long records, double recsPerSec,
                             double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
                             long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -123,8 +123,8 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.writeResponsePendingBytes.set(writeResponsePendingBytes);
         this.readResponsePendingRecords.set(readResponsePendingRecords);
         this.readResponsePendingBytes.set(readResponsePendingBytes);
-        this.writeReadPendingRecords.set(writeReadPendingRecords);
-        this.writeReadPendingBytes.set(writeReadPendingBytes);
+        this.writeReadPendingRecords.set(writeReadRequestPendingRecords);
+        this.writeReadPendingBytes.set(writeReadRequestPendingBytes);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                                 higherDiscard, slc1, slc2, percentileValues);
     }

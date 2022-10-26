@@ -188,13 +188,13 @@ public class CSVLogger extends SystemLogger {
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords, long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes, long writeReadPendingRecords, long writeReadPendingBytes, double seconds, long bytes,
+                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords, long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
                 writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
-                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
+                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         if (csvEnable) {
             writeToCSV(Config.NAME, REGULAR_PRINT, 0, 0,
