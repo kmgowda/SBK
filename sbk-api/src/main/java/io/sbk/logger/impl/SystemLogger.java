@@ -316,13 +316,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                                                            long writeResponsePendingBytes,
                                                            long readResponsePendingBytes,
                                                            long readResponsePendingRecords,
-                                                           long writeReadPendingRecords, long writeReadPendingBytes) {
+                                                           long writeReadRequestPendingRecords,
+                                                           long writeReadRequestPendingBytes) {
         out.append(String.format(" %8.2f write response pending MB, %11d write response pending records, ",
                 (writeResponsePendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeResponsePendingRecords));
         out.append(String.format(" %8.2f read response pending MB, %11d read response pending records, ",
                 (readResponsePendingBytes * 1.0) / Bytes.BYTES_PER_MB, readResponsePendingRecords));
         out.append(String.format(" %8.2f write read request pending MB, %11d write read request pending records, ",
-                (writeReadPendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeReadPendingRecords));
+                (writeReadRequestPendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeReadRequestPendingRecords));
     }
 
     private record ReadWriteRequests(long readRequestRecords, long readRequestBytes,
@@ -376,7 +377,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                                             long readRequestRecords, double readRequestRecordsPerSec,
                                             long writeResponsePendingRecords, long writeResponsePendingBytes,
                                             long readResponsePendingBytes, long readResponsePendingRecords,
-                                            long writeReadPendingRecords, long writeReadPendingBytes,
+                                            long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                                             double seconds, long bytes,
                                             long records, double recsPerSec, double mbPerSec,
                                             double avgLatency, long minLatency, long maxLatency, long invalid,
@@ -387,7 +388,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 writeRequestRecordsPerSec, readRequestBytes, readRequestMBPerSec, readRequestRecords,
                 readRequestRecordsPerSec);
         appendWriteAndReadRequestsPending(out, writeResponsePendingRecords, writeResponsePendingBytes,
-                readResponsePendingBytes, readResponsePendingRecords, writeReadPendingRecords, writeReadPendingBytes);
+                readResponsePendingBytes, readResponsePendingRecords, writeReadRequestPendingRecords,
+                writeReadRequestPendingBytes);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         out.append("\n");
@@ -506,7 +508,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                            long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                            long writeResponsePendingBytes, long readResponsePendingRecords,
-                           long readResponsePendingBytes, long writeReadPendingRecords, long writeReadPendingBytes,
+                           long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                            double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -515,7 +517,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes, seconds, bytes,
+                readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes, seconds, bytes,
                 records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
