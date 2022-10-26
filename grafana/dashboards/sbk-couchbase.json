@@ -629,7 +629,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Couchbase\"}",
           "refId": "A"
         },
         {
@@ -638,14 +638,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Nats\", action=\"Writing\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Couchbase\", action=\"Writing\"}",
           "hide": false,
           "legendFormat": "",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write Throughput MB/s",
+      "title": "SBK Couchbase Write Throughput MB/s",
       "type": "timeseries"
     },
     {
@@ -733,7 +733,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Couchbase\"}",
           "refId": "A"
         },
         {
@@ -742,14 +742,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Nats\", action=\"Writing\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Couchbase\", action=\"Writing\"}",
           "hide": false,
           "legendFormat": "",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write Throughput MB/s",
+      "title": "SBK Couchbase Write Throughput MB/s",
       "type": "timeseries"
     },
     {
@@ -835,7 +835,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_AvgLatency{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_AvgLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -845,13 +845,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_MaxLatency{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_MaxLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Couchbase Write Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -938,7 +938,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_5{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_5{class=\"Couchbase\"}",
           "hide": false,
           "refId": "V"
         },
@@ -947,7 +947,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_10{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_10{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -957,7 +957,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_20{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_20{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -967,7 +967,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_25{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -977,7 +977,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_30{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_30{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -987,7 +987,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_40{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_40{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -997,13 +997,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Nats Write Percentiles (Nanoseconds) 1",
+      "title": "SBK Couchbase Write Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -1104,11 +1104,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Couchbase\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Throughput MB/s",
+      "title": "SBK Couchbase Write Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -1195,7 +1195,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -1205,7 +1205,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_60{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_60{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -1215,7 +1215,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_70{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_70{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -1225,7 +1225,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_75{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -1235,7 +1235,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_80{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_80{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -1245,7 +1245,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_90{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_90{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -1255,7 +1255,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_92_5{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_92_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -1265,7 +1265,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_95{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -1275,7 +1275,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_97_5{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_97_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -1285,7 +1285,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -1295,7 +1295,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_25{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_99_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -1305,7 +1305,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_5{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_99_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -1315,7 +1315,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_75{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_99_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -1325,7 +1325,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_9{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_99_9{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -1335,7 +1335,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_95{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_99_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -1345,13 +1345,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_99{class=\"Nats\"}",
+          "expr": "SBK_Writing_ns_99_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Nats Write Percentiles (Nanoseconds) 2",
+      "title": "SBK Couchbase Write Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -1432,11 +1432,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Records{class=\"Nats\", action=\"Writing\"}",
+          "expr": "SBK_Write_Response_Pending_Records{class=\"Couchbase\", action=\"Writing\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Response Pending Records",
+      "title": "SBK Couchbase Write Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -1517,11 +1517,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Nats\", action=\"Writing\"}",
+          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Couchbase\", action=\"Writing\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Response Pending Bytes",
+      "title": "SBK Couchbase Write Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -1607,7 +1607,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_SLC_1{class=\"Nats\"}",
+          "expr": "SBK_Writing_SLC_1{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -1617,13 +1617,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_SLC_2{class=\"Nats\"}",
+          "expr": "SBK_Writing_SLC_2{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write  Sliding Latency Coverage (SLC)",
+      "title": "SBK Couchbase Write  Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -1694,7 +1694,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Writing_Bytes_total{class=\"Nats\"}",
+          "expr": "SBK_Writing_Bytes_total{class=\"Couchbase\"}",
           "legendFormat": "Write Bytes",
           "range": true,
           "refId": "A"
@@ -1705,14 +1705,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_total{class=\"Nats\", action=\"Writing\"}",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Couchbase\", action=\"Writing\"}",
           "hide": false,
           "legendFormat": "Write Request Bytes",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write Bytes Total",
+      "title": "SBK Couchbase Write Bytes Total",
       "type": "stat"
     },
     {
@@ -1768,7 +1768,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -1779,7 +1779,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -1789,13 +1789,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write Discarded Latencies",
+      "title": "SBK Couchbase Write Discarded Latencies",
       "type": "stat"
     },
     {
@@ -1899,7 +1899,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Reading_MBPerSec{class=\"Couchbase\"}",
           "refId": "A"
         },
         {
@@ -1908,14 +1908,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_MBPerSec{class=\"Nats\", action=\"Reading\"}",
+          "expr": "SBK_Read_Request_MBPerSec{class=\"Couchbase\", action=\"Reading\"}",
           "hide": false,
           "legendFormat": "",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Read Throughput MB/s",
+      "title": "SBK Couchbase Read Throughput MB/s",
       "type": "timeseries"
     },
     {
@@ -2002,7 +2002,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_RecordsPerSec{class=\"Nats\"}",
+          "expr": "SBK_Reading_RecordsPerSec{class=\"Couchbase\"}",
           "refId": "A"
         },
         {
@@ -2010,12 +2010,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Nats\", action=\"Reading\"}",
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Couchbase\", action=\"Reading\"}",
           "hide": false,
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Read Records/Sec",
+      "title": "SBK Couchbase Read Records/Sec",
       "type": "timeseries"
     },
     {
@@ -2101,7 +2101,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_AvgLatency{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_AvgLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -2111,13 +2111,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_MaxLatency{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_MaxLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Couchbase Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -2204,7 +2204,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_5{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_5{class=\"Couchbase\"}",
           "hide": false,
           "refId": "V"
         },
@@ -2213,7 +2213,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_10{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_10{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -2223,7 +2223,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_20{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_20{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -2233,7 +2233,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_25{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -2243,7 +2243,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_30{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_30{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -2253,7 +2253,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_40{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_40{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -2263,13 +2263,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Nats Read Percentiles (Nanoseconds) 1",
+      "title": "SBK Couchbase Read Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -2370,11 +2370,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Reading_MBPerSec{class=\"Couchbase\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Throughput MB/s",
+      "title": "SBK Couchbase Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -2461,7 +2461,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -2471,7 +2471,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_60{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_60{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -2481,7 +2481,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_70{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_70{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -2491,7 +2491,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_75{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -2501,7 +2501,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_80{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_80{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -2511,7 +2511,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_90{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_90{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -2521,7 +2521,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_92_25{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_92_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -2531,7 +2531,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_95{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -2541,7 +2541,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_97_5{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_97_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -2551,7 +2551,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -2561,7 +2561,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_25{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_99_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -2571,7 +2571,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_5{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_99_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -2581,7 +2581,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_75{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_99_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -2591,7 +2591,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_9{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_99_9{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -2601,7 +2601,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_95{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_99_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -2611,13 +2611,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_99{class=\"Nats\"}",
+          "expr": "SBK_Reading_ns_99_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Nats Read Percentiles (Nanoseconds) 2",
+      "title": "SBK Couchbase Read Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -2698,11 +2698,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Records{class=\"Nats\", action=\"Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Records{class=\"Couchbase\", action=\"Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Response Pending Records",
+      "title": "SBK Couchbase Read Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -2783,11 +2783,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Nats\", action=\"Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Couchbase\", action=\"Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Response Pending Bytes",
+      "title": "SBK Couchbase Read Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -2868,11 +2868,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Nats\", action=\"Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Couchbase\", action=\"Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Response Pending Bytes",
+      "title": "SBK Couchbase Read Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -2943,7 +2943,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Reading_Bytes_total{class=\"Nats\"}",
+          "expr": "SBK_Reading_Bytes_total{class=\"Couchbase\"}",
           "legendFormat": "Read Bytes",
           "range": true,
           "refId": "A"
@@ -2954,14 +2954,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_Bytes_total{class=\"Nats\", action=\"Reading\"}",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Couchbase\", action=\"Reading\"}",
           "hide": false,
           "legendFormat": "Read Request Bytes",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Read Bytes Total",
+      "title": "SBK Couchbase Read Bytes Total",
       "type": "stat"
     },
     {
@@ -3018,7 +3018,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -3029,7 +3029,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -3039,13 +3039,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Read Discarded Latencies",
+      "title": "SBK Couchbase Read Discarded Latencies",
       "type": "stat"
     },
     {
@@ -3148,7 +3148,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_MBPerSec{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3158,7 +3158,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Couchbase\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -3167,12 +3167,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_Bytes_MBPerSec{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Request_Bytes_MBPerSec{class=\"Couchbase\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write-Read Throughput MB/s ",
+      "title": "SBK Couchbase Write-Read Throughput MB/s ",
       "type": "timeseries"
     },
     {
@@ -3258,7 +3258,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_RecordsPerSec{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_RecordsPerSec{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3268,7 +3268,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Couchbase\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -3277,12 +3277,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Couchbase\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write-Read Records/Sec",
+      "title": "SBK Couchbase Write-Read Records/Sec",
       "type": "timeseries"
     },
     {
@@ -3367,7 +3367,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_AvgLatency{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_AvgLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -3377,13 +3377,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_MaxLatency{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_MaxLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write-Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Couchbase Write-Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -3467,7 +3467,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_5{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_5{class=\"Couchbase\"}",
           "hide": false,
           "refId": "V"
         },
@@ -3476,7 +3476,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_10{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_10{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3486,7 +3486,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_20{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_20{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -3496,7 +3496,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_25{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -3506,7 +3506,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_30{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_30{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -3516,7 +3516,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_40{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_40{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -3526,13 +3526,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Nats Write-Read Percentiles (Nanoseconds) 1",
+      "title": "SBK Couchbase Write-Read Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -3633,13 +3633,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_MBPerSec{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write-Read Throughput MB/s",
+      "title": "SBK Couchbase Write-Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -3723,7 +3723,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -3733,7 +3733,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_60{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_60{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -3743,7 +3743,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_70{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_70{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -3753,7 +3753,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_75{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -3763,7 +3763,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_80{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_80{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -3773,7 +3773,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_90{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_90{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -3783,7 +3783,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_92_5{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_92_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -3793,7 +3793,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_95{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -3803,7 +3803,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_97_5{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_97_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -3813,7 +3813,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -3823,7 +3823,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_25{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_99_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -3833,7 +3833,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_5{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_99_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -3843,7 +3843,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_75{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_99_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -3853,7 +3853,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_9{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_99_9{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -3863,7 +3863,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_95{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_99_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -3873,13 +3873,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_99{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_ns_99_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Nats Write-Read Percentiles (Nanoseconds) 2",
+      "title": "SBK Couchbase Write-Read Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -3960,11 +3960,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Records{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Response_Pending_Records{class=\"Couchbase\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Response Pending Records",
+      "title": "SBK Couchbase Write Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -4045,11 +4045,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Couchbase\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Response Pending Bytes",
+      "title": "SBK Couchbase Write Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -4130,11 +4130,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Records{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Records{class=\"Couchbase\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Response Pending Records",
+      "title": "SBK Couchbase Read Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -4215,11 +4215,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Couchbase\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Response Pending Bytes",
+      "title": "SBK Couchbase Read Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -4300,11 +4300,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Couchbase\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Read Request Pending Records",
+      "title": "SBK Couchbase Write Read Request Pending Records",
       "type": "timeseries"
     },
     {
@@ -4385,11 +4385,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Couchbase\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Read Request Pending Bytes",
+      "title": "SBK Couchbase Write Read Request Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -4475,7 +4475,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_SLC_1{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_SLC_1{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -4485,13 +4485,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_SLC_2{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_SLC_2{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write-Read Sliding Latency Coverage (SLC)",
+      "title": "SBK Couchbase Write-Read Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -4548,7 +4548,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Lower",
           "refId": "A"
@@ -4558,7 +4558,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -4568,13 +4568,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_InvalidLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_InvalidLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write-Read  Discarded Latencies",
+      "title": "SBK Couchbase Write-Read  Discarded Latencies",
       "type": "stat"
     },
     {
@@ -4645,7 +4645,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Reading_Bytes_total{class=\"Nats\"}",
+          "expr": "SBK_Write_Reading_Bytes_total{class=\"Couchbase\"}",
           "legendFormat": "Write Reading Bytes",
           "range": true,
           "refId": "A"
@@ -4656,7 +4656,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_Bytes_total{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Couchbase\", action=\"Write_Reading\"}",
           "hide": false,
           "legendFormat": "Read Request Bytes",
           "range": true,
@@ -4668,14 +4668,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_total{class=\"Nats\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Couchbase\", action=\"Write_Reading\"}",
           "hide": false,
           "legendFormat": "Write Request Bytes",
           "range": true,
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write Read Bytes Total",
+      "title": "SBK Couchbase Write Read Bytes Total",
       "type": "stat"
     },
     {
@@ -4779,7 +4779,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4789,7 +4789,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_MBPerSec{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Request_MBPerSec{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -4798,12 +4798,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write-Only Read Throughput MB/s ",
+      "title": "SBK Couchbase Write-Only Read Throughput MB/s ",
       "type": "timeseries"
     },
     {
@@ -4890,7 +4890,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_RecordsPerSec{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_RecordsPerSec{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4900,7 +4900,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Nats\",action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Couchbase\",action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -4909,12 +4909,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write-Only Read Records/Sec",
+      "title": "SBK Couchbase Write-Only Read Records/Sec",
       "type": "timeseries"
     },
     {
@@ -5000,7 +5000,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_AvgLatency{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_AvgLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -5010,13 +5010,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_OnlyReading_ns_MaxLatency{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_MaxLatency{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write-Only Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Couchbase Write-Only Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -5102,7 +5102,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_OnlyReading_ns_5{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_5{class=\"Couchbase\"}",
           "hide": false,
           "refId": "V"
         },
@@ -5112,7 +5112,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_10{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_10{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5123,7 +5123,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_20{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_20{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -5134,7 +5134,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_25{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -5145,7 +5145,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_30{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_30{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -5156,7 +5156,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_40{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_40{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -5167,13 +5167,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Nats Write-Only Read Percentiles (Nanoseconds) 1",
+      "title": "SBK Couchbase Write-Only Read Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -5275,13 +5275,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write-Only Read Throughput MB/s",
+      "title": "SBK Couchbase Write-Only Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -5368,7 +5368,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -5379,7 +5379,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_60{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_60{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -5390,7 +5390,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_70{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_70{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -5401,7 +5401,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_75{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -5412,7 +5412,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_80{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_80{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -5423,7 +5423,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_90{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_90{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -5434,7 +5434,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_92_5{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_92_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -5445,7 +5445,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_95{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -5456,7 +5456,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_97_5{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_97_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -5467,7 +5467,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -5478,7 +5478,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_25{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_25{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -5489,7 +5489,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_5{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_5{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -5500,7 +5500,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_75{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_75{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -5511,7 +5511,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_9{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_9{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -5522,7 +5522,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_95{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_95{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -5533,13 +5533,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_99{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_99{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Nats Write-Only Read Percentiles (Nanoseconds) 2",
+      "title": "SBK Couchbase Write-Only Read Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -5620,11 +5620,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Records{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Response_Pending_Records{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Response Pending Records",
+      "title": "SBK Couchbase Write Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -5705,11 +5705,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Response Pending Bytes",
+      "title": "SBK Couchbase Write Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -5790,11 +5790,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Records{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Response_Pending_Records{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Response Pending Records",
+      "title": "SBK Couchbase Read Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -5875,11 +5875,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Read Response Pending Bytes",
+      "title": "SBK Couchbase Read Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -5960,11 +5960,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Read Request Pending Records",
+      "title": "SBK Couchbase Write Read Request Pending Records",
       "type": "timeseries"
     },
     {
@@ -6045,11 +6045,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Nats Write Read Request Pending Bytes",
+      "title": "SBK Couchbase Write Read Request Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -6136,7 +6136,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_SLC_1{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_SLC_1{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -6147,13 +6147,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_SLC_2{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_SLC_2{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Nats Write-Only Read Sliding Latency Coverage (SLC)",
+      "title": "SBK Couchbase Write-Only Read Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -6224,7 +6224,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Couchbase\"}",
           "legendFormat": "Write Only Reading Bytes",
           "range": true,
           "refId": "A"
@@ -6235,7 +6235,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_Bytes_total{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "legendFormat": "Read Request Bytes",
           "range": true,
@@ -6247,14 +6247,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_total{class=\"Nats\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Couchbase\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "legendFormat": "Write Request Bytes",
           "range": true,
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write-Only Read Bytes Total",
+      "title": "SBK Couchbase Write-Only Read Bytes Total",
       "type": "stat"
     },
     {
@@ -6312,7 +6312,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_LowerDiscardedLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_LowerDiscardedLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Lower",
           "refId": "A"
@@ -6323,7 +6323,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_HigherDiscardLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_HigherDiscardLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -6334,13 +6334,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_InvalidLatencyRecords_total{class=\"Nats\"}",
+          "expr": "SBK_Write_OnlyReading_InvalidLatencyRecords_total{class=\"Couchbase\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Nats Write-Only Read  Discarded Latencies",
+      "title": "SBK Couchbase Write-Only Read  Discarded Latencies",
       "type": "stat"
     }
   ],
@@ -6379,7 +6379,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SBK Nats Dashboard",
+  "title": "SBK Couchbase Dashboard",
   "version": 1,
   "weekStart": ""
 }
