@@ -2797,49 +2797,51 @@
       },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "always",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
           "links": [],
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 500
+              },
+              {
+                "color": "#EF843C",
+                "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
               }
             ]
           },
-          "unit": "decbytes"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -2849,17 +2851,20 @@
         "x": 16,
         "y": 82
       },
-      "id": 135,
+      "id": 145,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
+        "textMode": "auto"
       },
       "pluginVersion": "9.0.6",
       "targets": [
@@ -2868,12 +2873,24 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Redis\", action=\"Reading\"}",
+          "expr": "SBK_Reading_SLC_1{class=\"Redis\"}",
+          "interval": "",
+          "legendFormat": "SLC 1",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Reading_SLC_2{class=\"Redis\"}",
+          "interval": "",
+          "legendFormat": "SLC 2",
+          "refId": "B"
         }
       ],
-      "title": "SBK Redis Read Response Pending Bytes",
-      "type": "timeseries"
+      "title": "SBK Redis Read  Sliding Latency Coverage (SLC)",
+      "type": "stat"
     },
     {
       "datasource": {
