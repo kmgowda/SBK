@@ -1,8 +1,8 @@
-io.sbk.config
-io.sbk.logger
-io.sbk.logger.impl
-io.sbk.main
-io.sbk.params
-io.sbk.params.impl
-io.sbk.ram
-io.sbk.ram.impl
+io.sbm.api
+io.sbm.api.impl
+io.sbm.config
+io.sbm.logger
+io.sbm.logger.impl
+io.sbm.main
+io.sbm.params
+io.sbm.params.impl

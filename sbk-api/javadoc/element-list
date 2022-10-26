@@ -5,7 +5,6 @@ io.sbk.config
 io.sbk.data
 io.sbk.data.impl
 io.sbk.exception
-io.sbk.grpc
 io.sbk.logger
 io.sbk.logger.impl
 io.sbk.main
@@ -13,3 +12,4 @@ io.sbk.params
 io.sbk.params.impl
 io.sbk.system
 io.sbk.utils
+io.sbp.grpc
