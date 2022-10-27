@@ -72,6 +72,8 @@ public class Kafka implements Storage<byte[]> {
         config.replica = Short.parseShort(params.getOptionValue("replica", Integer.toString(config.replica)));
         config.sync = Short.parseShort(params.getOptionValue("sync", Integer.toString(config.sync)));
         config.create = Boolean.parseBoolean(params.getOptionValue("create", Boolean.toString(config.create)));
+        producerConfig = createProducerConfig(params);
+        consumerConfig = createConsumerConfig(params);
     }
 
     private Properties createProducerConfig(ParameterOptions params) {
@@ -98,7 +100,7 @@ public class Kafka implements Storage<byte[]> {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.brokerUri);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Integer.MAX_VALUE);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, config.maxPollRecords);
         // props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, params.getTimeout());
         // Enabling the consumer to READ_COMMITTED is must, to compare between Kafka and Pravega.
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG,
@@ -117,8 +119,7 @@ public class Kafka implements Storage<byte[]> {
 
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
-        producerConfig = createProducerConfig(params);
-        consumerConfig = createConsumerConfig(params);
+
         if (params.getWritersCount() > 0 && config.create) {
             topicHandler = new KafkaTopicHandler(config);
             topicHandler.createTopic(true);

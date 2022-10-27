@@ -176,9 +176,9 @@ public class CSVLogger extends SystemLogger {
                                 + ",%5d,%5d,%5d,%5d"
                                 + ",%11.1f,%16d,%11.1f,%8.2f"
                                 + ",%11.1f,%16d,%11.1f,%8.2f"
-                                + ",%8.2f,%11d"
-                                + ",%8.2f,%11d"
-                                + ",%8.2f,%11d"
+                                + ",%8.2f,%13d"
+                                + ",%8.2f,%13d"
+                                + ",%8.2f,%13d"
                                 + ",%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%7d"
                                 + ",%8d,%8d,%8d,%2d,%2d",
                         ++csvRowCounter, header, type, connections, maxConnections,

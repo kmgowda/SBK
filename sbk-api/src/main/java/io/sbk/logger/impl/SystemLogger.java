@@ -318,11 +318,11 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                                                            long readResponsePendingRecords,
                                                            long writeReadRequestPendingRecords,
                                                            long writeReadRequestPendingBytes) {
-        out.append(String.format(" %8.2f write response pending MB, %11d write response pending records, ",
+        out.append(String.format(" %8.2f write response pending MB, %13d write response pending records, ",
                 (writeResponsePendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeResponsePendingRecords));
-        out.append(String.format(" %8.2f read response pending MB, %11d read response pending records, ",
+        out.append(String.format(" %8.2f read response pending MB, %13d read response pending records, ",
                 (readResponsePendingBytes * 1.0) / Bytes.BYTES_PER_MB, readResponsePendingRecords));
-        out.append(String.format(" %8.2f write read request pending MB, %11d write read request pending records, ",
+        out.append(String.format(" %8.2f write read request pending MB, %13d write read request pending records, ",
                 (writeReadRequestPendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeReadRequestPendingRecords));
     }
 
