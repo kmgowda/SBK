@@ -142,13 +142,14 @@ class SbkCharts:
     def get_throughput_records_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "Records/Sec")
 
-
     def get_throughput_write_request_records_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "WriteRequestRecords/Sec")
 
-
     def get_throughput_read_request_records_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "ReadRequestRecords/Sec")
+
+    def get_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "Records")
 
     def get_mb_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "MB")
@@ -159,8 +160,23 @@ class SbkCharts:
     def get_write_response_pending_mb_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "WriteResponsePendingMB")
 
+    def get_write_response_pending_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteResponsePendingRecords")
+
     def get_read_request_mb_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "ReadRequestMB")
+
+    def get_read_response_pending_mb_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadResponsePendingMB")
+
+    def get_read_response_pending_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadResponsePendingRecords")
+
+    def get_write_read_request_pending_mb_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteReadRequestPendingMB")
+
+    def get_write_read_request_pending_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteReadRequestPendingRecords")
 
     def get_avg_latency_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "AvgLatency")
