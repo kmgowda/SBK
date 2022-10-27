@@ -18,6 +18,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.system.Printer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.IsolationLevel;
@@ -66,14 +67,19 @@ public class Kafka implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
+        boolean rq = Boolean.parseBoolean(params.getOptionValue("rq", "false"));
+        if (rq) {
+            String errMsg = "For Kafka Readers, the reads are based on polling, so benchmarking read requests are " +
+                    "disabled, remove option '-rq'";
+            Printer.log.error(errMsg);
+            throw new IllegalArgumentException(errMsg);
+        }
         config.topicName = params.getOptionValue("topic", config.topicName);
         config.brokerUri = params.getOptionValue("broker", config.brokerUri);
         config.partitions = Integer.parseInt(params.getOptionValue("partitions", Integer.toString(config.partitions)));
         config.replica = Short.parseShort(params.getOptionValue("replica", Integer.toString(config.replica)));
         config.sync = Short.parseShort(params.getOptionValue("sync", Integer.toString(config.sync)));
         config.create = Boolean.parseBoolean(params.getOptionValue("create", Boolean.toString(config.create)));
-        producerConfig = createProducerConfig(params);
-        consumerConfig = createConsumerConfig(params);
     }
 
     private Properties createProducerConfig(ParameterOptions params) {
@@ -119,7 +125,8 @@ public class Kafka implements Storage<byte[]> {
 
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
-
+        producerConfig = createProducerConfig(params);
+        consumerConfig = createConsumerConfig(params);
         if (params.getWritersCount() > 0 && config.create) {
             topicHandler = new KafkaTopicHandler(config);
             topicHandler.createTopic(true);

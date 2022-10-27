@@ -43,7 +43,7 @@ public class KafkaReader implements Reader<byte[]> {
         this.timeoutDuration = Duration.ofMillis(timeoutMS);
         int maxPollRecords =  Integer.MAX_VALUE;
         try {
-            maxPollRecords = Integer.parseInt(consumerProps.getProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG));
+            maxPollRecords = (int) consumerProps.get(ConsumerConfig.MAX_POLL_RECORDS_CONFIG);
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
             Printer.log.warn("Max Poll Records set to "+ maxPollRecords);
