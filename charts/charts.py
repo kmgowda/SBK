@@ -157,11 +157,17 @@ class SbkCharts:
     def get_write_request_mb_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "WriteRequestMB")
 
+    def get_write_request_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteRequestRecords")
+
     def get_write_response_pending_mb_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "WriteResponsePendingMB")
 
     def get_write_response_pending_records_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "WriteResponsePendingRecords")
+
+    def get_read_request_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadRequestRecords")
 
     def get_read_request_mb_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "ReadRequestMB")
@@ -261,3 +267,4 @@ class SbkCharts:
         self.create_latency_graphs(r_ws, r_prefix)
         self.create_total_latency_percentile_graphs(t_ws, t_prefix)
         self.wb.save(self.file)
+        print("file : %s updated with graphs" % self.file)
