@@ -629,7 +629,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Dynamodb\"}",
           "refId": "A"
         },
         {
@@ -638,14 +638,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Asyncfile\", action=\"Writing\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Dynamodb\", action=\"Writing\"}",
           "hide": false,
           "legendFormat": "",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write Throughput MB/s",
+      "title": "SBK Dynamodb Write Throughput MB/s",
       "type": "timeseries"
     },
     {
@@ -733,7 +733,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Dynamodb\"}",
           "refId": "A"
         },
         {
@@ -742,14 +742,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Asyncfile\", action=\"Writing\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Dynamodb\", action=\"Writing\"}",
           "hide": false,
           "legendFormat": "",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write Throughput MB/s",
+      "title": "SBK Dynamodb Write Throughput MB/s",
       "type": "timeseries"
     },
     {
@@ -835,7 +835,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_AvgLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_AvgLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -845,13 +845,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_MaxLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_MaxLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Dynamodb Write Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -938,7 +938,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_5{class=\"Dynamodb\"}",
           "hide": false,
           "refId": "V"
         },
@@ -947,7 +947,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_10{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_10{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -957,7 +957,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_20{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_20{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -967,7 +967,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -977,7 +977,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_30{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_30{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -987,7 +987,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_40{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_40{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -997,13 +997,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Asyncfile Write Percentiles (Nanoseconds) 1",
+      "title": "SBK Dynamodb Write Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -1104,11 +1104,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_MBPerSec{class=\"Dynamodb\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Throughput MB/s",
+      "title": "SBK Dynamodb Write Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -1195,7 +1195,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -1205,7 +1205,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_60{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_60{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -1215,7 +1215,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_70{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_70{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -1225,7 +1225,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -1235,7 +1235,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_80{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_80{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -1245,7 +1245,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_90{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_90{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -1255,7 +1255,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_92_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_92_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -1265,7 +1265,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -1275,7 +1275,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_97_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_97_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -1285,7 +1285,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -1295,7 +1295,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_99_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -1305,7 +1305,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_99_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -1315,7 +1315,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_99_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -1325,7 +1325,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_9{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_99_9{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -1335,7 +1335,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_99_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -1345,13 +1345,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_ns_99_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_ns_99_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Asyncfile Write Percentiles (Nanoseconds) 2",
+      "title": "SBK Dynamodb Write Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -1432,11 +1432,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Records{class=\"Asyncfile\", action=\"Writing\"}",
+          "expr": "SBK_Write_Response_Pending_Records{class=\"Dynamodb\", action=\"Writing\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Response Pending Records",
+      "title": "SBK Dynamodb Write Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -1517,11 +1517,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Asyncfile\", action=\"Writing\"}",
+          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Dynamodb\", action=\"Writing\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Response Pending Bytes",
+      "title": "SBK Dynamodb Write Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -1607,7 +1607,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_SLC_1{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_SLC_1{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -1617,13 +1617,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_SLC_2{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_SLC_2{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write  Sliding Latency Coverage (SLC)",
+      "title": "SBK Dynamodb Write  Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -1694,7 +1694,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Writing_Bytes_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Writing_Bytes_total{class=\"Dynamodb\"}",
           "legendFormat": "Write Bytes",
           "range": true,
           "refId": "A"
@@ -1705,14 +1705,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_total{class=\"Asyncfile\", action=\"Writing\"}",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Dynamodb\", action=\"Writing\"}",
           "hide": false,
           "legendFormat": "Write Request Bytes",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write Bytes Total",
+      "title": "SBK Dynamodb Write Bytes Total",
       "type": "stat"
     },
     {
@@ -1768,7 +1768,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -1779,7 +1779,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -1789,13 +1789,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write Discarded Latencies",
+      "title": "SBK Dynamodb Write Discarded Latencies",
       "type": "stat"
     },
     {
@@ -1899,7 +1899,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_MBPerSec{class=\"Dynamodb\"}",
           "refId": "A"
         },
         {
@@ -1908,14 +1908,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_MBPerSec{class=\"Asyncfile\", action=\"Reading\"}",
+          "expr": "SBK_Read_Request_MBPerSec{class=\"Dynamodb\", action=\"Reading\"}",
           "hide": false,
           "legendFormat": "",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Read Throughput MB/s",
+      "title": "SBK Dynamodb Read Throughput MB/s",
       "type": "timeseries"
     },
     {
@@ -2002,7 +2002,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_RecordsPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_RecordsPerSec{class=\"Dynamodb\"}",
           "refId": "A"
         },
         {
@@ -2010,12 +2010,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Asyncfile\", action=\"Reading\"}",
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Dynamodb\", action=\"Reading\"}",
           "hide": false,
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Read Records/Sec",
+      "title": "SBK Dynamodb Read Records/Sec",
       "type": "timeseries"
     },
     {
@@ -2101,7 +2101,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_AvgLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_AvgLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -2111,13 +2111,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_MaxLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_MaxLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Dynamodb Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -2204,7 +2204,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_5{class=\"Dynamodb\"}",
           "hide": false,
           "refId": "V"
         },
@@ -2213,7 +2213,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_10{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_10{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -2223,7 +2223,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_20{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_20{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -2233,7 +2233,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -2243,7 +2243,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_30{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_30{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -2253,7 +2253,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_40{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_40{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -2263,13 +2263,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Asyncfile Read Percentiles (Nanoseconds) 1",
+      "title": "SBK Dynamodb Read Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -2370,11 +2370,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_MBPerSec{class=\"Dynamodb\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Read Throughput MB/s",
+      "title": "SBK Dynamodb Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -2461,7 +2461,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -2471,7 +2471,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_60{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_60{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -2481,7 +2481,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_70{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_70{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -2491,7 +2491,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -2501,7 +2501,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_80{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_80{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -2511,7 +2511,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_90{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_90{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -2521,7 +2521,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_92_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_92_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -2531,7 +2531,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -2541,7 +2541,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_97_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_97_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -2551,7 +2551,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -2561,7 +2561,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_99_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -2571,7 +2571,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_99_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -2581,7 +2581,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_99_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -2591,7 +2591,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_9{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_99_9{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -2601,7 +2601,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_99_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -2611,13 +2611,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_ns_99_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_ns_99_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Asyncfile Read Percentiles (Nanoseconds) 2",
+      "title": "SBK Dynamodb Read Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -2698,11 +2698,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Records{class=\"Asyncfile\", action=\"Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Records{class=\"Dynamodb\", action=\"Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Read Response Pending Records",
+      "title": "SBK Dynamodb Read Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -2783,11 +2783,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Asyncfile\", action=\"Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Dynamodb\", action=\"Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Read Response Pending Bytes",
+      "title": "SBK Dynamodb Read Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -2873,7 +2873,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_SLC_1{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_SLC_1{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -2883,13 +2883,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_SLC_2{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_SLC_2{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Read  Sliding Latency Coverage (SLC)",
+      "title": "SBK Dynamodb Read  Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -2960,7 +2960,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Reading_Bytes_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_Bytes_total{class=\"Dynamodb\"}",
           "legendFormat": "Read Bytes",
           "range": true,
           "refId": "A"
@@ -2971,14 +2971,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_Bytes_total{class=\"Asyncfile\", action=\"Reading\"}",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Dynamodb\", action=\"Reading\"}",
           "hide": false,
           "legendFormat": "Read Request Bytes",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Read Bytes Total",
+      "title": "SBK Dynamodb Read Bytes Total",
       "type": "stat"
     },
     {
@@ -3035,7 +3035,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_LowerDiscardedLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -3046,7 +3046,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_HigherDiscardLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -3056,13 +3056,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Reading_InvalidLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Read Discarded Latencies",
+      "title": "SBK Dynamodb Read Discarded Latencies",
       "type": "stat"
     },
     {
@@ -3165,7 +3165,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_MBPerSec{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3175,7 +3175,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -3184,12 +3184,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_Bytes_MBPerSec{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Request_Bytes_MBPerSec{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write-Read Throughput MB/s ",
+      "title": "SBK Dynamodb Write-Read Throughput MB/s ",
       "type": "timeseries"
     },
     {
@@ -3275,7 +3275,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_RecordsPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_RecordsPerSec{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3285,7 +3285,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -3294,12 +3294,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write-Read Records/Sec",
+      "title": "SBK Dynamodb Write-Read Records/Sec",
       "type": "timeseries"
     },
     {
@@ -3384,7 +3384,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_AvgLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_AvgLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -3394,13 +3394,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_MaxLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_MaxLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write-Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Dynamodb Write-Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -3484,7 +3484,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_5{class=\"Dynamodb\"}",
           "hide": false,
           "refId": "V"
         },
@@ -3493,7 +3493,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_10{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_10{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3503,7 +3503,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_20{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_20{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -3513,7 +3513,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -3523,7 +3523,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_30{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_30{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -3533,7 +3533,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_40{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_40{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -3543,13 +3543,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Asyncfile Write-Read Percentiles (Nanoseconds) 1",
+      "title": "SBK Dynamodb Write-Read Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -3650,13 +3650,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_MBPerSec{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write-Read Throughput MB/s",
+      "title": "SBK Dynamodb Write-Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -3740,7 +3740,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -3750,7 +3750,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_60{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_60{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -3760,7 +3760,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_70{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_70{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -3770,7 +3770,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -3780,7 +3780,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_80{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_80{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -3790,7 +3790,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_90{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_90{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -3800,7 +3800,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_92_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_92_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -3810,7 +3810,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -3820,7 +3820,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_97_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_97_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -3830,7 +3830,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -3840,7 +3840,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_99_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -3850,7 +3850,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_99_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -3860,7 +3860,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_99_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -3870,7 +3870,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_9{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_99_9{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -3880,7 +3880,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_99_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -3890,13 +3890,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_ns_99_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_ns_99_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Asyncfile Write-Read Percentiles (Nanoseconds) 2",
+      "title": "SBK Dynamodb Write-Read Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -3977,11 +3977,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Records{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Response_Pending_Records{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Response Pending Records",
+      "title": "SBK Dynamodb Write Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -4062,11 +4062,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Response Pending Bytes",
+      "title": "SBK Dynamodb Write Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -4147,11 +4147,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Records{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Records{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Read Response Pending Records",
+      "title": "SBK Dynamodb Read Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -4232,11 +4232,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Read Response Pending Bytes",
+      "title": "SBK Dynamodb Read Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -4317,11 +4317,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Read Request Pending Records",
+      "title": "SBK Dynamodb Write Read Request Pending Records",
       "type": "timeseries"
     },
     {
@@ -4402,11 +4402,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Read Request Pending Bytes",
+      "title": "SBK Dynamodb Write Read Request Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -4492,7 +4492,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_SLC_1{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_SLC_1{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -4502,13 +4502,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_SLC_2{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_SLC_2{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write-Read Sliding Latency Coverage (SLC)",
+      "title": "SBK Dynamodb Write-Read Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -4565,7 +4565,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_LowerDiscardedLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Lower",
           "refId": "A"
@@ -4575,7 +4575,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_HigherDiscardLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -4585,13 +4585,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Reading_InvalidLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_InvalidLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write-Read  Discarded Latencies",
+      "title": "SBK Dynamodb Write-Read  Discarded Latencies",
       "type": "stat"
     },
     {
@@ -4662,7 +4662,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Reading_Bytes_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_Reading_Bytes_total{class=\"Dynamodb\"}",
           "legendFormat": "Write Reading Bytes",
           "range": true,
           "refId": "A"
@@ -4673,7 +4673,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_Bytes_total{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "hide": false,
           "legendFormat": "Read Request Bytes",
           "range": true,
@@ -4685,14 +4685,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_total{class=\"Asyncfile\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Dynamodb\", action=\"Write_Reading\"}",
           "hide": false,
           "legendFormat": "Write Request Bytes",
           "range": true,
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write Read Bytes Total",
+      "title": "SBK Dynamodb Write Read Bytes Total",
       "type": "stat"
     },
     {
@@ -4796,7 +4796,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4806,7 +4806,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_MBPerSec{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Request_MBPerSec{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -4815,12 +4815,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Request_Bytes_MBPerSec{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Throughput MB/s ",
+      "title": "SBK Dynamodb Write-Only Read Throughput MB/s ",
       "type": "timeseries"
     },
     {
@@ -4907,7 +4907,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_RecordsPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_RecordsPerSec{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4917,7 +4917,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Asyncfile\",action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Request_RecordsPerSec{class=\"Dynamodb\",action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "B"
         },
@@ -4926,12 +4926,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Request_RecordsPerSec{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Records/Sec",
+      "title": "SBK Dynamodb Write-Only Read Records/Sec",
       "type": "timeseries"
     },
     {
@@ -5017,7 +5017,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_AvgLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_AvgLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Average Latency",
           "refId": "A"
@@ -5027,13 +5027,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_OnlyReading_ns_MaxLatency{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_MaxLatency{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Max Latency",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Avg and Max Latencies (Nanoseconds)",
+      "title": "SBK Dynamodb Write-Only Read Avg and Max Latencies (Nanoseconds)",
       "type": "stat"
     },
     {
@@ -5119,7 +5119,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_OnlyReading_ns_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_5{class=\"Dynamodb\"}",
           "hide": false,
           "refId": "V"
         },
@@ -5129,7 +5129,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_10{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_10{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5140,7 +5140,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_20{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_20{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -5151,7 +5151,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "C"
@@ -5162,7 +5162,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_30{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_30{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "D"
@@ -5173,7 +5173,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_40{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_40{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "E"
@@ -5184,13 +5184,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Percentiles (Nanoseconds) 1",
+      "title": "SBK Dynamodb Write-Only Read Percentiles (Nanoseconds) 1",
       "type": "timeseries"
     },
     {
@@ -5292,13 +5292,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_MBPerSec{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Throughput MB/s",
+      "title": "SBK Dynamodb Write-Only Read Throughput MB/s",
       "type": "gauge"
     },
     {
@@ -5385,7 +5385,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_50{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "F"
@@ -5396,7 +5396,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_60{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_60{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "G"
@@ -5407,7 +5407,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_70{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_70{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "H"
@@ -5418,7 +5418,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "I"
@@ -5429,7 +5429,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_80{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_80{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "J"
@@ -5440,7 +5440,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_90{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_90{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "K"
@@ -5451,7 +5451,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_92_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_92_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "L"
@@ -5462,7 +5462,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "M"
@@ -5473,7 +5473,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_97_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_97_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "N"
@@ -5484,7 +5484,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "O"
@@ -5495,7 +5495,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_25{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_25{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "P"
@@ -5506,7 +5506,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_5{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_5{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "Q"
@@ -5517,7 +5517,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_75{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_75{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "R"
@@ -5528,7 +5528,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_9{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_9{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "S"
@@ -5539,7 +5539,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_95{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_95{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "T"
@@ -5550,13 +5550,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_ns_99_99{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_ns_99_99{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "U"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Percentiles (Nanoseconds) 2",
+      "title": "SBK Dynamodb Write-Only Read Percentiles (Nanoseconds) 2",
       "type": "timeseries"
     },
     {
@@ -5637,11 +5637,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Records{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Response_Pending_Records{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Response Pending Records",
+      "title": "SBK Dynamodb Write Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -5722,11 +5722,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Response_Pending_Bytes{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Response Pending Bytes",
+      "title": "SBK Dynamodb Write Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -5807,11 +5807,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Records{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Response_Pending_Records{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Read Response Pending Records",
+      "title": "SBK Dynamodb Read Response Pending Records",
       "type": "timeseries"
     },
     {
@@ -5892,11 +5892,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Response_Pending_Bytes{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Read Response Pending Bytes",
+      "title": "SBK Dynamodb Read Response Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -5977,11 +5977,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Records{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Read Request Pending Records",
+      "title": "SBK Dynamodb Write Read Request Pending Records",
       "type": "timeseries"
     },
     {
@@ -6062,11 +6062,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Read_Request_Pending_Bytes{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Asyncfile Write Read Request Pending Bytes",
+      "title": "SBK Dynamodb Write Read Request Pending Bytes",
       "type": "timeseries"
     },
     {
@@ -6153,7 +6153,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_SLC_1{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_SLC_1{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 1",
           "refId": "A"
@@ -6164,13 +6164,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_SLC_2{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_SLC_2{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "SLC 2",
           "refId": "B"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Sliding Latency Coverage (SLC)",
+      "title": "SBK Dynamodb Write-Only Read Sliding Latency Coverage (SLC)",
       "type": "stat"
     },
     {
@@ -6241,7 +6241,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_Bytes_total{class=\"Dynamodb\"}",
           "legendFormat": "Write Only Reading Bytes",
           "range": true,
           "refId": "A"
@@ -6252,7 +6252,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Read_Request_Bytes_total{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Request_Bytes_total{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "legendFormat": "Read Request Bytes",
           "range": true,
@@ -6264,14 +6264,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Request_Bytes_total{class=\"Asyncfile\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Request_Bytes_total{class=\"Dynamodb\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "legendFormat": "Write Request Bytes",
           "range": true,
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read Bytes Total",
+      "title": "SBK Dynamodb Write-Only Read Bytes Total",
       "type": "stat"
     },
     {
@@ -6329,7 +6329,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_LowerDiscardedLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_LowerDiscardedLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Lower",
           "refId": "A"
@@ -6340,7 +6340,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_HigherDiscardLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_HigherDiscardLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Higher",
           "refId": "B"
@@ -6351,13 +6351,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "SBK_Write_OnlyReading_InvalidLatencyRecords_total{class=\"Asyncfile\"}",
+          "expr": "SBK_Write_OnlyReading_InvalidLatencyRecords_total{class=\"Dynamodb\"}",
           "interval": "",
           "legendFormat": "Invalid/Negative",
           "refId": "C"
         }
       ],
-      "title": "SBK Asyncfile Write-Only Read  Discarded Latencies",
+      "title": "SBK Dynamodb Write-Only Read  Discarded Latencies",
       "type": "stat"
     }
   ],
@@ -6396,7 +6396,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SBK Asyncfile Dashboard",
+  "title": "SBK Dynamodb Dashboard",
   "version": 1,
   "weekStart": ""
 }

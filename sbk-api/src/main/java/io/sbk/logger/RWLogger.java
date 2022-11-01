@@ -58,10 +58,12 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
 
 
     void printTotal(int writers, int maxWriters, int readers, int maxReaders,
-               long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-               double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMBPerSec,
-               long readRequestRecords, double readRequestRecordsPerSec, double seconds, long bytes,
-               long records, double recsPerSec, double mbPerSec,
-               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-               long higherDiscard, long slc1, long slc2, long[] percentileValues);
+                    long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                    double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMBPerSec,
+                    long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
+                    long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
+                    long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                    double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                    double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                    long higherDiscard, long slc1, long slc2, long[] percentileValues);
 }

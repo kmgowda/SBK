@@ -46,8 +46,7 @@ def wb_add_two_sheets(wb, r_name, t_name, df):
 
 def add_sbk_logo(wb):
     ws = wb.add_worksheet("SBK")
-    ws.insert_image("K7", "./images/sbk-logo.png", {'x_scale': 0.5, 'y_scale': 0.5})
-
+    ws.insert_image('K7', "./images/sbk-logo.png", {'x_scale': 0.5, 'y_scale': 0.5})
 
 class SbkSheets:
     def __init__(self, i_file, o_file):

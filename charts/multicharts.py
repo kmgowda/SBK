@@ -188,6 +188,40 @@ class SbkMultiCharts(SbkCharts):
         sheet = self.wb.create_sheet("Throughput_Records")
         sheet.add_chart(chart)
 
+    def create_multi_write_read_records_graph(self):
+        chart = self.create_line_chart("Write and Read Records Variations",
+                                       "Intervals", "Write and Read Records", 25, 50)
+        for name in self.wb.sheetnames:
+            if self.is_rnum_sheet(name):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_write_request_records_series(ws, prefix))
+                chart.append(self.get_read_request_records_series(ws, prefix))
+                chart.append(self.get_write_response_pending_records_series(ws, prefix))
+                chart.append(self.get_read_response_pending_records_series(ws, prefix))
+                chart.append(self.get_write_read_request_pending_records_series(ws, prefix))
+                chart.append(self.get_records_series(ws, prefix))
+        # add chart to the sheet
+        sheet = self.wb.create_sheet("Write_Read_Records")
+        sheet.add_chart(chart)
+
+    def create_multi_write_read_mb_graph(self):
+        chart = self.create_line_chart("Write and Read MBs Variations",
+                                       "Intervals", "Write and Read MBs", 25, 50)
+        for name in self.wb.sheetnames:
+            if self.is_rnum_sheet(name):
+                ws = self.wb[name]
+                prefix = name + "-" + self.get_storage_name(ws)
+                chart.append(self.get_write_request_mb_series(ws, prefix))
+                chart.append(self.get_read_request_mb_series(ws, prefix))
+                chart.append(self.get_write_response_pending_mb_series(ws, prefix))
+                chart.append(self.get_read_response_pending_mb_series(ws, prefix))
+                chart.append(self.get_write_read_request_pending_mb_series(ws, prefix))
+                chart.append(self.get_records_series(ws, prefix))
+        # add chart to the sheet
+        sheet = self.wb.create_sheet("Write_Read_MB")
+        sheet.add_chart(chart)
+
     def create_total_mb_compare_graph(self):
         chart = None
         for name in self.wb.sheetnames:
@@ -199,6 +233,9 @@ class SbkMultiCharts(SbkCharts):
                 prefix = name + "-" + self.get_storage_name(ws)
                 chart.append(self.get_write_request_mb_series(ws, prefix))
                 chart.append(self.get_read_request_mb_series(ws, prefix))
+                chart.append(self.get_write_response_pending_mb_series(ws, prefix))
+                chart.append(self.get_read_response_pending_mb_series(ws, prefix))
+                chart.append(self.get_write_read_request_pending_mb_series(ws, prefix))
                 chart.append(self.get_mb_series(ws, prefix))
         if chart is not None:
             # add chart to the sheet
@@ -297,6 +334,8 @@ class SbkMultiCharts(SbkCharts):
             self.create_all_latency_compare_graphs()
             self.create_multi_latency_compare_graphs()
             self.create_multi_latency_graphs()
+            self.create_multi_write_read_records_graph()
+            self.create_multi_write_read_mb_graph()
             self.create_total_multi_latency_percentile_graphs()
             self.create_total_mb_compare_graph()
             self.create_total_throughput_mb_compare_graph()
@@ -305,3 +344,4 @@ class SbkMultiCharts(SbkCharts):
             self.create_total_avg_latency_compare_graph()
             self.create_total_max_latency_compare_graph()
             self.wb.save(self.file)
+            print("file : %s updated with graphs" % self.file)

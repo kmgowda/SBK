@@ -124,77 +124,74 @@ class SbkCharts:
                                     title=ws_name + "_" + str(r))
         return data_series
 
-    def get_throughput_mb_series(self, ws, ws_name):
+    def get_column_series(self, ws, ws_name, column_name):
         cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["MB/Sec"], min_row=2,
-                                max_col=cols["MB/Sec"], max_row=ws.max_row),
-                      title=ws_name + "-MB/Sec")
+        return Series(Reference(ws, min_col=cols[column_name], min_row=2,
+                                max_col=cols[column_name], max_row=ws.max_row),
+                      title=ws_name + "-" + column_name)
+
+    def get_throughput_mb_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "MB/Sec")
 
     def get_throughput_write_request_mb_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["WriteRequestMB/Sec"], min_row=2,
-                                max_col=cols["WriteRequestMB/Sec"], max_row=ws.max_row),
-                      title=ws_name + "-WriteRequestMB/Sec")
+        return self.get_column_series(ws, ws_name, "WriteRequestMB/Sec")
 
     def get_throughput_read_request_mb_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["ReadRequestMB/Sec"], min_row=2,
-                                max_col=cols["ReadRequestMB/Sec"], max_row=ws.max_row),
-                      title=ws_name + "-ReadRequestMB/Sec")
+        return self.get_column_series(ws, ws_name, "ReadRequestMB/Sec")
 
     def get_throughput_records_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["Records/Sec"], min_row=2,
-                                max_col=cols["Records/Sec"], max_row=ws.max_row),
-                      title=ws_name + "-Records/Sec")
+        return self.get_column_series(ws, ws_name, "Records/Sec")
 
     def get_throughput_write_request_records_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["WriteRequestRecords/Sec"], min_row=2,
-                                max_col=cols["WriteRequestRecords/Sec"], max_row=ws.max_row),
-                      title=ws_name + "-WriteRequestRecords/Sec")
+        return self.get_column_series(ws, ws_name, "WriteRequestRecords/Sec")
 
     def get_throughput_read_request_records_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["ReadRequestRecords/Sec"], min_row=2,
-                                max_col=cols["ReadRequestRecords/Sec"], max_row=ws.max_row),
-                      title=ws_name + "-ReadRequestRecords/Sec")
+        return self.get_column_series(ws, ws_name, "ReadRequestRecords/Sec")
+
+    def get_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "Records")
 
     def get_mb_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["MB"], min_row=2,
-                                max_col=cols["MB"], max_row=ws.max_row),
-                      title=ws_name + "-MB")
+        return self.get_column_series(ws, ws_name, "MB")
 
     def get_write_request_mb_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["WriteRequestMB"], min_row=2,
-                                max_col=cols["WriteRequestMB"], max_row=ws.max_row),
-                      title=ws_name + "-WriteRequestMB")
+        return self.get_column_series(ws, ws_name, "WriteRequestMB")
+
+    def get_write_request_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteRequestRecords")
+
+    def get_write_response_pending_mb_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteResponsePendingMB")
+
+    def get_write_response_pending_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteResponsePendingRecords")
+
+    def get_read_request_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadRequestRecords")
 
     def get_read_request_mb_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["ReadRequestMB"], min_row=2,
-                                max_col=cols["ReadRequestMB"], max_row=ws.max_row),
-                      title=ws_name + "-ReadRequestMB")
+        return self.get_column_series(ws, ws_name, "ReadRequestMB")
+
+    def get_read_response_pending_mb_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadResponsePendingMB")
+
+    def get_read_response_pending_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadResponsePendingRecords")
+
+    def get_write_read_request_pending_mb_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteReadRequestPendingMB")
+
+    def get_write_read_request_pending_records_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteReadRequestPendingRecords")
 
     def get_avg_latency_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["AvgLatency"], min_row=2,
-                                max_col=cols["AvgLatency"], max_row=ws.max_row),
-                      title=ws_name + "-AvgLatency")
+        return self.get_column_series(ws, ws_name, "AvgLatency")
 
     def get_min_latency_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["MinLatency"], min_row=2,
-                                max_col=cols["MinLatency"], max_row=ws.max_row),
-                      title=ws_name + "-MinLatency")
+        return self.get_column_series(ws, ws_name, "MinLatency")
 
     def get_max_latency_series(self, ws, ws_name):
-        cols = self.get_columns_from_worksheet(ws)
-        return Series(Reference(ws, min_col=cols["MaxLatency"], min_row=2,
-                                max_col=cols["MaxLatency"], max_row=ws.max_row),
-                      title=ws_name + "-MaxLatency")
+        return self.get_column_series(ws, ws_name, "MaxLatency")
 
     def create_latency_compare_graphs(self, ws, prefix):
         charts, sheets = [], []
@@ -270,3 +267,4 @@ class SbkCharts:
         self.create_latency_graphs(r_ws, r_prefix)
         self.create_total_latency_percentile_graphs(t_ws, t_prefix)
         self.wb.save(self.file)
+        print("file : %s updated with graphs" % self.file)

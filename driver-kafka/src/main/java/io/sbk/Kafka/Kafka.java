@@ -18,6 +18,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.system.Printer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.IsolationLevel;
@@ -66,6 +67,13 @@ public class Kafka implements Storage<byte[]> {
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
+        boolean rq = Boolean.parseBoolean(params.getOptionValue("rq", "false"));
+        if (rq) {
+            String errMsg = "For Kafka Readers, the reads are based on polling, so benchmarking read requests are " +
+                    "disabled, remove option '-rq'";
+            Printer.log.error(errMsg);
+            throw new IllegalArgumentException(errMsg);
+        }
         config.topicName = params.getOptionValue("topic", config.topicName);
         config.brokerUri = params.getOptionValue("broker", config.brokerUri);
         config.partitions = Integer.parseInt(params.getOptionValue("partitions", Integer.toString(config.partitions)));
@@ -98,7 +106,7 @@ public class Kafka implements Storage<byte[]> {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.brokerUri);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Integer.MAX_VALUE);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, config.maxPollRecords);
         // props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, params.getTimeout());
         // Enabling the consumer to READ_COMMITTED is must, to compare between Kafka and Pravega.
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG,
