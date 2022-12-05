@@ -43,6 +43,8 @@ enum ActionEnum {
   Reading = 1;
   Write_Reading = 2;
   Write_OnlyReading = 3;
+  Read_Writing = 4;
+  Read_OnlyWriting = 5;
 }
 
 message Version {

@@ -53,7 +53,9 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         addOption("class", true, "storage class name; run 'sbk -help' to see the list");
         addOption("action", true,
                 """
-                            action [r: read, w: write, wr: write and read, wro: write but only read],
+                            action [r: read, w: write,
+                            wr: write and read, wro: write but only read,
+                            rw: read and write, rwo: read but only write],
                             default: r""");
         addOption("port", true, "SBM port number; default: " + this.port);
         addOption("max", true, "Maximum number of connections; default: " + maxConnections);
@@ -75,6 +77,8 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
             case "wro" -> Action.Write_OnlyReading;
             case "wr" -> Action.Write_Reading;
             case "w" -> Action.Writing;
+            case "rwo" -> Action.Read_OnlyWriting;
+            case "rw" -> Action.Read_Writing;
             default -> Action.Reading;
         };
         maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
