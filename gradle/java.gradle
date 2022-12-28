@@ -31,6 +31,7 @@ plugins.withId('java') {
     }
 
     task sourcesJar(type: Jar) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveClassifier = 'sources'
         from sourceSets.main.java
     }
