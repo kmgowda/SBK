@@ -17,7 +17,7 @@ import io.perl.logger.Print;
 import io.perl.api.ReportLatencies;
 import io.perl.api.impl.TotalLatencyRecordWindow;
 import io.sbm.api.SbmPeriodicRecorder;
-import io.sbp.grpc.LatenciesRecord;
+import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbk.logger.ReadRequestsLogger;
 import io.sbm.logger.SetRW;
 import io.sbk.logger.WriteRequestsLogger;
@@ -85,7 +85,7 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * @param currentTime current time.
      * @param record      Record Latencies
      */
-    public void record(long currentTime, LatenciesRecord record) {
+    public void record(long currentTime, MessageLatenciesRecord record) {
         addLatenciesRecord(record);
         checkWindowFullAndReset(currentTime);
     }
@@ -95,7 +95,7 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      *
      * @param record NotNull LatenciesRecord
      */
-    public void addLatenciesRecord(@NotNull LatenciesRecord record) {
+    public void addLatenciesRecord(@NotNull MessageLatenciesRecord record) {
         final int id = (int) (record.getClientID() - BASE_CLIENT_ID_VALUE);
         addRW(record.getClientID(), record.getReaders(), record.getWriters(),
                 record.getMaxReaders(), record.getMaxWriters());

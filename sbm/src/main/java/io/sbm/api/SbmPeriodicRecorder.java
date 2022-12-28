@@ -11,7 +11,7 @@
 package io.sbm.api;
 
 import io.perl.api.TotalPeriodicWindow;
-import io.sbp.grpc.LatenciesRecord;
+import io.sbp.grpc.MessageLatenciesRecord;
 
 /**
  * Interface for recording latencies.
@@ -24,6 +24,6 @@ public interface SbmPeriodicRecorder extends TotalPeriodicWindow {
      * @param currentTime Current Time
      * @param record      Latencies Record
      */
-    void record(long currentTime, LatenciesRecord record);
+    void record(long currentTime, MessageLatenciesRecord record);
 
 }

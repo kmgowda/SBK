@@ -10,7 +10,7 @@
 
 package io.sbm.api;
 
-import io.sbp.grpc.LatenciesRecord;
+import io.sbp.grpc.MessageLatenciesRecord;
 
 /**
  * Interface RamRegistry.
@@ -30,6 +30,6 @@ public interface SbmRegistry {
      *
      * @param record LatenciesRecord
      */
-    void enQueue(LatenciesRecord record);
+    void enQueue(MessageLatenciesRecord record);
 
 }

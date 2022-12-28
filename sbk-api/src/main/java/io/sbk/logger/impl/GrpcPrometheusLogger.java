@@ -26,7 +26,7 @@ import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.Config;
-import io.sbp.grpc.LatenciesRecord;
+import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbp.grpc.ServiceGrpc;
 import io.sbk.logger.SbmHostConfig;
 import io.sbk.params.InputOptions;
@@ -66,7 +66,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     private ManagedChannel channel;
     private ServiceGrpc.ServiceStub stub;
     private ServiceGrpc.ServiceBlockingStub blockingStub;
-    private LatenciesRecord.Builder builder;
+    private MessageLatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
     private ExceptionHandler exceptionHandler;
 
@@ -205,7 +205,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         latencyBytes = 0;
         recorder = new LatencyRecorder(getMinLatency(), getMaxLatency(), LatencyConfig.LONG_MAX,
                 LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX);
-        builder = LatenciesRecord.newBuilder();
+        builder = MessageLatenciesRecord.newBuilder();
         if (blocking) {
             stub = null;
             observer = null;

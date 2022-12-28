@@ -13,7 +13,7 @@ package io.sbm.api.impl;
 import io.perl.api.impl.ConcurrentLinkedQueueArray;
 import io.sbk.api.Benchmark;
 import io.sbm.api.SbmPeriodicRecorder;
-import io.sbp.grpc.LatenciesRecord;
+import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbm.api.SbmRegistry;
 import io.sbk.system.Printer;
 import io.state.State;
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Class RamBenchmark.
  */
-final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<LatenciesRecord> implements Benchmark,
+final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<MessageLatenciesRecord> implements Benchmark,
         SbmRegistry {
     private final int maxQs;
     private final int idleMS;
@@ -69,7 +69,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Latenc
     }
 
     void run() throws InterruptedException {
-        LatenciesRecord record;
+        MessageLatenciesRecord record;
         boolean doWork = true;
         boolean notFound;
         Printer.log.info("LatenciesRecord Benchmark Started");
@@ -109,7 +109,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Latenc
     }
 
     @Override
-    public void enQueue(@NotNull LatenciesRecord record) {
+    public void enQueue(@NotNull MessageLatenciesRecord record) {
         final int index = (int) (record.getClientID() % maxQs);
         add(index, record);
     }
@@ -121,7 +121,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Latenc
             if (qFuture != null) {
                 if (!qFuture.isDone()) {
                     try {
-                        add(0, LatenciesRecord.newBuilder().setSequenceNumber(-1).build());
+                        add(0, MessageLatenciesRecord.newBuilder().setSequenceNumber(-1).build());
                         qFuture.get();
                         clear();
                     } catch (ExecutionException | InterruptedException e) {

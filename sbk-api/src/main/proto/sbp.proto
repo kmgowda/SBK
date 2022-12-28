@@ -28,17 +28,17 @@ service Service {
   rpc isVersionSupported (Version) returns (google.protobuf.BoolValue) {}
   rpc getConfig (google.protobuf.Empty) returns (Config) {}
   rpc registerClient (Config) returns (ClientID) {}
-  rpc addLatenciesRecord (LatenciesRecord) returns (google.protobuf.Empty) {}
+  rpc addLatenciesRecord (MessageLatenciesRecord) returns (google.protobuf.Empty) {}
   rpc closeClient (ClientID) returns (google.protobuf.Empty) {}
 }
 
-enum TimeUnitEnum {
+enum EnumTimeUnit {
   ms = 0;
   mcs = 1;
   ns = 2;
 }
 
-enum ActionEnum {
+enum EnumAction {
   Writing = 0;
   Reading = 1;
   Write_Reading = 2;
@@ -54,8 +54,8 @@ message Version {
 
 message Config {
   string storageName = 1;
-  ActionEnum action = 2;
-  TimeUnitEnum timeUnit = 3;
+  EnumAction action = 2;
+  EnumTimeUnit timeUnit = 3;
   int64 minLatency = 4;
   int64 maxLatency = 5;
   bool isWriteRequests = 6;
@@ -67,7 +67,7 @@ message ClientID {
 }
 
 
-message LatenciesRecord {
+message MessageLatenciesRecord {
   int64 clientID = 1;
   int64 sequenceNumber = 2;
   int32 writers = 3;

@@ -128,7 +128,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
 
 
     @Override
-    public void addLatenciesRecord(io.sbp.grpc.LatenciesRecord request,
+    public void addLatenciesRecord(io.sbp.grpc.MessageLatenciesRecord request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         try {
             registry.enQueue(request);
