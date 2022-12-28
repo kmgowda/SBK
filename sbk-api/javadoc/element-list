@@ -12,4 +12,6 @@ io.sbk.params
 io.sbk.params.impl
 io.sbk.system
 io.sbk.utils
+io.sbp.api
+io.sbp.config
 io.sbp.grpc
