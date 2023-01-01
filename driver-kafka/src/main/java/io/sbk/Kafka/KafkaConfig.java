@@ -21,7 +21,7 @@ public class KafkaConfig {
     public int lingerMS;
     public int batchSize;
     public boolean autoCommit;
-
+    public String autoOffsetConfig;
     public int maxPollRecords;
     public int maxPartitionFetchBytes;
 

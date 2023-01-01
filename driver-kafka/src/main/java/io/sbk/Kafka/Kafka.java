@@ -12,7 +12,7 @@ package io.sbk.Kafka;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.sbk.action.Action;
+//import io.sbk.action.Action;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -113,6 +113,10 @@ public class Kafka implements Storage<byte[]> {
                 IsolationLevel.READ_COMMITTED.name().toLowerCase(Locale.ROOT));
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, config.autoCommit);
         props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, config.maxPartitionFetchBytes);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, config.autoOffsetConfig);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, config.topicName);
+        /*
+
         if (params.getAction() == Action.Write_Reading) {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
             props.put(ConsumerConfig.GROUP_ID_CONFIG, config.topicName);
@@ -120,6 +124,7 @@ public class Kafka implements Storage<byte[]> {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
             props.put(ConsumerConfig.GROUP_ID_CONFIG, Long.toString(System.currentTimeMillis()));
         }
+         */
         return props;
     }
 
