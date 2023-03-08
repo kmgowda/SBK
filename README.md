@@ -976,7 +976,8 @@ refer [SBK Charts](sbk-charts.md) for further details.
 ## SBK Publications
 1. The SBK is inspired from the Pravega benchmark tool, refer [Pravega benchmark tool](docs/kafka-pravega.pdf)
 2. The SBK uses the multiple concurrent queues for fast performance benchmarking, refer [Design of SBK](docs/sbk.pdf)
-3. The SBK implements SLC(Sliding Latency Coverage) factors to summarize the latency percentiles, refer [SLC](docs/sbk-slc.pdf) 
+3. The SBK implements SLC(Sliding Latency Coverage) factors to summarize the latency percentiles, refer [SLC](docs/sbk-slc.pdf)
+4. The SBK uses the SBP: Storage Benchmark Protocol and SBM: Storage Benchmark Monitor for distributed performance benchmarking, refer [SBP](docs/sbp.pdf)
 
 
 ## SBK and PerL
