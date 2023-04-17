@@ -392,7 +392,6 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 writeReadRequestPendingBytes);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
-        out.append("\n");
     }
 
     @Override
