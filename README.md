@@ -117,7 +117,7 @@ ___
 **Prerequisites**
 
 - Java 17+
-- Gradle 7+
+- Gradle 8+
 
 **Building**
 
