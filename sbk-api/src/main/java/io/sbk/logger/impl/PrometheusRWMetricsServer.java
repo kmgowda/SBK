@@ -51,6 +51,14 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
 
     final private AtomicLong writeReadRequestPendingBytes;
 
+    final private Counter writeMissEvents;
+
+    final private AtomicDouble writeMissEventsPerSec;
+
+    final private Counter readMissEvents;
+
+    final private AtomicDouble readMissEventsPerSec;
+
     public  PrometheusRWMetricsServer(String header, String action, String className, double[] percentiles, Time time,
                                         MetricsConfig config) throws IOException {
         super(header.toUpperCase()+" "+action, percentiles, time,
@@ -75,6 +83,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         final String readResponsePendingBytesName = rwMetricPrefix+"_Read_Response_Pending_Bytes";
         final String writeReadPendingRecordsName = rwMetricPrefix+"_Write_Read_Request_Pending_Records";
         final String writeReadPendingBytesName = rwMetricPrefix+"_Write_Read_Request_Pending_Bytes";
+        final String writeMissEventsName = rwMetricPrefix+"_Write_Miss_Events";
+        final String writeMissEventsPerSecName = rwMetricPrefix+"_Write_Miss_Events_PerSec";
+        final String readMissEventsName = rwMetricPrefix+"_Read_Miss_Events";
+        final String readMissEventsPerSecName = rwMetricPrefix+"_Read_Miss_Events_PerSec";
 
         this.writers = this.registry.gauge(writersName, new AtomicInteger());
         this.readers = this.registry.gauge(readersName, new AtomicInteger());
@@ -94,6 +106,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readResponsePendingBytes = this.registry.gauge(readResponsePendingBytesName, new AtomicLong());
         this.writeReadRequestPendingRecords = this.registry.gauge(writeReadPendingRecordsName, new AtomicLong());
         this.writeReadRequestPendingBytes = this.registry.gauge(writeReadPendingBytesName, new AtomicLong());
+        this.writeMissEvents = this.registry.counter(writeMissEventsName);
+        this.writeMissEventsPerSec = this.registry.gauge(writeMissEventsPerSecName, new AtomicDouble());
+        this.readMissEvents = this.registry.counter(readMissEventsName);
+        this.readMissEventsPerSec = this.registry.gauge(readMissEventsPerSecName, new AtomicDouble());
     }
 
 
@@ -103,7 +119,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
                             long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
                             double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                             long writeResponsePendingBytes, long readResponsePendingRecords,
-                            long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                            long readResponsePendingBytes, long writeReadRequestPendingRecords,
+                            long writeReadRequestPendingBytes,
+                            long writeMissEvents, double writeMissEventsPerSec,
+                            long readMissEvents, double readMissEventsPerSec,
                             double seconds, long bytes, long records, double recsPerSec,
                             double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
                             long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -125,6 +144,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readResponsePendingBytes.set(readResponsePendingBytes);
         this.writeReadRequestPendingRecords.set(writeReadRequestPendingRecords);
         this.writeReadRequestPendingBytes.set(writeReadRequestPendingBytes);
+        this.writeMissEvents.increment(writeMissEvents);
+        this.writeMissEventsPerSec.set(writeMissEventsPerSec);
+        this.readMissEvents.increment(readMissEvents);
+        this.readMissEventsPerSec.set(readMissEventsPerSec);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                                 higherDiscard, slc1, slc2, percentileValues);
     }

@@ -112,20 +112,24 @@ public abstract class PrometheusLogger extends CSVLogger {
                               double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
                               long readRequests, double readRequestsPerSec, long writeResponsePendingRecords,
                               long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                              long writeReadPendingRecords, long writeReadPendingBytes, double seconds, long bytes,
-                              long records, double recsPerSec, double mbPerSec,
+                              long writeReadPendingRecords, long writeReadPendingBytes,
+                              long writeMissEvents, double writeMissEventsPerSec,
+                              long readMissEvents, double readMissEventsPerSec,
+                              double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                               long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
                 writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
+                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
                 writesRequests, writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests,
                 readRequestsPerSec, writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
+                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
@@ -136,14 +140,18 @@ public abstract class PrometheusLogger extends CSVLogger {
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, double seconds, long bytes,
-                      long records, double recsPerSec, double mbPerSec,
+                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                      long writeMissEvents, double writeMissEventsPerSec,
+                      long readMissEvents, double readMissEventsPerSec,
+                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         printer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
                 writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
                 readRequestRecords, readRequestsRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
-                readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
+                writeReadRequestPendingBytes,
+                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }

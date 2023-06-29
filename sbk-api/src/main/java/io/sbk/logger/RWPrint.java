@@ -32,6 +32,10 @@ public interface RWPrint {
      * @param readResponsePendingBytes          Read response pending bytes
      * @param writeReadRequestPendingRecords    Write read pending records
      * @param writeReadRequestPendingBytes      Write read pending bytes
+     * @param writeMissEvents                   Missed Write Events
+     * @param writeMissEventsPerSec             Missed Write Events/sec
+     * @param readMissEvents                    Missed Read Events
+     * @param readMissEventsPerSec              Missed Write Events/sec
      * @param seconds                           reporting duration in seconds
      * @param bytes                             number of bytes read/write
      * @param records                           data to write.
@@ -53,6 +57,8 @@ public interface RWPrint {
                long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+               long writeMissEvents, double writeMissEventsPerSec,
+               long readMissEvents, double readMissEventsPerSec,
                double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                long higherDiscard, long slc1, long slc2, long[] percentileValues);
