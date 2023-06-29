@@ -18,11 +18,16 @@ import java.io.IOException;
  * Class for Reader.
  */
 public class NullReader implements Reader<byte[]> {
+    private final int timeoutMS;
+
+    public NullReader(int timeoutMS) {
+        this.timeoutMS = timeoutMS;
+    }
 
     @Override
     public byte[] read() throws IOException {
         try {
-            Thread.sleep(Long.MAX_VALUE);
+            Thread.sleep(timeoutMS);
         } catch (InterruptedException ex) {
             throw new IOException(ex);
         }

@@ -22,19 +22,23 @@ import java.io.IOException;
  */
 public class Null implements Storage<byte[]> {
     private long n;
+    private int timeoutMS;
 
     public Null() {
         n = 0;
+        timeoutMS = Integer.MAX_VALUE;
     }
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         params.addOption("n", true, "iteration loop max value for writers, default value: " + n);
+        params.addOption("timeout", true, "max timeout in milli seconds per writer/reader , default : "+ timeoutMS);
     }
 
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         n = Long.parseLong(params.getOptionValue("n", "0"));
+        timeoutMS = Integer.parseInt(params.getOptionValue("timeout", String.valueOf(timeoutMS)));
     }
 
     @Override
@@ -47,11 +51,11 @@ public class Null implements Storage<byte[]> {
 
     @Override
     public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
-        return new NullWriter(n);
+        return new NullWriter(timeoutMS, n);
     }
 
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
-        return new NullReader();
+        return new NullReader(timeoutMS);
     }
 }
