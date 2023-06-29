@@ -18,6 +18,7 @@ import io.time.Time;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Interface for Asynchronous Readers.
@@ -115,7 +116,11 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
-                perlChannel.throwException(ex);
+                if (ex instanceof TimeoutException) {
+                    logger.recordReadMissEvents(id, status.startTime, 1);
+                } else {
+                    perlChannel.throwException(ex);
+                }
                 return null;
             });
             ret.thenAccept(d -> {
@@ -154,6 +159,10 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         if (ret == null) {
             throw new IOException();
         } else {
+            ret.exceptionally(ex -> {
+                perlChannel.throwException(ex);
+                return null;
+            });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
                 perlChannel.send(dType.getTime(d), endTime, status.records, dType.length(d));
@@ -193,6 +202,14 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         if (ret == null) {
             throw new IOException();
         } else {
+            ret.exceptionally(ex -> {
+                if (ex instanceof TimeoutException) {
+                    logger.recordReadMissEvents(id, status.startTime, 1);
+                } else {
+                    perlChannel.throwException(ex);
+                }
+                return null;
+            });
             ret.thenAccept(d -> {
                 final long endTime = time.getCurrentTime();
                 perlChannel.send(dType.getTime(d), endTime, status.records, dType.length(d));

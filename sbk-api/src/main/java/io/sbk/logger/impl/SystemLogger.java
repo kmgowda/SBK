@@ -65,8 +65,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected int maxReaderRequestIds;
     protected volatile long[] writeBytesArray;
     protected volatile long[] writeRequestRecordsArray;
+    protected volatile long[] writeMissEventsArray;
     protected volatile long[] readBytesArray;
     protected volatile long[] readRequestRecordsArray;
+    protected volatile long[] readMissEventsArray;
     private LoggerConfig loggerConfig;
 
     static {
@@ -100,6 +102,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.writeRequestRecordsArray = null;
         this.maxReaderRequestIds = 0;
         this.maxWriterRequestIds = 0;
+        this.readMissEventsArray = null;
+        this.writeMissEventsArray = null;
     }
 
     @Override
@@ -242,6 +246,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.writeRequestRecordsArray = new long[maxWriterRequestIds];
         this.readBytesArray = new long[maxReaderRequestIds];
         this.readRequestRecordsArray = new long[maxReaderRequestIds];
+        this.writeMissEventsArray = new long[maxWriterRequestIds];
+        this.readMissEventsArray = new long[maxReaderRequestIds];
     }
 
     @Override
@@ -282,6 +288,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         VAR_HANDLE_ARRAY.getAndAdd(writeBytesArray, writerId, bytes);
     }
 
+    @Override
+    public void recordWriteMissEvents(int writerId, long startTime, long missEvents) {
+        VAR_HANDLE_ARRAY.getAndAdd(writeMissEventsArray, writerId, missEvents);
+    }
 
     @Override
     public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
@@ -289,6 +299,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         VAR_HANDLE_ARRAY.getAndAdd(readBytesArray, readerId, bytes);
     }
 
+    @Override
+    public void recordReadMissEvents(int readerId, long startTime, long missEvents) {
+        VAR_HANDLE_ARRAY.getAndAdd(readMissEventsArray, readerId, missEvents);
+    }
 
     protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,
                                           int readers, int maxReaders ) {
