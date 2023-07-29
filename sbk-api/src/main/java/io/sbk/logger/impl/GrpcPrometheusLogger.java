@@ -305,6 +305,22 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
             ramReadBytesArray.addAndGet(readerId, bytes);
         }
     }
+    
+    @Override
+    public void recordWriteMissEvents(int readerId, long startTime,  long events) {
+        super.recordWriteMissEvents(readerId, startTime, events);
+        if (enable) {
+            ramWriteMissEventsArray.addAndGet(readerId, events);
+        }
+    }
+
+    @Override
+    public void recordReadMissEvents(int writerId, long startTime, long events) {
+        super.recordReadMissEvents(writerId, startTime, events);
+        if (enable) {
+            ramReadMissEventsArray.addAndGet(writerId, events);
+        }
+    }
 
     /**
      * record every latency.
@@ -346,7 +362,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                 writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
-        if (latencyBytes > 0) {
+        if (enable) {
             sendLatenciesRecord();
         }
     }
