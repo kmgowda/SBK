@@ -13,7 +13,7 @@ public interface ReadRequestsLogger {
 
     void recordReadRequests(int readerId, long startTime, long bytes, long events);
 
-    void recordReadTimeoutEvents(int readerId, long startTime, long missEvents);
+    void recordReadTimeoutEvents(int readerId, long startTime, long timeoutEvents);
 
     int getMaxReaderIDs();
 }

@@ -350,8 +350,8 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                       long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
-                      long writeMissEvents, double writeMissEventsPerSec,
-                      long readMissEvents, double readMissEventsPerSec,
+                      long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                      long readTimeoutEvents, double readTimeoutEventsPerSec,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -359,7 +359,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                 writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
-                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
+                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         if (enable) {
