@@ -51,13 +51,13 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
 
     final private AtomicLong writeReadRequestPendingBytes;
 
-    final private Counter writeMissEvents;
+    final private Counter writeTimeoutEvents;
 
-    final private AtomicDouble writeMissEventsPerSec;
+    final private AtomicDouble writeTimeoutEventsPerSec;
 
-    final private Counter readMissEvents;
+    final private Counter readTimeoutEvents;
 
-    final private AtomicDouble readMissEventsPerSec;
+    final private AtomicDouble readTimeoutEventsPerSec;
 
     public  PrometheusRWMetricsServer(String header, String action, String className, double[] percentiles, Time time,
                                         MetricsConfig config) throws IOException {
@@ -83,10 +83,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         final String readResponsePendingBytesName = rwMetricPrefix+"_Read_Response_Pending_Bytes";
         final String writeReadPendingRecordsName = rwMetricPrefix+"_Write_Read_Request_Pending_Records";
         final String writeReadPendingBytesName = rwMetricPrefix+"_Write_Read_Request_Pending_Bytes";
-        final String writeMissEventsName = rwMetricPrefix+"_Write_Miss_Events";
-        final String writeMissEventsPerSecName = rwMetricPrefix+"_Write_Miss_Events_PerSec";
-        final String readMissEventsName = rwMetricPrefix+"_Read_Miss_Events";
-        final String readMissEventsPerSecName = rwMetricPrefix+"_Read_Miss_Events_PerSec";
+        final String writeTimeoutEventsName = rwMetricPrefix+"_Write_Timeout_Events";
+        final String writeTimeoutEventsPerSecName = rwMetricPrefix+"_Write_Timeout_Events_PerSec";
+        final String readTimeoutEventsName = rwMetricPrefix+"_Read_Timeout_Events";
+        final String readTimeoutEventsPerSecName = rwMetricPrefix+"_Read_Timeout_Events_PerSec";
 
         this.writers = this.registry.gauge(writersName, new AtomicInteger());
         this.readers = this.registry.gauge(readersName, new AtomicInteger());
@@ -106,10 +106,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readResponsePendingBytes = this.registry.gauge(readResponsePendingBytesName, new AtomicLong());
         this.writeReadRequestPendingRecords = this.registry.gauge(writeReadPendingRecordsName, new AtomicLong());
         this.writeReadRequestPendingBytes = this.registry.gauge(writeReadPendingBytesName, new AtomicLong());
-        this.writeMissEvents = this.registry.counter(writeMissEventsName);
-        this.writeMissEventsPerSec = this.registry.gauge(writeMissEventsPerSecName, new AtomicDouble());
-        this.readMissEvents = this.registry.counter(readMissEventsName);
-        this.readMissEventsPerSec = this.registry.gauge(readMissEventsPerSecName, new AtomicDouble());
+        this.writeTimeoutEvents = this.registry.counter(writeTimeoutEventsName);
+        this.writeTimeoutEventsPerSec = this.registry.gauge(writeTimeoutEventsPerSecName, new AtomicDouble());
+        this.readTimeoutEvents = this.registry.counter(readTimeoutEventsName);
+        this.readTimeoutEventsPerSec = this.registry.gauge(readTimeoutEventsPerSecName, new AtomicDouble());
     }
 
 
@@ -121,8 +121,8 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
                             long writeResponsePendingBytes, long readResponsePendingRecords,
                             long readResponsePendingBytes, long writeReadRequestPendingRecords,
                             long writeReadRequestPendingBytes,
-                            long writeMissEvents, double writeMissEventsPerSec,
-                            long readMissEvents, double readMissEventsPerSec,
+                            long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                            long readTimeoutEvents, double readTimeoutEventsPerSec,
                             double seconds, long bytes, long records, double recsPerSec,
                             double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
                             long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -144,10 +144,10 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readResponsePendingBytes.set(readResponsePendingBytes);
         this.writeReadRequestPendingRecords.set(writeReadRequestPendingRecords);
         this.writeReadRequestPendingBytes.set(writeReadRequestPendingBytes);
-        this.writeMissEvents.increment(writeMissEvents);
-        this.writeMissEventsPerSec.set(writeMissEventsPerSec);
-        this.readMissEvents.increment(readMissEvents);
-        this.readMissEventsPerSec.set(readMissEventsPerSec);
+        this.writeTimeoutEvents.increment(writeTimeoutEvents);
+        this.writeTimeoutEventsPerSec.set(writeTimeoutEventsPerSec);
+        this.readTimeoutEvents.increment(readTimeoutEvents);
+        this.readTimeoutEventsPerSec.set(readTimeoutEventsPerSec);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                                 higherDiscard, slc1, slc2, percentileValues);
     }
