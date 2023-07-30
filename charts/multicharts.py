@@ -242,30 +242,30 @@ class SbkMultiCharts(SbkCharts):
             sheet = self.wb.create_sheet("Total_MB")
             sheet.add_chart(chart)
 
-    def create_multi_write_read_miss_events_graph(self):
-        chart = self.create_line_chart("Write and Read Miss Events Variations",
-                                       "Intervals", "Write and Read Miss Events", 25, 50)
+    def create_multi_write_read_timeout_events_graph(self):
+        chart = self.create_line_chart("Write and Read Timeout Events Variations",
+                                       "Intervals", "Write and Read Timeout Events", 25, 50)
         for name in self.wb.sheetnames:
             if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
-                chart.append(self.get_write_miss_events_series(ws, prefix))
-                chart.append(self.get_read_miss_events_series(ws, prefix))
+                chart.append(self.get_write_timeout_events_series(ws, prefix))
+                chart.append(self.get_read_timeout_events_series(ws, prefix))
         # add chart to the sheet
-        sheet = self.wb.create_sheet("Write_Read_Miss_Events")
+        sheet = self.wb.create_sheet("Write_Read_Timeout_Events")
         sheet.add_chart(chart)
 
-    def create_multi_write_read_miss_events_per_sec_graph(self):
-        chart = self.create_line_chart("Write and Read Miss Events / Sec Variations",
-                                       "Intervals", "Write and Read Miss Events / Sec", 25, 50)
+    def create_multi_write_read_timeout_events_per_sec_graph(self):
+        chart = self.create_line_chart("Write and Read Timeout Events / Sec Variations",
+                                       "Intervals", "Write and Read Timeout Events / Sec", 25, 50)
         for name in self.wb.sheetnames:
             if self.is_rnum_sheet(name):
                 ws = self.wb[name]
                 prefix = name + "-" + self.get_storage_name(ws)
-                chart.append(self.get_write_miss_events_per_sec_series(ws, prefix))
-                chart.append(self.get_read_miss_events_per_sec_series(ws, prefix))
+                chart.append(self.get_write_timeout_events_per_sec_series(ws, prefix))
+                chart.append(self.get_read_timeout_events_per_sec_series(ws, prefix))
         # add chart to the sheet
-        sheet = self.wb.create_sheet("Write_Read_Miss_Events_Per_Sec")
+        sheet = self.wb.create_sheet("Write_Read_Timeout_Events_Per_Sec")
         sheet.add_chart(chart)
 
     def create_total_throughput_mb_compare_graph(self):
@@ -352,21 +352,21 @@ class SbkMultiCharts(SbkCharts):
             sheet = self.wb.create_sheet("Total_Max_Latency")
             sheet.add_chart(chart)
 
-    def create_total_write_read_miss_events_compare_graph(self):
+    def create_total_write_read_timeout_events_compare_graph(self):
         chart = None
         for name in self.wb.sheetnames:
             if self.is_tnum_sheet(name):
                 ws = self.wb[name]
                 if chart is None:
                     action = self.get_action_name(ws)
-                    chart = self.create_bar_chart("Total Write and Read Miss Events Comparison",
-                                                  action, "Write and Read Miss Events", 25, 50)
+                    chart = self.create_bar_chart("Total Write and Read Timeout Events Comparison",
+                                                  action, "Write and Read Timeout Events", 25, 50)
                 prefix = name + "-" + self.get_storage_name(ws)
-                chart.append(self.get_write_miss_events_series(ws, prefix))
-                chart.append(self.get_read_miss_events_series(ws, prefix))
+                chart.append(self.get_write_timeout_events_series(ws, prefix))
+                chart.append(self.get_read_timeout_events_series(ws, prefix))
         if chart is not None:
             # add chart to the sheet
-            sheet = self.wb.create_sheet("Total_Write_Read_Miss_Events")
+            sheet = self.wb.create_sheet("Total_Write_Read_Timeout_Events")
             sheet.add_chart(chart)
 
 
@@ -380,8 +380,8 @@ class SbkMultiCharts(SbkCharts):
             self.create_multi_latency_graphs()
             self.create_multi_write_read_records_graph()
             self.create_multi_write_read_mb_graph()
-            self.create_multi_write_read_miss_events_graph()
-            self.create_multi_write_read_miss_events_per_sec_graph()
+            self.create_multi_write_read_timeout_events_graph()
+            self.create_multi_write_read_timeout_events_per_sec_graph()
             self.create_total_multi_latency_percentile_graphs()
             self.create_total_mb_compare_graph()
             self.create_total_throughput_mb_compare_graph()
@@ -389,6 +389,6 @@ class SbkMultiCharts(SbkCharts):
             self.create_total_min_latency_compare_graph()
             self.create_total_avg_latency_compare_graph()
             self.create_total_max_latency_compare_graph()
-            self.create_total_write_read_miss_events_compare_graph()
+            self.create_total_write_read_timeout_events_compare_graph()
             self.wb.save(self.file)
             print("file : %s updated with graphs" % self.file)
