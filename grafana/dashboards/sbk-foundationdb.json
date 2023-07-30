@@ -1602,11 +1602,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Miss_Events_PerSec{class=\"Foundationdb\", action=\"Writing\"}",
+          "expr": "SBK_Write_Timeout_Events_PerSec{class=\"Foundationdb\", action=\"Writing\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Write Miss Events / sec",
+      "title": "SBK Foundationdb Write Timeout Events / sec",
       "type": "timeseries"
     },
     {
@@ -1933,14 +1933,14 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Miss_Events_total{class=\"Foundationdb\", action=\"Writing\"}",
+          "expr": "SBK_Write_Timeout_Events_total{class=\"Foundationdb\", action=\"Writing\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Write Miss Events",
+      "title": "SBK Foundationdb Write Timeout Events",
       "type": "stat"
     },
     {
@@ -3013,11 +3013,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Miss_Events_PerSec{class=\"Foundationdb\", action=\"Reading\"}",
+          "expr": "SBK_Read_Timeout_Events_PerSec{class=\"Foundationdb\", action=\"Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Read Miss Events / sec",
+      "title": "SBK Foundationdb Read Timeout Events / sec",
       "type": "timeseries"
     },
     {
@@ -3345,14 +3345,14 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Miss_Events_total{class=\"Foundationdb\", action=\"Reading\"}",
+          "expr": "SBK_Read_Timeout_Events_total{class=\"Foundationdb\", action=\"Reading\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Read Miss Events",
+      "title": "SBK Foundationdb Read Timeout Events",
       "type": "stat"
     },
     {
@@ -5063,11 +5063,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Miss_Events_PerSec{class=\"Foundationdb\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Timeout_Events_PerSec{class=\"Foundationdb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Write Miss Events / sec",
+      "title": "SBK Foundationdb Write Timeout Events / sec",
       "type": "timeseries"
     },
     {
@@ -5148,11 +5148,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Miss_Events_PerSec{class=\"Foundationdb\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Timeout_Events_PerSec{class=\"Foundationdb\", action=\"Write_Reading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Read Miss Events / sec",
+      "title": "SBK Foundationdb Read Timeout Events / sec",
       "type": "timeseries"
     },
     {
@@ -5205,7 +5205,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Miss_Events_total{class=\"Foundationdb\", action=\"Write_Reading\"}",
+          "expr": "SBK_Read_Timeout_Events_total{class=\"Foundationdb\", action=\"Write_Reading\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -5217,14 +5217,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Miss_Events_total{class=\"Foundationdb\", action=\"Write_Reading\"}",
+          "expr": "SBK_Write_Timeout_Events_total{class=\"Foundationdb\", action=\"Write_Reading\"}",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Foundationdb Write and Read Miss Events",
+      "title": "SBK Foundationdb Write and Read Timeout Events",
       "type": "stat"
     },
     {
@@ -6970,11 +6970,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Write_Miss_Events_PerSec{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Timeout_Events_PerSec{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Write Miss Events / sec",
+      "title": "SBK Foundationdb Write Timeout Events / sec",
       "type": "timeseries"
     },
     {
@@ -7055,11 +7055,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Miss_Events_PerSec{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Timeout_Events_PerSec{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
           "refId": "A"
         }
       ],
-      "title": "SBK Foundationdb Read Miss Events / sec",
+      "title": "SBK Foundationdb Read Timeout Events / sec",
       "type": "timeseries"
     },
     {
@@ -7112,7 +7112,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Read_Miss_Events_total{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Read_Timeout_Events_total{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
           "interval": "",
           "legendFormat": "Lower",
           "queryType": "randomWalk",
@@ -7124,14 +7124,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "SBK_Write_Miss_Events_total{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
+          "expr": "SBK_Write_Timeout_Events_total{class=\"Foundationdb\", action=\"Write_OnlyReading\"}",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "SBK Foundationdb Write and Read Miss Events",
+      "title": "SBK Foundationdb Write and Read Timeout Events",
       "type": "stat"
     }
   ],
