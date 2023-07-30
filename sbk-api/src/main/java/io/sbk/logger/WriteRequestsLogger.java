@@ -13,5 +13,7 @@ public interface WriteRequestsLogger {
 
     void recordWriteRequests(int writerId, long startTime, long bytes, long events);
 
+    void recordWriteMissEvents(int writerId, long startTime, long missEvents);
+
     int getMaxWriterIDs();
 }

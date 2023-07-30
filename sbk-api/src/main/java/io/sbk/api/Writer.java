@@ -17,6 +17,7 @@ import io.time.Time;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Interface for Writers.
@@ -166,7 +167,6 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         if (ret == null) {
             status.endTime = time.getCurrentTime();
             perlChannel.send(status.startTime, status.endTime, status.records, size);
-
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
@@ -210,7 +210,11 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
         } else {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
-                perlChannel.throwException(ex);
+                if (ex instanceof TimeoutException) {
+                    logger.recordWriteMissEvents(id, status.startTime, 1);
+                } else {
+                    perlChannel.throwException(ex);
+                }
                 return null;
             });
             ret.thenAccept(d -> {

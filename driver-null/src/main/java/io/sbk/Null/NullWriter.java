@@ -14,23 +14,32 @@ import io.sbk.api.Writer;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class for Writer.
  */
 public class NullWriter implements Writer<byte[]> {
-    long n;
+    private final long n;
+    private final int timeoutMS;
 
-    public NullWriter(long n) {
+
+    public NullWriter(int timeoutMS, long n) {
         this.n = n;
+        this.timeoutMS = timeoutMS;
     }
 
     @Override
     public CompletableFuture writeAsync(byte[] data) throws IOException {
-        for (long i = 0; i < n; i++) {
-            //no op
+        if (n > 0) {
+            for (long i = 0; i < n; i++) {
+                //no op
+            }
+            return null;
+        } else {
+            return new CompletableFuture<>().orTimeout(timeoutMS, TimeUnit.MILLISECONDS);
         }
-        return null;
+
     }
 
 

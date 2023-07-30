@@ -63,6 +63,8 @@ public interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsL
                     long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                     long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                     long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                    long writeMissEvents, double writeMissEventsPerSec,
+                    long readMissEvents, double readMissEventsPerSec,
                     double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                     double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                     long higherDiscard, long slc1, long slc2, long[] percentileValues);

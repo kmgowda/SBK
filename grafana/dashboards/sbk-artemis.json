@@ -576,7 +576,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -680,7 +680,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -883,7 +883,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1140,7 +1140,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1383,7 +1383,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1468,7 +1468,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1531,51 +1531,49 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanArtemiss": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "links": [],
           "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 100
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 500
-              },
-              {
-                "color": "#EF843C",
-                "value": 1000
-              },
-              {
-                "color": "#E24D42",
-                "value": 10000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 100000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 1000000
-              },
-              {
-                "color": "#705DA0",
-                "value": 10000000
-              },
-              {
-                "color": "#508642",
-                "value": 100000000
               }
             ]
           },
-          "unit": "short"
+          "unit": "cps"
         },
         "overrides": []
       },
@@ -1585,20 +1583,17 @@
         "x": 16,
         "y": 37
       },
-      "id": 71,
+      "id": 148,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "textMode": "auto"
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
       },
       "pluginVersion": "9.0.6",
       "targets": [
@@ -1607,24 +1602,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Writing_SLC_1{class=\"Artemis\"}",
-          "interval": "",
-          "legendFormat": "SLC 1",
+          "expr": "SBK_Write_Miss_Events_PerSec{class=\"Artemis\", action=\"Writing\"}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Writing_SLC_2{class=\"Artemis\"}",
-          "interval": "",
-          "legendFormat": "SLC 2",
-          "refId": "B"
         }
       ],
-      "title": "SBK Artemis Write  Sliding Latency Coverage (SLC)",
-      "type": "stat"
+      "title": "SBK Artemis Write Miss Events / sec",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -1799,6 +1782,168 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 500
+              },
+              {
+                "color": "#EF843C",
+                "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 16,
+        "y": 48
+      },
+      "id": 71,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_SLC_1{class=\"Artemis\"}",
+          "interval": "",
+          "legendFormat": "SLC 1",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Writing_SLC_2{class=\"Artemis\"}",
+          "interval": "",
+          "legendFormat": "SLC 2",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Artemis Write  Sliding Latency Coverage (SLC)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 20,
+        "y": 48
+      },
+      "id": 147,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Miss_Events_total{class=\"Artemis\", action=\"Writing\"}",
+          "interval": "",
+          "legendFormat": "Lower",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Artemis Write Miss Events",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "datasource": {
         "type": "datasource",
@@ -1844,7 +1989,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1947,7 +2092,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2149,7 +2294,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2406,7 +2551,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2649,7 +2794,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2734,7 +2879,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2797,51 +2942,49 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanArtemiss": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "links": [],
           "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 100
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 500
-              },
-              {
-                "color": "#EF843C",
-                "value": 1000
-              },
-              {
-                "color": "#E24D42",
-                "value": 10000
-              },
-              {
-                "color": "#1F78C1",
-                "value": 100000
-              },
-              {
-                "color": "#BA43A9",
-                "value": 1000000
-              },
-              {
-                "color": "#705DA0",
-                "value": 10000000
-              },
-              {
-                "color": "#508642",
-                "value": 100000000
               }
             ]
           },
-          "unit": "short"
+          "unit": "cps"
         },
         "overrides": []
       },
@@ -2851,20 +2994,17 @@
         "x": 16,
         "y": 82
       },
-      "id": 145,
+      "id": 149,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "textMode": "auto"
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
       },
       "pluginVersion": "9.0.6",
       "targets": [
@@ -2873,24 +3013,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "SBK_Reading_SLC_1{class=\"Artemis\"}",
-          "interval": "",
-          "legendFormat": "SLC 1",
+          "expr": "SBK_Read_Miss_Events_PerSec{class=\"Artemis\", action=\"Reading\"}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "SBK_Reading_SLC_2{class=\"Artemis\"}",
-          "interval": "",
-          "legendFormat": "SLC 2",
-          "refId": "B"
         }
       ],
-      "title": "SBK Artemis Read  Sliding Latency Coverage (SLC)",
-      "type": "stat"
+      "title": "SBK Artemis Read Miss Events / sec",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -3066,6 +3194,168 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 100
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 500
+              },
+              {
+                "color": "#EF843C",
+                "value": 1000
+              },
+              {
+                "color": "#E24D42",
+                "value": 10000
+              },
+              {
+                "color": "#1F78C1",
+                "value": 100000
+              },
+              {
+                "color": "#BA43A9",
+                "value": 1000000
+              },
+              {
+                "color": "#705DA0",
+                "value": 10000000
+              },
+              {
+                "color": "#508642",
+                "value": 100000000
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 16,
+        "y": 93
+      },
+      "id": 145,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Reading_SLC_1{class=\"Artemis\"}",
+          "interval": "",
+          "legendFormat": "SLC 1",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Reading_SLC_2{class=\"Artemis\"}",
+          "interval": "",
+          "legendFormat": "SLC 2",
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Artemis Read  Sliding Latency Coverage (SLC)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 20,
+        "y": 93
+      },
+      "id": 150,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Miss_Events_total{class=\"Artemis\", action=\"Reading\"}",
+          "interval": "",
+          "legendFormat": "Lower",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Artemis Read Miss Events",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "datasource": {
         "type": "datasource",
@@ -3111,7 +3401,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -3221,7 +3511,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -3432,7 +3722,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -3688,7 +3978,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -3928,7 +4218,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4013,7 +4303,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4098,7 +4388,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4183,7 +4473,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4268,7 +4558,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4353,7 +4643,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4696,6 +4986,248 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanArtemiss": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "cps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 158
+      },
+      "id": 153,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Miss_Events_PerSec{class=\"Artemis\", action=\"Write_Reading\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Artemis Write Miss Events / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanArtemiss": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "cps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 158
+      },
+      "id": 156,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Miss_Events_PerSec{class=\"Artemis\", action=\"Write_Reading\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Artemis Read Miss Events / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 158
+      },
+      "id": 154,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Miss_Events_total{class=\"Artemis\", action=\"Write_Reading\"}",
+          "interval": "",
+          "legendFormat": "Lower",
+          "queryType": "randomWalk",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "SBK_Write_Miss_Events_total{class=\"Artemis\", action=\"Write_Reading\"}",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Artemis Write and Read Miss Events",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "datasource": {
         "type": "datasource",
@@ -4705,7 +5237,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 158
+        "y": 166
       },
       "id": 77,
       "panels": [],
@@ -4741,7 +5273,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4772,7 +5304,7 @@
         "h": 13,
         "w": 8,
         "x": 0,
-        "y": 159
+        "y": 167
       },
       "id": 79,
       "options": {
@@ -4852,7 +5384,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -4883,7 +5415,7 @@
         "h": 13,
         "w": 8,
         "x": 8,
-        "y": 159
+        "y": 167
       },
       "id": 81,
       "options": {
@@ -4992,7 +5524,7 @@
         "h": 13,
         "w": 8,
         "x": 16,
-        "y": 159
+        "y": 167
       },
       "id": 83,
       "options": {
@@ -5065,7 +5597,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -5096,7 +5628,7 @@
         "h": 13,
         "w": 8,
         "x": 0,
-        "y": 172
+        "y": 180
       },
       "id": 85,
       "options": {
@@ -5269,7 +5801,7 @@
         "h": 13,
         "w": 8,
         "x": 8,
-        "y": 172
+        "y": 180
       },
       "id": 89,
       "options": {
@@ -5330,7 +5862,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -5361,7 +5893,7 @@
         "h": 13,
         "w": 8,
         "x": 16,
-        "y": 172
+        "y": 180
       },
       "id": 127,
       "options": {
@@ -5588,7 +6120,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -5616,7 +6148,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 185
+        "y": 193
       },
       "id": 139,
       "options": {
@@ -5673,7 +6205,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -5701,7 +6233,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 185
+        "y": 193
       },
       "id": 140,
       "options": {
@@ -5758,7 +6290,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -5786,7 +6318,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 185
+        "y": 193
       },
       "id": 141,
       "options": {
@@ -5843,7 +6375,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -5871,7 +6403,7 @@
         "h": 11,
         "w": 8,
         "x": 0,
-        "y": 196
+        "y": 204
       },
       "id": 142,
       "options": {
@@ -5928,7 +6460,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -5956,7 +6488,7 @@
         "h": 11,
         "w": 8,
         "x": 8,
-        "y": 196
+        "y": 204
       },
       "id": 143,
       "options": {
@@ -6013,7 +6545,7 @@
               "type": "linear"
             },
             "showPoints": "always",
-            "spanNulls": false,
+            "spanArtemiss": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -6041,7 +6573,7 @@
         "h": 11,
         "w": 8,
         "x": 16,
-        "y": 196
+        "y": 204
       },
       "id": 144,
       "options": {
@@ -6128,7 +6660,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 207
+        "y": 215
       },
       "id": 95,
       "options": {
@@ -6216,7 +6748,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 207
+        "y": 215
       },
       "id": 119,
       "options": {
@@ -6304,7 +6836,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 207
+        "y": 215
       },
       "id": 93,
       "options": {
@@ -6358,6 +6890,248 @@
         }
       ],
       "title": "SBK Artemis Write-Only Read  Discarded Latencies",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanArtemiss": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "cps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 222
+      },
+      "id": 155,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Write_Miss_Events_PerSec{class=\"Artemis\", action=\"Write_OnlyReading\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Artemis Write Miss Events / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanArtemiss": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "cps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 222
+      },
+      "id": 152,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Miss_Events_PerSec{class=\"Artemis\", action=\"Write_OnlyReading\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "SBK Artemis Read Miss Events / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 222
+      },
+      "id": 157,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "SBK_Read_Miss_Events_total{class=\"Artemis\", action=\"Write_OnlyReading\"}",
+          "interval": "",
+          "legendFormat": "Lower",
+          "queryType": "randomWalk",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "SBK_Write_Miss_Events_total{class=\"Artemis\", action=\"Write_OnlyReading\"}",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "SBK Artemis Write and Read Miss Events",
       "type": "stat"
     }
   ],

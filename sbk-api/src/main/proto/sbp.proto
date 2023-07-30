@@ -78,15 +78,17 @@ message MessageLatenciesRecord {
   int64 writeRequestRecords = 8;
   int64 readRequestBytes = 9;
   int64 readRequestRecords = 10;
-  int64 totalRecords = 11;
-  int64 validLatencyRecords = 12;
-  int64 lowerLatencyDiscardRecords = 13;
-  int64 higherLatencyDiscardRecords = 14;
-  int64 invalidLatencyRecords = 15;
-  int64 totalBytes = 16;
-  int64 totalLatency = 17;
-  int64 minLatency = 18;
-  int64 maxLatency = 19;
-  map<int64, int64 > latency = 20;
+  int64 writeMissEvents = 11;
+  int64 readMissEvents = 12;
+  int64 totalRecords = 13;
+  int64 validLatencyRecords = 14;
+  int64 lowerLatencyDiscardRecords = 15;
+  int64 higherLatencyDiscardRecords = 16;
+  int64 invalidLatencyRecords = 17;
+  int64 totalBytes = 18;
+  int64 totalLatency = 19;
+  int64 minLatency = 20;
+  int64 maxLatency = 21;
+  map<int64, int64 > latency = 22;
 }
 

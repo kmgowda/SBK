@@ -331,7 +331,7 @@ final public class SbkGem {
             throw ex;
         }
         Printer.log.info("SBK-GEM: Arguments to SBM command verification Success..");
-        return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, logger, time), gemConfig, params,
+        return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, ramLogger, time), gemConfig, params,
                 sbkArgsBuilder.toString());
     }
 

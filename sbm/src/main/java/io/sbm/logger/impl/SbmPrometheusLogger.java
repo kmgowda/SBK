@@ -101,6 +101,12 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         }
     }
 
+    @Override
+    public void recordWriteMissEvents(int writerId, long startTime, long missEvents) {
+        if (isRequestWrites) {
+            super.recordWriteMissEvents(writerId % maxWriterRequestIds, startTime, missEvents);
+        }
+    }
 
     @Override
     public final void recordReadRequests(int readerId, long startTime, long bytes, long events) {
@@ -109,13 +115,22 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
         }
     }
 
+    @Override
+    public void recordReadMissEvents(int readerId, long startTime, long missEvents) {
+        if (isRequestReads) {
+            super.recordReadMissEvents(readerId % maxReaderRequestIds, startTime, missEvents);
+        }
+    }
 
     public void print(String ramPrefix, String prefix, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestsMbPerSec, long writeRequestRecords,
                       double writeRequestsRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                       long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                      long writeReadPendingRecords, long writeReadPendingBytes, double seconds, long bytes,
+                      long writeReadPendingRecords, long writeReadPendingBytes,
+                      long writeMissEvents, double writeMissEventsPerSec,
+                      long readMissEvents, double readMissEventsPerSec,
+                      double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -127,6 +142,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
+                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
@@ -139,7 +155,10 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, double seconds, long bytes,
+                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                      long writeMissEvents, double writeMissEventsPerSec,
+                      long readMissEvents, double readMissEventsPerSec,
+                      double seconds, long bytes,
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -148,6 +167,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
@@ -157,6 +177,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                     readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                     writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                     readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                    writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
@@ -167,6 +188,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                     readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                     writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                     readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                    writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
@@ -176,7 +198,12 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                           long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords, long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, double seconds, long bytes,
+                           long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
+                           long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
+                           long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                           long writeMissEvents, double writeMissEventsPerSec,
+                           long readMissEvents, double readMissEventsPerSec,
+                           double seconds, long bytes,
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -185,6 +212,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
@@ -195,6 +223,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                     readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                     writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                     readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                    writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
