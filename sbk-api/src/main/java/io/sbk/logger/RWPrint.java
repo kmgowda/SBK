@@ -32,10 +32,10 @@ public interface RWPrint {
      * @param readResponsePendingBytes       Read response pending bytes
      * @param writeReadRequestPendingRecords Write read pending records
      * @param writeReadRequestPendingBytes   Write read pending bytes
-     * @param writeTimeoutEvents             Missed Write Events
-     * @param writeTimeoutEventsPerSec       Missed Write Events/sec
-     * @param readTimeoutEvents              Missed Read Events
-     * @param readTimeoutEventsPerSec        Missed Write Events/sec
+     * @param writeTimeoutEvents             Timeout Write Events
+     * @param writeTimeoutEventsPerSec       Timeout Write Events/sec
+     * @param readTimeoutEvents              Timeout Read Events
+     * @param readTimeoutEventsPerSec        Timeout Write Events/sec
      * @param seconds                        reporting duration in seconds
      * @param bytes                          number of bytes read/write
      * @param records                        data to write.

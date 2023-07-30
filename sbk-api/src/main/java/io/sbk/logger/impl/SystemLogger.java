@@ -342,14 +342,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 (writeReadRequestPendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeReadRequestPendingRecords));
     }
 
-    protected final void appendWriteAndReadMissEvents(@NotNull StringBuilder out,
-                                                           long writeMissEvents,
-                                                           double writeMissEventsPerSec,
-                                                           long readMissEvents,
-                                                           double readeMissEventsPerSec) {
+    protected final void appendWriteAndReadTimeoutEvents(@NotNull StringBuilder out,
+                                                         long writeTimeoutEvents,
+                                                         double writeTimeoutEventsPerSec,
+                                                         long readTimeoutEvents,
+                                                         double readeTimeoutEventsPerSec) {
         out.append(String.format(" %13d write timeout events, %8.2f write timeout events/sec, "+
                         "%13d read timeout events, %8.2f read timeout events/sec,",
-               writeMissEvents, writeMissEventsPerSec, readMissEvents, readeMissEventsPerSec));
+               writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readeTimeoutEventsPerSec));
 
     }
 
@@ -429,7 +429,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         appendWriteAndReadRequestsPending(out, writeResponsePendingRecords, writeResponsePendingBytes,
                 readResponsePendingBytes, readResponsePendingRecords, writeReadRequestPendingRecords,
                 writeReadRequestPendingBytes);
-        appendWriteAndReadMissEvents(out, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec);
+        appendWriteAndReadTimeoutEvents(out, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
