@@ -88,12 +88,12 @@ public abstract class PrometheusLogger extends CSVLogger {
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
         if (contextDisabled) {
-            printer = (writers1, maxWriters1, readers1, maxReaders1, writeRequestBytes1, writeRequestMbPerSec, writeRequestRecords1, writeRequestRecordsPerSec, readRequestBytes1, readRequestMbPerSec, readRequestRecords1, readRequestRecordsPerSec, writeResponsePendingRecords1, writeResponsePendingBytes1, readResponsePendingRecords1, readResponsePendingBytes1, writeReadRequestPendingRecords, writeReadRequestPendingBytes, writeTimeoutEvents1, writeTimeoutEventsPerSec, readTimeoutEvents1, readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency1, maxLatency1, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues) -> super.print(writers1, maxWriters1, readers1, maxReaders1, writeRequestBytes1, writeRequestMbPerSec, writeRequestRecords1, writeRequestRecordsPerSec, readRequestBytes1, readRequestMbPerSec, readRequestRecords1, readRequestRecordsPerSec, writeResponsePendingRecords1, writeResponsePendingBytes1, readResponsePendingRecords1, readResponsePendingBytes1, writeReadRequestPendingRecords, writeReadRequestPendingBytes, writeTimeoutEvents1, writeTimeoutEventsPerSec, readTimeoutEvents1, readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency1, maxLatency1, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+            printer = super::print;
             prometheusServer = null;
         } else {
             prometheusServer = getPrometheusRWMetricsServer();
             prometheusServer.start();
-            printer = (writers1, maxWriters1, readers1, maxReaders1, writeRequestBytes1, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec, readRequestBytes1, readRequestsMBPerSec, readRequests, readRequestsPerSec, writeResponsePendingRecords1, writeResponsePendingBytes1, readResponsePendingRecords1, readResponsePendingBytes1, writeReadPendingRecords, writeReadPendingBytes, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency1, maxLatency1, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues) -> printMetrics(writers1, maxWriters1, readers1, maxReaders1, writeRequestBytes1, writeRequestsMbPerSec, writesRequests, writeRequestsPerSec, readRequestBytes1, readRequestsMBPerSec, readRequests, readRequestsPerSec, writeResponsePendingRecords1, writeResponsePendingBytes1, readResponsePendingRecords1, readResponsePendingBytes1, writeReadPendingRecords, writeReadPendingBytes, writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency1, maxLatency1, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+            printer = this::printMetrics;
         }
         Printer.log.info("SBK PrometheusLogger Started");
     }
@@ -113,8 +113,8 @@ public abstract class PrometheusLogger extends CSVLogger {
                               long readRequests, double readRequestsPerSec, long writeResponsePendingRecords,
                               long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                               long writeReadPendingRecords, long writeReadPendingBytes,
-                              long writeMissEvents, double writeMissEventsPerSec,
-                              long readMissEvents, double readMissEventsPerSec,
+                              long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                              long readTimeoutEvents, double readTimeoutEventsPerSec,
                               double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                               long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -122,14 +122,14 @@ public abstract class PrometheusLogger extends CSVLogger {
                 writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
-                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
+                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
                 writesRequests, writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests,
                 readRequestsPerSec, writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
-                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
+                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
