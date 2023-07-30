@@ -102,9 +102,9 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
     @Override
-    public void recordWriteMissEvents(int writerId, long startTime, long missEvents) {
+    public void recordWriteTimeoutEvents(int writerId, long startTime, long missEvents) {
         if (isRequestWrites) {
-            super.recordWriteMissEvents(writerId % maxWriterRequestIds, startTime, missEvents);
+            super.recordWriteTimeoutEvents(writerId % maxWriterRequestIds, startTime, missEvents);
         }
     }
 
@@ -116,9 +116,9 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     }
 
     @Override
-    public void recordReadMissEvents(int readerId, long startTime, long missEvents) {
+    public void recordReadTimeoutEvents(int readerId, long startTime, long missEvents) {
         if (isRequestReads) {
-            super.recordReadMissEvents(readerId % maxReaderRequestIds, startTime, missEvents);
+            super.recordReadTimeoutEvents(readerId % maxReaderRequestIds, startTime, missEvents);
         }
     }
 

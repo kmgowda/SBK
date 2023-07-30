@@ -291,7 +291,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void recordWriteMissEvents(int writerId, long startTime, long missEvents) {
+    public void recordWriteTimeoutEvents(int writerId, long startTime, long missEvents) {
         VAR_HANDLE_ARRAY.getAndAdd(writeMissEventsArray, writerId, missEvents);
     }
 
@@ -302,7 +302,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void recordReadMissEvents(int readerId, long startTime, long missEvents) {
+    public void recordReadTimeoutEvents(int readerId, long startTime, long missEvents) {
         VAR_HANDLE_ARRAY.getAndAdd(readMissEventsArray, readerId, missEvents);
     }
 

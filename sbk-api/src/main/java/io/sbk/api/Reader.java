@@ -100,7 +100,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
         if (ret == null) {
             status.records = 0;
             status.endTime = status.startTime;
-            logger.recordReadMissEvents(id, status.startTime, 1);
+            logger.recordReadTimeoutEvents(id, status.startTime, 1);
         } else {
             status.endTime = time.getCurrentTime();
             status.bytes = dType.length(ret);
@@ -171,7 +171,7 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
         if (ret == null) {
             status.endTime = time.getCurrentTime();
             status.records = 0;
-            logger.recordReadMissEvents(id, status.startTime, 1);
+            logger.recordReadTimeoutEvents(id, status.startTime, 1);
         } else {
             status.startTime = dType.getTime(ret);
             status.endTime = time.getCurrentTime();

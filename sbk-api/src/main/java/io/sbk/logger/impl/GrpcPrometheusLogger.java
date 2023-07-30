@@ -307,16 +307,16 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     }
     
     @Override
-    public void recordWriteMissEvents(int readerId, long startTime,  long events) {
-        super.recordWriteMissEvents(readerId, startTime, events);
+    public void recordWriteTimeoutEvents(int readerId, long startTime, long events) {
+        super.recordWriteTimeoutEvents(readerId, startTime, events);
         if (enable) {
             ramWriteMissEventsArray.addAndGet(readerId, events);
         }
     }
 
     @Override
-    public void recordReadMissEvents(int writerId, long startTime, long events) {
-        super.recordReadMissEvents(writerId, startTime, events);
+    public void recordReadTimeoutEvents(int writerId, long startTime, long events) {
+        super.recordReadTimeoutEvents(writerId, startTime, events);
         if (enable) {
             ramReadMissEventsArray.addAndGet(writerId, events);
         }

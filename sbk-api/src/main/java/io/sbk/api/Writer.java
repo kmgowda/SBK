@@ -211,7 +211,7 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
                 if (ex instanceof TimeoutException) {
-                    logger.recordWriteMissEvents(id, status.startTime, 1);
+                    logger.recordWriteTimeoutEvents(id, status.startTime, 1);
                 } else {
                     perlChannel.throwException(ex);
                 }
