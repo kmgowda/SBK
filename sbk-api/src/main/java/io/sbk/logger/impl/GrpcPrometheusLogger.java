@@ -60,10 +60,10 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
 
     private AtomicLongArray ramWriteBytesArray;
     private AtomicLongArray ramWriteRequestRecordsArray;
-    private AtomicLongArray ramWriteMissEventsArray;
+    private AtomicLongArray ramWriteTimeoutEventsArray;
     private AtomicLongArray ramReadBytesArray;
     private AtomicLongArray ramReadRequestRecordsArray;
-    private AtomicLongArray ramReadMissEventsArray;
+    private AtomicLongArray ramReadTimeoutEventsArray;
     private ManagedChannel channel;
     private ServiceGrpc.ServiceStub stub;
     private ServiceGrpc.ServiceBlockingStub blockingStub;
@@ -80,8 +80,8 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         this.ramWriteRequestRecordsArray = null;
         this.ramReadBytesArray = null;
         this.ramReadRequestRecordsArray = null;
-        this.ramWriteMissEventsArray = null;
-        this.ramReadMissEventsArray = null;
+        this.ramWriteTimeoutEventsArray = null;
+        this.ramReadTimeoutEventsArray = null;
     }
 
     @Override
@@ -135,8 +135,8 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         this.ramWriteRequestRecordsArray = new AtomicLongArray(maxWriterRequestIds);
         this.ramReadBytesArray = new AtomicLongArray(maxReaderRequestIds);
         this.ramReadRequestRecordsArray = new AtomicLongArray(maxReaderRequestIds);
-        this.ramWriteMissEventsArray = new AtomicLongArray(maxWriterRequestIds);
-        this.ramReadMissEventsArray = new AtomicLongArray(maxReaderRequestIds);
+        this.ramWriteTimeoutEventsArray = new AtomicLongArray(maxWriterRequestIds);
+        this.ramReadTimeoutEventsArray = new AtomicLongArray(maxReaderRequestIds);
         channel = ManagedChannelBuilder.forTarget(sbmHostConfig.host + ":" + sbmHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         try {
@@ -245,24 +245,24 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         long writeBytesSum = 0;
         long readRequestsSum = 0;
         long readBytesSum = 0;
-        long writeMissEventsSum = 0;
-        long readMissEventsSum = 0;
+        long writeTimeoutEventsSum = 0;
+        long readTimeoutEventsSum = 0;
         for (int i = 0; i < maxWriterRequestIds; i++) {
             writeRequestsSum += ramWriteRequestRecordsArray.getAndSet(i, 0);
             writeBytesSum += ramWriteBytesArray.getAndSet(i, 0);
-            writeMissEventsSum += ramWriteMissEventsArray.getAndSet(i, 0);
+            writeTimeoutEventsSum += ramWriteTimeoutEventsArray.getAndSet(i, 0);
         }
         for (int i = 0; i < maxReaderRequestIds; i++) {
             readRequestsSum += ramReadRequestRecordsArray.getAndSet(i, 0);
             readBytesSum += ramReadBytesArray.getAndSet(i, 0);
-            readMissEventsSum += ramReadMissEventsArray.getAndSet(i, 0);
+            readTimeoutEventsSum += ramReadTimeoutEventsArray.getAndSet(i, 0);
         }
         builder.setWriteRequestBytes(writeBytesSum);
         builder.setWriteRequestRecords(writeRequestsSum);
         builder.setReadRequestBytes(readBytesSum);
         builder.setReadRequestRecords(readRequestsSum);
-        builder.setWriteMissEvents(writeMissEventsSum);
-        builder.setReadMissEvents(readMissEventsSum);
+        builder.setWriteTimeoutEvents(writeTimeoutEventsSum);
+        builder.setReadTimeoutEvents(readTimeoutEventsSum);
         builder.setClientID(clientID);
         builder.setSequenceNumber(++seqNum);
         builder.setMaxReaders(maxReaders.get());
@@ -310,7 +310,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     public void recordWriteTimeoutEvents(int readerId, long startTime, long events) {
         super.recordWriteTimeoutEvents(readerId, startTime, events);
         if (enable) {
-            ramWriteMissEventsArray.addAndGet(readerId, events);
+            ramWriteTimeoutEventsArray.addAndGet(readerId, events);
         }
     }
 
@@ -318,7 +318,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     public void recordReadTimeoutEvents(int writerId, long startTime, long events) {
         super.recordReadTimeoutEvents(writerId, startTime, events);
         if (enable) {
-            ramReadMissEventsArray.addAndGet(writerId, events);
+            ramReadTimeoutEventsArray.addAndGet(writerId, events);
         }
     }
 

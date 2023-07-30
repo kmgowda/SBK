@@ -101,11 +101,11 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
                 record.getMaxReaders(), record.getMaxWriters());
         wRequestLogger.recordWriteRequests(id, 0, record.getWriteRequestBytes(),
                 record.getWriteRequestRecords());
-        wRequestLogger.recordWriteTimeoutEvents(id, 0, record.getWriteMissEvents());
+        wRequestLogger.recordWriteTimeoutEvents(id, 0, record.getWriteTimeoutEvents());
 
         rRequestLogger.recordReadRequests(id, 0, record.getReadRequestBytes(),
                 record.getReadRequestRecords());
-        rRequestLogger.recordReadTimeoutEvents(id, 0, record.getReadMissEvents());
+        rRequestLogger.recordReadTimeoutEvents(id, 0, record.getReadTimeoutEvents());
 
         window.update(record.getTotalRecords(), record.getTotalLatency(), record.getTotalBytes(),
                 record.getInvalidLatencyRecords(), record.getLowerLatencyDiscardRecords(),
