@@ -347,8 +347,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                                                            double writeMissEventsPerSec,
                                                            long readMissEvents,
                                                            double readeMissEventsPerSec) {
-        out.append(String.format(" %13d write miss events, %8.2f write miss events/sec, "+
-                        "%13d read miss events, %8.2f read miss events/sec,",
+        out.append(String.format(" %13d write timeout events, %8.2f write timeout events/sec, "+
+                        "%13d read timeout events, %8.2f read timeout events/sec,",
                writeMissEvents, writeMissEventsPerSec, readMissEvents, readeMissEventsPerSec));
 
     }
