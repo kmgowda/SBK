@@ -252,7 +252,7 @@ class SbkMultiCharts(SbkCharts):
                 chart.append(self.get_write_timeout_events_series(ws, prefix))
                 chart.append(self.get_read_timeout_events_series(ws, prefix))
         # add chart to the sheet
-        sheet = self.wb.create_sheet("Write_Read_Timeout_Events")
+        sheet = self.wb.create_sheet("RW_TimeoutEvents")
         sheet.add_chart(chart)
 
     def create_multi_write_read_timeout_events_per_sec_graph(self):
@@ -265,7 +265,7 @@ class SbkMultiCharts(SbkCharts):
                 chart.append(self.get_write_timeout_events_per_sec_series(ws, prefix))
                 chart.append(self.get_read_timeout_events_per_sec_series(ws, prefix))
         # add chart to the sheet
-        sheet = self.wb.create_sheet("Write_Read_Timeout_Events_Per_Sec")
+        sheet = self.wb.create_sheet("RW_TimeoutEvents_Per_Sec")
         sheet.add_chart(chart)
 
     def create_total_throughput_mb_compare_graph(self):
@@ -366,7 +366,7 @@ class SbkMultiCharts(SbkCharts):
                 chart.append(self.get_read_timeout_events_series(ws, prefix))
         if chart is not None:
             # add chart to the sheet
-            sheet = self.wb.create_sheet("Total_Write_Read_Timeout_Events")
+            sheet = self.wb.create_sheet("Total_RW_TimeoutEvents")
             sheet.add_chart(chart)
 
 
