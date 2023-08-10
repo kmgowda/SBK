@@ -78,8 +78,8 @@ message MessageLatenciesRecord {
   int64 writeRequestRecords = 8;
   int64 readRequestBytes = 9;
   int64 readRequestRecords = 10;
-  int64 writeMissEvents = 11;
-  int64 readMissEvents = 12;
+  int64 writeTimeoutEvents = 11;
+  int64 readTimeoutEvents = 12;
   int64 totalRecords = 13;
   int64 validLatencyRecords = 14;
   int64 lowerLatencyDiscardRecords = 15;

@@ -117,7 +117,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             final long beginTime = status.startTime;
             ret.exceptionally(ex -> {
                 if (ex instanceof TimeoutException) {
-                    logger.recordReadMissEvents(id, status.startTime, 1);
+                    logger.recordReadTimeoutEvents(id, status.startTime, 1);
                 } else {
                     perlChannel.throwException(ex);
                 }
@@ -204,7 +204,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         } else {
             ret.exceptionally(ex -> {
                 if (ex instanceof TimeoutException) {
-                    logger.recordReadMissEvents(id, status.startTime, 1);
+                    logger.recordReadTimeoutEvents(id, status.startTime, 1);
                 } else {
                     perlChannel.throwException(ex);
                 }

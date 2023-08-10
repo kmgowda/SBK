@@ -48,10 +48,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected final AtomicInteger maxReaders;
     protected long writeRequestBytes;
     protected long writeRequestRecords;
-    protected long writeMissEvents;
+    protected long writeTimeoutEvents;
     protected long readRequestBytes;
     protected long readRequestRecords;
-    protected long readMissEvents;
+    protected long readTimeoutEvents;
     protected long writeResponsePendingRecords;
     protected long writeResponsePendingBytes;
     protected long readResponsePendingRecords;
@@ -67,10 +67,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     protected int maxReaderRequestIds;
     protected volatile long[] writeBytesArray;
     protected volatile long[] writeRequestRecordsArray;
-    protected volatile long[] writeMissEventsArray;
+    protected volatile long[] writeTimeoutEventsArray;
     protected volatile long[] readBytesArray;
     protected volatile long[] readRequestRecordsArray;
-    protected volatile long[] readMissEventsArray;
+    protected volatile long[] readTimeoutEventsArray;
     private LoggerConfig loggerConfig;
 
     static {
@@ -104,8 +104,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.writeRequestRecordsArray = null;
         this.maxReaderRequestIds = 0;
         this.maxWriterRequestIds = 0;
-        this.readMissEventsArray = null;
-        this.writeMissEventsArray = null;
+        this.readTimeoutEventsArray = null;
+        this.writeTimeoutEventsArray = null;
     }
 
     @Override
@@ -248,8 +248,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         this.writeRequestRecordsArray = new long[maxWriterRequestIds];
         this.readBytesArray = new long[maxReaderRequestIds];
         this.readRequestRecordsArray = new long[maxReaderRequestIds];
-        this.writeMissEventsArray = new long[maxWriterRequestIds];
-        this.readMissEventsArray = new long[maxReaderRequestIds];
+        this.writeTimeoutEventsArray = new long[maxWriterRequestIds];
+        this.readTimeoutEventsArray = new long[maxReaderRequestIds];
     }
 
     @Override
@@ -291,8 +291,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void recordWriteMissEvents(int writerId, long startTime, long missEvents) {
-        VAR_HANDLE_ARRAY.getAndAdd(writeMissEventsArray, writerId, missEvents);
+    public void recordWriteTimeoutEvents(int writerId, long startTime, long timeoutEvents) {
+        VAR_HANDLE_ARRAY.getAndAdd(writeTimeoutEventsArray, writerId, timeoutEvents);
     }
 
     @Override
@@ -302,8 +302,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
     }
 
     @Override
-    public void recordReadMissEvents(int readerId, long startTime, long missEvents) {
-        VAR_HANDLE_ARRAY.getAndAdd(readMissEventsArray, readerId, missEvents);
+    public void recordReadTimeoutEvents(int readerId, long startTime, long timeoutEvents) {
+        VAR_HANDLE_ARRAY.getAndAdd(readTimeoutEventsArray, readerId, timeoutEvents);
     }
 
     protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,
@@ -342,34 +342,34 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 (writeReadRequestPendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeReadRequestPendingRecords));
     }
 
-    protected final void appendWriteAndReadMissEvents(@NotNull StringBuilder out,
-                                                           long writeMissEvents,
-                                                           double writeMissEventsPerSec,
-                                                           long readMissEvents,
-                                                           double readeMissEventsPerSec) {
-        out.append(String.format(" %13d write miss events, %8.2f write miss events/sec, "+
-                        "%13d read miss events, %8.2f read miss events/sec,",
-               writeMissEvents, writeMissEventsPerSec, readMissEvents, readeMissEventsPerSec));
+    protected final void appendWriteAndReadTimeoutEvents(@NotNull StringBuilder out,
+                                                         long writeTimeoutEvents,
+                                                         double writeTimeoutEventsPerSec,
+                                                         long readTimeoutEvents,
+                                                         double readeTimeoutEventsPerSec) {
+        out.append(String.format(" %13d write timeout events, %8.2f write timeout events/sec, "+
+                        "%13d read timeout events, %8.2f read timeout events/sec,",
+               writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readeTimeoutEventsPerSec));
 
     }
 
-    private record ReadWriteRequests(long readRequestRecords, long readRequestBytes, long readMissEvents,
-                                     long writeRequestRecords, long writeRequestBytes, long writeMissEvents) {
+    private record ReadWriteRequests(long readRequestRecords, long readRequestBytes, long readTimeoutEvents,
+                                     long writeRequestRecords, long writeRequestBytes, long writeTimeoutEvents) {
     }
 
     protected final ReadWriteRequests getReadAndWriteRequests() {
         long writeRequestRecordssSum = 0;
         long writeBytesSum = 0;
-        long writeMissEventsSum = 0;
+        long writeTimeoutEventsSum = 0;
         long readRequestRecordsSum = 0;
         long readBytesSum = 0;
-        long readMissEventsSum = 0;
+        long readTimeoutEventsSum = 0;
 
         if (isRequestWrites) {
             for (int i = 0; i < maxWriterRequestIds; i++) {
                 writeRequestRecordssSum +=   (long) VAR_HANDLE_ARRAY.getAndSet(writeRequestRecordsArray, i, 0);
                 writeBytesSum += (long) VAR_HANDLE_ARRAY.getAndSet(writeBytesArray, i, 0);
-                writeMissEventsSum += (long) VAR_HANDLE_ARRAY.getAndSet(writeMissEventsArray, i, 0);
+                writeTimeoutEventsSum += (long) VAR_HANDLE_ARRAY.getAndSet(writeTimeoutEventsArray, i, 0);
             }
         }
 
@@ -377,20 +377,20 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
             for (int i = 0; i < maxReaderRequestIds; i++) {
                 readRequestRecordsSum += (long) VAR_HANDLE_ARRAY.getAndSet(readRequestRecordsArray, i, 0);
                 readBytesSum += (long) VAR_HANDLE_ARRAY.getAndSet(readBytesArray, i, 0);
-                readMissEventsSum += (long) VAR_HANDLE_ARRAY.getAndSet(readMissEventsArray, i, 0);
+                readTimeoutEventsSum += (long) VAR_HANDLE_ARRAY.getAndSet(readTimeoutEventsArray, i, 0);
             }
            }
-        return new ReadWriteRequests(readRequestRecordsSum, readBytesSum, readMissEventsSum,
-                writeRequestRecordssSum, writeBytesSum, writeMissEventsSum);
+        return new ReadWriteRequests(readRequestRecordsSum, readBytesSum, readTimeoutEventsSum,
+                writeRequestRecordssSum, writeBytesSum, writeTimeoutEventsSum);
     }
 
     private static class ReadWriteRequestsPerformance {
         public final double writeRequestsPerSec;
         public final double writeRequestsMbPerSec;
-        public final double writeMissEventsPerSec;
+        public final double writeTimeoutEventsPerSec;
         public final double readRequestsPerSec;
         public final double readRequestsMBPerSec;
-        public final double readMissEventsPerSec;
+        public final double readTimeoutEventsPerSec;
 
 
         public ReadWriteRequestsPerformance( double seconds, ReadWriteRequests req) {
@@ -399,10 +399,10 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
 
             writeRequestsPerSec = req.writeRequestRecords / seconds;
             writeRequestsMbPerSec = writeRequestMB / seconds;
-            writeMissEventsPerSec = req.writeMissEvents / seconds;
+            writeTimeoutEventsPerSec = req.writeTimeoutEvents / seconds;
             readRequestsPerSec = req.readRequestRecords / seconds;
             readRequestsMBPerSec = readRequestMB / seconds;
-            readMissEventsPerSec = req.readMissEvents / seconds;
+            readTimeoutEventsPerSec = req.readTimeoutEvents / seconds;
         }
     }
 
@@ -415,8 +415,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                                             long writeResponsePendingRecords, long writeResponsePendingBytes,
                                             long readResponsePendingBytes, long readResponsePendingRecords,
                                             long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
-                                            long writeMissEvents, double writeMissEventsPerSec,
-                                            long readMissEvents, double readMissEventsPerSec,
+                                            long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                                            long readTimeoutEvents, double readTimeoutEventsPerSec,
                                             double seconds, long bytes,
                                             long records, double recsPerSec, double mbPerSec,
                                             double avgLatency, long minLatency, long maxLatency, long invalid,
@@ -429,7 +429,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
         appendWriteAndReadRequestsPending(out, writeResponsePendingRecords, writeResponsePendingBytes,
                 readResponsePendingBytes, readResponsePendingRecords, writeReadRequestPendingRecords,
                 writeReadRequestPendingBytes);
-        appendWriteAndReadMissEvents(out, writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec);
+        appendWriteAndReadTimeoutEvents(out, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
@@ -448,14 +448,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
             writeRequestBytes += req.writeRequestBytes;
             writeResponsePendingRecords += (req.writeRequestRecords - records);
             writeResponsePendingBytes += (req.writeRequestBytes - bytes);
-            writeMissEvents += req.writeMissEvents;
+            writeTimeoutEvents += req.writeTimeoutEvents;
         }
         if (isRequestReads) {
             readRequestRecords += req.readRequestRecords;
             readRequestBytes += req.readRequestBytes;
             readResponsePendingRecords += (req.readRequestRecords - records);
             readResponsePendingBytes += (req.readRequestBytes - bytes);
-            readMissEvents += req.readMissEvents;
+            readTimeoutEvents += req.readTimeoutEvents;
         }
 
         if (isRequestWrites && isRequestReads) {
@@ -471,7 +471,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 req.readRequestBytes, perf.readRequestsMBPerSec, req.readRequestRecords, perf.readRequestsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
-                req.writeMissEvents, perf.writeMissEventsPerSec, req.readMissEvents, perf.readMissEventsPerSec,
+                req.writeTimeoutEvents, perf.writeTimeoutEventsPerSec, req.readTimeoutEvents, perf.readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
     }
@@ -484,8 +484,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                       long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
-                      long writeMissEvents, double writeMissEventsPerSec,
-                      long readMissEvents, double readMissEventsPerSec,
+                      long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                      long readTimeoutEvents, double readTimeoutEventsPerSec,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -495,7 +495,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
-                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
+                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);
@@ -515,14 +515,14 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
             writeRequestBytes += req.writeRequestBytes;
             writeResponsePendingRecords = writeRequestRecords - records;
             writeResponsePendingBytes = writeRequestBytes - bytes;
-            writeMissEvents += req.writeMissEvents;
+            writeTimeoutEvents += req.writeTimeoutEvents;
         }
         if (isRequestReads) {
             readRequestRecords += req.readRequestRecords;
             readRequestBytes += req.readRequestBytes;
             readResponsePendingRecords = readRequestRecords - records;
             readResponsePendingBytes = readRequestBytes - bytes;
-            readMissEvents += req.readMissEvents;
+            readTimeoutEvents += req.readTimeoutEvents;
         }
         if (isRequestWrites && isRequestReads) {
             writeReadPendingRecords = writeRequestRecords - readRequestRecords;
@@ -532,8 +532,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
             writeReadPendingBytes = 0;
         }
 
-        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequestRecords, readRequestBytes, readMissEvents,
-                writeRequestRecords, writeRequestBytes, writeMissEvents);
+        final ReadWriteRequests reqFinal = new ReadWriteRequests(readRequestRecords, readRequestBytes, readTimeoutEvents,
+                writeRequestRecords, writeRequestBytes, writeTimeoutEvents);
 
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, reqFinal);
         printTotal(writers.get(), maxWriters.get(), readers.get(), maxReaders.get(),
@@ -542,7 +542,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 reqFinal.readRequestRecords, perf.readRequestsPerSec, writeResponsePendingRecords,
                 writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
                 writeReadPendingRecords, writeReadPendingBytes,
-                writeMissEvents, perf.writeMissEventsPerSec, readMissEvents, perf.readMissEventsPerSec,
+                writeTimeoutEvents, perf.writeTimeoutEventsPerSec, readTimeoutEvents, perf.readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
 
@@ -557,8 +557,8 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                            long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                            long writeResponsePendingBytes, long readResponsePendingRecords,
                            long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
-                           long writeMissEvents, double writeMissEventsPerSec,
-                           long readMissEvents, double readMissEventsPerSec,
+                           long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                           long readTimeoutEvents, double readTimeoutEventsPerSec,
                            double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
@@ -568,7 +568,7 @@ public class SystemLogger extends ResultsLogger implements RWLogger {
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
-                writeMissEvents, writeMissEventsPerSec, readMissEvents, readMissEventsPerSec,
+                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
                 higherDiscard, slc1, slc2, percentileValues);
         System.out.println(out);

@@ -193,17 +193,17 @@ class SbkCharts:
     def get_max_latency_series(self, ws, ws_name):
         return self.get_column_series(ws, ws_name, "MaxLatency")
 
-    def get_write_miss_events_series(self, ws, ws_name):
-        return self.get_column_series(ws, ws_name, "WriteMissEvents")
+    def get_write_timeout_events_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteTimeoutEvents")
 
-    def get_write_miss_events_per_sec_series(self, ws, ws_name):
-        return self.get_column_series(ws, ws_name, "WriteMissEventsPerSec")
+    def get_write_timeout_events_per_sec_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "WriteTimeoutEventsPerSec")
 
-    def get_read_miss_events_series(self, ws, ws_name):
-        return self.get_column_series(ws, ws_name, "ReadMissEvents")
+    def get_read_timeout_events_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadTimeoutEvents")
 
-    def get_read_miss_events_per_sec_series(self, ws, ws_name):
-        return self.get_column_series(ws, ws_name, "ReadMissEventsPerSec")
+    def get_read_timeout_events_per_sec_series(self, ws, ws_name):
+        return self.get_column_series(ws, ws_name, "ReadTimeoutEventsPerSec")
 
     def create_latency_compare_graphs(self, ws, prefix):
         charts, sheets = [], []
