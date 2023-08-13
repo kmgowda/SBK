@@ -55,5 +55,6 @@ include 'driver-h2'
 include 'driver-couchbase'
 include 'driver-memcached'
 include 'driver-dynamodb'
+include 'driver-exasol'
 /* include 'driver-sbktemplate' */
 /* above line is a signature */
