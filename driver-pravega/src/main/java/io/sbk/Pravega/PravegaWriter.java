@@ -29,10 +29,13 @@ import java.util.concurrent.CompletableFuture;
 public class PravegaWriter implements Writer<byte[]> {
     final EventStreamWriter<byte[]> producer;
 
-    public PravegaWriter(int id, ParameterOptions params, String streamName, EventStreamClientFactory factory) throws IOException {
+    public PravegaWriter(int id, ParameterOptions params, String streamName, EventStreamClientFactory factory,
+                         boolean connectionPooling) throws IOException {
         this.producer = factory.createEventWriter(streamName,
                 new ByteArraySerializer(),
-                EventWriterConfig.builder().build());
+                EventWriterConfig.builder()
+                        .enableConnectionPooling(connectionPooling)
+                        .build());
     }
 
     /**

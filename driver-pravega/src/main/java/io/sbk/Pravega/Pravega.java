@@ -61,6 +61,7 @@ public class Pravega implements Storage<byte[]> {
         params.addOption("segments", true, "Number of segments, default :" + config.segmentCount);
         params.addOption("recreate", true,
                 "If the stream is already existing, delete and recreate the same, default :" + config.recreate);
+        params.addOption("connpool", true, "Enable Connection pooling, default :" + config.connPooling);
     }
 
     @Override
@@ -74,6 +75,8 @@ public class Pravega implements Storage<byte[]> {
         } else {
             config.recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
         }
+        config.connPooling = Boolean.parseBoolean(params.getOptionValue("connpool",
+                Boolean.toString(config.connPooling)));
 
         if (config.recreate) {
             rdGrpName = config.streamName + System.currentTimeMillis();
@@ -127,7 +130,7 @@ public class Pravega implements Storage<byte[]> {
     @Override
     public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         try {
-            return new PravegaWriter(id, params, config.streamName, factory);
+            return new PravegaWriter(id, params, config.streamName, factory, config.connPooling);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

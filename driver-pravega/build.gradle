@@ -9,5 +9,5 @@ repositories {
 
 dependencies {
     api project(":sbk-api")
-    api "io.pravega:pravega-client:0.10.0"
+    api "io.pravega:pravega-client:0.12.0"
 }

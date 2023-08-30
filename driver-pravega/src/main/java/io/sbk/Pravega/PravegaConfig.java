@@ -16,4 +16,5 @@ public class PravegaConfig {
     public String streamName;
     public int segmentCount;
     public boolean recreate;
+    public boolean connPooling;
 }
