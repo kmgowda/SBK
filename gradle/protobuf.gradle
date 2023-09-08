@@ -10,6 +10,9 @@
  */
 plugins.withId('com.google.protobuf') {
     protobuf {
+        // gradle protobuf plugin 0.9.2 : https://github.com/google/protobuf-gradle-plugin/releases/tag/v0.9.2
+        // onwards the generatedFilesBaseDir is deprecated
+       // generatedFilesBaseDir = "$projectDir/src/generated"
         protoc {
             artifact = "com.google.protobuf:protoc:${protobufProtocVersion}"
         }
@@ -18,7 +21,6 @@ plugins.withId('com.google.protobuf') {
                 artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
             }
         }
-        generatedFilesBaseDir = "$projectDir/src/generated"
         generateProtoTasks {
             all()*.plugins {
                 grpc_java {
