@@ -73,7 +73,11 @@ allprojects {
         sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
         sbkClass = sbkClass.replace("driver-", "")
     }
-    archivesBaseName = sbkProjectName
+
+    base {
+        archivesName = sbkProjectName
+    }
+
     version = sbkVersion
 
     configurations.all {
@@ -94,13 +98,13 @@ allprojects {
 
     distributions {
         main {
-            distributionBaseName.set(archivesBaseName)
+            distributionBaseName.set(sbkProjectName)
         }
     }
 
     application {
         mainClass = SbkMainClass
-        applicationName = archivesBaseName
+        applicationName = sbkProjectName
         def className = sbkClass
         if (sbkClass.equalsIgnoreCase(rootProject.name)) {
             className = ""
@@ -461,24 +465,26 @@ task SbkGemYal(type: CreateStartScripts) {
     }
 }
 
+application {
+    applicationDistribution.into("bin") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(SbkYal)
+        fileMode = 0755
+    }
 
-applicationDistribution.into("bin") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(SbkYal)
-    fileMode = 0755
+    applicationDistribution.into("bin") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(SbkGem)
+        fileMode = 0755
+    }
+
+    applicationDistribution.into("bin") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(SbkGemYal)
+        fileMode = 0755
+    }
 }
 
-applicationDistribution.into("bin") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(SbkGem)
-    fileMode = 0755
-}
-
-applicationDistribution.into("bin") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(SbkGemYal)
-    fileMode = 0755
-}
 
 task deleteDriver() {
     doLast {

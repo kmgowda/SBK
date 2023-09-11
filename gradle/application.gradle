@@ -27,8 +27,11 @@ plugins.withId('application') {
         }
     }
 
-    applicationDistribution.from(pathingJar) {
-        into "lib"
+    application {
+        applicationDistribution.from(pathingJar) {
+            into "lib"
+        }
     }
+
 
 }
