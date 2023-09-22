@@ -52,7 +52,7 @@ public class CSVLogger extends SystemLogger {
     /**
      * <code>csvWriter</code>.
      */
-    protected PrintWriter csvWriter;
+    private PrintWriter csvWriter;
     /**
      * <code>csvRowCounter = 0</code>.
      */
