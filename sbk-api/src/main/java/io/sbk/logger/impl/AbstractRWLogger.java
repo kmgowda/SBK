@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger {
@@ -78,7 +79,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         }
     }
 
-
     public AbstractRWLogger() {
         super();
         this.writers = new AtomicInteger(0);
@@ -103,6 +103,17 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         this.maxWriterRequestIds = 0;
         this.readTimeoutEventsArray = null;
         this.writeTimeoutEventsArray = null;
+    }
+
+    private String getTimeUnitNames() {
+        StringBuilder ret = new StringBuilder("[");
+
+        for (TimeUnit value : TimeUnit.values()) {
+            ret.append(value.name()).append(":").append(value).append(", ");
+        }
+        ret.append("]");
+
+        return ret.toString().replace(", ]", "]");
     }
 
     @Override
@@ -136,28 +147,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                         + " " + loggerConfig.timeUnit.name());
         params.addOption("wq", true, "Benchmark Write Requests; default: "+ isRequestWrites);
         params.addOption("rq", true, "Benchmark Reade Requests; default: "+ isRequestReads);
-    }
-
-    private String getTimeUnitNames() {
-        StringBuilder ret = new StringBuilder("[");
-
-        for (TimeUnit value : TimeUnit.values()) {
-            ret.append(value.name()).append(":").append(value).append(", ");
-        }
-        ret.append("]");
-
-        return ret.toString().replace(", ]", "]");
-    }
-
-
-    @Override
-    public int getMaxWriterIDs() {
-        return maxWriterRequestIds;
-    }
-
-    @Override
-    public int getMaxReaderIDs() {
-        return maxReaderRequestIds;
     }
 
     @Override
@@ -228,7 +217,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         this.action = action;
         this.time = time;
         this.timeUnitFullText = getTimeUnit().toString();
-        for (double p : getPercentiles()) {
+        for (double p : Objects.requireNonNull(getPercentiles())) {
             if (p < 0 || p > 100) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(getPercentiles()));
                 Printer.log.error("Percentile indices should be greater than 0 and less than 100");
@@ -245,6 +234,16 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
 
     @Override
     public void close(final ParsedOptions params) throws IOException {
+    }
+
+    @Override
+    public int getMaxWriterIDs() {
+        return maxWriterRequestIds;
+    }
+
+    @Override
+    public int getMaxReaderIDs() {
+        return maxReaderRequestIds;
     }
 
     @Override
@@ -351,7 +350,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                                      long writeRequestRecords, long writeRequestBytes, long writeTimeoutEvents) {
     }
 
-    protected final ReadWriteRequests getReadAndWriteRequests() {
+    private ReadWriteRequests getReadAndWriteRequests() {
         long writeRequestRecordssSum = 0;
         long writeBytesSum = 0;
         long writeTimeoutEventsSum = 0;
@@ -385,7 +384,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         public final double readRequestsPerSec;
         public final double readRequestsMBPerSec;
         public final double readTimeoutEventsPerSec;
-
 
         public ReadWriteRequestsPerformance( double seconds, ReadWriteRequests req) {
             final double writeRequestMB = req.writeRequestBytes / (Bytes.BYTES_PER_MB * 1.0);
@@ -482,7 +480,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         try {
-            throw new IOException("The print method is not overridden\n");
+            throw new IOException("The print method is not overridden/implemented\n");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -550,7 +548,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         try {
-            throw new IOException("The printTotal method is not overridden\n");
+            throw new IOException("The printTotal method is not overridden/implemented\n");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
