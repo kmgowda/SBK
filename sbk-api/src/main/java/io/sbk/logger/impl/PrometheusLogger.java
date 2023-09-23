@@ -30,7 +30,7 @@ import java.io.InputStream;
  */
 public abstract class PrometheusLogger extends CSVLogger {
     final private static String CONFIG_FILE = "metrics.properties";
-    protected MetricsConfig metricsConfig;
+    private MetricsConfig metricsConfig;
     private boolean contextDisabled;
     private PrometheusRWMetricsServer prometheusServer;
     private RWPrint printer;
@@ -39,15 +39,20 @@ public abstract class PrometheusLogger extends CSVLogger {
     public PrometheusLogger() {
         super();
         prometheusServer = null;
+        metricsConfig = null;
     }
 
     public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
-        return new PrometheusRWMetricsServer(Config.NAME, action.name(), storageName,
-                percentiles, time, metricsConfig);
+        return new PrometheusRWMetricsServer(Config.NAME, getAction().name(), getStorageName(),
+                getPercentiles(), getTime(), metricsConfig);
     }
 
     public InputStream getMetricsConfigStream() {
         return PrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+    }
+
+    protected final MetricsConfig getMetricsConfig() {
+        return this.metricsConfig;
     }
 
     @Override
@@ -138,7 +143,7 @@ public abstract class PrometheusLogger extends CSVLogger {
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                      long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       long writeTimeoutEvents, double writeTimeoutEventsPerSec,
@@ -148,7 +153,7 @@ public abstract class PrometheusLogger extends CSVLogger {
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         printer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
                 writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
-                readRequestRecords, readRequestsRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
+                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
                 readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
                 writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,

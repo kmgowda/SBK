@@ -25,7 +25,7 @@ public interface RWPrint {
      * @param readRequestBytes               Read requests Bytes
      * @param readRequestMbPerSec            Read requests MB/sec
      * @param readRequestRecords             Read requests
-     * @param readRequestsRecordsPerSec      Read Requests/sec
+     * @param readRequestRecordsPerSec      Read Requests/sec
      * @param writeResponsePendingRecords    Write response pending records
      * @param writeResponsePendingBytes      Write response pending bytes
      * @param readResponsePendingRecords     Read response pending records
@@ -54,7 +54,7 @@ public interface RWPrint {
     void print(int writers, int maxWriters, int readers, int maxReaders,
                long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-               long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+               long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                long writeTimeoutEvents, double writeTimeoutEventsPerSec,

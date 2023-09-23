@@ -46,9 +46,6 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
     private final static int LATENCY_MAP_BYTES = 16;
 
-    /**
-     * <code>Creating RamHostConfig ramHostConfig</code>.
-     */
     private SbmHostConfig sbmHostConfig;
     private boolean enable;
     private long clientID;
@@ -131,12 +128,12 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         if (!enable) {
             return;
         }
-        this.ramWriteBytesArray = new AtomicLongArray(maxWriterRequestIds);
-        this.ramWriteRequestRecordsArray = new AtomicLongArray(maxWriterRequestIds);
-        this.ramReadBytesArray = new AtomicLongArray(maxReaderRequestIds);
-        this.ramReadRequestRecordsArray = new AtomicLongArray(maxReaderRequestIds);
-        this.ramWriteTimeoutEventsArray = new AtomicLongArray(maxWriterRequestIds);
-        this.ramReadTimeoutEventsArray = new AtomicLongArray(maxReaderRequestIds);
+        this.ramWriteBytesArray = new AtomicLongArray(getMaxWriterIDs());
+        this.ramWriteRequestRecordsArray = new AtomicLongArray(getMaxWriterIDs());
+        this.ramReadBytesArray = new AtomicLongArray(getMaxReaderIDs());
+        this.ramReadRequestRecordsArray = new AtomicLongArray(getMaxReaderIDs());
+        this.ramWriteTimeoutEventsArray = new AtomicLongArray(getMaxWriterIDs());
+        this.ramReadTimeoutEventsArray = new AtomicLongArray(getMaxReaderIDs());
         channel = ManagedChannelBuilder.forTarget(sbmHostConfig.host + ":" + sbmHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         try {
@@ -182,14 +179,14 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
             Printer.log.warn("SBM, max latency : " + config.getMaxLatency()
                     + ", local max latency: " + getMaxLatency() + " are not same!");
         }
-        if (config.getIsReadRequests() !=  isRequestReads) {
+        if (config.getIsReadRequests() !=  isReadRequestsEnabled()) {
             Printer.log.warn("SBM, read request: " + config.getIsReadRequests()
-                    + ", local read request: " + isRequestReads + " are not same!" +
+                    + ", local read request: " + isReadRequestsEnabled() + " are not same!" +
                     ", set the option -rq to "+ config.getIsReadRequests());
         }
-        if (config.getIsWriteRequests() !=  isRequestWrites) {
+        if (config.getIsWriteRequests() !=  isWriteRequestsEnabled()) {
             Printer.log.warn("SBM, write request: " + config.getIsWriteRequests()
-                    + ", local write request: " + isRequestWrites + " are not same!" +
+                    + ", local write request: " + isWriteRequestsEnabled() + " are not same!" +
                     ", set the option -wq to "+config.getIsWriteRequests());
         }
 
@@ -247,12 +244,12 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         long readBytesSum = 0;
         long writeTimeoutEventsSum = 0;
         long readTimeoutEventsSum = 0;
-        for (int i = 0; i < maxWriterRequestIds; i++) {
+        for (int i = 0; i < getMaxWriterIDs(); i++) {
             writeRequestsSum += ramWriteRequestRecordsArray.getAndSet(i, 0);
             writeBytesSum += ramWriteBytesArray.getAndSet(i, 0);
             writeTimeoutEventsSum += ramWriteTimeoutEventsArray.getAndSet(i, 0);
         }
-        for (int i = 0; i < maxReaderRequestIds; i++) {
+        for (int i = 0; i < getMaxReaderIDs(); i++) {
             readRequestsSum += ramReadRequestRecordsArray.getAndSet(i, 0);
             readBytesSum += ramReadBytesArray.getAndSet(i, 0);
             readTimeoutEventsSum += ramReadTimeoutEventsArray.getAndSet(i, 0);
@@ -265,10 +262,10 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
         builder.setReadTimeoutEvents(readTimeoutEventsSum);
         builder.setClientID(clientID);
         builder.setSequenceNumber(++seqNum);
-        builder.setMaxReaders(maxReaders.get());
-        builder.setReaders(readers.get());
-        builder.setWriters(writers.get());
-        builder.setMaxWriters(maxWriters.get());
+        builder.setMaxReaders(getMaxReadersCount());
+        builder.setReaders(getReadersCount());
+        builder.setWriters(getWritersCount());
+        builder.setMaxWriters(getMaxWritersCount());
         builder.setMaxLatency(recorder.getMaxLatency());
         builder.setTotalLatency(recorder.getTotalLatency());
         builder.setInvalidLatencyRecords(recorder.getInvalidLatencyRecords());
@@ -347,7 +344,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                      long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       long writeTimeoutEvents, double writeTimeoutEventsPerSec,
@@ -356,7 +353,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
         super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
-                writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
+                writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,

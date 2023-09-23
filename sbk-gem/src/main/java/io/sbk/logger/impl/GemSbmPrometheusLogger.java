@@ -10,13 +10,10 @@
 
 package io.sbk.logger.impl;
 
-import io.sbk.logger.GemLogger;
-import io.sbm.logger.impl.SbmPrometheusLogger;
-
 /**
  * Class GemRamPrometheusLogger.
  */
-public final class GemSbmPrometheusLogger extends SbmPrometheusLogger implements GemLogger {
+public final class GemSbmPrometheusLogger extends AbstractGemLogger {
 
     @Override
     public String[] getOptionsArgs() {
@@ -25,18 +22,18 @@ public final class GemSbmPrometheusLogger extends SbmPrometheusLogger implements
 
     @Override
     public String[] getParsedArgs() {
-        if (csvEnable) {
-            return new String[]{"-csvfile", csvFile,
+        if (isCsvEnable()) {
+            return new String[]{"-csvfile", getCsvFile(),
                     "-time", getTimeUnit().name(),
                     "-minlatency", String.valueOf(getMinLatency()),
                     "-maxlatency", String.valueOf(getMaxLatency()),
-                    "-context", metricsConfig.port + metricsConfig.context};
+                    "-context", getMetricsConfig().port + getMetricsConfig().context};
 
         }
         return new String[]{"-time", getTimeUnit().name(),
                 "-minlatency", String.valueOf(getMinLatency()),
                 "-maxlatency", String.valueOf(getMaxLatency()),
-                "-context", metricsConfig.port + metricsConfig.context};
+                "-context", getMetricsConfig().port + getMetricsConfig().context};
     }
 
 }

@@ -19,7 +19,7 @@ import io.perl.api.impl.TotalLatencyRecordWindow;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbk.logger.ReadRequestsLogger;
-import io.sbm.logger.SetRW;
+import io.sbk.logger.SetRW;
 import io.sbk.logger.WriteRequestsLogger;
 import org.jetbrains.annotations.NotNull;
 

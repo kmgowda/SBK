@@ -44,15 +44,15 @@ public class CSVLogger extends SystemLogger {
     /**
      * <code>csvFile = null</code>.
      */
-    protected String csvFile;
+    private String csvFile;
     /**
      * <code>csvEnable = false</code>.
      */
-    protected boolean csvEnable;
+    private boolean csvEnable;
     /**
      * <code>csvWriter</code>.
      */
-    protected PrintWriter csvWriter;
+    private PrintWriter csvWriter;
     /**
      * <code>csvRowCounter = 0</code>.
      */
@@ -63,6 +63,17 @@ public class CSVLogger extends SystemLogger {
      */
     public CSVLogger() {
         super();
+        csvEnable = false;
+        csvFile = null;
+    }
+
+
+    protected final boolean isCsvEnable() {
+        return this.csvEnable;
+    }
+
+    protected final String getCsvFile() {
+        return this.csvFile;
     }
 
     @Override
@@ -102,7 +113,7 @@ public class CSVLogger extends SystemLogger {
         headerBuilder.append(",ReadTimeoutEvents,ReadTimeoutEventsPerSec");
         headerBuilder.append(",ReportSeconds,MB,Records,Records/Sec,MB/Sec");
         headerBuilder.append(",AvgLatency,MinLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard,SLC1,SLC2");
-        for (String percentileName : percentileNames) {
+        for (String percentileName : getPercentileNames()) {
             headerBuilder.append(",Percentile_");
             headerBuilder.append(percentileName);
         }
@@ -193,7 +204,7 @@ public class CSVLogger extends SystemLogger {
                                 + ",%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%7d"
                                 + ",%8d,%8d,%8d,%2d,%2d",
                         ++csvRowCounter, header, type, connections, maxConnections,
-                        storageName, action.name(), timeUnitFullText,
+                        getStorageName(), getAction().name(), getTimeUnit().toString(),
                         writers, readers, maxWriters, maxReaders,
                         (writeRequestBytes * 1.0) / Bytes.BYTES_PER_MB, writeRequestRecords, writeRequestRecordsPerSec,
                         writeRequestMbPerSec,
@@ -207,7 +218,7 @@ public class CSVLogger extends SystemLogger {
                         invalid, lowerDiscard, higherDiscard, slc1, slc2)
         );
 
-        for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {
+        for (int i = 0; i < Math.min(getPercentiles().length, percentileValues.length); ++i) {
             data.append(String.format(",%7d", percentileValues[i]));
         }
         csvWriter.println(data);

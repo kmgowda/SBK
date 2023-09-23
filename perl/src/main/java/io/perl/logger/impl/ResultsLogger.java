@@ -25,39 +25,34 @@ import java.util.Arrays;
 public class ResultsLogger implements PerformanceLogger {
 
     /**
-     * <code>String prefix</code>.
+     * <code>String header</code>.
      */
-    protected String prefix;
-
-    /**
-     * <code>String timeUnitName</code>.
-     */
-    protected String timeUnitName;
+    private String prefix;
 
     /**
      * <code>String[] percentileNames</code>.
      */
-    protected String[] percentileNames;
+    private String[] percentileNames;
 
     /**
      * <code>TimeUnit timeUnit</code>.
      */
-    protected TimeUnit timeUnit;
+    private TimeUnit timeUnit;
 
     /**
      * <code>double[] percentiles</code>.
      */
-    protected double[] percentiles;
+    private double[] percentiles;
 
     /**
      * <code>long minLatency</code>.
      */
-    protected long minLatency;
+    private long minLatency;
 
     /**
      * <code>long maxLatency</code>.
      */
-    protected long maxLatency;
+    private long maxLatency;
 
     /**
      * <code>DecimalFormat format</code>.
@@ -78,11 +73,9 @@ public class ResultsLogger implements PerformanceLogger {
         this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
         this.prefix = prefix;
         this.timeUnit = timeUnit;
-        this.percentiles = percentiles.clone();
-        this.timeUnitName = timeUnit.name();
         this.minLatency = minLatency;
         this.maxLatency = maxLatency;
-        setPercentileNames(percentiles);
+        setPercentiles(percentiles.clone());
     }
 
     /**
@@ -93,12 +86,44 @@ public class ResultsLogger implements PerformanceLogger {
                 LatencyConfig.DEFAULT_MIN_LATENCY, LatencyConfig.DEFAULT_MAX_LATENCY);
     }
 
-    /**
-     * Method setPercentileNames collecting all names and setting it in {@link #percentileNames}.
-     *
-     * @param percentiles     double[]
-     */
-    protected void setPercentileNames(double[] percentiles) {
+    protected void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+
+    protected void setTimeUnit(TimeUnit timeUnit) {
+        this.timeUnit = timeUnit;
+    }
+
+    protected final String[] getPercentileNames() {
+        return this.percentileNames;
+    }
+
+    protected final void setMinLatency(long minLatency) {
+        this.minLatency = minLatency;
+    }
+
+    protected final void setMaxLatency(long maxLatency) {
+        this.maxLatency = maxLatency;
+    }
+
+    @Override
+    public final TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    @Override
+    public final long getMinLatency() {
+        return minLatency;
+    }
+
+    @Override
+    public final long getMaxLatency() {
+        return maxLatency;
+    }
+
+    protected final void setPercentiles(double[] percentiles) {
+        this.percentiles = percentiles;
         Arrays.sort(percentiles);
         percentileNames = new String[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
@@ -106,24 +131,12 @@ public class ResultsLogger implements PerformanceLogger {
         }
     }
 
-    @Override
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
+    protected final String getPrefix() {
+        return this.prefix;
     }
 
     @Override
-    public long getMinLatency() {
-        return minLatency;
-    }
-
-    @Override
-    public long getMaxLatency() {
-        return maxLatency;
-    }
-
-    @Override
-    public double[] getPercentiles() {
-
+    public final double[] getPercentiles() {
         if (percentiles == null) {
             return null;
         }
@@ -154,6 +167,7 @@ public class ResultsLogger implements PerformanceLogger {
                                             long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                                             long slc1, long slc2, long[] percentileValues) {
         final double mBytes = (bytes * 1.0) / Bytes.BYTES_PER_MB;
+        String timeUnitName = timeUnit.name();
         out.append(String.format("%8d seconds, %11.1f MB, %16d records, %11.1f records/sec, %8.2f MB/sec"
                         + ", %8.1f %s avg latency, %7d %s min latency, %7d %s max latency;"
                         + " %8d invalid latencies; Discarded Latencies:%8d lower, %8d higher;"

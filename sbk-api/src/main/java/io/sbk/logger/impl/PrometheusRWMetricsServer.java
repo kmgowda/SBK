@@ -117,7 +117,7 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
     public final void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
                             double writeRequestMbPerSec, long writeRequestRecords, double writeRequestRecordsPerSec,
                             long readRequestBytes, double readRequestMbPerSec, long readRequestRecords,
-                            double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                            double readRequestRecordsPerSec, long writeResponsePendingRecords,
                             long writeResponsePendingBytes, long readResponsePendingRecords,
                             long readResponsePendingBytes, long writeReadRequestPendingRecords,
                             long writeReadRequestPendingBytes,
@@ -137,7 +137,7 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
         this.readRequestBytes.increment(readRequestBytes);
         this.readRequestRecords.increment(readRequestRecords);
         this.readRequestsMbPerSec.set(readRequestMbPerSec);
-        this.readRequestRecordsPerSec.set(readRequestsRecordsPerSec);
+        this.readRequestRecordsPerSec.set(readRequestRecordsPerSec);
         this.writeResponsePendingRecords.set(writeResponsePendingRecords);
         this.writeResponsePendingBytes.set(writeResponsePendingBytes);
         this.readResponsePendingRecords.set(readResponsePendingRecords);
