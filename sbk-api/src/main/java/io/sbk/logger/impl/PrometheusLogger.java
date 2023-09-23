@@ -42,8 +42,8 @@ public abstract class PrometheusLogger extends CSVLogger {
     }
 
     public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
-        return new PrometheusRWMetricsServer(Config.NAME, action.name(), storageName,
-                getPercentiles(), time, metricsConfig);
+        return new PrometheusRWMetricsServer(Config.NAME, getAction().name(), getStorageName(),
+                getPercentiles(), getTime(), metricsConfig);
     }
 
     public InputStream getMetricsConfigStream() {

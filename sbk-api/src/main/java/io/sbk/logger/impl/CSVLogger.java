@@ -193,7 +193,7 @@ public class CSVLogger extends SystemLogger {
                                 + ",%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%7d"
                                 + ",%8d,%8d,%8d,%2d,%2d",
                         ++csvRowCounter, header, type, connections, maxConnections,
-                        storageName, action.name(), timeUnitFullText,
+                        getStorageName(), getAction().name(), getTimeUnit().toString(),
                         writers, readers, maxWriters, maxReaders,
                         (writeRequestBytes * 1.0) / Bytes.BYTES_PER_MB, writeRequestRecords, writeRequestRecordsPerSec,
                         writeRequestMbPerSec,

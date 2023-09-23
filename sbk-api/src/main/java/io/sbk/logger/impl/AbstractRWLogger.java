@@ -18,6 +18,7 @@ import io.perl.logger.impl.ResultsLogger;
 import io.sbk.action.Action;
 import io.sbk.logger.LoggerConfig;
 import io.sbk.logger.RWLogger;
+import io.sbk.logger.SetRW;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
@@ -36,22 +37,23 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger {
+public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger, SetRW {
     private final static String LOGGER_FILE = "logger.properties";
     private final static VarHandle VAR_HANDLE_ARRAY;
 
-    protected String storageName;
-    protected String timeUnitFullText;
-    protected Action action;
-    protected Time time;
-    protected final AtomicInteger writers;
-    protected final AtomicInteger readers;
-    protected final AtomicInteger maxWriters;
-    protected final AtomicInteger maxReaders;
-    protected boolean isRequestWrites;
-    protected boolean isRequestReads;
-    protected int maxWriterRequestIds;
-    protected int maxReaderRequestIds;
+    private final AtomicInteger writers;
+    private final AtomicInteger readers;
+    private final AtomicInteger maxWriters;
+    private final AtomicInteger maxReaders;
+    private boolean isRequestWrites;
+    private boolean isRequestReads;
+    private int maxWriterRequestIds;
+    private int maxReaderRequestIds;
+
+    private String storageName;
+    private Time time;
+    private Action action;
+
     private LoggerConfig loggerConfig;
     private long writeRequestBytes;
     private long writeRequestRecords;
@@ -85,6 +87,8 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         this.readers = new AtomicInteger(0);
         this.maxWriters = new AtomicInteger(0);
         this.maxReaders = new AtomicInteger(0);
+        this.storageName = null;
+        this.time = null;
         this.writeRequestBytes = 0;
         this.writeRequestRecords = 0;
         this.readRequestBytes = 0;
@@ -216,7 +220,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         this.storageName = storageName;
         this.action = action;
         this.time = time;
-        this.timeUnitFullText = getTimeUnit().toString();
         for (double p : Objects.requireNonNull(getPercentiles())) {
             if (p < 0 || p > 100) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(getPercentiles()));
@@ -297,6 +300,70 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
 
     protected InputStream getLoggerConfigStream() {
         return SystemLogger.class.getClassLoader().getResourceAsStream(LOGGER_FILE);
+    }
+
+    protected final String getStorageName() {
+        return this.storageName;
+    }
+
+    protected final Time getTime() {
+        return this.time;
+    }
+
+    protected final Action getAction() {
+        return this.action;
+    }
+
+    protected final void setMaxWritersIds(int maxWriterRequestIds) {
+        this.maxWriterRequestIds = maxWriterRequestIds;
+    }
+
+    protected final void setMaxReadersIds(int maxReaderRequestIds) {
+        this.maxReaderRequestIds = maxReaderRequestIds;
+    }
+
+    protected final int getWritersCount() {
+        return this.writers.get();
+    }
+
+    protected final int getReadersCount() {
+        return this.readers.get();
+    }
+
+    protected final int getMaxWritersCount() {
+        return this.maxWriters.get();
+    }
+
+    protected final int getMaxReadersCount() {
+        return this.maxReaders.get();
+    }
+
+    @Override
+    public final void setWriters(int val) {
+        writers.set(val);
+    }
+
+    @Override
+    public final void setMaxWriters(int val) {
+        maxWriters.set(Math.max(maxWriters.get(), val));
+    }
+
+    @Override
+    public final void setReaders(int val) {
+        readers.set(val);
+    }
+
+    @Override
+    public final void setMaxReaders(int val) {
+        maxReaders.set(Math.max(maxReaders.get(), val));
+    }
+
+    public final boolean isWriteRequestsEnabled() {
+        return this.isRequestWrites;
+    }
+
+    public final boolean isReadRequestsEnabled() {
+        return this.isRequestReads;
     }
 
     protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,

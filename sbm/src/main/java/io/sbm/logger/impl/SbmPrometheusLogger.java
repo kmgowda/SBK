@@ -14,7 +14,7 @@ import io.perl.api.LatencyRecord;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbm.logger.RamLogger;
-import io.sbm.logger.SetRW;
+import io.sbk.logger.SetRW;
 import io.sbk.logger.impl.PrometheusLogger;
 import io.sbk.logger.impl.PrometheusRWMetricsServer;
 import io.sbk.params.ParsedOptions;
@@ -55,8 +55,8 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public @Nonnull PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
-            prometheusServer = new SbmMetricsPrometheusServer(Config.NAME, action.name(), storageName,
-                    getPercentiles(), time, metricsConfig);
+            prometheusServer = new SbmMetricsPrometheusServer(Config.NAME, getAction().name(), getStorageName(),
+                    getPercentiles(), getTime(), metricsConfig);
         }
         return prometheusServer;
     }
@@ -64,8 +64,8 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        this.maxReaderRequestIds = MAX_REQUEST_RW_IDS;
-        this.maxWriterRequestIds = MAX_REQUEST_RW_IDS;
+        setMaxReadersIds(MAX_REQUEST_RW_IDS);
+        setMaxWritersIds(MAX_REQUEST_RW_IDS);
     }
 
     @Override
@@ -96,29 +96,29 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     @Override
     public final void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
-        if (isRequestWrites) {
-            super.recordWriteRequests(writerId % maxWriterRequestIds, startTime, bytes, events);
+        if (isWriteRequestsEnabled()) {
+            super.recordWriteRequests(writerId % getMaxWriterIDs(), startTime, bytes, events);
         }
     }
 
     @Override
     public void recordWriteTimeoutEvents(int writerId, long startTime, long timeoutEvents) {
-        if (isRequestWrites) {
-            super.recordWriteTimeoutEvents(writerId % maxWriterRequestIds, startTime, timeoutEvents);
+        if (isWriteRequestsEnabled()) {
+            super.recordWriteTimeoutEvents(writerId % getMaxWriterIDs(), startTime, timeoutEvents);
         }
     }
 
     @Override
     public final void recordReadRequests(int readerId, long startTime, long bytes, long events) {
-        if (isRequestReads) {
-            super.recordReadRequests(readerId % maxReaderRequestIds, startTime, bytes, events);
+        if (isReadRequestsEnabled()) {
+            super.recordReadRequests(readerId % getMaxReaderIDs(), startTime, bytes, events);
         }
     }
 
     @Override
     public void recordReadTimeoutEvents(int readerId, long startTime, long timeoutEvents) {
-        if (isRequestReads) {
-            super.recordReadTimeoutEvents(readerId % maxReaderRequestIds, startTime, timeoutEvents);
+        if (isReadRequestsEnabled()) {
+            super.recordReadTimeoutEvents(readerId % getMaxReaderIDs(), startTime, timeoutEvents);
         }
     }
 
@@ -240,23 +240,4 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
 
     }
 
-    @Override
-    public final void setWriters(int val) {
-        writers.set(val);
-    }
-
-    @Override
-    public final void setMaxWriters(int val) {
-        maxWriters.set(Math.max(maxWriters.get(), val));
-    }
-
-    @Override
-    public final void setReaders(int val) {
-        readers.set(val);
-    }
-
-    @Override
-    public final void setMaxReaders(int val) {
-        maxReaders.set(Math.max(maxReaders.get(), val));
-    }
 }

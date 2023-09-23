@@ -13,6 +13,7 @@ package io.sbm.logger;
 import io.perl.api.ReportLatencies;
 import io.sbk.logger.Logger;
 import io.sbk.logger.ReadRequestsLogger;
+import io.sbk.logger.SetRW;
 import io.sbk.logger.WriteRequestsLogger;
 
 /**
