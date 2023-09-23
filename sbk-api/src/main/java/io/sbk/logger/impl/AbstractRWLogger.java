@@ -538,7 +538,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                      long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       long writeTimeoutEvents, double writeTimeoutEventsPerSec,

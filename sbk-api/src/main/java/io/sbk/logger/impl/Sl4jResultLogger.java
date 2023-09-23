@@ -28,7 +28,7 @@ public class Sl4jResultLogger extends SystemLogger {
     public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                      long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       long writeTimeoutEvents, double writeTimeoutEventsPerSec,
@@ -39,7 +39,7 @@ public class Sl4jResultLogger extends SystemLogger {
         StringBuilder out = new StringBuilder(getPrefix());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
-                readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
+                readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
