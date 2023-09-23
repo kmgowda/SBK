@@ -30,7 +30,7 @@ import java.io.InputStream;
  */
 public abstract class PrometheusLogger extends CSVLogger {
     final private static String CONFIG_FILE = "metrics.properties";
-    protected MetricsConfig metricsConfig;
+    private MetricsConfig metricsConfig;
     private boolean contextDisabled;
     private PrometheusRWMetricsServer prometheusServer;
     private RWPrint printer;
@@ -39,6 +39,7 @@ public abstract class PrometheusLogger extends CSVLogger {
     public PrometheusLogger() {
         super();
         prometheusServer = null;
+        metricsConfig = null;
     }
 
     public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
@@ -48,6 +49,10 @@ public abstract class PrometheusLogger extends CSVLogger {
 
     public InputStream getMetricsConfigStream() {
         return PrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+    }
+
+    protected final MetricsConfig getMetricsConfig() {
+        return this.metricsConfig;
     }
 
     @Override

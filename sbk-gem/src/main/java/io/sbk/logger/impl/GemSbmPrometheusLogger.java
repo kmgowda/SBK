@@ -27,13 +27,13 @@ public final class GemSbmPrometheusLogger extends AbstractGemLogger {
                     "-time", getTimeUnit().name(),
                     "-minlatency", String.valueOf(getMinLatency()),
                     "-maxlatency", String.valueOf(getMaxLatency()),
-                    "-context", metricsConfig.port + metricsConfig.context};
+                    "-context", getMetricsConfig().port + getMetricsConfig().context};
 
         }
         return new String[]{"-time", getTimeUnit().name(),
                 "-minlatency", String.valueOf(getMinLatency()),
                 "-maxlatency", String.valueOf(getMaxLatency()),
-                "-context", metricsConfig.port + metricsConfig.context};
+                "-context", getMetricsConfig().port + getMetricsConfig().context};
     }
 
 }

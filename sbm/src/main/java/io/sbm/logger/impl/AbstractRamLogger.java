@@ -52,7 +52,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
     public @Nonnull PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
             prometheusServer = new SbmMetricsPrometheusServer(Config.NAME, getAction().name(), getStorageName(),
-                    getPercentiles(), getTime(), metricsConfig);
+                    getPercentiles(), getTime(), getMetricsConfig());
         }
         return prometheusServer;
     }
