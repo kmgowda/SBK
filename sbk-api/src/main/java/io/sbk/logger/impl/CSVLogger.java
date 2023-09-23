@@ -44,11 +44,11 @@ public class CSVLogger extends SystemLogger {
     /**
      * <code>csvFile = null</code>.
      */
-    protected String csvFile;
+    private String csvFile;
     /**
      * <code>csvEnable = false</code>.
      */
-    protected boolean csvEnable;
+    private boolean csvEnable;
     /**
      * <code>csvWriter</code>.
      */
@@ -63,6 +63,17 @@ public class CSVLogger extends SystemLogger {
      */
     public CSVLogger() {
         super();
+        csvEnable = false;
+        csvFile = null;
+    }
+
+
+    protected final boolean isCsvEnable() {
+        return this.csvEnable;
+    }
+
+    protected final String getCsvFile() {
+        return this.csvFile;
     }
 
     @Override

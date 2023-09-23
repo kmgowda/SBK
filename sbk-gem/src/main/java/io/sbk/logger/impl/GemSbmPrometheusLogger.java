@@ -22,8 +22,8 @@ public final class GemSbmPrometheusLogger extends AbstractGemLogger {
 
     @Override
     public String[] getParsedArgs() {
-        if (csvEnable) {
-            return new String[]{"-csvfile", csvFile,
+        if (isCsvEnable()) {
+            return new String[]{"-csvfile", getCsvFile(),
                     "-time", getTimeUnit().name(),
                     "-minlatency", String.valueOf(getMinLatency()),
                     "-maxlatency", String.valueOf(getMaxLatency()),

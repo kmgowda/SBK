@@ -158,7 +158,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
         }
-        if (csvEnable) {
+        if (isCsvEnable()) {
             writeToCSV(SBM_PREFIX, REGULAR_PRINT, connections.get(), maxConnections.get(),
                     writers, maxWriters, readers, maxReaders,
                     writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
@@ -212,7 +212,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        if (csvEnable) {
+        if (isCsvEnable()) {
             writeToCSV(SBM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),
                     writers, maxWriters, readers, maxReaders,
                     writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
