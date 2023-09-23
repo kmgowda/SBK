@@ -16,22 +16,27 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.perl.data.Bytes;
 import io.perl.logger.impl.ResultsLogger;
 import io.sbk.action.Action;
+import io.sbk.logger.LoggerConfig;
 import io.sbk.logger.RWLogger;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
+import io.time.MicroSeconds;
+import io.time.MilliSeconds;
+import io.time.NanoSeconds;
 import io.time.Time;
 import io.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger {
-
+    private final static String LOGGER_FILE = "logger.properties";
     private final static VarHandle VAR_HANDLE_ARRAY;
 
     protected String storageName;
@@ -46,7 +51,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     protected boolean isRequestReads;
     protected int maxWriterRequestIds;
     protected int maxReaderRequestIds;
-
+    private LoggerConfig loggerConfig;
     private long writeRequestBytes;
     private long writeRequestRecords;
     private long writeTimeoutEvents;
@@ -104,19 +109,33 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        try {
+            loggerConfig = mapper.readValue(getLoggerConfigStream(), LoggerConfig.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException(ex);
+        }
+        String[] percentilesList = loggerConfig.percentiles.split(",");
+        double[] percentiles = new double[percentilesList.length];
+        for (int i = 0; i < percentilesList.length; i++) {
+            percentiles[i] = Double.parseDouble(percentilesList[i].trim());
+        }
+        setPercentiles(percentiles);
+
+        params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
+                "; default: " + loggerConfig.timeUnit.name());
+        params.addOption("minlatency", true,
+                """
+                        Minimum latency;
+                        use '-time' for time unit; default:""" + loggerConfig.minLatency
+                        + " " + loggerConfig.timeUnit.name());
+        params.addOption("maxlatency", true,
+                """
+                        Maximum latency;
+                        use '-time' for time unit; default:""" + loggerConfig.maxLatency
+                        + " " + loggerConfig.timeUnit.name());
         params.addOption("wq", true, "Benchmark Write Requests; default: "+ isRequestWrites);
         params.addOption("rq", true, "Benchmark Reade Requests; default: "+ isRequestReads);
-    }
-
-
-    @Override
-    public int getMaxWriterIDs() {
-        return maxWriterRequestIds;
-    }
-
-    @Override
-    public int getMaxReaderIDs() {
-        return maxReaderRequestIds;
     }
 
     private String getTimeUnitNames() {
@@ -132,7 +151,66 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
 
 
     @Override
+    public int getMaxWriterIDs() {
+        return maxWriterRequestIds;
+    }
+
+    @Override
+    public int getMaxReaderIDs() {
+        return maxReaderRequestIds;
+    }
+
+    @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
+        try {
+            setTimeUnit(TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name())));
+        } catch (IllegalArgumentException ex) {
+            Printer.log.error("Invalid value for option '-time', valid values " +
+                    Arrays.toString(Arrays.stream(TimeUnit.values()).map(Enum::name).toArray()));
+            throw ex;
+        }
+
+        //copy the default values
+        setMinLatency(loggerConfig.minLatency);
+        setMaxLatency(loggerConfig.maxLatency);
+        Time convertTime = null;
+        switch (getTimeUnit()) {
+            case ms -> {
+                convertTime = switch (loggerConfig.timeUnit) {
+                    case ns -> new NanoSeconds();
+                    case mcs -> new MicroSeconds();
+                    default -> null;
+                };
+                if (convertTime != null) {
+                    setMinLatency((long) convertTime.convertToMilliSeconds(loggerConfig.minLatency));
+                    setMaxLatency((long) convertTime.convertToMilliSeconds(loggerConfig.maxLatency));
+                }
+            }
+            case ns -> {
+                convertTime = switch (loggerConfig.timeUnit) {
+                    case ms -> new MilliSeconds();
+                    case mcs -> new MicroSeconds();
+                    default -> null;
+                };
+                if (convertTime != null) {
+                    setMinLatency((long) convertTime.convertToNanoSeconds(loggerConfig.minLatency));
+                    setMaxLatency((long) convertTime.convertToNanoSeconds(loggerConfig.maxLatency));
+                }
+            }
+            case mcs -> {
+                convertTime = switch (loggerConfig.timeUnit) {
+                    case ms -> new MilliSeconds();
+                    case ns -> new NanoSeconds();
+                    default -> null;
+                };
+                if (convertTime != null) {
+                    setMinLatency((long) convertTime.convertToMicroSeconds(loggerConfig.minLatency));
+                    setMaxLatency((long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency));
+                }
+            }
+        }
+        setMinLatency(Long.parseLong(params.getOptionValue("minlatency", Long.toString(getMinLatency()))));
+        setMaxLatency(Long.parseLong(params.getOptionValue("maxlatency", Long.toString(getMaxLatency()))));
         isRequestWrites = Boolean.parseBoolean(params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
         isRequestReads = Boolean.parseBoolean(params.getOptionValue("rq", Boolean.toString(isRequestReads)));
         if (isRequestWrites) {
@@ -141,7 +219,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         if (isRequestReads) {
             maxReaderRequestIds = Integer.parseInt(params.getOptionValue("readers", "0"));
         }
-
     }
 
     @Override
@@ -170,6 +247,10 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     public void close(final ParsedOptions params) throws IOException {
     }
 
+    @Override
+    public int getPrintingIntervalSeconds() {
+        return loggerConfig.reportingSeconds;
+    }
 
     @Override
     public void incrementWriters() {
@@ -193,7 +274,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         readers.decrementAndGet();
     }
 
-
     @Override
     public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
         VAR_HANDLE_ARRAY.getAndAdd(writeRequestRecordsArray, writerId, events);
@@ -214,6 +294,10 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     @Override
     public void recordReadTimeoutEvents(int readerId, long startTime, long timeoutEvents) {
         VAR_HANDLE_ARRAY.getAndAdd(readTimeoutEventsArray, readerId, timeoutEvents);
+    }
+
+    protected InputStream getLoggerConfigStream() {
+        return SystemLogger.class.getClassLoader().getResourceAsStream(LOGGER_FILE);
     }
 
     protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,
