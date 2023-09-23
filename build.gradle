@@ -665,4 +665,4 @@ dependencies {
     api project(":sbk-gem-yal")
 }
 
-apply from: "$rootDir/build-drivers.gradle"
+apply from: "build-drivers.gradle"
