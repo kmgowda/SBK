@@ -27,7 +27,7 @@ public class ResultsLogger implements PerformanceLogger {
     /**
      * <code>String header</code>.
      */
-    private String header;
+    private String prefix;
 
     /**
      * <code>String[] percentileNames</code>.
@@ -62,16 +62,16 @@ public class ResultsLogger implements PerformanceLogger {
     /**
      * Constructor ResultsLogger initialize all values with given parameters.
      *
-     * @param header            String
+     * @param prefix            String
      * @param percentiles       double[]
      * @param timeUnit          TimeUnit
      * @param minLatency        long
      * @param maxLatency        long
      */
-    public ResultsLogger(String header, @Nonnull double[] percentiles,
+    public ResultsLogger(String prefix, @Nonnull double[] percentiles,
                          @Nonnull TimeUnit timeUnit, long minLatency, long maxLatency) {
         this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
-        this.header = header;
+        this.prefix = prefix;
         this.timeUnit = timeUnit;
         this.minLatency = minLatency;
         this.maxLatency = maxLatency;
@@ -86,8 +86,8 @@ public class ResultsLogger implements PerformanceLogger {
                 LatencyConfig.DEFAULT_MIN_LATENCY, LatencyConfig.DEFAULT_MAX_LATENCY);
     }
 
-    protected void setHeader(String header) {
-        this.header = header;
+    protected void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
 
@@ -131,8 +131,8 @@ public class ResultsLogger implements PerformanceLogger {
         }
     }
 
-    protected final String getHeader() {
-        return this.header;
+    protected final String getPrefix() {
+        return this.prefix;
     }
 
     @Override
@@ -190,7 +190,7 @@ public class ResultsLogger implements PerformanceLogger {
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
                       long[] percentileValues) {
-        final StringBuilder out = new StringBuilder(header);
+        final StringBuilder out = new StringBuilder(prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
                 percentileValues);
@@ -201,7 +201,7 @@ public class ResultsLogger implements PerformanceLogger {
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        final StringBuilder out = new StringBuilder("Total : "+ header);
+        final StringBuilder out = new StringBuilder("Total : "+ prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
                 percentileValues);

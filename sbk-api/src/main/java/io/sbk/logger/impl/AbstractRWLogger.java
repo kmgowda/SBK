@@ -216,7 +216,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
 
     @Override
     public void open(final ParsedOptions params, final String storageName, final Action action, Time time) throws IOException {
-        setHeader(storageName+" "+action.name());
+        setPrefix(storageName+" "+action.name());
         this.storageName = storageName;
         this.action = action;
         this.time = time;
