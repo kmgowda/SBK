@@ -14,7 +14,6 @@ import io.perl.api.LatencyRecord;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbm.logger.RamLogger;
-import io.sbk.logger.SetRW;
 import io.sbk.logger.impl.PrometheusLogger;
 import io.sbk.logger.impl.PrometheusRWMetricsServer;
 import io.sbk.params.ParsedOptions;
@@ -30,14 +29,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamLogger {
+public class SbmPrometheusLogger extends PrometheusLogger implements RamLogger {
     final static String CONFIG_FILE = "sbm-metrics.properties";
     final static String SBM_PREFIX = "SBM";
     final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
     private SbmMetricsPrometheusServer prometheusServer;
-
 
     /**
      * Constructor RamPrometheusLogger calling its super calls and initializing {@link #prometheusServer} = null.

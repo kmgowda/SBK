@@ -298,7 +298,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         VAR_HANDLE_ARRAY.getAndAdd(readTimeoutEventsArray, readerId, timeoutEvents);
     }
 
-    protected InputStream getLoggerConfigStream() {
+    public InputStream getLoggerConfigStream() {
         return SystemLogger.class.getClassLoader().getResourceAsStream(LOGGER_FILE);
     }
 
