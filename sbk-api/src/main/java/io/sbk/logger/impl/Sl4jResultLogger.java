@@ -36,7 +36,7 @@ public class Sl4jResultLogger extends SystemLogger {
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        StringBuilder out = new StringBuilder(prefix);
+        StringBuilder out = new StringBuilder(getHeader());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
@@ -59,7 +59,7 @@ public class Sl4jResultLogger extends SystemLogger {
                            double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        StringBuilder out = new StringBuilder("Total " + prefix);
+        StringBuilder out = new StringBuilder("Total " + getHeader());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,

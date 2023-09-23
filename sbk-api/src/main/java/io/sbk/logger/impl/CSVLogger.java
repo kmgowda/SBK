@@ -102,7 +102,7 @@ public class CSVLogger extends SystemLogger {
         headerBuilder.append(",ReadTimeoutEvents,ReadTimeoutEventsPerSec");
         headerBuilder.append(",ReportSeconds,MB,Records,Records/Sec,MB/Sec");
         headerBuilder.append(",AvgLatency,MinLatency,MaxLatency,InvalidLatencies,LowerDiscard,HigherDiscard,SLC1,SLC2");
-        for (String percentileName : percentileNames) {
+        for (String percentileName : getPercentileNames()) {
             headerBuilder.append(",Percentile_");
             headerBuilder.append(percentileName);
         }
@@ -207,7 +207,7 @@ public class CSVLogger extends SystemLogger {
                         invalid, lowerDiscard, higherDiscard, slc1, slc2)
         );
 
-        for (int i = 0; i < Math.min(percentiles.length, percentileValues.length); ++i) {
+        for (int i = 0; i < Math.min(getPercentiles().length, percentileValues.length); ++i) {
             data.append(String.format(",%7d", percentileValues[i]));
         }
         csvWriter.println(data);

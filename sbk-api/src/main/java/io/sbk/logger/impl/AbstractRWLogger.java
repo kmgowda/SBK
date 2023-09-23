@@ -104,7 +104,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         params.addOption("wq", true, "Benchmark Write Requests; default: "+ isRequestWrites);
         params.addOption("rq", true, "Benchmark Reade Requests; default: "+ isRequestReads);
     }
@@ -134,7 +133,6 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
 
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
-
         isRequestWrites = Boolean.parseBoolean(params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
         isRequestReads = Boolean.parseBoolean(params.getOptionValue("rq", Boolean.toString(isRequestReads)));
         if (isRequestWrites) {
@@ -148,15 +146,14 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
 
     @Override
     public void open(final ParsedOptions params, final String storageName, final Action action, Time time) throws IOException {
+        setHeader(storageName+" "+action.name());
         this.storageName = storageName;
         this.action = action;
         this.time = time;
-        this.prefix = storageName + " " + action.name();
-        this.timeUnitName = getTimeUnit().name();
         this.timeUnitFullText = getTimeUnit().toString();
-        for (double p : this.percentiles) {
+        for (double p : getPercentiles()) {
             if (p < 0 || p > 100) {
-                Printer.log.error("Invalid percentiles indices : " + Arrays.toString(percentiles));
+                Printer.log.error("Invalid percentiles indices : " + Arrays.toString(getPercentiles()));
                 Printer.log.error("Percentile indices should be greater than 0 and less than 100");
                 throw new IllegalArgumentException();
             }

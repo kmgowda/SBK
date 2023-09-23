@@ -13,6 +13,7 @@ package io.sbk.logger.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.action.Action;
 import io.sbk.logger.LoggerConfig;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
@@ -23,6 +24,7 @@ import io.time.NanoSeconds;
 import io.time.Time;
 import io.time.TimeUnit;
 import javax.annotation.concurrent.NotThreadSafe;
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -51,11 +53,11 @@ public class SystemLogger extends AbstractRWLogger {
             throw new IllegalArgumentException(ex);
         }
         String[] percentilesList = loggerConfig.percentiles.split(",");
-        percentiles = new double[percentilesList.length];
+        double[] percentiles = new double[percentilesList.length];
         for (int i = 0; i < percentilesList.length; i++) {
             percentiles[i] = Double.parseDouble(percentilesList[i].trim());
         }
-        setPercentileNames(percentiles);
+        setPercentiles(percentiles);
 
         params.addOption("time", true, "Latency Time Unit " + getTimeUnitNames() +
                 "; default: " + loggerConfig.timeUnit.name());
@@ -93,7 +95,7 @@ public class SystemLogger extends AbstractRWLogger {
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         try {
-            timeUnit = TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name()));
+            setTimeUnit(TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name())));
         } catch (IllegalArgumentException ex) {
             Printer.log.error("Invalid value for option '-time', valid values " +
                     Arrays.toString(Arrays.stream(TimeUnit.values()).map(Enum::name).toArray()));
@@ -101,10 +103,10 @@ public class SystemLogger extends AbstractRWLogger {
         }
 
         //copy the default values
-        minLatency = loggerConfig.minLatency;
-        maxLatency = loggerConfig.maxLatency;
+        setMinLatency(loggerConfig.minLatency);
+        setMaxLatency(loggerConfig.maxLatency);
         Time convertTime = null;
-        switch (timeUnit) {
+        switch (getTimeUnit()) {
             case ms -> {
                 convertTime = switch (loggerConfig.timeUnit) {
                     case ns -> new NanoSeconds();
@@ -112,8 +114,8 @@ public class SystemLogger extends AbstractRWLogger {
                     default -> null;
                 };
                 if (convertTime != null) {
-                    minLatency = (long) convertTime.convertToMilliSeconds(loggerConfig.minLatency);
-                    maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+                    setMinLatency((long) convertTime.convertToMilliSeconds(loggerConfig.minLatency));
+                    setMaxLatency((long) convertTime.convertToMilliSeconds(loggerConfig.maxLatency));
                 }
             }
             case ns -> {
@@ -123,8 +125,8 @@ public class SystemLogger extends AbstractRWLogger {
                     default -> null;
                 };
                 if (convertTime != null) {
-                    minLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.minLatency);
-                    maxLatency = (long) convertTime.convertToNanoSeconds(loggerConfig.maxLatency);
+                    setMinLatency((long) convertTime.convertToNanoSeconds(loggerConfig.minLatency));
+                    setMaxLatency((long) convertTime.convertToNanoSeconds(loggerConfig.maxLatency));
                 }
             }
             case mcs -> {
@@ -134,13 +136,17 @@ public class SystemLogger extends AbstractRWLogger {
                     default -> null;
                 };
                 if (convertTime != null) {
-                    minLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.minLatency);
-                    maxLatency = (long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency);
+                    setMinLatency((long) convertTime.convertToMicroSeconds(loggerConfig.minLatency));
+                    setMaxLatency((long) convertTime.convertToMicroSeconds(loggerConfig.maxLatency));
                 }
             }
         }
-        minLatency = Long.parseLong(params.getOptionValue("minlatency", Long.toString(minLatency)));
-        maxLatency = Long.parseLong(params.getOptionValue("maxlatency", Long.toString(maxLatency)));
+        setMinLatency(Long.parseLong(params.getOptionValue("minlatency", Long.toString(getMinLatency()))));
+        setMaxLatency(Long.parseLong(params.getOptionValue("maxlatency", Long.toString(getMaxLatency()))));
+    }
+
+    public void open(final ParsedOptions params, final String storageName, final Action action, Time time) throws IOException {
+        super.open(params, storageName, action, time);
     }
 
     @Override
@@ -155,7 +161,7 @@ public class SystemLogger extends AbstractRWLogger {
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        StringBuilder out = new StringBuilder(prefix);
+        StringBuilder out = new StringBuilder(getHeader());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
@@ -178,7 +184,7 @@ public class SystemLogger extends AbstractRWLogger {
                            double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        StringBuilder out = new StringBuilder("Total " + prefix);
+        StringBuilder out = new StringBuilder("Total " + getHeader());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,

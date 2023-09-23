@@ -56,7 +56,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
     public @Nonnull PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
             prometheusServer = new SbmMetricsPrometheusServer(Config.NAME, action.name(), storageName,
-                    percentiles, time, metricsConfig);
+                    getPercentiles(), time, metricsConfig);
         }
         return prometheusServer;
     }
@@ -162,7 +162,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        print(SBM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
+        print(SBM_PREFIX, getHeader(), writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
@@ -207,7 +207,7 @@ public class SbmPrometheusLogger extends PrometheusLogger implements SetRW, RamL
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
-        print("Total : " + SBM_PREFIX, prefix, writers, maxWriters, readers, maxReaders,
+        print("Total : " + SBM_PREFIX, getHeader(), writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
