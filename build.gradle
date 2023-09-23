@@ -69,9 +69,10 @@ allprojects {
 
     def sbkProjectName = project.name
     def sbkClass = project.name
-    if (sbkProjectName.startsWith("driver-")) {
-        sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
-        sbkClass = sbkClass.replace("driver-", "")
+    if (project.parent) {
+        if (project.parent.name == "drivers") {
+            sbkProjectName = rootProject.name + "-" + sbkProjectName
+        }
     }
 
     base {
@@ -81,7 +82,7 @@ allprojects {
     version = sbkVersion
 
     configurations.all {
-        exclude group: sbkGroup, module: "driver-sbktemplate"
+        exclude group: sbkGroup, module: "sbktemplate"
     }
 
     jar {
