@@ -205,7 +205,7 @@ allprojects {
     }
 
     task generateDockerfiles() {
-        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem"]
+        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem", "drivers", "sbk-yal", "sbk-gem-yal"]
         def buffer = ""
         def outDir = 'build/dockers'
         def outFile = sbkProjectName + "-" + sbkVersion
@@ -229,11 +229,11 @@ allprojects {
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == sbkGroup) {
                         if (!driversToSkip.contains(id.name)) {
-                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
+                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/drivers/" + id.name + "\n"
                         }
                     }
                 }
-                buffer += "COPY --chown=root:root " + project.name + " \${APP_HOME}/" + project.name + "\n"
+                buffer += "COPY --chown=root:root " + project.name + " \${APP_HOME}/drivers/" + project.name + "\n"
                 copy {
                     from "$rootDir/driver-docker-template"
                     into outDir
@@ -251,7 +251,7 @@ allprojects {
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == sbkGroup) {
                         if (!driversToSkip.contains(id.name)) {
-                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
+                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/drivers/" + id.name + "\n"
                         }
                     }
                 }
