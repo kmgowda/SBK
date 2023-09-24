@@ -493,20 +493,11 @@ application {
 
 task deleteDriver() {
     doLast {
-        String templateName = "driver-sbktemplate"
+        String templateName = "sbktemplate"
         String driverName = templateName
 
         if (project.hasProperty("driver")) {
-            String name1 = driver
-            if (name1.equalsIgnoreCase("driver") || name1.equalsIgnoreCase("driver-")) {
-                println "driver name is missing"
-                return
-            } else if (name1.startsWith("driver-")) {
-                driverName = name1
-            } else {
-                driverName = "driver-" + name1
-            }
-            driverName = driverName.toLowerCase()
+            driverName = driver.toLowerCase()
         } else {
             println "driver name is missing user -Pdriver "
             return
@@ -516,7 +507,7 @@ task deleteDriver() {
             println "Invalid driver name"
             return
         }
-        delete "$rootDir/$driverName"
+        delete "$rootDir/drivers/$driverName"
 
         def inFile1 = new File("$rootDir/settings-drivers.gradle").newInputStream()
         String outText1 = ""
@@ -547,44 +538,28 @@ task deleteDriver() {
 
 task addDriver(dependsOn: deleteDriver) {
     doLast {
-        String templateName = "driver-sbktemplate"
+        String templateName = "sbktemplate"
         String driverName = templateName
-        String sbkDriverName = ""
+        String sbkDriverName = driverName.capitalize()
 
         if (project.hasProperty("driver")) {
-            String name1 = driver
-            if (name1.equalsIgnoreCase("driver") || name1.equalsIgnoreCase("driver-")) {
-                println "driver name is missing"
-                return
-            } else if (name1.startsWith("driver-")) {
-                driverName = name1
-                String[] lt = name1.split("driver-")
-                if (lt.length < 2) {
-                    println "Missing driver name"
-                    return
-                }
-                sbkDriverName = lt[1]
-            } else {
-                driverName = "driver-" + name1
-                sbkDriverName = name1
-            }
-            driverName = driverName.toLowerCase()
-            sbkDriverName = sbkDriverName.capitalize()
+            driverName = driver.toLowerCase()
         } else {
             println "driver name is missing user -Pdriver "
             return
         }
-
-        println "Add Driver: $driverName"
+        sbkDriverName = driverName.capitalize()
+        println "Add Driver: $sbkDriverName"
         if (driverName.contains(templateName)) {
             println "Invalid driver name"
             return
         }
+
         copy {
-            from "$rootDir/$templateName"
-            into "$rootDir/$driverName"
+            from "$rootDir/drivers/$templateName"
+            into "$rootDir/drivers/$driverName"
             from("$driverName/src/main/java/io/sbk/SbkTemplate") {
-                into "src/main/java/io/sbk/$sbkDriverName"
+                into "src/main/java/io/sbk/$driverName"
             }
             exclude 'build'
             rename "SbkTemplate", sbkDriverName
@@ -597,7 +572,7 @@ task addDriver(dependsOn: deleteDriver) {
         inFile1.eachLine {
             String line = it
             if (line.contains(templateName)) {
-                outText1 += "    api project(':$driverName')\n"
+                outText1 += "    api project(':drivers:$driverName')\n"
             }
             outText1 += line + "\n"
         }
@@ -610,7 +585,7 @@ task addDriver(dependsOn: deleteDriver) {
         inFile2.eachLine {
             String line = it
             if (line.contains(templateName)) {
-                outText2 += "include '$driverName'\n"
+                outText2 += "include 'drivers:$driverName'\n"
             }
             outText2 += line + "\n"
         }
