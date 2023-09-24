@@ -221,7 +221,7 @@ allprojects {
         }
 
 
-        if (project.path.startsWith(":driver-")) {
+        if (project.path.startsWith(":drivers")) {
             doLast {
                 println "generatering file : " + outDir + "/" + outFile
 
