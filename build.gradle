@@ -90,6 +90,7 @@ allprojects {
         exclude group: sbkGroup, module: "sbktemplate"
     }
 
+
     jar {
         manifest {
             attributes 'Name': sbkProjectName.toUpperCase(),
@@ -283,24 +284,58 @@ allprojects {
 }
 
 task printDependencies {
+
     doLast {
         project.subprojects.findAll().each {
             println "subproject : " + it.name
-            it.configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                def id = artifact.moduleVersion.id
-                if (id.group.toString() == sbkGroup) {
-                    println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+            it.configurations.each {k ->
+                k.dependencies.each { dep ->
+                        if (dep.group.toString() == sbkGroup) {
+                            println "\tgroup: ${dep.group}, version: ${dep.version},  name: ${dep.name}"
+                            def projName = dep.name
+                            while (projName) {
+                                def proj = project.findProject(projName)
+                                if (!proj) {
+                                    //search inside drivers
+                                    proj = project.findProject("drivers:"+projName)
+                                }
+                                projName = null
+                                if (proj) {
+                                    proj.configurations.each {x->
+                                        x.dependencies.each { y ->
+                                            if(y.group.toString() == sbkGroup) {
+                                                println "\tgroup: ${y.group}, version: ${y.version},  name: ${y.name}"
+                                                projName = y.name
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    break
+                                }
+                            }
+                        }
                 }
             }
             println()
         }
+
         println("Root project : " + rootProject.name)
+        rootProject.configurations.each {k ->
+            k.dependencies.each {dep ->
+                if (dep.group.toString() == sbkGroup) {
+                    println "\tgroup: ${dep.group}, version: ${dep.version},  name: ${dep.name}"
+                }
+            }
+        }
+
+        /*
         configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             def id = artifact.moduleVersion.id
             if (id.group.toString() == sbkGroup) {
                 println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
             }
         }
+        */
         println()
     }
 }
