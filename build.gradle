@@ -42,6 +42,11 @@ gradle.rootProject {
 }
 
 allprojects {
+
+    if (project.name == "drivers") {
+        return
+    }
+
     repositories {
         mavenLocal()
         mavenCentral()
