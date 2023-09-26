@@ -42,6 +42,11 @@ gradle.rootProject {
 }
 
 allprojects {
+
+    if (project.name == "drivers") {
+        return
+    }
+
     repositories {
         mavenLocal()
         mavenCentral()
@@ -69,9 +74,10 @@ allprojects {
 
     def sbkProjectName = project.name
     def sbkClass = project.name
-    if (sbkProjectName.startsWith("driver-")) {
-        sbkProjectName = sbkProjectName.replace( "driver-", rootProject.name + "-")
-        sbkClass = sbkClass.replace("driver-", "")
+    if (project.parent) {
+        if (project.parent.name == "drivers") {
+            sbkProjectName = rootProject.name + "-" + sbkProjectName
+        }
     }
 
     base {
@@ -81,8 +87,9 @@ allprojects {
     version = sbkVersion
 
     configurations.all {
-        exclude group: sbkGroup, module: "driver-sbktemplate"
+        exclude group: sbkGroup, module: "sbktemplate"
     }
+
 
     jar {
         manifest {
@@ -198,7 +205,7 @@ allprojects {
     }
 
     task generateDockerfiles() {
-        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem"]
+        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem", "drivers", "sbk-yal", "sbk-gem-yal"]
         def buffer = ""
         def outDir = 'build/dockers'
         def outFile = sbkProjectName + "-" + sbkVersion
@@ -214,7 +221,7 @@ allprojects {
         }
 
 
-        if (project.path.startsWith(":driver-")) {
+        if (project.path.startsWith(":drivers")) {
             doLast {
                 println "generatering file : " + outDir + "/" + outFile
 
@@ -222,11 +229,11 @@ allprojects {
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == sbkGroup) {
                         if (!driversToSkip.contains(id.name)) {
-                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
+                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/drivers/" + id.name + "\n"
                         }
                     }
                 }
-                buffer += "COPY --chown=root:root " + project.name + " \${APP_HOME}/" + project.name + "\n"
+                buffer += "COPY --chown=root:root " + project.name + " \${APP_HOME}/drivers/" + project.name + "\n"
                 copy {
                     from "$rootDir/driver-docker-template"
                     into outDir
@@ -244,7 +251,7 @@ allprojects {
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == sbkGroup) {
                         if (!driversToSkip.contains(id.name)) {
-                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/" + id.name + "\n"
+                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/drivers/" + id.name + "\n"
                         }
                     }
                 }
@@ -277,24 +284,58 @@ allprojects {
 }
 
 task printDependencies {
+
     doLast {
         project.subprojects.findAll().each {
             println "subproject : " + it.name
-            it.configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                def id = artifact.moduleVersion.id
-                if (id.group.toString() == sbkGroup) {
-                    println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
+            it.configurations.each {k ->
+                k.dependencies.each { dep ->
+                        if (dep.group.toString() == sbkGroup) {
+                            println "\tgroup: ${dep.group}, version: ${dep.version},  name: ${dep.name}"
+                            def projName = dep.name
+                            while (projName) {
+                                def proj = project.findProject(projName)
+                                if (!proj) {
+                                    //search inside drivers
+                                    proj = project.findProject("drivers:"+projName)
+                                }
+                                projName = null
+                                if (proj) {
+                                    proj.configurations.each {x->
+                                        x.dependencies.each { y ->
+                                            if(y.group.toString() == sbkGroup) {
+                                                println "\tgroup: ${y.group}, version: ${y.version},  name: ${y.name}"
+                                                projName = y.name
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    break
+                                }
+                            }
+                        }
                 }
             }
             println()
         }
+
         println("Root project : " + rootProject.name)
+        rootProject.configurations.each {k ->
+            k.dependencies.each {dep ->
+                if (dep.group.toString() == sbkGroup) {
+                    println "\tgroup: ${dep.group}, version: ${dep.version},  name: ${dep.name}"
+                }
+            }
+        }
+
+        /*
         configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             def id = artifact.moduleVersion.id
             if (id.group.toString() == sbkGroup) {
                 println "\tgroup: ${id.group}, version: ${id.version},  name: ${id.name}"
             }
         }
+        */
         println()
     }
 }
@@ -305,21 +346,20 @@ task printDependencies {
    another command : ./gradlew printdrivers -Preadme -Pdec   (add the project description)
  */
 task printDrivers {
-    String readmePrefix = ""
+    String readmePrefix = "drivers/"
 
     doLast {
         int i = 1;
         println();
         project.subprojects.findAll().each {
-            if (it.name.startsWith("driver-") && !it.name.equals("driver-template")) {
+            if (it.parent.name == "drivers") {
                 String out = it.name
                 String dec = it.getDescription()
                 if (project.hasProperty("readme")) {
-                    String name = it.name.replace("driver-", "")
                     if (dec != null && project.hasProperty("dec")) {
-                        out = "[" + name.capitalize() + "](" + readmePrefix + it.name + " \"" + dec + "\"" + ")"
+                        out = "[" + it.name.capitalize() + "](" + readmePrefix + it.name + " \"" + dec + "\"" + ")"
                     } else {
-                        out = "[" + name.capitalize() + "](" + readmePrefix + it.name + ")"
+                        out = "[" + it.name.capitalize() + "](" + readmePrefix + it.name + ")"
                     }
                 }
                 printf("%4d. %s\n", i, out)
@@ -488,20 +528,11 @@ application {
 
 task deleteDriver() {
     doLast {
-        String templateName = "driver-sbktemplate"
+        String templateName = "sbktemplate"
         String driverName = templateName
 
         if (project.hasProperty("driver")) {
-            String name1 = driver
-            if (name1.equalsIgnoreCase("driver") || name1.equalsIgnoreCase("driver-")) {
-                println "driver name is missing"
-                return
-            } else if (name1.startsWith("driver-")) {
-                driverName = name1
-            } else {
-                driverName = "driver-" + name1
-            }
-            driverName = driverName.toLowerCase()
+            driverName = driver.toLowerCase()
         } else {
             println "driver name is missing user -Pdriver "
             return
@@ -511,7 +542,7 @@ task deleteDriver() {
             println "Invalid driver name"
             return
         }
-        delete "$rootDir/$driverName"
+        delete "$rootDir/drivers/$driverName"
 
         def inFile1 = new File("$rootDir/settings-drivers.gradle").newInputStream()
         String outText1 = ""
@@ -542,44 +573,28 @@ task deleteDriver() {
 
 task addDriver(dependsOn: deleteDriver) {
     doLast {
-        String templateName = "driver-sbktemplate"
+        String templateName = "sbktemplate"
         String driverName = templateName
-        String sbkDriverName = ""
+        String sbkDriverName = driverName.capitalize()
 
         if (project.hasProperty("driver")) {
-            String name1 = driver
-            if (name1.equalsIgnoreCase("driver") || name1.equalsIgnoreCase("driver-")) {
-                println "driver name is missing"
-                return
-            } else if (name1.startsWith("driver-")) {
-                driverName = name1
-                String[] lt = name1.split("driver-")
-                if (lt.length < 2) {
-                    println "Missing driver name"
-                    return
-                }
-                sbkDriverName = lt[1]
-            } else {
-                driverName = "driver-" + name1
-                sbkDriverName = name1
-            }
-            driverName = driverName.toLowerCase()
-            sbkDriverName = sbkDriverName.capitalize()
+            driverName = driver.toLowerCase()
         } else {
             println "driver name is missing user -Pdriver "
             return
         }
-
-        println "Add Driver: $driverName"
+        sbkDriverName = driverName.capitalize()
+        println "Add Driver: $sbkDriverName"
         if (driverName.contains(templateName)) {
             println "Invalid driver name"
             return
         }
+
         copy {
-            from "$rootDir/$templateName"
-            into "$rootDir/$driverName"
+            from "$rootDir/drivers/$templateName"
+            into "$rootDir/drivers/$driverName"
             from("$driverName/src/main/java/io/sbk/SbkTemplate") {
-                into "src/main/java/io/sbk/$sbkDriverName"
+                into "src/main/java/io/sbk/$driverName"
             }
             exclude 'build'
             rename "SbkTemplate", sbkDriverName
@@ -592,7 +607,7 @@ task addDriver(dependsOn: deleteDriver) {
         inFile1.eachLine {
             String line = it
             if (line.contains(templateName)) {
-                outText1 += "    api project(':$driverName')\n"
+                outText1 += "    api project(':drivers:$driverName')\n"
             }
             outText1 += line + "\n"
         }
@@ -605,7 +620,7 @@ task addDriver(dependsOn: deleteDriver) {
         inFile2.eachLine {
             String line = it
             if (line.contains(templateName)) {
-                outText2 += "include '$driverName'\n"
+                outText2 += "include 'drivers:$driverName'\n"
             }
             outText2 += line + "\n"
         }
@@ -665,5 +680,4 @@ dependencies {
     api project(":sbk-gem-yal")
 }
 
-apply from: "$rootDir/build-drivers.gradle"
-
+apply from: "build-drivers.gradle"
