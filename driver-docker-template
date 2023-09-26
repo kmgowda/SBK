@@ -34,6 +34,8 @@ COPY --chown=root:root sbm ${APP_HOME}/sbm
 COPY --chown=root:root sbk-gem ${APP_HOME}/sbk-gem
 COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
 
+RUN mkdir -p ${APP_HOME}/drivers
+
 # Copy the SBK storage drivers
 COPY@SBK
 
