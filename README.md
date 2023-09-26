@@ -67,29 +67,29 @@ ___
 
 | #   	| Driver                              	| #   	| Driver                            	|
 |-----	|-------------------------------------	|-----	|-----------------------------------	|
-| 1.  	| [Activemq](driver-activemq)         	| 24. 	| [Mariadb](driver-mariadb)         	|
-| 2.  	| [Artemis](driver-artemis)           	| 25. 	| [Memcached](driver-memcached)     	|
-| 3.  	| [Asyncfile](driver-asyncfile)       	| 26. 	| [Minio](driver-minio)             	|
-| 4.  	| [Bookkeeper](driver-bookkeeper)     	| 27. 	| [Mongodb](driver-mongodb)         	|
-| 5.  	| [Cassandra](driver-cassandra)       	| 28. 	| [Mssql](driver-mssql)             	|
-| 6.  	| [Cephs3](driver-cephs3)             	| 29. 	| [Mysql](driver-mysql)             	|
-| 7.  	| [Concurrentq](driver-concurrentq)   	| 30. 	| [Nats](driver-nats)               	|
-| 8.  	| [Couchbase](driver-couchbase)       	| 31. 	| [NatsStream](driver-natsStream)   	|
-| 9.  	| [Couchdb](driver-couchdb)           	| 32. 	| [Nsq](driver-nsq)                 	|
-| 10. 	| [Csv](driver-csv)                   	| 33. 	| [Null](driver-null)               	|
-| 11. 	| [Db2](driver-db2)                   	| 34. 	| [Openio](driver-openio)           	|
-| 12. 	| [Derby](driver-derby)               	| 35. 	| [Postgresql](driver-postgresql)   	|
-| 13. 	| [Fdbrecord](driver-fdbrecord)       	| 36. 	| [Pravega](driver-pravega)         	|
-| 14. 	| [File](driver-file)                 	| 37. 	| [Pulsar](driver-pulsar)           	|
-| 15. 	| [Filestream](driver-filestream)     	| 38. 	| [Rabbitmq](driver-rabbitmq)       	|
-| 16. 	| [Foundationdb](driver-foundationdb) 	| 39. 	| [Redis](driver-redis)             	|
-| 17. 	| [H2](driver-h2)                     	| 40. 	| [Redpanda](driver-redpanda)       	|
-| 18. 	| [Hdfs](driver-hdfs)                 	| 41. 	| [Rocketmq](driver-rocketmq)       	|
-| 19. 	| [Hive](driver-hive)                 	| 42. 	| [Rocksdb](driver-rocksdb)         	|
-| 20. 	| [Ignite](driver-ignite)             	| 43. 	| [Sbktemplate](driver-sbktemplate) 	|
-| 21. 	| [Jdbc](driver-jdbc)                 	| 44. 	| [Seaweeds3](driver-seaweeds3)     	|
-| 22. 	| [Kafka](driver-kafka)               	| 45. 	| [Sqlite](driver-sqlite)           	|
-| 23. 	| [Leveldb](driver-leveldb)           	|     	|                                   	|
+| 1.  	| [Activemq](drivers/activemq)         	| 24. 	| [Mariadb](drivers/mariadb)         	|
+| 2.  	| [Artemis](drivers/artemis)           	| 25. 	| [Memcached](drivers/memcached)     	|
+| 3.  	| [Asyncfile](drivers/asyncfile)       	| 26. 	| [Minio](drivers/minio)             	|
+| 4.  	| [Bookkeeper](drivers/bookkeeper)     	| 27. 	| [Mongodb](drivers/mongodb)         	|
+| 5.  	| [Cassandra](drivers/cassandra)       	| 28. 	| [Mssql](drivers/mssql)             	|
+| 6.  	| [Cephs3](drivers/cephs3)             	| 29. 	| [Mysql](drivers/mysql)             	|
+| 7.  	| [Concurrentq](drivers/concurrentq)   	| 30. 	| [Nats](drivers/nats)               	|
+| 8.  	| [Couchbase](drivers/couchbase)       	| 31. 	| [NatsStream](drivers/natsStream)   	|
+| 9.  	| [Couchdb](drivers/couchdb)           	| 32. 	| [Nsq](drivers/nsq)                 	|
+| 10. 	| [Csv](drivers/csv)                   	| 33. 	| [Null](drivers/null)               	|
+| 11. 	| [Db2](drivers/db2)                   	| 34. 	| [Openio](drivers/openio)           	|
+| 12. 	| [Derby](drivers/derby)               	| 35. 	| [Postgresql](drivers/postgresql)   	|
+| 13. 	| [Fdbrecord](drivers/fdbrecord)       	| 36. 	| [Pravega](drivers/pravega)         	|
+| 14. 	| [File](drivers/file)                 	| 37. 	| [Pulsar](drivers/pulsar)           	|
+| 15. 	| [Filestream](drivers/filestream)     	| 38. 	| [Rabbitmq](drivers/rabbitmq)       	|
+| 16. 	| [Foundationdb](drivers/foundationdb) 	| 39. 	| [Redis](drivers/redis)             	|
+| 17. 	| [H2](drivers/h2)                     	| 40. 	| [Redpanda](drivers/redpanda)       	|
+| 18. 	| [Hdfs](drivers/hdfs)                 	| 41. 	| [Rocketmq](drivers/rocketmq)       	|
+| 19. 	| [Hive](drivers/hive)                 	| 42. 	| [Rocksdb](drivers/rocksdb)         	|
+| 20. 	| [Ignite](drivers/ignite)             	| 43. 	| [Sbktemplate](drivers/sbktemplate) 	|
+| 21. 	| [Jdbc](drivers/jdbc)                 	| 44. 	| [Seaweeds3](drivers/seaweeds3)     	|
+| 22. 	| [Kafka](drivers/kafka)               	| 45. 	| [Sqlite](drivers/sqlite)           	|
+| 23. 	| [Leveldb](drivers/leveldb)           	|     	|                                   	|
 
 *In the future, many more storage systems drivers will be plugged in* 
 
@@ -594,7 +594,7 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
    * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line.
 
    g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
-   * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+   * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
    * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
 
 3. You have to implement the following methods of Writer class
@@ -610,13 +610,13 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
       i). Read Data
       1. for synchronous reads: [[read](hhttps://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#read())]
-         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
+         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
       2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AsyncReader.html)]
          * create a new class
-         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/driver-file/src/main/java/io/sbk/File/FileAsyncReader.java)]
+         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/drivers/file/src/main/java/io/sbk/File/FileAsyncReader.java)]
       3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AbstractCallbackReader.html)]
          * Create a new class
-         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/driver-rabbitmq/src/main/java/io/sbk/RabbitMQ/RabbitMQCallbackReader.java)]
+         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/drivers/rabbitmq/src/main/java/io/sbk/RabbitMQ/RabbitMQCallbackReader.java)]
       
       ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
 
@@ -699,17 +699,17 @@ Please report issues at https://github.com/kmgowda/SBK
 ### Add your driver to SBK Manually
 1. Create the gradle subproject preferable with the name **driver-<your driver(storage device) name>**.
 
-    * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/driver-pulsar)]   
+    * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar)]   
 
 
 2. Create the package **io.sbk.< your driver name>** 
 
-    * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/driver-pulsar/src/main/java/io/sbk/Pulsar)]   
+    * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar/src/main/java/io/sbk/Pulsar)]   
     
 
 3. In your driver package you have to implement the Interface: [[Storage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html)]
 
-    * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+    * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
     
     * you have to implement the following methods of Benchmark Interface:
         
@@ -729,13 +729,13 @@ Please report issues at https://github.com/kmgowda/SBK
         * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line. 
         
       g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
-        * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+        * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
         * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
 
     
 4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html)]
 
-    * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java)]
+    * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java)]
     
     * you have to implement the following methods of Writer class:
         
@@ -754,18 +754,18 @@ Please report issues at https://github.com/kmgowda/SBK
         
       i). Read Data 
       1. for synchronous reads: [[read](hhttps://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#read())]
-         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
+         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
       2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AsyncReader.html)]
-         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/driver-file/src/main/java/io/sbk/File/FileAsyncReader.java)]
+         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/drivers/file/src/main/java/io/sbk/File/FileAsyncReader.java)]
       3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AbstractCallbackReader.html)]
-         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/driver-rabbitmq/src/main/java/io/sbk/RabbitMQ/RabbitMQCallbackReader.java)]
+         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/drivers/rabbitmq/src/main/java/io/sbk/RabbitMQ/RabbitMQCallbackReader.java)]
          
       ii). Close the Reader: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
 
 
 6.  Add the Gradle dependency [ compile project(":sbk-api")] to your sub-project (driver)
 
-    * see the Example:[[Pulsar Gradle Build](https://github.com/kmgowda/sbk/blob/master/driver-pulsar/build.gradle)]
+    * see the Example:[[Pulsar Gradle Build](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/build.gradle)]
 
 
 7. Add your subproject to the main gradle as dependency.
