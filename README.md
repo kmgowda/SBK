@@ -594,7 +594,8 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
    * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line.
 
    g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
-   * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+   * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar 
+     class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/Pulsar.java)]
    * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
 
 3. You have to implement the following methods of Writer class
@@ -610,13 +611,13 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
       i). Read Data
       1. for synchronous reads: [[read](hhttps://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#read())]
-         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
+         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/PulsarReader.java)]
       2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AsyncReader.html)]
          * create a new class
-         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/drivers/file/src/main/java/io/sbk/File/FileAsyncReader.java)]
+         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/drivers/file/src/main/java/io/sbk/driver/File/FileAsyncReader.java)]
       3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AbstractCallbackReader.html)]
          * Create a new class
-         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/drivers/rabbitmq/src/main/java/io/sbk/RabbitMQ/RabbitMQCallbackReader.java)]
+         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/drivers/rabbitmq/src/main/java/io/sbk/driver/RabbitMQ/RabbitMQCallbackReader.java)]
       
       ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
 
@@ -704,12 +705,12 @@ Please report issues at https://github.com/kmgowda/SBK
 
 2. Create the package **io.sbk.< your driver name>** 
 
-    * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar/src/main/java/io/sbk/Pulsar)]   
+    * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar)]   
     
 
 3. In your driver package you have to implement the Interface: [[Storage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html)]
 
-    * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+    * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/Pulsar.java)]
     
     * you have to implement the following methods of Benchmark Interface:
         
@@ -729,13 +730,13 @@ Please report issues at https://github.com/kmgowda/SBK
         * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line. 
         
       g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
-        * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/Pulsar.java)]
+        * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/Pulsar.java)]
         * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
 
     
 4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html)]
 
-    * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/PulsarWriter.java)]
+    * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/PulsarWriter.java)]
     
     * you have to implement the following methods of Writer class:
         
@@ -754,7 +755,7 @@ Please report issues at https://github.com/kmgowda/SBK
         
       i). Read Data 
       1. for synchronous reads: [[read](hhttps://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#read())]
-         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/Pulsar/PulsarReader.java)]
+         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/PulsarReader.java)]
       2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AsyncReader.html)]
          * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/drivers/file/src/main/java/io/sbk/File/FileAsyncReader.java)]
       3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AbstractCallbackReader.html)]
