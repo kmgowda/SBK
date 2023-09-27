@@ -117,7 +117,7 @@ public final class SbkGemYal {
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             if (isPrintOption) {
-                SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, packageName, applicationName, outLogger);
+                SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, applicationName, packageName, outLogger);
                 throw new HelpException(ex.toString());
             }
             params.printHelp();
@@ -131,6 +131,6 @@ public final class SbkGemYal {
             sbkGemArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
         }
 
-        return SbkGem.run(sbkGemArgs, packageName, applicationName, outLogger);
+        return SbkGem.run(sbkGemArgs, applicationName, packageName, outLogger);
     }
 }

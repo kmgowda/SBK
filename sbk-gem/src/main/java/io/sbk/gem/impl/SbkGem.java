@@ -18,6 +18,10 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
+import io.sbk.gem.GemLoggerPackage;
+import io.sbk.logger.impl.GemSbmPrometheusLogger;
+import io.sbk.params.InputParameterOptions;
+import io.sbk.params.impl.SbkDriversParameters;
 import io.sbm.logger.RamLogger;
 import io.sbm.logger.impl.SbmPrometheusLogger;
 import io.sbk.utils.SbkUtils;
@@ -30,7 +34,6 @@ import io.sbk.gem.GemBenchmark;
 import io.sbk.params.GemParameterOptions;
 import io.sbk.gem.RemoteResponse;
 import io.sbk.logger.GemLogger;
-import io.sbk.logger.impl.GemSbmPrometheusLogger;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.params.impl.SbkGemParameters;
 import io.sbm.api.impl.Sbm;
@@ -68,13 +71,13 @@ final public class SbkGem {
     /**
      * Run the Performance Benchmarking .
      *
-     * @param args            command line arguments.
-     * @param packageName     Name of the package where storage class is available.
-     *                        If you pass null to this parameter, then default package name "io.sbk" is used.
-     * @param applicationName Name of the application. will be used in the 'help' message. if it is 'null' ,
-     *                        SbkServer is used by default.
-     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args               command line arguments.
+     * @param applicationName    Name of the application. will be used in the 'help' message. if it is 'null' ,
+     *                           SbkServer is used by default.
+     * @param storagePackageName Name of the package where storage class is available.
+     *                           If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                           logger will be used.
      * @return Array of remote responses
      * @throws ParseException           If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
@@ -83,12 +86,13 @@ final public class SbkGem {
      * @throws ExecutionException       If an exception occurred.
      * @throws TimeoutException         If an exception occurred if an I/O operation is timed out.
      */
-    public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
-                                                GemLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InterruptedException, ExecutionException, TimeoutException {
+    public static RemoteResponse[] run(final String[] args, final String applicationName, final String storagePackageName,
+                                       String loggerPackageName) throws ParseException, IllegalArgumentException,
+            IOException, InterruptedException, InstantiationException, ExecutionException, TimeoutException,
+            ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final GemBenchmark benchmark;
         try {
-            benchmark = buildBenchmark(args, packageName, applicationName, outLogger);
+            benchmark = buildBenchmark(args, applicationName, storagePackageName, loggerPackageName);
         } catch (HelpException ex) {
             return null;
         }
@@ -106,26 +110,28 @@ final public class SbkGem {
     /**
      * Build the Benchmark Object.
      *
-     * @param args            command line arguments.
-     * @param packageName     Name of the package where storage class is available.
-     *                        If you pass null to this parameter, then default package name "io.sbk" is used.
-     * @param applicationName Name of the application. will be used in the 'help' message.
-     *                        if it is 'null' , storage name is used by default.
-     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args               command line arguments.
+     * @param applicationName    Name of the application. will be used in the 'help' message.
+     *                           if it is 'null' , storage name is used by default.
+     * @param storagePackageName Name of the package where storage class is available.
+     *                           If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                           logger will be used.
      * @return Benchmark Interface
      * @throws HelpException  if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IOException    If an exception occurred due to write or read failures.
      */
     @Contract("_, _, _, _ -> new")
-    public static @NotNull GemBenchmark buildBenchmark(final String[] args, final String packageName,
-                                                       final String applicationName, GemLogger outLogger)
-            throws ParseException, IOException, HelpException {
+    public static @NotNull GemBenchmark buildBenchmark(final String[] args, final String applicationName,
+                                                       final String storagePackageName, final String loggerPackageName)
+            throws ParseException, IOException, HelpException, ClassNotFoundException, InvocationTargetException,
+            NoSuchMethodException, IllegalAccessException, InstantiationException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
         final GemLogger logger;
+        final RamLogger ramLogger;
         final SbmConfig sbmConfig;
         final Time time;
         final String version = io.sbk.gem.impl.SbkGem.class.getPackage().getImplementationVersion();
@@ -137,14 +143,20 @@ final public class SbkGem {
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
+        final String argsLoggerName = SbkUtils.getLoggerName(args);
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName : sbkClassName;
-        final String storagePackageName = StringUtils.isNotEmpty(packageName) ? packageName : Config.SBK_PACKAGE_NAME;
-        final StoragePackage packageStore = new StoragePackage(storagePackageName);
+        final String sbkStoragePackageName = StringUtils.isNotEmpty(storagePackageName) ?
+                storagePackageName : Config.SBK_STORAGE_PACKAGE_NAME;
+        final String gemLoggerPackageName = StringUtils.isNotEmpty(loggerPackageName) ?
+                loggerPackageName : GemConfig.SBK_GEM_LOGGER_PACKAGE_NAME;
+        final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
+        final GemLoggerPackage loggerStore = new GemLoggerPackage(gemLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
         final Storage storageDevice;
         final String usageLine;
         final String[] storageDrivers;
         final String[] nextArgs;
+        final String[] loggerNames;
 
         Printer.log.info(IOUtils.toString(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(GemConfig.DESC);
@@ -153,12 +165,13 @@ final public class SbkGem {
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
-        Printer.log.info("Storage Drivers Package: " + storagePackageName);
+        Printer.log.info("Storage Drivers Package: " + sbkStoragePackageName);
         Printer.log.info(Config.SBK_APP_NAME + ": " + Objects.requireNonNullElse(sbkAppName, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME + ": " + Objects.requireNonNullElse(sbkAppHome, ""));
         Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + Objects.requireNonNullElse(argsClassName, ""));
         packageStore.printClasses("Storage");
+        loggerStore.printClasses("Gem Logger");
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -167,6 +180,38 @@ final public class SbkGem {
                 SbmConfig.class);
         gemConfig = mapper.readValue(io.sbk.gem.impl.SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);
+
+        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName :
+                appName;
+
+        if (StringUtils.isEmpty(argsLoggerName)) {
+            logger = new GemSbmPrometheusLogger();
+            ramLogger = new GemSbmPrometheusLogger();
+            String[] loggers = loggerStore.getClassNames();
+            if(loggers != null && loggers.length > 0) {
+                loggerNames = loggers;
+            } else {
+                loggerNames = new String[]{logger.getClass().getSimpleName()};
+                Printer.log.error("No logger classes found from the package : "+gemLoggerPackageName +
+                        " default logger "+ Arrays.toString(loggerNames));
+            }
+        } else {
+            loggerNames = loggerStore.getClassNames();
+            try {
+                logger = loggerStore.getClass(argsLoggerName);
+                ramLogger = loggerStore.getClass(argsLoggerName);
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                     | IllegalAccessException | InstantiationException ex) {
+                Printer.log.error("Instantiation of Logger class '" + argsLoggerName + "' from the package '" +
+                        gemLoggerPackageName + "' failed!, " + "error: " + ex);
+                final InputParameterOptions helpParams = new SbkDriversParameters(usageLine,
+                        packageStore.getClassNames(), loggerNames);
+                helpParams.printHelp();
+                throw ex;
+            }
+        }
+
+
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isNotEmpty(sbkCommand)) {
@@ -181,8 +226,6 @@ final public class SbkGem {
             gemConfig.remoteDir += "-" + version;
         }
 
-        logger = Objects.requireNonNullElseGet(outLogger, GemSbmPrometheusLogger::new);
-
         if (StringUtils.isEmpty(className)) {
             storageDevice = null;
         } else {
@@ -192,16 +235,14 @@ final public class SbkGem {
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                     IllegalAccessException | InstantiationException ex) {
                 Printer.log.warn("Instantiation of storage class '" + className + "' from the package '" +
-                        storagePackageName + "' failed!, " + "error: " + ex);
+                        sbkStoragePackageName + "' failed!, " + "error: " + ex);
             }
             storageDevice = device;
         }
 
-        usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName :
-                appName;
         storageDrivers = storageDevice == null ? packageStore.getClassNames() : null;
 
-        params = new SbkGemParameters(usageLine, storageDrivers, gemConfig, sbmConfig.port);
+        params = new SbkGemParameters(usageLine, storageDrivers, loggerNames, gemConfig, sbmConfig.port);
         logger.addArgs(params);
         if (storageDevice != null) {
             storageDevice.addArgs(params);
@@ -318,9 +359,8 @@ final public class SbkGem {
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
         Printer.log.info("Arguments to SBM: " + Arrays.toString(ramArgs));
 
-        final RamLogger ramLogger = new SbmPrometheusLogger();
-
-        ramParams = new SbmParameters(appName, params.getSbmPort(), params.getConnections().length);
+        ramParams = new SbmParameters(appName, params.getSbmPort(), params.getConnections().length,
+                new String[]{ramLogger.getClass().getSimpleName()});
         ramLogger.addArgs(ramParams);
         try {
             ramParams.parseArgs(ramArgs);

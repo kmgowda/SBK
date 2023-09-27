@@ -88,6 +88,10 @@ final public class SbkUtils {
         return getArgValue(args, Config.CLASS_OPTION_ARG);
     }
 
+    public static String getLoggerName(String[] args) {
+        return getArgValue(args, Config.LOGGER_OPTION_ARG);
+    }
+
     public static boolean hasArg(String[] args, String argName) {
         if (args == null) {
             return false;

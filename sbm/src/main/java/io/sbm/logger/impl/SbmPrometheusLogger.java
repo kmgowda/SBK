@@ -9,12 +9,10 @@
  */
 package io.sbm.logger.impl;
 
-import io.sbm.logger.RamLogger;
-
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class SbmPrometheusLogger extends AbstractRamLogger implements RamLogger {
+public class SbmPrometheusLogger extends AbstractRamLogger {
 
     @Override
     public void print(int connections, int maxConnections, int writers, int maxWriters, int readers, int maxReaders,

@@ -10,6 +10,7 @@
 package io.sbm.params.impl;
 
 import io.sbk.action.Action;
+import io.sbk.config.Config;
 import io.sbm.config.SbmConfig;
 import io.sbk.exception.HelpException;
 import io.sbm.params.RamParameterOptions;
@@ -19,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.StringUtils;
+
+import java.util.Arrays;
 
 
 /**
@@ -39,18 +42,23 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
     @Getter
     private int port;
 
+    final private String[] loggerNames;
     /**
      * Constructor SbmParameters initializing all values.
      *
-     * @param name              String
-     * @param port              int
-     * @param maxConnections    int
+     * @param name           String
+     * @param port           int
+     * @param maxConnections int
+     * @param loggerNames
      */
-    public SbmParameters(String name, int port, int maxConnections) {
+    public SbmParameters(String name, int port, int maxConnections, String[] loggerNames) {
         super(name, SbmConfig.DESC);
         this.maxConnections = maxConnections;
         this.port = port;
-        addOption("class", true, "storage class name; run 'sbk -help' to see the list");
+        this.loggerNames = loggerNames;
+        addOption(Config.CLASS_OPTION, true, "storage class name; run 'sbm -help' to see the list");
+        addOption(Config.LOGGER_OPTION, true, "Logger Driver Class,\n Available Drivers "
+                + Arrays.toString(this.loggerNames));
         addOption("action", true,
                 """
                             action [r: read, w: write,

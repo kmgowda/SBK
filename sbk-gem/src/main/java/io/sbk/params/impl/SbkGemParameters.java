@@ -58,13 +58,14 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     /**
      * This Constructor is responsible for initializing all values.
      *
-     * @param name      String
-     * @param drivers   String[]
-     * @param config    NotNull GemConfig
-     * @param sbmPort   int
+     * @param name    String
+     * @param drivers String[]
+     * @param loggers
+     * @param config  NotNull GemConfig
+     * @param sbmPort int
      */
-    public SbkGemParameters(String name, String[] drivers, @NotNull GemConfig config, int sbmPort) {
-        super(name, GemConfig.DESC, drivers);
+    public SbkGemParameters(String name, String[] drivers, String[] loggers, @NotNull GemConfig config, int sbmPort) {
+        super(name, GemConfig.DESC, drivers, loggers);
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * Time.MS_PER_SEC;
         this.sbmPort = sbmPort;

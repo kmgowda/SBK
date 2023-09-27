@@ -13,26 +13,10 @@ package io.sbk.logger.impl;
 import io.sbk.logger.GemLogger;
 import io.sbm.logger.impl.SbmPrometheusLogger;
 
-import java.io.IOException;
-
 public abstract class AbstractGemLogger extends SbmPrometheusLogger implements GemLogger {
     @Override
-    public String[] getOptionsArgs() {
-        try {
-            throw new IOException("The getOptionsArgs method is not overridden/implemented\n");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
+    public abstract String[] getOptionsArgs();
 
     @Override
-    public String[] getParsedArgs() {
-        try {
-            throw new IOException("The getParsedArgs method is not overridden/implemented\n");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
+    public abstract String[] getParsedArgs();
 }

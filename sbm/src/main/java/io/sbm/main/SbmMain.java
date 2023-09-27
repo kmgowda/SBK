@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -33,8 +34,9 @@ public final class SbmMain {
             Sbm.run(args, null, null);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);
-        } catch (ParseException | IllegalArgumentException | IOException |
-                TimeoutException | InterruptedException | ExecutionException | InstantiationException ex) {
+        } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
+                 ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
+                 NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(1);
         }

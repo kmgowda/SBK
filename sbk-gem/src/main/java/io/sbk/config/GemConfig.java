@@ -35,6 +35,10 @@ final public class GemConfig {
      */
     final public static String LOCAL_HOST = "localhost";
 
+    /**
+     *<code>String SBK_GEM_LOGGER_PACKAGE_NAME = "io.sbm.logger"</code>.
+     */
+    final public static String SBK_GEM_LOGGER_PACKAGE_NAME = "io.sbm.logger";
 
     //override by props file or command line parameters
     /**

@@ -16,6 +16,8 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
+import io.sbk.utils.SbkUtils;
+import io.sbm.api.RamLoggerPackage;
 import io.sbm.config.SbmConfig;
 import io.sbk.exception.HelpException;
 import io.sbm.logger.RamLogger;
@@ -28,8 +30,10 @@ import io.sbp.config.SbpVersion;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -46,10 +50,10 @@ final public class Sbm {
     /**
      * Run the Performance Benchmarking .
      *
-     * @param args            command line arguments.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , SbkServer is used by default.
-     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args              command line arguments.
+     * @param applicationName   name of the application. will be used in the 'help' message. if it is 'null' , SbkServer is used by default.
+     * @param loggerPackageName Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                          logger will be used.
      * @throws ParseException           If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException              If an exception occurred due to write or read failures.
@@ -57,13 +61,19 @@ final public class Sbm {
      * @throws InterruptedException     If an exception occurred if the writers and readers are interrupted.
      * @throws ExecutionException       If an exception occurred.
      * @throws TimeoutException         If an exception occurred if an I/O operation is timed out.
+     * @throws ClassNotFoundException   If an exception occurred.
+     * @throws InvocationTargetException If an exception occurred.
+     * @throws NoSuchMethodException     If an exception occurred.
+     * @throws IllegalAccessException    If an exception occurred.
+     *
      */
     public static void run(final String[] args, final String applicationName,
-                           RamLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException {
+                           String loggerPackageName) throws ParseException, IllegalArgumentException,
+            IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException,
+            ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final Benchmark benchmark;
         try {
-            benchmark = buildBenchmark(args, applicationName, outLogger);
+            benchmark = buildBenchmark(args, applicationName, loggerPackageName);
         } catch (HelpException ex) {
             return;
         }
@@ -80,26 +90,36 @@ final public class Sbm {
     /**
      * Build the Benchmark Object.
      *
-     * @param args            command line arguments.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
-     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args              command line arguments.
+     * @param applicationName   name of the application. will be used in the 'help' message. if it is 'null' , storage name is used by default.
+     * @param loggerPackageName Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                          logger will be used.
      * @return Benchmark Interface
      * @throws HelpException            if '-help' option is supplied.
      * @throws ParseException           If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
      * @throws IOException              If an exception occurred due to write or read failures.
+     * @throws ClassNotFoundException   If an exception occurred.
+     * @throws InvocationTargetException If an exception occurred.
+     * @throws NoSuchMethodException     If an exception occurred.
+     * @throws IllegalAccessException    If an exception occurred.
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
-                                           RamLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, HelpException {
+                                           String loggerPackageName) throws ParseException, IllegalArgumentException,
+            IOException, HelpException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException,
+            IllegalAccessException, InstantiationException {
         final RamParameterOptions params;
         final RamLogger logger;
         final SbmConfig sbmConfig;
         final Time time;
+        final String[] loggerNames;
         final String version = Sbm.class.getPackage().getImplementationVersion();
         final String appName = Objects.requireNonNullElse(applicationName, SbmConfig.NAME);
         final SbpVersion sbpVersion = Sbp.getVersion();
+        final String ramLoggerPackageName = StringUtils.isNotEmpty(loggerPackageName) ?
+                loggerPackageName : SbmConfig.SBM_LOGGER_PACKAGE_NAME;
+        final RamLoggerPackage loggerStore = new RamLoggerPackage(ramLoggerPackageName);
+        final String argsLoggerName = SbkUtils.getLoggerName(args);
 
         Printer.log.info(IOUtils.toString(Sbm.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbmConfig.DESC);
@@ -108,6 +128,7 @@ final public class Sbm {
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
+        loggerStore.printClasses("Logger");
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -115,11 +136,35 @@ final public class Sbm {
         sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 SbmConfig.class);
 
-        // disable CSV
-        sbmConfig.csv = false;
-        logger = Objects.requireNonNullElseGet(outLogger, SbmPrometheusLogger::new);
+        if(StringUtils.isEmpty(argsLoggerName)) {
+            logger = new  SbmPrometheusLogger();
+            String[] loggers = loggerStore.getClassNames();
+            if(loggers != null && loggers.length > 0) {
+                loggerNames = loggers;
+            } else {
+                loggerNames = new String[]{logger.getClass().getSimpleName()};
+                Printer.log.error("No logger classes found from the package : "+ramLoggerPackageName +
+                        " default logger "+ Arrays.toString(loggerNames));
+            }
+        } else {
+            loggerNames = loggerStore.getClassNames();
+            try {
+                logger = loggerStore.getClass(argsLoggerName);
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                     IllegalAccessException | InstantiationException ex) {
+                Printer.log.error("Instantiation of Logger class '" + argsLoggerName + "' from the package '" +
+                        ramLoggerPackageName + "' failed!, " + "error: " + ex);
+                final RamParameterOptions helpParams = new SbmParameters(appName, sbmConfig.port,
+                        sbmConfig.maxConnections, loggerNames);
+                helpParams.printHelp();
+                throw ex;
+            }
+        }
 
-        params = new SbmParameters(appName, sbmConfig.port, sbmConfig.maxConnections);
+       // disable CSV
+        sbmConfig.csv = false;
+
+        params = new SbmParameters(appName, sbmConfig.port, sbmConfig.maxConnections, loggerNames);
         logger.addArgs(params);
         try {
             params.parseArgs(args);

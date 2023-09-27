@@ -17,7 +17,6 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
-import io.sbk.logger.RWLogger;
 import io.sbk.system.Printer;
 import io.sbk.params.YmlMap;
 import io.sbk.params.impl.SbkYalParameters;
@@ -46,13 +45,13 @@ public final class SbkYal {
     /**
      * Run the Performance Benchmarking .
      *
-     * @param args            command line arguments.
-     * @param packageName     Name of the package where storage class is available.
-     *                        If you pass null to this parameter, then default package name "io.sbk" is used.
-     * @param applicationName Name of the application. will be used in the 'help' message. if it is 'null' ,
-     *                        SbkServer is used by default.
-     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args               command line arguments.
+     * @param applicationName    Name of the application. will be used in the 'help' message. if it is 'null' ,
+     *                           SbkServer is used by default.
+     * @param storgePackageName Name of the package where storage class is available.
+     *                           If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                           logger will be used.
      * @throws ParseException            If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException  If an exception occurred due to invalid arguments.
      * @throws IOException               If an exception occurred due to write or read failures.
@@ -66,14 +65,14 @@ public final class SbkYal {
      * @throws TimeoutException          If an exception occurred if an I/O operation is timed out.
      * @throws HelpException             if '-help' is used or yaml file is missing.
      */
-    public static void run(final String[] args, final String packageName, final String applicationName,
-                           RWLogger outLogger) throws ParseException, IllegalArgumentException,
+    public static void run(final String[] args, final String applicationName, final String storgePackageName,
+                           String loggerPackageName) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, HelpException, ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
-        runBenchmark(args, packageName, applicationName, outLogger);
+        runBenchmark(args, applicationName, storgePackageName, loggerPackageName);
     }
 
-    private static void runBenchmark(final String[] args, final String packageName,
-                                     final String applicationName, RWLogger outLogger)
+    private static void runBenchmark(final String[] args, final String applicationName, final String storagePackageName,
+                                     String loggerPackageName)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,
             ExecutionException, TimeoutException, HelpException, ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
         final String version = io.sbk.api.impl.SbkYal.class.getPackage().getImplementationVersion();
@@ -119,7 +118,7 @@ public final class SbkYal {
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             if (isPrintOption) {
-                Sbk.run(new String[]{Config.HELP_OPTION_ARG}, packageName, applicationName, outLogger);
+                Sbk.run(new String[]{Config.HELP_OPTION_ARG}, applicationName, storagePackageName, loggerPackageName);
                 throw new HelpException(ex.toString());
             }
             params.printHelp();
@@ -131,6 +130,6 @@ public final class SbkYal {
             sbkArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);
             sbkArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
         }
-        Sbk.run(sbkArgs, packageName, applicationName, outLogger);
+        Sbk.run(sbkArgs, applicationName, storagePackageName, loggerPackageName);
     }
 }

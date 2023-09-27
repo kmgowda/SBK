@@ -180,24 +180,16 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
     }
 
     @Override
-    public void print(int connections, int maxConnections, int writers, int maxWriters, int readers, int maxReaders,
-                      long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-                      double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
-                      long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, long writeTimeoutEvents,
-                      double writeTimeoutEventsPerSec, long readTimeoutEvents, double readTimeoutEventsPerSec,
-                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                      long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
-        try {
-            throw new IOException("The print method is not overridden/implemented\n");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-
+    public abstract void print(int connections, int maxConnections, int writers, int maxWriters, int readers,
+                               int maxReaders, long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                               double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
+                               long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
+                               long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
+                               long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, long writeTimeoutEvents,
+                               double writeTimeoutEventsPerSec, long readTimeoutEvents, double readTimeoutEventsPerSec,
+                               double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                               long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                               long slc1, long slc2, long[] percentileValues);
 
     @Override
     public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
@@ -236,7 +228,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
 
 
     @Override
-    public void printTotal(int connections, int maxConnections, int writers, int maxWriters,
+    public abstract void printTotal(int connections, int maxConnections, int writers, int maxWriters,
                            int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec,
                            long writeRequestRecords, double writeRequestRecordsPerSec, long readRequestBytes,
                            double readRequestMbPerSec, long readRequestRecords, double readRequestRecordsPerSec,
@@ -247,13 +239,6 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                            double readTimeoutEventsPerSec, double seconds, long bytes, long records,
                            double recsPerSec, double mbPerSec, double avgLatency, long minLatency,
                            long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentileValues) {
-        try {
-            throw new IOException("The printTotal method is not overridden/implemented\n");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
+                           long slc1, long slc2, long[] percentileValues);
 
 }

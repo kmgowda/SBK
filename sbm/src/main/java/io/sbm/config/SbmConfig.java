@@ -27,6 +27,10 @@ final public class SbmConfig extends LatencyConfig {
      */
     final public static String DESC = "Storage Benchmark Monitor";
 
+    /**
+     * <code>SBM_LOGGER_PACKAGE_NAME = "io.sbm.logger";</code>.
+     */
+    final public static String SBM_LOGGER_PACKAGE_NAME = "io.sbm.logger";
 
     /**
      * <code>int port</code>.
