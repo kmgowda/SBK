@@ -150,7 +150,7 @@ final public class Sbk {
         Printer.log.info(Config.SBK_APP_HOME + ": " + Objects.requireNonNullElse(sbkAppHome, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + argsClassName);
-        packageStore.printDrivers();
+        packageStore.printClasses("Storage");
 
         rwLogger = Objects.requireNonNullElseGet(outRWLogger, GrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
@@ -158,7 +158,7 @@ final public class Sbk {
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
         if (StringUtils.isEmpty(className)) {
-            final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
+            final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getClassNames());
             rwLogger.addArgs(helpParams);
             final String helpText = helpParams.getHelpText();
             System.out.println("\n" + helpText);
@@ -168,12 +168,12 @@ final public class Sbk {
             throw new ParseException("The option '-class' is not supplied");
         } else {
             try {
-                storageDevice = packageStore.getStorage(className);
+                storageDevice = packageStore.getClass(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
                     | IllegalAccessException ex) {
                 Printer.log.error("Instantiation of storage class '" + className + "' from the package '" +
                         storagePackageName + "' failed!, " + "error: " + ex);
-                final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getDrivers());
+                final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getClassNames());
                 rwLogger.addArgs(helpParams);
                 helpParams.printHelp();
                 throw ex;

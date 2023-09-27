@@ -158,7 +158,7 @@ final public class SbkGem {
         Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info(Config.SBK_APP_HOME + ": " + Objects.requireNonNullElse(sbkAppHome, ""));
         Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + Objects.requireNonNullElse(argsClassName, ""));
-        packageStore.printDrivers();
+        packageStore.printClasses("Storage");
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -188,7 +188,7 @@ final public class SbkGem {
         } else {
             Storage<?> device = null;
             try {
-                device = packageStore.getStorage(className);
+                device = packageStore.getClass(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                     IllegalAccessException | InstantiationException ex) {
                 Printer.log.warn("Instantiation of storage class '" + className + "' from the package '" +
@@ -199,7 +199,7 @@ final public class SbkGem {
 
         usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName :
                 appName;
-        storageDrivers = storageDevice == null ? packageStore.getDrivers() : null;
+        storageDrivers = storageDevice == null ? packageStore.getClassNames() : null;
 
         params = new SbkGemParameters(usageLine, storageDrivers, gemConfig, sbmConfig.port);
         logger.addArgs(params);

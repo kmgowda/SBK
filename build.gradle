@@ -598,12 +598,12 @@ task addDriver(dependsOn: deleteDriver) {
             filter { line -> line.replaceAll('SbkTemplate', sbkDriverName) }
         }
         copy {
-            from "drivers/$driverName/src/main/java/io/sbk/drivers/SbkTemplate"
-            into "drivers/$driverName/src/main/java/io/sbk/drivers/$sbkDriverName"
+            from "drivers/$driverName/src/main/java/io/sbk/driver/SbkTemplate"
+            into "drivers/$driverName/src/main/java/io/sbk/driver/$sbkDriverName"
             rename "SbkTemplate", "$sbkDriverName"
             filter { line -> line.replaceAll('SbkTemplate', sbkDriverName) }
         }
-        delete "drivers/$driverName/src/main/java/io/sbk/drivers/SbkTemplate"
+        delete "drivers/$driverName/src/main/java/io/sbk/driver/SbkTemplate"
 
         def inFile1 = new File("$rootDir/build-drivers.gradle").newInputStream()
         String outText1 = ""

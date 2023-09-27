@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-option java_package = "io.sbk.drivers.FdbRecord";
+option java_package = "io.sbk.driver.FdbRecord";
 option java_outer_classname = "FdbRecordLayerProto";
 
 import "record_metadata_options.proto";

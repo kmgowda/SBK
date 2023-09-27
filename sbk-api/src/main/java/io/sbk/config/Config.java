@@ -43,7 +43,7 @@ final public class Config {
     /**
      * <code>SBK_PACKAGE_NAME = "io.sbk";</code>.
      */
-    final public static String SBK_PACKAGE_NAME = "io.sbk.drivers";
+    final public static String SBK_PACKAGE_NAME = "io.sbk.driver";
 
     /**
      * <code>SBK_WEBSITE_NAME = "https://github.com/kmgowda/SBK";</code>.
