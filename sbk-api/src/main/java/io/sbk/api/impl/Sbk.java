@@ -143,8 +143,8 @@ final public class Sbk {
         final RWLogger rwLogger;
         final Time time;
         final String[] nextArgs;
-        final String usageLine;
         final String[] loggerNames;
+        String usageLine;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         Printer.log.info(Config.DESC);
@@ -168,15 +168,19 @@ final public class Sbk {
 
         if (StringUtils.isEmpty(argsLoggerName)) {
             rwLogger = new SystemLogger();
+            usageLine = usageLine+" "+Config.LOGGER_OPTION_ARG+ " "+rwLogger.getClass().getSimpleName();
             String[] loggers = loggerStore.getClassNames();
             if (loggers != null && loggers.length > 0) {
                 loggerNames = loggers;
+                Printer.log.warn("The option '-"+ Config.LOGGER_OPTION +"' is not supplied;"+
+                        " default logger: "+ rwLogger.getClass().getSimpleName());
             } else {
                 loggerNames = new String[]{rwLogger.getClass().getSimpleName()};
-                Printer.log.error("No logger classes found from the package : "+sbkLoggerPackageName +
-                        " default logger "+ Arrays.toString(loggerNames));
+                Printer.log.error("No logger class found from the package: "+sbkLoggerPackageName +
+                        "; default logger: "+ rwLogger.getClass().getSimpleName());
             }
         } else {
+            usageLine = usageLine+" "+Config.LOGGER_OPTION_ARG+ " "+argsLoggerName;
             loggerNames = loggerStore.getClassNames();
             try {
                 rwLogger = loggerStore.getClass(argsLoggerName);
@@ -201,7 +205,7 @@ final public class Sbk {
             if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
                 throw new HelpException(helpText);
             }
-            throw new ParseException("The option '-class' is not supplied");
+            throw new ParseException("The option '-"+Config.CLASS_OPTION+"' is not supplied");
         } else {
             try {
                 storageDevice = packageStore.getClass(className);

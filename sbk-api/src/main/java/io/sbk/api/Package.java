@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,20 +33,25 @@ public abstract class Package<T> {
     final private StringCompareIgnoreCase stringComparator;
 
     public Package(String packageName) {
-        final Set<Class<? extends T>> subTypes = getClasses(packageName);
-        final int size = subTypes.size();
+        final Map<String, Class<? extends T>> classMap = new HashMap<>();
+        getClasses(packageName).forEach(x -> {
+            //Exclude the Abstract classes & interfaces
+            int mod = x.getModifiers();
+            if (!Modifier.isAbstract(mod) && !Modifier.isInterface(mod)) {
+                classMap.put(x.getSimpleName(), x);
+            }
+        });
+        final int size = classMap.size();
         this.packageName = packageName;
         this.stringComparator = new StringCompareIgnoreCase();
         this.simpleNames = new String[size];
         this.names = new String[size];
         if (size > 0) {
             final AtomicInteger index = new AtomicInteger(0);
-            final Map<String, String> classMap = new HashMap<>();
-            subTypes.forEach(x -> classMap.put(x.getSimpleName(), x.getName()));
             classMap.keySet().stream().sorted(String::compareToIgnoreCase).forEach(x -> {
                 final int i = index.get();
                 simpleNames[i] = StringUtils.capitalize(x);
-                names[i] = classMap.get(x);
+                names[i] = classMap.get(x).getName();
                 index.incrementAndGet();
             });
         }
