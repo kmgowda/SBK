@@ -55,7 +55,11 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         super(name, SbmConfig.DESC);
         this.maxConnections = maxConnections;
         this.port = port;
-        this.loggerNames = loggerNames;
+        if (loggerNames != null && loggerNames.length > 0) {
+            this.loggerNames = loggerNames.clone();
+        } else {
+            this.loggerNames = new String[]{""};
+        }
         addOption(Config.CLASS_OPTION, true, "storage class name; run 'sbm -help' to see the list");
         addOption(Config.LOGGER_OPTION, true, "Logger Driver Class,\n Available Drivers "
                 + Arrays.toString(this.loggerNames));

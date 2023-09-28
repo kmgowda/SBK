@@ -23,7 +23,6 @@ import io.sbk.logger.impl.GemSbmPrometheusLogger;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbm.logger.RamLogger;
-import io.sbm.logger.impl.SbmPrometheusLogger;
 import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
 import io.sbk.config.GemConfig;
@@ -85,6 +84,11 @@ final public class SbkGem {
      * @throws InterruptedException     If an exception occurred if the writers and readers are interrupted.
      * @throws ExecutionException       If an exception occurred.
      * @throws TimeoutException         If an exception occurred if an I/O operation is timed out.
+     * @throws InstantiationException    if the exception occurred due to initiation failures.
+     * @throws ClassNotFoundException    If the storage class driver is not found.
+     * @throws InvocationTargetException if the exception occurs.
+     * @throws NoSuchMethodException     if the exception occurs.
+     * @throws IllegalAccessException    if the exception occurs.
      */
     public static RemoteResponse[] run(final String[] args, final String applicationName, final String storagePackageName,
                                        String loggerPackageName) throws ParseException, IllegalArgumentException,
@@ -121,6 +125,11 @@ final public class SbkGem {
      * @throws HelpException  if '-help' option is supplied.
      * @throws ParseException If an exception occurred while parsing command line arguments.
      * @throws IOException    If an exception occurred due to write or read failures.
+     * @throws InstantiationException    if the exception occurred due to initiation failures.
+     * @throws ClassNotFoundException    If the storage class driver is not found.
+     * @throws InvocationTargetException if the exception occurs.
+     * @throws NoSuchMethodException     if the exception occurs.
+     * @throws IllegalAccessException    if the exception occurs.
      */
     @Contract("_, _, _, _ -> new")
     public static @NotNull GemBenchmark buildBenchmark(final String[] args, final String applicationName,
@@ -188,7 +197,7 @@ final public class SbkGem {
             logger = new GemSbmPrometheusLogger();
             ramLogger = new GemSbmPrometheusLogger();
             String[] loggers = loggerStore.getClassNames();
-            if(loggers != null && loggers.length > 0) {
+            if (loggers != null && loggers.length > 0) {
                 loggerNames = loggers;
             } else {
                 loggerNames = new String[]{logger.getClass().getSimpleName()};
@@ -210,7 +219,6 @@ final public class SbkGem {
                 throw ex;
             }
         }
-
 
         nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 

@@ -18,7 +18,6 @@ import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.gem.RemoteResponse;
-import io.sbk.logger.GemLogger;
 import io.sbk.system.Printer;
 import io.sbk.params.YmlMap;
 import io.sbk.params.impl.SbkGemYmlMap;
@@ -29,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -46,13 +46,13 @@ public final class SbkGemYal {
     /**
      * Run the Performance Benchmarking .
      *
-     * @param args            command line arguments.
-     * @param packageName     Name of the package where storage class is available.
-     *                        If you pass null to this parameter, then default package name "io.sbk" is used.
-     * @param applicationName Name of the application. will be used in the 'help' message. if it is 'null' ,
-     *                        SbkServer is used by default.
-     * @param outLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args               command line arguments.
+     * @param applicationName    Name of the application. will be used in the 'help' message. if it is 'null' ,
+     *                           SbkServer is used by default.
+     * @param storagePackageName Name of the package where storage class is available.
+     *                           If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                           logger will be used.
      * @return Array of remote responses
      * @throws ParseException           If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException If an exception occurred due to invalid arguments.
@@ -60,19 +60,27 @@ public final class SbkGemYal {
      * @throws InterruptedException     If an exception occurred if the writers and readers are interrupted.
      * @throws ExecutionException       If an exception occurred.
      * @throws TimeoutException         If an exception occurred if an I/O operation is timed out.
+     * @throws InstantiationException    if the exception occurred due to initiation failures.
+     * @throws ClassNotFoundException    If the storage class driver is not found.
+     * @throws InvocationTargetException if the exception occurs.
+     * @throws NoSuchMethodException     if the exception occurs.
+     * @throws IllegalAccessException    if the exception occurs.
      * @throws HelpException            if '-help' is used or yaml file is missing.
      */
-    public static RemoteResponse[] run(final String[] args, final String packageName, final String applicationName,
-                                       GemLogger outLogger) throws ParseException, IllegalArgumentException,
-            IOException, InterruptedException, ExecutionException, TimeoutException, HelpException {
-        return runBenchmark(args, packageName, applicationName, outLogger);
+    public static RemoteResponse[] run(final String[] args, final String applicationName, final String storagePackageName,
+                                       String loggerPackageName) throws ParseException, IllegalArgumentException,
+            IOException, InterruptedException, ExecutionException, TimeoutException, HelpException,
+            ClassNotFoundException, InvocationTargetException, InstantiationException,
+            NoSuchMethodException, IllegalAccessException {
+        return runBenchmark(args, applicationName, storagePackageName, loggerPackageName);
     }
 
 
-    private static RemoteResponse[] runBenchmark(final String[] args, final String packageName,
-                                                 final String applicationName, GemLogger outLogger)
+    private static RemoteResponse[] runBenchmark(final String[] args, final String applicationName,
+                                                 final String storagePackageName, final String loggerPackageName)
             throws ParseException, IllegalArgumentException, IOException, InterruptedException,
-            ExecutionException, TimeoutException, HelpException {
+            ExecutionException, TimeoutException, HelpException, ClassNotFoundException, InvocationTargetException,
+            InstantiationException, NoSuchMethodException, IllegalAccessException {
         final String version = io.sbk.gem.impl.SbkGemYal.class.getPackage().getImplementationVersion();
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName : SbkGemYal.NAME;
         final String[] gemArgs;
@@ -117,7 +125,7 @@ public final class SbkGemYal {
         } catch (FileNotFoundException ex) {
             Printer.log.error(ex.toString());
             if (isPrintOption) {
-                SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, applicationName, packageName, outLogger);
+                SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, applicationName, storagePackageName, loggerPackageName);
                 throw new HelpException(ex.toString());
             }
             params.printHelp();
@@ -131,6 +139,6 @@ public final class SbkGemYal {
             sbkGemArgs[mergeArgs.length] = Config.HELP_OPTION_ARG;
         }
 
-        return SbkGem.run(sbkGemArgs, applicationName, packageName, outLogger);
+        return SbkGem.run(sbkGemArgs, applicationName, storagePackageName, loggerPackageName);
     }
 }

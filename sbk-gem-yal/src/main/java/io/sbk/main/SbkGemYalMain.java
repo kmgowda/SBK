@@ -15,6 +15,7 @@ import io.sbk.gem.impl.SbkGemYal;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -33,8 +34,9 @@ public final class SbkGemYalMain {
             SbkGemYal.run(args, null, null, null);
         } catch (HelpException ex) {
             System.exit(2);
-        } catch (ParseException | IllegalArgumentException | IOException | TimeoutException |
-                InterruptedException | ExecutionException ex) {
+        } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
+                 ExecutionException | ClassNotFoundException | InvocationTargetException | InstantiationException |
+                 NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(1);
         }

@@ -166,11 +166,10 @@ final public class Sbk {
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
                 appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName : appName;
 
-
         if (StringUtils.isEmpty(argsLoggerName)) {
             rwLogger = new SystemLogger();
             String[] loggers = loggerStore.getClassNames();
-            if(loggers != null && loggers.length > 0) {
+            if (loggers != null && loggers.length > 0) {
                 loggerNames = loggers;
             } else {
                 loggerNames = new String[]{rwLogger.getClass().getSimpleName()};

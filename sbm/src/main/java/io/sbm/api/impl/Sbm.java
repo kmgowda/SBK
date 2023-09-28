@@ -103,6 +103,7 @@ final public class Sbm {
      * @throws InvocationTargetException If an exception occurred.
      * @throws NoSuchMethodException     If an exception occurred.
      * @throws IllegalAccessException    If an exception occurred.
+     * @throws InstantiationException    If an exception occurred.
      */
     public static Benchmark buildBenchmark(final String[] args, final String applicationName,
                                            String loggerPackageName) throws ParseException, IllegalArgumentException,
@@ -136,10 +137,10 @@ final public class Sbm {
         sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 SbmConfig.class);
 
-        if(StringUtils.isEmpty(argsLoggerName)) {
+        if (StringUtils.isEmpty(argsLoggerName)) {
             logger = new  SbmPrometheusLogger();
             String[] loggers = loggerStore.getClassNames();
-            if(loggers != null && loggers.length > 0) {
+            if (loggers != null && loggers.length > 0) {
                 loggerNames = loggers;
             } else {
                 loggerNames = new String[]{logger.getClass().getSimpleName()};
@@ -161,7 +162,7 @@ final public class Sbm {
             }
         }
 
-       // disable CSV
+        // disable CSV
         sbmConfig.csv = false;
 
         params = new SbmParameters(appName, sbmConfig.port, sbmConfig.maxConnections, loggerNames);
