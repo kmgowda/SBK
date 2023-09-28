@@ -32,7 +32,7 @@ public class PrometheusLogger extends CSVLogger {
     final private static String CONFIG_FILE = "metrics.properties";
     private MetricsConfig metricsConfig;
     private boolean contextDisabled;
-    private PrometheusRWMetricsServer prometheusServer;
+    private SbkPrometheusServer prometheusServer;
     private RWPrint printer;
 
 
@@ -42,8 +42,8 @@ public class PrometheusLogger extends CSVLogger {
         metricsConfig = null;
     }
 
-    public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
-        return new PrometheusRWMetricsServer(Config.NAME, getAction().name(), getStorageName(),
+    public SbkPrometheusServer getPrometheusRWMetricsServer() throws IOException {
+        return new SbkPrometheusServer(Config.NAME, getAction().name(), getStorageName(),
                 getPercentiles(), getTime(), metricsConfig);
     }
 

@@ -12,7 +12,7 @@ package io.sbm.logger.impl;
 
 import io.sbm.logger.CountConnections;
 import io.sbk.logger.MetricsConfig;
-import io.sbk.logger.impl.PrometheusRWMetricsServer;
+import io.sbk.logger.impl.SbkPrometheusServer;
 import io.time.Time;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class RamMetricsPrometheusServer.
  */
-public final class SbmMetricsPrometheusServer extends PrometheusRWMetricsServer implements CountConnections {
+public final class SbmPrometheusServer extends SbkPrometheusServer implements CountConnections {
     final private AtomicInteger connections;
     final private AtomicInteger maxConnections;
 
@@ -37,8 +37,8 @@ public final class SbmMetricsPrometheusServer extends PrometheusRWMetricsServer 
      * @param config            MetricsConfig
      * @throws IOException If it Occurs.
      */
-    public SbmMetricsPrometheusServer(String header, String action, String storageName,
-                                      double[] percentiles, Time time, MetricsConfig config) throws IOException {
+    public SbmPrometheusServer(String header, String action, String storageName,
+                               double[] percentiles, Time time, MetricsConfig config) throws IOException {
         super(header, action, storageName, percentiles, time, config);
         final String name = rwMetricPrefix + "_Connections";
         final String maxName = rwMetricPrefix + "_Max_Connections";

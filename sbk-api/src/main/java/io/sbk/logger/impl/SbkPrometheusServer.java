@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class PrometheusRWMetricsServer extends PrometheusMetricsServer implements RWPrint {
+public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPrint {
     final private static String ACTION_TEXT = "action";
     final protected String rwMetricPrefix;
     final private AtomicInteger writers;
@@ -59,8 +59,8 @@ public class PrometheusRWMetricsServer extends PrometheusMetricsServer implement
 
     final private AtomicDouble readTimeoutEventsPerSec;
 
-    public  PrometheusRWMetricsServer(String header, String action, String className, double[] percentiles, Time time,
-                                        MetricsConfig config) throws IOException {
+    public SbkPrometheusServer(String header, String action, String className, double[] percentiles, Time time,
+                               MetricsConfig config) throws IOException {
         super(header.toUpperCase()+" "+action, percentiles, time,
                 config.latencyTimeUnit, config.port, config.context,
                 Tags.of(Config.CLASS_OPTION, className, ACTION_TEXT, action));

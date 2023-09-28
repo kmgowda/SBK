@@ -15,7 +15,7 @@ import io.perl.api.LatencyRecord;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.impl.PrometheusLogger;
-import io.sbk.logger.impl.PrometheusRWMetricsServer;
+import io.sbk.logger.impl.SbkPrometheusServer;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
 import io.sbm.logger.RamLogger;
@@ -33,7 +33,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
     final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
-    private SbmMetricsPrometheusServer prometheusServer;
+    private SbmPrometheusServer prometheusServer;
 
     /**
      * Constructor RamPrometheusLogger calling its super calls and initializing {@link #prometheusServer} = null.
@@ -49,9 +49,9 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
 
     @Override
     @SuppressFBWarnings("EI_EXPOSE_REP")
-    public @Nonnull PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
+    public @Nonnull SbkPrometheusServer getPrometheusRWMetricsServer() throws IOException {
         if (prometheusServer == null) {
-            prometheusServer = new SbmMetricsPrometheusServer(Config.NAME, getAction().name(), getStorageName(),
+            prometheusServer = new SbmPrometheusServer(Config.NAME, getAction().name(), getStorageName(),
                     getPercentiles(), getTime(), getMetricsConfig());
         }
         return prometheusServer;
