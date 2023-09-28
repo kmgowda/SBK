@@ -195,7 +195,7 @@ final public class Sbk {
             }
         }
 
-        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
+        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG, Config.LOGGER_OPTION_ARG});
         if (StringUtils.isEmpty(className)) {
             final InputParameterOptions helpParams = new SbkDriversParameters(usageLine,
                     packageStore.getClassNames(), loggerNames);
