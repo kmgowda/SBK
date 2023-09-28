@@ -17,15 +17,12 @@ buildscript {
         }
     }
     dependencies {
-        // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-gradle-plugin
-        classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
         classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
         classpath group: 'com.google.cloud.tools.jib', name: 'com.google.cloud.tools.jib.gradle.plugin', version: jibVersion
     }
 }
 
 apply plugin: 'java-library'
-apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
 apply plugin: "com.github.spotbugs"
 apply plugin: 'com.google.cloud.tools.jib'
