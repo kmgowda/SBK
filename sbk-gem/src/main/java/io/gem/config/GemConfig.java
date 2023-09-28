@@ -38,7 +38,7 @@ final public class GemConfig {
     /**
      *<code>String SBK_GEM_LOGGER_PACKAGE_NAME = "io.sbm.logger"</code>.
      */
-    final public static String SBK_GEM_LOGGER_PACKAGE_NAME = "io.sbm.logger";
+    final public static String SBK_GEM_LOGGER_PACKAGE_NAME = "io.gem.logger";
 
     //override by props file or command line parameters
     /**

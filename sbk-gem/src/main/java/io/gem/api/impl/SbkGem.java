@@ -18,7 +18,7 @@ import io.gem.api.GemBenchmark;
 import io.gem.api.GemLoggerPackage;
 import io.gem.api.RemoteResponse;
 import io.gem.logger.GemLogger;
-import io.gem.logger.impl.GemSbmPrometheusLogger;
+import io.gem.logger.impl.GemPrometheusLogger;
 import io.gem.params.GemParameterOptions;
 import io.gem.params.impl.SbkGemParameters;
 import io.micrometer.core.instrument.util.IOUtils;
@@ -195,8 +195,8 @@ final public class SbkGem {
                 appName;
 
         if (StringUtils.isEmpty(argsLoggerName)) {
-            logger = new GemSbmPrometheusLogger();
-            ramLogger = new GemSbmPrometheusLogger();
+            logger = new GemPrometheusLogger();
+            ramLogger = new GemPrometheusLogger();
             usageLine = usageLine+" "+Config.LOGGER_OPTION_ARG+ " "+logger.getClass().getSimpleName();
             String[] loggers = loggerStore.getClassNames();
             if (loggers != null && loggers.length > 0) {
@@ -371,6 +371,7 @@ final public class SbkGem {
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
         Printer.log.info("Arguments to SBM: " + Arrays.toString(ramArgs));
+        Printer.log.info("Logger for SBM: " + ramLogger.getClass().getSimpleName());
 
         ramParams = new SbmParameters(appName, params.getSbmPort(), params.getConnections().length,
                 new String[]{ramLogger.getClass().getSimpleName()});

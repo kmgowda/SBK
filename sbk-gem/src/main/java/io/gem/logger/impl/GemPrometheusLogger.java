@@ -16,7 +16,7 @@ import io.sbm.logger.impl.SbmPrometheusLogger;
 /**
  * Class GemRamPrometheusLogger.
  */
-public final class GemSbmPrometheusLogger extends SbmPrometheusLogger implements GemLogger {
+public final class GemPrometheusLogger extends SbmPrometheusLogger implements GemLogger {
 
     @Override
     public String[] getOptionsArgs() {
