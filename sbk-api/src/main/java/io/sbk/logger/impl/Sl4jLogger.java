@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Class for recoding/printing results on Sl4j.
  */
-public class Sl4jResultLogger extends SystemLogger {
+public class Sl4jLogger extends SystemLogger {
     final private Logger log;
 
-    public Sl4jResultLogger() {
+    public Sl4jLogger() {
         super();
         log = LoggerFactory.getLogger("SBK");
     }

@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class GrpcPrometheusLogger extends PrometheusLogger {
+public class GrpcLogger extends PrometheusLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
     private final static int LATENCY_MAP_BYTES = 16;
 
@@ -71,7 +71,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
     /**
      * calls its super class PrometheusLogger.
      */
-    public GrpcPrometheusLogger() {
+    public GrpcLogger() {
         super();
         this.ramWriteBytesArray = null;
         this.ramWriteRequestRecordsArray = null;
@@ -93,7 +93,7 @@ public class GrpcPrometheusLogger extends PrometheusLogger {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             sbmHostConfig = mapper.readValue(
-                    GrpcPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
+                    GrpcLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     SbmHostConfig.class);
         } catch (Exception ex) {
             ex.printStackTrace();
