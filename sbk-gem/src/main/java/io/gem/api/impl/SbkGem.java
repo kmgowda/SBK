@@ -26,6 +26,7 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
+import io.sbk.logger.impl.GrpcLogger;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbm.logger.RamLogger;
@@ -162,10 +163,10 @@ final public class SbkGem {
         final GemLoggerPackage loggerStore = new GemLoggerPackage(gemLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
         final Storage storageDevice;
-        final String usageLine;
         final String[] storageDrivers;
         final String[] nextArgs;
         final String[] loggerNames;
+        String usageLine;
 
         Printer.log.info(IOUtils.toString(SbkGem.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(GemConfig.DESC);
@@ -196,6 +197,7 @@ final public class SbkGem {
         if (StringUtils.isEmpty(argsLoggerName)) {
             logger = new GemSbmPrometheusLogger();
             ramLogger = new GemSbmPrometheusLogger();
+            usageLine = usageLine+" "+Config.LOGGER_OPTION_ARG+ " "+logger.getClass().getSimpleName();
             String[] loggers = loggerStore.getClassNames();
             if (loggers != null && loggers.length > 0) {
                 loggerNames = loggers;
@@ -205,6 +207,7 @@ final public class SbkGem {
                         " default logger "+ Arrays.toString(loggerNames));
             }
         } else {
+            usageLine = usageLine+" "+Config.LOGGER_OPTION_ARG+ " "+argsLoggerName;
             loggerNames = loggerStore.getClassNames();
             try {
                 logger = loggerStore.getClass(argsLoggerName);
@@ -220,7 +223,8 @@ final public class SbkGem {
             }
         }
 
-        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
+        nextArgs = SbkUtils.removeOptionArgsAndValues(args,
+                            new String[]{Config.CLASS_OPTION_ARG, Config.LOGGER_OPTION_ARG});
 
         if (StringUtils.isNotEmpty(sbkCommand)) {
             gemConfig.sbkcommand = GemConfig.BIN_DIR + File.separator + sbkCommand;
@@ -328,6 +332,7 @@ final public class SbkGem {
             sbkArgsBuilder.append(" ");
             sbkArgsBuilder.append(arg);
         }
+        sbkArgsBuilder.append(" -out ").append(GrpcLogger.class.getSimpleName());
         time = PerlBuilder.buildTime(logger);
         sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
         sbkArgsBuilder.append(" -minlatency ").append(logger.getMinLatency());

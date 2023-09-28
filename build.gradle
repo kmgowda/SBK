@@ -430,7 +430,7 @@ task SbkYal(type: CreateStartScripts) {
 }
 
 task SbkGem(type: CreateStartScripts) {
-    mainClass = 'io.sbk.main.SbkGemMain'
+    mainClass = 'io.gem.main.SbkGemMain'
     applicationName = 'sbk-gem'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
     outputDir = startScripts.outputDir
@@ -468,7 +468,7 @@ task SbkGem(type: CreateStartScripts) {
 }
 
 task SbkGemYal(type: CreateStartScripts) {
-    mainClass = 'io.sbk.main.SbkGemYalMain'
+    mainClass = 'io.gem.main.SbkGemYalMain'
     applicationName = 'sbk-gem-yal'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
     outputDir = startScripts.outputDir
