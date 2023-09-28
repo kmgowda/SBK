@@ -14,6 +14,8 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
+import io.sbk.api.RWLoggerPackage;
+import io.sbk.logger.impl.SystemLogger;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
@@ -21,7 +23,6 @@ import io.sbk.config.Config;
 import io.sbk.data.DataType;
 import io.sbk.exception.HelpException;
 import io.sbk.logger.RWLogger;
-import io.sbk.logger.impl.GrpcPrometheusLogger;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbk.params.impl.SbkParameters;
 import io.sbk.system.Printer;
@@ -53,13 +54,13 @@ final public class Sbk {
     /**
      * Run the Performance Benchmarking .
      *
-     * @param args            command line arguments.
-     * @param packageName     the name of the package where storage class is available.
-     *                        If you pass null to this parameter, then default package name "io.sbk" is used.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , name
-     *                        'sbk' used as default.
-     * @param outRWLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args               command line arguments.
+     * @param applicationName    name of the application. will be used in the 'help' message. if it is 'null' , name
+     *                           'sbk' used as default.
+     * @param storagePackageName the name of the package where storage class is available.
+     *                           If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                           logger will be used.
      * @throws ParseException            If an exception occurred while parsing command line arguments.
      * @throws IllegalArgumentException  If an exception occurred due to invalid arguments.
      * @throws IOException               If an exception occurred due to write or read failures.
@@ -72,13 +73,13 @@ final public class Sbk {
      * @throws NoSuchMethodException     if the exception occurs.
      * @throws IllegalAccessException    if the exception occurs.
      */
-    public static void run(final String[] args, final String packageName,
-                           final String applicationName, RWLogger outRWLogger) throws ParseException, IllegalArgumentException,
+    public static void run(final String[] args, final String applicationName, final String storagePackageName,
+                           String loggerPackageName) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, ExecutionException, TimeoutException, InstantiationException,
             ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final Benchmark benchmark;
         try {
-            benchmark = buildBenchmark(args, packageName, applicationName, outRWLogger);
+            benchmark = buildBenchmark(args, applicationName, storagePackageName, loggerPackageName);
         } catch (HelpException ex) {
             return;
         }
@@ -95,13 +96,13 @@ final public class Sbk {
     /**
      * Build the Benchmark Object.
      *
-     * @param args            command line arguments.
-     * @param packageName     Name of the package where storage class is available.
-     *                        If you pass null to this parameter, then default package name "io.sbk" is used.
-     * @param applicationName name of the application. will be used in the 'help' message. if it is 'null' , name
-     *                        'sbk' used as default.
-     * @param outRWLogger       Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
-     *                        logger will be used.
+     * @param args               command line arguments.
+     * @param applicationName    name of the application. will be used in the 'help' message. if it is 'null' , name
+     *                           'sbk' used as default.
+     * @param storagePackageName Name of the package where storage class is available.
+     *                           If you pass null to this parameter, then default package name "io.sbk" is used.
+     * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
+     *                           logger will be used.
      * @return Benchmark interface
      * @throws HelpException             if '-help' option is supplied.
      * @throws ParseException            If an exception occurred while parsing command line arguments.
@@ -115,28 +116,35 @@ final public class Sbk {
      */
     @Contract("_, _, _, _ -> new")
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    public static @NotNull Benchmark buildBenchmark(final String[] args, final String packageName,
-                                                    final String applicationName, final RWLogger outRWLogger) throws ParseException,
+    public static @NotNull Benchmark buildBenchmark(final String[] args, final String applicationName,
+                                                    final String storagePackageName,
+                                                    final String loggerPackageName) throws ParseException,
             IllegalArgumentException, IOException, InstantiationException, HelpException, ClassNotFoundException,
             InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
         final String sbkApplicationName = System.getProperty(Config.SBK_APP_NAME);
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
                 StringUtils.isNotEmpty(sbkApplicationName) ? sbkApplicationName : Config.NAME;
-        final String storagePackageName = StringUtils.isNotEmpty(packageName) ? packageName : Config.SBK_PACKAGE_NAME;
+        final String sbkStoragePackageName = StringUtils.isNotEmpty(storagePackageName) ?
+                storagePackageName : Config.SBK_STORAGE_PACKAGE_NAME;
+        final String sbkLoggerPackageName = StringUtils.isNotEmpty(loggerPackageName) ?
+                loggerPackageName : Config.SBK_LOGGER_PACKAGE_NAME;
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
+        final String argsLoggerName = SbkUtils.getLoggerName(args);
         final String className = StringUtils.isNotEmpty(argsClassName) ? argsClassName :
                 Objects.requireNonNullElse(sbkClassName, "");
-        final StoragePackage packageStore = new StoragePackage(storagePackageName);
+        final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
+        final RWLoggerPackage loggerStore = new RWLoggerPackage(sbkLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
         final Storage storageDevice;
         final InputParameterOptions params;
         final RWLogger rwLogger;
         final Time time;
         final String[] nextArgs;
-        final String usageLine;
+        final String[] loggerNames;
+        String usageLine;
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         Printer.log.info(Config.DESC);
@@ -145,35 +153,68 @@ final public class Sbk {
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
-        Printer.log.info("Storage Drivers Package: " + storagePackageName);
+        Printer.log.info("Storage Drivers Package: " + sbkStoragePackageName);
+        Printer.log.info("Logger Package: " + sbkLoggerPackageName);
         Printer.log.info(Config.SBK_APP_NAME + ": " + Objects.requireNonNullElse(sbkApplicationName, ""));
         Printer.log.info(Config.SBK_APP_HOME + ": " + Objects.requireNonNullElse(sbkAppHome, ""));
         Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
         Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + argsClassName);
+        Printer.log.info("'" + Config.LOGGER_OPTION_ARG + "': " + argsLoggerName);
         packageStore.printClasses("Storage");
+        loggerStore.printClasses("Logger");
 
-        rwLogger = Objects.requireNonNullElseGet(outRWLogger, GrpcPrometheusLogger::new);
         usageLine = StringUtils.isNotEmpty(argsClassName) ?
                 appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName : appName;
-        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG});
 
+        if (StringUtils.isEmpty(argsLoggerName)) {
+            rwLogger = new SystemLogger();
+            usageLine = usageLine+" "+Config.LOGGER_OPTION_ARG+ " "+rwLogger.getClass().getSimpleName();
+            String[] loggers = loggerStore.getClassNames();
+            if (loggers != null && loggers.length > 0) {
+                loggerNames = loggers;
+                Printer.log.warn("The option '-"+ Config.LOGGER_OPTION +"' is not supplied;"+
+                        " default logger: "+ rwLogger.getClass().getSimpleName());
+            } else {
+                loggerNames = new String[]{rwLogger.getClass().getSimpleName()};
+                Printer.log.error("No logger class found from the package: "+sbkLoggerPackageName +
+                        "; default logger: "+ rwLogger.getClass().getSimpleName());
+            }
+        } else {
+            usageLine = usageLine+" "+Config.LOGGER_OPTION_ARG+ " "+argsLoggerName;
+            loggerNames = loggerStore.getClassNames();
+            try {
+                rwLogger = loggerStore.getClass(argsLoggerName);
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                     | IllegalAccessException | InstantiationException ex) {
+                Printer.log.error("Instantiation of Logger class '" + argsLoggerName + "' from the package '" +
+                        sbkLoggerPackageName + "' failed!, " + "error: " + ex);
+                final InputParameterOptions helpParams = new SbkDriversParameters(usageLine,
+                        packageStore.getClassNames(), loggerNames);
+                helpParams.printHelp();
+                throw ex;
+            }
+        }
+
+        nextArgs = SbkUtils.removeOptionArgsAndValues(args, new String[]{Config.CLASS_OPTION_ARG, Config.LOGGER_OPTION_ARG});
         if (StringUtils.isEmpty(className)) {
-            final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getClassNames());
+            final InputParameterOptions helpParams = new SbkDriversParameters(usageLine,
+                    packageStore.getClassNames(), loggerNames);
             rwLogger.addArgs(helpParams);
             final String helpText = helpParams.getHelpText();
             System.out.println("\n" + helpText);
             if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
                 throw new HelpException(helpText);
             }
-            throw new ParseException("The option '-class' is not supplied");
+            throw new ParseException("The option '-"+Config.CLASS_OPTION+"' is not supplied");
         } else {
             try {
                 storageDevice = packageStore.getClass(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
                     | IllegalAccessException ex) {
                 Printer.log.error("Instantiation of storage class '" + className + "' from the package '" +
-                        storagePackageName + "' failed!, " + "error: " + ex);
-                final InputParameterOptions helpParams = new SbkDriversParameters(usageLine, packageStore.getClassNames());
+                        sbkStoragePackageName + "' failed!, " + "error: " + ex);
+                final InputParameterOptions helpParams = new SbkDriversParameters(usageLine,
+                        packageStore.getClassNames(), loggerNames);
                 rwLogger.addArgs(helpParams);
                 helpParams.printHelp();
                 throw ex;

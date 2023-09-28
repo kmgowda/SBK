@@ -30,7 +30,7 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 application {
-    mainClass = 'io.sbk.main.SbkGemYalMain'
+    mainClass = 'io.gem.main.SbkGemYalMain'
     applicationDefaultJvmArgs = ['-Dsbk.applicationName=', '-Dsbk.className=', '-Dsbk.appHome=SBK_APP_HOME']
 }
 

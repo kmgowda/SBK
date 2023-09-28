@@ -25,13 +25,14 @@ public class BookKeeperTest {
      */
     private final static String CONFIGFILE = "BookKeeper.properties";
     final String[] drivers = {"BookKeeper"};
+    final String[] loggers = {};
     final String benchmarkName = Config.NAME + " -class bookkeeper";
     private InputParameterOptions params;
     private BookKeeper bk;
 
     @Test
     public void addArgsTest() {
-        params = new SbkDriversParameters(benchmarkName, drivers);
+        params = new SbkDriversParameters(benchmarkName, drivers, loggers);
         bk = new BookKeeper();
         bk.addArgs(params);
 
@@ -42,7 +43,7 @@ public class BookKeeperTest {
      */
     @Test
     public void parseArgs() {
-        params = new SbkDriversParameters(benchmarkName, drivers);
+        params = new SbkDriversParameters(benchmarkName, drivers, loggers);
         bk = new BookKeeper();
         bk.addArgs(params);
         Exception exception = null;
@@ -58,7 +59,7 @@ public class BookKeeperTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsNullLogName() {
         final String[] args = {"-class", "bookkeeper", "-uri", "distributedlog://localhost:2181/streams", "-writers", "1", "-size", "100"};
-        params = new SbkDriversParameters(benchmarkName, drivers);
+        params = new SbkDriversParameters(benchmarkName, drivers, loggers);
         bk = new BookKeeper();
         bk.addArgs(params);
         try {
@@ -73,7 +74,7 @@ public class BookKeeperTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseArgsNullUri() {
         final String[] args = {"-class", "bookkeeper", "-log", "logName", "writers", "1", "size", "100"};
-        params = new SbkDriversParameters(benchmarkName, drivers);
+        params = new SbkDriversParameters(benchmarkName, drivers, loggers);
         bk = new BookKeeper();
         bk.addArgs(params);
         try {

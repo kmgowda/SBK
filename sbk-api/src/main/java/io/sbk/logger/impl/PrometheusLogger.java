@@ -28,11 +28,11 @@ import java.io.InputStream;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public abstract class PrometheusLogger extends CSVLogger {
+public class PrometheusLogger extends CSVLogger {
     final private static String CONFIG_FILE = "metrics.properties";
     private MetricsConfig metricsConfig;
     private boolean contextDisabled;
-    private PrometheusRWMetricsServer prometheusServer;
+    private SbkPrometheusServer prometheusServer;
     private RWPrint printer;
 
 
@@ -42,8 +42,8 @@ public abstract class PrometheusLogger extends CSVLogger {
         metricsConfig = null;
     }
 
-    public PrometheusRWMetricsServer getPrometheusRWMetricsServer() throws IOException {
-        return new PrometheusRWMetricsServer(Config.NAME, getAction().name(), getStorageName(),
+    public SbkPrometheusServer getPrometheusRWMetricsServer() throws IOException {
+        return new SbkPrometheusServer(Config.NAME, getAction().name(), getStorageName(),
                 getPercentiles(), getTime(), metricsConfig);
     }
 

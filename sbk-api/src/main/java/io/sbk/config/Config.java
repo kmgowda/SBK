@@ -41,9 +41,14 @@ final public class Config {
     final public static String SBK_CLASS_NAME = "sbk.className";
 
     /**
-     * <code>SBK_PACKAGE_NAME = "io.sbk";</code>.
+     * <code>SBK_STORAGE_PACKAGE_NAME = "io.sbk.driver";</code>.
      */
-    final public static String SBK_PACKAGE_NAME = "io.sbk.driver";
+    final public static String SBK_STORAGE_PACKAGE_NAME = "io.sbk.driver";
+
+    /**
+     * <code>SBK_LOGGER_PACKAGE_NAME = "io.sbk.logger";</code>.
+     */
+    final public static String SBK_LOGGER_PACKAGE_NAME = "io.sbk.logger";
 
     /**
      * <code>SBK_WEBSITE_NAME = "https://github.com/kmgowda/SBK";</code>.
@@ -61,6 +66,11 @@ final public class Config {
     public final static String CLASS_OPTION = "class";
 
     /**
+     * <code>LOGGER_OPTION = "out";</code>.
+     */
+    public final static String LOGGER_OPTION = "out";
+
+    /**
      * <code>HELP_OPTION = "help";</code>.
      */
     public final static String HELP_OPTION = "help";
@@ -74,6 +84,11 @@ final public class Config {
      * <code>CLASS_OPTION_ARG = ARG_PREFIX + CLASS_OPTION;</code>.
      */
     public final static String CLASS_OPTION_ARG = ARG_PREFIX + CLASS_OPTION;
+
+    /**
+     * <code>LOGGER_OPTION_ARG = ARG_PREFIX + LOGGER_OPTION;</code>.
+     */
+    public final static String LOGGER_OPTION_ARG = ARG_PREFIX + LOGGER_OPTION;
 
     /**
      * <code>HELP_OPTION_ARG = ARG_PREFIX + HELP_OPTION;</code>.

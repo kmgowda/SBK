@@ -14,8 +14,9 @@ import java.util.Arrays;
 
 public non-sealed class SbkDriversParameters extends SbkParameters {
     final private String[] drivers;
+    final private String[] loggers;
 
-    public SbkDriversParameters(String name, String desc, String[] drivers) {
+    public SbkDriversParameters(String name, String desc, String[] drivers, String[] loggers) {
         super(name, desc);
 
         if (drivers != null && drivers.length > 0) {
@@ -25,10 +26,18 @@ public non-sealed class SbkDriversParameters extends SbkParameters {
         } else {
             this.drivers = new String[]{""};
         }
+
+        if (loggers != null && loggers.length > 0) {
+            this.loggers = loggers.clone();
+        } else {
+            this.loggers = new String[]{""};
+        }
+        addOption(Config.LOGGER_OPTION, true, "Logger Driver Class,\n Available Drivers "
+                + Arrays.toString(this.loggers));
     }
 
-    public SbkDriversParameters(String name, String[] drivers) {
-        this(name, Config.DESC, drivers);
+    public SbkDriversParameters(String name, String[] drivers, String[] loggers) {
+        this(name, Config.DESC, drivers, loggers);
     }
 
 }

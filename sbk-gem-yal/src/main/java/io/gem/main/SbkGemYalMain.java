@@ -8,11 +8,11 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.sbm.main;
+package io.gem.main;
 
-import io.sbm.api.impl.Sbm;
+import io.gem.api.impl.SbkGemYal;
+import io.sbk.exception.HelpException;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -20,22 +20,22 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Main class of SBK Server.
+ * Class SbkGemYalMain.
  */
-public final class SbmMain {
+public final class SbkGemYalMain {
 
     /**
-     * The main method for SBM module.
+     * The main Method of sbk-gem-yal module.
      *
      * @param args String[]
      */
     public static void main(final String[] args) {
         try {
-            Sbm.run(args, null, null);
-        } catch (UnrecognizedOptionException ex) {
+            SbkGemYal.run(args, null, null, null);
+        } catch (HelpException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
-                 ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
+                 ExecutionException | ClassNotFoundException | InvocationTargetException | InstantiationException |
                  NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();
             System.exit(1);
