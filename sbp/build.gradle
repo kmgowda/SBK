@@ -1,0 +1,65 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
+apply plugin: 'java-library'
+apply plugin: "com.google.protobuf"
+apply plugin: "maven-publish"
+apply plugin: "com.github.spotbugs"
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
+        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
+    }
+}
+
+apply from: "$rootDir/gradle/protobuf.gradle"
+apply from: "$rootDir/gradle/rat.gradle"
+apply from: "$rootDir/gradle/maven.gradle"
+apply from: "$rootDir/gradle/spotbugs.gradle"
+
+dependencies {
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    implementation group: 'org.eclipse.collections', name: 'eclipse-collections', version: eclipseCollectionVersion
+    api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
+    api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
+    api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
+}
+
+generateJavadoc {
+    // follow the package path , it should not be folder path.
+    // but dont use . (dot) in the path
+    //exclude 'io/sbp/grpc/ServiceGrpc.java'
+    //exclude 'io/sbp/grpc/LatenciesRecordOrBuilder.java'
+    //exclude 'io/sbp/grpc/LatenciesRecord.java'
+}
+
+
+task updateDocs(dependsOn: javadoc) {
+    doLast {
+        println "Update $projectDir Javadocs"
+        delete "$projectDir/javadoc"
+        copy {
+            from "$projectDir/build/docs/javadoc"
+            into "$projectDir/javadoc"
+        }
+    }
+}
