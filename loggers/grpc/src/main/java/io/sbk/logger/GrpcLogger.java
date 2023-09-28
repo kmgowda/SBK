@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.logger.impl;
+package io.sbk.logger;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,13 +22,13 @@ import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecorder;
 import io.sbk.action.Action;
 import io.perl.exception.ExceptionHandler;
+import io.sbk.logger.impl.PrometheusLogger;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbp.grpc.ServiceGrpc;
-import io.sbk.logger.SbmHostConfig;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;

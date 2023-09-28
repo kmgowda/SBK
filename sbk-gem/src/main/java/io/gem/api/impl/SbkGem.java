@@ -26,7 +26,7 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
-import io.sbk.logger.impl.GrpcLogger;
+import io.sbk.logger.GrpcLogger;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbm.logger.RamLogger;

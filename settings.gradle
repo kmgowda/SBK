@@ -22,5 +22,5 @@ include 'sbk-gem-yal'
 include 'drivers:sbktemplate'
 
 apply from: "settings-drivers.gradle"
-
+apply from: "settings-loggers.gradle"
 

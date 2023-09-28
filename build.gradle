@@ -43,7 +43,7 @@ gradle.rootProject {
 
 allprojects {
 
-    if (project.name == "drivers") {
+    if (project.name == "drivers" || project.name == "loggers") {
         return
     }
 
