@@ -1,8 +1,8 @@
-io.sbk.config
-io.sbk.gem
-io.sbk.gem.impl
-io.sbk.logger
-io.sbk.logger.impl
-io.sbk.main
-io.sbk.params
-io.sbk.params.impl
+io.gem.api
+io.gem.api.impl
+io.gem.config
+io.gem.logger
+io.gem.logger.impl
+io.gem.main
+io.gem.params
+io.gem.params.impl

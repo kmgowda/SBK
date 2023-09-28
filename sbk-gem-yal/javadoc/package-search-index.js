@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.sbk.gem.impl"},{"l":"io.sbk.main"},{"l":"io.sbk.params.impl"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.gem.api.impl"},{"l":"io.gem.main"},{"l":"io.gem.params.impl"}];updateSearchResults();
