@@ -181,7 +181,7 @@ final public class Sbk {
             try {
                 rwLogger = loggerStore.getClass(argsLoggerName);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
-                     | IllegalAccessException ex) {
+                     | IllegalAccessException | InstantiationException ex) {
                 Printer.log.error("Instantiation of Logger class '" + argsLoggerName + "' from the package '" +
                         sbkLoggerPackageName + "' failed!, " + "error: " + ex);
                 final InputParameterOptions helpParams = new SbkDriversParameters(usageLine,
