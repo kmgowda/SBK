@@ -37,8 +37,8 @@ COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
 RUN mkdir -p ${APP_HOME}/drivers
 
 # Copy the SBK storage drivers
-COPY --chown=root:root jdbc ${APP_HOME}/drivers/jdbc
-COPY --chown=root:root exasol ${APP_HOME}/drivers/exasol
+COPY --chown=root:root drivers/jdbc ${APP_HOME}/drivers/jdbc
+COPY --chown=root:root drivers/exasol ${APP_HOME}/drivers/exasol
 
 
 

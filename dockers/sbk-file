@@ -37,7 +37,7 @@ COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
 RUN mkdir -p ${APP_HOME}/drivers
 
 # Copy the SBK storage drivers
-COPY --chown=root:root file ${APP_HOME}/drivers/file
+COPY --chown=root:root drivers/file ${APP_HOME}/drivers/file
 
 
 

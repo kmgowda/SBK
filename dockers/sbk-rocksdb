@@ -37,7 +37,7 @@ COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
 RUN mkdir -p ${APP_HOME}/drivers
 
 # Copy the SBK storage drivers
-COPY --chown=root:root rocksdb ${APP_HOME}/drivers/rocksdb
+COPY --chown=root:root drivers/rocksdb ${APP_HOME}/drivers/rocksdb
 
 
 
