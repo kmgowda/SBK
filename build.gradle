@@ -251,7 +251,8 @@ allprojects {
                     def id = artifact.moduleVersion.id
                     if (id.group.toString() == sbkGroup) {
                         if (!driversToSkip.contains(id.name)) {
-                            buffer += "COPY --chown=root:root " + id.name + " \${APP_HOME}/drivers/" + id.name + "\n"
+                            buffer += "COPY --chown=root:root " + "drivers/"+ id.name + " \${APP_HOME}/drivers/" +
+                                    id.name + "\n"
                         }
                     }
                 }

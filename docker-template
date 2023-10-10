@@ -9,7 +9,7 @@
 ##
 
 # Building Container
-FROM gradle:7.5.0-jdk17 as SbkGradleBuilder
+FROM gradle:8.3.0-jdk17 as SbkGradleBuilder
 MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 USER root
 
