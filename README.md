@@ -137,35 +137,34 @@ Build the SBK:
 untar the SBK  to local folder
 
 ```
-tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
+tar -xvf ./build/distributions/sbk-5.0.tar -C ./build/distributions/.
 ```
 
 Running SBK locally:
 
 ```
-<SBK directory>/./build/distributions/sbk/bin/sbk -help
+<SBK directory>/./build/distributions/sbk-5.0/bin/sbk -help
 ...
-usage: sbk
+usage: sbk -out SystemLogger
 Storage Benchmark Kit
 
  -class <arg>        Storage Driver Class,
                      Available Drivers [Activemq, Artemis, AsyncFile,
-                     BookKeeper, Cassandra, CephS3, ConcurrentQ, CouchDB,
-                     CSV, Db2, Derby, FdbRecord, File, FileStream,
-                     FoundationDB, H2, HDFS, Hive, Jdbc, Kafka, LevelDB,
-                     MariaDB, MinIO, MongoDB, MsSql, MySQL, Nats,
-                     NatsStream, Nsq, Null, OpenIO, PostgreSQL, Pravega,
-                     Pulsar, RabbitMQ, Redis, RedPanda, RocketMQ, RocksDB,
-                     SeaweedS3, SQLite]
- -context <arg>      Prometheus Metric context;
-                     'no' disables this option; default: 9718/metrics
- -csvfile <arg>      CSV file to record results;
-                     'no' disables this option, default: no
+                     BookKeeper, Cassandra, CephS3, Couchbase, CouchDB,
+                     CSV, Db2, Derby, Dynamodb, Exasol, FdbRecord, File,
+                     FileStream, FoundationDB, H2, HDFS, Hive, Jdbc,
+                     Kafka, LevelDB, MariaDB, Memcached, MinIO, MongoDB,
+                     MsSql, MySQL, Nats, NatsStream, Nsq, Null, OpenIO,
+                     PostgreSQL, Pravega, Pulsar, RabbitMQ, Redis,
+                     RedPanda, RocketMQ, RocksDB, SeaweedS3, SQLite]
  -help               Help message
  -maxlatency <arg>   Maximum latency;
                      use '-time' for time unit; default:180000 ms
  -minlatency <arg>   Minimum latency;
                      use '-time' for time unit; default:0 ms
+ -out <arg>          Logger Driver Class,
+                     Available Drivers [CSVLogger, GrpcLogger,
+                     PrometheusLogger, Sl4jLogger, SystemLogger]
  -readers <arg>      Number of readers
  -records <arg>      Number of records(events) if 'seconds' not specified;
                      otherwise, Maximum records per second by writer(s);
@@ -177,8 +176,6 @@ Storage Benchmark Kit
  -rq <arg>           Benchmark Reade Requests; default: false
  -rsec <arg>         Number of seconds/step for readers, default: 0
  -rstep <arg>        Number of readers/step, default: 1
- -sbm <arg>          SBM host; 'no' disables this option, default: no
- -sbmport <arg>      SBM Port; default: 9717
  -seconds <arg>      Number of seconds to run
                      if not specified, runs forever
  -size <arg>         Size of each message (event or record)
@@ -630,16 +627,16 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 untar the SBK  to local folder
 
 ```
-tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
+tar -xvf ./build/distributions/sbk-5.0.tar -C ./build/distributions/.
 ```
 
 6. To invoke the benchmarking of the driver you have to issue the parameters "-class < your driver name>"
    Example: For pulsar driver
 
 ```
-<SBK directory>./build/distributions/sbk/bin/sbk  -class pulsar -help
+<SBK directory>./build/distributions/sbk-5.0/bin/sbk -class pulsar -help
 
-usage: sbk -class Pulsar
+usage: sbk -class pulsar -out SystemLogger
 Storage Benchmark Kit
 
  -ackQuorum <arg>       AckQuorum default: 1
@@ -647,10 +644,6 @@ Storage Benchmark Kit
                         topic, default: null
  -broker <arg>          Broker URI, default: tcp://localhost:6650
  -cluster <arg>         Cluster name (optional parameter)
- -context <arg>         Prometheus Metric context;
-                        'no' disables this option; default: 9718/metrics
- -csvfile <arg>         CSV file to record results;
-                        'no' disables this option, default: no
  -deduplication <arg>   Enable or Disable Deduplication; default: false
  -ensembleSize <arg>    EnsembleSize default: 1
  -help                  Help message
@@ -671,8 +664,6 @@ Storage Benchmark Kit
  -rq <arg>              Benchmark Reade Requests; default: false
  -rsec <arg>            Number of seconds/step for readers, default: 0
  -rstep <arg>           Number of readers/step, default: 1
- -sbm <arg>             SBM host; 'no' disables this option, default: no
- -sbmport <arg>         SBM Port; default: 9717
  -seconds <arg>         Number of seconds to run
                         if not specified, runs forever
  -size <arg>            Size of each message (event or record)
@@ -694,6 +685,7 @@ Storage Benchmark Kit
  -wstep <arg>           Number of writers/step, default: 1
 
 Please report issues at https://github.com/kmgowda/SBK
+
 
 ```
 
