@@ -162,10 +162,12 @@ final public class Sbm {
             }
         }
 
+        final String usageLine = appName + " " + Config.LOGGER_OPTION_ARG + " " + logger.getClass().getSimpleName();
+
         // disable CSV
         sbmConfig.csv = false;
 
-        params = new SbmParameters(appName, sbmConfig.port, sbmConfig.maxConnections, loggerNames);
+        params = new SbmParameters(usageLine, sbmConfig.port, sbmConfig.maxConnections, loggerNames);
         logger.addArgs(params);
         try {
             params.parseArgs(args);
