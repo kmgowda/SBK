@@ -8,10 +8,8 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.gem.api.impl;
+package io.gem.api;
 
-import io.gem.api.ConnectionConfig;
-import io.gem.api.SshUtils;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
 import org.apache.sshd.client.SshClient;
@@ -63,7 +61,7 @@ final public class SshSession {
     }
 
     @Synchronized
-    private void creationSession(long timeoutSeconds) {
+    private void createSession(long timeoutSeconds) {
         Printer.log.info("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' starting...");
         try {
             client.start();
@@ -83,7 +81,7 @@ final public class SshSession {
      * @return CompletableFuture
      */
     public CompletableFuture<Void> createSessionAsync(long timeoutSeconds) {
-        return CompletableFuture.runAsync(() -> creationSession(timeoutSeconds), executor);
+        return CompletableFuture.runAsync(() -> createSession(timeoutSeconds), executor);
     }
 
     @Synchronized
@@ -105,7 +103,7 @@ final public class SshSession {
      * @return CompletableFuture
      * @throws ConnectException If connection exception occurs.
      */
-    public CompletableFuture<Void> runCommandAsync(String cmd, long timeoutSeconds, SshResponseStream response)
+    public CompletableFuture<Void> runCommandAsync(String cmd, long timeoutSeconds, SshResponse response)
             throws ConnectException {
         final ClientSession sshSession = getSession();
         return CompletableFuture.runAsync(() -> {
