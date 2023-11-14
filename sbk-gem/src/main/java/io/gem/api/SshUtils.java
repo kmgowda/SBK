@@ -35,19 +35,19 @@ public final class SshUtils {
      * This method is responsible for creating client sessions.
      *
      * @param client            SshClient
-     * @param conn              SshConnection
+     * @param connConfig        SshConnection
      * @param timeoutSeconds    long
      * @return session
      * @throws IOException If it occurs
      */
-    public static ClientSession createSession(SshClient client, SshConnection conn, long timeoutSeconds)
+    public static ClientSession createSession(SshClient client, ConnectionConfig connConfig, long timeoutSeconds)
             throws IOException {
         // Connect to the server
-        final ConnectFuture cf = client.connect(conn.getUserName(), conn.getHost(), conn.getPort());
+        final ConnectFuture cf = client.connect(connConfig.getUserName(), connConfig.getHost(), connConfig.getPort());
         final ClientSession session = cf.verify().getSession();
 
-        if (StringUtils.isNotEmpty(conn.getPassword())) {
-            session.addPasswordIdentity(conn.getPassword());
+        if (StringUtils.isNotEmpty(connConfig.getPassword())) {
+            session.addPasswordIdentity(connConfig.getPassword());
             session.auth().verify(TimeUnit.SECONDS.toMillis(timeoutSeconds));
         }
         return session;
