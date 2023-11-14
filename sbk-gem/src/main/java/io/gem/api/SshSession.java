@@ -97,21 +97,23 @@ final public class SshSession {
     /**
      * This method is responsible for running commands but throws ConnectException if it occurs.
      *
-     * @param cmd               String
-     * @param timeoutSeconds    long
-     * @param response          SshResponseStream
+     * @param cmd            String
+     * @param isOutput       Is stdout output is required
+     * @param timeoutSeconds long
      * @return CompletableFuture
      * @throws ConnectException If connection exception occurs.
      */
-    public CompletableFuture<Void> runCommandAsync(String cmd, long timeoutSeconds, SshResponse response)
+    public CompletableFuture<SshResponse> runCommandAsync(String cmd, Boolean isOutput, long timeoutSeconds)
             throws ConnectException {
         final ClientSession sshSession = getSession();
-        return CompletableFuture.runAsync(() -> {
+        return CompletableFuture.supplyAsync(() -> {
+            final SshResponse response = new SshResponse(isOutput);
             try {
                 SshUtils.runCommand(sshSession, cmd, timeoutSeconds, response);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return response;
         }, executor);
     }
 

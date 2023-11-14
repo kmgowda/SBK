@@ -95,14 +95,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return Integer.parseInt(tmp[1].split("\\.")[0]);
     }
 
-    private static @NotNull SshResponse[] createMultiSshResponseStream(int length, boolean stdout) {
-        final SshResponse[] results = new SshResponse[length];
-        for (int i = 0; i < results.length; i++) {
-            results[i] = new SshResponse(stdout);
-        }
-        return results;
-    }
-
     @Override
     @Synchronized
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
@@ -142,19 +134,22 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final int javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0].substring(0, 2));
 
-        final SshResponse[] sshResults = createMultiSshResponseStream(nodes.length, true);
+        final CompletableFuture<SshResponse>[] cfResults = new CompletableFuture[nodes.length];
+        final SshResponse[] sshResults = new SshResponse[cfArray.length];
         final String cmd = "java -version";
         consMap.reset();
         for (int i = 0; i < nodes.length; i++) {
             if (consMap.isVisited(nodes[i].connection)) {
-                cfArray[i] = new CompletableFuture<>();
-                cfArray[i].complete(null);
+                cfResults[i] = new CompletableFuture<>();
+                SshResponse dummyResponse = new SshResponse(true);
+                dummyResponse.returnCode = -1;
+                cfResults[i].complete(dummyResponse);
             } else {
                 consMap.visit(nodes[i].connection);
-                cfArray[i] = nodes[i].runCommandAsync(cmd, config.remoteTimeoutSeconds, sshResults[i]);
+                cfResults[i] = nodes[i].runCommandAsync(cmd, true, config.remoteTimeoutSeconds );
             }
         }
-        final CompletableFuture<Void> ret = CompletableFuture.allOf(cfArray);
+        final CompletableFuture<Void> ret = CompletableFuture.allOf(cfResults);
 
         for (int i = 0; i < config.maxIterations && !ret.isDone(); i++) {
             try {
@@ -169,12 +164,15 @@ final public class SbkGemBenchmark implements GemBenchmark {
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         } else {
-            for (int i = 0; i < sshResults.length; i++) {
-                String stdOut = sshResults[i].stdOutputStream.toString();
-                String stdErr = sshResults[i].errOutputStream.toString();
-                if (javaMajorVersion > parseJavaVersion(stdOut) && javaMajorVersion > parseJavaVersion(stdErr)) {
-                    Printer.log.info("Java version :" + javaMajorVersion + " , mismatch at : " + nodes[i].connection.getHost());
-                    stop = true;
+            for (int i = 0; i < cfResults.length; i++) {
+                sshResults[i] =  cfResults[i].get();
+                if (sshResults[i] != null) {
+                    String stdOut = sshResults[i].stdOutputStream.toString();
+                    String stdErr = sshResults[i].errOutputStream.toString();
+                    if (javaMajorVersion > parseJavaVersion(stdOut) && javaMajorVersion > parseJavaVersion(stdErr)) {
+                        Printer.log.info("Java version :" + javaMajorVersion + " , mismatch at : " + nodes[i].connection.getHost());
+                        stop = true;
+                    }
                 }
             }
             fillSshResults(sshResults);
@@ -196,7 +194,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 throw new InterruptedException(errStr);
             }
 
-            final SshResponse[] mkDirResults = createMultiSshResponseStream(nodes.length, false);
             consMap.reset();
             for (int i = 0; i < nodes.length; i++) {
                 if (consMap.isVisited(nodes[i].connection)) {
@@ -205,7 +202,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 } else {
                     consMap.visit(nodes[i].connection);
                     cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
-                            config.remoteTimeoutSeconds, mkDirResults[i]);
+                            true, config.remoteTimeoutSeconds );
                 }
             }
 
@@ -259,21 +256,28 @@ final public class SbkGemBenchmark implements GemBenchmark {
         sbmBenchmark.start();
 
         // Start remote SBK instances
-        final SshResponse[] sbkResults = createMultiSshResponseStream(nodes.length, true);
+        final SshResponse[] sbkResults = new SshResponse[nodes.length];
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final String sbkCommand = sbkDir + File.separator + params.getSbkCommand() + " " + sbkArgs;
         Printer.log.info("SBK-GEM: Remote SBK command: " + sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
-            cfArray[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir() + File.separator + sbkCommand,
-                    config.remoteTimeoutSeconds, sbkResults[i]);
+            cfResults[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir() + File.separator + sbkCommand,
+                    true, config.remoteTimeoutSeconds );
         }
-        final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfArray);
+        final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfResults);
         sbkFuture.exceptionally(ex -> {
             shutdown(ex);
             return null;
         });
 
         sbkFuture.thenAccept(x -> {
+            for (int i = 0; i < cfResults.length; i++) {
+                try {
+                    sbkResults[i] = cfResults[i].get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             fillSshResults(sbkResults);
             shutdown(null);
         });
@@ -283,7 +287,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     private boolean remoteDirectoryDelete() throws InterruptedException, ConnectException {
         final CompletableFuture<?>[] rmCfArray = new CompletableFuture[nodes.length];
-        final SshResponse[] results = createMultiSshResponseStream(nodes.length, false);
         consMap.reset();
         for (int i = 0; i < nodes.length; i++) {
             if (consMap.isVisited(nodes[i].connection)) {
@@ -292,7 +295,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             } else {
                 consMap.visit(nodes[i].connection);
                 rmCfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
-                        config.remoteTimeoutSeconds, results[i]);
+                        true, config.remoteTimeoutSeconds );
             }
         }
         final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(rmCfArray);
