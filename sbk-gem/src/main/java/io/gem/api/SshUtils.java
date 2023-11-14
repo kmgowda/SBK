@@ -10,7 +10,6 @@
 
 package io.gem.api;
 
-import io.gem.api.impl.SshResponseStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ChannelExec;
@@ -63,7 +62,7 @@ public final class SshUtils {
      * @throws IOException If it occurs
      */
     public static void runCommand(final @NotNull ClientSession session, String cmd, long timeoutSeconds,
-                                  @NotNull SshResponseStream response) throws IOException {
+                                  @NotNull SshResponse response) throws IOException {
         // Create the exec and channel its output/error streams
         final ChannelExec execChannel = session.createExecChannel(cmd);
         execChannel.setErr(response.errOutputStream);

@@ -11,6 +11,8 @@
 package io.gem.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.gem.api.SshResponse;
+import io.gem.api.SshSession;
 import io.gem.config.GemConfig;
 import io.gem.api.GemBenchmark;
 import io.gem.api.RemoteResponse;
@@ -93,10 +95,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return Integer.parseInt(tmp[1].split("\\.")[0]);
     }
 
-    private static @NotNull SshResponseStream[] createMultiSshResponseStream(int length, boolean stdout) {
-        final SshResponseStream[] results = new SshResponseStream[length];
+    private static @NotNull SshResponse[] createMultiSshResponseStream(int length, boolean stdout) {
+        final SshResponse[] results = new SshResponse[length];
         for (int i = 0; i < results.length; i++) {
-            results[i] = new SshResponseStream(stdout);
+            results[i] = new SshResponse(stdout);
         }
         return results;
     }
@@ -140,7 +142,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final int javaMajorVersion = Integer.parseInt(System.getProperty("java.runtime.version").
                 split("\\.")[0].substring(0, 2));
 
-        final SshResponseStream[] sshResults = createMultiSshResponseStream(nodes.length, true);
+        final SshResponse[] sshResults = createMultiSshResponseStream(nodes.length, true);
         final String cmd = "java -version";
         consMap.reset();
         for (int i = 0; i < nodes.length; i++) {
@@ -194,7 +196,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 throw new InterruptedException(errStr);
             }
 
-            final SshResponseStream[] mkDirResults = createMultiSshResponseStream(nodes.length, false);
+            final SshResponse[] mkDirResults = createMultiSshResponseStream(nodes.length, false);
             consMap.reset();
             for (int i = 0; i < nodes.length; i++) {
                 if (consMap.isVisited(nodes[i].connection)) {
@@ -257,7 +259,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         sbmBenchmark.start();
 
         // Start remote SBK instances
-        final SshResponseStream[] sbkResults = createMultiSshResponseStream(nodes.length, true);
+        final SshResponse[] sbkResults = createMultiSshResponseStream(nodes.length, true);
         final String sbkDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final String sbkCommand = sbkDir + File.separator + params.getSbkCommand() + " " + sbkArgs;
         Printer.log.info("SBK-GEM: Remote SBK command: " + sbkCommand);
@@ -281,7 +283,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     private boolean remoteDirectoryDelete() throws InterruptedException, ConnectException {
         final CompletableFuture<?>[] rmCfArray = new CompletableFuture[nodes.length];
-        final SshResponseStream[] results = createMultiSshResponseStream(nodes.length, false);
+        final SshResponse[] results = createMultiSshResponseStream(nodes.length, false);
         consMap.reset();
         for (int i = 0; i < nodes.length; i++) {
             if (consMap.isVisited(nodes[i].connection)) {
@@ -313,7 +315,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @Synchronized
-    private void fillSshResults(SshResponseStream[] responseStreams) {
+    private void fillSshResults(SshResponse[] responseStreams) {
         final ConnectionConfig[] connections = params.getConnections();
         for (int i = 0; i < remoteResults.length; i++) {
             remoteResults[i] = new RemoteResponse(responseStreams[i].returnCode, responseStreams[i].stdOutputStream.toString(),

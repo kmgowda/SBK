@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.gem.api.impl;
+package io.gem.api;
 
 
 import java.io.ByteArrayOutputStream;
@@ -17,7 +17,7 @@ import java.io.OutputStream;
 /**
  * Class SshResponseStream.
  */
-public final class SshResponseStream {
+public final class SshResponse {
     /**
      * <code>OutputStream errOutputStream</code>.
      */
@@ -37,7 +37,7 @@ public final class SshResponseStream {
      *
      * @param stdout boolean
      */
-    public SshResponseStream(boolean stdout) {
+    public SshResponse(boolean stdout) {
         this.returnCode = 0;
         this.errOutputStream = new ByteArrayOutputStream();
         if (stdout) {
