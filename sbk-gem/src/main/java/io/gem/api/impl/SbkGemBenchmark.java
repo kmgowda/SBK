@@ -14,7 +14,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.gem.config.GemConfig;
 import io.gem.api.GemBenchmark;
 import io.gem.api.RemoteResponse;
-import io.gem.api.SshConnection;
+import io.gem.api.ConnectionConfig;
 import io.gem.params.GemParameters;
 import io.sbk.api.Benchmark;
 import io.sbk.system.Printer;
@@ -49,7 +49,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private final CompletableFuture<RemoteResponse[]> retFuture;
     private final RemoteResponse[] remoteResults;
     private final ExecutorService executor;
-    private final SbkSsh[] nodes;
+    private final SshSession[] nodes;
     private final ConnectionsMap consMap;
 
     @GuardedBy("this")
@@ -71,16 +71,16 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.sbkArgs = sbkArgs;
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
-        final SshConnection[] connections = params.getConnections();
+        final ConnectionConfig[] connections = params.getConnections();
         if (config.fork) {
             executor = new ForkJoinPool(connections.length + 10);
         } else {
             executor = Executors.newFixedThreadPool(connections.length + 10);
         }
         this.remoteResults = new RemoteResponse[connections.length];
-        this.nodes = new SbkSsh[connections.length];
+        this.nodes = new SshSession[connections.length];
         for (int i = 0; i < connections.length; i++) {
-            nodes[i] = new SbkSsh(connections[i], executor);
+            nodes[i] = new SshSession(connections[i], executor);
         }
         this.consMap = new ConnectionsMap(connections);
     }
@@ -314,7 +314,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     @Synchronized
     private void fillSshResults(SshResponseStream[] responseStreams) {
-        final SshConnection[] connections = params.getConnections();
+        final ConnectionConfig[] connections = params.getConnections();
         for (int i = 0; i < remoteResults.length; i++) {
             remoteResults[i] = new RemoteResponse(responseStreams[i].returnCode, responseStreams[i].stdOutputStream.toString(),
                     responseStreams[i].errOutputStream.toString(), connections[i].getHost());
@@ -340,7 +340,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     rmEx.printStackTrace();
                 }
             }
-            for (SbkSsh node : nodes) {
+            for (SshSession node : nodes) {
                 node.stop();
             }
             sbmBenchmark.stop();
@@ -362,10 +362,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private final static class ConnectionsMap {
         private final Map<Map.Entry<String, String>, Boolean> kMap;
 
-        public ConnectionsMap(@NotNull SshConnection[] conn) {
+        public ConnectionsMap(@NotNull ConnectionConfig[] conn) {
             this.kMap = new HashMap<>();
-            for (SshConnection sshConnection : conn) {
-                this.kMap.put(Map.entry(sshConnection.getHost().toLowerCase(), sshConnection.getDir().toLowerCase()), false);
+            for (ConnectionConfig connectionConfig : conn) {
+                this.kMap.put(Map.entry(connectionConfig.getHost().toLowerCase(), connectionConfig.getDir().toLowerCase()), false);
             }
         }
 
@@ -373,11 +373,11 @@ final public class SbkGemBenchmark implements GemBenchmark {
             this.kMap.keySet().forEach(k -> this.kMap.put(k, false));
         }
 
-        void visit(@NotNull SshConnection conn) {
+        void visit(@NotNull ConnectionConfig conn) {
             this.kMap.put(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()), true);
         }
 
-        boolean isVisited(@NotNull SshConnection conn) {
+        boolean isVisited(@NotNull ConnectionConfig conn) {
             return this.kMap.get(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()));
         }
     }

@@ -10,7 +10,7 @@
 
 package io.gem.api.impl;
 
-import io.gem.api.SshConnection;
+import io.gem.api.ConnectionConfig;
 import io.gem.api.SshUtils;
 import io.sbk.system.Printer;
 import lombok.Synchronized;
@@ -26,12 +26,12 @@ import java.util.concurrent.ExecutorService;
 /**
  * Class SbkSsh.
  */
-final public class SbkSsh {
+final public class SshSession {
 
     /**
      * <code>public SshConnection connection</code>.
      */
-    final public SshConnection connection;
+    final public ConnectionConfig connection;
 
     /**
      * <code>private SshClient client</code>.
@@ -56,7 +56,7 @@ final public class SbkSsh {
      * @param conn      SshConnection
      * @param executor  ExecutorService
      */
-    public SbkSsh(SshConnection conn, ExecutorService executor) {
+    public SshSession(ConnectionConfig conn, ExecutorService executor) {
         this.connection = conn;
         this.executor = executor;
         this.client = SshClient.setUpDefaultClient();

@@ -11,7 +11,7 @@
 package io.gem.params.impl;
 
 import io.gem.config.GemConfig;
-import io.gem.api.SshConnection;
+import io.gem.api.ConnectionConfig;
 import io.gem.params.GemParameterOptions;
 import io.sbk.exception.HelpException;
 import io.sbk.params.impl.SbkDriversParameters;
@@ -48,7 +48,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     private String[] parsedArgs;
 
     @Getter
-    private SshConnection[] connections;
+    private ConnectionConfig[] connections;
 
     @Getter
     private String localHost;
@@ -118,9 +118,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 "-delete", Boolean.toString(config.delete), "-localhost", localHost, "-ramport",
                 Integer.toString(sbmPort)};
 
-        connections = new SshConnection[nodes.length];
+        connections = new ConnectionConfig[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            connections[i] = new SshConnection(nodes[i], config.gemuser, config.gempass, config.gemport,
+            connections[i] = new ConnectionConfig(nodes[i], config.gemuser, config.gempass, config.gemport,
                     config.remoteDir);
         }
 

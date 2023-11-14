@@ -10,7 +10,7 @@
 
 package io.gem.params;
 
-import io.gem.api.SshConnection;
+import io.gem.api.ConnectionConfig;
 import io.sbk.params.Parameters;
 
 /**
@@ -23,7 +23,7 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
      *
      * @return SshConnection.
      */
-    SshConnection[] getConnections();
+    ConnectionConfig[] getConnections();
 
     /**
      * to get Sbk directory.

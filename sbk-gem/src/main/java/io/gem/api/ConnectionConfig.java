@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  * Class SshConnection.
  */
 @Slf4j
-public final class SshConnection {
+public final class ConnectionConfig {
 
     @Getter
     private final String host;
@@ -43,7 +43,7 @@ public final class SshConnection {
      * @param port          int
      * @param dir           String
      */
-    public SshConnection(String host, String userName, String password, int port, String dir) {
+    public ConnectionConfig(String host, String userName, String password, int port, String dir) {
         this.host = host;
         this.userName = userName;
         this.password = password;
