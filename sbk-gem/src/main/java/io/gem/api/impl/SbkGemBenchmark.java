@@ -262,7 +262,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         Printer.log.info("SBK-GEM: Remote SBK command: " + sbkCommand);
         for (int i = 0; i < nodes.length; i++) {
             cfResults[i] = nodes[i].runCommandAsync(nodes[i].connection.getDir() + File.separator + sbkCommand,
-                    true, config.remoteTimeoutSeconds );
+                    false, config.remoteTimeoutSeconds );
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfResults);
         sbkFuture.exceptionally(ex -> {
