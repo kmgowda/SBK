@@ -9,19 +9,20 @@
  */
 package io.sbk.driver.ConcurrentQ;
 
+import io.perl.api.Queue;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
+
 
 /**
  * Class for Concurrent Queue Writer.
  */
 public class CqWriter implements Writer<byte[]> {
-    private ConcurrentLinkedQueue<byte[]> queue;
+    private Queue<byte[]> queue;
 
-    public CqWriter(ConcurrentLinkedQueue queue) throws IOException {
+    public CqWriter(Queue queue) throws IOException {
         this.queue = queue;
     }
 

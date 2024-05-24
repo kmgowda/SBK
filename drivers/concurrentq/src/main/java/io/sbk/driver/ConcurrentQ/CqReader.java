@@ -9,10 +9,10 @@
  */
 package io.sbk.driver.ConcurrentQ;
 
+import io.perl.api.Queue;
 import io.sbk.api.Reader;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -23,9 +23,9 @@ public class CqReader implements Reader<byte[]> {
     final private static int MICROS_PER_MS = 1000;
     final private static int NS_PER_MS = NS_PER_MICRO * MICROS_PER_MS;
     final private static int PARK_NS = NS_PER_MS;
-    private final ConcurrentLinkedQueue<byte[]> queue;
+    private final Queue<byte[]> queue;
 
-    public CqReader(ConcurrentLinkedQueue queue) throws IOException {
+    public CqReader(Queue queue) throws IOException {
         this.queue = queue;
     }
 

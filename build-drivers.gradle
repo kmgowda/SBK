@@ -1,6 +1,7 @@
 
 dependencies {
     api project(":drivers:file")
+    api project(":drivers:concurrentq")
     api project(":drivers:filestream")
     api project(":drivers:asyncfile")
     api project(":drivers:hdfs")
