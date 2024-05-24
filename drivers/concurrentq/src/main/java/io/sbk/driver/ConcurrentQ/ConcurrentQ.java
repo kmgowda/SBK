@@ -22,7 +22,7 @@ import java.io.IOException;
  * Class for Concurrent Queue Benchmarking.
  */
 public class ConcurrentQ implements Storage<byte[]> {
-    private Queue<byte[]> queue;
+    protected Queue<byte[]> queue;
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {

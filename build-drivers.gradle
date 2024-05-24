@@ -46,6 +46,7 @@ dependencies {
     api project(':drivers:memcached')
     api project(':drivers:dynamodb')
     api project(':drivers:exasol')
+    api project(':drivers:conqueue')
     /* api project(':drivers:sbktemplate') */
     /* above line is a signature */
 }

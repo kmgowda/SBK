@@ -56,5 +56,6 @@ include 'drivers:couchbase'
 include 'drivers:memcached'
 include 'drivers:dynamodb'
 include 'drivers:exasol'
+include 'drivers:conqueue'
 /* include 'drivers:sbktemplate' */
 /* above line is a signature */
