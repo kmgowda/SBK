@@ -64,7 +64,8 @@ final public class CQueue<T> implements Queue<T> {
         if (cur == null) {
             return null;
         }
-        HEAD.set(this, cur);
+        Object oldHead = HEAD.getAndSet(this, cur);
+        oldHead = null;    //might help the Java garbage collector
         return (T) ITEM.getAndSetRelease(cur, null);
     }
 
