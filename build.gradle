@@ -178,7 +178,7 @@ allprojects {
     }
 
     task generateDashboards(type: Copy) {
-        if (project.path.startsWith(":driver-")) {
+        if (project.path.startsWith(":drivers")) {
             def outDir = 'build/dashboard'
             def outFile = sbkProjectName + "-" + sbkVersion + ".json"
             def sbkClassName = sbkClass.toLowerCase().capitalize()
@@ -199,7 +199,7 @@ allprojects {
             rename 'dashboard-template.json', outFile
 
             doLast {
-                println "generatering file : " + outDir + "/" + outFile
+                println "generating file : " + outDir + "/" + outFile
             }
         }
     }
