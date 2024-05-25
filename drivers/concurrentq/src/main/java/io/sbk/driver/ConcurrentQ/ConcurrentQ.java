@@ -9,6 +9,7 @@
  */
 package io.sbk.driver.ConcurrentQ;
 
+import io.perl.api.Queue;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -16,13 +17,12 @@ import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Class for Concurrent Queue Benchmarking.
  */
 public class ConcurrentQ implements Storage<byte[]> {
-    private ConcurrentLinkedQueue<byte[]> queue;
+    protected Queue<byte[]> queue;
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
@@ -37,7 +37,7 @@ public class ConcurrentQ implements Storage<byte[]> {
 
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
-        this.queue = new ConcurrentLinkedQueue<>();
+        this.queue = new LinkedCQueue<>();
     }
 
     @Override

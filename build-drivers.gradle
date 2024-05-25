@@ -1,6 +1,7 @@
 
 dependencies {
     api project(":drivers:file")
+    api project(":drivers:concurrentq")
     api project(":drivers:filestream")
     api project(":drivers:asyncfile")
     api project(":drivers:hdfs")
@@ -45,6 +46,8 @@ dependencies {
     api project(':drivers:memcached')
     api project(':drivers:dynamodb')
     api project(':drivers:exasol')
+    api project(':drivers:conqueue')
+    api project(':drivers:linkedbq')
     /* api project(':drivers:sbktemplate') */
     /* above line is a signature */
 }
