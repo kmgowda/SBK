@@ -48,6 +48,7 @@ dependencies {
     api project(':drivers:exasol')
     api project(':drivers:conqueue')
     api project(':drivers:linkedbq')
+    api project(':drivers:atomicq')
     /* api project(':drivers:sbktemplate') */
     /* above line is a signature */
 }

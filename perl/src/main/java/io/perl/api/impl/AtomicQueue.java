@@ -59,7 +59,7 @@ final public class AtomicQueue<T> implements Queue<T> {
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
         final Node<T> tailnode = tail.getAndSet(node);
-        node.next.set(tailnode);
+        tailnode.next.set(node);
         return true;
     }
 

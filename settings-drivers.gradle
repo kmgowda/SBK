@@ -58,5 +58,6 @@ include 'drivers:dynamodb'
 include 'drivers:exasol'
 include 'drivers:conqueue'
 include 'drivers:linkedbq'
+include 'drivers:atomicq'
 /* include 'drivers:sbktemplate' */
 /* above line is a signature */
