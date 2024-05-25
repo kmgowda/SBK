@@ -223,7 +223,7 @@ allprojects {
 
         if (project.path.startsWith(":drivers")) {
             doLast {
-                println "generatering file : " + outDir + "/" + outFile
+                println "generating file : " + outDir + "/" + outFile
 
                 configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
                     def id = artifact.moduleVersion.id
