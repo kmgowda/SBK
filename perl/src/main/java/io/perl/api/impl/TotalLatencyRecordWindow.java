@@ -74,8 +74,9 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
      */
     public void checkTotalWindowFullAndReset(long currTime) {
         if (totalWindow.isFull()) {
-            stop(currTime);
-            start(currTime);
+            /* don't call stop here , it may cause recursion */
+            totalWindow.print(currTime, totalLogger, null);
+            totalWindow.reset(currTime);
         }
     }
 
@@ -103,7 +104,9 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
     @Override
     public void stop(long endTime) {
         if (window.getTotalRecords() > 0) {
-            stopWindow(endTime);
+            /* don't call stopWindow , it leads to recursion  */
+            window.print(endTime, windowLogger, totalWindow);
+            window.reset(endTime);
         }
         totalWindow.print(endTime, totalLogger, null);
     }
