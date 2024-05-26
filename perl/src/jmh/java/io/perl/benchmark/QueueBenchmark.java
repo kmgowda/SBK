@@ -10,6 +10,7 @@
 
 package io.perl.benchmark;
 
+import io.perl.api.impl.AtomicQueue;
 import io.perl.api.impl.CQueue;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
@@ -23,6 +24,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 @State(Scope.Thread)
@@ -31,18 +33,22 @@ public class QueueBenchmark {
 
     final private CQueue<Integer> cqueue;
     final private ConcurrentLinkedQueue<Integer> clinkedQueue;
+    final private LinkedBlockingQueue<Integer> linkedbq;
+    final private AtomicQueue<Integer> atomicQueue;
 
     
     public QueueBenchmark() {
         cqueue = new CQueue<>();
         clinkedQueue = new ConcurrentLinkedQueue<>();
+        linkedbq = new LinkedBlockingQueue<>();
+        atomicQueue = new AtomicQueue<>();
     }
     
     @Benchmark
     @Fork(value = 1, warmups = 0)
     @Timeout(time = 60)
     @Warmup(iterations = 0)
-    @Measurement(iterations = 2)
+    @Measurement(iterations = 3)
     public void cqueueBenchmark() {
         cqueue.add(1);
         cqueue.poll();
@@ -52,10 +58,30 @@ public class QueueBenchmark {
     @Fork(value = 1, warmups = 0)
     @Timeout(time = 60)
     @Warmup(iterations = 0)
-    @Measurement(iterations = 2)
+    @Measurement(iterations = 3)
     public void concurrentQueueBenchmark() {
         clinkedQueue.add(1);
         clinkedQueue.poll();
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    public void linkedBlockingQueueBenchmark() {
+        linkedbq.add(1);
+        linkedbq.poll();
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    public void atomicQueueBenchmark() {
+        atomicQueue.add(1);
+        atomicQueue.poll();
     }
 
     public static void main(String[] args) throws Exception {
