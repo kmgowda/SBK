@@ -12,7 +12,7 @@ package io.sbk.driver.Linkedbq;
 
 import io.perl.api.Queue;
 
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class LinkedBQueue<T> extends LinkedBlockingDeque<T> implements Queue<T> {
+public class LinkedBQueue<T> extends LinkedBlockingQueue<T> implements Queue<T> {
 }
