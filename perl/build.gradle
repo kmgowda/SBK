@@ -12,6 +12,8 @@
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 apply plugin: "com.github.spotbugs"
+apply plugin: "me.champeau.jmh"
+
 
 buildscript {
     repositories {
@@ -22,6 +24,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
+        classpath group: 'me.champeau.jmh', name: 'jmh-gradle-plugin', version: jmhGradleVersion
     }
 }
 
@@ -48,6 +51,14 @@ dependencies {
     api group: 'com.google.guava', name: 'guava', version: guavaVersion
     implementation group: 'org.eclipse.collections', name: 'eclipse-collections', version: eclipseCollectionVersion
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    testImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: jmhVersion
+    annotationProcessor group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: jmhVersion
+    testImplementation group: 'org.openjdk.jmh', name: 'jmh-core-benchmarks', version: jmhVersion
+}
+
+jmh {
+    jvmArgs = ["-Djmh.blackhole.autoDetect=false"]
+    excludes = ['org.openjdk.jmh.benchmarks',]
 }
 
 task updateDocs(dependsOn: javadoc) {

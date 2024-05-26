@@ -75,4 +75,5 @@
     <allow pkg="com.couchbase" />
     <allow pkg="net.rubyeye" />
     <allow pkg="software.amazon"/>
+    <allow pkg="org.openjdk.jmh"/>
 </import-control>
