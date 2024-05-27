@@ -39,6 +39,8 @@ RUN mkdir -p ${APP_HOME}/drivers
 COPY --chown=root:root drivers/file ${APP_HOME}/drivers/file
 COPY --chown=root:root drivers/conqueue ${APP_HOME}/drivers/conqueue
 COPY --chown=root:root drivers/linkedbq ${APP_HOME}/drivers/linkedbq
+COPY --chown=root:root drivers/atomicq ${APP_HOME}/drivers/atomicq
+COPY --chown=root:root drivers/syncq ${APP_HOME}/drivers/syncq
 COPY --chown=root:root drivers/concurrentq ${APP_HOME}/drivers/concurrentq
 COPY --chown=root:root drivers/filestream ${APP_HOME}/drivers/filestream
 COPY --chown=root:root drivers/asyncfile ${APP_HOME}/drivers/asyncfile
