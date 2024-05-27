@@ -12,6 +12,7 @@ package io.perl.benchmark;
 
 import io.perl.api.impl.AtomicQueue;
 import io.perl.api.impl.CQueue;
+import io.perl.api.impl.SyncQueue;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -35,6 +36,7 @@ public class QueueBenchmark {
     final private ConcurrentLinkedQueue<Integer> clinkedQueue;
     final private LinkedBlockingQueue<Integer> linkedbq;
     final private AtomicQueue<Integer> atomicQueue;
+    final private SyncQueue<Integer> syncQueue;
 
     
     public QueueBenchmark() {
@@ -42,6 +44,7 @@ public class QueueBenchmark {
         clinkedQueue = new ConcurrentLinkedQueue<>();
         linkedbq = new LinkedBlockingQueue<>();
         atomicQueue = new AtomicQueue<>();
+        syncQueue = new SyncQueue<>();
     }
     
     @Benchmark
@@ -83,6 +86,18 @@ public class QueueBenchmark {
         atomicQueue.add(1);
         atomicQueue.poll();
     }
+
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    public void syncQueueBenchmark() {
+        syncQueue.add(1);
+        syncQueue.poll();
+    }
+
 
     public static void main(String[] args) throws Exception {
         Options opt = new OptionsBuilder()
