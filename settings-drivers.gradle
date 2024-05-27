@@ -59,5 +59,6 @@ include 'drivers:exasol'
 include 'drivers:conqueue'
 include 'drivers:linkedbq'
 include 'drivers:atomicq'
+include 'drivers:syncq'
 /* include 'drivers:sbktemplate' */
 /* above line is a signature */

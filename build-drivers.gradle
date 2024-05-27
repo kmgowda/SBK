@@ -49,6 +49,7 @@ dependencies {
     api project(':drivers:conqueue')
     api project(':drivers:linkedbq')
     api project(':drivers:atomicq')
+    api project(':drivers:syncq')
     /* api project(':drivers:sbktemplate') */
     /* above line is a signature */
 }
