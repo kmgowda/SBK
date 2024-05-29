@@ -18,6 +18,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
@@ -32,11 +33,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 //@Fork(value = 2, jvmArgs = {"-Djmh.blackhole.autoDetect=false"})
 public class QueueBenchmark {
 
-    final private CQueue<Integer> cqueue;
-    final private ConcurrentLinkedQueue<Integer> clinkedQueue;
-    final private LinkedBlockingQueue<Integer> linkedbq;
-    final private AtomicQueue<Integer> atomicQueue;
-    final private SyncQueue<Integer> syncQueue;
+    final protected CQueue<Integer> cqueue;
+    final protected ConcurrentLinkedQueue<Integer> clinkedQueue;
+    final protected LinkedBlockingQueue<Integer> linkedbq;
+    final protected AtomicQueue<Integer> atomicQueue;
+    final protected SyncQueue<Integer> syncQueue;
 
     
     public QueueBenchmark() {
@@ -95,6 +96,62 @@ public class QueueBenchmark {
     @Measurement(iterations = 3)
     public void syncQueueBenchmark() {
         syncQueue.add(1);
+        syncQueue.poll();
+    }
+
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    @Threads(10)
+    public void cqueueMultiThreadBenchmark() {
+        cqueue.add(10);
+        cqueue.poll();
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    @Threads(10)
+    public void concurrentQueueMultiThreadBenchmark() {
+        clinkedQueue.add(10);
+        clinkedQueue.poll();
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    @Threads(10)
+    public void linkedBlockingQueueMultiThreadBenchmark() {
+        linkedbq.add(10);
+        linkedbq.poll();
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    @Threads(10)
+    public void atomicQueueMultiThreadBenchmark() {
+        atomicQueue.add(10);
+        atomicQueue.poll();
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 0)
+    @Timeout(time = 60)
+    @Warmup(iterations = 0)
+    @Measurement(iterations = 3)
+    @Threads(10)
+    public void syncQueueMultiThreadBenchmark() {
+        syncQueue.add(10);
         syncQueue.poll();
     }
 

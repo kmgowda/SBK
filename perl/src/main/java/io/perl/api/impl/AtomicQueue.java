@@ -43,12 +43,13 @@ final public class AtomicQueue<T> implements Queue<T> {
 
     @Override
     public T poll() {
-        final Node<T> curHead = head.get();
+        final Node<T> curHead = head.getAndSet(null);
         if (curHead == null) {
             return null;
         }
         final Node<T> nxt = curHead.next.getAndSet(null);
         if (nxt == null) {
+            head.set(curHead);
             return null;
         }
         head.set(nxt);
