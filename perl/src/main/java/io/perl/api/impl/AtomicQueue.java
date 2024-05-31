@@ -41,8 +41,7 @@ final public class AtomicQueue<T> implements Queue<T> {
         this.tail = new AtomicReference<>(firstNode);
     }
 
-    @Override
-    public T poll() {
+    public T pollOnce() {
         final Node<T> curHead = head.getAndSet(null);
         if (curHead == null) {
             return null;
@@ -57,6 +56,25 @@ final public class AtomicQueue<T> implements Queue<T> {
     }
 
     @Override
+    public T poll() {
+        Node<T> curHead = head.get();
+        Node<T> nxt = curHead.next.get();
+
+        while ( nxt != null && !head.compareAndSet(curHead, nxt) ) {
+            curHead = head.get();
+            nxt = curHead.next.get();
+        }
+
+        if (nxt == null) {
+            return null;
+        }
+        curHead.next.set(null);
+
+        return nxt.item;
+    }
+
+
+    @Override
     public boolean add(T data) {
         final Node<T> node = new Node<>(data);
         final Node<T> tailnode = tail.getAndSet(node);
@@ -66,6 +84,7 @@ final public class AtomicQueue<T> implements Queue<T> {
 
     @Override
     public void clear() {
+        firstNode.next.set(null);
         Node<T> first = head.getAndSet(firstNode);
         tail.set(first);
         /*
