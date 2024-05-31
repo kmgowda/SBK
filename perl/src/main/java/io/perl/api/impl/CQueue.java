@@ -58,14 +58,30 @@ final public class CQueue<T> implements Queue<T> {
         this.tail = firstNode;
     }
 
-    @Override
-    public T poll() {
+    public T pollOnce() {
         final Object cur = NEXT.getAndSet(head, null);
         if (cur == null) {
             return null;
         }
         HEAD.set(this, cur);
         return (T) ITEM.getAndSet(cur, null);
+    }
+
+    @Override
+    public T poll() {
+        Object curHead = HEAD.get(this);
+        Object nxt = NEXT.get(curHead);
+
+        while (nxt != null && !HEAD.compareAndSet(this, curHead, nxt)) {
+            curHead = HEAD.get(this);
+            nxt = NEXT.get(curHead);
+        }
+
+        if (nxt == null) {
+            return null;
+        }
+        NEXT.set(curHead, null);
+        return (T) ITEM.getAndSet(nxt, null);
     }
 
     @Override
@@ -78,6 +94,7 @@ final public class CQueue<T> implements Queue<T> {
 
     @Override
     public void clear() {
+        NEXT.set(firstNode, null);
         Object first = HEAD.getAndSet(this, firstNode);
         TAIL.set(this, firstNode);
         /*
