@@ -14,8 +14,10 @@ import io.perl.api.impl.AtomicQueue;
 import io.perl.api.impl.CQueue;
 import io.perl.api.impl.SyncQueue;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
@@ -53,6 +55,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     public void cqueueBenchmark() {
         cqueue.add(1);
         cqueue.poll();
@@ -63,6 +66,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     public void concurrentQueueBenchmark() {
         clinkedQueue.add(1);
         clinkedQueue.poll();
@@ -73,6 +77,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     public void linkedBlockingQueueBenchmark() {
         linkedbq.add(1);
         linkedbq.poll();
@@ -83,6 +88,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     public void atomicQueueBenchmark() {
         atomicQueue.add(1);
         atomicQueue.poll();
@@ -94,6 +100,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     public void syncQueueBenchmark() {
         syncQueue.add(1);
         syncQueue.poll();
@@ -105,6 +112,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     @Threads(10)
     public void cqueueMultiThreadBenchmark() {
         cqueue.add(10);
@@ -116,6 +124,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     @Threads(10)
     public void concurrentQueueMultiThreadBenchmark() {
         clinkedQueue.add(10);
@@ -127,6 +136,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     @Threads(10)
     public void linkedBlockingQueueMultiThreadBenchmark() {
         linkedbq.add(10);
@@ -138,6 +148,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     @Threads(10)
     public void atomicQueueMultiThreadBenchmark() {
         atomicQueue.add(10);
@@ -149,6 +160,7 @@ public class QueueBenchmark {
     @Timeout(time = 60)
     @Warmup(iterations = 0)
     @Measurement(iterations = 3)
+    @BenchmarkMode(Mode.Throughput)
     @Threads(10)
     public void syncQueueMultiThreadBenchmark() {
         syncQueue.add(10);
