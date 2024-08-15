@@ -36,7 +36,10 @@ dependencies {
     api project(":perl")
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    api group: 'commons-configuration', name: 'commons-configuration', version: commonsConfigurationVersion
+    api group: 'org.apache.commons', name: 'commons-configuration2', version: apacheCommonsConfigVersion
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    api group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLang3Version
+
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
 }
 

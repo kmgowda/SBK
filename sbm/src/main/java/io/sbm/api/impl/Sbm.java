@@ -30,7 +30,7 @@ import io.sbp.config.SbpVersion;
 import io.time.Time;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

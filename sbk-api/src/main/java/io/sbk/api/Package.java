@@ -11,7 +11,7 @@
 package io.sbk.api;
 
 import io.sbk.system.Printer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

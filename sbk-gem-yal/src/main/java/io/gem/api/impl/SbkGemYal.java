@@ -24,7 +24,7 @@ import io.sbk.params.YmlMap;
 import io.sbk.params.impl.SbkYalParameters;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Class SbkGemYal.
  */
-public final class SbkGemYal {
+final public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
     final static String DESC = "Storage Benchmark Kit-Group Execution Monitor-YML Arguments Loader";

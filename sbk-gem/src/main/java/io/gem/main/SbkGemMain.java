@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Class SbkGemMain.
  */
-public final class SbkGemMain {
+final public class SbkGemMain {
 
     /**
      * This method is the main method of Sbk-Gem module.
