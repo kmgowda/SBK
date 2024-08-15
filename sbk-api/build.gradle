@@ -38,7 +38,7 @@ dependencies {
     api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
     api group: 'org.apache.commons', name: 'commons-configuration2', version: apacheCommonsConfigVersion
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    api group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonslang3Version
+    api group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLang3Version
 
     implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
 }
