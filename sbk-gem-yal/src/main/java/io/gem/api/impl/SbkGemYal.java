@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Class SbkGemYal.
  */
-public final class SbkGemYal {
+final public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
     final static String DESC = "Storage Benchmark Kit-Group Execution Monitor-YML Arguments Loader";
