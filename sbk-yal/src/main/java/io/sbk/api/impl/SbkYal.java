@@ -23,7 +23,7 @@ import io.sbk.params.impl.SbkYalParameters;
 import io.sbk.params.impl.SbkYmlMap;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
