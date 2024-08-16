@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
  * Class for Concurrent Queue based PerL.
  */
 final public class CQueuePerl implements Perl {
-    final private PerformanceRecorder perlReceiver;
+    final private PerformanceRecorderIdleWait perlReceiver;
     final private Channel[] channels;
     final private Time time;
     final private ExecutorService executor;
@@ -75,7 +75,7 @@ final public class CQueuePerl implements Perl {
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
-        this.perlReceiver = new PerformanceRecorder(periodicRecorder, channels, time, reportingIntervalMS,
+        this.perlReceiver = new PerformanceRecorderIdleWait(periodicRecorder, channels, time, reportingIntervalMS,
                 Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
     }
 
