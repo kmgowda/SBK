@@ -21,9 +21,24 @@ docker build -f ./sbk-file ./../ --tag file-docker
 
 ```
 
+Example to build specific version of SBK
+```
+docker build -f ./dockers/sbk ./ --tag kmgowda/sbk:5.2
+```
+
 Example to run:
 
 ```
 docker run file-docker  -writers 1 -size 100 -seconds 120 -time ns
 
+```
+
+Example to pull specific version of SBK 
+```
+docker pull kmgowda/sbk:5.2
+```
+
+Example to push to repo ; make sure that you login to docker hub before pushing the image
+```
+docker push kmgowda/sbk:5.2
 ```
