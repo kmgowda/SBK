@@ -82,6 +82,11 @@ final public class PerlConfig extends LatencyConfig {
     public int idleNS;
 
     /**
+     * <code>int sleepMS</code>.
+     */
+    public int sleepMS;
+
+    /**
      * <code>int maxQs</code>.
      */
     public int maxQs;

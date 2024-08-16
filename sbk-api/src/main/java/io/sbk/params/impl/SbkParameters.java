@@ -64,6 +64,9 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     @Getter
     private Action action;
 
+    @Getter
+    private int idleSleepMilliSeconds;
+
 
     public SbkParameters(String name, String desc) {
         super(name, desc);
@@ -103,6 +106,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                 """
                            Readonly Benchmarking,
                            Applicable only if both writers and readers are set; default: false""");
+        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: 0 ms");
     }
 
     public SbkParameters(String name) {
@@ -149,6 +153,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         writersStepSeconds = Integer.parseInt(getOptionValue("wsec", "0"));
         readersStep = Integer.parseInt(getOptionValue("rstep", "1"));
         readersStepSeconds = Integer.parseInt(getOptionValue("rsec", "0"));
+        idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep", "0"));
 
         int workersCnt = writersCount;
         if (workersCnt == 0) {

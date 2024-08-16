@@ -103,4 +103,11 @@ public interface Parameters extends ActionParameter {
      */
     int getReadersStepSeconds();
 
+
+    /**
+     * get duration idle sleep in Milliseconds.
+     *
+     * @return get idle sleep in milliseconds .
+     */
+    int getIdleSleepMilliSeconds();
 }

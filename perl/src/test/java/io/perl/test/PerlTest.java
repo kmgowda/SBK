@@ -13,6 +13,7 @@ package io.perl.test;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
 import io.perl.api.impl.PerlBuilder;
+import io.perl.config.PerlConfig;
 import io.perl.logger.impl.DefaultLogger;
 import io.perl.system.PerlPrinter;
 import org.junit.Assert;
@@ -28,12 +29,13 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Class for PerL validation.
  */
-public class PerlTest  {
+public class PerlTest {
     public final static int PERL_THREADS = 2;
     public final static int PERL_TOTAL_RECORDS = 100;
     public final static int PERL_RECORDS_PER_THREAD = PERL_TOTAL_RECORDS / PERL_THREADS;
     public final static int PERL_RECORD_SIZE = 10;
     public final static int PERL_TIMEOUT_SECONDS = 5;
+    public final static int PERL_SLEEP_MS = 100;
 
     public static class TestLogger extends DefaultLogger {
         public final AtomicLong latencyReporterCnt;
@@ -75,15 +77,14 @@ public class PerlTest  {
         }
     }
 
-    @Test
-    public void testPerlRecords() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        TestLogger logger = new TestLogger();
-        Perl perl = PerlBuilder.build( logger, logger, null, null, null);
+
+    private void runPerlRecords(final TestLogger logger, final Perl perl) throws IOException, ExecutionException,
+            InterruptedException, TimeoutException {
         PerlChannel[] channels = new PerlChannel[PERL_THREADS];
         for (int i = 0; i < PERL_THREADS; i++) {
             channels[i] = perl.getPerlChannel();
         }
-        CompletableFuture<Void>  ret = perl.run(0, PERL_TOTAL_RECORDS);
+        CompletableFuture<Void> ret = perl.run(0, PERL_TOTAL_RECORDS);
 
         int records = PERL_TOTAL_RECORDS;
         int ch = 0;
@@ -99,16 +100,34 @@ public class PerlTest  {
         }
         ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         if (logger.latencyReporterCnt.get() != PERL_TOTAL_RECORDS) {
-            Assert.fail("Latency Reporter Count Failed! Latency Reporter Count : "+ logger.latencyReporterCnt.get() +
-            " , Expected : " + PERL_TOTAL_RECORDS);
+            Assert.fail("Latency Reporter Count Failed! Latency Reporter Count : " + logger.latencyReporterCnt.get() +
+                    " , Expected : " + PERL_TOTAL_RECORDS);
         }
         if (logger.printCnt.get() != PERL_TOTAL_RECORDS) {
-            Assert.fail("Print Count Failed! Latency Reporter Count : "+ logger.latencyReporterCnt.get() +
+            Assert.fail("Print Count Failed! Latency Reporter Count : " + logger.printCnt.get() +
                     " , Expected : " + PERL_TOTAL_RECORDS);
         }
         if (logger.totalPrintCnt.get() != PERL_TOTAL_RECORDS) {
-            Assert.fail("Total Print Count Failed! Latency Reporter Count : " + logger.latencyReporterCnt.get() +
+            Assert.fail("Total Print Count Failed! Latency Reporter Count : " + logger.totalPrintCnt.get() +
                     " , Expected : " + PERL_TOTAL_RECORDS);
         }
     }
+
+    @Test
+    public void testPerlRecordsIdleNS() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+        TestLogger logger = new TestLogger();
+        Perl perl = PerlBuilder.build(logger, logger, null, null, null);
+        runPerlRecords(logger, perl);
+    }
+
+    @Test
+    public void testPerlRecordsSleepMS() throws IOException, ExecutionException,
+            InterruptedException, TimeoutException {
+        TestLogger logger = new TestLogger();
+        PerlConfig config = PerlConfig.build();
+        config.sleepMS = PERL_SLEEP_MS;
+        Perl perl = PerlBuilder.build(logger, logger, null, config, null);
+        runPerlRecords(logger, perl);
+    }
+
 }

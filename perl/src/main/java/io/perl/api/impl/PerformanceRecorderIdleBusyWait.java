@@ -10,6 +10,7 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
+import io.perl.api.PerformanceRecorder;
 import io.perl.api.PeriodicRecorder;
 import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
@@ -23,12 +24,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance Recording.
  */
 @NotThreadSafe
-public final class PerformanceRecorder {
-    final private int windowIntervalMS;
+public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
     final private int idleNS;
-    final private Time time;
-    final private PeriodicRecorder periodicRecorder;
-    final private Channel[] channels;
 
     /**
      * Constructor to initialize values.
@@ -39,12 +36,9 @@ public final class PerformanceRecorder {
      * @param reportingIntervalMS   int
      * @param idleNS                int
      */
-    public PerformanceRecorder(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
-                               int reportingIntervalMS, int idleNS) {
-        this.periodicRecorder = periodicRecorder;
-        this.channels = channels.clone();
-        this.time = time;
-        this.windowIntervalMS = reportingIntervalMS;
+    public PerformanceRecorderIdleBusyWait(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
+                                           int reportingIntervalMS, int idleNS) {
+        super(periodicRecorder, channels, time, reportingIntervalMS);
         this.idleNS = idleNS;
     }
 
@@ -64,7 +58,7 @@ public final class PerformanceRecorder {
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        PerlPrinter.log.info("Performance Recorder Started");
+        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Started");
         periodicRecorder.start(startTime);
         periodicRecorder.startWindow(startTime);
         while (doWork) {
@@ -115,7 +109,7 @@ public final class PerformanceRecorder {
             }
         }
         periodicRecorder.stop(ctime);
-        PerlPrinter.log.info("Performance Recorder Exited");
+        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Exited");
     }
 
 }

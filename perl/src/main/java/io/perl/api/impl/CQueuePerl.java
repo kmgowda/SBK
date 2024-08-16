@@ -10,6 +10,7 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
+import io.perl.api.PerformanceRecorder;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
@@ -51,11 +52,11 @@ final public class CQueuePerl implements Perl {
     /**
      * Constructor CQueuePerl initialize all values.
      *
-     * @param perlConfig                NotNull PerlConfig
-     * @param periodicRecorder          PeriodicRecorder
-     * @param reportingIntervalMS       int
-     * @param time                      Time
-     * @param executor                  ExecutorService
+     * @param perlConfig          NotNull PerlConfig
+     * @param periodicRecorder    PeriodicRecorder
+     * @param reportingIntervalMS int
+     * @param time                Time
+     * @param executor            ExecutorService
      */
     public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicRecorder periodicRecorder,
                       int reportingIntervalMS, Time time, ExecutorService executor) {
@@ -75,8 +76,13 @@ final public class CQueuePerl implements Perl {
         for (int i = 0; i < channels.length; i++) {
             channels[i] = new CQueueChannel(maxQs, new OnError());
         }
-        this.perlReceiver = new PerformanceRecorder(periodicRecorder, channels, time, reportingIntervalMS,
-                Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
+        if (perlConfig.sleepMS > 0) {
+            this.perlReceiver = new PerformanceRecorderIdleSleep(periodicRecorder, channels, time, reportingIntervalMS,
+                    Math.min(perlConfig.sleepMS, reportingIntervalMS));
+        } else {
+            this.perlReceiver = new PerformanceRecorderIdleBusyWait(periodicRecorder, channels, time, reportingIntervalMS,
+                    Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
+        }
     }
 
 
@@ -153,8 +159,7 @@ final public class CQueuePerl implements Perl {
     }
 
     /**
-     *  Stop the CQ Perl.
-     *
+     * Stop the CQ Perl.
      */
     @Override
     public void stop() {
@@ -168,7 +173,7 @@ final public class CQueuePerl implements Perl {
 
     @NotThreadSafe
     static final class CQueueChannel extends ConcurrentLinkedQueueArray<TimeStamp> implements Channel {
-        final private  int maxQs;
+        final private int maxQs;
         final private Throw eThrow;
         private int rIndex;
 
