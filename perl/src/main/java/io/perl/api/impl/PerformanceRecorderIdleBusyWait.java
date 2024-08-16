@@ -24,7 +24,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Class for Performance Recording.
  */
 @NotThreadSafe
-public final class PerformanceRecorderIdleWait extends PerformanceRecorder {
+public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
     final private int idleNS;
 
     /**
@@ -36,8 +36,8 @@ public final class PerformanceRecorderIdleWait extends PerformanceRecorder {
      * @param reportingIntervalMS   int
      * @param idleNS                int
      */
-    public PerformanceRecorderIdleWait(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
-                                       int reportingIntervalMS, int idleNS) {
+    public PerformanceRecorderIdleBusyWait(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
+                                           int reportingIntervalMS, int idleNS) {
         super(periodicRecorder, channels, time, reportingIntervalMS);
         this.idleNS = idleNS;
     }
