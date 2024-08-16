@@ -97,8 +97,8 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                     doWork = false;
                 }
             }
-            periodicRecorder.stop(ctime);
-            PerlPrinter.log.info("PerformanceRecorderIdleSleep Exited");
         }
+        periodicRecorder.stop(ctime);
+        PerlPrinter.log.info("PerformanceRecorderIdleSleep Exited");
     }
 }
