@@ -91,6 +91,7 @@ final public class SbkBenchmark implements Benchmark {
         if (params.getWritersCount() > 0 && params.getAction() == Action.Writing) {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             wConfig.workers = params.getWritersCount();
+            wConfig.sleepMS = params.getIdleSleepMilliSeconds();
             wConfig.csv = false;
             writePerl = PerlBuilder.build(rwLogger, rwLogger, this.time, wConfig, executor);
         } else {
@@ -100,6 +101,7 @@ final public class SbkBenchmark implements Benchmark {
         if (params.getReadersCount() > 0) {
             PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             rConfig.workers = params.getReadersCount();
+            rConfig.sleepMS = params.getIdleSleepMilliSeconds();
             rConfig.csv = false;
             readPerl = PerlBuilder.build(rwLogger, rwLogger, this.time, rConfig, executor);
         } else {

@@ -58,7 +58,7 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        PerlPrinter.log.info("PerformanceRecorderIdleWait Started");
+        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Started");
         periodicRecorder.start(startTime);
         periodicRecorder.startWindow(startTime);
         while (doWork) {
@@ -109,7 +109,7 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
             }
         }
         periodicRecorder.stop(ctime);
-        PerlPrinter.log.info("PerformanceRecorderIdleWait Exited");
+        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Exited");
     }
 
 }
