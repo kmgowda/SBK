@@ -254,7 +254,7 @@ final public class SbkGem {
 
         storageDrivers = storageDevice == null ? packageStore.getClassNames() : null;
 
-        params = new SbkGemParameters(usageLine, storageDrivers, loggerNames, gemConfig, sbmConfig.port);
+        params = new SbkGemParameters(usageLine, storageDrivers, loggerNames, gemConfig, sbmConfig.port, sbmConfig.idleMS);
         logger.addArgs(params);
         if (storageDevice != null) {
             storageDevice.addArgs(params);
@@ -368,13 +368,15 @@ final public class SbkGem {
         ramArgsList.add(String.valueOf(logger.getMaxReaderIDs() > 0));
         ramArgsList.add("-max");
         ramArgsList.add(Integer.toString(params.getConnections().length));
+        ramArgsList.add("-millisecsleep");
+        ramArgsList.add(Integer.toString(params.getSbmIdleSleepMilliSeconds()));
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
         Printer.log.info("Arguments to SBM: " + Arrays.toString(ramArgs));
         Printer.log.info("Logger for SBM: " + ramLogger.getClass().getSimpleName());
 
         ramParams = new SbmParameters(appName, params.getSbmPort(), params.getConnections().length,
-                new String[]{ramLogger.getClass().getSimpleName()});
+                params.getSbmIdleSleepMilliSeconds(), new String[]{ramLogger.getClass().getSimpleName()});
         ramLogger.addArgs(ramParams);
         try {
             ramParams.parseArgs(ramArgs);

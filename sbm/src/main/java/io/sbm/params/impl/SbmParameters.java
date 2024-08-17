@@ -42,6 +42,9 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
     @Getter
     private int port;
 
+    @Getter
+    private int idleSleepMilliSeconds;
+
     final private String[] loggerNames;
     /**
      * Constructor SbmParameters initializing all values.
@@ -49,9 +52,10 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
      * @param name           String
      * @param port           int
      * @param maxConnections int
+     * @param idleMS         int
      * @param loggerNames
      */
-    public SbmParameters(String name, int port, int maxConnections, String[] loggerNames) {
+    public SbmParameters(String name, int port, int maxConnections, int idleMS, String[] loggerNames) {
         super(name, SbmConfig.DESC);
         this.maxConnections = maxConnections;
         this.port = port;
@@ -71,6 +75,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
                             default: r""");
         addOption("port", true, "SBM port number; default: " + this.port);
         addOption("max", true, "Maximum number of connections; default: " + maxConnections);
+        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + idleMS);
     }
 
 
@@ -95,6 +100,6 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         };
         maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
         port = Integer.parseInt(getOptionValue("port", Integer.toString(port)));
+        idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep", Integer.toString(idleSleepMilliSeconds)));
     }
-
 }

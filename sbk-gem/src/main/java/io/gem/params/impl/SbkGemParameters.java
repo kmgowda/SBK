@@ -56,6 +56,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     @Getter
     private int sbmPort;
 
+    @Getter
+    private int sbmIdleSleepMilliSeconds;
+
     /**
      * This Constructor is responsible for initializing all values.
      *
@@ -64,12 +67,15 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
      * @param loggers
      * @param config  NotNull GemConfig
      * @param sbmPort int
+     * @param sbmIdleSleepMilliSeconds int
      */
-    public SbkGemParameters(String name, String[] drivers, String[] loggers, @NotNull GemConfig config, int sbmPort) {
+    public SbkGemParameters(String name, String[] drivers, String[] loggers, @NotNull GemConfig config, int sbmPort,
+                            int sbmIdleSleepMilliSeconds) {
         super(name, GemConfig.DESC, drivers, loggers);
         this.config = config;
         this.timeoutMS = config.timeoutSeconds * Time.MS_PER_SEC;
         this.sbmPort = sbmPort;
+        this.sbmIdleSleepMilliSeconds = sbmIdleSleepMilliSeconds;
         try {
             this.localHost = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException ex) {
@@ -88,9 +94,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("copy", true, "Copy the SBK package to remote hosts; default: " + config.copy);
         addOption("delete", true, "Delete SBK package after benchmark; default: " + config.delete);
         addOption("localhost", true, "this local SBM host name, default: " + localHost);
-        addOption("sbmPort", true, "SBM port number; default: " + this.sbmPort);
+        addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
+        addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds);
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-copy", "-delete", "-localhost", "-sbmPort"};
+                "-copy", "-delete", "-localhost", "-sbmPort", "-sbmsleepms"};
         this.parsedArgs = null;
     }
 
@@ -108,14 +115,15 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         config.sbkdir = getOptionValue("sbkdir", config.sbkdir);
         config.sbkcommand = getOptionValue("sbkcommand", config.sbkcommand);
         localHost = getOptionValue("localhost", localHost);
-        sbmPort = Integer.parseInt(getOptionValue("ramport", Integer.toString(sbmPort)));
+        sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
+        sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmPort)));
         config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
         config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.sbkcommand, "-gempass",
                 config.gempass, "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
                 "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
-                "-delete", Boolean.toString(config.delete), "-localhost", localHost, "-ramport",
+                "-delete", Boolean.toString(config.delete), "-localhost", localHost, "-sbmport",
                 Integer.toString(sbmPort)};
 
         connections = new ConnectionConfig[nodes.length];
