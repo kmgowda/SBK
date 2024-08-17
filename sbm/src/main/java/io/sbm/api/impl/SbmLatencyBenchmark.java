@@ -72,7 +72,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         MessageLatenciesRecord record;
         boolean doWork = true;
         boolean notFound;
-        Printer.log.info("LatenciesRecord Benchmark Started");
+        Printer.log.info("SbmLatencyBenchmark Started");
         long currentTime = time.getCurrentTime();
         window.start(currentTime);
         window.startWindow(currentTime);
@@ -131,10 +131,10 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                 qFuture = null;
             }
             if (ex != null) {
-                Printer.log.warn("LatenciesRecord Benchmark with Exception:" + ex);
+                Printer.log.warn("SbmLatencyBenchmark with Exception:" + ex);
                 retFuture.completeExceptionally(ex);
             } else {
-                Printer.log.info("LatenciesRecord Benchmark Shutdown");
+                Printer.log.info("SbmLatencyBenchmark Shutdown");
                 retFuture.complete(null);
             }
         }
