@@ -38,4 +38,10 @@ public sealed interface RamParameters extends ActionParameter permits RamParamet
      */
     int getMaxConnections();
 
+    /**
+     * get duration idle sleep in Milliseconds.
+     *
+     * @return get idle sleep in milliseconds .
+     */
+    int getIdleSleepMilliSeconds();
 }

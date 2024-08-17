@@ -53,6 +53,15 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
      */
     int getSbmPort();
 
+
+    /**
+     * to get SBM idle milliseconds sleep.
+     *
+     * @return SBM idle milliseconds sleep.
+     */
+    int getSbmIdleSleepMilliSeconds();
+
+
     /**
      * checks if parameters are copy.
      *

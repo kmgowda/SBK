@@ -156,7 +156,7 @@ final public class Sbm {
                 Printer.log.error("Instantiation of Logger class '" + argsLoggerName + "' from the package '" +
                         ramLoggerPackageName + "' failed!, " + "error: " + ex);
                 final RamParameterOptions helpParams = new SbmParameters(appName, sbmConfig.port,
-                        sbmConfig.maxConnections, loggerNames);
+                        sbmConfig.maxConnections, sbmConfig.idleMS, loggerNames);
                 helpParams.printHelp();
                 throw ex;
             }
@@ -167,7 +167,7 @@ final public class Sbm {
         // disable CSV
         sbmConfig.csv = false;
 
-        params = new SbmParameters(usageLine, sbmConfig.port, sbmConfig.maxConnections, loggerNames);
+        params = new SbmParameters(usageLine, sbmConfig.port, sbmConfig.maxConnections, sbmConfig.idleMS, loggerNames);
         logger.addArgs(params);
         try {
             params.parseArgs(args);
