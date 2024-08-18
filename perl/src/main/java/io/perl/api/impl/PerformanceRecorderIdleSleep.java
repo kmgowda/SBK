@@ -50,7 +50,8 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        PerlPrinter.log.info("PerformanceRecorderIdleSleep Started");
+        PerlPrinter.log.info("PerformanceRecorderIdleSleep Started : {} milliseconds idle sleep",
+                this.sleepMS);
         periodicRecorder.start(startTime);
         periodicRecorder.startWindow(startTime);
         while (doWork) {

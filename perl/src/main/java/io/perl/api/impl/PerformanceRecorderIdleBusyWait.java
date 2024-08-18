@@ -58,7 +58,7 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
-        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Started");
+        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Started : {} nanoseconds idle busy wait", this.idleNS);
         periodicRecorder.start(startTime);
         periodicRecorder.startWindow(startTime);
         while (doWork) {

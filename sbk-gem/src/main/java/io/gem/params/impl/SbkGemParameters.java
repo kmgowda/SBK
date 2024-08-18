@@ -62,11 +62,11 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     /**
      * This Constructor is responsible for initializing all values.
      *
-     * @param name    String
-     * @param drivers String[]
+     * @param name                     String
+     * @param drivers                  String[]
      * @param loggers
-     * @param config  NotNull GemConfig
-     * @param sbmPort int
+     * @param config                   NotNull GemConfig
+     * @param sbmPort                  int
      * @param sbmIdleSleepMilliSeconds int
      */
     public SbkGemParameters(String name, String[] drivers, String[] loggers, @NotNull GemConfig config, int sbmPort,
@@ -95,7 +95,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("delete", true, "Delete SBK package after benchmark; default: " + config.delete);
         addOption("localhost", true, "this local SBM host name, default: " + localHost);
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
-        addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds);
+        addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
+                " ms");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
                 "-copy", "-delete", "-localhost", "-sbmPort", "-sbmsleepms"};
         this.parsedArgs = null;

@@ -75,7 +75,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
                             default: r""");
         addOption("port", true, "SBM port number; default: " + this.port);
         addOption("max", true, "Maximum number of connections; default: " + maxConnections);
-        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + idleMS);
+        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + idleMS+" ms");
     }
 
 

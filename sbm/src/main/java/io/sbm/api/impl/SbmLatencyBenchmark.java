@@ -72,7 +72,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         MessageLatenciesRecord record;
         boolean doWork = true;
         boolean notFound;
-        Printer.log.info("SbmLatencyBenchmark Started");
+        Printer.log.info("SbmLatencyBenchmark Started : {} milliseconds idle sleep", this.idleMS);
         long currentTime = time.getCurrentTime();
         window.start(currentTime);
         window.startWindow(currentTime);
