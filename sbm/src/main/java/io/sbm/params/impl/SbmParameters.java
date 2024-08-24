@@ -59,6 +59,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         super(name, SbmConfig.DESC);
         this.maxConnections = maxConnections;
         this.port = port;
+        this.idleSleepMilliSeconds = idleMS;
         if (loggerNames != null && loggerNames.length > 0) {
             this.loggerNames = loggerNames.clone();
         } else {
@@ -74,8 +75,8 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
                             rw: read and write, rwo: read but only write],
                             default: r""");
         addOption("port", true, "SBM port number; default: " + this.port);
-        addOption("max", true, "Maximum number of connections; default: " + maxConnections);
-        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + idleMS+" ms");
+        addOption("max", true, "Maximum number of connections; default: " + this.maxConnections);
+        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + this.idleSleepMilliSeconds + " ms");
     }
 
 
