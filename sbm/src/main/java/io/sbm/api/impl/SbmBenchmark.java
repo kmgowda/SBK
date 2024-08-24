@@ -80,7 +80,7 @@ final public class SbmBenchmark implements Benchmark {
         }
 
         latencyRecorder = createLatencyRecorder();
-        benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, sbmConfig.idleMS, time, latencyRecorder,
+        benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, params.getIdleSleepMilliSeconds(), time, latencyRecorder,
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
         service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
         server = ServerBuilder.forPort(params.getPort()).addService(service).directExecutor().build();
