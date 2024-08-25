@@ -28,33 +28,51 @@ SBM is a submodule/project of the SBK framework. If you [build SBK](./../README.
 The standard help output with SBM parameters as follows
 
 ```
-kmg@kmgs-MBP SBK % ./sbm/build/install/sbm/bin/sbm -help 
-2021-07-08 16:58:10 INFO 
-    _____   ____    _  __           _____               __  __
-   / ____| |  _ \  | |/ /          |  __ \      /\     |  \/  |
-  | (___   | |_) | | ' /   ______  | |__) |    /  \    | \  / |
-   \___ \  |  _ <  |  <   |______| |  _  /    / /\ \   | |\/| |
-   ____) | | |_) | | . \           | | \ \   / ____ \  | |  | |
-  |_____/  |____/  |_|\_\          |_|  \_\ /_/    \_\ |_|  |_|
+kmg@kmgs-MacBook-Pro SBK % ./sbm/build/install/sbm/bin/sbm -help
+2024-08-24 16:50:31 INFO Reflections took 27 ms to scan 1 urls, producing 10 keys and 11 values
+2024-08-24 16:50:31 INFO 
+   _____   ____    __  __
+  / ____| |  _ \  |  \/  |
+ | (___   | |_) | | \  / |
+  \___ \  |  _ <  | |\/| |
+  ____) | | |_) | | |  | |
+ |_____/  |____/  |_|  |_|
 
-2021-07-08 16:58:10 INFO Storage Benchmark Kit - Results Aggregation Monitor
-2021-07-08 16:58:10 INFO SBM Version: 0.892
-2021-07-08 16:58:10 INFO Arguments List: [-help]
-2021-07-08 16:58:10 INFO Java Runtime Version: 11.0.8+11
+2024-08-24 16:50:31 INFO Storage Benchmark Monitor
+2024-08-24 16:50:31 INFO SBM Version: 5.3
+2024-08-24 16:50:31 INFO SBM Website: https://github.com/kmgowda/SBK
+2024-08-24 16:50:31 INFO Arguments List: [-help]
+2024-08-24 16:50:31 INFO Java Runtime Version: 17.0.2+8
+2024-08-24 16:50:31 INFO SBP Version Major: 3, Minor: 0
+2024-08-24 16:50:31 INFO Logger Classes in package 'io.sbm.logger': 1 [SbmPrometheusLogger]
 
-usage: sbm
-Storage Benchmark Kit - Results Aggregation Monitor
+usage: sbm -out SbmPrometheusLogger
+Storage Benchmark Monitor
 
- -action <arg>    action [r: read, w: write, wr: write and read], default:
-                  r
- -class <arg>     storage class name; run 'sbk -help' to see the list
- -context <arg>   Prometheus Metric context; default: 9719/metrics; 'no'
-                  disables the metrics
- -help            Help message
- -max <arg>       Maximum number of connections; default: 1000
- -ramport <arg>   RAM port number; default: 9717
- -time <arg>      Latency Time Unit [ms:MILLISECONDS, mcs:MICROSECONDS,
-                  ns:NANOSECONDS]; default: ms
+ -action <arg>          action [r: read, w: write,
+                        wr: write and read, wro: write but only read,
+                        rw: read and write, rwo: read but only write],
+                        default: r
+ -class <arg>           storage class name; run 'sbk -help' to see the
+                        list
+ -context <arg>         Prometheus Metric context;
+                        'no' disables this option; default: 9719/metrics
+ -csvfile <arg>         CSV file to record results;
+                        'no' disables this option, default: no
+ -help                  Help message
+ -max <arg>             Maximum number of connections; default: 1000
+ -maxlatency <arg>      Maximum latency;
+                        use '-time' for time unit; default:180000 ms
+ -millisecsleep <arg>   Idle sleep in milliseconds; default: 10 ms
+ -minlatency <arg>      Minimum latency;
+                        use '-time' for time unit; default:0 ms
+ -out <arg>             logger driver class,
+                        Available Drivers [SbmPrometheusLogger]
+ -port <arg>            SBM port number; default: 9717
+ -rq <arg>              Benchmark Reade Requests; default: false
+ -time <arg>            Latency Time Unit [ms:MILLISECONDS,
+                        mcs:MICROSECONDS, ns:NANOSECONDS]; default: ms
+ -wq <arg>              Benchmark Write Requests; default: false
 
 Please report issues at https://github.com/kmgowda/SBK
 

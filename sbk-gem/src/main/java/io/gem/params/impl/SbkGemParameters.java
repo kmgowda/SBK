@@ -117,7 +117,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         config.sbkcommand = getOptionValue("sbkcommand", config.sbkcommand);
         localHost = getOptionValue("localhost", localHost);
         sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
-        sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmPort)));
+        sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));
         config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
         config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
 
