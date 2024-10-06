@@ -53,7 +53,6 @@ public class ElasticsearchWriter implements Writer<String> {
 
     @Override
     public void close() throws IOException {
-        shutDownElasticsearch();
     }
 
 
@@ -72,21 +71,4 @@ public class ElasticsearchWriter implements Writer<String> {
             throw new RuntimeException(ex);
         }
     }
-
-    private void shutDownElasticsearch() {
-        try {
-            String[] command = {"sh", "-c", "sudo systemctl stop elasticsearch"};
-            Process process = Runtime.getRuntime().exec(command);
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                System.out.println("Elasticsearch shut down successfully.");
-            } else {
-                System.out.println("Failed to shut down Elasticsearch.");
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

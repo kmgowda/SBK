@@ -51,23 +51,5 @@ public class ElasticsearchReader implements Reader<String> {
 
     @Override
     public void close() throws IOException {
-        shutDownElasticsearch();
     }
-
-    private void shutDownElasticsearch() {
-        try {
-            String[] command = {"sh", "-c", "sudo systemctl stop elasticsearch"};
-            Process process = Runtime.getRuntime().exec(command);
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                Printer.log.info("Elasticsearch shut down successfully.");
-            } else {
-                Printer.log.info("Failed to shut down Elasticsearch.");
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

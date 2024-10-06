@@ -143,26 +143,15 @@ public class Elasticsearch implements Storage<String> {
         }
     }
 
-    private void shutDownElasticsearch() {
-        //shut down for linux system (optional)
-        try {
-            String[] command = {"sh", "-c", "sudo systemctl stop elasticsearch"};
-            Process process = Runtime.getRuntime().exec(command);
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                Printer.log.info("Elasticsearch shut down successfully.");
-            } else {
-                Printer.log.info("Failed to shut down Elasticsearch.");
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void closeStorage(final ParameterOptions params) throws IOException {
-        shutDownElasticsearch();
+        try {
+            elasticsearchClient._transport().close();
+        } catch (ElasticsearchException e) {
+            e.printStackTrace();
+            Printer.log.error("Failed to close the connection");
+        }
+
     }
 
     @Override
