@@ -50,6 +50,7 @@ dependencies {
     api project(':drivers:linkedbq')
     api project(':drivers:atomicq')
     api project(':drivers:syncq')
+    api project(':drivers:elasticsearch')
     /* api project(':drivers:sbktemplate') */
     /* above line is a signature */
 }

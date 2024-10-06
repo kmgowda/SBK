@@ -76,4 +76,6 @@
     <allow pkg="net.rubyeye" />
     <allow pkg="software.amazon"/>
     <allow pkg="org.openjdk.jmh"/>
+    <allow pkg="co.elastic.clients" />
+    <allow pkg="org.elasticsearch.client" />
 </import-control>

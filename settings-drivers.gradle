@@ -60,5 +60,6 @@ include 'drivers:conqueue'
 include 'drivers:linkedbq'
 include 'drivers:atomicq'
 include 'drivers:syncq'
+include 'drivers:elasticsearch'
 /* include 'drivers:sbktemplate' */
 /* above line is a signature */
