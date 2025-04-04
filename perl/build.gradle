@@ -38,7 +38,7 @@ dependencies {
     api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
     api group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
-    api group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsConfigCsvVersion
+    api group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsCsvVersion
     api group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
     api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     api group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
@@ -47,6 +47,7 @@ dependencies {
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
     api group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
     api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
+    //api group: 'io.micrometer', name: 'micrometer-registry-prometheus-simpleclient', version: micrometerVersion
     api group: 'io.prometheus.jmx', name: jmxAgent, version: jmxPrometheusVersion
     api group: 'com.google.guava', name: 'guava', version: guavaVersion
     implementation group: 'org.eclipse.collections', name: 'eclipse-collections', version: eclipseCollectionVersion

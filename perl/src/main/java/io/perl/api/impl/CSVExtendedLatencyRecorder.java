@@ -142,7 +142,7 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
                 try {
                     PerlPrinter.log.info("Creating CSV file: " + csvFile + " ...");
                     csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(csvFile)),
-                            CSVFormat.DEFAULT.builder().setHeader(" Latency", "Records").build());
+                            CSVFormat.DEFAULT.builder().setHeader(" Latency", "Records").get());
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -182,9 +182,9 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             PerlPrinter.log.info("Reading CSV file: " + csvFile + " ...");
             reportLatencies.reportLatencyRecord(recorder);
             try {
-                CSVParser csvParser = new CSVParser(Files.newBufferedReader(Paths.get(csvFile)),
+                CSVParser csvParser =  CSVParser.parse(Files.newBufferedReader(Paths.get(csvFile)),
                         CSVFormat.DEFAULT.builder().
-                                setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build());
+                                setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).get());
                 for (CSVRecord csvEntry : csvParser) {
                     reportLatencies.reportLatency(Long.parseLong(csvEntry.get(0)), Long.parseLong(csvEntry.get(1)));
                 }
