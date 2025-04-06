@@ -17,7 +17,7 @@ import io.time.TimeUnit;
 /**
  * Interface PerformanceLogger.
  */
-public interface PerformanceLogger extends Print {
+public interface PerformanceLogger extends Print, ReportLatency {
 
     /**
      * Print the Periodic performance results.
@@ -40,6 +40,14 @@ public interface PerformanceLogger extends Print {
     void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                     long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                     long slc1, long slc2, long[] percentileValues);
+
+    /**
+     * Default method to record latency of every/multiple event(s).
+     */
+    @Override
+    default void recordLatency(long startTime, int events, int bytes, long latency) {
+
+    }
 
     /**
      * Default implementation of Reporting interval.

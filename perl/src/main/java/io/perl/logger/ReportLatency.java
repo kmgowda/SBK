@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perl.api;
+package io.perl.logger;
 
 /**
  * Interface ReportLatency.

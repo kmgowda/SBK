@@ -74,7 +74,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Superinterfaces:</dt>
-<dd><code><a href="CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code>io.perl.logger.PerformanceLogger</code>, <code>io.perl.logger.Print</code>, <code><a href="ReadRequestsLogger.html" title="interface in io.sbk.logger">ReadRequestsLogger</a></code>, <code>io.perl.api.ReportLatency</code>, <code><a href="RWPrint.html" title="interface in io.sbk.logger">RWPrint</a></code>, <code><a href="WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a></code></dd>
+<dd><code><a href="CountReaders.html" title="interface in io.sbk.logger">CountReaders</a></code>, <code><a href="CountRW.html" title="interface in io.sbk.logger">CountRW</a></code>, <code><a href="CountWriters.html" title="interface in io.sbk.logger">CountWriters</a></code>, <code><a href="Logger.html" title="interface in io.sbk.logger">Logger</a></code>, <code>io.perl.logger.PerformanceLogger</code>, <code>io.perl.logger.Print</code>, <code><a href="ReadRequestsLogger.html" title="interface in io.sbk.logger">ReadRequestsLogger</a></code>, <code>io.perl.logger.ReportLatency</code>, <code><a href="RWPrint.html" title="interface in io.sbk.logger">RWPrint</a></code>, <code><a href="WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a></code></dd>
 </dl>
 <dl class="notes">
 <dt>All Known Implementing Classes:</dt>
@@ -82,7 +82,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public non-sealed interface </span><span class="element-name type-name-label">RWLogger</span><span class="extends-implements">
-extends <a href="Logger.html" title="interface in io.sbk.logger">Logger</a>, <a href="CountRW.html" title="interface in io.sbk.logger">CountRW</a>, io.perl.api.ReportLatency, <a href="WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>, <a href="ReadRequestsLogger.html" title="interface in io.sbk.logger">ReadRequestsLogger</a>, <a href="RWPrint.html" title="interface in io.sbk.logger">RWPrint</a></span></div>
+extends <a href="Logger.html" title="interface in io.sbk.logger">Logger</a>, <a href="CountRW.html" title="interface in io.sbk.logger">CountRW</a>, io.perl.logger.ReportLatency, <a href="WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>, <a href="ReadRequestsLogger.html" title="interface in io.sbk.logger">ReadRequestsLogger</a>, <a href="RWPrint.html" title="interface in io.sbk.logger">RWPrint</a></span></div>
 <div class="block">Interface for recoding/printing results.</div>
 </section>
 <section class="summary">
@@ -218,7 +218,7 @@ extends <a href="Logger.html" title="interface in io.sbk.logger">Logger</a>, <a 
 <div class="block">Default method to record latency of every/multiple event(s).</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code>recordLatency</code>&nbsp;in interface&nbsp;<code>io.perl.api.ReportLatency</code></dd>
+<dd><code>recordLatency</code>&nbsp;in interface&nbsp;<code>io.perl.logger.ReportLatency</code></dd>
 </dl>
 </section>
 </li>

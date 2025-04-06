@@ -10,13 +10,12 @@
 
 package io.perl.logger.impl;
 
-import io.perl.api.ReportLatency;
 import io.time.TimeUnit;
 
 /**
  * Class DefaultLogger.
  */
-public class DefaultLogger extends ResultsLogger implements ReportLatency {
+public class DefaultLogger extends ResultsLogger {
 
     /**
      * Constructor DefaultLogger pass all values to its super class.
@@ -39,8 +38,4 @@ public class DefaultLogger extends ResultsLogger implements ReportLatency {
         super();
     }
 
-    @Override
-    public void recordLatency(long startTime, int events, int bytes, long latency) {
-
-    }
 }

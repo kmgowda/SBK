@@ -12,7 +12,7 @@ package io.perl.api.impl;
 
 import io.perl.api.LatencyRecordWindow;
 import io.perl.logger.Print;
-import io.perl.api.ReportLatency;
+import io.perl.logger.ReportLatency;
 
 /**
  * Class TotalWindowLatencyRecorder.

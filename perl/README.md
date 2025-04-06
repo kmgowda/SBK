@@ -110,7 +110,7 @@ Note that 'mavenCentral()' repository is required to fetch the SBK APIs package 
 5. in case of any exception, you can send the [exception](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/exception/ExceptionHandler.html)
 
 6. The Perl will periodically sends/prints the performance results to logger/printer which is supplied with 
-   [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/impl/PerlBuilder.html#build(io.perl.logger.PerformanceLogger,io.perl.api.ReportLatency,io.time.Time,io.perl.config.PerlConfig,java.util.concurrent.ExecutorService)) in step 1.
+   [PerlBuilder.build API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/impl/PerlBuilder.html#build(io.perl.logger.PerformanceLogger,io.perl.logger.ReportLatency,io.time.Time,io.perl.config.PerlConfig,java.util.concurrent.ExecutorService)) in step 1.
 
 7. stop the benchmarking using [Stop API](https://kmgowda.github.io/SBK/perl/javadoc/io/perl/api/Perl.html)
    1. see the example: https://github.com/kmgowda/SBK/blob/master/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java#L364
