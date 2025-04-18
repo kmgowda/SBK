@@ -47,7 +47,6 @@ dependencies {
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
     api group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
     api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
-    //api group: 'io.micrometer', name: 'micrometer-registry-prometheus-simpleclient', version: micrometerVersion
     api group: 'io.prometheus.jmx', name: jmxAgent, version: jmxPrometheusVersion
     api group: 'com.google.guava', name: 'guava', version: guavaVersion
     implementation group: 'org.eclipse.collections', name: 'eclipse-collections', version: eclipseCollectionVersion
