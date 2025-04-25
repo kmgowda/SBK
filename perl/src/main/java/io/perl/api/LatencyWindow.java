@@ -101,7 +101,7 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
         logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, minLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
-                slc[0], slc[1], this.percentiles.latencies.clone());
+                slc[0], slc[1], this.percentiles.latencies);
     }
 
     private void getSLC(@NotNull LatencyPercentiles percentiles, @NotNull long[] slc) {
