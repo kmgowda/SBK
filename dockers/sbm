@@ -9,7 +9,7 @@
 ##
 
 # Building Container
-FROM gradle:7.5.0-jdk17 as SbkGradleBuilder
+FROM gradle:8.13.0-jdk21 as SbkGradleBuilder
 MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
 USER root
 
@@ -34,7 +34,7 @@ ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  distTar --no-daemon --info --stacktrace
 
 # Runtime Container
-FROM openjdk:17-jdk-slim as SbkApp
+FROM openjdk:21-jdk-slim as SbkApp
 ENV APP_NAME=sbk
 ENV SBM_APP_NAME=sbm
 ENV SBM_APP_HOME=/opt/${APP_NAME}/${SBM_APP_NAME}
