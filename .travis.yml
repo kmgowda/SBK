@@ -13,7 +13,7 @@ git:
 language: java
 install: true
 jdk:
-  - openjdk21
+  - oraclejdk21
 
 env:
   global:
