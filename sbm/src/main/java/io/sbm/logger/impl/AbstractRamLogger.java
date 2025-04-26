@@ -134,6 +134,10 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
 
     }
 
+    @Override
+    public final void recordLatency(long startTime, int events, int bytes, long latency) {
+
+    }
 
     @Override
     public void print(int writers, int maxWriters, int readers, int maxReaders,

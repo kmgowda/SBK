@@ -17,7 +17,6 @@ import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
-import io.perl.api.ReportLatency;
 import io.time.MicroSeconds;
 import io.time.MilliSeconds;
 import io.time.NanoSeconds;
@@ -95,14 +94,12 @@ public final class PerlBuilder {
      * @param time              Time interface
      * @param config            Latency configurations
      * @param logger            Performance Logger
-     * @param reportLatency     interface to report latencies
      * @return  Periodic Recorder
      */
     @Contract("_, _, _, _ -> new")
     private static @NotNull PeriodicRecorder buildPeriodicLogger(Time time,
                                                                  LatencyConfig config,
-                                                                 @NotNull PerformanceLogger logger,
-                                                                 ReportLatency reportLatency) {
+                                                                 @NotNull PerformanceLogger logger) {
         final long minLatency = logger.getMinLatency();
         final long maxLatency = logger.getMaxLatency();
         final double[] percentiles = logger.getPercentiles();
@@ -142,14 +139,14 @@ public final class PerlBuilder {
             PerlPrinter.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal, reportLatency, time);
+        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
+                logger::recordLatency, time);
     }
 
     /**
      * Build CQ (Concurrent Queue) based Perl.
      *
      * @param logger            Performance Logger
-     * @param latencyReporter   Report latencies
      * @param time              time interface
      * @param config            Perl configuration
      * @param executor          Executor Service
@@ -159,10 +156,10 @@ public final class PerlBuilder {
      * @throws IOException   if the CQ perl creation failed.
      */
     @Contract("null, _, _, _, _ -> fail; !null, null, _, _, _ -> fail")
-    public static @NotNull Perl build(PerformanceLogger logger, ReportLatency latencyReporter, Time time,
+    public static @NotNull Perl build(PerformanceLogger logger, Time time,
                                       PerlConfig config, ExecutorService executor)
                                 throws IllegalArgumentException, IOException {
-        if (logger == null || latencyReporter == null) {
+        if (logger == null ) {
             throw new IllegalArgumentException("Performance logger and ReportLatency are missing");
         }
         if (config == null) {
@@ -177,7 +174,7 @@ public final class PerlBuilder {
         if (executor == null) {
             executor = new ForkJoinPool();
         }
-        return new CQueuePerl(config, buildPeriodicLogger(time, config, logger, latencyReporter),
+        return new CQueuePerl(config, buildPeriodicLogger(time, config, logger),
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, time, executor);
     }
 

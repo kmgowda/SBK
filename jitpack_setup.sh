@@ -14,7 +14,7 @@ echo "Default java path:`which java`"
 echo "Default java version"
 java --version
 wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-source install-jdk.sh -F 17 -L GPL
+source install-jdk.sh -F 21 -L GPL
 echo "Updated JAVA_HOME :$JAVA_HOME"
 echo "Updated java path :`which java`"
 echo "Updated java version"

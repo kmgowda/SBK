@@ -107,7 +107,6 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
         }
     }
 
-
     /**
      * Record the latency.
      *

@@ -116,7 +116,7 @@ public class PerlTest {
     @Test
     public void testPerlRecordsIdleNS() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         TestLogger logger = new TestLogger();
-        Perl perl = PerlBuilder.build(logger, logger, null, null, null);
+        Perl perl = PerlBuilder.build(logger, null, null, null);
         runPerlRecords(logger, perl);
     }
 
@@ -126,7 +126,7 @@ public class PerlTest {
         TestLogger logger = new TestLogger();
         PerlConfig config = PerlConfig.build();
         config.sleepMS = PERL_SLEEP_MS;
-        Perl perl = PerlBuilder.build(logger, logger, null, config, null);
+        Perl perl = PerlBuilder.build(logger, null, config, null);
         runPerlRecords(logger, perl);
     }
 

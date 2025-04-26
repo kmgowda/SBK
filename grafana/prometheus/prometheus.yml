@@ -29,26 +29,31 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   - job_name: 'node'
+    fallback_scrape_protocol: PrometheusText0.0.4
     file_sd_configs:
       - files:
           - 'node-exporters.json'
 
   - job_name: 'sbk'
+    fallback_scrape_protocol: PrometheusText0.0.4
     file_sd_configs:
       - files:
         - 'targets.json'
 
   - job_name: 'sbm'
+    fallback_scrape_protocol: PrometheusText0.0.4
     file_sd_configs:
       - files:
           - 'sbm-targets.json'
 
   - job_name: 'sbk-jmx'
+    fallback_scrape_protocol: PrometheusText0.0.4
     file_sd_configs:
       - files:
           - 'jmx-targets.json'
 
   - job_name: 'sbm-jmx'
+    fallback_scrape_protocol: PrometheusText0.0.4
     file_sd_configs:
       - files:
           - 'sbm-jmx-targets.json'

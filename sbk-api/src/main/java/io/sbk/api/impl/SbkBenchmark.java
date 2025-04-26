@@ -93,7 +93,7 @@ final public class SbkBenchmark implements Benchmark {
             wConfig.workers = params.getWritersCount();
             wConfig.sleepMS = params.getIdleSleepMilliSeconds();
             wConfig.csv = false;
-            writePerl = PerlBuilder.build(rwLogger, rwLogger, this.time, wConfig, executor);
+            writePerl = PerlBuilder.build(rwLogger, this.time, wConfig, executor);
         } else {
             writePerl = null;
         }
@@ -103,7 +103,7 @@ final public class SbkBenchmark implements Benchmark {
             rConfig.workers = params.getReadersCount();
             rConfig.sleepMS = params.getIdleSleepMilliSeconds();
             rConfig.csv = false;
-            readPerl = PerlBuilder.build(rwLogger, rwLogger, this.time, rConfig, executor);
+            readPerl = PerlBuilder.build(rwLogger, this.time, rConfig, executor);
         } else {
             readPerl = null;
         }

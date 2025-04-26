@@ -22,7 +22,7 @@ spec:
         - env:
             - name: GF_SECURITY_ADMIN_PASSWORD
               value: admin
-          image: grafana/grafana:7.3.7
+          image: grafana/grafana:11.6.0
           name: grafana
           ports:
             - containerPort: 3000

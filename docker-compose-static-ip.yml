@@ -11,7 +11,7 @@
 version: '3'
 services:
   prometheus:
-    image: prom/prometheus:v2.30.0
+    image: prom/prometheus:v3.3.0
     volumes:
       - ./grafana/prometheus:/etc/prometheus
     command:

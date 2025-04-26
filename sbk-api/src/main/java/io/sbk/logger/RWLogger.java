@@ -9,20 +9,10 @@
  */
 package io.sbk.logger;
 
-import io.perl.api.ReportLatency;
-
 /**
  * Interface for recoding/printing results.
  */
-public non-sealed interface RWLogger extends Logger, CountRW, ReportLatency, WriteRequestsLogger, ReadRequestsLogger, RWPrint {
-
-    /**
-     * Default method to record latency of every/multiple event(s).
-     */
-    @Override
-    default void recordLatency(long startTime, int events, int bytes, long latency) {
-
-    }
+public non-sealed interface RWLogger extends Logger, CountRW, WriteRequestsLogger, ReadRequestsLogger, RWPrint {
 
     /**
      * Default method to record every/multiple write event(s).

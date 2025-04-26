@@ -45,6 +45,4 @@ public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnecti
                double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                long higherDiscard, long slc1, long slc2, long[] percentileValues);
-
-
 }

@@ -31,7 +31,7 @@ public class CSVWriter implements Writer<String> {
         java.io.File file = new java.io.File(config.fileName);
         file.delete();
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(config.fileName)),
-                CSVFormat.DEFAULT.builder().setHeader("key", "text").build());
+                CSVFormat.DEFAULT.builder().setHeader("key", "text").get());
         key = 0;
     }
 

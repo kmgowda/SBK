@@ -9,6 +9,7 @@
  */
 package io.perl.api;
 
+import io.perl.logger.ReportLatency;
 import io.time.Time;
 
 import javax.annotation.concurrent.NotThreadSafe;
