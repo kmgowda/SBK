@@ -73,7 +73,7 @@ for performance benchmarking of any software system.
     repositories {
         mavenCentral()
         maven {
-            url 'https://jitpack.io'
+            url  'https://jitpack.io'
         }
     }
 

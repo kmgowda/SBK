@@ -18,7 +18,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url = "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
@@ -51,7 +51,7 @@ allprojects {
         mavenLocal()
         mavenCentral()
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url = "https://plugins.gradle.org/m2/"
         }
     }
     group = sbkGroup
@@ -384,7 +384,7 @@ task buildJar(type: Jar) {
                 'Implementation-Vendor': "KMG",
                 'Main-Class': SbkMainClass
     }
-    zip64 true
+    zip64 = true
     archiveBaseName = rootProject.name
     from { configurations.api.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude 'META-INF/*.RSA'
@@ -511,19 +511,40 @@ application {
     applicationDistribution.into("bin") {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(SbkYal)
-        fileMode = 0755
+       // fileMode = 0755
+        filePermissions {
+            user {
+                read = true
+                execute = true
+            }
+            other.execute = true
+        }
     }
 
     applicationDistribution.into("bin") {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(SbkGem)
-        fileMode = 0755
+        //fileMode = 0755
+        filePermissions {
+            user {
+                read = true
+                execute = true
+            }
+            other.execute = true
+        }
     }
 
     applicationDistribution.into("bin") {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(SbkGemYal)
-        fileMode = 0755
+       // fileMode = 0755
+        filePermissions {
+            user {
+                read = true
+                execute = true
+            }
+            other.execute = true
+        }
     }
 }
 
