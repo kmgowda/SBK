@@ -177,7 +177,7 @@ allprojects {
         }
     }
 
-    task generateDashboards(type: Copy) {
+    tasks.register('generateDashboards', Copy) {
         if (project.path.startsWith(":drivers")) {
             def outDir = 'build/dashboard'
             def outFile = sbkProjectName + "-" + sbkVersion + ".json"
@@ -204,7 +204,7 @@ allprojects {
         }
     }
 
-    task generateDockerfiles() {
+    tasks.register('generateDockerfiles') {
         def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem", "drivers", "sbk-yal", "sbk-gem-yal"]
         def buffer = ""
         def outDir = 'build/dockers'
@@ -285,45 +285,45 @@ allprojects {
     */
 }
 
-task printDependencies {
+tasks.register('printDependencies') {
 
     doLast {
         project.subprojects.findAll().each {
             println "subproject : " + it.name
-            it.configurations.each {k ->
+            it.configurations.each { k ->
                 k.dependencies.each { dep ->
-                        if (dep.group.toString() == sbkGroup) {
-                            println "\tgroup: ${dep.group}, version: ${dep.version},  name: ${dep.name}"
-                            def projName = dep.name
-                            while (projName) {
-                                def proj = project.findProject(projName)
-                                if (!proj) {
-                                    //search inside drivers
-                                    proj = project.findProject("drivers:"+projName)
-                                }
-                                projName = null
-                                if (proj) {
-                                    proj.configurations.each {x->
-                                        x.dependencies.each { y ->
-                                            if(y.group.toString() == sbkGroup) {
-                                                println "\tgroup: ${y.group}, version: ${y.version},  name: ${y.name}"
-                                                projName = y.name
-                                            }
+                    if (dep.group.toString() == sbkGroup) {
+                        println "\tgroup: ${dep.group}, version: ${dep.version},  name: ${dep.name}"
+                        def projName = dep.name
+                        while (projName) {
+                            def proj = project.findProject(projName)
+                            if (!proj) {
+                                //search inside drivers
+                                proj = project.findProject("drivers:" + projName)
+                            }
+                            projName = null
+                            if (proj) {
+                                proj.configurations.each { x ->
+                                    x.dependencies.each { y ->
+                                        if (y.group.toString() == sbkGroup) {
+                                            println "\tgroup: ${y.group}, version: ${y.version},  name: ${y.name}"
+                                            projName = y.name
                                         }
                                     }
-                                } else {
-                                    break
                                 }
+                            } else {
+                                break
                             }
                         }
+                    }
                 }
             }
             println()
         }
 
         println("Root project : " + rootProject.name)
-        rootProject.configurations.each {k ->
-            k.dependencies.each {dep ->
+        rootProject.configurations.each { k ->
+            k.dependencies.each { dep ->
                 if (dep.group.toString() == sbkGroup) {
                     println "\tgroup: ${dep.group}, version: ${dep.version},  name: ${dep.name}"
                 }
@@ -347,7 +347,7 @@ task printDependencies {
    Example command : ./gradlew printdrivers -Preadme
    another command : ./gradlew printdrivers -Preadme -Pdec   (add the project description)
  */
-task printDrivers {
+tasks.register('printDrivers') {
     String readmePrefix = "drivers/"
 
     doLast {
@@ -373,7 +373,7 @@ task printDrivers {
 
 
 //create a single Jar with all dependencies
-task buildJar(type: Jar) {
+tasks.register('buildJar', Jar) {
     manifest {
         attributes 'Name': rootProject.name.toUpperCase(),
                 'Specification-Title': "Storage Benchmark Kit",
@@ -393,7 +393,7 @@ task buildJar(type: Jar) {
     with jar
 }
 
-task SbkYal(type: CreateStartScripts) {
+tasks.register('SbkYal', CreateStartScripts) {
     mainClass = 'io.sbk.main.SbkYalMain'
     applicationName = 'sbk-yal'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
@@ -431,7 +431,7 @@ task SbkYal(type: CreateStartScripts) {
     }
 }
 
-task SbkGem(type: CreateStartScripts) {
+tasks.register('SbkGem', CreateStartScripts) {
     mainClass = 'io.gem.main.SbkGemMain'
     applicationName = 'sbk-gem'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
@@ -469,7 +469,7 @@ task SbkGem(type: CreateStartScripts) {
     }
 }
 
-task SbkGemYal(type: CreateStartScripts) {
+tasks.register('SbkGemYal', CreateStartScripts) {
     mainClass = 'io.gem.main.SbkGemYalMain'
     applicationName = 'sbk-gem-yal'
     defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
@@ -549,7 +549,7 @@ application {
 }
 
 
-task deleteDriver() {
+tasks.register('deleteDriver') {
     doLast {
         String templateName = "sbktemplate"
         String driverName = templateName
@@ -594,7 +594,8 @@ task deleteDriver() {
 }
 
 
-task addDriver(dependsOn: deleteDriver) {
+tasks.register('addDriver') {
+    dependsOn deleteDriver
     doLast {
         String templateName = "sbktemplate"
         String driverName = templateName
