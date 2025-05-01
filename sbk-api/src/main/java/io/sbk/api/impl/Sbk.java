@@ -116,6 +116,7 @@ final public class Sbk {
      */
     @Contract("_, _, _, _ -> new")
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
+    @SuppressWarnings("unchecked")
     public static @NotNull Benchmark buildBenchmark(final String[] args, final String applicationName,
                                                     final String storagePackageName,
                                                     final String loggerPackageName) throws ParseException,

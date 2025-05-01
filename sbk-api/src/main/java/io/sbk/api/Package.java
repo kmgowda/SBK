@@ -65,6 +65,7 @@ public abstract class Package<T> {
      */
     public abstract Set<Class<? extends T>> getClasses(String packageName);
 
+    @SuppressWarnings("unchecked")
     private  @NotNull T getClassInstance(String storageFullPath) throws ClassNotFoundException,
             NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return (T) Class.forName(storageFullPath).getConstructor().newInstance();

@@ -13,6 +13,7 @@ package io.perl.api.impl;
 import io.perl.api.QueueArray;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+@SuppressWarnings("unchecked")
 public class ConcurrentLinkedQueueArray<T> implements QueueArray<T> {
     final private ConcurrentLinkedQueue<T>[] cQueues;
 
