@@ -98,6 +98,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @Override
     @Synchronized
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    @SuppressWarnings("unchecked")
     public CompletableFuture<RemoteResponse[]> start() throws IOException, InterruptedException, ExecutionException,
             IllegalStateException {
         if (state != State.BEGIN) {
@@ -318,6 +319,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @Synchronized
+    @SuppressWarnings("unchecked")
     private void fillSshResults(SshResponse[] responseStreams) {
         final ConnectionConfig[] connections = params.getConnections();
         for (int i = 0; i < remoteResults.length; i++) {

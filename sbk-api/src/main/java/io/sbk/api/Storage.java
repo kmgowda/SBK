@@ -94,6 +94,7 @@ public interface Storage<T> {
      * @throws IllegalArgumentException if data type is other than byte[]
      */
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    @SuppressWarnings("unchecked")
     default DataType<T> getDataType() throws IllegalArgumentException {
         final TypeToken<T> typeToken = new TypeToken<T>(getClass()) {
         };

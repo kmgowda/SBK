@@ -16,6 +16,7 @@ import io.perl.api.QueueArray;
  * DON'T USE THIS CLASS.
  * Use ConcurrentLinkedQueueArray, because the ConcurrentLinkedQueue does better Garbage collection.
  */
+@SuppressWarnings("unchecked")
 public class CQueueArray<T> implements QueueArray<T> {
     final private CQueue<T>[] cQueues;
 
