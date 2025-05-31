@@ -169,7 +169,8 @@ public final class PerlBuilder {
             time = buildTime(logger);
         }
         if (time.getTimeUnit() != logger.getTimeUnit()) {
-            throw new IllegalArgumentException("Time units are not matching");
+            throw new IllegalArgumentException("Time units are not matching; logger time unit: " +
+                    logger.getTimeUnit() + ", Time time unit: " + time.getTimeUnit());
         }
         if (executor == null) {
             executor = new ForkJoinPool();
