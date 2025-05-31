@@ -53,7 +53,8 @@ dependencies {
 }
 
 
-task updateDocs(dependsOn: javadoc) {
+tasks.register('updateDocs') {
+    dependsOn javadoc
     doLast {
         println "Update $projectDir Javadocs"
         delete "$projectDir/javadoc"
