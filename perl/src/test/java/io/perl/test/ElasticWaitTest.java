@@ -12,7 +12,10 @@ package io.perl.test;
 
 import io.perl.api.impl.ElasticWait;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * Unit tests for {@link ElasticWait}.
