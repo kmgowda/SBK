@@ -14,7 +14,7 @@ plugins.withId('application') {
         artifacts.remove artifacts.find { it.hasProperty('archiveTask') && it.archiveTask.is(distTar) }
     }
 
-    task pathingJar(type: Jar) {
+    tasks.register('pathingJar', Jar) {
         archiveAppendix = 'pathing'
 
         // Delay configuring the manifest to avoid resolving the configuration

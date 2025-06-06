@@ -16,12 +16,17 @@ import io.perl.api.impl.PerlBuilder;
 import io.perl.config.PerlConfig;
 import io.perl.logger.impl.DefaultLogger;
 import io.perl.system.PerlPrinter;
+import io.time.MicroSeconds;
+import io.time.NanoSeconds;
+import io.time.Time;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -130,4 +135,57 @@ public class PerlTest {
         runPerlRecords(logger, perl);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullLoggerThrowsException() throws Exception {
+        PerlBuilder.build(null, null, null, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMismatchedTimeUnitThrowsException() throws Exception {
+        TestLogger logger = new TestLogger();
+        Time wrongTime = new MicroSeconds();
+        PerlBuilder.build(logger, wrongTime, null, null);
+    }
+
+    @Test
+    public void testCustomExecutorService() throws Exception {
+        TestLogger logger = new TestLogger();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        Perl perl = PerlBuilder.build(logger, null, null, executor);
+        runPerlRecords(logger, perl);
+        executor.shutdown();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDifferentTimeUnits() throws Exception {
+        TestLogger logger = new TestLogger();
+        Perl perlNs = PerlBuilder.build(logger, new NanoSeconds(), null, null);
+        runPerlRecords(logger, perlNs);
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void testZeroRecords() throws Exception {
+        TestLogger logger = new TestLogger();
+        Perl perl = PerlBuilder.build(logger, null, null, null);
+        PerlChannel channel = perl.getPerlChannel();
+        CompletableFuture<Void> ret = perl.run(0, 0);
+        channel.send(0, 0, 0, 0);
+        ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        Assert.assertEquals(0, logger.latencyReporterCnt.get());
+    }
+
+    @Test
+    public void testHistogramAndCsvConfig() throws Exception {
+        PerlConfig config = PerlConfig.build();
+        TestLogger logger = new TestLogger();
+        config.histogram = true;
+        Perl perl = PerlBuilder.build(logger, null, config, null);
+        runPerlRecords(logger, perl);
+
+        TestLogger logger1 = new TestLogger();
+        config.histogram = false;
+        config.csv = true;
+        Perl perlCsv = PerlBuilder.build(logger1, null, config, null);
+        runPerlRecords(logger, perlCsv);
+    }
 }
