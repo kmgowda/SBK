@@ -8,7 +8,9 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
+
 plugins.withId('maven-publish') {
+
     group = sbkGroup
     setVersion(sbkVersion)
 
@@ -33,7 +35,7 @@ plugins.withId('maven-publish') {
                     println "Publishing SBK packages to Maven Central"
                     maven {
                         name = "SBK-Maven"
-                        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                        url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
                         credentials {
                             username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
                             password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")

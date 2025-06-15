@@ -22,6 +22,12 @@ buildscript {
     }
 }
 
+/*
+plugins {
+    id 'org.jreleaser' version  "${jReleaserPluginVersion}"
+}
+*/
+
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 apply plugin: "com.github.spotbugs"
