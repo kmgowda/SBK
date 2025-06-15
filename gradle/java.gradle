@@ -33,28 +33,28 @@ plugins.withId('java') {
         ])
     }
 
-    task sourcesJar(type: Jar) {
+    tasks.register('sourcesJar', Jar) {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveClassifier = 'sources'
         from sourceSets.main.java
     }
     artifacts { archives sourcesJar }
 
-    task generateJavadoc(type: Javadoc) {
+    tasks.register('generateJavadoc', Javadoc) {
         source = sourceSets.main.allJava
         classpath = sourceSets.main.runtimeClasspath
         options.addBooleanOption("Xdoclint:-missing", true)
         failOnError = false
     }
 
-    task javadocJar(type: Jar) {
+    tasks.register('javadocJar', Jar) {
         archiveClassifier = 'javadoc'
         exclude "**/generated/**"
         from generateJavadoc
     }
     artifacts { archives javadocJar }
 
-    task testJar(type: Jar) {
+    tasks.register('testJar', Jar) {
         archiveClassifier = 'tests'
         from sourceSets.test.output
     }
