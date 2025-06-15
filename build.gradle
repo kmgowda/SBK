@@ -34,11 +34,10 @@ buildscript {
     println "Build SBK Version      : $sbkVersion"
 }
 
-/*
+
 plugins {
     id 'org.jreleaser' version  "${jReleaserPluginVersion}"
 }
-*/
 
 def SbkMainClass = "io.sbk.main.SbkMain"
 
