@@ -967,7 +967,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
 you can log the performance results to CSV file using option '--csvfile'.
 if you have SBK results in one or multiple CSV files,
 then you can use python application 'sbk-charts' to compare the SBK benchmarking results plot the graphs into an Excel sheet.
-refer [SBK Charts](sbk-charts.md) for further details.
+refer [SBK Charts](https://github.com/kmgowda/sbk-charts) for further details.
 
 
 ## SBK Publications
