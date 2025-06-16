@@ -8,7 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
+
 plugins.withId('maven-publish') {
+    def localRepoDir = "sbk-repo"
+    def buildRepoDir = "build" + File.separator + localRepoDir
     group = sbkGroup
     setVersion(sbkVersion)
 
@@ -25,22 +28,18 @@ plugins.withId('maven-publish') {
     publishing {
         repositories {
             if (project.gradle.startParameter.taskNames.contains("publish")) {
-                if (!project.hasProperty("maven") && !project.hasProperty("github")) {
-                    println "Missing parameters -Pmaven or/and -Pgithub"
-                    return
-                }
                 if (project.hasProperty("maven")) {
                     println "Publishing SBK packages to Maven Central"
                     maven {
                         name = "SBK-Maven"
-                        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                      //  url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                        url = uri("https://central.sonatype.com/publishing")
                         credentials {
                             username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
                             password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
                         }
                     }
-                }
-                if (project.hasProperty("github")) {
+                } else if (project.hasProperty("github")) {
                     println "Publishing SBK packages to Git Hub"
                     maven {
                         name = "SBK-GitHub"
@@ -49,6 +48,12 @@ plugins.withId('maven-publish') {
                             username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
                             password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
                         }
+                    }
+                } else {
+                    def stagingDir = project.getProjectDir().toString() + File.separator + buildRepoDir
+                    println "Publishing SBK packages to local Maven repository $stagingDir"
+                    maven {
+                        url = layout.buildDirectory.dir(localRepoDir)
                     }
                 }
             }
@@ -104,4 +109,61 @@ plugins.withId('maven-publish') {
             }
         }
     }
+
+/*
+  As of now , jreleaser is not used to publish the sbk packages.
+
+    jreleaser {
+        environment {
+            // Location of a properties file with key/value pairs
+            // Each key must be prefixed with `JRELEASER_` and match
+            // the environment variable it overrides.
+            //
+            variables = '/Users/kmg/.jreleaser/config.toml'
+        }
+
+        release {
+            github {
+                enabled = false
+            }
+        }
+
+        signing {
+            active = 'ALWAYS'
+            armored = true
+        }
+
+        deploy {
+            maven {
+                mavenCentral {
+                    sonatype {
+                        active = 'ALWAYS'
+                        url = 'https://central.sonatype.com/api/v1/publisher'
+                        stagingRepository(buildRepoDir)
+                    }
+                }
+            }
+        }
+    }
+*/
 }
+
+
+/*
+perform the following command to publish the sbk packages via jreleaser
+
+Once all configuration is in place you may execute the following commands:
+
+1) Verify release & deploy configuration
+$ ./gradlew jreleaserConfig
+
+2) Ensure a clean deployment
+$ ./gradlew clean
+
+3) Stage all artifacts to a local directory
+$ ./gradlew publish
+
+4) Deploy and release
+$ ./gradlew jreleaserFullRelease
+
+ */
