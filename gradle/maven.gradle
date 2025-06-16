@@ -32,7 +32,8 @@ plugins.withId('maven-publish') {
                     println "Publishing SBK packages to Maven Central"
                     maven {
                         name = "SBK-Maven"
-                        url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                      //  url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                        url = uri("https://central.sonatype.com/publishing")
                         credentials {
                             username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
                             password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
@@ -109,6 +110,9 @@ plugins.withId('maven-publish') {
         }
     }
 
+/*
+  As of now , jreleaser is not used to publish the sbk packages.
+
     jreleaser {
         environment {
             // Location of a properties file with key/value pairs
@@ -141,7 +145,7 @@ plugins.withId('maven-publish') {
             }
         }
     }
-
+*/
 }
 
 
