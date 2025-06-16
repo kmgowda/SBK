@@ -110,6 +110,20 @@ plugins.withId('maven-publish') {
     }
 
     jreleaser {
+        environment {
+            // Location of a properties file with key/value pairs
+            // Each key must be prefixed with `JRELEASER_` and match
+            // the environment variable it overrides.
+            //
+            variables = '/Users/kmg/.jreleaser/config.toml'
+        }
+
+        release {
+            github {
+                enabled = false
+            }
+        }
+
         signing {
             active = 'ALWAYS'
             armored = true
