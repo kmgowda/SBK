@@ -33,7 +33,7 @@ plugins.withId('maven-publish') {
                     maven {
                         name = "SBK-Maven"
                       //  url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                        url = uri("https://central.sonatype.com/publishing")
+                        url = uri("https://central.sonatype.com/ap1/v1/publisher/upload")
                         credentials {
                             username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
                             password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
@@ -110,8 +110,7 @@ plugins.withId('maven-publish') {
         }
     }
 
-/*
-  As of now , jreleaser is not used to publish the sbk packages.
+
 
     jreleaser {
         environment {
@@ -124,7 +123,8 @@ plugins.withId('maven-publish') {
 
         release {
             github {
-                enabled = false
+                skipRelease = true
+                skipTag = true
             }
         }
 
@@ -139,13 +139,19 @@ plugins.withId('maven-publish') {
                     sonatype {
                         active = 'ALWAYS'
                         url = 'https://central.sonatype.com/api/v1/publisher'
-                        stagingRepository(buildRepoDir)
+                        stagingRepository(layout.buildDirectory.dir(localRepoDir).get().toString())
+                        setAuthorization("Basic")
+                        applyMavenCentralRules = false // Wait for fix: https://github.com/kordamp/pomchecker/issues/21
+                        sign = true
+                        checksums = true
+                        sourceJar = true
+                        javadocJar = true
                     }
                 }
             }
         }
     }
-*/
+
 }
 
 
