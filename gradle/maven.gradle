@@ -123,9 +123,15 @@ plugins.withId('maven-publish') {
 
         release {
             github {
+                enabled = true
                 skipRelease = true
                 skipTag = true
             }
+        }
+
+        upload {
+            active = 'ALWAYS'
+            enabled = true
         }
 
         signing {
@@ -172,4 +178,4 @@ $ ./gradlew publish
 4) Deploy and release
 $ ./gradlew jreleaserFullRelease
 
- */
+*/
