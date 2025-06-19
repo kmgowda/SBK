@@ -121,6 +121,7 @@ plugins.withId('maven-publish') {
             variables = '/Users/kmg/.jreleaser/config.toml'
         }
 
+        /*
         release {
             github {
                 enabled = true
@@ -134,6 +135,7 @@ plugins.withId('maven-publish') {
             active = 'ALWAYS'
             enabled = true
         }
+        */
 
         signing {
             active = 'ALWAYS'
@@ -176,7 +178,10 @@ $ ./gradlew clean
 3) Stage all artifacts to a local directory
 $ ./gradlew publish
 
-4) Deploy and release
+4) Deploy and release    // This dopes full release
 $ ./gradlew jreleaserFullRelease
 
+or
+
+$ ./gradlew jreleaserdeploy   // This also does full release
 */
