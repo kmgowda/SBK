@@ -148,11 +148,11 @@ plugins.withId('maven-publish') {
                         url = 'https://central.sonatype.com/api/v1/publisher'
                         stagingRepository(layout.buildDirectory.dir(localRepoDir).get().toString())
                         setAuthorization("Basic")
-                        applyMavenCentralRules = false // Wait for fix: https://github.com/kordamp/pomchecker/issues/21
                         sign = true
                         checksums = true
                         sourceJar = true
                         javadocJar = true
+                        applyMavenCentralRules = true
                     }
                 }
             }
