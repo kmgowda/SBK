@@ -147,6 +147,7 @@ plugins.withId('maven-publish') {
                 mavenCentral {
                     sonatype {
                         active = 'ALWAYS'
+                        stage = "UPLOAD"     // only upload, no release
                         url = 'https://central.sonatype.com/api/v1/publisher'
                         stagingRepository(layout.buildDirectory.dir(localRepoDir).get().toString())
                         setAuthorization("Basic")
