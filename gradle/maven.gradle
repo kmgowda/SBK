@@ -33,7 +33,7 @@ plugins.withId('maven-publish') {
                     maven {
                         name = "SBK-Maven"
                       //  url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                        url = uri("https://central.sonatype.com/publishing")
+                        url = uri("https://central.sonatype.com/ap1/v1/publisher/upload")
                         credentials {
                             username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
                             password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
@@ -110,8 +110,7 @@ plugins.withId('maven-publish') {
         }
     }
 
-/*
-  As of now , jreleaser is not used to publish the sbk packages.
+
 
     jreleaser {
         environment {
@@ -122,11 +121,21 @@ plugins.withId('maven-publish') {
             variables = '/Users/kmg/.jreleaser/config.toml'
         }
 
+        /*
         release {
             github {
-                enabled = false
+                enabled = true
+                skipRelease = true
+                skipTag = true
+                // overwrite = true
             }
         }
+
+        upload {
+            active = 'ALWAYS'
+            enabled = true
+        }
+        */
 
         signing {
             active = 'ALWAYS'
@@ -138,14 +147,21 @@ plugins.withId('maven-publish') {
                 mavenCentral {
                     sonatype {
                         active = 'ALWAYS'
+                        stage = "UPLOAD"     // only upload, no release
                         url = 'https://central.sonatype.com/api/v1/publisher'
-                        stagingRepository(buildRepoDir)
+                        stagingRepository(layout.buildDirectory.dir(localRepoDir).get().toString())
+                        setAuthorization("Basic")
+                        sign = true
+                        checksums = true
+                        sourceJar = true
+                        javadocJar = true
+                        applyMavenCentralRules = true
                     }
                 }
             }
         }
     }
-*/
+
 }
 
 
@@ -163,7 +179,10 @@ $ ./gradlew clean
 3) Stage all artifacts to a local directory
 $ ./gradlew publish
 
-4) Deploy and release
+4) Deploy and release    // This dopes full release
 $ ./gradlew jreleaserFullRelease
 
- */
+or
+
+$ ./gradlew jreleaserdeploy   // This also does full release
+*/
