@@ -117,6 +117,10 @@ public class CSVLogger extends SystemLogger {
             headerBuilder.append(",Percentile_");
             headerBuilder.append(percentileName);
         }
+        for (String percentileName : getPercentileNames()) {
+            headerBuilder.append(",Percentile_Count_");
+            headerBuilder.append(percentileName);
+        }
         csvWriter = new PrintWriter(Files.newBufferedWriter(Paths.get(csvFile)));
         csvWriter.println(headerBuilder);
     }
@@ -221,6 +225,9 @@ public class CSVLogger extends SystemLogger {
 
         for (int i = 0; i < Math.min(getPercentiles().length, percentileLatencies.length); ++i) {
             data.append(String.format(",%7d", percentileLatencies[i]));
+        }
+        for (int i = 0; i < Math.min(getPercentiles().length, percentileLatencies.length); ++i) {
+            data.append(String.format(",%7d", percentileLatencyCounts[i]));
         }
         csvWriter.println(data);
     }
