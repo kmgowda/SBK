@@ -83,7 +83,12 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
     /**
      *<code>AtomicDouble[] percentileGauges</code>.
      */
-    final private AtomicDouble[] percentileGauges;
+    final private AtomicDouble[] percentileLatencyGauges;
+
+    /**
+     *<code>AtomicDouble[] percentileGauges</code>.
+     */
+    final private AtomicLong[] percentileLatencyCountGauges;
 
     /**
      *<code>AtomicLong slc1</code>.
@@ -125,10 +130,13 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicDouble());
         this.slc1 = this.registry.gauge(slc1Name, new AtomicLong());
         this.slc2 = this.registry.gauge(slc2Name, new AtomicLong());
-        this.percentileGauges = new AtomicDouble[percentileNames.length];
-        for (int i = 0; i < percentileNames.length; i++) {
-            this.percentileGauges[i] = this.registry.gauge(percentileNames[i],
+        this.percentileLatencyGauges = new AtomicDouble[percentileLatencyNames.length];
+        this.percentileLatencyCountGauges = new AtomicLong[percentileLatencyNames.length];
+        for (int i = 0; i < percentileLatencyNames.length; i++) {
+            this.percentileLatencyGauges[i] = this.registry.gauge(percentileLatencyNames[i],
                     new AtomicDouble());
+            this.percentileLatencyCountGauges[i] = this.registry.gauge(percentileLatencyCountNames[i],
+                    new AtomicLong());
         }
         if (latencyTimeUnit == TimeUnit.ns) {
             convert = time::convertToNanoSeconds;
@@ -164,8 +172,9 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         this.avgLatency.set(convert.apply(avgLatency));
         this.minLatency.set(convert.apply((double) minLatency));
         this.maxLatency.set(convert.apply((double) maxLatency));
-        for (int i = 0; i < Math.min(this.percentileGauges.length, percentileLatencies.length); i++) {
-            this.percentileGauges[i].set(convert.apply((double) percentileLatencies[i]));
+        for (int i = 0; i < Math.min(this.percentileLatencyGauges.length, percentileLatencies.length); i++) {
+            this.percentileLatencyGauges[i].set(convert.apply((double) percentileLatencies[i]));
+            this.percentileLatencyCountGauges[i].set(percentileLatencyCounts[i]);
         }
     }
 

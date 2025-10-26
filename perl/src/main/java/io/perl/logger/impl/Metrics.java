@@ -82,7 +82,12 @@ public abstract sealed class Metrics permits PrintMetrics {
     /**
      * <code>String[] percentileNames</code>.
      */
-    final protected String[] percentileNames;
+    final protected String[] percentileLatencyNames;
+
+    /**
+     * <code>String[] percentileNames</code>.
+     */
+    final protected String[] percentileLatencyCountNames;
 
     /**
      * Constructor Metrics for initializing All Values.
@@ -107,9 +112,11 @@ public abstract sealed class Metrics permits PrintMetrics {
         higherDiscardName = metricPrefix + "_HigherDiscardLatencyRecords";
         slc1Name = metricPrefix + "_SLC_1";
         slc2Name = metricPrefix + "_SLC_2";
-        percentileNames = new String[percentiles.length];
+        percentileLatencyNames = new String[percentiles.length];
+        percentileLatencyCountNames = new String[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
-            this.percentileNames[i] = metricPrefix + "_" + metricTimeUnit + "_" + percentileFormat.format(percentiles[i]);
+            this.percentileLatencyNames[i] = metricPrefix + "_" + metricTimeUnit + "_" + percentileFormat.format(percentiles[i]);
+            this.percentileLatencyCountNames[i] = metricPrefix+ "_Count_" + percentileFormat.format(percentiles[i]);
         }
     }
 
