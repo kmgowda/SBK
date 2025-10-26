@@ -186,17 +186,18 @@ allprojects {
         }
     }
 
+    /*
     tasks.register('generateDashboards', Copy) {
         if (project.path.startsWith(":drivers")) {
             def outDir = 'build/dashboard'
             def outFile = sbkProjectName + "-" + sbkVersion + ".json"
             def sbkClassName = sbkClass.toLowerCase().capitalize()
 
-            /*
-            call with parameter
-            ./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/grafana/dashboards"
-            to generate dashboard files on single folder
-             */
+
+           // call with parameter
+           // ./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/grafana/dashboards"
+           // to generate dashboard files on single folder
+
             if (project.hasProperty("outdir")) {
                 outDir = outdir
                 outFile = sbkProjectName + ".json"
@@ -212,6 +213,7 @@ allprojects {
             }
         }
     }
+    */
 
     tasks.register('generateDockerfiles') {
         def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem", "drivers", "sbk-yal", "sbk-gem-yal"]
