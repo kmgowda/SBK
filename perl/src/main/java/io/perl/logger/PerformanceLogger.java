@@ -36,10 +36,11 @@ public interface PerformanceLogger extends Print, ReportLatency {
      * @param slc1                          Sliding Latency Coverage factor
      * @param slc2                          Sliding Latency Coverage factor
      * @param percentileLatencies           Array of percentile Latency Values
+     * @param percentileLatencyCounts       Array of percentile Latency Counts
      */
     void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                     long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                    long slc1, long slc2, long[] percentileLatencies);
+                    long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 
     /**
      * Default method to record latency of every/multiple event(s).

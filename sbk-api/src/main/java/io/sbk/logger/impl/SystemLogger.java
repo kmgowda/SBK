@@ -34,7 +34,8 @@ public class SystemLogger extends AbstractRWLogger {
                       long readTimeoutEvents, double readTimeoutEventsPerSec,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                      long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                      long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder(getPrefix());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
@@ -43,7 +44,7 @@ public class SystemLogger extends AbstractRWLogger {
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileValues);
+                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(out);
     }
 
@@ -57,7 +58,7 @@ public class SystemLogger extends AbstractRWLogger {
                            long readTimeoutEvents, double readTimeoutEventsPerSec,
                            double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder("Total " + getPrefix());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
@@ -66,7 +67,7 @@ public class SystemLogger extends AbstractRWLogger {
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileValues);
+                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(out);
     }
 

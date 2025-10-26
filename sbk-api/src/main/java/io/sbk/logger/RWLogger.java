@@ -57,5 +57,5 @@ public non-sealed interface RWLogger extends Logger, CountRW, WriteRequestsLogge
                     long readTimeoutEvents, double readTimeoutEventsPerSec,
                     double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                     double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                    long higherDiscard, long slc1, long slc2, long[] percentileValues);
+                    long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 }

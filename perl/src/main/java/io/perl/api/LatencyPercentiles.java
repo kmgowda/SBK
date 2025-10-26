@@ -32,7 +32,7 @@ final public class LatencyPercentiles {
     /**
      * <code>public long[] latencyCount</code>.
      */
-    final public long[] latencyCount;
+    final public long[] latenciesCount;
 
     /**
      * <code>long medianLatency</code>.
@@ -58,7 +58,7 @@ final public class LatencyPercentiles {
         this.fractions = percentileFractions;
         this.latencies = new long[this.fractions.length];
         this.latencyIndexes = new long[this.fractions.length];
-        this.latencyCount = new long[this.fractions.length];
+        this.latenciesCount = new long[this.fractions.length];
         this.medianLatency = 0;
         this.medianIndex = 0;
         this.index = 0;
@@ -73,7 +73,7 @@ final public class LatencyPercentiles {
         for (int i = 0; i < fractions.length; i++) {
             latencyIndexes[i] = (long) (totalRecords * fractions[i]);
             latencies[i] = 0;
-            latencyCount[i] = 0;
+            latenciesCount[i] = 0;
         }
         medianIndex = totalRecords >> 1;
         medianLatency = 0;
@@ -95,7 +95,7 @@ final public class LatencyPercentiles {
         while (index < latencyIndexes.length) {
             if (latencyIndexes[index] >= startIndex && latencyIndexes[index] < endIndex) {
                 latencies[index] = latency;
-                latencyCount[index] = count;
+                latenciesCount[index] = count;
                 index++;
             } else {
                 break;

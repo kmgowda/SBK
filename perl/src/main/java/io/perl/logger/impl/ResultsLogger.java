@@ -22,7 +22,7 @@ import java.util.Arrays;
 /**
  * Class ResultsLogger.
  */
-public class ResultsLogger implements PerformanceLogger {
+public abstract class ResultsLogger implements PerformanceLogger {
 
     /**
      * <code>String header</code>.
@@ -189,7 +189,7 @@ public class ResultsLogger implements PerformanceLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
-                      long[] percentileLatencies) {
+                      long[] percentileLatencies, long[] percentileLatencyCounts) {
         final StringBuilder out = new StringBuilder(prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
@@ -200,7 +200,8 @@ public class ResultsLogger implements PerformanceLogger {
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies) {
+                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                           long[] percentileLatencyCounts) {
         final StringBuilder out = new StringBuilder("Total : "+ prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,

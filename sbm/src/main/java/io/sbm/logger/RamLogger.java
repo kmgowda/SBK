@@ -32,17 +32,17 @@ public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnecti
                long readTimeoutEvents, double readTimeoutEventsPerSec,
                double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-               long higherDiscard, long slc1, long slc2, long[] percentileValues);
+               long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 
     void printTotal(int connections, int maxConnections, int writers, int maxWriters, int readers, int maxReaders,
-               long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-               double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-               long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
-               long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-               long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
-               long writeTimeoutEvents, double writeTimeoutEventsPerSec,
-               long readTimeoutEvents, double readTimeoutEventsPerSec,
-               double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-               long higherDiscard, long slc1, long slc2, long[] percentileValues);
+                    long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                    double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
+                    long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
+                    long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
+                    long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                    long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                    long readTimeoutEvents, double readTimeoutEventsPerSec,
+                    double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                    double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                    long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 }

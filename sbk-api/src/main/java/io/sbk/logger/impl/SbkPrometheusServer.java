@@ -125,7 +125,8 @@ public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPr
                             long readTimeoutEvents, double readTimeoutEventsPerSec,
                             double seconds, long bytes, long records, double recsPerSec,
                             double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
-                            long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                            long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                            long[] percentileLatencyCounts) {
         this.writers.set(writers);
         this.maxWriters.set(maxWriters);
         this.readers.set(readers);
@@ -149,6 +150,6 @@ public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPr
         this.readTimeoutEvents.increment(readTimeoutEvents);
         this.readTimeoutEventsPerSec.set(readTimeoutEventsPerSec);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                                higherDiscard, slc1, slc2, percentileValues);
+                                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 }
