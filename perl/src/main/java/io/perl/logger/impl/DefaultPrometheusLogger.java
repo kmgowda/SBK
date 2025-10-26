@@ -70,11 +70,11 @@ public class DefaultPrometheusLogger extends DefaultLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
+                      long slc1, long slc2, long[] percentileLatencies) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies);
         server.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies);
     }
 
 }

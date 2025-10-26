@@ -495,7 +495,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     @Override
     public final void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                            long higherDiscard, long slc1, long slc2, long[] percentileLatencies) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, req);
         final long writeReadPendingRecords;
@@ -531,7 +531,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                 req.writeTimeoutEvents, perf.writeTimeoutEventsPerSec, req.readTimeoutEvents, perf.readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies);
     }
 
     @Override
@@ -556,7 +556,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     @Override
     public final void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                                  double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                                 long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                                 long higherDiscard, long slc1, long slc2, long[] percentileLatencies) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final long writeReadPendingRecords;
         final long writeReadPendingBytes;
@@ -595,7 +595,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 writeReadPendingRecords, writeReadPendingBytes,
                 writeTimeoutEvents, perf.writeTimeoutEventsPerSec, readTimeoutEvents, perf.readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies);
 
         readRequestRecords = readRequestBytes = writeRequestRecords = writeRequestBytes = 0;
         writeResponsePendingRecords = writeResponsePendingBytes = 0;

@@ -189,22 +189,22 @@ public class ResultsLogger implements PerformanceLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
-                      long[] percentileValues) {
+                      long[] percentileLatencies) {
         final StringBuilder out = new StringBuilder(prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
-                percentileValues);
+                percentileLatencies);
         System.out.print(out);
     }
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies) {
         final StringBuilder out = new StringBuilder("Total : "+ prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
-                percentileValues);
+                percentileLatencies);
         System.out.print(out);
     }
 }

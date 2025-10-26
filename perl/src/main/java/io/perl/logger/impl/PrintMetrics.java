@@ -151,7 +151,7 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
     @Override
     final public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                            long slc1, long slc2, long[] percentileValues) {
+                            long slc1, long slc2, long[] percentileLatencies) {
         this.bytes.increment(bytes);
         this.records.increment(records);
         this.invalidLatencyRecords.increment(invalid);
@@ -164,8 +164,8 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         this.avgLatency.set(convert.apply(avgLatency));
         this.minLatency.set(convert.apply((double) minLatency));
         this.maxLatency.set(convert.apply((double) maxLatency));
-        for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
-            this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));
+        for (int i = 0; i < Math.min(this.percentileGauges.length, percentileLatencies.length); i++) {
+            this.percentileGauges[i].set(convert.apply((double) percentileLatencies[i]));
         }
     }
 
