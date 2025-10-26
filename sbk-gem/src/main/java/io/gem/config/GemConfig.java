@@ -40,6 +40,11 @@ final public class GemConfig {
      */
     final public static String SBK_GEM_LOGGER_PACKAGE_NAME = "io.gem.logger";
 
+    /**
+     *<code>String SBK_GEM_SSH_PASSWD = "io.sbm.logger"</code>.
+     */
+    final public static String SBK_GEM_SSH_PASSWD = "SBK_GEM_SSH_PASSWD";
+
     //override by props file or command line parameters
     /**
      * <code>String nodes</code>.

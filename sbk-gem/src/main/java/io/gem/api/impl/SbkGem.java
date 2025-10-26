@@ -191,6 +191,20 @@ final public class SbkGem {
         gemConfig = mapper.readValue(SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);
 
+        if (StringUtils.isEmpty(gemConfig.gempass)) {
+            Printer.log.warn("SBK-GEM: The ssh password is not set in the gem.properties file, " +
+                    "checking " + GemConfig.SBK_GEM_SSH_PASSWD + " environment variable");
+            String envPass = System.getenv(GemConfig.SBK_GEM_SSH_PASSWD);
+            if (StringUtils.isNotEmpty(envPass)) {
+                gemConfig.gempass = envPass;
+                Printer.log.warn("SBK-GEM: Using password from "+ GemConfig.SBK_GEM_SSH_PASSWD +
+                        " environment variable");
+            } else {
+                Printer.log.warn("SBK-GEM: The ssh password is not set in the " + GemConfig.SBK_GEM_SSH_PASSWD +
+                        " environment variable");
+            }
+        }
+
         usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName :
                 appName;
 
