@@ -267,14 +267,14 @@ As an example, just follow the below steps to see the performance graphs
    com/kmgowda/SBK/blob/master/sbm/docker-compose.yml) file as follows.
 
  ```
- <SBK dir>% docker-compose build
+ <SBK dir>% docker compose build
 
  ```
 
 2. Run the 'sbm' service as follows.
 
  ```
- <SBK dir>% docker-compose run -p 127.0.0.1:9717:9717/tcp sbm -class file -time ns
+ <SBK dir>% docker compose run -p 127.0.0.1:9717:9717/tcp sbm -class file -time ns
 
  ```
 Note that , 9717 is the exposed port from sbm container to receive the benchmark results from remote SBK

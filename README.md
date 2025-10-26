@@ -391,14 +391,14 @@ As an example, just follow the below steps to see the performance graphs
 1. In the SBK directory build the 'SBK' service of the [docker compose](docker-compose.yml) file as follows.
 
    ```
-   <SBK dir>% docker-compose -f ./docker-compose-sbk-grafana.yml build 
+   <SBK dir>% docker compose -f ./docker-compose-sbk-grafana.yml build 
 
    ```
 
 1. Run the 'SBK' service as follows.
 
    ```
-   <SBK dir>% docker-compose run sbk  -class concurrentq -writers 1  -readers 5 -size 1000 -seconds 120 
+   <SBK dir>% docker compose run sbk  -class concurrentq -writers 1  -readers 5 -size 1000 -seconds 120 
 
    ```
 
