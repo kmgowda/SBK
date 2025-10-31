@@ -28,6 +28,9 @@ public class FdbRecordWriter implements Writer<ByteString> {
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
 
+    @SuppressWarnings("unused")
+    private int cnt;
+
     public FdbRecordWriter(int id, ParameterOptions params, FDBDatabase db,
                            Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {
         this.key = FdbRecord.generateStartKey(id);
@@ -36,7 +39,7 @@ public class FdbRecordWriter implements Writer<ByteString> {
     }
 
     @Override
-    public CompletableFuture writeAsync(ByteString data) throws IOException {
+    public CompletableFuture<?> writeAsync(ByteString data) throws IOException {
         final long startKey = key++;
         return db.run(context -> {
             FDBRecordStore recordStore = recordStoreProvider.apply(context);

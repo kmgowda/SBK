@@ -32,6 +32,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     final private FDBDatabase db;
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
+    @SuppressWarnings("unused")
     private int cnt;
 
     public FdbRecordMultiWriter(int id, ParameterOptions params, FDBDatabase db,
@@ -43,7 +44,7 @@ public class FdbRecordMultiWriter implements Writer<ByteString> {
     }
 
     @Override
-    public CompletableFuture writeAsync(ByteString data) throws IOException {
+    public CompletableFuture<?> writeAsync(ByteString data) throws IOException {
         key++;
         return db.run(context -> {
             FDBRecordStore recordStore = recordStoreProvider.apply(context);

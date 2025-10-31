@@ -25,7 +25,7 @@ public class CqReader implements Reader<byte[]> {
     final private static int PARK_NS = NS_PER_MS;
     private final Queue<byte[]> queue;
 
-    public CqReader(Queue queue) throws IOException {
+    public CqReader(Queue<byte[]> queue) throws IOException {
         this.queue = queue;
     }
 

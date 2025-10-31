@@ -52,7 +52,7 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
+    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         status.startTime = time.getCurrentTime();
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
         status.endTime = time.getCurrentTime();
@@ -70,7 +70,7 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel, int id,
+    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel, int id,
                     ReadRequestsLogger logger) throws EOFException, IOException {
         status.startTime = time.getCurrentTime();
         logger.recordReadRequests(id, status.startTime, (long) size * maxPollRecords, maxPollRecords);
@@ -90,14 +90,14 @@ public class KafkaReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel,
+    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel,
                         int id, ReadRequestsLogger logger) throws EOFException, IOException {
         logger.recordReadRequests(id, time.getCurrentTime(), (long) size * maxPollRecords, maxPollRecords);
         recordReadTime(dType, size, time, status, perlChannel);
     }
 
     @Override
-    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel)
+    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel)
             throws IOException {
         final ConsumerRecords<byte[], byte[]> records = consumer.poll(timeoutDuration);
         status.endTime = time.getCurrentTime();

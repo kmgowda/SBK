@@ -162,7 +162,7 @@ final public class SbkGem {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final GemLoggerPackage loggerStore = new GemLoggerPackage(gemLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
-        final Storage storageDevice;
+        final Storage<?> storageDevice;
         final String[] storageDrivers;
         final String[] nextArgs;
         final String[] loggerNames;
@@ -257,7 +257,7 @@ final public class SbkGem {
         } else {
             Storage<?> device = null;
             try {
-                device = packageStore.getClass(className);
+                device = (Storage<?>) packageStore.getClass(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                     IllegalAccessException | InstantiationException ex) {
                 Printer.log.warn("Instantiation of storage class '" + className + "' from the package '" +
@@ -429,6 +429,4 @@ final public class SbkGem {
         }
         System.out.println(separatorText);
     }
-
-
 }

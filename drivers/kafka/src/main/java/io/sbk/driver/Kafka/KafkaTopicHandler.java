@@ -36,7 +36,15 @@ public class KafkaTopicHandler {
         topicProperties.put("min.insync.replicas", Short.toString(config.sync));
         admin = AdminClient.create(adminProperties);
         topic = new NewTopic(config.topicName, config.partitions, config.replica);
-        topic.configs(new HashMap<>((Map) topicProperties));
+        final Map<String, String> configMap = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : topicProperties.entrySet()) {
+            final Object key = entry.getKey();
+            final Object value = entry.getValue();
+            if (key != null && value != null) {
+                configMap.put(key.toString(), value.toString());
+            }
+        }
+        topic.configs(configMap);
 
     }
 

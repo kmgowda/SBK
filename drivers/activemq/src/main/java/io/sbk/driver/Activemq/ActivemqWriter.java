@@ -34,7 +34,7 @@ public class ActivemqWriter implements Writer<String> {
     }
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         try {
             this.producer.send(config.session.createTextMessage(data));
         } catch (JMSException ex) {

@@ -34,14 +34,14 @@ public class ElasticsearchReader implements Reader<String> {
         this.client = client;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
     public String read() throws IOException {
         try {
             GetRequest request = GetRequest.of(g -> g
                     .index(config.index.trim())
                     .id(String.valueOf(id++))
             );
-            GetResponse<Map> response = client.get(request, Map.class);
+            GetResponse<Map<String, Object>> response = client.get(request, (Class<Map<String, Object>>) (Class<?>) Map.class);
             return response.fields().toString();
         } catch (ElasticsearchException e) {
             Printer.log.error("Elastic Search: recordRead failed !");

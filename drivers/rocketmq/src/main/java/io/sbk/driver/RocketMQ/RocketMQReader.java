@@ -13,7 +13,7 @@ import io.sbk.params.ParameterOptions;
 import io.sbk.api.Reader;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageExt;
 
@@ -33,7 +33,7 @@ public class RocketMQReader implements Reader<byte[]> {
     public RocketMQReader(int readerId, ParameterOptions params, String namesAdr, String topicName,
                           RocketMQClientConfig config, String subscriptionName) throws IOException {
         this.params = params;
-        queue = new LinkedBlockingQueue();
+        queue = new LinkedBlockingQueue<byte[]>();
         rmqConsumer = new DefaultMQPushConsumer(subscriptionName);
         rmqConsumer.setNamesrvAddr(namesAdr);
         rmqConsumer.setInstanceName("ConsumerInstance" + readerId);
@@ -42,7 +42,8 @@ public class RocketMQReader implements Reader<byte[]> {
         }
         try {
             rmqConsumer.subscribe(topicName, "*");
-            rmqConsumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
+            rmqConsumer.registerMessageListener((java.util.List<MessageExt> msgs,
+                                                ConsumeConcurrentlyContext context) -> {
                 for (MessageExt message : msgs) {
                     queue.add(message.getBody());
                 }

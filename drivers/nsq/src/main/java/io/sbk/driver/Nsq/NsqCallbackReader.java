@@ -37,7 +37,7 @@ public class NsqCallbackReader extends AbstractCallbackReader<byte[]> {
     }
 
     @Override
-    public void start(Callback callback) throws IOException {
+    public void start(Callback<byte[]> callback) throws IOException {
         consumer = new NSQConsumer(lookup, topicName, subscriptionName, msg -> {
             //now mark the message as finished.
             callback.consume(msg.getMessage());

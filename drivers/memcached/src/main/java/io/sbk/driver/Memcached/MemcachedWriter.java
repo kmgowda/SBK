@@ -32,7 +32,7 @@ public class MemcachedWriter implements Writer<String> {
     }
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         try {
             xMemcachedClient.set(Long.toString(key++), 3600, data);
         } catch (TimeoutException e) {

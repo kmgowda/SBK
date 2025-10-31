@@ -26,7 +26,8 @@ import java.util.Map;
 public class DynamodbReader implements Reader<byte[]> {
 
     private DynamoDbClient ddb;
-    final private ParameterOptions params;
+    @SuppressWarnings("unused")
+    private final ParameterOptions params;
 
     private DynamodbConfig config;
 

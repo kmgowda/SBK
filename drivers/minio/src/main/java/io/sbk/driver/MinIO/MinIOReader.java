@@ -35,6 +35,7 @@ import java.security.NoSuchAlgorithmException;
  * Class for MinIO Reader.
  */
 public class MinIOReader implements Reader<byte[]> {
+    @SuppressWarnings("unused")
     final private ParameterOptions params;
     final private MinIOConfig config;
     final private MinioClient client;
@@ -46,7 +47,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordRead(DataType dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
+    public void recordRead(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;
@@ -69,7 +70,7 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     @Override
-    public void recordReadTime(DataType dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
+    public void recordReadTime(DataType<byte[]> dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final Iterable<Result<Item>> results =
                 client.listObjects(config.bucketName, config.bucketName, false);
         Item item;

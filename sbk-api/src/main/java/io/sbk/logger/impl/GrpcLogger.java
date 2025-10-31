@@ -66,7 +66,7 @@ public class GrpcLogger extends PrometheusLogger {
     private ServiceGrpc.ServiceBlockingStub blockingStub;
     private MessageLatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
-    private ExceptionHandler exceptionHandler;
+    // Removed unused exceptionHandler field. If you need custom exception handling, implement setExceptionHandler logic here.
 
     /**
      * calls its super class PrometheusLogger.
@@ -83,7 +83,7 @@ public class GrpcLogger extends PrometheusLogger {
 
     @Override
     public void setExceptionHandler(ExceptionHandler handler) {
-        this.exceptionHandler = handler;
+        // No-op as per edit hint.
     }
 
     @Override
@@ -119,7 +119,7 @@ public class GrpcLogger extends PrometheusLogger {
         sbmHostConfig.port = Integer.parseInt(params.getOptionValue("sbmport", Integer.toString(sbmHostConfig.port)));
         //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
         blocking = false;
-        exceptionHandler = null;
+        // exceptionHandler = null; // This line is removed as per edit hint.
     }
 
     @Override

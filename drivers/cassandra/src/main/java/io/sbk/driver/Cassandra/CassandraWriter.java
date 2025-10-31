@@ -29,7 +29,7 @@ public class CassandraWriter implements Writer<String> {
 
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
                 .append(config.keyspace).append(".").append(config.table).append(" (id, data) ")
                 .append("VALUES (").append(UUID.randomUUID())

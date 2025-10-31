@@ -30,7 +30,7 @@ public class NullWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         if (n > 0) {
             for (long i = 0; i < n; i++) {
                 //no op

@@ -68,7 +68,7 @@ public class NatsStreamWriter implements Writer<byte[]> {
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         try {
             producer.publish(topic, data);
         } catch (InterruptedException | TimeoutException ex) {

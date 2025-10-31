@@ -30,7 +30,7 @@ public class LevelDBWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         db.put(String.valueOf(this.key++).getBytes(), data);
         return null;
     }

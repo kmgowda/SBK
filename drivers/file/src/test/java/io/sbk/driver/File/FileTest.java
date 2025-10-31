@@ -195,6 +195,7 @@ public class FileTest {
     }
 
     // This test case works only if the append mode is disabled
+    @SuppressWarnings("null")
     @Test
     public void testWriterReaderData() {
         final String data = "KMG-SBK";
@@ -285,6 +286,7 @@ public class FileTest {
     }
 
     // This test case works only if the append mode is disabled
+    @SuppressWarnings("null")
     @Test
     public void testReaderEOF() {
         final String data = "KMG-SBK";

@@ -25,14 +25,10 @@ import java.util.Map;
  */
 public class CouchDBReader implements Reader<String> {
     final private CouchDbConnector db;
-    final private ParameterOptions params;
     private long key;
-    private int cnt;
 
     public CouchDBReader(int id, ParameterOptions params, CouchDBConfig config, CouchDbConnector db) throws IOException {
         this.key = CouchDB.generateStartKey(id);
-        this.cnt = 0;
-        this.params = params;
         this.db = db;
     }
 
@@ -40,7 +36,7 @@ public class CouchDBReader implements Reader<String> {
     public String read() throws EOFException, IOException {
         String k = Long.toString(key);
         try {
-            Map<String, Object> map = db.get(Map.class, k);
+            Map<?, ?> map = db.get(Map.class, k);
             if (map != null) {
                 key++;
                 return (String) map.get("data");

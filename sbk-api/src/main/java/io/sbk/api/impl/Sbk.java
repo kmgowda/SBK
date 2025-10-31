@@ -139,7 +139,7 @@ final public class Sbk {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final RWLoggerPackage loggerStore = new RWLoggerPackage(sbkLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
-        final Storage storageDevice;
+        final Storage<Object> storageDevice;
         final InputParameterOptions params;
         final RWLogger rwLogger;
         final Time time;
@@ -209,7 +209,7 @@ final public class Sbk {
             throw new ParseException("The option '-"+Config.CLASS_OPTION+"' is not supplied");
         } else {
             try {
-                storageDevice = packageStore.getClass(className);
+                storageDevice = (Storage<Object>) packageStore.getClass(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
                     | IllegalAccessException ex) {
                 Printer.log.error("Instantiation of storage class '" + className + "' from the package '" +
@@ -248,7 +248,7 @@ final public class Sbk {
             throw ex;
         }
 
-        final DataType dType = storageDevice.getDataType();
+        final DataType<Object> dType = (DataType<Object>) storageDevice.getDataType();
         if (dType == null) {
             String errMsg = "No storage Data type";
             Printer.log.error(errMsg);

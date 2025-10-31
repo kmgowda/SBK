@@ -35,7 +35,7 @@ public class CouchbaseWriter implements Writer<String> {
     }
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         collection.upsert(Long.toString(key++), data);
         return null;
     }

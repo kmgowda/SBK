@@ -19,7 +19,7 @@ import java.util.Set;
  * class StoragePackage.
  */
 @NotThreadSafe
-final public class StoragePackage extends Package<Storage> {
+final public class StoragePackage extends Package<Storage<?>> {
     public StoragePackage(String packageName) {
         super(packageName);
     }
@@ -30,10 +30,11 @@ final public class StoragePackage extends Package<Storage> {
      * @param packageName Name of the package.
      * @return Set of classes extends Storage class
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public Set<Class<? extends Storage>> getClasses(String packageName) {
+    public Set<Class<? extends Storage<?>>> getClasses(String packageName) {
         final Reflections reflections = new Reflections(packageName);
-        return reflections.getSubTypesOf(Storage.class);
+        return (Set<Class<? extends Storage<?>>>) (Set<?>) reflections.getSubTypesOf(Storage.class);
     }
 
 }
