@@ -13,6 +13,12 @@ import io.time.Time;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Base class for implementations that collect events from multiple channels
+ * and drive periodic recorders. Concrete subclasses implement the dispatching
+ * loop in {@link #run(long, long)} and manage channel consumption semantics
+ * (for example busy-wait vs sleep strategies).
+ */
 abstract public class PerformanceRecorder {
     final protected int windowIntervalMS;
     final protected Time time;
@@ -20,12 +26,12 @@ abstract public class PerformanceRecorder {
     final protected Channel[] channels;
 
     /**
-     * Constructor to initialize values.
+     * Constructor to initialize performance recorder.
      *
-     * @param periodicRecorder      PeriodicRecorder
-     * @param channels              Channel[]
-     * @param time                  Time
-     * @param reportingIntervalMS   int
+     * @param periodicRecorder      periodic aggregator/recorder
+     * @param channels              array of channels (one per worker/thread)
+     * @param time                  time helper for conversions
+     * @param reportingIntervalMS   reporting interval in milliseconds
      */
     public PerformanceRecorder(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
                                        int reportingIntervalMS) {
@@ -36,10 +42,12 @@ abstract public class PerformanceRecorder {
     }
 
     /**
-     * Method run.
+     * Main loop that consumes channel events and updates periodic recorders.
+     * Implementations must honor the provided {@code secondsToRun} /
+     * {@code totalRecords} termination semantics.
      *
-     * @param secondsToRun      final long.
-     * @param totalRecords      final long.
+     * @param secondsToRun final long seconds to run (0 for record-count-based run)
+     * @param totalRecords total number of records when running in count-based mode
      */
     abstract public void run(final long secondsToRun, final long totalRecords);
 

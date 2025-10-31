@@ -11,7 +11,9 @@
 package io.perl.api;
 
 /**
- * Interface for Periodic window.
+ * Interface representing a periodic aggregation window used by recorders to
+ * group events between calls to {@link #startWindow(long)} and
+ * {@link #stopWindow(long)}.
  */
 public interface PeriodicWindow {
 
@@ -31,8 +33,8 @@ public interface PeriodicWindow {
     long elapsedMilliSecondsWindow(long currentTime);
 
     /**
-     * Stop the Recording window.
-     * Results from startWindow to this method are printed /flushed.
+     * Stop the Recording window. Results from startWindow to this method are
+     * printed or flushed.
      *
      * @param stopTime stopTime.
      */

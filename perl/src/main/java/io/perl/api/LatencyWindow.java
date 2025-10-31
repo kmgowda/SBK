@@ -16,37 +16,45 @@ import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Sealed Class LatencyWindow.
+ * LatencyWindow aggregates latency and throughput data.
+ *
+ * It accumulates records, computes averages, percentiles and SLC metrics, and delegates
+ * printing to a {@link Print} implementation.
+ *
+ * <p>Typical flow:
+ * <ol>
+ *     <li>{@link #reset(long)} is called with the window start time.</li>
+ *     <li>Events are recorded into the window's recorder.</li>
+ *     <li>When the reporting time arrives the framework calls
+ *     {@link #print(long, Print, ReportLatencies)} to compute percentiles and
+ *     emit the periodic summary.</li>
+ * </ol>
  */
 abstract public sealed class LatencyWindow extends LatencyRecorder permits LatencyRecordWindow {
-    /**
-     * <code>LatencyPercentiles percentiles</code>.
-     */
+
+    /* configured percentiles helper */
     final protected LatencyPercentiles percentiles;
-    /**
-     * <code>Time time</code>.
-     */
+
+    /* time helper used for elapsed conversions */
     final protected Time time;
-    /**
-     * <code>long[] slc</code>.
-     */
+
+    /* sliding latency coverage result */
     final private long[] slc;
-    /**
-     * <code>long startTime</code>.
-     */
+
+    /* window start time in the Time implementation's unit */
     private long startTime;
 
 
     /**
-     * Constructor LatencyWindow to initialize values and pass Latencies to it's super class.
+     * Construct a latency window with configured thresholds and percentiles.
      *
-     * @param lowLatency                 long
-     * @param highLatency                long
-     * @param totalLatencyMax            long
-     * @param totalRecordsMax            long
-     * @param bytesMax                   long
-     * @param percentilesFractions       double[]
-     * @param time                       Time
+     * @param lowLatency            minimum latency value (inclusive)
+     * @param highLatency           maximum latency value (inclusive)
+     * @param totalLatencyMax       maximum cumulative latency allowed before overflow
+     * @param totalRecordsMax       maximum total records allowed before overflow
+     * @param bytesMax              maximum total bytes allowed before overflow
+     * @param percentilesFractions  array of percentile fractions (e.g. {0.5, 0.9})
+     * @param time                  Time helper used for elapsed conversions
      */
     public LatencyWindow(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax, long bytesMax,
                          double[] percentilesFractions, Time time) {
@@ -57,7 +65,7 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
     }
 
     /**
-     * Reset the window.
+     * Reset the window state and set the start time.
      *
      * @param startTime starting time.
      */
@@ -68,7 +76,8 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
 
 
     /**
-     * Get the current time duration of this window since reset() method invoked.
+     * Get the elapsed time in milliseconds between the provided current time
+     * and the window start time.
      *
      * @param currentTime current time.
      * @return elapsed Time in Milliseconds
@@ -78,11 +87,13 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
     }
 
     /**
-     * Print the window statistics.
+     * Print the computed window statistics using the supplied logger. This
+     * method computes percentiles by delegating to {@link #copyPercentiles}
+     * and computes SLC before delegating to the logger's print method.
      *
      * @param endTime       End time.
      * @param logger        printer interface.
-     * @param copyLatencies Copy Latency values
+     * @param copyLatencies Copy Latency values provider.
      */
     final public void print(long endTime, Print logger, ReportLatencies copyLatencies) {
         copyPercentiles(percentiles, copyLatencies);
@@ -104,7 +115,7 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
                 slc[0], slc[1], this.percentiles.latencies, this.percentiles.latenciesCount);
     }
 
-    private void getSLC(@NotNull LatencyPercentiles percentiles, @NotNull long[] slc) {
+    private void getSLC(@NotNull LatencyPercentiles percentiles, long[] slc) {
         slc[0] = 0;
         slc[1] = 0;
         final int h = percentiles.latencies.length - 1;
@@ -146,15 +157,15 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
 
 
     /**
-     * is the latency storage full.
+     * Indicates whether the underlying storage used by the window is full.
      *
-     * @return indicate the latency storage is full or not
+     * @return true if the storage is full
      */
     abstract public boolean isFull();
 
 
     /**
-     * Max memory Size in Bytes.
+     * Return the maximum memory usage in bytes for the window's storage.
      *
      * @return Maximum window memory size in bytes
      */

@@ -11,14 +11,17 @@
 package io.perl.exception;
 
 /**
- * Interface ExceptionHandler.
+ * Simple callback interface for reporting exceptions from PerL internals to
+ * caller code. Implementations may rethrow, log, or otherwise handle the
+ * provided Throwable.
  */
 public interface ExceptionHandler {
 
     /**
-     * throw an Exception.
+     * Report or propagate an exception occurred inside the PerL runtime.
+     * Implementations may choose to rethrow the exception or record it.
      *
-     * @param ex Exception
+     * @param ex Throwable to handle
      */
     void throwException(Throwable ex);
 }

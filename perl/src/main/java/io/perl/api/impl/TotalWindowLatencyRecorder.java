@@ -15,18 +15,21 @@ import io.perl.logger.Print;
 import io.perl.logger.ReportLatency;
 
 /**
- * Class TotalWindowLatencyRecorder.
+ * Recorder that forwards incoming latency samples to a windowed storage and
+ * checks whether the window storage is full to trigger periodic resets.
+ * This class also maintains a total aggregated window for end-of-run
+ * reporting.
  */
 public sealed class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow
         implements ReportLatency permits TotalWindowLatencyPeriodicRecorder {
 
     /**
-     * Constructor TotalWindowLatencyRecorder passing all values to its super class.
+     * Construct recorder with per-window and total storage plus loggers.
      *
-     * @param window                LatencyRecordWindow
-     * @param totalWindow           LatencyRecordWindow
-     * @param windowLogger          Print
-     * @param totalLogger           Print
+     * @param window       per-window latency store
+     * @param totalWindow  total-window latency store used for final aggregation
+     * @param windowLogger logger used for periodic window-level printing
+     * @param totalLogger  logger used for total-level printing
      */
     public TotalWindowLatencyRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
                                       Print windowLogger, Print totalLogger) {

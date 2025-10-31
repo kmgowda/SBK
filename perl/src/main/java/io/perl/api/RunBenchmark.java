@@ -14,19 +14,31 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Interface for executing writers/readers benchmarks.
+ * Contract for starting a benchmark run. The implementation should start any
+ * required background tasks and return a {@link CompletableFuture} that
+ * completes when the benchmark run finishes (either naturally or due to an
+ * error).
  */
 public interface RunBenchmark {
 
     /**
-     * Run the performance Benchmark.
+     * Start the performance benchmark.
      *
-     * @param secondsToRun Number of seconds to Run
-     * @param recordsCount If secondsToRun is 0, then this indicates the total number of records to benchmark or
-     *                     read/write. If secondsToRun is higher than 0, then this parameter is ignored.
-     * @return CompletableFuture.
-     * @throws IllegalStateException If an exception occurred.
-     * @throws IOException           End of File exception
+     * <p>If {@code secondsToRun} &gt; 0 the benchmark should run for the given
+     * number of seconds and then stop; if {@code secondsToRun} == 0 the
+     * benchmark should run until {@code recordsCount} records are processed.
+     *
+     * The returned {@link CompletableFuture} completes when the benchmark
+     * finishes. The future completes exceptionally if an error occurs.
+     *
+     * @param secondsToRun Number of seconds to run; when > 0 this takes precedence
+     *                     over {@code recordsCount}
+     * @param recordsCount When {@code secondsToRun} == 0, this indicates the total
+     *                     number of records to process before completing
+     * @return a CompletableFuture that completes when the run finishes
+     * @throws IllegalStateException If the benchmark cannot be started due to
+     *                               incorrect state
+     * @throws IOException           if an I/O error occurs while starting
      */
     CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException,
             IllegalStateException;

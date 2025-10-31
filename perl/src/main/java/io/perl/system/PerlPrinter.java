@@ -15,12 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class PerlPrinter.
+ * Centralized logger used by PerL classes. Exposes a single public
+ * {@link #log} instance configured with the PerL module name for consistent
+ * logging across the module.
  */
 final public class PerlPrinter {
     final private static String LOGGER_NAME = PerlConfig.NAME;
-    /**
-     * <code>Logger log = LoggerFactory.getLogger(LOGGER_NAME)</code>.
-     */
+    /** Logger instance for PerL internals. */
     final public static Logger log = LoggerFactory.getLogger(LOGGER_NAME);
 }

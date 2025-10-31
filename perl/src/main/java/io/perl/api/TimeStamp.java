@@ -11,27 +11,39 @@
 package io.perl.api;
 
 /**
- * class for time stamp including start, end time, bytes and records.
+ * Immutable container representing a benchmarking event timestamp. An instance
+ * carries a start and end time together with the number of records and bytes
+ * processed for that event.
+ *
+ * <p>Convention:
+ * <ul>
+ *     <li>A {@link TimeStamp} with {@code startTime == -1} is treated as an
+ *     end marker (see {@link #isEnd()}).</li>
+ *     <li>Time units for {@code startTime} and {@code endTime} are caller
+ *     defined (commonly nanoseconds); callers must convert timings to the
+ *     desired {@link io.perl.logger.PerformanceLogger#getTimeUnit()} when
+ *     reporting latencies.</li>
+ * </ul>
  */
 final public class TimeStamp {
 
     /**
-     * <code>long startTime</code>.
+     * Event start time (caller-defined time unit).
      */
     final public long startTime;
 
     /**
-     * <code>long endTime</code>.
+     * Event end time (caller-defined time unit).
      */
     final public long endTime;
 
     /**
-     * <code>int records</code>.
+     * Number of records/events represented by this timestamp.
      */
     final public int records;
 
     /**
-     * <code>int bytes</code>.
+     * Size in bytes for the event(s).
      */
     final public int bytes;
 
@@ -52,24 +64,24 @@ final public class TimeStamp {
     }
 
     /**
-     * This Constructor TimeStamp with no arguments initialize all values with 0.
+     * Create an empty TimeStamp with all zeros.
      */
     public TimeStamp() {
         this(0, 0, 0, 0);
     }
 
     /**
-     * This Constructor TimeStamp with just one argument, initialize {@link #startTime} = -1
-     * and {@link #endTime} according to the given parameters.
+     * Create an end marker TimeStamp. A TimeStamp with {@code startTime == -1}
+     * is treated as an end-of-stream indicator by consumers.
      *
-     * @param endTime long
+     * @param endTime end time value
      */
     public TimeStamp(long endTime) {
         this(-1, endTime, 0, 0);
     }
 
     /**
-     * Checks if it is the end.
+     * Checks if this timestamp is the end marker.
      *
      * @return true if {@link #startTime} == -1.
      */

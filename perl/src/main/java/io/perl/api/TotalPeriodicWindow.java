@@ -11,12 +11,15 @@
 package io.perl.api;
 
 /**
- * Interface for recording latencies.
+ * Interface that extends {@link PeriodicWindow} with lifecycle methods for a
+ * total aggregation window. Implementations maintain a global view across the
+ * entire benchmark run and can be used to print final aggregated results.
  */
 public interface TotalPeriodicWindow extends PeriodicWindow {
 
     /**
-     * Start the Total Window.
+     * Start the total aggregation window at the given start time. Called once
+     * when the benchmark run begins.
      *
      * @param startTime starting time.
      */
@@ -24,7 +27,7 @@ public interface TotalPeriodicWindow extends PeriodicWindow {
 
 
     /**
-     * Stop the Total Window.
+     * Stop the total aggregation window and flush final totals.
      *
      * @param endTime current time.
      */
