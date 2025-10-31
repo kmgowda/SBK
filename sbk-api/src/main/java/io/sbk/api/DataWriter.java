@@ -18,6 +18,18 @@ import java.io.IOException;
 
 /**
  * Interface for Basic Data Writers.
+ *
+ * <p>This is the low-level writer contract that driver implementations must
+ * implement. It focuses on the primitive writer lifecycle and the basic
+ * workload entry points used by the harness. Higher-level helper methods and
+ * default workload implementations are provided in {@link DataRecordsWriter}.
+ *
+ * <p>Implementors should:
+ * <ul>
+ *   <li>Implement {@link #close()} to release any resources held by the writer.</li>
+ *   <li>Provide efficient implementations for the workload entry points when
+ *       the default helpers are not sufficient for the driver's optimized path.</li>
+ * </ul>
  */
 public sealed interface DataWriter<T> permits DataRecordsWriter {
 

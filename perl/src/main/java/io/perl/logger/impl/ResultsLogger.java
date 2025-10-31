@@ -20,7 +20,23 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 /**
- * Class ResultsLogger.
+ * Base implementation for printing benchmark results to different sinks.
+ *
+ * <p>The {@code ResultsLogger} centralises formatting and percentile handling
+ * for the various concrete logger implementations. It stores the configured
+ * percentile fractions, the reporting time unit and min/max latency bounds
+ * and exposes utility helpers used by subclasses to build consistent textual
+ * output or to forward metrics to other systems.
+ *
+ * <p>Responsibilities:
+ * <ul>
+ *   <li>Store and validate percentile fractions and produce human-friendly
+ *       percentile name strings used in textual output.</li>
+ *   <li>Provide the shared {@link #appendResultString} helper that formats
+ *       the standard summary line used across loggers.</li>
+ *   <li>Offer pluggable constructors so subclasses can override configuration
+ *       such as the prefix, percentiles or time units.</li>
+ * </ul>
  */
 public abstract class ResultsLogger implements PerformanceLogger {
 

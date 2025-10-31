@@ -20,6 +20,36 @@ import java.io.IOException;
 
 /**
  * Interface for Data Record Readers.
+ *
+ * <p>This interface defines the higher-level read primitives the SBK harness
+ * uses to exercise read workloads. It focuses on recording read metrics and
+ * provides default implementations that compose lower-level read operations
+ * into common benchmark patterns (count-based, time-based, with/without rate
+ * control and optional per-request logging).
+ *
+ * <p>Key concepts:
+ * <ul>
+ *   <li>{@code recordRead(...)} and {@code recordReadTime(...)} are the
+ *       primitive metric-reporting callbacks drivers should implement or rely
+ *       on via the provided default helpers.</li>
+ *   <li>Default methods like {@code genericRecordsReader} and
+ *       {@code genericRecordsTimeReader} implement common patterns and avoid
+ *       duplication across drivers.</li>
+ *   <li>Rate-controlled variants accept a {@link io.sbk.api.RateController}
+ *       and call its {@code control} method to throttle throughput.</li>
+ * </ul>
+ *
+ * <p>Implementation notes:
+ * <ul>
+ *   <li>Prefer implementing the most efficient primitive (single-record or
+ *       multi-record) and let the default methods compose them for the
+ *       harness.</li>
+ *   <li>When payloads embed a start timestamp, implement
+ *       {@code recordReadTime} so end-to-end latency is measured correctly.</li>
+ * </ul>
+ *
+ * <p>Original brief description preserved for compatibility:
+ * <blockquote>Interface for Data Record Readers.</blockquote>
  */
 public sealed interface DataRecordsReader<T> extends DataReader<T> permits AsyncReader, Reader {
 

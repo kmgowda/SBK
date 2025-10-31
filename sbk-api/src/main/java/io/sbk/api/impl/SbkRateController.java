@@ -13,6 +13,23 @@ package io.sbk.api.impl;
 import io.sbk.api.RateController;
 import io.time.Time;
 
+/**
+ * Simple rate controller used by SBK to pace operations to a target
+ * records-per-second value.
+ *
+ * <p>The controller computes an average inter-record sleep time in
+ * nanoseconds and accumulates fractional sleep time to decide when to
+ * perform an actual Thread.sleep with millisecond+nanosecond precision.
+ * This avoids sleeping on every operation while preserving long-term
+ * throughput accuracy.
+ *
+ * <p>Notes:
+ * <ul>
+ *   <li>If {@code recordsPerSec} is zero or negative the controller is inactive.</li>
+ *   <li>Sleep durations smaller than {@link #MIN_SLEEP_NS} are accumulated and coalesced
+ *       before a blocking sleep is issued to avoid excessive context switches.</li>
+ * </ul>
+ */
 final public class SbkRateController implements RateController {
     private static final long MIN_SLEEP_NS = 2 * Time.NS_PER_MS;
     private long sleepTimeNs;

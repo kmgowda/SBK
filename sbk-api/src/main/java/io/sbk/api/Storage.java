@@ -22,7 +22,34 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 
 /**
- * Interface for Benchmarking.
+ * Storage driver interface used by the SBK harness.
+ *
+ * <p>Driver implementations provide the plumbing to create reader and writer
+ * instances, parse and handle driver-specific command-line arguments, and
+ * manage the storage client's lifecycle. The harness uses this abstraction
+ * to remain storage-agnostic and to execute uniform benchmark workloads.
+ *
+ * <p>Key responsibilities for implementations:
+ * <ul>
+ *   <li>Declare and parse driver-specific arguments via {@link #addArgs(InputOptions)}
+ *       and {@link #parseArgs(ParameterOptions)}.</li>
+ *   <li>Open and close the storage client in {@link #openStorage(ParameterOptions)}
+ *       and {@link #closeStorage(ParameterOptions)}.</li>
+ *   <li>Provide {@link DataWriter} and {@link DataReader} instances that
+ *       implement the per-worker read/write behaviour used by the harness.</li>
+ *   <li>Supply a {@link DataType} via {@link #getDataType()} that describes the
+ *       payload format; the default implementation returns {@code byte[]}.
+ * </ul>
+ *
+ * <p>Implementation notes:
+ * <ul>
+ *   <li>The default {@link #getDataType()} returns a {@link io.sbk.data.impl.ByteArray}
+ *       for convenience; override it when your driver works with a different
+ *       payload type.</li>
+ *   <li>All driver methods may throw {@link IOException} when I/O failures
+ *       occur; the harness will surface these back to the user and stop the
+ *       benchmark run.</li>
+ * </ul>
  */
 public interface Storage<T> {
 

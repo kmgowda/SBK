@@ -18,7 +18,20 @@ import java.io.EOFException;
 import java.io.IOException;
 
 /**
- * Interface for Basic Data Readers.
+ * Abstraction for data-reading capabilities used by SBK drivers.
+ *
+ * <p>This interface exposes multiple entry points used by the benchmark harness
+ * to drive read workloads (fixed count, time-based, with/without concurrent
+ * writers, and with optional rate limiting). Implementations should perform
+ * the requested workload using the provided {@link Worker} descriptor and
+ * report metrics via the configured logging/Perl hooks.
+ *
+ * <p>Important details for implementors:
+ * <ul>
+ *   <li>Default methods are provided for common patterns; override them when optimized or batch reads are needed.</li>
+ *   <li>Methods ending with "RW" are intended for workloads where concurrent writers are also active.</li>
+ *   <li>Rate-controlled variants accept a {@link RateController} to allow the harness to throttle throughput.</li>
+ * </ul>
  */
 public sealed interface DataReader<T> permits AbstractCallbackReader, DataRecordsReader {
 

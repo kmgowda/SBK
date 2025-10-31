@@ -19,7 +19,28 @@ import java.io.EOFException;
 import java.io.IOException;
 
 /**
- * Interface for Readers.
+ * Reader abstraction used by SBK drivers to provide synchronous read semantics.
+ *
+ * <p>This interface extends {@link DataRecordsReader} and exposes a simple
+ * synchronous {@link #read()} method that returns a single record. Default
+ * helper methods are provided to convert the returned payload into PerL
+ * metric events; implementors may override these helpers when batching or
+ * more efficient read paths are available.
+ *
+ * <p>Guidelines for implementors:
+ * <ul>
+ *   <li>Return {@code null} from {@link #read()} to indicate no data was read
+ *       (timeout or empty stream); the default helpers interpret this as a
+ *       zero-record event.</li>
+ *   <li>Use {@link DataType#getTime(Object)} when the payload encodes a
+ *       start timestamp and prefer the {@code recordReadTime} helpers to
+ *       measure end-to-end latency.</li>
+ *   <li>Close resources in {@link #close()} to avoid leaks when drivers are
+ *       dynamically loaded or run in long-lived processes.</li>
+ * </ul>
+ *
+ * <p>Original brief description preserved for compatibility:
+ * <blockquote>Interface for Readers.</blockquote>
  */
 public non-sealed interface Reader<T> extends DataRecordsReader<T> {
 
@@ -181,4 +202,3 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
         }
     }
 }
-

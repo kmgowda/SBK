@@ -22,6 +22,22 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Interface for Asynchronous Readers.
+ *
+ * <p>This interface extends {@link DataRecordsReader} and models readers that
+ * return data asynchronously using {@link java.util.concurrent.CompletableFuture}.
+ * Implementations should provide a non-blocking {@link #readAsync(int)}
+ * primitive and may rely on default helpers to report PerL metrics when
+ * the benchmark harness requires timing or throughput observations.
+ *
+ * <p>Notes for implementors:
+ * <ul>
+ *   <li>When the reader cannot perform an asynchronous read, returning a
+ *       completed future that contains {@code null} is an acceptable signal
+ *       that no data was read.</li>
+ *   <li>Default metric-recording helpers convert completed futures into
+ *       PerL events and propagate exceptions (including timeouts) to the
+ *       configured logger or PerL channel.</li>
+ * </ul>
  */
 public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
 
@@ -217,4 +233,3 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         }
     }
 }
-

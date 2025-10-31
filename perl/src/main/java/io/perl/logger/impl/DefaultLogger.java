@@ -13,7 +13,13 @@ package io.perl.logger.impl;
 import io.time.TimeUnit;
 
 /**
- * Class DefaultLogger.
+ * Simple textual results logger that prints the formatted summary to stdout.
+ *
+ * <p>This concrete logger is a thin convenience wrapper around
+ * {@link ResultsLogger} that exposes two constructors: a fully-configurable
+ * constructor and a no-argument convenience constructor that uses default
+ * values from configuration. Use this logger when you want human-readable
+ * results on the console or redirected to a file.
  */
 public class DefaultLogger extends ResultsLogger {
 

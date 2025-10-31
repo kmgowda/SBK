@@ -20,7 +20,29 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Interface for Writers.
+ * Writer interface used by SBK drivers to provide asynchronous write semantics.
+ *
+ * <p>This interface extends {@link DataRecordsWriter} and provides a simple
+ * asynchronous {@link #writeAsync(Object)} primitive plus convenience default
+ * implementations that attach timing metadata and report metrics. Implementors
+ * should override the asynchronous primitive and may rely on the default
+ * helpers for common harness behaviour.
+ *
+ * <p>Guidelines for implementors:
+ * <ul>
+ *   <li>Implement {@link #writeAsync(Object)} to perform a non-blocking write
+ *       and return a {@link java.util.concurrent.CompletableFuture} that
+ *       completes when the write is accepted/committed. Returning {@code null}
+ *       from higher-level helpers is used to indicate synchronous completion.
+ *   <li>Override {@link #sync()} if your storage requires an explicit flush or
+ *       durability call after batches of writes.</li>
+ *   <li>Prefer the {@code writeSetTime} helpers when you need the harness to
+ *       embed a start timestamp into the payload for end-to-end latency
+ *       measurement.</li>
+ * </ul>
+ *
+ * <p>Original short description preserved:
+ * <blockquote>Interface for Writers.</blockquote>
  */
 public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
 

@@ -16,7 +16,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Set;
 
 /**
- * class StoragePackage.
+ * Concrete Package implementation for discovering {@link io.sbk.api.Storage}
+ * implementations on the classpath. It uses Reflections to locate subtypes.
  */
 @NotThreadSafe
 final public class StoragePackage extends Package<Storage<?>> {

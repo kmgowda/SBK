@@ -12,6 +12,12 @@ package io.sbk.api;
 
 /**
  * Interface for Rate or Throughput Controller.
+ *
+ * <p>Implementations of this interface are used to throttle the harness' I/O
+ * operations to a configured target throughput (records per second). The
+ * controller exposes a {@code start} method to configure the target rate and
+ * a {@code control} callback that the harness calls periodically to allow
+ * the controller to sleep or yield as necessary.
  */
 public interface RateController {
 

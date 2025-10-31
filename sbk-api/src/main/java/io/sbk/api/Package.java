@@ -25,6 +25,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Utility base class for discovering implementation classes in a package.
+ *
+ * <p>This helper enumerates concrete classes of the configured type {@code T}
+ * using the concrete subclass's implementation of {@link #getClasses(String)}
+ * (implementation typically uses a classpath scanner such as Reflections).
+ * It provides convenience methods to list available implementations and to
+ * instantiate them by simple name.
+ *
+ * <p>Subclasses should implement {@link #getClasses(String)} to return the set
+ * of concrete classes for the target package. The class stores the
+ * discovered types in stable arrays and exposes sorted lookup functions used
+ * by the CLI and helper utilities.
+ */
 public abstract class Package<T> {
     final private static int MAX_PRINT_WIDTH = 80;
     final private String packageName;

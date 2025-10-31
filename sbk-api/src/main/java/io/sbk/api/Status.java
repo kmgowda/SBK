@@ -11,7 +11,23 @@
 package io.sbk.api;
 
 /**
- * class for Read and Write status.
+ * Holder for per-operation read/write status used by the SBK harness.
+ *
+ * <p>This mutable value object is reused by the benchmark helpers to return
+ * timing and size information for a single read or write operation. Fields
+ * are public for lightweight access from hot paths in the harness. Typical
+ * lifecycle for a {@link Status} instance in the harness:
+ * <ol>
+ *   <li>Set {@link #startTime} before beginning an operation.</li>
+ *   <li>Set {@link #endTime} when the operation completes (or equals
+ *       {@link #startTime} for synchronous operations).</li>
+ *   <li>Set {@link #records} and {@link #bytes} to indicate how many
+ *       records and bytes were processed.</li>
+ * </ol>
+ *
+ * <p>Note: this class intentionally exposes mutable public fields to avoid
+ * allocation and accessor overhead in the hot benchmarking loop. Do not
+ * share a single {@code Status} instance across concurrent operations.
  */
 final public class Status {
     public long startTime;

@@ -18,7 +18,13 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Class PrometheusMetricsServer.
+ * Metrics server wrapper that exposes Micrometer metrics via an HTTP endpoint
+ * using an embedded {@link PrometheusServer}.
+ *
+ * <p>This class composes a {@link PrintMetrics} registry with a small HTTP
+ * server that scrapes and returns Prometheus-formatted metrics. It is used
+ * by the Prometheus-enabled logger to publish runtime metrics for scraping
+ * by a Prometheus server.
  */
 public non-sealed class PrometheusMetricsServer extends PrintMetrics {
     final private PrometheusServer server;

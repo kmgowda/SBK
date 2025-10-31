@@ -14,7 +14,15 @@ import io.perl.config.LatencyConfig;
 import java.text.DecimalFormat;
 
 /**
- *  Class Metrics.
+ * Metrics name builder used by metric-based logger implementations.
+ *
+ * <p>The {@code Metrics} base class centralises naming conventions for Micrometer
+ * metrics (prefixes, unit suffixes and percentile-related metric names). It
+ * prepares arrays of metric names for both percentile values and percentile
+ * counts so concrete classes can register them easily with a meter registry.
+ *
+ * <p>Concrete subclasses should reuse the prepared name fields when creating
+ * counters, gauges or other metric instruments.
  */
 public abstract sealed class Metrics permits PrintMetrics {
     /**

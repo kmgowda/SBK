@@ -46,7 +46,26 @@ import java.util.concurrent.TimeoutException;
 
 
 /**
- * Main class of SBK.
+ * Central SBK bootstrap and factory helper.
+ *
+ * <p>This class contains the public entry-point used by the CLI to construct
+ * and run a benchmark. It performs the following responsibilities:
+ * <ul>
+ *   <li>Parse and normalise command-line arguments and environment properties.</li>
+ *   <li>Discover and instantiate the configured storage driver and logger using the
+ *       {@link io.sbk.api.Package} discovery helpers.</li>
+ *   <li>Build and return a {@link io.sbk.api.Benchmark} implementation ready to
+ *       be executed.</li>
+ * </ul>
+ *
+ * <p>Design notes:
+ * <ul>
+ *   <li>The {@link #buildBenchmark(String[], String, String, String)} method performs
+ *       discovery, validation and wiring: it never starts the benchmark — callers
+ *       must invoke {@link io.sbk.api.Benchmark#start()} to run the workload.</li>
+ *   <li>This class logs diagnostic information (SBK version, configured packages, JVM
+ *       and argument details) to aid troubleshooting in test and CI environments.</li>
+ * </ul>
  */
 final public class Sbk {
     final static String BANNERFILE = "banner.txt";

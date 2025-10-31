@@ -19,7 +19,16 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Class DefaultPrometheusLogger.
+ * Prometheus-enabled results logger.
+ *
+ * <p>This logger extends {@link DefaultLogger} to publish metrics to a
+ * locally-created Prometheus metrics server in addition to the textual
+ * output. It instantiates a {@link PrometheusMetricsServer} that registers
+ * Micrometer meters and exposes them via an HTTP endpoint.
+ *
+ * <p>Typical usage: construct with the required percentiles and a running
+ * {@link io.time.Time} instance, call {@link #start()} to begin serving
+ * metrics and call {@link #stop()} to shut the server down gracefully.
  */
 public class DefaultPrometheusLogger extends DefaultLogger {
     private final PrometheusMetricsServer server;

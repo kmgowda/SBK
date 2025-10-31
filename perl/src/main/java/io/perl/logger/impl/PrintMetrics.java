@@ -21,7 +21,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
+ * Metric-backed results reporter that publishes values to a Micrometer
+ * CompositeMeterRegistry.
+ *
+ * <p>This class registers counters and gauges for common result fields
+ * (bytes, records, rates and latencies) and provides a {@link #print}
+ * implementation that updates the registered instruments. It is primarily
+ * used as the backing implementation for Prometheus exposition.
  */
 public sealed class PrintMetrics extends Metrics implements Print permits PrometheusMetricsServer {
 
