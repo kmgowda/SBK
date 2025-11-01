@@ -161,7 +161,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         boolean stop = false;
         if (!ret.isDone()) {
-            final String errMsg = "SBK-GEM: command: " + cmd + " time out after " + config.maxIterations + " iterations";
+            final String errMsg = "SBK-GEM: command: " + cmd + " time out after " + config.maxIterations +
+                    " iterations! Check ssh user name and password or network connection";
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         } else {
