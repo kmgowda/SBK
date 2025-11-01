@@ -10,6 +10,12 @@
 
 package io.sbk.params;
 
+/**
+ * Builder/registry for supported command-line options before parsing.
+ *
+ * <p>Implementations allow components to declare options (name, arg requirement, description)
+ * and to query if an option has been registered. Parsing is handled by sub-interfaces.
+ */
 public sealed interface InputOptions permits ParseInputOptions {
     /**
      * Add the driver specific command line arguments.

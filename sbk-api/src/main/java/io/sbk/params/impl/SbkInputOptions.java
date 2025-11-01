@@ -28,6 +28,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 
+/**
+ * Default implementation of {@link ParseInputOptions} based on Apache Commons CLI.
+ *
+ * <p>Manages registration of options, parsing of arguments, and rendering of help text.
+ * Thread-safety is not guaranteed.
+ */
 public class SbkInputOptions implements ParseInputOptions {
     final private String benchmarkName;
     final private String header;
@@ -58,6 +64,11 @@ public class SbkInputOptions implements ParseInputOptions {
     }
 
     @Override
+    /**
+     * Register an option with name, argument-arity, and description.
+     *
+     * @throws IllegalArgumentException if an option with a case-insensitive matching name already exists
+     */
     final public void addOption(String name, boolean hasArg, String description) throws IllegalArgumentException {
         if (hasOption(name)) {
             throw new IllegalArgumentException("The matching case-insensitive option: '" + name +"' already exists!");
@@ -67,10 +78,17 @@ public class SbkInputOptions implements ParseInputOptions {
     }
 
     @Override
+    /**
+     * Check if an option with the given name (case-insensitive) was registered.
+     */
     final public boolean hasOption(String name) {
         return argNames.contains(name);
     }
 
+
+    /**
+     * Build and return the formatted help text for all registered options.
+     */
     @Override
     final public String getHelpText() {
         final OutputStream outStream = new ByteArrayOutputStream();
@@ -102,6 +120,10 @@ public class SbkInputOptions implements ParseInputOptions {
         return commandline != null ? commandline.getOptionValue(name, defaultValue) : defaultValue;
     }
 
+    /**
+     * Parse the provided arguments into a {@link CommandLine}. If the help option is present,
+     * throws {@link HelpException} carrying the formatted help text.
+     */
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         commandline = parser.parse(options, args, stopAtNonOption);

@@ -10,6 +10,12 @@
 
 package io.sbk.params;
 
+/**
+ * Parsed command-line options accessor.
+ *
+ * <p>Implementations provide read-only access to parsed CLI options, including presence checks,
+ * retrieval with and without defaults, and rendering of a formatted help message.
+ */
 public interface ParsedOptions {
 
     /**

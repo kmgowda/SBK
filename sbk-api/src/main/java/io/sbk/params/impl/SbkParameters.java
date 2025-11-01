@@ -19,7 +19,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 
 /**
- * Class for processing command Line arguments/parameters.
+ * Parses and exposes common SBK benchmark parameters.
+ *
+ * <p>Builds the CLI schema for core options (writers/readers, size, records, seconds,
+ * throughput, step controls, read-only, idle sleep) and maps parsed values into
+ * typed getters via Lombok {@link Getter} annotations.
+ *
+ * <p>Semantics (high-level):
+ * - **writers/readers**: concurrency configuration; at least one must be > 0.
+ * - **size**: record size (bytes); required if workers > 0.
+ * - **records/seconds/throughput**: determine rate control and runtime.
+ * - **wstep/wsec, rstep/rsec**: step ramping configuration.
+ * - **ro**: read-only when both writers and readers are set.
+ * - **millisecsleep**: idle sleep in milliseconds between operations.
  */
 @Slf4j
 public sealed class SbkParameters extends SbkInputOptions implements InputParameterOptions
@@ -68,6 +80,13 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     private int idleSleepMilliSeconds;
 
 
+    /**
+     * Construct parameters with the given benchmark name and description.
+     * Registers the standard SBK options and default values.
+     *
+     * @param name benchmark name
+     * @param desc help description
+     */
     public SbkParameters(String name, String desc) {
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
@@ -109,12 +128,22 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: 0 ms");
     }
 
+    /**
+     * Construct parameters using the default description.
+     *
+     * @param name benchmark name
+     */
     public SbkParameters(String name) {
         this(name, Config.DESC);
     }
 
 
     @Override
+    /**
+     * Parse SBK core options and compute derived values (e.g., recordsPerSec, totalSecondsToRun).
+     * Validates required combinations (e.g., at least one of writers/readers must be > 0).
+     * May throw {@link HelpException} via the superclass when help is requested.
+     */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
         final boolean writeReadOnly = Boolean.parseBoolean(getOptionValue("ro", "false"));

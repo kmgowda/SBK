@@ -12,10 +12,25 @@ package io.sbk.params.impl;
 import io.sbk.config.Config;
 import java.util.Arrays;
 
+/**
+ * Parameters implementation that exposes storage driver and logger selection options.
+ *
+ * <p>Augments {@link SbkParameters} by adding {@code -class} (storage driver) and
+ * {@code -logger} (logger driver) options. The available values are provided via the
+ * constructor and rendered in help text.
+ */
 public non-sealed class SbkDriversParameters extends SbkParameters {
     final private String[] drivers;
     final private String[] loggers;
 
+    /**
+     * Create parameters with custom help description and available drivers/loggers.
+     *
+     * @param name    benchmark name (used in help header)
+     * @param desc    help description
+     * @param drivers allowed storage driver class names to list in help
+     * @param loggers allowed logger class names to list in help
+     */
     public SbkDriversParameters(String name, String desc, String[] drivers, String[] loggers) {
         super(name, desc);
 
@@ -36,6 +51,13 @@ public non-sealed class SbkDriversParameters extends SbkParameters {
                 + Arrays.toString(this.loggers));
     }
 
+    /**
+     * Convenience constructor using the default description.
+     *
+     * @param name    benchmark name
+     * @param drivers allowed storage driver class names
+     * @param loggers allowed logger class names
+     */
     public SbkDriversParameters(String name, String[] drivers, String[] loggers) {
         this(name, Config.DESC, drivers, loggers);
     }

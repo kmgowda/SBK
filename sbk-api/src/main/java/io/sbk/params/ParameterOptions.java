@@ -10,7 +10,10 @@
 package io.sbk.params;
 
 /**
- * class for Command Line Parameters.
+ * Composite interface combining parsed CLI access with typed benchmark parameters.
+ *
+ * <p>Extends {@link ParsedOptions} for raw option/value retrieval and {@link Parameters}
+ * for strongly-typed accessors (writers, readers, sizes, steps, etc.).
  */
 public sealed interface ParameterOptions extends ParsedOptions, Parameters permits InputParameterOptions {
 

@@ -11,7 +11,10 @@
 package io.sbk.params;
 
 /**
- * Interface Parameters.
+ * Typed accessors for common SBK benchmark parameters.
+ *
+ * <p>These getters reflect parsed CLI values such as total runtime, record sizing,
+ * writer/reader concurrency, rate limiting, step ramping, and idle sleep.
  */
 public interface Parameters extends ActionParameter {
 

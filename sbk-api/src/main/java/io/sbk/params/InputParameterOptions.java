@@ -10,5 +10,12 @@
 
 package io.sbk.params;
 
+/**
+ * Composite interface bundling option registration, parsing, and typed parameter access.
+ *
+ * <p>Implementations both build the CLI schema (via {@link InputOptions}), parse arguments
+ * ({@link ParseInputOptions}), and expose strongly-typed parameter getters ({@link Parameters})
+ * transitively through {@link ParameterOptions}.
+ */
 public non-sealed interface InputParameterOptions extends ParseInputOptions, ParameterOptions {
 }
