@@ -96,7 +96,7 @@ public class CSVLogger extends SystemLogger {
     }
 
     /**
-     * final public method to Open CSV.
+     * Open the CSV and write the header line.
      *
      * @throws IOException If an exception occurred.
      */
@@ -136,7 +136,7 @@ public class CSVLogger extends SystemLogger {
     }
 
     /**
-     * final public method to write CSV.
+     * Write a single record (row) to the CSV file.
      *
      * @param header                         String
      * @param type                           String

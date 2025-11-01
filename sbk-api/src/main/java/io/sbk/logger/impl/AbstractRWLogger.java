@@ -7,7 +7,6 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-
 package io.sbk.logger.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -37,6 +36,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Base implementation of {@link io.sbk.logger.RWLogger} providing shared read/write request accounting,
+ * periodic aggregation, and printing helpers. Subclasses implement concrete outputs
+ * (System out, CSV, Prometheus, gRPC) by overriding the print methods while reusing the
+ * counters, percentiles, and CLI configuration handling provided here.
+ */
 public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger, SetRW {
     private final static String LOGGER_FILE = "logger.properties";
     private final static VarHandle VAR_HANDLE_ARRAY;
