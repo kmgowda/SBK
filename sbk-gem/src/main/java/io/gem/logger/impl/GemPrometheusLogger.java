@@ -14,15 +14,34 @@ import io.gem.logger.GemLogger;
 import io.sbm.logger.impl.SbmPrometheusLogger;
 
 /**
- * Class GemRamPrometheusLogger.
+ * Prometheus-backed GEM logger built atop {@link SbmPrometheusLogger}.
+ *
+ * <p>Provides the CLI arguments expected by GEM when launching remote SBK instances.
+ * Options returned by {@link #getOptionsArgs()} are those the logger contributes to the
+ * command line. {@link #getParsedArgs()} returns the concrete values based on the current
+ * logger configuration (time unit, latency bounds, CSV settings, metrics context).
  */
 public final class GemPrometheusLogger extends SbmPrometheusLogger implements GemLogger {
 
+    /**
+     * List of logger-specific CLI options that GEM should include when composing the
+     * remote SBK command line.
+     *
+     * @return array of option names (e.g., -time, -minlatency, -maxlatency, -csvfile, -context)
+     */
     @Override
     public String[] getOptionsArgs() {
         return new String[]{"-time", "-minlatency", "-maxlatency", "-csvfile", "-context"};
     }
 
+    /**
+     * Concrete logger arguments reflecting current configuration.
+     *
+     * <p>If CSV is enabled, includes the CSV filepath; otherwise omits it. Always includes
+     * time unit, latency bounds, and the metrics context (port + context path).
+     *
+     * @return array of option/value pairs to be appended to the remote SBK command.
+     */
     @Override
     public String[] getParsedArgs() {
         if (isCsvEnable()) {

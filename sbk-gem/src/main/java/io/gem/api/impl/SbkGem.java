@@ -61,7 +61,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Class SbkGem.
+ * SBK-GEM orchestrator entry points and utilities.
+ *
+ * <p>Provides static helpers to build and run a GEM benchmark across multiple remote nodes
+ * over SSH. Responsibilities include:
+ * - discover storage and logger classes,
+ * - parse GEM/SBK parameters and logger options,
+ * - verify local/remote prerequisites (e.g., Java versions, SBK directory/command),
+ * - optionally copy SBK artifacts to remote hosts,
+ * - start SBM locally and coordinate remote SBK runs,
+ * - aggregate and print remote results.
  */
 final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";

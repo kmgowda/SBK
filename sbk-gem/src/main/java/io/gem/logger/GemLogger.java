@@ -14,7 +14,11 @@ import io.gem.params.GetArguments;
 import io.sbm.logger.RamLogger;
 
 /**
- * Interface GemLogger.
+ * Logger contract for SBK-GEM orchestrations.
+ *
+ * <p>Extends the SBM {@link RamLogger} for RAM-side metrics and {@link GetArguments} to supply
+ * CLI arguments required when launching remote SBK instances. Implementations define how
+ * metrics are exported (e.g., Prometheus) and what arguments are needed.
  */
 public interface GemLogger extends RamLogger, GetArguments {
 }

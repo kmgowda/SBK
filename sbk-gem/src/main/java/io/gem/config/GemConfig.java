@@ -11,7 +11,11 @@
 package io.gem.config;
 
 /**
- * Class GemConfig.
+ * Configuration properties for SBK-GEM orchestration.
+ *
+ * <p>Values are typically loaded from {@code gem.properties} and may be overridden via
+ * command-line parameters. Contains defaults for SSH connection, remote directory
+ * management, and SBM coordination.
  */
 final public class GemConfig {
     /**
@@ -36,12 +40,12 @@ final public class GemConfig {
     final public static String LOCAL_HOST = "localhost";
 
     /**
-     *<code>String SBK_GEM_LOGGER_PACKAGE_NAME = "io.sbm.logger"</code>.
+     * Default logger package to scan for {@code GemLogger} implementations.
      */
     final public static String SBK_GEM_LOGGER_PACKAGE_NAME = "io.gem.logger";
 
     /**
-     *<code>String SBK_GEM_SSH_PASSWD = "io.sbm.logger"</code>.
+     * Environment variable name from which to read the SSH password if not provided in properties.
      */
     final public static String SBK_GEM_SSH_PASSWD = "SBK_GEM_SSH_PASSWD";
 
@@ -51,54 +55,54 @@ final public class GemConfig {
      */
     public String nodes;
     /**
-     * <code>String gemuse</code>.
+     * SSH user name.
      */
     public String gemuser;
     /**
-     * <code>String gempass</code>.
+     * SSH password.
      */
     public String gempass;
     /**
-     * <code>int gemport</code>.
+     * SSH port.
      */
     public int gemport;
     /**
-     * <code>String sbkdir</code>.
+     * Local SBK application directory.
      */
     public String sbkdir;
     /**
-     * <code>String sbkcommand</code>.
+     * SBK launcher command relative to {@link #sbkdir}.
      */
     public String sbkcommand;
     /**
-     * <code>boolean copy</code>.
+     * Whether to copy SBK to remote nodes before running.
      */
     public boolean copy;
     /**
-     * <code>boolean delete</code>.
+     * Whether to delete SBK from remote nodes after run.
      */
     public boolean delete;
 
 
     //override by props file
     /**
-     * <code>long remoteTimeoutSeconds</code>.
+     * Timeout value used for remote operations (seconds).
      */
     public long remoteTimeoutSeconds;
     /**
-     * <code>int timeoutSeconds</code>.
+     * Per-iteration wait timeout used during async joins (seconds).
      */
     public int timeoutSeconds;
     /**
-     * <code>int maxIterations</code>.
+     * Maximum number of iterations to wait/retry for remote operations.
      */
     public int maxIterations;
     /**
-     * <code>String remoteDir</code>.
+     * Remote working directory on each host (derived from app name/version).
      */
     public String remoteDir;
     /**
-     * <code>boolean fork</code>.
+     * Whether to fork a {@code ForkJoinPool} for execution (vs fixed thread pool).
      */
     public boolean fork;
 }

@@ -26,18 +26,21 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Class SshUtils.
+ * SSH utility methods for session creation, command execution, and SCP copy.
+ *
+ * <p>Wraps Apache Mina SSHD primitives to provide simpler operations used by SBK-GEM
+ * for orchestrating remote SBK runs.
  */
 public final class SshUtils {
 
     /**
-     * This method is responsible for creating client sessions.
+     * Create and authenticate an SSH {@link ClientSession}.
      *
-     * @param client            SshClient
-     * @param connConfig        SshConnection
-     * @param timeoutSeconds    long
-     * @return session
-     * @throws IOException If it occurs
+     * @param client         SSH client (must be started by caller)
+     * @param connConfig     connection details (host, user, password, port)
+     * @param timeoutSeconds authentication timeout in seconds
+     * @return authenticated session (caller is responsible for closing it)
+     * @throws IOException on connection or authentication failure
      */
     public static ClientSession createSession(SshClient client, ConnectionConfig connConfig, long timeoutSeconds)
             throws IOException {
@@ -53,13 +56,13 @@ public final class SshUtils {
     }
 
     /**
-     * This method is responsible for running commands.
+     * Execute a command over SSH, wiring stdout/stderr to the provided response streams.
      *
-     * @param session           final NotNull ClientSession
-     * @param cmd               String
-     * @param timeoutSeconds    long
-     * @param response          NotNull SshResponseStream
-     * @throws IOException If it occurs
+     * @param session        non-null SSH session
+     * @param cmd            command to execute
+     * @param timeoutSeconds execution timeout in seconds
+     * @param response       non-null holder to capture stdout/stderr and exit status
+     * @throws IOException on timeout or channel errors
      */
     public static void runCommand(final @NotNull ClientSession session, String cmd, long timeoutSeconds,
                                   @NotNull SshResponse response) throws IOException {
@@ -85,12 +88,12 @@ public final class SshUtils {
     }
 
     /**
-     * It copies directory of sessions.
+     * Recursively copy a directory to a remote path using SCP.
      *
-     * @param session   final ClientSession
-     * @param srcPath   String
-     * @param dstPath   String
-     * @throws IOException If it occurs.
+     * @param session SSH session
+     * @param srcPath local source path
+     * @param dstPath remote destination path
+     * @throws IOException on copy failure
      */
     public static void copyDirectory(final ClientSession session, String srcPath,
                                      String dstPath) throws IOException {

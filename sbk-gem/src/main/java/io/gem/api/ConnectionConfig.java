@@ -14,7 +14,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Class SshConnection.
+ * Immutable SSH connection configuration used by SBK-GEM.
+ *
+ * <p>Holds the remote host, credentials, SSH port, and a working directory where
+ * SBK binaries and artifacts will be placed/executed on the remote node.
  */
 @Slf4j
 public final class ConnectionConfig {
@@ -35,13 +38,13 @@ public final class ConnectionConfig {
     private final String dir;
 
     /**
-     * This Constructor is responsible for initializing all values.
+     * Create a connection configuration.
      *
-     * @param host          String
-     * @param userName      String
-     * @param password      String
-     * @param port          int
-     * @param dir           String
+     * @param host      remote host name or IP
+     * @param userName  SSH user name
+     * @param password  SSH password (may be empty if key auth is used upstream)
+     * @param port      SSH port
+     * @param dir       remote working directory (e.g., target SBK path)
      */
     public ConnectionConfig(String host, String userName, String password, int port, String dir) {
         this.host = host;

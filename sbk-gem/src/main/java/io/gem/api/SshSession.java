@@ -22,7 +22,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Class SbkSsh.
+ * Lifecycle wrapper around an SSH client/session for a single connection.
+ *
+ * <p>Encapsulates connect, command execution, SCP directory copy, and graceful shutdown,
+ * exposing async methods returning {@link CompletableFuture}s and performing operations on a
+ * provided {@link ExecutorService}. Thread-safe for public methods guarded via
+ * {@link Synchronized} or internal synchronization.
  */
 final public class SshSession {
 

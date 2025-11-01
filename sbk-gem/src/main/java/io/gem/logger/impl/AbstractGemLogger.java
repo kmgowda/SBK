@@ -13,6 +13,13 @@ package io.gem.logger.impl;
 import io.gem.logger.GemLogger;
 import io.sbm.logger.impl.SbmPrometheusLogger;
 
+/**
+ * Base class for GEM loggers built on top of {@link SbmPrometheusLogger}.
+ *
+ * <p>Provides the SBM metrics implementation and leaves argument exposure to subclasses
+ * via {@link #getOptionsArgs()} and {@link #getParsedArgs()} so orchestrators can pass
+ * appropriate CLI parameters when launching remote SBK instances.
+ */
 public abstract class AbstractGemLogger extends SbmPrometheusLogger implements GemLogger {
     @Override
     public abstract String[] getOptionsArgs();
