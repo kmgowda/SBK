@@ -22,9 +22,9 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: spotbugsPluginVersion
-        classpath group: 'gradle.plugin.com.palantir.graal', name: 'gradle-graal', version: graalvmPluginVersion
-        classpath group: 'com.google.cloud.tools.jib', name: 'com.google.cloud.tools.jib.gradle.plugin', version: jibVersion
+        classpath "com.github.spotbugs.snom:spotbugs-gradle-plugin:$spotbugsPluginVersion"
+        classpath "gradle.plugin.com.palantir.graal:gradle-graal:$graalvmPluginVersion"
+        classpath "com.google.cloud.tools.jib:com.google.cloud.tools.jib.gradle.plugin:$jibVersion"
         // classpath group: 'org.hidetake', name:'gradle-ssh-plugin', version: sshPluginVersion
         //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }

@@ -18,7 +18,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
+        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
     }
 }
 
@@ -37,8 +37,8 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 dependencies {
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.jetbrains:annotations:$jetbrainVersion"
     api project(":sbk-api")
 }
 

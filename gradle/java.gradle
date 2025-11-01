@@ -38,7 +38,8 @@ plugins.withId('java') {
         archiveClassifier = 'sources'
         from sourceSets.main.java
     }
-    artifacts { archives sourcesJar }
+
+    assemble.dependsOn(sourcesJar)
 
     tasks.register('generateJavadoc', Javadoc) {
         source = sourceSets.main.allJava
@@ -52,13 +53,15 @@ plugins.withId('java') {
         exclude "**/generated/**"
         from generateJavadoc
     }
-    artifacts { archives javadocJar }
+
+    assemble.dependsOn(javadocJar)
 
     tasks.register('testJar', Jar) {
         archiveClassifier = 'tests'
         from sourceSets.test.output
     }
-    artifacts { runtimeOnly testJar }
+
+    assemble.dependsOn(testJar)
 
     if (project.hasProperty("doSigning")) {
         signing {
@@ -86,8 +89,8 @@ plugins.withId('java') {
 
     dependencies {
         // The production code uses the SLF4J logging API at api time
-        api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-        api group: 'junit', name: 'junit', version: junitVersion
+        api "org.slf4j:slf4j-api:$slf4jVersion"
+        api "junit:junit:$junitVersion"
         api "org.mockito:mockito-core:${mockitoVersion}"
     }
 }

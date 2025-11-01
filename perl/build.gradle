@@ -17,8 +17,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
-        classpath group: 'me.champeau.jmh', name: 'jmh-gradle-plugin', version: jmhGradleVersion
+        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
+        classpath "me.champeau.jmh:jmh-gradle-plugin:$jmhGradleVersion"
     }
 }
 
@@ -33,27 +33,27 @@ apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
 dependencies {
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
-    api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
-    api group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
-    api group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsCsvVersion
-    api group: 'org.hdrhistogram', name: 'HdrHistogram', version: HdrHistogramVersion
-    api group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-    api group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: fasterxmlVersion
-    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: fasterxmlVersion
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: fasterxmlVersion
-    api group: 'io.micrometer', name: 'micrometer-registry-jmx', version: micrometerVersion
-    api group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: micrometerVersion
-    api group: 'io.prometheus.jmx', name: jmxAgent, version: jmxPrometheusVersion
-    api group: 'com.google.guava', name: 'guava', version: guavaVersion
-    implementation group: 'org.eclipse.collections', name: 'eclipse-collections', version: eclipseCollectionVersion
-    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
-    testImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: jmhVersion
-    annotationProcessor group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: jmhVersion
-    testImplementation group: 'org.openjdk.jmh', name: 'jmh-core-benchmarks', version: jmhVersion
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    api "javax.annotation:javax.annotation-api:$javaxAnnotationVersion"
+    api "org.projectlombok:lombok:$lombokVersion"
+    api "com.github.spotbugs:spotbugs-annotations:$spotbugsVersion"
+    api "commons-cli:commons-cli:$commonsCliVersion"
+    api "org.apache.commons:commons-csv:$apacheCommonsCsvVersion"
+    api "org.hdrhistogram:HdrHistogram:$HdrHistogramVersion"
+    api "org.slf4j:slf4j-api:$slf4jVersion"
+    api "org.slf4j:slf4j-simple:$slf4jVersion"
+    api "com.fasterxml.jackson.dataformat:jackson-dataformat-properties:$fasterxmlVersion"
+    api "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$fasterxmlVersion"
+    api "com.fasterxml.jackson.core:jackson-databind:$fasterxmlVersion"
+    api "io.micrometer:micrometer-registry-jmx:$micrometerVersion"
+    api "io.micrometer:micrometer-registry-prometheus:$micrometerVersion"
+    api "io.prometheus.jmx:$jmxAgent:$jmxPrometheusVersion"
+    api "com.google.guava:guava:$guavaVersion"
+    implementation "org.eclipse.collections:eclipse-collections:$eclipseCollectionVersion"
+    implementation "org.jetbrains:annotations:$jetbrainVersion"
+    testImplementation "org.openjdk.jmh:jmh-core:$jmhVersion"
+    annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+    testImplementation "org.openjdk.jmh:jmh-core-benchmarks:$jmhVersion"
 }
 
 jmh {
