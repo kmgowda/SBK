@@ -164,7 +164,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         if (state == State.BEGIN) {
             state = State.RUN;
             qFuture = CompletableFuture.runAsync(() -> {
-                try {bin
+                try {
                     run();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
