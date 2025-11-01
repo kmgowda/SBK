@@ -25,7 +25,11 @@ import java.util.Arrays;
 
 
 /**
- * Class for processing command Line arguments/parameters.
+ * Parses SBM server command-line parameters and exposes typed getters.
+ *
+ * <p>Extends {@link io.sbk.params.impl.SbkInputOptions} to register SBM-specific options
+ * such as storage class, logger selection, action, port, max connections, and idle sleep.
+ * Validates inputs and maps values for use by the SBM runtime and loggers.
  */
 @Slf4j
 final public class SbmParameters extends SbkInputOptions implements RamParameterOptions {
@@ -47,13 +51,13 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
 
     final private String[] loggerNames;
     /**
-     * Constructor SbmParameters initializing all values.
+     * Construct parameter parser and register SBM options.
      *
-     * @param name           String
-     * @param port           int
-     * @param maxConnections int
-     * @param idleMS         int
-     * @param loggerNames
+     * @param name           application/usage header used in help
+     * @param port           default port for SBM server
+     * @param maxConnections default maximum concurrent client connections
+     * @param idleMS         default idle sleep in milliseconds
+     * @param loggerNames    available logger class names to show in help
      */
     public SbmParameters(String name, int port, int maxConnections, int idleMS, String[] loggerNames) {
         super(name, SbmConfig.DESC);
@@ -81,6 +85,14 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
 
 
     @Override
+    /**
+     * Parse options and populate derived fields.
+     *
+     * @param args command-line arguments
+     * @throws ParseException           if parsing fails or required options are missing
+     * @throws IllegalArgumentException if an option value is invalid
+     * @throws HelpException            if help is requested and should be displayed upstream
+     */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
 

@@ -10,7 +10,10 @@
 package io.sbm.logger.impl;
 
 /**
- * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
+ * Concrete SBM logger that prints to stdout and exports metrics via Prometheus.
+ *
+ * <p>Extends {@link AbstractRamLogger} to format periodic and total results including
+ * connection counts, request/response stats, throughput, and latency percentiles.
  */
 public class SbmPrometheusLogger extends AbstractRamLogger {
 

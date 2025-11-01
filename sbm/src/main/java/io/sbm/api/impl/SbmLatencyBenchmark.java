@@ -28,7 +28,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * Class RamBenchmark.
+ * In-memory aggregator that receives latency records from remote clients and reports metrics.
+ *
+ * <p>Backed by a fixed array of concurrent queues, one per client modulo index, to reduce
+ * contention. Periodically flushes a window to the configured {@link SbmPeriodicRecorder}, and
+ * on stop prints total results.
  */
 final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<MessageLatenciesRecord> implements Benchmark,
         SbmRegistry {
@@ -49,11 +53,11 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     /**
      * Constructor RamBenchmark initializing all values.
      *
-     * @param maxQs              int
-     * @param idleMS                int
-     * @param time                  Time
-     * @param window                RamPeriodicRecorder
-     * @param reportingIntervalMS   int
+     * @param maxQs               number of internal queues used for sharding
+     * @param idleMS              sleep in milliseconds when queues are empty
+     * @param time                time source
+     * @param window              periodic/total latency recorder
+     * @param reportingIntervalMS interval in ms between periodic window prints
      */
     public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS) {
         super(maxQs);
@@ -68,6 +72,13 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         this.qFuture = null;
     }
 
+    /**
+     * Main processing loop: drains records from all queues, records latencies, and rotates
+     * periodic windows at the configured interval. Terminates when a sentinel with
+     * sequenceNumber <= 0 is observed.
+     *
+     * @throws InterruptedException if the thread sleep or processing is interrupted
+     */
     void run() throws InterruptedException {
         MessageLatenciesRecord record;
         boolean doWork = true;
@@ -103,11 +114,17 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     }
 
 
+    /**
+     * Allocate a unique client ID for a new connection.
+     */
     @Override
     public long getID() {
         return counter.getAndIncrement();
     }
 
+    /**
+     * Enqueue a latency record into a sharded queue based on client ID.
+     */
     @Override
     public void enQueue(@NotNull MessageLatenciesRecord record) {
         final int index = (int) (record.getClientID() % maxQs);
@@ -147,7 +164,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         if (state == State.BEGIN) {
             state = State.RUN;
             qFuture = CompletableFuture.runAsync(() -> {
-                try {
+                try {bin
                     run();
                 } catch (InterruptedException e) {
                     e.printStackTrace();

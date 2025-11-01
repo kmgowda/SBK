@@ -27,6 +27,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Base Prometheus-backed logger for SBM.
+ *
+ * <p>Extends SBK's {@link io.sbk.logger.impl.PrometheusLogger} to add SBM-specific
+ * connection gauges and request metrics aggregation. Manages a {@link SbmPrometheusServer}
+ * that exposes metrics and provides helper methods shared by concrete SBM loggers.
+ */
 public abstract class AbstractRamLogger extends PrometheusLogger implements RamLogger {
     final static String CONFIG_FILE = "sbm-metrics.properties";
     final static String SBM_PREFIX = "SBM";
@@ -43,10 +50,21 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
         prometheusServer = null;
     }
 
+    /**
+     * Load SBM metrics configuration from classpath.
+     *
+     * @return input stream for {@code sbm-metrics.properties}
+     */
     public InputStream getMetricsConfigStream() {
         return SbmPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
+    /**
+     * Create or return the {@link SbmPrometheusServer} exposing SBM metrics.
+     *
+     * @return initialized Prometheus server instance
+     * @throws IOException if metrics server initialization fails
+     */
     @Override
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public @Nonnull SbkPrometheusServer getPrometheusRWMetricsServer() throws IOException {
@@ -57,6 +75,12 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
         return prometheusServer;
     }
 
+    /**
+     * Parse logger arguments and set SBM-specific limits for writer/reader ID dimensions.
+     *
+     * @param params parsed CLI options
+     * @throws IllegalArgumentException if an argument is invalid
+     */
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
@@ -64,6 +88,16 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
         setMaxWritersIds(MAX_REQUEST_RW_IDS);
     }
 
+    /**
+     * Open the logger and initialize connection counters.
+     *
+     * @param params      parsed options
+     * @param storageName storage under test
+     * @param action      selected action
+     * @param time        time source
+     * @throws IllegalArgumentException on invalid params
+     * @throws IOException              on initialization errors
+     */
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
@@ -73,6 +107,9 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
     }
 
 
+    /**
+     * Increment current and maximum connection counters and update metrics.
+     */
     @Override
     public void incrementConnections() {
         connections.incrementAndGet();
@@ -82,6 +119,9 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
         }
     }
 
+    /**
+     * Decrement current connection counter and update metrics.
+     */
     @Override
     public void decrementConnections() {
         connections.decrementAndGet();
@@ -119,6 +159,13 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
     }
 
 
+    /**
+     * Append connection summary to the output builder.
+     *
+     * @param out            string builder to append to
+     * @param connections    current connections
+     * @param maxConnections maximum observed connections
+     */
     protected final void appendConnections(@NotNull StringBuilder out, int connections, int maxConnections) {
         out.append(String.format(" %5d connections, %5d max connections: ", connections, maxConnections));
     }

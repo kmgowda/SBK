@@ -39,7 +39,12 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- * Class for performing the benchmark.
+ * Server-side benchmark that exposes a gRPC endpoint and aggregates latency metrics.
+ *
+ * <p>Responsibilities:
+ * - Build latency windows and periodic/total recorders based on {@link SbmConfig} and logger settings.
+ * - Start the gRPC {@link Server} and accept client registrations and records via {@link SbmGrpcService}.
+ * - Periodically print results and on shutdown emit totals.
  */
 final public class SbmBenchmark implements Benchmark {
     final SbmConfig sbmConfig;
@@ -89,6 +94,11 @@ final public class SbmBenchmark implements Benchmark {
     }
 
     @Contract(" -> new")
+    /**
+     * Create the periodic and total latency recorders used during the benchmark run.
+     *
+     * @return recorder that tracks periodic windows and a backing total window.
+     */
     private @NotNull SbmPeriodicRecorder createLatencyRecorder() {
         final LatencyRecordWindow window = PerlBuilder.buildLatencyRecordWindow(sbmConfig, time,
                 logger.getMinLatency(), logger.getMaxLatency(), percentileFractions);
@@ -125,15 +135,16 @@ final public class SbmBenchmark implements Benchmark {
     }
 
     /**
-     * Start SBK Server Benchmark.
+     * Start SBM server benchmark and gRPC service.
      *
-     * opens the storage device/client , creates the writers/readers.
-     * conducts the performance benchmarking for given time in seconds
-     * or exits if the input the number of records are written/read.
-     * NOTE: This method does NOT invoke parsing of parameters, storage device/client.
+     * <p>Initializes logger and latency benchmark, then starts the gRPC server. Returns a
+     * future that completes when the benchmark is shutdown.
      *
-     * @throws IOException           If an exception occurred.
-     * @throws IllegalStateException If an exception occurred.
+     * @return future that completes on shutdown
+     * @throws IOException              if the gRPC server cannot be started
+     * @throws InterruptedException     if interrupted while starting
+     * @throws ExecutionException       if async initialization fails
+     * @throws IllegalStateException    if called in an invalid state
      */
     @Override
     @Synchronized
@@ -156,10 +167,7 @@ final public class SbmBenchmark implements Benchmark {
     }
 
     /**
-     * Shutdown SBK Benchmark.
-     *
-     * closes all writers/readers.
-     * closes the storage device/client.
+     * Shutdown SBM benchmark: stop gRPC server, stop latency benchmark, and close logger.
      */
     @Synchronized
     private void shutdown() {
