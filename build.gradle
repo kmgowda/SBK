@@ -37,6 +37,7 @@ buildscript {
 
 plugins {
     id 'org.jreleaser' version  "${jReleaserPluginVersion}"
+    id 'com.github.ben-manes.versions' version "${gradleVersionsPluginVersion}"
 }
 
 def SbkMainClass = "io.sbk.main.SbkMain"
