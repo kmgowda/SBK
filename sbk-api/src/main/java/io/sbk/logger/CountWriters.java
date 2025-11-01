@@ -11,17 +11,24 @@
 package io.sbk.logger;
 
 /**
- * sealed interface CountWriters which permits CountRW.
+ * Interface for tracking the count of active writers in the benchmarking system.
+ * This sealed interface is part of the writer tracking mechanism in SBK.
+ * It provides methods to increment and decrement the count of active writers
+ * during benchmark operations.
+ * 
+ * <p>This interface is sealed and only permits implementation by CountRW.</p>
  */
 public sealed interface CountWriters permits CountRW {
 
     /**
-     * Increment Writers.
+     * Increments the count of active writers.
+     * This method should be called when a new writer becomes active.
      */
     void incrementWriters();
 
     /**
-     * Decrement Writers.
+     * Decrements the count of active writers.
+     * This method should be called when a writer completes its operation or becomes inactive.
      */
     void decrementWriters();
 
