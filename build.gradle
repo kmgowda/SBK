@@ -40,6 +40,11 @@ plugins {
     id 'com.github.ben-manes.versions' version "${gradleVersionsPluginVersion}"
 }
 
+/*
+ * to get the dependency for the drivers : ./gradlew dependencyUpdatesAll -Drevision=release --no-parallel -PincludeDriversDeps=true
+ */
+def includeDriversDeps = (project.findProperty('includeDrivers') ?: 'false').toString().toBoolean()
+
 def SbkMainClass = "io.sbk.main.SbkMain"
 
 gradle.rootProject {
@@ -113,6 +118,20 @@ allprojects {
         main {
             distributionBaseName.set(sbkProjectName)
         }
+    }
+
+    if (it.project == rootProject) {
+        // Ensure the task is disabled for root project
+        tasks.matching { it.name == 'dependencyUpdates' }.configureEach { enabled = false }
+    } else if (project.path.startsWith(':drivers')) {
+        if (includeDriversDeps) {
+            apply plugin: 'com.github.ben-manes.versions'
+        } else {
+            // Ensure the task is disabled if applied elsewhere
+            tasks.matching { it.name == 'dependencyUpdates' }.configureEach { enabled = false }
+        }
+    } else {
+        apply plugin: 'com.github.ben-manes.versions'
     }
 
     application {
