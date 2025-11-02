@@ -34,6 +34,7 @@ import java.util.TreeSet;
  * <p>Manages registration of options, parsing of arguments, and rendering of help text.
  * Thread-safety is not guaranteed.
  */
+@SuppressWarnings("deprecation")   // for HelpFormatter
 public class SbkInputOptions implements ParseInputOptions {
     final private String benchmarkName;
     final private String header;
