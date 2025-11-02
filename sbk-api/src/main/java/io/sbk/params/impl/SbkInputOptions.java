@@ -23,7 +23,7 @@ import org.apache.commons.cli.ParseException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -93,14 +93,16 @@ public class SbkInputOptions implements ParseInputOptions {
     @Override
     final public String getHelpText() {
         final OutputStream outStream = new ByteArrayOutputStream();
-        final PrintWriter helpPrinter = new PrintWriter(outStream);
-        formatter.printHelp(helpPrinter, HelpFormatter.DEFAULT_WIDTH, benchmarkName, header, options,
-                HelpFormatter.DEFAULT_LEFT_PAD, HelpFormatter.DEFAULT_DESC_PAD, footer);
-        helpPrinter.flush();
+        final PrintStream helpStream = new PrintStream(outStream);
+        final PrintStream oldOut = System.out;
         try {
-            outStream.close();
+            System.setOut(helpStream); // Redirect System.out to our PrintStream
+            formatter.printHelp(benchmarkName, header, options, footer, false);
         } catch (Exception ex) {
+            System.setOut(oldOut);
             Printer.log.error(ex.toString());
+        } finally {
+            System.setOut(oldOut); // Restore original System.out
         }
         return outStream.toString();
     }
