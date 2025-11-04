@@ -40,7 +40,7 @@ COPY@SBK
 
 
 ENV GRADLE_USER_HOME=/opt/SBK
-RUN gradle  distTar --no-daemon --info --stacktrace
+RUN gradle distTar
 
 # Runtime Container
 FROM openjdk:21-ea-jdk-slim  AS sbkapp

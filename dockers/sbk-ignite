@@ -1,16 +1,14 @@
 ##
 # Copyright (c) KMG. All Rights Reserved.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
-##
 
 # Building Container
-FROM gradle:8.13.0-jdk-21 as SbkGradleBuilder
-MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
+FROM gradle:9.2.0-jdk21 AS sbkgradlebuilder
+LABEL maintainer="Keshava Munegowda <keshava.gowda@gmail.com>"
 USER root
 
 ENV APP_NAME=sbk
@@ -46,12 +44,12 @@ ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  :${SBK_PROJECT}:distTar --no-daemon --info --stacktrace
 
 # Runtime Container
-FROM openjdk:21-jdk-slim as SbkApp
+FROM openjdk:21-ea-jdk-slim  AS sbkapp
 ENV APP_NAME=sbk
 ENV SBK_PROJECT=ignite
 ENV APP_HOME=/opt/${APP_NAME}
 
-COPY --from=SbkGradleBuilder ${APP_HOME}/${SBK_PROJECT}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
+COPY --from=sbkgradlebuilder ${APP_HOME}/${SBK_PROJECT}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}

@@ -1,16 +1,14 @@
 ##
 # Copyright (c) KMG. All Rights Reserved.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
-##
 
 # Building Container
-FROM gradle:8.13.0-jdk-21 as SbkGradleBuilder
-MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
+FROM gradle:9.2.0-jdk21 AS sbkgradlebuilder
+LABEL maintainer="Keshava Munegowda <keshava.gowda@gmail.com>"
 USER root
 
 ENV APP_NAME=sbk
@@ -21,10 +19,11 @@ WORKDIR /opt/sbk
 
 COPY --chown=root:root gradle ${APP_HOME}/gradle
 COPY --chown=root:root build.gradle ${APP_HOME}/build.gradle
-COPY --chown=root:root build-drivers.gradle ${APP_HOME}/build-drivers.gradle
 COPY --chown=root:root gradle.properties ${APP_HOME}/gradle.properties
 COPY --chown=root:root settings.gradle ${APP_HOME}/settings.gradle
-COPY --chown=root:root settings-drivers.gradle ${APP_HOME}/settings-drivers.gradle
+RUN  echo "include 'drivers:${SBK_PROJECT}'" >  ${APP_HOME}/settings-drivers.gradle
+RUN  echo "dependencies { api project(':drivers:${SBK_PROJECT}') }" > ${APP_HOME}/build-drivers.gradle
+
 COPY --chown=root:root jmx-config.yml ${APP_HOME}/jmx-config.yml
 COPY --chown=root:root gradlew ${APP_HOME}/gradlew
 COPY --chown=root:root checkstyle ${APP_HOME}/checkstyle
@@ -35,6 +34,7 @@ COPY --chown=root:root sbm ${APP_HOME}/sbm
 COPY --chown=root:root sbk-gem ${APP_HOME}/sbk-gem
 COPY --chown=root:root sbk-gem-yal ${APP_HOME}/sbk-gem-yal
 
+
 RUN mkdir -p ${APP_HOME}/drivers
 
 # Copy the SBK storage drivers
@@ -43,15 +43,15 @@ COPY --chown=root:root drivers/nsq ${APP_HOME}/drivers/nsq
 
 
 ENV GRADLE_USER_HOME=/opt/SBK
-RUN gradle  :${SBK_PROJECT}:distTar --no-daemon --info --stacktrace
+RUN gradle  :drivers:${SBK_PROJECT}:distTar
 
 # Runtime Container
-FROM openjdk:21-jdk-slim as SbkApp
+FROM openjdk:21-ea-jdk-slim  AS sbkapp
 ENV APP_NAME=sbk
 ENV SBK_PROJECT=nsq
 ENV APP_HOME=/opt/${APP_NAME}
 
-COPY --from=SbkGradleBuilder ${APP_HOME}/${SBK_PROJECT}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
+COPY --from=sbkgradlebuilder ${APP_HOME}/drivers/${SBK_PROJECT}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 RUN mv /opt/${APP_NAME}-* /opt/${APP_NAME}

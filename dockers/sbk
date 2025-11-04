@@ -1,11 +1,13 @@
 ##
 # Copyright (c) KMG. All Rights Reserved.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 ##
+
 # Building Container
 FROM gradle:9.2.0-jdk21 AS sbkgradlebuilder
 LABEL maintainer="Keshava Munegowda <keshava.gowda@gmail.com>"
@@ -83,22 +85,17 @@ COPY --chown=root:root drivers/activemq ${APP_HOME}/drivers/activemq
 COPY --chown=root:root drivers/couchbase ${APP_HOME}/drivers/couchbase
 COPY --chown=root:root drivers/memcached ${APP_HOME}/drivers/memcached
 COPY --chown=root:root drivers/dynamodb ${APP_HOME}/drivers/dynamodb
-COPY --chown=root:root drivers/ignite ${APP_HOME}/drivers/ignite
-COPY --chown=root:root drivers/sbktemplate ${APP_HOME}/drivers/sbktemplate
 COPY --chown=root:root drivers/elasticsearch ${APP_HOME}/drivers/elasticsearch
 
 
 
 ENV GRADLE_USER_HOME=/opt/SBK
-RUN gradle  distTar --no-daemon --info --stacktrace
+RUN gradle distTar
 
 # Runtime Container
-FROM openjdk:21-ea-jdk-slim AS sbkapp
+FROM openjdk:21-ea-jdk-slim  AS sbkapp
 ENV APP_NAME=sbk
 ENV APP_HOME=/opt/${APP_NAME}
-
-# Install xargs (part of findutils on Debian-based systems like Bullseye)
-# RUN apt-get update && apt-get install -y --no-install-recommends findutils && rm -rf /var/lib/apt/lists/*
 
 COPY --from=sbkgradlebuilder ${APP_HOME}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
 

@@ -19,7 +19,7 @@ include 'sbk-gem'
 include 'sbk-gem-yal'
 
 // The 'driver-sbktemplate' is only the driver template; not for usage
-include 'drivers:sbktemplate'
+//include 'drivers:sbktemplate'
 
 apply from: "settings-drivers.gradle"
 
