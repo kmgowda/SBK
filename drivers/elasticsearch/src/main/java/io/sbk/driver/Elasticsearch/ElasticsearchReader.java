@@ -34,6 +34,7 @@ public class ElasticsearchReader implements Reader<String> {
         this.client = client;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public String read() throws IOException {
         try {
