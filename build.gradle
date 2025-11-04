@@ -41,7 +41,7 @@ plugins {
 }
 
 /*
- * to get the dependency for the drivers : ./gradlew dependencyUpdatesAll -Drevision=release --no-parallel -PincludeDriversDeps=true
+ * to get the dependency for the drivers : ./gradlew dependencyUpdates -Drevision=release --no-parallel -PincludeDriversDeps=true
  */
 def includeDriversDeps = (project.findProperty('includeDrivers') ?: 'false').toString().toBoolean()
 
