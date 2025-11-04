@@ -10,8 +10,8 @@
 
 # Running Container
 
-FROM openjdk:21-jdk-slim
-MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
+FROM openjdk:21-ea-jdk-slim
+LABEL maintainer="Keshava Munegowda <keshava.gowda@gmail.com>"
 
 USER root
 

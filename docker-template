@@ -9,10 +9,9 @@
 ##
 
 # Building Container
-FROM gradle:8.13.0-jdk21 as SbkGradleBuilder
-MAINTAINER Keshava Munegowda <keshava.gowda@gmail.com>
+FROM gradle:9.2.0-jdk21 AS sbkgradlebuilder
+LABEL maintainer="Keshava Munegowda <keshava.gowda@gmail.com>"
 USER root
-
 
 ENV APP_NAME=sbk
 ENV APP_HOME=/opt/${APP_NAME}
@@ -44,11 +43,11 @@ ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  distTar --no-daemon --info --stacktrace
 
 # Runtime Container
-FROM openjdk:21-jdk-slim as SbkApp
+FROM openjdk:21-ea-jdk-slim  AS sbkapp
 ENV APP_NAME=sbk
 ENV APP_HOME=/opt/${APP_NAME}
 
-COPY --from=SbkGradleBuilder ${APP_HOME}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
+COPY --from=sbkgradlebuilder ${APP_HOME}/build/distributions/${APP_NAME}-*.tar /opt/${APP_NAME}.tar
 
 RUN tar -xvf /opt/${APP_NAME}.tar -C /opt/.
 

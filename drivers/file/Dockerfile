@@ -36,7 +36,7 @@ ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  :${SBK_DRIVER}:build --no-daemon --info --stacktrace
 
 # Runtime Container
-FROM openjdk:11-jre
+FROM openjdk:21-jre
 ENV APP_NAME=sbk
 ENV SBK_DRIVER=driver-file
 ENV APP_HOME=/opt/${APP_NAME}
