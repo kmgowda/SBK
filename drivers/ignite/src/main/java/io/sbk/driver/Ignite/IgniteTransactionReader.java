@@ -30,7 +30,8 @@ public class IgniteTransactionReader implements Reader<byte[]> {
     private final IgniteCache<Long, byte[]> cache;
     private final org.apache.ignite.Ignite ignite;
     private long key;
-    private long cnt;
+    @SuppressWarnings("unused")
+    private int cnt;
 
     public IgniteTransactionReader(int id, ParameterOptions params, IgniteCache<Long, byte[]> cache,
                                    org.apache.ignite.Ignite ignite) throws IOException {

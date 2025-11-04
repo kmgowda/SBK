@@ -41,7 +41,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Main class of SBK Server.
+ * Entry points for starting the SBM (Server/BenchMark) service.
+ *
+ * <p>Builds an SBM benchmark with a selected RAM logger, reads configuration,
+ * parses command-line options, and starts the gRPC server to receive latency
+ * records from remote SBK clients.
  */
 final public class Sbm {
     final static String CONFIG_FILE = "sbm.properties";

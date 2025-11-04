@@ -37,7 +37,7 @@ public class RocksDBWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         try {
             db.put(String.valueOf(this.key++).getBytes(), data);
         } catch (RocksDBException ex) {

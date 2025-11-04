@@ -64,21 +64,11 @@ public class KafkaWriter implements Writer<byte[]> {
         });
     }
 
-    private CompletableFuture writeAsyncFuture(byte[] data) {
-        CompletableFuture<Void> retFuture = new CompletableFuture();
-        producer.send(new ProducerRecord<>(topicName, data), (metadata, exception) -> {
-            if (exception == null) {
-                retFuture.complete(null);
-            } else {
-                retFuture.completeExceptionally(exception);
-            }
-        });
-        return retFuture;
-    }
+    
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         producer.send(new ProducerRecord<>(topicName, data));
         return null;
     }

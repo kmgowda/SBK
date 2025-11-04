@@ -18,6 +18,13 @@ import org.apache.commons.cli.ParseException;
 public class SbkYalParameters extends SbkInputOptions implements YalParameters {
     protected YalConfig config;
 
+    /**
+     * Create a YAML parameters handler.
+     *
+     * @param name   benchmark name used in help header
+     * @param desc   help description footer
+     * @param config YAL configuration holder (provides defaults, receives parsed values)
+     */
     public SbkYalParameters(String name, String desc, YalConfig config) {
         super(name, desc);
         this.config = config;
@@ -25,6 +32,11 @@ public class SbkYalParameters extends SbkInputOptions implements YalParameters {
         addOption(YalConfig.PRINT_OPTION, false, getPrintOptionDescription());
     }
 
+    /**
+     * Build description text for the {@code -file} option including the default path.
+     *
+     * @return user-facing description for the file option
+     */
     public String getFileOptionDescription() {
         return "SBK YAML file, default: " + config.yamlFileName;
     }
@@ -34,11 +46,18 @@ public class SbkYalParameters extends SbkInputOptions implements YalParameters {
         return this.config.yamlFileName;
     }
 
+    /**
+     * Build description text for the {@code -print} option.
+     *
+     * @return user-facing description for the print option
+     */
     public String getPrintOptionDescription() {
         return "Print SBK Options Help Text";
     }
 
-
+    /**
+     * Parse arguments and update {@link YalConfig#yamlFileName} to reflect any override from CLI.
+     */
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);

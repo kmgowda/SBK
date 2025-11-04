@@ -32,15 +32,18 @@ import java.util.concurrent.ForkJoinPool;
 
 
 /**
- * Class for Building Perl, Time and Periodic Recorder.
+ * Helper class responsible for constructing configured PerL instances and
+ * their supporting components (time implementations, latency windows, and
+ * periodic recorders) based on supplied configuration and logger choices.
  */
 public final class PerlBuilder {
 
     /**
-     * Build 'Time' object based on Performance logger.
+     * Build 'Time' object based on Performance logger. The returned Time
+     * implementation matches the logger's {@link TimeUnit}.
      *
-     * @param logger               Performance logger
-     * @return Time Object.
+     * @param logger Performance logger
+     * @return Time object appropriate for the logger's time unit
      */
     public static @NotNull Time buildTime(@NotNull PerformanceLogger logger) {
         final TimeUnit timeUnit = logger.getTimeUnit();
@@ -55,16 +58,16 @@ public final class PerlBuilder {
         return ret;
     }
 
-
     /**
-     * Build Latency Record Window.
+     * Build Latency Record Window using configured strategy (array or hashmap)
+     * depending on memory estimation and latency range.
      *
-     * @param config               Latency configuration
-     * @param time                 Time
-     * @param minLatency           Minimum Latency
-     * @param maxLatency           Maximum Latency
-     * @param percentileFractions  Percentile fractions
-     * @return Latency record window.
+     * @param config              Latency configuration
+     * @param time                Time instance used for conversions
+     * @param minLatency          Minimum Latency value (inclusive)
+     * @param maxLatency          Maximum Latency value (inclusive)
+     * @param percentileFractions Array of percentile fractions (e.g. {0.5,0.9})
+     * @return a configured LatencyRecordWindow instance
      */
     public static @NotNull LatencyRecordWindow buildLatencyRecordWindow(@NotNull LatencyConfig config, Time time,
                                                                         long minLatency, long maxLatency,
@@ -89,14 +92,15 @@ public final class PerlBuilder {
     }
 
     /**
-     * Build Periodic Logger.
+     * Build Periodic Logger and total window, configuring optional extensions
+     * such as HdrHistogram or CSV output based on the provided config.
      *
-     * @param time              Time interface
-     * @param config            Latency configurations
-     * @param logger            Performance Logger
-     * @return  Periodic Recorder
+     * @param time   Time instance used for window timing
+     * @param config Latency configuration driving window choices
+     * @param logger Performance logger used to obtain percentile and thresholds
+     * @return a new PeriodicRecorder instance
      */
-    @Contract("_, _, _, _ -> new")
+    @Contract("_, _, _ -> new")
     private static @NotNull PeriodicRecorder buildPeriodicLogger(Time time,
                                                                  LatencyConfig config,
                                                                  @NotNull PerformanceLogger logger) {
@@ -146,16 +150,16 @@ public final class PerlBuilder {
     /**
      * Build CQ (Concurrent Queue) based Perl.
      *
-     * @param logger            Performance Logger
-     * @param time              time interface
-     * @param config            Perl configuration
-     * @param executor          Executor Service
-     * @return  Perl Object
-     * @throws IllegalArgumentException   in case logger and latency reporter are missing and time unit of 'Time' and
-     * performance logger is not matching
-     * @throws IOException   if the CQ perl creation failed.
+     * @param logger   Performance Logger
+     * @param time     time interface
+     * @param config   Perl configuration
+     * @param executor Executor Service
+     * @return Perl Object
+     * @throws IllegalArgumentException in case logger and latency reporter are missing and time unit of 'Time' and
+     *                                  performance logger is not matching
+     * @throws IOException              if the CQ perl creation failed.
      */
-    @Contract("null, _, _, _, _ -> fail; !null, null, _, _, _ -> fail")
+    @Contract("null, _, _, _ -> fail; !null, null, _ -> fail")
     public static @NotNull Perl build(PerformanceLogger logger, Time time,
                                       PerlConfig config, ExecutorService executor)
                                 throws IllegalArgumentException, IOException {
@@ -173,7 +177,8 @@ public final class PerlBuilder {
                     logger.getTimeUnit() + ", Time time unit: " + time.getTimeUnit());
         }
         if (executor == null) {
-            executor = new ForkJoinPool();
+            // Use common pool to avoid creating a short-lived pool here.
+            executor = ForkJoinPool.commonPool();
         }
         return new CQueuePerl(config, buildPeriodicLogger(time, config, logger),
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, time, executor);

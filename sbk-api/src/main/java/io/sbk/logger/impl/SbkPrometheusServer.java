@@ -22,18 +22,35 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-
+/**
+ * Prometheus metrics server adapter for SBK read/write benchmarks.
+ *
+ * <p>This class bridges SBK's {@link RWPrint} reporting callbacks to Micrometer counters and gauges
+ * and exposes them via the embedded HTTP server implemented in {@link PrometheusMetricsServer} so
+ * that Prometheus can scrape them. It publishes per-interval throughput, request counts, pending
+ * records/bytes, timeout events, as well as statistical latency metrics (avg/min/max/discards and
+ * percentiles).
+ *
+ * <p>Metrics are tagged with the SBK storage class name (tag key: {@code class}) and the action
+ * (tag key: {@code action}). Metric names are prefixed using an upper-cased header (for example,
+ * {@code SBK_READ}) and follow a stable schema, such as
+ * {@code <prefix>_Write_Request_Bytes}, {@code <prefix>_Read_Request_RecordsPerSec}, etc.
+ */
 public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPrint {
     final private static String ACTION_TEXT = "action";
+    /** Metric name prefix derived from the header (upper-cased and '_' separated). */
     final protected String rwMetricPrefix;
+    /** Gauges tracking current and maximum active writers/readers. */
     final private AtomicInteger writers;
     final private AtomicInteger readers;
     final private AtomicInteger maxWriters;
     final private AtomicInteger maxReaders;
+    /** Cumulative counters for request bytes and records. */
     final private Counter writeRequestBytes;
     final private Counter readRequestBytes;
     final private Counter writeRequestRecords;
     final private Counter readRequestRecords;
+    /** Per-interval rates exposed as gauges. */
     final private AtomicDouble writeRequestsMbPerSec;
     final private AtomicDouble writeRequestRecordsPerSec;
     final private AtomicDouble readRequestsMbPerSec;
@@ -59,6 +76,17 @@ public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPr
 
     final private AtomicDouble readTimeoutEventsPerSec;
 
+    /**
+     * Construct the SBK Prometheus metrics server.
+     *
+     * @param header       SBK header (used to derive the metric name prefix)
+     * @param action       SBK action (READ/WRITE)
+     * @param className    storage implementation class name (exposed as a tag)
+     * @param percentiles  percentile configuration to publish
+     * @param time         time provider for latency measurements
+     * @param config       metrics endpoint configuration (port, context, latency time unit)
+     * @throws IOException if the underlying server cannot be initialized
+     */
     public SbkPrometheusServer(String header, String action, String className, double[] percentiles, Time time,
                                MetricsConfig config) throws IOException {
         super(header.toUpperCase()+" "+action, percentiles, time,
@@ -113,6 +141,47 @@ public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPr
     }
 
 
+    /**
+     * Update Micrometer counters/gauges and delegate latency stats to the base server.
+     *
+     * @param writers                        current writers
+     * @param maxWriters                     max writers observed
+     * @param readers                        current readers
+     * @param maxReaders                     max readers observed
+     * @param writeRequestBytes              write request bytes in this interval
+     * @param writeRequestMbPerSec           write throughput MB/sec
+     * @param writeRequestRecords            write request count
+     * @param writeRequestRecordsPerSec      write requests/sec
+     * @param readRequestBytes               read request bytes in this interval
+     * @param readRequestMbPerSec            read throughput MB/sec
+     * @param readRequestRecords             read request count
+     * @param readRequestRecordsPerSec       read requests/sec
+     * @param writeResponsePendingRecords    pending write response records
+     * @param writeResponsePendingBytes      pending write response bytes
+     * @param readResponsePendingRecords     pending read response records
+     * @param readResponsePendingBytes       pending read response bytes
+     * @param writeReadRequestPendingRecords write-read pending records
+     * @param writeReadRequestPendingBytes   write-read pending bytes
+     * @param writeTimeoutEvents             write timeout events
+     * @param writeTimeoutEventsPerSec       write timeout events/sec
+     * @param readTimeoutEvents              read timeout events
+     * @param readTimeoutEventsPerSec        read timeout events/sec
+     * @param seconds                        reporting period seconds
+     * @param bytes                          total bytes in period
+     * @param records                        total records in period
+     * @param recsPerSec                     records/sec
+     * @param mbPerSec                       MB/sec
+     * @param avgLatency                     average latency
+     * @param minLatency                     minimum latency
+     * @param maxLatency                     maximum latency
+     * @param invalid                        invalid/negative latency count
+     * @param lowerDiscard                   discarded below min latency
+     * @param higherDiscard                  discarded above max latency
+     * @param slc1                           sliding latency coverage 1
+     * @param slc2                           sliding latency coverage 2
+     * @param percentileLatencies            percentile latency values
+     * @param percentileLatencyCounts        percentile latency counts
+     */
     @Override
     public final void print(int writers, int maxWriters, int readers, int maxReaders, long writeRequestBytes,
                             double writeRequestMbPerSec, long writeRequestRecords, double writeRequestRecordsPerSec,
@@ -125,7 +194,8 @@ public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPr
                             long readTimeoutEvents, double readTimeoutEventsPerSec,
                             double seconds, long bytes, long records, double recsPerSec,
                             double mbPerSec, double avgLatency, long minLatency, long maxLatency, long invalid,
-                            long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                            long lowerDiscard, long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                            long[] percentileLatencyCounts) {
         this.writers.set(writers);
         this.maxWriters.set(maxWriters);
         this.readers.set(readers);
@@ -149,6 +219,6 @@ public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPr
         this.readTimeoutEvents.increment(readTimeoutEvents);
         this.readTimeoutEventsPerSec.set(readTimeoutEventsPerSec);
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                                higherDiscard, slc1, slc2, percentileValues);
+                                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 }

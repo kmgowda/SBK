@@ -46,7 +46,26 @@ import java.util.concurrent.TimeoutException;
 
 
 /**
- * Main class of SBK.
+ * Central SBK bootstrap and factory helper.
+ *
+ * <p>This class contains the public entry-point used by the CLI to construct
+ * and run a benchmark. It performs the following responsibilities:
+ * <ul>
+ *   <li>Parse and normalise command-line arguments and environment properties.</li>
+ *   <li>Discover and instantiate the configured storage driver and logger using the
+ *       {@link io.sbk.api.Package} discovery helpers.</li>
+ *   <li>Build and return a {@link io.sbk.api.Benchmark} implementation ready to
+ *       be executed.</li>
+ * </ul>
+ *
+ * <p>Design notes:
+ * <ul>
+ *   <li>The {@link #buildBenchmark(String[], String, String, String)} method performs
+ *       discovery, validation and wiring: it never starts the benchmark — callers
+ *       must invoke {@link io.sbk.api.Benchmark#start()} to run the workload.</li>
+ *   <li>This class logs diagnostic information (SBK version, configured packages, JVM
+ *       and argument details) to aid troubleshooting in test and CI environments.</li>
+ * </ul>
  */
 final public class Sbk {
     final static String BANNERFILE = "banner.txt";
@@ -139,7 +158,7 @@ final public class Sbk {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final RWLoggerPackage loggerStore = new RWLoggerPackage(sbkLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
-        final Storage storageDevice;
+        final Storage<Object> storageDevice;
         final InputParameterOptions params;
         final RWLogger rwLogger;
         final Time time;
@@ -209,7 +228,7 @@ final public class Sbk {
             throw new ParseException("The option '-"+Config.CLASS_OPTION+"' is not supplied");
         } else {
             try {
-                storageDevice = packageStore.getClass(className);
+                storageDevice = (Storage<Object>) packageStore.getClass(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
                     | IllegalAccessException ex) {
                 Printer.log.error("Instantiation of storage class '" + className + "' from the package '" +
@@ -248,7 +267,7 @@ final public class Sbk {
             throw ex;
         }
 
-        final DataType dType = storageDevice.getDataType();
+        final DataType<Object> dType = (DataType<Object>) storageDevice.getDataType();
         if (dType == null) {
             String errMsg = "No storage Data type";
             Printer.log.error(errMsg);

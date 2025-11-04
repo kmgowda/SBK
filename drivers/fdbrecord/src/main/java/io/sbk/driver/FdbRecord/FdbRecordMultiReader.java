@@ -35,7 +35,8 @@ public class FdbRecordMultiReader implements Reader<ByteString> {
     final private FDBDatabase db;
     final private Function<FDBRecordContext, FDBRecordStore> recordStoreProvider;
     private long key;
-    private long cnt;
+    @SuppressWarnings("unused")
+    private int cnt;
 
     public FdbRecordMultiReader(int id, ParameterOptions params, FDBDatabase db,
                                 Function<FDBRecordContext, FDBRecordStore> recordStoreProvider) throws IOException {

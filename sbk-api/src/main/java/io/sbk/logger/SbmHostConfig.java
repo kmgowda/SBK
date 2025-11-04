@@ -10,8 +10,16 @@
 
 package io.sbk.logger;
 
+/**
+ * Configuration for the SBK Benchmark Manager (SBM) gRPC endpoint.
+ *
+ * Used by {@code io.sbk.logger.impl.GrpcLogger} to connect and stream metrics to SBM.
+ */
 public final class SbmHostConfig {
+    /* Hostname or IP address of the SBM server. */
     public String host;
+    /* Port of the SBM server. */
     public int port;
+    /* Maximum record payload size (in MB) permitted when sending latencies. */
     public int maxRecordSizeMB;
 }

@@ -14,74 +14,61 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Sealed Class LatencyRecord.
+ * Base class that holds aggregated latency and count statistics for a
+ * measurement window or total aggregation. It provides common fields and a
+ * {@link #reset()} method to initialize or clear the counters.
+ *
+ * <p>Fields include totalRecords, totalBytes, valid/invalid/discard counters,
+ * min/max latency and aggregated total latency used to compute averages.
  */
 @Slf4j
 abstract public sealed class LatencyRecord permits LatencyRecorder {
 
-    /**
-     * <code>long totalRecords</code>.
-     */
+    /** Total number of records observed. */
     @Getter
     protected long totalRecords;
 
-    /**
-     * <code>long validLatencyRecords</code>.
-     */
+    /** Number of records counted as valid latency samples. */
     @Getter
     protected long validLatencyRecords;
 
-    /**
-     * <code>lowerLatencyDiscardRecords</code>.
-     */
+    /** Number of latency samples discarded because they were below the minimum threshold. */
     @Getter
     protected long lowerLatencyDiscardRecords;
 
-    /**
-     * <code>long higherLatencyDiscardRecords</code>.
-     */
+    /** Number of latency samples discarded because they exceeded the maximum threshold. */
     @Getter
     protected long higherLatencyDiscardRecords;
 
-    /**
-     * <code>long invalidLatencyRecords</code>.
-     */
+    /** Number of invalid/negative latency samples observed. */
     @Getter
     protected long invalidLatencyRecords;
 
-    /**
-     * <code>long totalBytes</code>.
-     */
+    /** Cumulative bytes observed during the aggregation period. */
     @Getter
     protected long totalBytes;
 
-    /**
-     * <code>long totalLatency</code>.
-     */
+    /** Sum of latencies of valid samples; used to compute averages. */
     @Getter
     protected long totalLatency;
 
-    /**
-     * <code>long minLatency</code>.
-     */
+    /** Minimum observed latency; starts at Long.MAX_VALUE until samples are recorded. */
     @Getter
     protected long minLatency;
 
-    /**
-     * <code>long maxLatency</code>.
-     */
+    /** Maximum observed latency. */
     @Getter
     protected long maxLatency;
 
     /**
-     * Method to reset all recording variables.
+     * Construct and reset counters.
      */
     public LatencyRecord() {
         reset();
     }
 
     /**
-     * Reset all recording variables.
+     * Reset all recording variables to initial state.
      */
     final public void reset() {
         this.totalRecords = 0;

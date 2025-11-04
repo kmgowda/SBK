@@ -10,18 +10,20 @@
 package io.perl.logger;
 
 /**
- * Interface ReportLatency.
+ * Callback interface used by the PerL framework to report individual latency
+ * samples or aggregated latency events. Implementations typically forward
+ * these events to recorders or histogram data structures.
  */
 public interface ReportLatency {
 
 
     /**
-     * Record the latency.
+     * Record the latency for an event or batch.
      *
      * @param startTime start time.
      * @param events    number of events(records).
      * @param bytes     number of bytes.
-     * @param latency   latency value in milliseconds.
+     * @param latency   latency value in milliseconds (or caller-defined unit)
      */
     void recordLatency(long startTime, int events, int bytes, long latency);
 }

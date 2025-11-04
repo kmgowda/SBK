@@ -16,6 +16,12 @@ import org.reflections.Reflections;
 
 import java.util.Set;
 
+/**
+ * Reflection-backed package scanner for {@link RamLogger} implementations.
+ *
+ * <p>Used to discover available SBM logger classes under a given package so the
+ * application can present choices and instantiate the selected logger.
+ */
 public class RamLoggerPackage extends Package<RamLogger> {
 
     public RamLoggerPackage(String packageName) {

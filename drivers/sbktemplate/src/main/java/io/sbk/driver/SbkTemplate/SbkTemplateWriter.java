@@ -25,7 +25,7 @@ public class SbkTemplateWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         throw new IOException("The SbkTemplate Writer Driver not defined");
     }
 

@@ -37,7 +37,7 @@ public class PulsarWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         return producer.sendAsync(data);
     }
 

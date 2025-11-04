@@ -31,7 +31,8 @@ public class IgniteClientTransactionReader implements Reader<byte[]> {
     private final ClientCache<Long, byte[]> cache;
     private final IgniteClient client;
     private long key;
-    private long cnt;
+    @SuppressWarnings("unused")
+    private int cnt;
 
     public IgniteClientTransactionReader(int id, ParameterOptions params, ClientCache<Long, byte[]> cache,
                                          IgniteClient client) throws IOException {

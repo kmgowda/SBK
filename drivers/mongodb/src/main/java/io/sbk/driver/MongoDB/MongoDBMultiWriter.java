@@ -40,7 +40,7 @@ public class MongoDBMultiWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         Document document = new Document();
         document.put("index", Long.toString(key++));
         document.put("data", data);

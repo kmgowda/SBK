@@ -37,7 +37,7 @@ public class ElasticsearchWriter implements Writer<String> {
     }
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         try {
             writeData(data);
         } catch (ElasticsearchException ex ) {

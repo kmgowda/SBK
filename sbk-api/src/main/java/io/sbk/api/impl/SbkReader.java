@@ -33,6 +33,27 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Reader Benchmarking Implementation.
+ *
+ * <p>This class adapts a {@link io.sbk.api.DataReader} into the SBK harness
+ * by implementing the {@link io.perl.api.RunBenchmark} contract. It wires the
+ * reader instance with per-worker context (id, params, perlChannel) and
+ * exposes a set of pre-built benchmark variants (time-based, count-based,
+ * with/without rate control and optional per-request logging).
+ *
+ * <p>Key behavior:
+ * <ul>
+ *   <li>The {@link #run(long,long)} method executes asynchronously on the
+ *       supplied executor and returns a {@link java.util.concurrent.CompletableFuture}.</li>
+ *   <li>Depending on {@link io.sbk.params.ParameterOptions}, the class selects
+ *       specialized benchmark paths (e.g. {@code RecordsReaderRateControl}).</li>
+ *   <li>It uses {@link io.sbk.api.impl.SbkRateController} to pace reads when a
+ *       records-per-second limit is provided.</li>
+ * </ul>
+ *
+ * <p>Implementors and maintainers: keep this class focused on orchestration —
+ * the actual I/O semantics live in the driver-provided {@link io.sbk.api.DataReader}
+ * implementation, which may override default 'recordRead' helpers for batching
+ * or more efficient reads.
  */
 final public class SbkReader extends Worker implements RunBenchmark {
     final private DataType<Object> dType;

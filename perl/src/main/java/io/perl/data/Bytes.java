@@ -11,22 +11,19 @@
 package io.perl.data;
 
 /**
- * Class Bytes.
+ * Utility constants for byte size conversions used across the PerL module.
+ *
+ * Note: {@link #BYTES_PER_GB} uses {@code long} to avoid overflow for large
+ * multiplications.
  */
 public final class Bytes {
 
-    /**
-     * <code>BYTES_PER_KB = 1024</code>.
-     */
+    /** Number of bytes per kilobyte. */
     final public static int BYTES_PER_KB = 1024;
 
-    /**
-     * <code>BYTES_PER_MB = BYTES_PER_KB * BYTES_PER_KB</code>.
-     */
+    /** Number of bytes per megabyte. */
     final public static int BYTES_PER_MB = BYTES_PER_KB * BYTES_PER_KB;
 
-    /**
-     * <code>BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_MB</code>.
-     */
+    /** Number of bytes per gigabyte. */
     final public static long BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_MB;
 }

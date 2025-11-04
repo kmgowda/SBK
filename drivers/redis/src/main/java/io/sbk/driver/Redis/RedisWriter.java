@@ -32,7 +32,7 @@ public class RedisWriter implements Writer<String> {
 
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         jedis.rpush(listName, data);
         return null;
     }

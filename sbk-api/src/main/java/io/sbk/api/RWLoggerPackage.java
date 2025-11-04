@@ -14,6 +14,13 @@ import org.reflections.Reflections;
 
 import java.util.Set;
 
+/**
+ * Package helper for discovering RWLogger implementations on the classpath.
+ *
+ * <p>Uses Reflections to find concrete subclasses of {@link io.sbk.logger.RWLogger}
+ * in the configured package and reuses the generic lookup/instantiation
+ * helpers provided by {@link Package}.
+ */
 public final class RWLoggerPackage extends Package<RWLogger> {
 
     public RWLoggerPackage(String packageName) {

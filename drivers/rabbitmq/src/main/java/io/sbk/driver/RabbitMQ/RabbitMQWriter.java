@@ -108,8 +108,7 @@ public class RabbitMQWriter implements Writer<byte[]> {
         channel.addConfirmListener(listener);
     }
 
-    @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         BasicProperties.Builder builder = DEFAULT_PROPS.builder().timestamp(new Date());
         if (isPersist) {
             builder.deliveryMode(2);

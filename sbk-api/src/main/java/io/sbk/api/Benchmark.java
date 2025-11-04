@@ -16,13 +16,20 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Interface for Benchmark.
+ *
+ * <p>Represents a runnable benchmark which can be started and stopped.
+ * Implementations should return a {@link java.util.concurrent.CompletableFuture}
+ * from {@link #start()} that completes when the benchmark has finished or
+ * was shutdown. The {@link #stop()} method should trigger a graceful
+ * termination of the running workload and ensure the returned future
+ * completes.
  */
 public interface Benchmark {
 
     /**
      * Start the Benchmark.
      *
-     * @return CompletableFuture.
+     * @return CompletableFuture that completes when the benchmark finishes
      * @throws IOException           If an exception occurred.
      * @throws InterruptedException  If an exception occurred
      * @throws ExecutionException    If an exception occurred

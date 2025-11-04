@@ -68,7 +68,7 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         try {
             client.putObject(config.bucketName, config.bucketName + "-" + UUID.randomUUID().toString(),
                     new ByteArrayInputStream(data), (long) data.length, null, (ServerSideEncryption) null,

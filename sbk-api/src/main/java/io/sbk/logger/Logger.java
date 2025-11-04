@@ -21,7 +21,14 @@ import io.time.Time;
 import java.io.IOException;
 
 /**
- * Interface for recoding/printing results.
+ * Primary logging interface for SBK benchmarks to configure, open, and close metrics reporting.
+ *
+ * Implementations are responsible for:
+ * - Adding and parsing metric-specific CLI arguments via {@link #addArgs(InputOptions)} and
+ *   {@link #parseArgs(ParsedOptions)}.
+ * - Initializing resources on {@link #open(ParsedOptions, String, Action, Time)} and releasing them
+ *   on {@link #close(ParsedOptions)}.
+ * - Optionally integrating with SBK's {@link ExceptionHandler} using {@link #setExceptionHandler(ExceptionHandler)}.
  */
 public interface Logger extends PerformanceLogger {
 
@@ -36,7 +43,7 @@ public interface Logger extends PerformanceLogger {
     /**
      * Parse the Metric specific command line arguments.
      *
-     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
+     * @param params ParsedOptions containing driver/logger specific parameters/arguments.
      * @throws IllegalArgumentException If an exception occurred.
      */
     void parseArgs(final ParsedOptions params) throws IllegalArgumentException;
@@ -45,7 +52,7 @@ public interface Logger extends PerformanceLogger {
     /**
      * Open the Logger.
      *
-     * @param params      InputOptions object to be parsed for driver specific parameters/arguments.
+     * @param params      ParsedOptions including logger-specific configuration.
      * @param storageName The Name of the storage.
      * @param action      action to print
      * @param time        time interface
@@ -57,7 +64,7 @@ public interface Logger extends PerformanceLogger {
     /**
      * Close the Logger.
      *
-     * @param params InputOptions object to be parsed for driver specific parameters/arguments.
+     * @param params ParsedOptions used during open; may carry shutdown options.
      * @throws IOException If an exception occurred.
      */
     void close(final ParsedOptions params) throws IOException;

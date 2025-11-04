@@ -42,7 +42,7 @@ public class FileBufferedWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         out.write(data);
         return null;
     }

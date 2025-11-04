@@ -12,12 +12,15 @@ package io.sbk.logger;
 
 /**
  * Interface SetRW.
+ *
+ * Contract for loggers that track and update the number of active and maximum
+ * writers/readers in a benchmark run.
  */
 public interface SetRW {
 
 
     /**
-     * Set Writers.
+     * Set current number of active writers.
      *
      * @param val new value.
      */
@@ -25,21 +28,21 @@ public interface SetRW {
 
 
     /**
-     * Set Max Writers.
+     * Update the max number of writers seen so far.
      *
      * @param val new value.
      */
     void setMaxWriters(int val);
 
     /**
-     * Set Readers.
+     * Set current number of active readers.
      *
      * @param val new value.
      */
     void setReaders(int val);
 
     /**
-     * Set Max Readers.
+     * Update the max number of readers seen so far.
      *
      * @param val new value.
      */

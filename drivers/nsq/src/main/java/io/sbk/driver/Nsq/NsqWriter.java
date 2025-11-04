@@ -36,7 +36,7 @@ public class NsqWriter implements Writer<byte[]> {
 
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         try {
             producer.produce(topicName, data);
         } catch (NSQException | TimeoutException ex) {

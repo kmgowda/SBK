@@ -16,13 +16,20 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 
 /**
- * non-sealed Class LatencyRecordWindow.
+ * Concrete extension of {@link LatencyWindow} that implements reporting
+ * interfaces to receive both per-latency and aggregated latency records.
+ * Implementations back the window with a particular storage strategy (array,
+ * hashmap, histogram extension, etc.).
+ *
+ * <p>Thread Safety: This class is not thread-safe. Instances of this class
+ * should not be accessed by multiple threads concurrently. If thread-safe
+ * behavior is required, it must be implemented by the extending class.
  */
 @NotThreadSafe
 public abstract non-sealed class LatencyRecordWindow extends LatencyWindow implements ReportLatency, ReportLatencies {
 
     /**
-     * Constructor LatencyRecordWindow passing all latencies to it's super class LatencyWindow.
+     * Construct a latency record window with configured thresholds and percentiles.
      *
      * @param lowLatency                        long
      * @param highLatency                       long

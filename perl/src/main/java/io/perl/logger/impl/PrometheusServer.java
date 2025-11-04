@@ -24,7 +24,13 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 /**
- * Class PrometheusServer.
+ * Lightweight embedded HTTP server that exposes a Prometheus scrape endpoint.
+ *
+ * <p>This final class composes a PrometheusMeterRegistry (Micrometer) and an
+ * embedded HttpServer that serves the registry's scrape output at the
+ * configured context path. It is intentionally minimal: the server runs in
+ * a single-thread executor and is suitable for local testing and small-scale
+ * deployments.
  */
 public final class PrometheusServer extends CompositeMeterRegistry {
     final private int port;

@@ -32,6 +32,21 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Writer Benchmarking Implementation.
+ *
+ * <p>This class adapts a {@link io.sbk.api.DataWriter} into the SBK harness
+ * by implementing the {@link io.perl.api.RunBenchmark} contract. It constructs
+ * a payload using the configured {@link io.sbk.data.DataType} and exposes
+ * benchmark variants (time-based, count-based, sync/batched and with optional
+ * write-request logging).
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Create and manage per-writer payload and lifecycle.</li>
+ *   <li>Select and execute the appropriate benchmark variant based on
+ *       {@link io.sbk.params.ParameterOptions}.</li>
+ *   <li>Coordinate rate control using {@link io.sbk.api.impl.SbkRateController} when
+ *       a target throughput is configured.</li>
+ * </ul>
  */
 final public class SbkWriter extends Worker implements RunBenchmark {
     final private DataType<Object> dType;

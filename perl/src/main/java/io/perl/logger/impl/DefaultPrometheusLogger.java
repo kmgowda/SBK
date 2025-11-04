@@ -19,7 +19,16 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Class DefaultPrometheusLogger.
+ * Prometheus-enabled results logger.
+ *
+ * <p>This logger extends {@link DefaultLogger} to publish metrics to a
+ * locally-created Prometheus metrics server in addition to the textual
+ * output. It instantiates a {@link PrometheusMetricsServer} that registers
+ * Micrometer meters and exposes them via an HTTP endpoint.
+ *
+ * <p>Typical usage: construct with the required percentiles and a running
+ * {@link io.time.Time} instance, call {@link #start()} to begin serving
+ * metrics and call {@link #stop()} to shut the server down gracefully.
  */
 public class DefaultPrometheusLogger extends DefaultLogger {
     private final PrometheusMetricsServer server;
@@ -70,11 +79,11 @@ public class DefaultPrometheusLogger extends DefaultLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
+                      long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         super.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         server.print(seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
 }

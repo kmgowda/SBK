@@ -56,7 +56,7 @@ public class FileWriter implements Writer<ByteBuffer> {
 
 
     @Override
-    public CompletableFuture writeAsync(ByteBuffer data) throws IOException {
+    public CompletableFuture<?> writeAsync(ByteBuffer data) throws IOException {
         final ByteBuffer buffer = data.asReadOnlyBuffer();
         out.write(buffer);
         return null;

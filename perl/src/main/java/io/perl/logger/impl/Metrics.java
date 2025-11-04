@@ -14,7 +14,15 @@ import io.perl.config.LatencyConfig;
 import java.text.DecimalFormat;
 
 /**
- *  Class Metrics.
+ * Metrics name builder used by metric-based logger implementations.
+ *
+ * <p>The {@code Metrics} base class centralises naming conventions for Micrometer
+ * metrics (prefixes, unit suffixes and percentile-related metric names). It
+ * prepares arrays of metric names for both percentile values and percentile
+ * counts so concrete classes can register them easily with a meter registry.
+ *
+ * <p>Concrete subclasses should reuse the prepared name fields when creating
+ * counters, gauges or other metric instruments.
  */
 public abstract sealed class Metrics permits PrintMetrics {
     /**
@@ -82,7 +90,12 @@ public abstract sealed class Metrics permits PrintMetrics {
     /**
      * <code>String[] percentileNames</code>.
      */
-    final protected String[] percentileNames;
+    final protected String[] percentileLatencyNames;
+
+    /**
+     * <code>String[] percentileNames</code>.
+     */
+    final protected String[] percentileLatencyCountNames;
 
     /**
      * Constructor Metrics for initializing All Values.
@@ -107,9 +120,11 @@ public abstract sealed class Metrics permits PrintMetrics {
         higherDiscardName = metricPrefix + "_HigherDiscardLatencyRecords";
         slc1Name = metricPrefix + "_SLC_1";
         slc2Name = metricPrefix + "_SLC_2";
-        percentileNames = new String[percentiles.length];
+        percentileLatencyNames = new String[percentiles.length];
+        percentileLatencyCountNames = new String[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
-            this.percentileNames[i] = metricPrefix + "_" + metricTimeUnit + "_" + percentileFormat.format(percentiles[i]);
+            this.percentileLatencyNames[i] = metricPrefix + "_" + metricTimeUnit + "_" + percentileFormat.format(percentiles[i]);
+            this.percentileLatencyCountNames[i] = metricPrefix+ "_Count_" + percentileFormat.format(percentiles[i]);
         }
     }
 

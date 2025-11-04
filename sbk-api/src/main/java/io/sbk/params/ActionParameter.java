@@ -14,14 +14,17 @@ import io.sbk.action.Action;
 
 
 /**
- * Interface ActionParameter.
+ * Supplies the benchmark {@link io.sbk.action.Action} (READ/WRITE variants) selected via CLI.
+ *
+ * <p>Implementations typically parse the action from command-line options and expose it
+ * through {@link #getAction()} so downstream components can adjust behavior accordingly.
  */
 public interface ActionParameter {
 
     /**
-     * Get the Action.
+     * Get the selected benchmark action.
      *
-     * @return action
+     * @return the {@link io.sbk.action.Action} to execute
      */
     Action getAction();
 }

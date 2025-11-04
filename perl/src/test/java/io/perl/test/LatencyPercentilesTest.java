@@ -39,7 +39,7 @@ public class LatencyPercentilesTest {
         assertArrayEquals(fractions, percentiles.fractions, 0.0001);
         assertEquals(fractions.length, percentiles.latencies.length);
         assertEquals(fractions.length, percentiles.latencyIndexes.length);
-        assertEquals(fractions.length, percentiles.latencyCount.length);
+        assertEquals(fractions.length, percentiles.latenciesCount.length);
         assertEquals(0, percentiles.medianLatency);
         assertEquals(0, percentiles.medianIndex);
     }
@@ -55,7 +55,7 @@ public class LatencyPercentilesTest {
         assertEquals(99, percentiles.latencyIndexes[2]);
         for (int i = 0; i < fractions.length; i++) {
             assertEquals(0, percentiles.latencies[i]);
-            assertEquals(0, percentiles.latencyCount[i]);
+            assertEquals(0, percentiles.latenciesCount[i]);
         }
         assertEquals(50, percentiles.medianIndex);
         assertEquals(0, percentiles.medianLatency);
@@ -73,14 +73,14 @@ public class LatencyPercentilesTest {
         assertEquals(10, percentiles.medianLatency);
         // 0.5 (index 0)  is within 0-60
         assertEquals(10, percentiles.latencies[0]);
-        assertEquals(5, percentiles.latencyCount[0]);
+        assertEquals(5, percentiles.latenciesCount[0]);
         assertEquals(0, percentiles.latencies[1]);
-        assertEquals(0, percentiles.latencyCount[1]);
+        assertEquals(0, percentiles.latenciesCount[1]);
 
         // Next bucket: 60-100, latency=20, count=2
         percentiles.copyLatency(20, 2, 60, 100);
         // 0.99 (index 2) is within 60-100
         assertEquals(20, percentiles.latencies[1]);
-        assertEquals(2, percentiles.latencyCount[1]);
+        assertEquals(2, percentiles.latenciesCount[1]);
     }
 }

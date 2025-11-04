@@ -10,7 +10,10 @@
 package io.sbm.logger.impl;
 
 /**
- * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
+ * Concrete SBM logger that prints to stdout and exports metrics via Prometheus.
+ *
+ * <p>Extends {@link AbstractRamLogger} to format periodic and total results including
+ * connection counts, request/response stats, throughput, and latency percentiles.
  */
 public class SbmPrometheusLogger extends AbstractRamLogger {
 
@@ -24,7 +27,7 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                       double writeTimeoutEventsPerSec, long readTimeoutEvents, double readTimeoutEventsPerSec,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                      long slc1, long slc2, long[] percentileValues) {
+                      long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder(SBM_PREFIX);
         appendConnections(out, connections, maxConnections);
         out.append(getPrefix());
@@ -35,7 +38,7 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(out);
 
     }
@@ -52,7 +55,7 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                            double readTimeoutEventsPerSec, double seconds, long bytes, long records,
                            double recsPerSec, double mbPerSec, double avgLatency, long minLatency,
                            long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                           long slc1, long slc2, long[] percentileValues) {
+                           long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder("Total : " + SBM_PREFIX);
         appendConnections(out, connections, maxConnections);
         out.append(getPrefix());
@@ -63,7 +66,7 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(out);
     }
 }

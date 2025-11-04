@@ -9,28 +9,38 @@
  */
 package io.perl.api;
 
-/*
- * Array of queues
+/**
+ * Represents an array of {@link Queue} instances. This abstraction is used when
+ * the PerL framework allocates one queue per worker thread or IO channel.
  */
 public interface QueueArray<T> {
 
-    /*
-     * Return data of type T from queue at 'index', if it's available. Return Null otherwise.
+    /**
+     * Poll an element from the queue at the given index, or {@code null} if none.
+     *
+     * @param index index of the queue to poll
+     * @return element from the queue or {@code null}
      */
     T poll(int index);
 
-    /*
-     * Add data of type T to queue at 'index'.
+    /**
+     * Add an element to the queue identified by index.
+     *
+     * @param index index of the queue to add the element to
+     * @param data  element to add
+     * @return true if added successfully
      */
     boolean add(int index, T data);
 
-    /*
-     * Clear queue at 'index'.
+    /**
+     * Clear the queue at the specified index.
+     *
+     * @param index index of the queue to clear
      */
     void clear(int index);
 
-    /*
-     * Clear all queues.
+    /**
+     * Clear all queues in the array.
      */
     void clear();
 }

@@ -10,14 +10,15 @@
 
 package io.perl.api;
 
-
 /**
- * Interface ReportLatencies.
+ * Interface used by latency windows to retrieve percentile values from a
+ * backing latency store. Implementers provide methods to report aggregated
+ * latency records or individual latency counts.
  */
 public interface ReportLatencies {
 
     /**
-     * Report a latency Record.
+     * Report an aggregated latency record (bucket summary) to the consumer.
      *
      * @param record Latency Record
      */
@@ -25,7 +26,7 @@ public interface ReportLatencies {
 
 
     /**
-     * Report one latency .
+     * Report a single latency value observed a number of times.
      *
      * @param latency Latency value
      * @param count   Number of times the latency value is observed

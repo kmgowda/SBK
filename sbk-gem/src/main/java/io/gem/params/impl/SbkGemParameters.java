@@ -31,7 +31,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Class SbkGemParameters.
+ * GEM (Group Execution Monitor) parameters and argument parsing.
+ *
+ * <p>Extends {@link SbkDriversParameters} to include SBK driver/logger help, and adds GEM-specific
+ * options for remote orchestration (nodes, SSH creds/port, SBK directory/command, copy/delete,
+ * local SBM host/port/idle sleep). Populates typed getters and constructs {@link ConnectionConfig}
+ * instances for each target node.
+ *
+ * <p>Supported options (help text shows defaults from {@link GemConfig}):
+ * - -nodes: comma/space/newline-separated hostnames
+ * - -gemuser, -gempass, -gemport
+ * - -sbkdir, -sbkcommand
+ * - -copy, -delete
+ * - -localhost
+ * - -sbmport, -sbmsleepms
  */
 @Slf4j
 public final class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
@@ -60,14 +73,14 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     private int sbmIdleSleepMilliSeconds;
 
     /**
-     * This Constructor is responsible for initializing all values.
+     * Construct GEM parameters with defaults and register GEM options.
      *
-     * @param name                     String
-     * @param drivers                  String[]
-     * @param loggers
-     * @param config                   NotNull GemConfig
-     * @param sbmPort                  int
-     * @param sbmIdleSleepMilliSeconds int
+     * @param name   benchmark/application name used in help
+     * @param drivers storage driver class names for help listing
+     * @param loggers logger class names for help listing
+     * @param config configuration backing defaults and parsed values
+     * @param sbmPort SBM port default
+     * @param sbmIdleSleepMilliSeconds SBM idle sleep default (ms)
      */
     public SbkGemParameters(String name, String[] drivers, String[] loggers, @NotNull GemConfig config, int sbmPort,
                             int sbmIdleSleepMilliSeconds) {
@@ -98,23 +111,32 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
                 " ms");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-copy", "-delete", "-localhost", "-sbmPort", "-sbmsleepms"};
+                "-copy", "-delete", "-localhost", "-sbmport", "-sbmsleepms"};
         this.parsedArgs = null;
     }
 
 
-    @Override
+    /**
+     * Parse GEM options, validate SBK directory/command, and build connection set.
+     *
+     * <p>Derives {@link #parsedArgs} and {@link #connections}. Validates that SBK directory exists,
+     * command exists and is executable.
+     *
+     * @param args command-line arguments to parse
+     * @throws ParseException            if parsing of arguments fails or required values are invalid
+     * @throws IllegalArgumentException  if SBK directory/command checks fail or other validation errors occur
+     * @throws HelpException             if help text needs to be displayed by upstream handling
+     */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
         final String nodeString = getOptionValue("nodes", config.nodes);
         String[] nodes = nodeString.replace("[ ]+", " ")
-                .replace("[,]+", ",")
+                .replace("[,] +", ",")
                 .split("[ ,\n]+");
         config.gemuser = getOptionValue("gemuser", config.gemuser);
         config.gempass = getOptionValue("gempass", config.gempass);
         config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
         config.sbkdir = getOptionValue("sbkdir", config.sbkdir);
-        config.sbkcommand = getOptionValue("sbkcommand", config.sbkcommand);
         localHost = getOptionValue("localhost", localHost);
         sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
         sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));

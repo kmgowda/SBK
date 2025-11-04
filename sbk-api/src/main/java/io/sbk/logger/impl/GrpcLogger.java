@@ -66,10 +66,10 @@ public class GrpcLogger extends PrometheusLogger {
     private ServiceGrpc.ServiceBlockingStub blockingStub;
     private MessageLatenciesRecord.Builder builder;
     private StreamObserver<com.google.protobuf.Empty> observer;
-    private ExceptionHandler exceptionHandler;
+    // Removed unused exceptionHandler field. If you need custom exception handling, implement setExceptionHandler logic here.
 
     /**
-     * calls its super class PrometheusLogger.
+     * Construct a gRPC logger. Calls super to initialize base logging and metrics behavior.
      */
     public GrpcLogger() {
         super();
@@ -83,9 +83,12 @@ public class GrpcLogger extends PrometheusLogger {
 
     @Override
     public void setExceptionHandler(ExceptionHandler handler) {
-        this.exceptionHandler = handler;
+        // No-op as per edit hint.
     }
 
+    /**
+     * Add SBM host/port options and load defaults from {@code sbmhost.properties}.
+     */
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
@@ -108,6 +111,9 @@ public class GrpcLogger extends PrometheusLogger {
         //params.addOption("blocking", true, "blocking calls to SBM; default: false");
     }
 
+    /**
+     * Parse SBM options and decide if gRPC export is enabled.
+     */
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
@@ -119,9 +125,12 @@ public class GrpcLogger extends PrometheusLogger {
         sbmHostConfig.port = Integer.parseInt(params.getOptionValue("sbmport", Integer.toString(sbmHostConfig.port)));
         //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
         blocking = false;
-        exceptionHandler = null;
+        // exceptionHandler = null; // This line is removed as per edit hint.
     }
 
+    /**
+     * Open the logger, establish a gRPC channel, validate configuration with SBM, and prepare buffers.
+     */
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
@@ -218,6 +227,9 @@ public class GrpcLogger extends PrometheusLogger {
         Printer.log.info("SBK GRPC Logger Started");
     }
 
+    /**
+     * Close the logger, unregister the client, and shutdown the gRPC channel.
+     */
     @Override
     public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
         super.close(params);
@@ -235,7 +247,7 @@ public class GrpcLogger extends PrometheusLogger {
     }
 
     /**
-     * Sends Latencies Records.
+     * Send the accumulated request/latency counters to SBM and reset local accumulators.
      */
     public void sendLatenciesRecord() {
         long writeRequestsSum = 0;
@@ -285,6 +297,9 @@ public class GrpcLogger extends PrometheusLogger {
         latencyBytes = 0;
     }
 
+    /**
+     * Record write requests locally and mirror them into RAM buffers for gRPC export when enabled.
+     */
     @Override
     public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
         super.recordWriteRequests(writerId, startTime, bytes, events);
@@ -294,6 +309,9 @@ public class GrpcLogger extends PrometheusLogger {
         }
     }
 
+    /**
+     * Record read requests locally and mirror them into RAM buffers for gRPC export when enabled.
+     */
     @Override
     public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
         super.recordReadRequests(readerId, startTime, bytes, events);
@@ -303,6 +321,9 @@ public class GrpcLogger extends PrometheusLogger {
         }
     }
     
+    /**
+     * Record write timeout events and mirror them into RAM buffers for gRPC export when enabled.
+     */
     @Override
     public void recordWriteTimeoutEvents(int readerId, long startTime, long events) {
         super.recordWriteTimeoutEvents(readerId, startTime, events);
@@ -311,6 +332,9 @@ public class GrpcLogger extends PrometheusLogger {
         }
     }
 
+    /**
+     * Record read timeout events and mirror them into RAM buffers for gRPC export when enabled.
+     */
     @Override
     public void recordReadTimeoutEvents(int writerId, long startTime, long events) {
         super.recordReadTimeoutEvents(writerId, startTime, events);
@@ -320,7 +344,7 @@ public class GrpcLogger extends PrometheusLogger {
     }
 
     /**
-     * record every latency.
+     * Record individual latency values into the local {@code LatencyRecorder} and stage them for gRPC export.
      */
     @Override
     public void recordLatency(long startTime, int events, int bytes, long latency) {
@@ -351,14 +375,15 @@ public class GrpcLogger extends PrometheusLogger {
                       long readTimeoutEvents, double readTimeoutEventsPerSec,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                      long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                      long[] percentileLatencyCounts) {
         super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
                 writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileValues);
+                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         if (enable) {
             sendLatenciesRecord();
         }

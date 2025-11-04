@@ -30,7 +30,16 @@ import java.security.InvalidKeyException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Class SbkGrpcService.
+ * gRPC service implementation for SBM.
+ *
+ * <p>Exposes RPCs for clients to:
+ * - query SBP version and compatibility,
+ * - obtain server configuration,
+ * - register/unregister a client ID,
+ * - stream latency records for aggregation.
+ *
+ * <p>Tracks current and maximum connections via {@link CountConnections} and forwards
+ * records to an {@link SbmRegistry} for queueing/processing.
  */
 final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     private final AtomicInteger connections;
@@ -69,6 +78,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void getVersion(com.google.protobuf.Empty request,
                            io.grpc.stub.StreamObserver<io.sbp.grpc.Version> responseObserver) {
+        // Respond with the SBP protocol version supported by this server instance
         try {
             final SbpVersion version = Sbp.getVersion();
             final Version.Builder outVersion = Version.newBuilder();
@@ -86,6 +96,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void isVersionSupported(io.sbp.grpc.Version request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.BoolValue> responseObserver) {
+        // Validate that the client's major version matches the server's supported major version
         try {
             final SbpVersion version = Sbp.getVersion();
             if (version.major == request.getMajor()) {
@@ -108,6 +119,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void getConfig(com.google.protobuf.Empty request,
                           io.grpc.stub.StreamObserver<io.sbp.grpc.Config> responseObserver) {
+        // Provide configuration to clients while enforcing max connections
         if (connections.get() < params.getMaxConnections()) {
             responseObserver.onNext(config);
             responseObserver.onCompleted();
@@ -120,6 +132,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void registerClient(io.sbp.grpc.Config request,
                                @NotNull io.grpc.stub.StreamObserver<io.sbp.grpc.ClientID> responseObserver) {
+        // Allocate a client ID and account the new connection
         responseObserver.onNext(ClientID.newBuilder().setId(registry.getID()).build());
         responseObserver.onCompleted();
         countConnections.incrementConnections();
@@ -130,6 +143,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void addLatenciesRecord(io.sbp.grpc.MessageLatenciesRecord request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        // Queue a latency record for aggregation; respond with Empty on success
         try {
             registry.enQueue(request);
             if (responseObserver != null) {
@@ -147,6 +161,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public void closeClient(io.sbp.grpc.ClientID request,
                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        // Decrement counters upon client disconnect and acknowledge
         countConnections.decrementConnections();
         connections.decrementAndGet();
         if (responseObserver != null) {

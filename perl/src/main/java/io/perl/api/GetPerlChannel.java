@@ -11,14 +11,19 @@
 package io.perl.api;
 
 /**
- * Interface GetPerlChannel.
+ * Capability interface for obtaining a dedicated {@link PerlChannel}. This is
+ * used by PerL implementations to hand out per-thread channels to producers.
+ *
+ * <p>Callers should obtain one channel per thread and must not share a
+ * {@code PerlChannel} instance between multiple threads.
  */
 public sealed interface GetPerlChannel permits Channel, Perl {
 
     /**
-     * Get the PerlChannel to get the benchmark results.
+     * Returns a dedicated {@link PerlChannel} instance for the caller to submit
+     * benchmarking events.
      *
-     * @return PerlChannel to get the benchmark results.
+     * @return a thread-dedicated {@link PerlChannel}
      */
     PerlChannel getPerlChannel();
 

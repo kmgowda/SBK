@@ -12,7 +12,11 @@ package io.sbk.logger;
 
 
 /**
- * non-sealed interface CountRW which extends CountReaders and  CountWriters.
+ * Combined interface for tracking both readers and writers in the benchmarking system.
+ * This interface extends both CountReaders and CountWriters interfaces to provide
+ * a unified way to track both types of operations.
+ * 
+ * <p>This interface is sealed and only permits implementation by RWLogger.</p>
  */
 public sealed interface CountRW extends CountReaders, CountWriters permits RWLogger {
 

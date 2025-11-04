@@ -11,7 +11,13 @@
 package io.sbk.api;
 
 /**
- * Interface Callback.
+ * Callback interface used by callback-driven drivers to receive data and
+ * optionally report per-record benchmarking metrics.
+ *
+ * <p>Drivers that provide a callback-style API may implement this interface
+ * to bridge into SBK's metric reporting. The {@code record} method is a
+ * convenience to report pre-computed timing and size information; it has a
+ * default no-op implementation so callback-only drivers can ignore it.
  *
  * @param <T> Flexible parameter
  */

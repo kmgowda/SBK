@@ -14,7 +14,11 @@ import io.sbk.exception.HelpException;
 import org.apache.commons.cli.ParseException;
 
 /**
- * Interface InputOptions.
+ * Contract for parsing command-line arguments into {@link ParsedOptions}.
+ *
+ * <p>Extends {@link InputOptions} to ensure options are registered prior to parsing and
+ * {@link ParsedOptions} to expose the parsed values. Implementations should validate
+ * required arguments and may throw {@link HelpException} when a help flag is present.
  */
 public non-sealed interface ParseInputOptions extends InputOptions, ParsedOptions {
 

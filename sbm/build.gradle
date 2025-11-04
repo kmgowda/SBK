@@ -17,8 +17,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
-        classpath group: 'com.google.cloud.tools.jib', name: 'com.google.cloud.tools.jib.gradle.plugin', version: jibVersion
+        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
+        classpath "com.google.cloud.tools.jib:com.google.cloud.tools.jib.gradle.plugin:$jibVersion"
     }
 }
 
@@ -60,8 +60,8 @@ application {
 }
 
 dependencies {
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.jetbrains:annotations:$jetbrainVersion"
     api project(":sbk-api")
 }
 

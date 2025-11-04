@@ -11,7 +11,10 @@
 package io.gem.api;
 
 /**
- * Class RemoteResponse.
+ * Immutable result of executing a command on a remote host.
+ *
+ * <p>Captures the exit status, stdout/stderr text, and the host identifier so callers can
+ * correlate results across multiple nodes.
  */
 public final class RemoteResponse {
 
@@ -37,12 +40,12 @@ public final class RemoteResponse {
 
 
     /**
-     * The constructor RemoteResponse is responsible for initializing all values.
+     * Create a remote response snapshot.
      *
-     * @param returnCode    int
-     * @param stdOutput     String
-     * @param errOutput     String
-     * @param host          String
+     * @param returnCode exit status returned by the remote command (null may indicate unknown)
+     * @param stdOutput  standard output captured as text (may be large)
+     * @param errOutput  standard error captured as text
+     * @param host       remote host identifier for this response
      */
     public RemoteResponse(int returnCode, String stdOutput, String errOutput, String host) {
         this.returnCode = returnCode;

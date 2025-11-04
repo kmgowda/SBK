@@ -41,7 +41,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Class SbkGemBenchmark.
+ * Coordinates remote SBK execution and local SBM lifecycle.
+ *
+ * <p>Responsibilities:
+ * - Establish SSH sessions to all nodes and validate remote Java versions.
+ * - Optionally delete/copy SBK directory on remote hosts.
+ * - Start SBM locally, then execute SBK remotely and collect results.
+ * - Aggregate remote outputs into {@link io.gem.api.RemoteResponse}[] and shutdown cleanly.
  */
 final public class SbkGemBenchmark implements GemBenchmark {
     private final Benchmark sbmBenchmark;
@@ -161,7 +167,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         boolean stop = false;
         if (!ret.isDone()) {
-            final String errMsg = "SBK-GEM: command: " + cmd + " time out after " + config.maxIterations + " iterations";
+            final String errMsg = "SBK-GEM: command: " + cmd + " time out after " + config.maxIterations +
+                    " iterations! Check ssh user name and password or network connection";
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
         } else {
@@ -366,6 +373,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
         shutdown(null);
     }
 
+    /**
+     * Tracks visited (host, remoteDir) combinations to avoid duplicate operations
+     * when multiple connections point to the same remote target.
+     */
     private final static class ConnectionsMap {
         private final Map<Map.Entry<String, String>, Boolean> kMap;
 

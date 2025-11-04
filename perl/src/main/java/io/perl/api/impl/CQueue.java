@@ -23,7 +23,9 @@ import java.lang.invoke.VarHandle;
 final public class CQueue<T> implements Queue<T> {
 
     static final private class Node<T> {
+        @SuppressWarnings("unused")
         public volatile T item;
+        @SuppressWarnings("unused")
         public volatile Node<T> next;
         Node(T item) {
             this.item = item;
@@ -38,6 +40,7 @@ final public class CQueue<T> implements Queue<T> {
 
     final private Node<T> firstNode;
     private volatile Node<T> head;
+    @SuppressWarnings("unused")
     private volatile Node<T> tail;
 
     static {

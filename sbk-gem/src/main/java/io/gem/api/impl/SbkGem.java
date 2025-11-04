@@ -61,7 +61,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Class SbkGem.
+ * SBK-GEM orchestrator entry points and utilities.
+ *
+ * <p>Provides static helpers to build and run a GEM benchmark across multiple remote nodes
+ * over SSH. Responsibilities include:
+ * - discover storage and logger classes,
+ * - parse GEM/SBK parameters and logger options,
+ * - verify local/remote prerequisites (e.g., Java versions, SBK directory/command),
+ * - optionally copy SBK artifacts to remote hosts,
+ * - start SBM locally and coordinate remote SBK runs,
+ * - aggregate and print remote results.
  */
 final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
@@ -162,7 +171,7 @@ final public class SbkGem {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final GemLoggerPackage loggerStore = new GemLoggerPackage(gemLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
-        final Storage storageDevice;
+        final Storage<?> storageDevice;
         final String[] storageDrivers;
         final String[] nextArgs;
         final String[] loggerNames;
@@ -190,6 +199,20 @@ final public class SbkGem {
                 SbmConfig.class);
         gemConfig = mapper.readValue(SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 GemConfig.class);
+
+        if (StringUtils.isEmpty(gemConfig.gempass)) {
+            Printer.log.warn("SBK-GEM: The ssh password is not set in the gem.properties file, " +
+                    "checking " + GemConfig.SBK_GEM_SSH_PASSWD + " environment variable");
+            String envPass = System.getenv(GemConfig.SBK_GEM_SSH_PASSWD);
+            if (StringUtils.isNotEmpty(envPass)) {
+                gemConfig.gempass = envPass;
+                Printer.log.warn("SBK-GEM: Using password from "+ GemConfig.SBK_GEM_SSH_PASSWD +
+                        " environment variable");
+            } else {
+                Printer.log.warn("SBK-GEM: The ssh password is not set in the " + GemConfig.SBK_GEM_SSH_PASSWD +
+                        " environment variable");
+            }
+        }
 
         usageLine = StringUtils.isNotEmpty(argsClassName) ? appName + " " + Config.CLASS_OPTION_ARG + " " + argsClassName :
                 appName;
@@ -243,7 +266,7 @@ final public class SbkGem {
         } else {
             Storage<?> device = null;
             try {
-                device = packageStore.getClass(className);
+                device = (Storage<?>) packageStore.getClass(className);
             } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                     IllegalAccessException | InstantiationException ex) {
                 Printer.log.warn("Instantiation of storage class '" + className + "' from the package '" +
@@ -415,6 +438,4 @@ final public class SbkGem {
         }
         System.out.println(separatorText);
     }
-
-
 }

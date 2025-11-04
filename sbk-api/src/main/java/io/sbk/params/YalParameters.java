@@ -10,7 +10,18 @@
 
 package io.sbk.params;
 
+/**
+ * Parameters contract for YAML-based configuration (YAL) support.
+ *
+ * <p>Implementations provide accessors to retrieve the YAML file name that should be
+ * read to load CLI arguments, typically used together with {@link YmlMap} helpers.
+ */
 public interface YalParameters {
 
+    /**
+     * Get the configured YAML file name.
+     *
+     * @return path or name of the YAML file to read
+     */
     String getFileName();
 }

@@ -11,17 +11,24 @@
 package io.sbk.logger;
 
 /**
- * Sealed interface CountReaders which permits CountRW.
+ * Interface for tracking the count of active readers in the benchmarking system.
+ * This sealed interface is part of the reader tracking mechanism in SBK.
+ * It provides methods to increment and decrement the count of active readers
+ * during benchmark operations.
+ * 
+ * <p>This interface is sealed and only permits implementation by CountRW.</p>
  */
 public sealed interface CountReaders permits CountRW {
 
     /**
-     * Increment Readers.
+     * Increments the count of active readers.
+     * This method should be called when a new reader becomes active.
      */
     void incrementReaders();
 
     /**
-     * Decrement Readers.
+     * Decrements the count of active readers.
+     * This method should be called when a reader completes its operation or becomes inactive.
      */
     void decrementReaders();
 }

@@ -7,7 +7,6 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-
 package io.sbk.logger.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -37,6 +36,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Base implementation of {@link io.sbk.logger.RWLogger} providing shared read/write request accounting,
+ * periodic aggregation, and printing helpers. Subclasses implement concrete outputs
+ * (System out, CSV, Prometheus, gRPC) by overriding the print methods while reusing the
+ * counters, percentiles, and CLI configuration handling provided here.
+ */
 public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger, SetRW {
     private final static String LOGGER_FILE = "logger.properties";
     private final static VarHandle VAR_HANDLE_ARRAY;
@@ -479,7 +484,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                                             long records, double recsPerSec, double mbPerSec,
                                             double avgLatency, long minLatency, long maxLatency, long invalid,
                                             long lowerDiscard, long higherDiscard, long slc1, long slc2,
-                                            long[] percentileValues) {
+                                            long[] percentileLatencies, long[] percentileLatencyCounts) {
         appendWritesAndReaders(out, writers, maxWriters, readers, maxReaders);
         appendWriteAndReadRequests(out, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
                 writeRequestRecordsPerSec, readRequestBytes, readRequestMBPerSec, readRequestRecords,
@@ -489,13 +494,14 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 writeReadRequestPendingBytes);
         appendWriteAndReadTimeoutEvents(out, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
-                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies);
     }
 
     @Override
     public final void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                            long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                            long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                            long[] percentileLatencyCounts) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final ReadWriteRequestsPerformance perf = new ReadWriteRequestsPerformance(seconds, req);
         final long writeReadPendingRecords;
@@ -531,7 +537,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                 req.writeTimeoutEvents, perf.writeTimeoutEventsPerSec, req.readTimeoutEvents, perf.readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
     @Override
@@ -545,7 +551,8 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                       long readTimeoutEvents, double readTimeoutEventsPerSec,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                      long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                      long[] percentileLatencyCounts) {
         try {
             throw new IOException("The print method is not overridden/implemented\n");
         } catch (Exception ex) {
@@ -556,7 +563,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     @Override
     public final void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                                  double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                                 long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                                 long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         final ReadWriteRequests req = getReadAndWriteRequests();
         final long writeReadPendingRecords;
         final long writeReadPendingBytes;
@@ -595,7 +602,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 writeReadPendingRecords, writeReadPendingBytes,
                 writeTimeoutEvents, perf.writeTimeoutEventsPerSec, readTimeoutEvents, perf.readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
 
         readRequestRecords = readRequestBytes = writeRequestRecords = writeRequestBytes = 0;
         writeResponsePendingRecords = writeResponsePendingBytes = 0;
@@ -613,7 +620,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                            long readTimeoutEvents, double readTimeoutEventsPerSec,
                            double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         try {
             throw new IOException("The printTotal method is not overridden/implemented\n");
         } catch (Exception ex) {

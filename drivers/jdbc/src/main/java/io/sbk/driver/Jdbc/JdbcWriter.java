@@ -86,8 +86,7 @@ public class JdbcWriter implements Writer<String> {
     }
 
 
-    @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         try {
             st.executeUpdate(gerWriteQuery());
         } catch (SQLException ex) {

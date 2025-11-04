@@ -11,12 +11,15 @@
 package io.perl.api;
 
 /**
- * Interface for recording latencies.
+ * Recorder that receives individual events and aggregates them into periodic
+ * windows and a total aggregation. Also extends {@link TotalPeriodicWindow}
+ * to expose methods for printing total summaries.
  */
 public interface PeriodicRecorder extends TotalPeriodicWindow {
 
     /**
-     * Record the Event/record.
+     * Record the Event/record. Implementations should update internal
+     * aggregations and forward values to window storage.
      *
      * @param startTime start time
      * @param endTime   end time

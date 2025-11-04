@@ -21,7 +21,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Class for recoding/printing benchmark results on micrometer Composite Meter Registry.
+ * Metric-backed results reporter that publishes values to a Micrometer
+ * CompositeMeterRegistry.
+ *
+ * <p>This class registers counters and gauges for common result fields
+ * (bytes, records, rates and latencies) and provides a {@link #print}
+ * implementation that updates the registered instruments. It is primarily
+ * used as the backing implementation for Prometheus exposition.
  */
 public sealed class PrintMetrics extends Metrics implements Print permits PrometheusMetricsServer {
 
@@ -83,7 +89,12 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
     /**
      *<code>AtomicDouble[] percentileGauges</code>.
      */
-    final private AtomicDouble[] percentileGauges;
+    final private AtomicDouble[] percentileLatencyGauges;
+
+    /**
+     *<code>AtomicDouble[] percentileGauges</code>.
+     */
+    final private AtomicLong[] percentileLatencyCountGauges;
 
     /**
      *<code>AtomicLong slc1</code>.
@@ -125,10 +136,13 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         this.maxLatency = this.registry.gauge(maxLatencyName, new AtomicDouble());
         this.slc1 = this.registry.gauge(slc1Name, new AtomicLong());
         this.slc2 = this.registry.gauge(slc2Name, new AtomicLong());
-        this.percentileGauges = new AtomicDouble[percentileNames.length];
-        for (int i = 0; i < percentileNames.length; i++) {
-            this.percentileGauges[i] = this.registry.gauge(percentileNames[i],
+        this.percentileLatencyGauges = new AtomicDouble[percentileLatencyNames.length];
+        this.percentileLatencyCountGauges = new AtomicLong[percentileLatencyNames.length];
+        for (int i = 0; i < percentileLatencyNames.length; i++) {
+            this.percentileLatencyGauges[i] = this.registry.gauge(percentileLatencyNames[i],
                     new AtomicDouble());
+            this.percentileLatencyCountGauges[i] = this.registry.gauge(percentileLatencyCountNames[i],
+                    new AtomicLong());
         }
         if (latencyTimeUnit == TimeUnit.ns) {
             convert = time::convertToNanoSeconds;
@@ -151,7 +165,7 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
     @Override
     final public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                            long slc1, long slc2, long[] percentileValues) {
+                            long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         this.bytes.increment(bytes);
         this.records.increment(records);
         this.invalidLatencyRecords.increment(invalid);
@@ -164,8 +178,9 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
         this.avgLatency.set(convert.apply(avgLatency));
         this.minLatency.set(convert.apply((double) minLatency));
         this.maxLatency.set(convert.apply((double) maxLatency));
-        for (int i = 0; i < Math.min(this.percentileGauges.length, percentileValues.length); i++) {
-            this.percentileGauges[i].set(convert.apply((double) percentileValues[i]));
+        for (int i = 0; i < Math.min(this.percentileLatencyGauges.length, percentileLatencies.length); i++) {
+            this.percentileLatencyGauges[i].set(convert.apply((double) percentileLatencies[i]));
+            this.percentileLatencyCountGauges[i].set(percentileLatencyCounts[i]);
         }
     }
 

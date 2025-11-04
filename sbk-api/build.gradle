@@ -18,8 +18,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: protobufGradlePlugin
-        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
+        classpath "com.google.protobuf:protobuf-gradle-plugin:$protobufGradlePlugin"
+        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
     }
 }
 
@@ -35,13 +35,12 @@ apply from: "$rootDir/gradle/spotbugs.gradle"
 
 dependencies {
     api project(":perl")
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    api group: 'org.reflections', name: 'reflections', version: reflectionsVersion
-    api group: 'org.apache.commons', name: 'commons-configuration2', version: apacheCommonsConfigVersion
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    api group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLang3Version
-
-    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    api "org.reflections:reflections:$reflectionsVersion"
+    api "org.apache.commons:commons-configuration2:$apacheCommonsConfigVersion"
+    api "org.apache.commons:commons-lang3:$apacheCommonsLang3Version" // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation "commons-cli:commons-cli:$commonsCliVersion"
+    implementation "org.jetbrains:annotations:$jetbrainVersion"
 }
 
 generateJavadoc {

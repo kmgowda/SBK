@@ -19,7 +19,33 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Interface for Data Records Writers.
+ * Higher-level writer abstraction that exposes methods for recording write
+ * metrics and provides default harness-driven write workloads.
+ *
+ * <p>This interface builds on the lower-level {@link DataWriter} abstraction
+ * and adds methods that the SBK harness uses to measure and report write
+ * performance. Implementations should implement the low-level write
+ * operations (see {@link #write(DataType, Object, int, Time, Status)}) and
+ * may override the default convenience methods provided here to implement
+ * batching, backpressure handling, or driver-specific optimizations.
+ *
+ * <p>The interface's default methods provide standard benchmark workloads
+ * such as fixed-count writes, time-based writes, and rate-controlled
+ * writes. These default implementations delegate to {@link #recordWrite}
+ * or {@link #write} and call {@link #sync()} where appropriate to ensure
+ * durability semantics expected by the harness. Use these helpers to avoid
+ * duplicating common harness logic in drivers.
+ *
+ * <p>Implementation notes:
+ * <ul>
+ *   <li>Returning {@code null} from {@link #write(DataType, Object, int, Time, Status)} indicates the
+ *       write completed synchronously; the default helpers handle this case.</li>
+ *   <li>Implement {@link #writeSetTime} when your payload can contain an embedded
+ *       start timestamp so the harness can compute end-to-end latency from the
+ *       payload's timestamp.</li>
+ *   <li>Override {@link #sync()} if your driver requires an explicit durability
+ *       call (e.g., fsync or flush) after batches of writes.</li>
+ * </ul>
  */
 public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Writer {
 

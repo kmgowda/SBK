@@ -25,6 +25,15 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * SBK Callback reader implementation.
  *
+ * <p>This deprecated helper adapts callback-style drivers into the older SBK
+ * Benchmark interface. It is retained for backwards compatibility but has been
+ * superseded by the {@link io.sbk.api.impl.SbkReader} / {@link io.sbk.api.AbstractCallbackReader}
+ * classes which provide richer orchestration and explicit lifecycle management.
+ *
+ * <p>If you are maintaining drivers, prefer implementing a {@link io.sbk.api.DataReader}
+ * (synchronous or asynchronous) and integrate with {@link io.sbk.api.impl.SbkReader}
+ * instead of using this deprecated callback path.
+ *
  * @deprecated This interface is replaced by Abstract class AbstractCallbackReader and SbkReader.
  */
 @Deprecated

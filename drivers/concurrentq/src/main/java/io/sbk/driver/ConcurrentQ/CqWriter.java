@@ -22,12 +22,12 @@ import java.util.concurrent.CompletableFuture;
 public class CqWriter implements Writer<byte[]> {
     private Queue<byte[]> queue;
 
-    public CqWriter(Queue queue) throws IOException {
+    public CqWriter(Queue<byte[]> queue) throws IOException {
         this.queue = queue;
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         queue.add(data);
         return null;
     }

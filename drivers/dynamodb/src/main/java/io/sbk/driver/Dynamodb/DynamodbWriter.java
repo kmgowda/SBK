@@ -41,7 +41,7 @@ public class DynamodbWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         HashMap<String, AttributeValue> itemValues = new HashMap<>();
         itemValues.put("key", AttributeValue.builder().s(Long.toString(key++)).build());
         itemValues.put("data", AttributeValue.builder().b(SdkBytes.fromByteArray(data)).build());

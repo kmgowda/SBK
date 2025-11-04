@@ -18,7 +18,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'org.nosphere.apache', name: 'creadur-rat-gradle', version: apacheRatVersion
+        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
     }
 }
 
@@ -42,21 +42,15 @@ application {
 }
 
 dependencies {
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    implementation group: 'org.jetbrains', name: 'annotations', version: jetbrainVersion
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.jetbrains:annotations:$jetbrainVersion"
     api project(":sbm")
 
-    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
-    implementation group: 'org.apache.sshd', name: 'sshd-common', version: sshdVersion
-
-    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
-    implementation group: 'org.apache.sshd', name: 'sshd-core', version: sshdVersion
-
-    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-scp
-    implementation group: 'org.apache.sshd', name: 'sshd-scp', version: sshdVersion
-
-    // https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
-    implementation group: 'org.apache.sshd', name: 'sshd-mina', version: sshdVersion
+// https://mvnrepository.com/artifact/org.apache.sshd/sshd-mina
+    implementation "org.apache.sshd:sshd-common:$sshdVersion"
+    implementation "org.apache.sshd:sshd-core:$sshdVersion"
+    implementation "org.apache.sshd:sshd-scp:$sshdVersion"
+    implementation "org.apache.sshd:sshd-mina:$sshdVersion"
 }
 
 

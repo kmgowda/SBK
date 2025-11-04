@@ -16,6 +16,13 @@ import org.reflections.Reflections;
 
 import java.util.Set;
 
+/**
+ * Reflection-backed package scanner for {@link GemLogger} implementations.
+ *
+ * <p>Provides discovery utilities to enumerate and load logger classes under a given
+ * package name for SBK-GEM. Used by orchestrators to present available logger choices
+ * and to instantiate the selected one.
+ */
 public final class GemLoggerPackage extends Package<GemLogger> {
 
     public GemLoggerPackage(String packageName) {

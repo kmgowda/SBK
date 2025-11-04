@@ -53,8 +53,7 @@ public class RocketMQWriter implements Writer<byte[]> {
         }
     }
 
-    @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         Message message = new Message(topicName, data);
 
         CompletableFuture<Void> future = new CompletableFuture<>();
@@ -112,7 +111,7 @@ public class RocketMQWriter implements Writer<byte[]> {
     }
 
     //  writeAsync implementation for recordWriteImpl.
-    private CompletableFuture writeAsyncImpl(byte[] data) throws IOException {
+    private CompletableFuture<?> writeAsyncImpl(byte[] data) throws IOException {
         Message message = new Message(topicName, data);
         try {
             this.rmqProducer.send(message);

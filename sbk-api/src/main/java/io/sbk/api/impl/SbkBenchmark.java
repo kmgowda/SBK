@@ -47,6 +47,25 @@ import java.util.stream.IntStream;
 
 /**
  * Class for performing the benchmark.
+ *
+ * <p>This class orchestrates the full lifecycle of an SBK benchmark run:
+ * it opens the storage client, constructs writer and reader instances,
+ * wires PerL-based metric collectors, schedules timeouts and executes
+ * the writers/readers concurrently using an executor pool.
+ *
+ * <p>Responsibilities include:
+ * <ul>
+ *   <li>Opening and closing the storage device lifecycle via {@link io.sbk.api.Storage}.</li>
+ *   <li>Creating and managing multiple {@link io.sbk.api.DataWriter} and {@link io.sbk.api.DataReader} instances.</li>
+ *   <li>Coordinating PerL metric collectors for writers and readers when enabled.</li>
+ *   <li>Providing a fault-tolerant shutdown path and reporting via the configured {@link io.sbk.logger.RWLogger}.</li>
+ * </ul>
+ *
+ * <p>Notes for maintainers:
+ * <ul>
+ *   <li>The class reserves executor threads based on configured writers/readers; adjust the thread accounting carefully.</li>
+ *   <li>Perl-based metrics and timeouts are configured conditionally depending on writer/reader counts.</li>
+ * </ul>
  */
 final public class SbkBenchmark implements Benchmark {
     final private static String CONFIGFILE = "sbk.properties";

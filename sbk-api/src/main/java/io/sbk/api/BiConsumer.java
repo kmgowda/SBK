@@ -7,14 +7,18 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-
 package io.sbk.api;
 
 import java.io.EOFException;
 import java.io.IOException;
 
 /**
- *Interface BiConsumer.
+ * Functional-style BiConsumer used by internal harness code to represent
+ * a benchmark invocation that accepts a time budget and a records limit.
+ *
+ * <p>Implementations should perform the selected benchmark variant and may
+ * throw EOFException/IOException when the driver signals end-of-stream or
+ * an I/O error.
  */
 public interface BiConsumer {
 

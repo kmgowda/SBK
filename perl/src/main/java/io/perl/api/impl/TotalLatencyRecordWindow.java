@@ -15,7 +15,10 @@ import io.perl.logger.Print;
 import io.perl.api.TotalPeriodicWindow;
 
 /**
- * Class TotalLatencyRecordWindow.
+ * Combines a per-window latency store and a total-window store and provides
+ * the PeriodicWindow/TotalPeriodicWindow lifecycle semantics. This class is
+ * used by the periodic recorder to manage window resets and to print both
+ * window-level and total-level metrics.
  */
 public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
 
@@ -40,7 +43,7 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
     final protected Print totalLogger;
 
     /**
-     * Constructor TotalLatencyRecordWindow initialize all values.
+     * Construct with window and total-window storage and corresponding loggers.
      *
      * @param window            LatencyRecordWindow
      * @param totalWindow       LatencyRecordWindow
@@ -56,7 +59,7 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
     }
 
     /**
-     * This method check if window is full and Stop the Recording window.
+     * Check if the current window is full and, if so, stop and restart it.
      *
      * @param currTime long
      */
@@ -68,7 +71,7 @@ public class TotalLatencyRecordWindow implements TotalPeriodicWindow {
     }
 
     /**
-     * This method checks if totalWindow is full and Stop the Total Window.
+     * Check if the total window is full and flush/reset its contents.
      *
      * @param currTime long
      */

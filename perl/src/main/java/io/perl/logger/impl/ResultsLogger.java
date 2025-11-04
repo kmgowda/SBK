@@ -20,9 +20,25 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 /**
- * Class ResultsLogger.
+ * Base implementation for printing benchmark results to different sinks.
+ *
+ * <p>The {@code ResultsLogger} centralises formatting and percentile handling
+ * for the various concrete logger implementations. It stores the configured
+ * percentile fractions, the reporting time unit and min/max latency bounds
+ * and exposes utility helpers used by subclasses to build consistent textual
+ * output or to forward metrics to other systems.
+ *
+ * <p>Responsibilities:
+ * <ul>
+ *   <li>Store and validate percentile fractions and produce human-friendly
+ *       percentile name strings used in textual output.</li>
+ *   <li>Provide the shared {@link #appendResultString} helper that formats
+ *       the standard summary line used across loggers.</li>
+ *   <li>Offer pluggable constructors so subclasses can override configuration
+ *       such as the prefix, percentiles or time units.</li>
+ * </ul>
  */
-public class ResultsLogger implements PerformanceLogger {
+public abstract class ResultsLogger implements PerformanceLogger {
 
     /**
      * <code>String header</code>.
@@ -189,22 +205,23 @@ public class ResultsLogger implements PerformanceLogger {
     @Override
     public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
-                      long[] percentileValues) {
+                      long[] percentileLatencies, long[] percentileLatencyCounts) {
         final StringBuilder out = new StringBuilder(prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
-                percentileValues);
+                percentileLatencies);
         System.out.print(out);
     }
 
     @Override
     public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                           long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                           long[] percentileLatencyCounts) {
         final StringBuilder out = new StringBuilder("Total : "+ prefix);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
-                percentileValues);
+                percentileLatencies);
         System.out.print(out);
     }
 }

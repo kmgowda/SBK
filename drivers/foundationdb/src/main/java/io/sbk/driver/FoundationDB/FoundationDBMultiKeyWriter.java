@@ -49,7 +49,7 @@ public class FoundationDBMultiKeyWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         final long startKey = key++;
         return db.run(tr -> {
             tr.set(Tuple.from(startKey).pack(), data);

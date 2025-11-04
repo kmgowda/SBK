@@ -34,7 +34,7 @@ public class CouchDBWriter implements Writer<String> {
     }
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         // fill the map
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("data", data);

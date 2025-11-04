@@ -22,7 +22,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Abstract class for Callback Reader.
+ * Abstract helper for callback-style readers.
+ *
+ * <p>Provides a small lifecycle and metric reporting adapter that callback-based
+ * storage drivers can extend. It centralises the timing and PerL reporting
+ * logic while leaving the concrete 'consume' method for driver-specific
+ * payload handling.
  */
 public abstract non-sealed class AbstractCallbackReader<T> implements DataReader<T> {
     private DataType<T> dataType;

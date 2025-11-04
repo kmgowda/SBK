@@ -43,7 +43,7 @@ public class RabbitMQReader extends DefaultConsumer implements Reader<byte[]> {
         channel.queueDeclare(queueName, true, false, false, Collections.emptyMap());
         channel.queueBind(queueName, topicName, "");
         channel.basicConsume(queueName, true, this);
-        queue = new LinkedBlockingQueue();
+        queue = new LinkedBlockingQueue<byte[]>();
     }
 
     @Override

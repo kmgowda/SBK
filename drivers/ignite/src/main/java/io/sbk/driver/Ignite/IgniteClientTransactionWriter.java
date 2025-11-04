@@ -31,7 +31,8 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
     private final ClientCache<Long, byte[]> cache;
     private final IgniteClient client;
     private long key;
-    private long cnt;
+    @SuppressWarnings("unused")
+    private int cnt;
 
     public IgniteClientTransactionWriter(int id, ParameterOptions params, ClientCache<Long, byte[]> cache,
                                          IgniteClient client) throws IOException {
@@ -43,7 +44,7 @@ public class IgniteClientTransactionWriter implements Writer<byte[]> {
     }
 
     @Override
-    public CompletableFuture writeAsync(byte[] data) throws IOException {
+    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
         cache.put(key++, data);
         return null;
     }

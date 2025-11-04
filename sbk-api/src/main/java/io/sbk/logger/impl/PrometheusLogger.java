@@ -89,6 +89,9 @@ public class PrometheusLogger extends CSVLogger {
     }
 
 
+    /**
+     * Open the logger and, if metrics are enabled, start the Prometheus HTTP server.
+     */
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
@@ -103,6 +106,9 @@ public class PrometheusLogger extends CSVLogger {
         Printer.log.info("SBK PrometheusLogger Started");
     }
 
+    /**
+     * Close the logger and stop the HTTP server if it was started.
+     */
     @Override
     public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
         if (prometheusServer != null) {
@@ -112,6 +118,47 @@ public class PrometheusLogger extends CSVLogger {
         Printer.log.info("SBK PrometheusLogger Shutdown");
     }
 
+    /**
+     * Print to both the base outputs and the Prometheus registry when metrics are enabled.
+     *
+     * @param writers                       number of active writers
+     * @param maxWriters                    maximum writers seen
+     * @param readers                       number of active readers
+     * @param maxReaders                    maximum readers seen
+     * @param writeRequestBytes             write request bytes in this interval
+     * @param writeRequestsMbPerSec         write request throughput in MB/sec
+     * @param writesRequests                write request count
+     * @param writeRequestsPerSec           write requests per second
+     * @param readRequestBytes              read request bytes in this interval
+     * @param readRequestsMBPerSec          read request throughput in MB/sec
+     * @param readRequests                  read request count
+     * @param readRequestsPerSec            read requests per second
+     * @param writeResponsePendingRecords   pending write response records
+     * @param writeResponsePendingBytes     pending write response bytes
+     * @param readResponsePendingRecords    pending read response records
+     * @param readResponsePendingBytes      pending read response bytes
+     * @param writeReadPendingRecords       write-read pending records delta
+     * @param writeReadPendingBytes         write-read pending bytes delta
+     * @param writeTimeoutEvents            write timeout events count
+     * @param writeTimeoutEventsPerSec      write timeout events per second
+     * @param readTimeoutEvents             read timeout events count
+     * @param readTimeoutEventsPerSec       read timeout events per second
+     * @param seconds                       reporting interval seconds
+     * @param bytes                         total bytes processed in interval
+     * @param records                       total records processed in interval
+     * @param recsPerSec                    records per second
+     * @param mbPerSec                      MB per second
+     * @param avgLatency                    average latency
+     * @param minLatency                    minimum latency
+     * @param maxLatency                    maximum latency
+     * @param invalid                       invalid/negative latency count
+     * @param lowerDiscard                  discarded below min latency
+     * @param higherDiscard                 discarded above max latency
+     * @param slc1                          sliding latency coverage 1
+     * @param slc2                          sliding latency coverage 2
+     * @param percentileLatencies           percentile latency values
+     * @param percentileLatencyCounts       percentile latency counts
+     */
     private void printMetrics(int writers, int maxWriters, int readers, int maxReaders,
                               long writeRequestBytes, double writeRequestsMbPerSec, long writesRequests,
                               double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
@@ -122,21 +169,21 @@ public class PrometheusLogger extends CSVLogger {
                               long readTimeoutEvents, double readTimeoutEventsPerSec,
                               double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                              long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                              long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
                 writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
                 writesRequests, writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests,
                 readRequestsPerSec, writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
     @Override
@@ -150,7 +197,7 @@ public class PrometheusLogger extends CSVLogger {
                       long readTimeoutEvents, double readTimeoutEventsPerSec,
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                      long higherDiscard, long slc1, long slc2, long[] percentileValues) {
+                      long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         printer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
                 writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
                 readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
@@ -158,6 +205,6 @@ public class PrometheusLogger extends CSVLogger {
                 writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc1, slc2, percentileValues);
+                lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 }

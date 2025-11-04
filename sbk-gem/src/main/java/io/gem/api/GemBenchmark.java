@@ -15,7 +15,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Interface GemBenchmark.
+ * Orchestrates a remote multi-node SBK run via SSH.
+ *
+ * <p>Implementations manage remote session lifecycle, distribution of SBK binaries/commands,
+ * and collection of {@link RemoteResponse} results from multiple hosts.
  */
 public interface GemBenchmark {
 

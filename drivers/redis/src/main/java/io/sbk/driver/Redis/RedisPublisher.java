@@ -32,7 +32,7 @@ public class RedisPublisher implements Writer<String> {
 
 
     @Override
-    public CompletableFuture writeAsync(String data) throws IOException {
+    public CompletableFuture<?> writeAsync(String data) throws IOException {
         jedis.publish(channelName, data);
         return null;
     }
