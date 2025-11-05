@@ -117,7 +117,7 @@ ___
 **Prerequisites**
 
 - Java 21+
-- Gradle 8.13+
+- Gradle 9.2+
 
 **Building**
 
