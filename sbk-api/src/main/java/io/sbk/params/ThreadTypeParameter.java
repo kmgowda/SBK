@@ -12,7 +12,18 @@ package io.sbk.params;
 
 import io.sbk.thread.ThreadType;
 
+/**
+ * Interface for parameters that provide thread type configuration.
+ * This interface allows access to the thread type setting used for
+ * executing benchmark operations, which can be platform threads,
+ * fork-join threads, or virtual threads.
+ */
 public interface ThreadTypeParameter {
 
+    /**
+     * Gets the thread type to be used for benchmark execution.
+     *
+     * @return the ThreadType enum value indicating the type of threads to use
+     */
     ThreadType getThreadType();
 }
