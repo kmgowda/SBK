@@ -14,9 +14,20 @@ plugins.withId('java') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
+    // Validate Java version
+    def currentJavaVersion = JavaVersion.current()
+    def expectedJavaVersion = JavaVersion.VERSION_25
+    
+    if (currentJavaVersion != expectedJavaVersion) {
+        throw new GradleException(
+            "Java version mismatch! Expected: ${expectedJavaVersion}, but found: ${currentJavaVersion}. " +
+            "Please install Java ${expectedJavaVersion.majorVersion} and set JAVA_HOME appropriately."
+        )
+    }
+
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = expectedJavaVersion
+        targetCompatibility = expectedJavaVersion
     }
 
 
