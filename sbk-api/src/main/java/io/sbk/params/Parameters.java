@@ -16,7 +16,7 @@ package io.sbk.params;
  * <p>These getters reflect parsed CLI values such as total runtime, record sizing,
  * writer/reader concurrency, rate limiting, step ramping, and idle sleep.
  */
-public interface Parameters extends ActionParameter {
+public interface Parameters extends ActionParameter, ThreadTypeParameter {
 
     /**
      * Get the execution time in seconds.

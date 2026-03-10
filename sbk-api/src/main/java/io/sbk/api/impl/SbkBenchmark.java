@@ -21,10 +21,10 @@ import io.sbk.logger.ReadRequestsLogger;
 import io.sbk.logger.WriteRequestsLogger;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
-import io.sbk.config.Config;
 import io.sbk.data.DataType;
 import io.sbk.logger.RWLogger;
 import io.sbk.system.Printer;
+import io.sbk.thread.ThreadType;
 import io.state.State;
 import io.time.Time;
 import lombok.Synchronized;
@@ -74,6 +74,7 @@ final public class SbkBenchmark implements Benchmark {
     final private Time time;
     final private RWLogger rwLogger;
     final private ExecutorService executor;
+    final private ExecutorService perlExecutor;
     final private ParameterOptions params;
     final private Perl writePerl;
     final private Perl readPerl;
@@ -105,14 +106,21 @@ final public class SbkBenchmark implements Benchmark {
         this.time = time;
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
-        this.executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
+
+        this.executor = switch (params.getThreadType()) {
+            case ThreadType.ForkJoin -> new ForkJoinPool(threadCount);
+            case ThreadType.Virtual -> Executors.newFixedThreadPool(threadCount, Thread.ofVirtual().factory());
+            default -> Executors.newFixedThreadPool(threadCount);
+        };
+
+        this.perlExecutor = new ForkJoinPool(5);
 
         if (params.getWritersCount() > 0 && params.getAction() == Action.Writing) {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
             wConfig.workers = params.getWritersCount();
             wConfig.sleepMS = params.getIdleSleepMilliSeconds();
             wConfig.csv = false;
-            writePerl = PerlBuilder.build(rwLogger, this.time, wConfig, executor);
+            writePerl = PerlBuilder.build(rwLogger, this.time, wConfig, this.perlExecutor);
         } else {
             writePerl = null;
         }
@@ -122,7 +130,7 @@ final public class SbkBenchmark implements Benchmark {
             rConfig.workers = params.getReadersCount();
             rConfig.sleepMS = params.getIdleSleepMilliSeconds();
             rConfig.csv = false;
-            readPerl = PerlBuilder.build(rwLogger, this.time, rConfig, executor);
+            readPerl = PerlBuilder.build(rwLogger, this.time, rConfig, this.perlExecutor);
         } else {
             readPerl = null;
         }

@@ -95,8 +95,4 @@ final public class Config {
      */
     public final static String HELP_OPTION_ARG = ARG_PREFIX + HELP_OPTION;
 
-    /**
-     * <code>FORK = true;</code>.
-     */
-    public final static boolean FORK = true;
 }

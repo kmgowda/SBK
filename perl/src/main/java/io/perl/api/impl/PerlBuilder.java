@@ -52,9 +52,9 @@ public final class PerlBuilder {
             case ns -> new NanoSeconds();
             default -> new MilliSeconds();
         };
-        PerlPrinter.log.info("Time Unit: " + ret.getTimeUnit().toString());
-        PerlPrinter.log.info("Minimum Latency: " + logger.getMinLatency() + " " + ret.getTimeUnit().name());
-        PerlPrinter.log.info("Maximum Latency: " + logger.getMaxLatency() + " " + ret.getTimeUnit().name());
+        PerlPrinter.log.info("Time Unit: {}", ret.getTimeUnit().toString());
+        PerlPrinter.log.info("Minimum Latency: {} {}", logger.getMinLatency(), ret.getTimeUnit().name());
+        PerlPrinter.log.info("Maximum Latency: {} {}", logger.getMaxLatency(), ret.getTimeUnit().name());
         return ret;
     }
 
