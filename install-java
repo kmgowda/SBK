@@ -13,13 +13,13 @@ import subprocess
 import jdk
 import threading
 
-JDK_VERSION = '21'
+JDK_VERSION = '25'
 JDK_PATH = os.path.expanduser('~') + os.sep + 'jdk-' + JDK_VERSION
 JAVA_HOME_DIR = os.sep + 'Contents' + os.sep + 'Home'
 
 
 def install_java(res):
-    # Platform dependent install of Java JDK 17
+    # Platform dependent install of Java JDK 25
     os.system('mkdir -p '+JDK_PATH)
     val = jdk.install(JDK_VERSION, path=JDK_PATH)
     res.append(val)
