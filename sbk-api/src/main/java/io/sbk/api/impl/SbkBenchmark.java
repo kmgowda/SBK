@@ -105,7 +105,7 @@ final public class SbkBenchmark implements Benchmark {
         this.time = time;
 
         final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
-        executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
+        this.executor = Config.FORK ? new ForkJoinPool(threadCount) : Executors.newFixedThreadPool(threadCount);
 
         if (params.getWritersCount() > 0 && params.getAction() == Action.Writing) {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
@@ -127,7 +127,7 @@ final public class SbkBenchmark implements Benchmark {
             readPerl = null;
         }
 
-        timeoutExecutor = Executors.newScheduledThreadPool(1);
+        timeoutExecutor = Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();
         readers = new ArrayList<>();
