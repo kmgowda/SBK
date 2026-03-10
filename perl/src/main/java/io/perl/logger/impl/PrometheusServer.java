@@ -33,10 +33,12 @@ import java.util.concurrent.Executors;
  * deployments.
  */
 public final class PrometheusServer extends CompositeMeterRegistry {
+    final boolean virtualThreadPool;
     final private int port;
     final private String context;
     final private PrometheusMeterRegistry prometheusRegistry;
     final private HttpServer server;
+
 
     /**
      * Constructor PrometheusServer initializing values.
@@ -55,6 +57,7 @@ public final class PrometheusServer extends CompositeMeterRegistry {
         if (tags != null) {
             this.config().commonTags(tags);
         }
+        this.virtualThreadPool = true;
         this.port = port;
         this.context = context;
         this.prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
@@ -97,7 +100,11 @@ public final class PrometheusServer extends CompositeMeterRegistry {
                 os.write(response.getBytes());
             }
         });
-        server.setExecutor(Executors.newSingleThreadExecutor());
+        if (this.virtualThreadPool) {
+            server.setExecutor(Executors.newSingleThreadExecutor(Thread.ofVirtual().factory()));
+        } else {
+            server.setExecutor(Executors.newSingleThreadExecutor());
+        }
         return server;
     }
 }
