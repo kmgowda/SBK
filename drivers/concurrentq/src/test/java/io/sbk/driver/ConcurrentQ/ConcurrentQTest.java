@@ -13,16 +13,17 @@ package io.sbk.driver.ConcurrentQ;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.impl.SbkParameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConcurrentQTest {
 
     private ConcurrentQ concurrentQ;
     private SbkParameters params;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         concurrentQ = new ConcurrentQ();
         params = new SbkParameters("test");
@@ -30,12 +31,13 @@ public class ConcurrentQTest {
         params.parseArgs(new String[]{"-writers", "1", "-readers", "1", "-size", "10"});
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParseArgsThrowsOnInvalidCounts() throws Exception {
         SbkParameters badParams = new SbkParameters("test");
         // Both writers and readers set to 0, should throw
-        badParams.parseArgs(new String[]{"-writers", "0", "-readers", "0", "-size", "10"});
-        concurrentQ.parseArgs(badParams);
+        assertThrows(IllegalArgumentException.class, () -> {
+            badParams.parseArgs(new String[]{"-writers", "0", "-readers", "0", "-size", "10"});
+        });
     }
 
     @Test
@@ -43,7 +45,7 @@ public class ConcurrentQTest {
         concurrentQ.queue = new LinkedCQueue<>();
         DataWriter<byte[]> writer = concurrentQ.createWriter(0, params);
         DataReader<byte[]> reader = concurrentQ.createReader(0, params);
-        Assert.assertNotNull(writer);
-        Assert.assertNotNull(reader);
+        assertNotNull(writer);
+        assertNotNull(reader);
     }
 }

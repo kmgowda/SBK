@@ -9,12 +9,11 @@
  */
 package io.perl.test;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.perl.api.LatencyPercentiles;
 
 /**
@@ -25,7 +24,7 @@ public class LatencyPercentilesTest {
     private double[] fractions;
     private LatencyPercentiles percentiles;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         fractions = new double[]{0.5, 0.9, 0.99};
         percentiles = new LatencyPercentiles(fractions);

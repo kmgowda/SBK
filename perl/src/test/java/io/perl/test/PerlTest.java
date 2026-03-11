@@ -19,8 +19,10 @@ import io.perl.system.PerlPrinter;
 import io.time.MicroSeconds;
 import io.time.NanoSeconds;
 import io.time.Time;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -107,15 +109,15 @@ public class PerlTest {
         }
         ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         if (logger.latencyReporterCnt.get() != PERL_TOTAL_RECORDS) {
-            Assert.fail("Latency Reporter Count Failed! Latency Reporter Count : " + logger.latencyReporterCnt.get() +
+            fail("Latency Reporter Count Failed! Latency Reporter Count : " + logger.latencyReporterCnt.get() +
                     " , Expected : " + PERL_TOTAL_RECORDS);
         }
         if (logger.printCnt.get() != PERL_TOTAL_RECORDS) {
-            Assert.fail("Print Count Failed! Latency Reporter Count : " + logger.printCnt.get() +
+            fail("Print Count Failed! Latency Reporter Count : " + logger.printCnt.get() +
                     " , Expected : " + PERL_TOTAL_RECORDS);
         }
         if (logger.totalPrintCnt.get() != PERL_TOTAL_RECORDS) {
-            Assert.fail("Total Print Count Failed! Latency Reporter Count : " + logger.totalPrintCnt.get() +
+            fail("Total Print Count Failed! Latency Reporter Count : " + logger.totalPrintCnt.get() +
                     " , Expected : " + PERL_TOTAL_RECORDS);
         }
     }
@@ -137,16 +139,20 @@ public class PerlTest {
         runPerlRecords(logger, perl);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullLoggerThrowsException() throws Exception {
-        PerlBuilder.build(null, null, null, null);
+        assertThrows(IllegalArgumentException.class, () -> {
+            PerlBuilder.build(null, null, null, null);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMismatchedTimeUnitThrowsException() throws Exception {
         TestLogger logger = new TestLogger();
         Time wrongTime = new MicroSeconds();
-        PerlBuilder.build(logger, wrongTime, null, null);
+        assertThrows(IllegalArgumentException.class, () -> {
+            PerlBuilder.build(logger, wrongTime, null, null);
+        });
     }
 
     @Test
@@ -158,22 +164,25 @@ public class PerlTest {
         executor.shutdown();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testDifferentTimeUnits() throws Exception {
         TestLogger logger = new TestLogger();
-        Perl perlNs = PerlBuilder.build(logger, new NanoSeconds(), null, null);
-        runPerlRecords(logger, perlNs);
+        assertThrows(IllegalArgumentException.class, () -> {
+            PerlBuilder.build(logger, new NanoSeconds(), null, null);
+        });
     }
 
-    @Test(expected = TimeoutException.class)
+    @Test
     public void testZeroRecords() throws Exception {
         TestLogger logger = new TestLogger();
         Perl perl = PerlBuilder.build(logger, null, null, null);
         PerlChannel channel = perl.getPerlChannel();
         CompletableFuture<Void> ret = perl.run(0, 0);
         channel.send(0, 0, 0, 0);
-        ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        Assert.assertEquals(0, logger.latencyReporterCnt.get());
+        assertThrows(TimeoutException.class, () -> {
+            ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        });
+        assertEquals(0, logger.latencyReporterCnt.get());
     }
 
     @Test
