@@ -19,9 +19,9 @@ import com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore;
 import com.apple.foundationdb.record.provider.foundationdb.keyspace.KeySpace;
 import com.apple.foundationdb.record.provider.foundationdb.keyspace.KeySpaceDirectory;
 import com.apple.foundationdb.record.provider.foundationdb.keyspace.KeySpacePath;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.google.protobuf.ByteString;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
@@ -50,8 +50,7 @@ public class FdbRecord implements Storage<ByteString> {
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             config = mapper.readValue(Objects.requireNonNull(FdbRecord.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     FdbRecordConfig.class);

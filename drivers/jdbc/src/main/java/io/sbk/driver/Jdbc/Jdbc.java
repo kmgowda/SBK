@@ -9,9 +9,9 @@
  */
 package io.sbk.driver.Jdbc;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
@@ -122,8 +122,7 @@ public class Jdbc implements Storage<String> {
      * @throws IllegalArgumentException If an exception occurred.
      */
     public void addArgs(final InputOptions params, JdbcConfig jdbcConfig) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         this.config = jdbcConfig;
 
         if (getDriver() == null) {
@@ -149,8 +148,7 @@ public class Jdbc implements Storage<String> {
      * @throws IllegalArgumentException If an exception occurred.
      */
     public void addArgs(final InputOptions params, String configFile) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
 
         try {
             addArgs(params, mapper.readValue(Objects.requireNonNull(Jdbc.class.getClassLoader().getResourceAsStream(configFile)),

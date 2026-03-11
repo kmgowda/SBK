@@ -10,6 +10,9 @@
 
 package io.time;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * enum TimeUnit {
  *  ms { public String toString() {return "MILLISECONDS";} },
@@ -23,6 +26,7 @@ public enum TimeUnit {
      * <code>ms { public String toString() {return "MILLISECONDS";} }</code>.
      */
     ms {
+        @JsonValue
         public String toString() {
             return "MILLISECONDS";
         }
@@ -32,6 +36,7 @@ public enum TimeUnit {
      * <code>mcs { public String toString() {return "MICROSECONDS";} }</code>.
      */
     mcs {
+        @JsonValue
         public String toString() {
             return "MICROSECONDS";
         }
@@ -41,9 +46,20 @@ public enum TimeUnit {
      * <code>ns { public String toString() {return "NANOSECONDS";} }</code>.
      */
     ns {
+        @JsonValue
         public String toString() {
             return "NANOSECONDS";
         }
+    };
+
+    @JsonCreator
+    public static TimeUnit fromString(String value) {
+        for (TimeUnit unit : TimeUnit.values()) {
+            if (unit.name().equalsIgnoreCase(value)) {
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Unknown TimeUnit: " + value);
     }
 
 }

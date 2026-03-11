@@ -10,9 +10,9 @@
 
 package io.gem.api.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.gem.config.GemConfig;
 import io.gem.api.GemBenchmark;
 import io.gem.api.GemLoggerPackage;
@@ -192,8 +192,7 @@ final public class SbkGem {
         packageStore.printClasses("Storage");
         loggerStore.printClasses("Gem Logger");
 
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
 
         sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(SBM_CONFIG_FILE),
                 SbmConfig.class);

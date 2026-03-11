@@ -9,9 +9,9 @@
  */
 package io.sbk.driver.MongoDB;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -42,8 +42,7 @@ public class MongoDB implements Storage<byte[]> {
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             config = mapper.readValue(Objects.requireNonNull(MongoDB.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     MongoDBConfig.class);

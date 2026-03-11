@@ -9,9 +9,9 @@
  */
 package io.sbk.logger.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.perl.data.Bytes;
 import io.perl.logger.impl.ResultsLogger;
 import io.sbk.action.Action;
@@ -127,8 +127,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             loggerConfig = mapper.readValue(getLoggerConfigStream(), LoggerConfig.class);
         } catch (Exception ex) {

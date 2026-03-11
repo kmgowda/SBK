@@ -9,9 +9,9 @@
  */
 package io.sbm.api.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
@@ -135,8 +135,7 @@ final public class Sbm {
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         loggerStore.printClasses("Logger");
 
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
 
         sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 SbmConfig.class);

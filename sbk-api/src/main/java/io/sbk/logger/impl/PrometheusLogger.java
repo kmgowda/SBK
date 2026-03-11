@@ -9,9 +9,9 @@
  */
 package io.sbk.logger.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
@@ -58,8 +58,7 @@ public class PrometheusLogger extends CSVLogger {
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             metricsConfig = mapper.readValue(getMetricsConfigStream(), MetricsConfig.class);
         } catch (Exception ex) {
