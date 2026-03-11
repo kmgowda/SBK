@@ -34,7 +34,7 @@ apply from: "$rootDir/gradle/spotbugs.gradle"
 
 dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    api "javax.annotation:javax.annotation-api:$javaxAnnotationVersion"
+    api "jakarta.annotation:jakarta.annotation-api:$javaxAnnotationVersion"
     api "org.projectlombok:lombok:$lombokVersion"
     api "com.github.spotbugs:spotbugs-annotations:$spotbugsVersion"
     api "commons-cli:commons-cli:$commonsCliVersion"
