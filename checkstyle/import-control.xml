@@ -79,4 +79,5 @@
     <allow pkg="org.openjdk.jmh"/>
     <allow pkg="co.elastic.clients" />
     <allow pkg="org.elasticsearch.client" />
+    <allow pkg="com.oath.halodb" />
 </import-control>
