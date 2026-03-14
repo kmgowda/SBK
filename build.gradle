@@ -311,7 +311,7 @@ allprojects {
         def className = sbkClass.capitalize();
         mainClass SbkMainClass
         outputName sbkProjectName
-        javaVersion '17'
+        javaVersion '25'
         graalVersion '21.0.0'
         option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
         option "--initialize-at-build-time=io.sbk.$className"
@@ -719,7 +719,7 @@ gradle.rootProject {
 
     jib {
         from {
-            image = 'openjdk:17-jdk'
+            image = 'openjdk:25-jdk'
         }
 
         to {
