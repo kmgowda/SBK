@@ -50,6 +50,7 @@ You may obtain a copy of the License at
 - **Comprehensive Metrics**: 17+ latency percentiles (5th to 99.99th)
 - **Real-time Monitoring**: Live performance data via Prometheus/Grafana
 - **Multi-threaded**: Support for concurrent writers and readers
+- **AI-Powered Performance Analysis**: Generate comprehensive Excel reports with AI-driven insights and comparative analysis using [sbk-charts](https://github.com/kmgowda/sbk-charts) 
 
 ### 🏗️ **Universal Compatibility**
 - **Any Storage System**: Databases, message queues, file systems, cloud storage
@@ -93,31 +94,35 @@ ___
 
 *SBK supports performance benchmarking of following storage systems*
 
-| #   	| Driver                              	| #   	| Driver                            	|
-|-----	|-------------------------------------	|-----	|-----------------------------------	|
-| 1.  	| [Activemq](drivers/activemq)         	| 24. 	| [Mariadb](drivers/mariadb)         	|
-| 2.  	| [Artemis](drivers/artemis)           	| 25. 	| [Memcached](drivers/memcached)     	|
-| 3.  	| [Asyncfile](drivers/asyncfile)       	| 26. 	| [Minio](drivers/minio)             	|
-| 4.  	| [Bookkeeper](drivers/bookkeeper)     	| 27. 	| [Mongodb](drivers/mongodb)         	|
-| 5.  	| [Cassandra](drivers/cassandra)       	| 28. 	| [Mssql](drivers/mssql)             	|
-| 6.  	| [Cephs3](drivers/cephs3)             	| 29. 	| [Mysql](drivers/mysql)             	|
-| 7.  	| [Concurrentq](drivers/concurrentq)   	| 30. 	| [Nats](drivers/nats)               	|
-| 8.  	| [Couchbase](drivers/couchbase)       	| 31. 	| [NatsStream](drivers/natsStream)   	|
-| 9.  	| [Couchdb](drivers/couchdb)           	| 32. 	| [Nsq](drivers/nsq)                 	|
-| 10. 	| [Csv](drivers/csv)                   	| 33. 	| [Null](drivers/null)               	|
-| 11. 	| [Db2](drivers/db2)                   	| 34. 	| [Openio](drivers/openio)           	|
-| 12. 	| [Derby](drivers/derby)               	| 35. 	| [Postgresql](drivers/postgresql)   	|
-| 13. 	| [Fdbrecord](drivers/fdbrecord)       	| 36. 	| [Pravega](drivers/pravega)         	|
-| 14. 	| [File](drivers/file)                 	| 37. 	| [Pulsar](drivers/pulsar)           	|
-| 15. 	| [Filestream](drivers/filestream)     	| 38. 	| [Rabbitmq](drivers/rabbitmq)       	|
-| 16. 	| [Foundationdb](drivers/foundationdb) 	| 39. 	| [Redis](drivers/redis)             	|
-| 17. 	| [H2](drivers/h2)                     	| 40. 	| [Redpanda](drivers/redpanda)       	|
-| 18. 	| [Hdfs](drivers/hdfs)                 	| 41. 	| [Rocketmq](drivers/rocketmq)       	|
-| 19. 	| [Hive](drivers/hive)                 	| 42. 	| [Rocksdb](drivers/rocksdb)         	|
-| 20. 	| [Ignite](drivers/ignite)             	| 43. 	| [Sbktemplate](drivers/sbktemplate) 	|
-| 21. 	| [Jdbc](drivers/jdbc)                 	| 44. 	| [Seaweeds3](drivers/seaweeds3)     	|
-| 22. 	| [Kafka](drivers/kafka)               	| 45. 	| [Sqlite](drivers/sqlite)           	|
-| 23. 	| [Leveldb](drivers/leveldb)           	|     	|                                   	|
+| #   	   | Driver                              	| #   	| Driver                            	|
+|---------|-------------------------------------	|-----	|-----------------------------------	|
+| 1.  	   | [Activemq](drivers/activemq)         	| 28. 	| [Kafka](drivers/kafka)             	|
+| 2.  	   | [Artemis](drivers/artemis)           	| 29. 	| [Leveldb](drivers/leveldb)         	|
+| 3.  	   | [Asyncfile](drivers/asyncfile)       	| 30. 	| [Linkedbq](drivers/linkedbq)      	|
+| 4.  	   | [Atomicq](drivers/atomicq)           	| 31. 	| [Mariadb](drivers/mariadb)         	|
+| 5.  	   | [Bookkeeper](drivers/bookkeeper)     	| 32. 	| [Memcached](drivers/memcached)     	|
+| 6.  	   | [Cassandra](drivers/cassandra)       	| 33. 	| [Minio](drivers/minio)             	|
+| 7.  	   | [Cephs3](drivers/cephs3)             	| 34. 	| [Mongodb](drivers/mongodb)         	|
+| 8.  	   | [Chromadb](drivers/chromadb)         	| 35. 	| [Mssql](drivers/mssql)             	|
+| 9.  	   | [Concurrentq](drivers/concurrentq)   	| 36. 	| [Mysql](drivers/mysql)             	|
+| 10. 	   | [Conqueue](drivers/conqueue)         	| 37. 	| [Nats](drivers/nats)               	|
+| 11. 	   | [Couchbase](drivers/couchbase)       	| 38. 	| [NatsStream](drivers/natsStream)   	|
+| 12. 	   | [Couchdb](drivers/couchdb)           	| 39. 	| [Nsq](drivers/nsq)                 	|
+| 13. 	   | [Csv](drivers/csv)                   	| 40. 	| [Null](drivers/null)               	|
+| 14. 	   | [Db2](drivers/db2)                   	| 41. 	| [Openio](drivers/openio)           	|
+| 15. 	   | [Derby](drivers/derby)               	| 42. 	| [Postgresql](drivers/postgresql)   	|
+| 16. 	   | [Dynamodb](drivers/dynamodb)         	| 43. 	| [Pravega](drivers/pravega)         	|
+| 17. 	   | [Elasticsearch](drivers/elasticsearch) 	| 44. 	| [Pulsar](drivers/pulsar)           	|
+| 18. 	   | [Exasol](drivers/exasol)             	| 45. 	| [Rabbitmq](drivers/rabbitmq)       	|
+| 19. 	   | [Fdbrecord](drivers/fdbrecord)       	| 46. 	| [Redis](drivers/redis)             	|
+| 20. 	   | [File](drivers/file)                 	| 47. 	| [Redpanda](drivers/redpanda)       	|
+| 21. 	   | [Filestream](drivers/filestream)     	| 48. 	| [Rocketmq](drivers/rocketmq)       	|
+| 22. 	   | [Foundationdb](drivers/foundationdb) 	| 49. 	| [Rocksdb](drivers/rocksdb)         	|
+| 23. 	   | [H2](drivers/h2)                     	| 50. 	| [Seaweeds3](drivers/seaweeds3)     	|
+| 24. 	   | [Halodb](drivers/halodb)             	| 51. 	| [Sqlite](drivers/sqlite)           	|
+| 25. 	   | [Hdfs](drivers/hdfs)                 	| 52. 	| [Syncq](drivers/syncq)             	|
+| 26. 	   | [Hive](drivers/hive)                 	|  	|                	|
+| 27.   	 |   [Jdbc](drivers/jdbc)               |  	|            	|
 
 *In the future, many more storage systems drivers will be plugged in* 
 
@@ -144,23 +149,16 @@ ___
 - **Community Support**: Active Slack channel and issue tracking
 - **Showcase Platform**: Your driver featured in our driver ecosystem
 
-We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to: 
-* [Contributing to SBK](#contributing-to-sbk) for the Contributing guidelines.
-* [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or 
-  client) for performance benchmarking.
 
 ## 🚀 Quick Start for Developers
 
 ### Adding Your Storage Driver - It's Easy!
 
-**Option 1: Automated Driver Generation**
+1. Generate you driver template
 ```bash
-# Generate your driver in seconds!
+# Generate your driver template in seconds!
 ./gradlew addDriver -Pdriver="your-storage-name"
 ```
-
-**Option 2: Manual Implementation**
-1. Create your driver package
 2. Implement the `Storage` interface (just 7 methods!)
 3. Implement `Writer` and `Reader` interfaces
 4. Add your driver to the build configuration
@@ -194,6 +192,12 @@ public class MyStorage implements Storage<byte[]> {
 - **API documentation** with examples
 - **Best practices** for performance testing
 - **Troubleshooting guides** for common issues
+
+We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to:
+* [Contributing to SBK](#contributing-to-sbk) for the Contributing guidelines.
+* [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or
+  client) for performance benchmarking in detail.
+
 
 ## Build SBK
 
@@ -1067,33 +1071,10 @@ refer [SBK Charts](https://github.com/kmgowda/sbk-charts) for further details.
 - **Pull Requests**: [Contribute code](https://github.com/kmgowda/SBK/pulls)
 - **Discussions**: [Ask questions and share ideas](https://github.com/kmgowda/SBK/discussions)
 
-### 🏆 **Recognition Program**
-- **Contributor Hall of Fame**: Acknowledged in README and releases
-- **Driver Showcase**: Featured driver of the month
-- **Performance Leaderboard**: Top-performing drivers highlighted
-- **Community Badges**: Earn badges for various contributions
-
 ### 📈 **Impact Metrics**
 - **50+ Storage Drivers**: From databases to message queues
 - **Used by Major Companies**: Production deployments worldwide
-- **Active Community**: 100+ contributors and growing
 - **Regular Releases**: Continuous improvements and features
-
----
-
-## 🎉 Ready to Get Started?
-
-**For Storage Companies:**
-- 🚀 Add your driver today and showcase your performance
-- 📊 Get accurate, verifiable performance metrics
-- 🌐 Join our ecosystem of high-performance storage systems
-
-**For Developers:**
-- 🛠️ Start with our automated driver generator
-- 🤝 Join our active community of storage experts
-- 🏆 Make an impact on the storage industry
-
-**Together, we're building the most comprehensive storage benchmarking framework!** 🚀
 
 ---
 
