@@ -709,7 +709,10 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
       
       ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
 
-4. That's all ; Now, Build the SBK included your driver with the command:
+4. make sure that you driver is added in [build-drivers.gradle](build-drivers.gradle) and [settings-drivers.gradle](settings-driver.gradle) files
+5. make sure that your packages are allowed for compilation by adding an entry in the file checkstyle 
+   [import-control](checkstyle/import-control.xml) file
+6. That's all ; Now, Build the SBK included your driver with the command:
 
 ```
 ./gradlew build
