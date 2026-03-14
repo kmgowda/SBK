@@ -80,4 +80,5 @@
     <allow pkg="co.elastic.clients" />
     <allow pkg="org.elasticsearch.client" />
     <allow pkg="com.oath.halodb" />
+    <allow pkg="tech.amikos.chromadb" />
 </import-control>
