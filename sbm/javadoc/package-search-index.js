@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.sbm.api"},{"l":"io.sbm.api.impl"},{"l":"io.sbm.config"},{"l":"io.sbm.logger"},{"l":"io.sbm.logger.impl"},{"l":"io.sbm.main"},{"l":"io.sbm.params"},{"l":"io.sbm.params.impl"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"io.sbm.api"},{"l":"io.sbm.api.impl"},{"l":"io.sbm.config"},{"l":"io.sbm.logger"},{"l":"io.sbm.logger.impl"},{"l":"io.sbm.main"},{"l":"io.sbm.params"},{"l":"io.sbm.params.impl"}];updateSearchResults();

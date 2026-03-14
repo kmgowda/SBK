@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.gem.api"},{"l":"io.gem.api.impl"},{"l":"io.gem.config"},{"l":"io.gem.logger"},{"l":"io.gem.logger.impl"},{"l":"io.gem.main"},{"l":"io.gem.params"},{"l":"io.gem.params.impl"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"io.gem.api"},{"l":"io.gem.api.impl"},{"l":"io.gem.config"},{"l":"io.gem.logger"},{"l":"io.gem.logger.impl"},{"l":"io.gem.main"},{"l":"io.gem.params"},{"l":"io.gem.params.impl"}];updateSearchResults();

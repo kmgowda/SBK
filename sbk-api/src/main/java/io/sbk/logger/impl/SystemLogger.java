@@ -18,8 +18,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  *
  * <p>This implementation relies on the aggregation utilities provided by
  * {@link AbstractRWLogger} and formats the final output line using
- * {@link AbstractRWLogger#appendResultString(StringBuilder, int, int, int, int, long, double, long, double, long, double, long, long, long, long, long, long, double, long, double, double, long, long, long, long, long, long, long, long[], long[])}.
- *
+ * {@link AbstractRWLogger#appendResultString(StringBuilder, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])} 
  * <p>Note: Marked {@link NotThreadSafe} because printing occurs from a single
  * scheduling context while internal counters are updated by the base class.
  */

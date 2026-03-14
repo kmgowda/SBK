@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.sbk.api.impl"},{"l":"io.sbk.main"},{"l":"io.sbk.params.impl"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"io.sbk.api.impl"},{"l":"io.sbk.main"},{"l":"io.sbk.params.impl"}];updateSearchResults();
