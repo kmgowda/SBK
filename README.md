@@ -98,26 +98,12 @@ We welcome open source developers to contribute to this project by adding a driv
 * [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or 
   client) for performance benchmarking.
 
-___
-
-<p align="center">
-   Supported By
-</p>
-
-<p align="center">
-    <a href="https://www.jetbrains.com/?from=SBK">
-        <img src="images/jetbrains.png" alt="Jet Brains" width="100" height="100">
-    </a>
-</p>
-
-___
-
 ## Build SBK
 
 **Prerequisites**
 
-- Java 21+
-- Gradle 9.2+
+- Java 25+
+- Gradle 9.4+
 
 **Building**
 
