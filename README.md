@@ -120,8 +120,8 @@ ___
 | 22. 	   | [Foundationdb](drivers/foundationdb) 	| 49. 	| [Rocksdb](drivers/rocksdb)         	|
 | 23. 	   | [H2](drivers/h2)                     	| 50. 	| [Seaweeds3](drivers/seaweeds3)     	|
 | 24. 	   | [Halodb](drivers/halodb)             	| 51. 	| [Sqlite](drivers/sqlite)           	|
-| 25. 	   | [Hdfs](drivers/hdfs)                 	| 52. 	| [Syncq](drivers/syncq)             	|
-| 26. 	   | [Hive](drivers/hive)                 	|  	|                	|
+| 25. 	   | [Hdfs](drivers/hdfs)                 	| 52. 	| [Solr](drivers/solr)               	|
+| 26. 	   | [Hive](drivers/hive)                 	| 53. 	| [Syncq](drivers/syncq)             	|
 | 27.   	 |   [Jdbc](drivers/jdbc)               |  	|            	|
 
 *In the future, many more storage systems drivers will be plugged in* 

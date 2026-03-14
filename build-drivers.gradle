@@ -53,6 +53,7 @@ dependencies {
     api project(':drivers:elasticsearch')
     api project(':drivers:halodb')
     api project(':drivers:chromadb')
+    api project(':drivers:solr')
     /* api project(':drivers:sbktemplate') */
     /* above line is a signature */
 }

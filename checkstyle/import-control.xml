@@ -81,4 +81,5 @@
     <allow pkg="org.elasticsearch.client" />
     <allow pkg="com.oath.halodb" />
     <allow pkg="tech.amikos.chromadb" />
+    <allow pkg="org.apache.solr" />
 </import-control>

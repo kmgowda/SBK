@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(":sbk-api")
+
+    // Add Solr specific dependencies
+    api 'org.apache.solr:solr-solrj:8.11.2'
+}

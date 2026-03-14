@@ -63,6 +63,7 @@ include 'drivers:syncq'
 include 'drivers:elasticsearch'
 include 'drivers:halodb'
 include 'drivers:chromadb'
+include 'drivers:solr'
 /* include 'drivers:sbktemplate' */
 /* above line is a signature */
 
