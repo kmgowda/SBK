@@ -7,8 +7,8 @@ repositories {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/yahoo/HaloDB")
         credentials {
-            username = "sbk-public"
-            password = "\u0067hp_FBqmGRV6KLTcFjwnDTvozvlhs3VNja4F67B5"
+            username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME") ?: "sbk-public"
+            password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN") ?: "\u0067hp_FBqmGRV6KLTcFjwnDTvozvlhs3VNja4F67B5"
         }
     }
     mavenCentral()
