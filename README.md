@@ -232,22 +232,23 @@ tar -xvf ./build/distributions/sbk-5.0.tar -C ./build/distributions/.
 Running SBK locally:
 
 ```
-<SBK directory>/./build/distributions/sbk-5.0/bin/sbk -help
+<SBK directory>/./build/distributions/sbk-9.0/bin/sbk -help
 ...
 usage: sbk -out SystemLogger
 Storage Benchmark Kit
 
  -class <arg>           Storage Driver Class,
                         Available Drivers [Activemq, Artemis, AsyncFile,
-                        Atomicq, BookKeeper, Cassandra, CephS3,
+                        Atomicq, BookKeeper, Cassandra, CephS3, ChromaDB,
                         ConcurrentQ, Conqueue, Couchbase, CouchDB, CSV,
-                        Db2, Derby, Dynamodb, Exasol, FdbRecord, File,
-                        FileStream, FoundationDB, H2, HDFS, Hive, Jdbc,
-                        Kafka, LevelDB, Linkedbq, MariaDB, Memcached,
-                        MinIO, MongoDB, MsSql, MySQL, Nats, NatsStream,
-                        Nsq, Null, OpenIO, PostgreSQL, Pravega, Pulsar,
-                        RabbitMQ, Redis, RedPanda, RocketMQ, RocksDB,
-                        SeaweedS3, SQLite, Syncq]
+                        Db2, Derby, Dynamodb, Elasticsearch, Exasol,
+                        FdbRecord, File, FileStream, FoundationDB, H2,
+                        HaloDB, HDFS, Hive, Jdbc, Kafka, LevelDB,
+                        Linkedbq, MariaDB, Memcached, MinIO, MongoDB,
+                        MsSql, MySQL, Nats, NatsStream, Nsq, Null, OpenIO,
+                        PostgreSQL, Pravega, Pulsar, RabbitMQ, Redis,
+                        RedPanda, RocketMQ, RocksDB, SeaweedS3, Solr,
+                        SQLite, Syncq]
  -help                  Help message
  -maxlatency <arg>      Maximum latency;
                         use '-time' for time unit; default:180000 ms
@@ -276,6 +277,8 @@ Storage Benchmark Kit
                         number of of events(records); and/or
                         <arg> number of events(records) per Write or Read
                         Transaction
+ -thread <arg>          Thread Type [p: platform, f: fork-join,
+                        v:virtual], default: p
  -throughput <arg>      If > 0, throughput in MB/s
                         If 0, writes/reads 'records'
                         If -1, get the maximum throughput (default: -1)
