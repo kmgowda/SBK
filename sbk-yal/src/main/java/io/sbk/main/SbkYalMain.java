@@ -23,9 +23,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK-YAL.
  */
-public final class SbkYalMain {
+public abstract class SbkYalMain {
 
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         try {
             SbkYal.run(args, null, null, null);
         } catch (UnrecognizedOptionException | HelpException ex) {

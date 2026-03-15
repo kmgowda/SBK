@@ -22,14 +22,14 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK Server.
  */
-public final class SbmMain {
+public abstract class SbmMain {
 
     /**
      * The main method for SBM module.
      *
      * @param args String[]
      */
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         try {
             Sbm.run(args, null, null);
         } catch (UnrecognizedOptionException ex) {
