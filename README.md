@@ -226,7 +226,7 @@ Build the SBK:
 untar the SBK  to local folder
 
 ```
-tar -xvf ./build/distributions/sbk-5.0.tar -C ./build/distributions/.
+tar -xvf ./build/distributions/sbk-9.0.tar -C ./build/distributions/.
 ```
 
 Running SBK locally:
@@ -1039,7 +1039,7 @@ Instead of using entire SBK framework, if you just want to use the [SBK framewor
     }
 
     dependencies {
-        implementation "io.github.kmgowda.sbk:sbk-api:1.0"
+        implementation "io.github.kmgowda.sbk:sbk-api:8.0"
     }
 
    ```
@@ -1097,7 +1097,7 @@ The SBK API package is available in [JitPack Repository](https://jitpack.io/#kmg
     }
 
     dependencies {
-        implementation "com.github.kmgowda.SBK:sbk-api:1.0"
+        implementation "com.github.kmgowda.SBK:sbk-api:8.0"
     }
    
    ```
@@ -1148,7 +1148,7 @@ The SBK APIs Package is available at [maven central](https://search.maven.org/cl
     }
 
     dependencies {
-        implementation "io.github.kmgowda.sbk:sbk-api:1.0"
+        implementation "io.github.kmgowda.sbk:sbk-api:8.0"
     }
    ```
    few points to remember here  
