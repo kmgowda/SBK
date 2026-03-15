@@ -665,7 +665,9 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
    1. This command create the new subproject under the SBK framework with <driver name>.java and <driver name>Reader.
       java and <driver name>Writer.java files filled with required classes definitions
    
-2. You have to implement the following methods of Benchmark Interface:
+2. Add the java library of the driver via MavenCentral or Github packages in the dependencies of the driver build.
+   gradle file. [Add packages](drivers/sbk-template/build.gradle)
+3. You have to implement the following methods of Benchmark Interface:
    a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.params.ParameterOptions))]
    * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
 
@@ -792,9 +794,11 @@ Please report issues at https://github.com/kmgowda/SBK
 2. Create the package **io.sbk.< your driver name>** 
 
     * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar)]   
-    
 
-3. In your driver package you have to implement the Interface: [[Storage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html)]
+3. Add the java library of the driver via MavenCentral or Github packages in the dependencies of the driver build.
+   gradle file. [Add packages](drivers/sbk-template/build.gradle)
+
+4. In your driver package you have to implement the Interface: [[Storage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html)]
 
     * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/Pulsar.java)]
     
@@ -820,7 +824,7 @@ Please report issues at https://github.com/kmgowda/SBK
         * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
 
     
-4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html)]
+5. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html)]
 
     * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/PulsarWriter.java)]
     
@@ -835,7 +839,7 @@ Please report issues at https://github.com/kmgowda/SBK
       d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int))]
 
 
-5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html)]
+6. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html)]
 
     * you have to implement the following methods of Reader class:
         
@@ -850,19 +854,24 @@ Please report issues at https://github.com/kmgowda/SBK
       ii). Close the Reader: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
 
 
-6.  Add the Gradle dependency [ compile project(":sbk-api")] to your sub-project (driver)
+7. Add the Gradle dependency [ compile project(":sbk-api")] to your sub-project (driver)
 
     * see the Example:[[Pulsar Gradle Build](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/build.gradle)]
 
 
-7. Add your subproject to the main gradle as dependency.
+8. Add your subproject to the main gradle as dependency.
 
     * see the Example: [[SBK Gradle](build-drivers.gradle)]
     
     * make sure that gradle settings file: [[SBK Gradle Settings](settings-drivers.gradle)] has your Storage driver subproject name
 
+9. make sure that you driver is added in [build-drivers.gradle](build-drivers.gradle) and [settings-drivers.gradle]
+(settings-driver.gradle) files
 
-8. That's all ; Now, Build the SBK included your driver with the command:
+10.   make sure that your packages are allowed for compilation by adding an entry in the file checkstyle
+   [import-control](checkstyle/import-control.xml) file
+
+11.   That's all ; Now, Build the SBK included your driver with the command:
 
 ```
 ./gradlew build
