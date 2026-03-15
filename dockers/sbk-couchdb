@@ -7,7 +7,7 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 
 # Building Container
-FROM gradle:9.2.0-jdk21 AS sbkgradlebuilder
+FROM gradle:9.4.0-jdk25 AS sbkgradlebuilder
 LABEL maintainer="Keshava Munegowda <keshava.gowda@gmail.com>"
 USER root
 
@@ -46,7 +46,7 @@ ENV GRADLE_USER_HOME=/opt/SBK
 RUN gradle  :drivers:${SBK_PROJECT}:distTar
 
 # Runtime Container
-FROM openjdk:21-ea-jdk-slim  AS sbkapp
+FROM openjdk:25-ea-jdk-slim  AS sbkapp
 ENV APP_NAME=sbk
 ENV SBK_PROJECT=couchdb
 ENV APP_HOME=/opt/${APP_NAME}
