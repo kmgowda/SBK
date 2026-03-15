@@ -660,132 +660,249 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
 ## Add your driver to SBK
 
-### Add your driver to SBK using Gradle command and template driver
-1. Run the command **./gradlew addDriver -Pdriver="your driver name"**
-   1. This command create the new subproject under the SBK framework with <driver name>.java and <driver name>Reader.
-      java and <driver name>Writer.java files filled with required classes definitions
-   
-2. Add the java library of the driver via MavenCentral or Github packages in the dependencies of the driver build.
-   gradle file. [Add packages](drivers/sbk-template/build.gradle)
-3. You have to implement the following methods of Benchmark Interface:
-   a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.params.ParameterOptions))]
-   * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
+### 🚀 Quick Start: Add Your Driver Using Gradle Template
 
-   b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#parseArgs(io.sbk.params.ParameterOptions))]
+SBK provides an automated template system to generate new storage drivers instantly. This is the **recommended approach** for AI coding agents and developers.
 
-   c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#openStorage(io.sbk.params.ParameterOptions))]
+#### Step 1: Generate Your Driver Template
 
-   d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#closeStorage(io.sbk.params.ParameterOptions))]
-
-   e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createWriter(int,io.sbk.params.ParameterOptions))]
-   * Create Writer will be called multiple times by SBK in case of Multi writers are specified in the command line.
-
-   f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createReader(int,io.sbk.params.ParameterOptions))]
-   * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line.
-
-   g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
-   * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar 
-     class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/Pulsar.java)]
-   * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
-
-3. You have to implement the following methods of Writer class
-   a). Writer Data [Async or Sync]: [[writeAsync](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#writeAsync(T))]
-
-   b). Flush the data: [[sync](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#sync())]
-
-   c). Close the Writer: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#close())]
-
-   d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int))]
-
-   1. You have to implement the following methods of Reader class
-
-      i). Read Data
-      1. for synchronous reads: [[read](hhttps://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#read())]
-         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/PulsarReader.java)]
-      2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AsyncReader.html)]
-         * create a new class
-         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/drivers/file/src/main/java/io/sbk/driver/File/FileAsyncReader.java)]
-      3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AbstractCallbackReader.html)]
-         * Create a new class
-         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/drivers/rabbitmq/src/main/java/io/sbk/driver/RabbitMQ/RabbitMQCallbackReader.java)]
-      
-      ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
-
-4. make sure that you driver is added in [build-drivers.gradle](build-drivers.gradle) and [settings-drivers.gradle](settings-driver.gradle) files
-5. make sure that your packages are allowed for compilation by adding an entry in the file checkstyle 
-   [import-control](checkstyle/import-control.xml) file
-6. That's all ; Now, Build the SBK included your driver with the command:
-
+```bash
+# Generate your driver template in seconds!
+./gradlew addDriver -Pdriver="your-storage-name"
 ```
+
+**What this command does:**
+- Creates a new driver subproject under `drivers/your-storage-name/`
+- Generates all required Java files with proper package structure
+- Automatically adds your driver to SBK's build configuration
+- Sets up template classes with clear implementation guidance
+
+**Generated Files:**
+```
+drivers/your-storage-name/
+├── build.gradle                           # Driver-specific dependencies
+└── src/main/java/io/sbk/driver/YourStorageName/
+    ├── YourStorageName.java               # Main storage class (7 methods to implement)
+    ├── YourStorageNameConfig.java         # Configuration handling
+    ├── YourStorageNameWriter.java         # Write operations
+    └── YourStorageNameReader.java         # Read operations
+```
+
+#### Step 2: Add Driver Dependencies
+
+Edit `drivers/your-storage-name/build.gradle` to add your storage system's dependencies:
+
+```gradle
+dependencies {
+    api project(":sbk-api")
+    
+    // Add your storage driver dependencies here
+    // Example for a database:
+    // implementation 'org.postgresql:postgresql:42.7.3'
+    // Example for a message queue:
+    // implementation 'org.apache.pulsar:pulsar-client:3.1.0'
+}
+```
+
+#### Step 3: Implement the Storage Interface
+
+Your main storage class (`YourStorageName.java`) needs to implement **7 simple methods**:
+
+```java
+public class YourStorageName implements Storage<byte[]> {
+    
+    // 1. Add command-line parameters for your driver
+    public void addArgs(InputOptions params) {
+        // Add driver-specific parameters like:
+        // params.addOption("host", true, "Database host");
+        // params.addOption("port", true, "Database port");
+    }
+    
+    // 2. Parse the command-line parameters
+    public void parseArgs(ParameterOptions params) {
+        // Extract and validate parameters:
+        // config.host = params.getOptionValue("host", "localhost");
+        // config.port = Integer.parseInt(params.getOptionValue("port", "5432"));
+    }
+    
+    // 3. Initialize connection to your storage system
+    public void openStorage(ParameterOptions params) throws IOException {
+        // Establish connection, create session, etc.
+    }
+    
+    // 4. Clean up resources
+    public void closeStorage(ParameterOptions params) throws IOException {
+        // Close connections, cleanup resources
+    }
+    
+    // 5. Create writer instance (called for each writer thread)
+    public DataWriter<byte[]> createWriter(int id, ParameterOptions params) {
+        return new YourStorageNameWriter(id, params, config);
+    }
+    
+    // 6. Create reader instance (called for each reader thread)
+    public DataReader<byte[]> createReader(int id, ParameterOptions params) {
+        return new YourStorageNameReader(id, params, config);
+    }
+    
+    // 7. Specify data type (byte[] is default, change if needed)
+    public DataType<byte[]> getDataType() {
+        return new ByteArray();  // Use String(), CustomType(), etc. if needed
+    }
+}
+```
+
+#### Step 4: Implement Writer and Reader Classes
+
+**Writer Class** (`YourStorageNameWriter.java`):
+```java
+public class YourStorageNameWriter extends Writer<byte[]> {
+    
+    // Write data asynchronously (required)
+    public void writeAsync(byte[] data) throws IOException {
+        // Write data to your storage system
+        // Measure latency automatically by SBK
+    }
+    
+    // Flush/sync data (optional)
+    public void sync() throws IOException {
+        // Ensure data is persisted
+    }
+    
+    // Close writer (required)
+    public void close() throws IOException {
+        // Cleanup writer resources
+    }
+}
+```
+
+**Reader Class** (`YourStorageNameReader.java`):
+```java
+public class YourStorageNameReader extends Reader<byte[]> {
+    
+    // Read data synchronously (required)
+    public void read() throws IOException {
+        // Read data from your storage system
+        // SBK automatically measures read latency
+    }
+    
+    // Close reader (required)
+    public void close() throws IOException {
+        // Cleanup reader resources
+    }
+}
+```
+
+#### Step 5: Build and Test
+
+```bash
+# Build SBK with your new driver
 ./gradlew build
+
+# Extract the distribution
+tar -xvf ./build/distributions/sbk-*.tar -C ./build/distributions/.
+
+# Test your driver
+./build/distributions/sbk-*/bin/sbk -class YourStorageName -help
 ```
 
-untar the SBK  to local folder
+#### 🎯 Implementation Patterns by Storage Type
 
-```
-tar -xvf ./build/distributions/sbk-5.0.tar -C ./build/distributions/.
-```
+**For Databases (SQL/NoSQL):**
+- Use connection pools in `openStorage()`
+- Implement batch writes in `writeAsync()` for better performance
+- Handle connection failures gracefully
 
-6. To invoke the benchmarking of the driver you have to issue the parameters "-class < your driver name>"
-   Example: For pulsar driver
+**For Message Queues:**
+- Create producers/consumers in writer/reader constructors
+- Use async APIs to avoid blocking
+- Handle acknowledgments properly
 
-```
-<SBK directory>./build/distributions/sbk-5.0/bin/sbk -class pulsar -help
+**For File Systems:**
+- Use buffered I/O for better performance
+- Implement proper file handle management
+- Consider memory-mapped files for high throughput
 
-usage: sbk -class pulsar -out SystemLogger
-Storage Benchmark Kit
+**For Cloud Storage:**
+- Handle network timeouts and retries
+- Use multipart uploads for large files
+- Implement proper authentication
 
- -ackQuorum <arg>       AckQuorum default: 1
- -admin <arg>           Admin URI, required to create the partitioned
-                        topic, default: null
- -broker <arg>          Broker URI, default: tcp://localhost:6650
- -cluster <arg>         Cluster name (optional parameter)
- -deduplication <arg>   Enable or Disable Deduplication; default: false
- -ensembleSize <arg>    EnsembleSize default: 1
- -help                  Help message
- -maxlatency <arg>      Maximum latency;
-                        use '-time' for time unit; default:180000 ms
- -millisecsleep <arg>   Idle sleep in milliseconds; default: 0 ms
- -minlatency <arg>      Minimum latency;
-                        use '-time' for time unit; default:0 ms
- -partitions <arg>      Number of partitions of the topic, default: 1
- -readers <arg>         Number of readers
- -records <arg>         Number of records(events) if 'seconds' not
-                        specified;
-                        otherwise, Maximum records per second by
-                        writer(s); and/or
-                        Number of records per second by reader(s)
- -ro <arg>              Readonly Benchmarking,
-                        Applicable only if both writers and readers are
-                        set; default: false
- -rq <arg>              Benchmark Reade Requests; default: false
- -rsec <arg>            Number of seconds/step for readers, default: 0
- -rstep <arg>           Number of readers/step, default: 1
- -seconds <arg>         Number of seconds to run
-                        if not specified, runs forever
- -size <arg>            Size of each message (event or record)
- -sync <arg>            Each Writer calls flush/sync after writing <arg>
-                        number of of events(records); and/or
-                        <arg> number of events(records) per Write or Read
-                        Transaction
- -threads <arg>         io threads per Topic, default: 1
- -throughput <arg>      If > 0, throughput in MB/s
-                        If 0, writes/reads 'records'
-                        If -1, get the maximum throughput (default: -1)
- -time <arg>            Latency Time Unit [ms:MILLISECONDS,
-                        mcs:MICROSECONDS, ns:NANOSECONDS]; default: ms
- -topic <arg>           Topic name, default : test
- -wq <arg>              Benchmark Write Requests; default: false
- -writeQuorum <arg>     WriteQuorum default: 1
- -writers <arg>         Number of writers
- -wsec <arg>            Number of seconds/step for writers, default: 0
- -wstep <arg>           Number of writers/step, default: 1
+#### 📋 Complete Implementation Checklist
 
-Please report issues at https://github.com/kmgowda/SBK
+- [ ] Run `./gradlew addDriver -Pdriver="your-name"`
+- [ ] Add dependencies in `build.gradle`
+- [ ] Implement 7 methods in main storage class
+- [ ] Implement writer class methods
+- [ ] Implement reader class methods
+- [ ] Add error handling and validation
+- [ ] Test with `./gradlew build`
+- [ ] Verify driver appears in help output
+- [ ] Run basic benchmark tests
 
+#### 🔧 Advanced Features
+
+**Custom Data Types:**
+If you need to work with data other than `byte[]`, override `getDataType()`:
+```java
+public DataType<String> getDataType() {
+    return new String();  // For text data
+}
 ```
 
-### Add your driver to SBK Manually
+**Configuration Management:**
+Use the generated `Config` class to handle complex configurations:
+```java
+// In your main class
+private YourStorageNameConfig config;
+
+// Load configuration in addArgs()
+config = mapper.readValue(
+    Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("YourStorageName.properties")),
+    YourStorageNameConfig.class);
+```
+
+**Async vs Sync Operations:**
+- Use `writeAsync()` for non-blocking operations
+- Implement `sync()` for explicit flush operations
+- SBK automatically handles timing and latency measurement
+
+**Async Reader Class** (`YourStorageNameReader.java`):
+```java
+public class YourStorageNameReader extends AsyncReader<byte[]> {
+    
+    // Read data synchronously (required)
+    public CompletableFuture<T> readAsync(int size) throws IOException {
+        // Read data from your storage system
+        // SBK automatically measures read latency
+    }
+    
+    // Close reader (required)
+    public void close() throws IOException {
+        // Cleanup reader resources
+    }
+}
+```
+
+#### 🐛 Common Pitfalls to Avoid
+
+1. **Blocking Operations**: Never block in `writeAsync()` or `readAsync()`
+2. **Resource Leaks**: Always implement proper cleanup in `close()` methods
+3. **Thread Safety**: Each writer/reader instance is used by a single thread
+4. **Error Handling**: Wrap storage-specific exceptions in `IOException`
+5. **Configuration**: Validate all parameters in `parseArgs()` before using
+
+#### 📚 Example Drivers for Reference
+
+- **Simple File System**: `drivers/file`
+- **Database (PostgreSQL)**: `drivers/postgresql`
+- **Message Queue (Kafka)**: `drivers/kafka`
+- **Cloud Storage (S3)**: `drivers/minio`
+
+Review these examples to understand best practices for your storage type.
+
+### 📖 Manual Driver Setup (Alternative Method)
+
 1. Create the gradle subproject preferable with the name **driver-<your driver(storage device) name>**.
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar)]   
@@ -884,6 +1001,9 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
 9.  To invoke the benchmarking of the driver you have to issue the parameters "-class < your driver name>"
+
+> 💡 **Recommendation**: Use the automated template system (`./gradlew addDriver`) for faster, error-free setup.
+
 
 
 ## Use SBK git hub packages
