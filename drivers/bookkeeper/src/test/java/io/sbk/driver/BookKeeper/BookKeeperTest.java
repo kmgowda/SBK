@@ -12,10 +12,10 @@ package io.sbk.driver.BookKeeper;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbk.config.Config;
-import org.junit.Assert;
-import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 //create the test Class for Bookkeeper Benchmarking
 public class BookKeeperTest {
@@ -56,7 +56,7 @@ public class BookKeeperTest {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParseArgsNullLogName() {
         final String[] args = {"-class", "bookkeeper", "-uri", "distributedlog://localhost:2181/streams", "-writers", "1", "-size", "100"};
         params = new SbkDriversParameters(benchmarkName, drivers, loggers);
@@ -66,12 +66,14 @@ public class BookKeeperTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("ParseArgs Failed!");
+            fail("ParseArgs Failed!");
         }
-        bk.parseArgs(params);
+        assertThrows(IllegalArgumentException.class, () -> {
+            bk.parseArgs(params);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParseArgsNullUri() {
         final String[] args = {"-class", "bookkeeper", "-log", "logName", "writers", "1", "size", "100"};
         params = new SbkDriversParameters(benchmarkName, drivers, loggers);
@@ -81,8 +83,10 @@ public class BookKeeperTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            //Assert.fail("ParseArgs Failed!");
+            //fail("ParseArgs Failed!");
         }
-        bk.parseArgs(params);
+        assertThrows(IllegalArgumentException.class, () -> {
+            bk.parseArgs(params);
+        });
     }
 }

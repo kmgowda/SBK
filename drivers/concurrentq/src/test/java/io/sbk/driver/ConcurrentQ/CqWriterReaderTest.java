@@ -9,20 +9,20 @@
  */
 package io.sbk.driver.ConcurrentQ;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class CqWriterReaderTest {
 
     private LinkedCQueue<byte[]> queue;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         queue = new LinkedCQueue<>();
     }
@@ -32,7 +32,7 @@ public class CqWriterReaderTest {
         CqWriter writer = new CqWriter(queue);
         byte[] data = {1, 2, 3};
         CompletableFuture future = writer.writeAsync(data);
-        assertNull("writeAsync should return null", future);
+        assertNull(future, "writeAsync should return null");
         assertEquals(1, queue.size());
         assertArrayEquals(data, queue.poll());
     }

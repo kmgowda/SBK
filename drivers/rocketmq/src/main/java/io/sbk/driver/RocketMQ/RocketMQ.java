@@ -9,9 +9,9 @@
  */
 package io.sbk.driver.RocketMQ;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.google.common.io.BaseEncoding;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
@@ -74,8 +74,7 @@ public class RocketMQ implements Storage<byte[]> {
         clusterName = params.getOptionValue("cluster", DEFAULT_CLUSTER);
         partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
         async = Boolean.parseBoolean(params.getOptionValue("async", "false"));
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             rmqClientConfig = mapper.readValue(getClass().getClassLoader().getResourceAsStream(CONFIGFILE),
                     RocketMQClientConfig.class);

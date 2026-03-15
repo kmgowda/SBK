@@ -10,9 +10,9 @@
 
 package io.sbk.driver.Ignite;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
@@ -44,8 +44,7 @@ public class Ignite implements Storage<byte[]> {
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             config = mapper.readValue(Objects.requireNonNull(Ignite.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     IgniteConfig.class);

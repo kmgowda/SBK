@@ -15,16 +15,17 @@ import io.sbk.api.Writer;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbk.config.Config;
 import io.sbk.system.Printer;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Class for File System validation.
@@ -46,12 +47,12 @@ public class FileTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed!");
+            fail("Parse Args Failed!");
         }
         file.parseArgs(params);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParseArgsWritersCount() {
         final String[] args = {"-class", "file", "-size", "100", "-writers", "2", "records", "1"};
         params = new SbkDriversParameters(benchmarkName, drivers, loggers);
@@ -61,12 +62,14 @@ public class FileTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed!");
+            fail("Parse Args Failed!");
         }
-        file.parseArgs(params);
+        assertThrows(IllegalArgumentException.class, () -> {
+            file.parseArgs(params);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParseArgsReadersWritersCount() {
         final String[] args = {"-class", "file", "-size", "100", "-readers", "1", "-writers", "1", "records", "1"};
         params = new SbkDriversParameters(benchmarkName, drivers, loggers);
@@ -76,9 +79,11 @@ public class FileTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed!");
+            fail("Parse Args Failed!");
         }
-        file.parseArgs(params);
+        assertThrows(IllegalArgumentException.class, () -> {
+            file.parseArgs(params);
+        });
     }
 
     @Test
@@ -91,7 +96,7 @@ public class FileTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed!");
+            fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         try {
@@ -99,7 +104,7 @@ public class FileTest {
             file.closeStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("Open/Close Storage Failed!");
+            fail("Open/Close Storage Failed!");
         }
     }
 
@@ -120,14 +125,14 @@ public class FileTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed!");
+            fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         try {
             file.createWriter(0, params);
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail("create Writer Failed!");
+            fail("create Writer Failed!");
         }
     }
 
@@ -142,14 +147,14 @@ public class FileTest {
             params.parseArgs(writeArgs);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail();
+            fail();
         }
         file.parseArgs(params);
         try {
             file.createWriter(0, params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("CreateWriter failed!");
+            fail("CreateWriter failed!");
         }
         params = new SbkDriversParameters(benchmarkName, drivers, loggers);
         file = new File();
@@ -159,14 +164,14 @@ public class FileTest {
             params.parseArgs(readArgs);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed!");
+            fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         try {
             file.createReader(0, params);
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail("createReader failed!");
+            fail("createReader failed!");
         }
     }
 
@@ -182,7 +187,7 @@ public class FileTest {
             params.parseArgs(args);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed!");
+            fail("Parse Args Failed!");
         }
         file.parseArgs(params);
         try {
@@ -214,20 +219,20 @@ public class FileTest {
             params.parseArgs(writeArgs);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Arg failed");
+            fail("Parse Arg Assert.failed");
         }
         file.parseArgs(params);
         try {
             file.openStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("open storage Failed");
+            fail("open storage Failed");
         }
         try {
             writer = (Writer<ByteBuffer>) file.createWriter(0, params);
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail("createWriter Failed");
+            fail("createWriter Failed");
         }
         byte[] byteData = data.getBytes();
         writeBuffer = file.getDataType().allocate(byteData.length);
@@ -241,7 +246,7 @@ public class FileTest {
             file.closeStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("Writer Failed");
+            fail("Writer Failed");
         }
         params = new SbkDriversParameters(benchmarkName, drivers, loggers);
         file = new File();
@@ -251,14 +256,14 @@ public class FileTest {
             params.parseArgs(readArgs);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed");
+            fail("Parse Args Failed");
         }
         file.parseArgs(params);
         try {
             file.openStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("open storage Failed");
+            fail("open storage Failed");
         }
 
         try {
@@ -268,7 +273,7 @@ public class FileTest {
             file.closeStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("Reader Failed");
+            fail("Reader Failed");
         }
 
         byte[] arr = new byte[readBuffer.limit()];
@@ -305,20 +310,20 @@ public class FileTest {
             params.parseArgs(writeArgs);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Arg failed");
+            fail("Parse Arg Assert.failed");
         }
         file.parseArgs(params);
         try {
             file.openStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("open storage Failed");
+            fail("open storage Failed");
         }
         try {
             writer = (Writer<ByteBuffer>) file.createWriter(0, params);
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail("createWriter Failed");
+            fail("createWriter Failed");
         }
         byte[] byteData = data.getBytes();
         writeBuffer = file.getDataType().allocate(byteData.length);
@@ -332,7 +337,7 @@ public class FileTest {
             file.closeStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("Writer Failed");
+            fail("Writer Failed");
         }
         params = new SbkDriversParameters(benchmarkName, drivers, loggers);
         file = new File();
@@ -342,14 +347,14 @@ public class FileTest {
             params.parseArgs(readArgs);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Parse Args Failed");
+            fail("Parse Args Failed");
         }
         file.parseArgs(params);
         try {
             file.openStorage(params);
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("open storage Failed");
+            fail("open storage Failed");
         }
 
         try {
@@ -357,7 +362,7 @@ public class FileTest {
             readBuffer = reader.read();
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("Reader Failed");
+            fail("Reader Failed");
         }
 
         byte[] arr = new byte[readBuffer.limit()];
@@ -379,7 +384,7 @@ public class FileTest {
             Printer.log.info("Got EOF Expected");
         } catch (IOException ex) {
             ex.printStackTrace();
-            Assert.fail("Reader Failed");
+            fail("Reader Failed");
         }
     }
 }

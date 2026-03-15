@@ -59,6 +59,14 @@ allprojects {
     }
 
     repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/yahoo/HaloDB")
+            credentials {
+                username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME") ?: "sbk-public"
+                password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN") ?: "\u0067hp_FBqmGRV6KLTcFjwnDTvozvlhs3VNja4F67B5"
+            }
+        }
         mavenLocal()
         mavenCentral()
         maven {
@@ -303,7 +311,7 @@ allprojects {
         def className = sbkClass.capitalize();
         mainClass SbkMainClass
         outputName sbkProjectName
-        javaVersion '17'
+        javaVersion '25'
         graalVersion '21.0.0'
         option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
         option "--initialize-at-build-time=io.sbk.$className"
@@ -711,7 +719,7 @@ gradle.rootProject {
 
     jib {
         from {
-            image = 'openjdk:17-jdk'
+            image = 'openjdk:25-jdk'
         }
 
         to {

@@ -68,7 +68,7 @@ dependencies {
 
 jib {
     from {
-        image = 'openjdk:21-jdk'
+        image = 'openjdk:25-jdk'
     }
 
     to {

@@ -10,8 +10,8 @@
 
 package io.sbk.params;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import io.sbk.utils.SbkUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +49,6 @@ public abstract class YmlMap {
      */
     public static @NotNull String[] getYmlArgs(String fileName, Class<? extends YmlMap> tClass) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
 
         final YmlMap yap = mapper.readValue(new File(fileName), tClass);
         return SbkUtils.mapToArgs(yap.args, true);

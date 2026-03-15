@@ -11,7 +11,7 @@
 version: '3'
 services:
   prometheus:
-    image: prom/prometheus:v3.7.3
+    image: prom/prometheus:v3.10.0
     container_name: prometheus
     hostname: prometheus
     volumes:

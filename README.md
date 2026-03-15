@@ -9,13 +9,30 @@ You may obtain a copy of the License at
 -->
 # Storage Benchmark Kit  ![SBK](images/sbk-logo-small-1.png)
 
-[![Build Status](https://travis-ci.org/kmgowda/SBK.svg?branch=master)](https://travis-ci.org/kmgowda/SBK)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Api](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-api/javadoc/index.html)
 [![Version](https://img.shields.io/github/v/release/kmgowda/sbk)](https://github.com/kmgowda/SBK/releases)
 [![](https://jitpack.io/v/kmgowda/SBK.svg)](https://jitpack.io/#kmgowda/SBK)
 [![SBK dockers](https://img.shields.io/badge/SBK-Dockers-blue)](https://hub.docker.com/r/kmgowda/sbk)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4606/badge)](https://bestpractices.coreinfrastructure.org/projects/4606)
+
+>  **_The Ultimate Performance Benchmarking Framework for Any Storage System_**
+
+## 🚀 Why SBK?
+
+**For Storage Companies/Vendors:**
+- 🎯 **Accurate Performance Insights**: 100% accurate latency percentiles without sampling
+- 📊 **Comprehensive Analytics**: Detailed throughput, latency, and performance metrics
+- 🔧 **Easy Integration**: Simple driver interface to benchmark your storage system
+- 🌐 **Enterprise Ready**: Docker, Kubernetes, and distributed benchmarking support
+- 📈 **Competitive Advantage**: Showcase your storage system's true performance potential
+
+**For Open Source Developers:**
+- 🛠️ **Simple Driver Development**: Clean API with comprehensive documentation
+- 🤝 **Active Community**: Collaborate with storage experts and companies
+- 📚 **Learning Opportunity**: Understand storage system performance characteristics
+- 🏆 **Showcase Skills**: Contribute to a high-performance benchmarking framework
+- 🔥 **High Impact**: Your contributions help companies make better storage decisions
 
 >  **_Any Storage System_...  _Any Payload_...  _Any Time Stamp_...**
 
@@ -28,14 +45,28 @@ You may obtain a copy of the License at
 
 [![PerL](https://img.shields.io/badge/Per-L%20-yellow)](perl)
 
-The SBK (Storage Benchmark Kit) is an open source software framework for the performance benchmarking of any storage system. If you are curious to measure the maximum throughput performance of your storage device/system, then SBK is the right software for you. The SBK itself is a very high-performance benchmark tool/framework.
-It massively writes the data to the storage system and reads the data from the storage system. The SBK supports multi writers and readers and also the End to End latency benchmarking.
-The latency quartiles and percentiles are calculated for complete data written/read without any sampling; hence the 
-percentiles are 100% accurate.
+## 🎯 Key Features
 
-SBK can be deployed in  distributed nodes using applications [**SBM**](sbm), [**SBK-GEM**](sbk-gem) and 
-[**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on the multiple nodes and performance results can be aggregated 
-into one master node called SBM (Storage Benchmark Monitor).
+### 📊 **Unmatched Accuracy**
+- **100% Accurate Percentiles**: No sampling - every operation is measured
+- **Comprehensive Metrics**: 17+ latency percentiles (5th to 99.99th)
+- **Real-time Monitoring**: Live performance data via Prometheus/Grafana
+- **Multi-threaded**: Support for concurrent writers and readers
+- **AI-Powered Performance Analysis**: Generate comprehensive Excel reports with AI-driven insights and comparative analysis using [sbk-charts](https://github.com/kmgowda/sbk-charts) 
+
+### 🏗️ **Universal Compatibility**
+- **Any Storage System**: Databases, message queues, file systems, cloud storage
+- **Any Data Type**: Byte arrays, strings, custom payloads
+- **Any Time Unit**: Milliseconds, microseconds, nanoseconds
+- **Flexible Deployment**: Standalone, Docker, Kubernetes, distributed clusters
+
+### ⚡ **Extreme Performance**
+- **High Throughput**: Designed to push storage systems to their limits
+- **Low Overhead**: Minimal impact on storage system performance
+- **Scalable Architecture**: Benchmark from single nodes to large clusters
+- **Multiple Modes**: Burst, throughput, rate-limited, and end-to-end latency testing
+
+SBK can be deployed in distributed nodes using applications [**SBM**](sbm), [**SBK-GEM**](sbk-gem) and [**SBK-GEM-YAL**](sbk-gem-yal). SBK can be executed on multiple nodes and performance results can be aggregated into one master node called SBM (Storage Benchmark Monitor).
 
 <p align="center">
     <a href="images/sbm.png">
@@ -65,59 +96,117 @@ ___
 
 *SBK supports performance benchmarking of following storage systems*
 
-| #   	| Driver                              	| #   	| Driver                            	|
-|-----	|-------------------------------------	|-----	|-----------------------------------	|
-| 1.  	| [Activemq](drivers/activemq)         	| 24. 	| [Mariadb](drivers/mariadb)         	|
-| 2.  	| [Artemis](drivers/artemis)           	| 25. 	| [Memcached](drivers/memcached)     	|
-| 3.  	| [Asyncfile](drivers/asyncfile)       	| 26. 	| [Minio](drivers/minio)             	|
-| 4.  	| [Bookkeeper](drivers/bookkeeper)     	| 27. 	| [Mongodb](drivers/mongodb)         	|
-| 5.  	| [Cassandra](drivers/cassandra)       	| 28. 	| [Mssql](drivers/mssql)             	|
-| 6.  	| [Cephs3](drivers/cephs3)             	| 29. 	| [Mysql](drivers/mysql)             	|
-| 7.  	| [Concurrentq](drivers/concurrentq)   	| 30. 	| [Nats](drivers/nats)               	|
-| 8.  	| [Couchbase](drivers/couchbase)       	| 31. 	| [NatsStream](drivers/natsStream)   	|
-| 9.  	| [Couchdb](drivers/couchdb)           	| 32. 	| [Nsq](drivers/nsq)                 	|
-| 10. 	| [Csv](drivers/csv)                   	| 33. 	| [Null](drivers/null)               	|
-| 11. 	| [Db2](drivers/db2)                   	| 34. 	| [Openio](drivers/openio)           	|
-| 12. 	| [Derby](drivers/derby)               	| 35. 	| [Postgresql](drivers/postgresql)   	|
-| 13. 	| [Fdbrecord](drivers/fdbrecord)       	| 36. 	| [Pravega](drivers/pravega)         	|
-| 14. 	| [File](drivers/file)                 	| 37. 	| [Pulsar](drivers/pulsar)           	|
-| 15. 	| [Filestream](drivers/filestream)     	| 38. 	| [Rabbitmq](drivers/rabbitmq)       	|
-| 16. 	| [Foundationdb](drivers/foundationdb) 	| 39. 	| [Redis](drivers/redis)             	|
-| 17. 	| [H2](drivers/h2)                     	| 40. 	| [Redpanda](drivers/redpanda)       	|
-| 18. 	| [Hdfs](drivers/hdfs)                 	| 41. 	| [Rocketmq](drivers/rocketmq)       	|
-| 19. 	| [Hive](drivers/hive)                 	| 42. 	| [Rocksdb](drivers/rocksdb)         	|
-| 20. 	| [Ignite](drivers/ignite)             	| 43. 	| [Sbktemplate](drivers/sbktemplate) 	|
-| 21. 	| [Jdbc](drivers/jdbc)                 	| 44. 	| [Seaweeds3](drivers/seaweeds3)     	|
-| 22. 	| [Kafka](drivers/kafka)               	| 45. 	| [Sqlite](drivers/sqlite)           	|
-| 23. 	| [Leveldb](drivers/leveldb)           	|     	|                                   	|
+| #   	   | Driver                              	| #   	| Driver                            	|
+|---------|-------------------------------------	|-----	|-----------------------------------	|
+| 1.  	   | [Activemq](drivers/activemq)         	| 28. 	| [Kafka](drivers/kafka)             	|
+| 2.  	   | [Artemis](drivers/artemis)           	| 29. 	| [Leveldb](drivers/leveldb)         	|
+| 3.  	   | [Asyncfile](drivers/asyncfile)       	| 30. 	| [Linkedbq](drivers/linkedbq)      	|
+| 4.  	   | [Atomicq](drivers/atomicq)           	| 31. 	| [Mariadb](drivers/mariadb)         	|
+| 5.  	   | [Bookkeeper](drivers/bookkeeper)     	| 32. 	| [Memcached](drivers/memcached)     	|
+| 6.  	   | [Cassandra](drivers/cassandra)       	| 33. 	| [Minio](drivers/minio)             	|
+| 7.  	   | [Cephs3](drivers/cephs3)             	| 34. 	| [Mongodb](drivers/mongodb)         	|
+| 8.  	   | [Chromadb](drivers/chromadb)         	| 35. 	| [Mssql](drivers/mssql)             	|
+| 9.  	   | [Concurrentq](drivers/concurrentq)   	| 36. 	| [Mysql](drivers/mysql)             	|
+| 10. 	   | [Conqueue](drivers/conqueue)         	| 37. 	| [Nats](drivers/nats)               	|
+| 11. 	   | [Couchbase](drivers/couchbase)       	| 38. 	| [NatsStream](drivers/natsStream)   	|
+| 12. 	   | [Couchdb](drivers/couchdb)           	| 39. 	| [Nsq](drivers/nsq)                 	|
+| 13. 	   | [Csv](drivers/csv)                   	| 40. 	| [Null](drivers/null)               	|
+| 14. 	   | [Db2](drivers/db2)                   	| 41. 	| [Openio](drivers/openio)           	|
+| 15. 	   | [Derby](drivers/derby)               	| 42. 	| [Postgresql](drivers/postgresql)   	|
+| 16. 	   | [Dynamodb](drivers/dynamodb)         	| 43. 	| [Pravega](drivers/pravega)         	|
+| 17. 	   | [Elasticsearch](drivers/elasticsearch) 	| 44. 	| [Pulsar](drivers/pulsar)           	|
+| 18. 	   | [Exasol](drivers/exasol)             	| 45. 	| [Rabbitmq](drivers/rabbitmq)       	|
+| 19. 	   | [Fdbrecord](drivers/fdbrecord)       	| 46. 	| [Redis](drivers/redis)             	|
+| 20. 	   | [File](drivers/file)                 	| 47. 	| [Redpanda](drivers/redpanda)       	|
+| 21. 	   | [Filestream](drivers/filestream)     	| 48. 	| [Rocketmq](drivers/rocketmq)       	|
+| 22. 	   | [Foundationdb](drivers/foundationdb) 	| 49. 	| [Rocksdb](drivers/rocksdb)         	|
+| 23. 	   | [H2](drivers/h2)                     	| 50. 	| [Seaweeds3](drivers/seaweeds3)     	|
+| 24. 	   | [Halodb](drivers/halodb)             	| 51. 	| [Sqlite](drivers/sqlite)           	|
+| 25. 	   | [Hdfs](drivers/hdfs)                 	| 52. 	| [Solr](drivers/solr)               	|
+| 26. 	   | [Hive](drivers/hive)                 	| 53. 	| [Syncq](drivers/syncq)             	|
+| 27.   	 |   [Jdbc](drivers/jdbc)               |  	|            	|
 
 *In the future, many more storage systems drivers will be plugged in* 
 
-We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to : 
+## 🌟 Why Contribute to SBK?
+
+### 🏢 **For Storage Companies**
+- **Showcase Performance**: Demonstrate your storage system's superiority
+- **Customer Confidence**: Provide transparent, verifiable performance metrics
+- **Competitive Edge**: Stand out with comprehensive benchmarking support
+- **Community Engagement**: Connect with potential customers and partners
+- **Marketing Leverage**: Use SBK results in your marketing materials
+
+### 👨‍💻 **For Open Source Developers**
+- **High-Impact Contributions**: Your code helps companies make critical decisions
+- **Learning Opportunity**: Deep understanding of storage system performance
+- **Portfolio Builder**: Work on a project used by major companies
+- **Community Recognition**: Get acknowledged for your expertise
+- **Skill Development**: Work with high-performance Java, distributed systems
+
+### 🎁 **What You Get**
+- **Comprehensive Documentation**: Step-by-step driver development guide
+- **Template Support**: Automated driver generation with Gradle commands
+- **Code Review**: Expert feedback on your contributions
+- **Community Support**: Active Slack channel and issue tracking
+- **Showcase Platform**: Your driver featured in our driver ecosystem
+
+
+## 🚀 Quick Start for Developers
+
+### Adding Your Storage Driver - It's Easy!
+
+1. Generate you driver template
+```bash
+# Generate your driver template in seconds!
+./gradlew addDriver -Pdriver="your-storage-name"
+```
+2. Implement the `Storage` interface (just 7 methods!)
+3. Implement `Writer` and `Reader` interfaces
+4. Add your driver to the build configuration
+5. You're done! 🎉
+
+### 📝 Simple Driver Example
+
+```java
+public class MyStorage implements Storage<byte[]> {
+    // Just implement these 7 methods:
+    public void addArgs(ParameterOptions params) { /* add your params */ }
+    public void parseArgs(ParameterOptions params) { /* parse your params */ }
+    public void openStorage(ParameterOptions params) throws IOException { /* connect */ }
+    public void closeStorage(ParameterOptions params) throws IOException { /* cleanup */ }
+    public DataWriter<byte[]> createWriter(int id, ParameterOptions params) { /* writer */ }
+    public DataReader<byte[]> createReader(int id, ParameterOptions params) { /* reader */ }
+    public DataType<byte[]> getDataType() { return new ByteArray(); }
+}
+```
+
+### 🎯 What You Get Out-of-the-Box
+- **Automatic Performance Metrics**: Throughput, latency, percentiles
+- **Real-time Monitoring**: Prometheus integration
+- **Grafana Dashboards**: Beautiful visualizations
+- **Docker Support**: Containerized benchmarking
+- **Distributed Testing**: Multi-node benchmarking
+- **CSV Export**: Detailed results for analysis
+
+### 📚 Comprehensive Documentation
+- **Step-by-step tutorials** for driver development
+- **API documentation** with examples
+- **Best practices** for performance testing
+- **Troubleshooting guides** for common issues
+
+We welcome open source developers to contribute to this project by adding a driver for your storage device and any features to SBK. Refer to:
 * [Contributing to SBK](#contributing-to-sbk) for the Contributing guidelines.
-* [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or 
-  client) for performance benchmarking.
+* [Add your storage driver to SBK](#add-your-driver-to-sbk) to know how to add your driver (storage device driver or
+  client) for performance benchmarking in detail.
 
-___
-
-<p align="center">
-   Supported By
-</p>
-
-<p align="center">
-    <a href="https://www.jetbrains.com/?from=SBK">
-        <img src="images/jetbrains.png" alt="Jet Brains" width="100" height="100">
-    </a>
-</p>
-
-___
 
 ## Build SBK
 
 **Prerequisites**
 
-- Java 21+
-- Gradle 9.2+
+- Java 25+
+- Gradle 9.4+
 
 **Building**
 
@@ -573,127 +662,249 @@ For eclipse, you can generate eclipse project files by running `./gradlew eclips
 
 ## Add your driver to SBK
 
-### Add your driver to SBK using Gradle command and template driver
-1. Run the command **./gradlew addDriver -Pdriver="your driver name"**
-   1. This command create the new subproject under the SBK framework with <driver name>.java and <driver name>Reader.
-      java and <driver name>Writer.java files filled with required classes definitions
-   
-2. You have to implement the following methods of Benchmark Interface:
-   a). Add the Additional parameters (Command line Parameters) for your driver :[[addArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#addArgs(io.sbk.params.ParameterOptions))]
-   * The default command line parameters are listed in the help output here : [[Building SBK](https://github.com/kmgowda/sbk#building)]
+### 🚀 Quick Start: Add Your Driver Using Gradle Template
 
-   b). Parse your driver specific parameters: [[parseArgs](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#parseArgs(io.sbk.params.ParameterOptions))]
+SBK provides an automated template system to generate new storage drivers instantly. This is the **recommended approach** for AI coding agents and developers.
 
-   c). Open the storage: [[openStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#openStorage(io.sbk.params.ParameterOptions))]
+#### Step 1: Generate Your Driver Template
 
-   d). Close the storage:[[closeStorage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#closeStorage(io.sbk.params.ParameterOptions))]
-
-   e). Create a single writer instance:[[createWriter](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createWriter(int,io.sbk.params.ParameterOptions))]
-   * Create Writer will be called multiple times by SBK in case of Multi writers are specified in the command line.
-
-   f). Create a single Reader instance:[[createReader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#createReader(int,io.sbk.params.ParameterOptions))]
-   * Create Reader will be called multiple times by SBK in case of Multi readers are specified in the command line.
-
-   g). Get the Data Type :[[getDataType](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html#getDataType())]
-   * In case your data type is byte[] (Byte Array), No need to override this method. see the example:   [[Pulsar 
-     class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/Pulsar.java)]
-   * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
-
-3. You have to implement the following methods of Writer class
-   a). Writer Data [Async or Sync]: [[writeAsync](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#writeAsync(T))]
-
-   b). Flush the data: [[sync](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#sync())]
-
-   c). Close the Writer: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#close())]
-
-   d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int))]
-
-   1. You have to implement the following methods of Reader class
-
-      i). Read Data
-      1. for synchronous reads: [[read](hhttps://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#read())]
-         * Example: [[Pulsar Reader](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/PulsarReader.java)]
-      2. for Asynchronous reads: [[AsyncRead](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AsyncReader.html)]
-         * create a new class
-         * Example: [[File Async Reader](https://github.com/kmgowda/SBK/blob/master/drivers/file/src/main/java/io/sbk/driver/File/FileAsyncReader.java)]
-      3. for call-back reads extend the abstract class: [[Abstract callback Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/AbstractCallbackReader.html)]
-         * Create a new class
-         * Example: [[RabbitMQ Reader](https://github.com/kmgowda/SBK/blob/master/drivers/rabbitmq/src/main/java/io/sbk/driver/RabbitMQ/RabbitMQCallbackReader.java)]
-      
-      ii). Close the Reader:[[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
-
-4. That's all ; Now, Build the SBK included your driver with the command:
-
+```bash
+# Generate your driver template in seconds!
+./gradlew addDriver -Pdriver="your-storage-name"
 ```
+
+**What this command does:**
+- Creates a new driver subproject under `drivers/your-storage-name/`
+- Generates all required Java files with proper package structure
+- Automatically adds your driver to SBK's build configuration
+- Sets up template classes with clear implementation guidance
+
+**Generated Files:**
+```
+drivers/your-storage-name/
+├── build.gradle                           # Driver-specific dependencies
+└── src/main/java/io/sbk/driver/YourStorageName/
+    ├── YourStorageName.java               # Main storage class (7 methods to implement)
+    ├── YourStorageNameConfig.java         # Configuration handling
+    ├── YourStorageNameWriter.java         # Write operations
+    └── YourStorageNameReader.java         # Read operations
+```
+
+#### Step 2: Add Driver Dependencies
+
+Edit `drivers/your-storage-name/build.gradle` to add your storage system's dependencies:
+
+```gradle
+dependencies {
+    api project(":sbk-api")
+    
+    // Add your storage driver dependencies here
+    // Example for a database:
+    // implementation 'org.postgresql:postgresql:42.7.3'
+    // Example for a message queue:
+    // implementation 'org.apache.pulsar:pulsar-client:3.1.0'
+}
+```
+
+#### Step 3: Implement the Storage Interface
+
+Your main storage class (`YourStorageName.java`) needs to implement **7 simple methods**:
+
+```java
+public class YourStorageName implements Storage<byte[]> {
+    
+    // 1. Add command-line parameters for your driver
+    public void addArgs(InputOptions params) {
+        // Add driver-specific parameters like:
+        // params.addOption("host", true, "Database host");
+        // params.addOption("port", true, "Database port");
+    }
+    
+    // 2. Parse the command-line parameters
+    public void parseArgs(ParameterOptions params) {
+        // Extract and validate parameters:
+        // config.host = params.getOptionValue("host", "localhost");
+        // config.port = Integer.parseInt(params.getOptionValue("port", "5432"));
+    }
+    
+    // 3. Initialize connection to your storage system
+    public void openStorage(ParameterOptions params) throws IOException {
+        // Establish connection, create session, etc.
+    }
+    
+    // 4. Clean up resources
+    public void closeStorage(ParameterOptions params) throws IOException {
+        // Close connections, cleanup resources
+    }
+    
+    // 5. Create writer instance (called for each writer thread)
+    public DataWriter<byte[]> createWriter(int id, ParameterOptions params) {
+        return new YourStorageNameWriter(id, params, config);
+    }
+    
+    // 6. Create reader instance (called for each reader thread)
+    public DataReader<byte[]> createReader(int id, ParameterOptions params) {
+        return new YourStorageNameReader(id, params, config);
+    }
+    
+    // 7. Specify data type (byte[] is default, change if needed)
+    public DataType<byte[]> getDataType() {
+        return new ByteArray();  // Use String(), CustomType(), etc. if needed
+    }
+}
+```
+
+#### Step 4: Implement Writer and Reader Classes
+
+**Writer Class** (`YourStorageNameWriter.java`):
+```java
+public class YourStorageNameWriter extends Writer<byte[]> {
+    
+    // Write data asynchronously (required)
+    public void writeAsync(byte[] data) throws IOException {
+        // Write data to your storage system
+        // Measure latency automatically by SBK
+    }
+    
+    // Flush/sync data (optional)
+    public void sync() throws IOException {
+        // Ensure data is persisted
+    }
+    
+    // Close writer (required)
+    public void close() throws IOException {
+        // Cleanup writer resources
+    }
+}
+```
+
+**Reader Class** (`YourStorageNameReader.java`):
+```java
+public class YourStorageNameReader extends Reader<byte[]> {
+    
+    // Read data synchronously (required)
+    public void read() throws IOException {
+        // Read data from your storage system
+        // SBK automatically measures read latency
+    }
+    
+    // Close reader (required)
+    public void close() throws IOException {
+        // Cleanup reader resources
+    }
+}
+```
+
+#### Step 5: Build and Test
+
+```bash
+# Build SBK with your new driver
 ./gradlew build
+
+# Extract the distribution
+tar -xvf ./build/distributions/sbk-*.tar -C ./build/distributions/.
+
+# Test your driver
+./build/distributions/sbk-*/bin/sbk -class YourStorageName -help
 ```
 
-untar the SBK  to local folder
+#### 🎯 Implementation Patterns by Storage Type
 
-```
-tar -xvf ./build/distributions/sbk-5.0.tar -C ./build/distributions/.
-```
+**For Databases (SQL/NoSQL):**
+- Use connection pools in `openStorage()`
+- Implement batch writes in `writeAsync()` for better performance
+- Handle connection failures gracefully
 
-6. To invoke the benchmarking of the driver you have to issue the parameters "-class < your driver name>"
-   Example: For pulsar driver
+**For Message Queues:**
+- Create producers/consumers in writer/reader constructors
+- Use async APIs to avoid blocking
+- Handle acknowledgments properly
 
-```
-<SBK directory>./build/distributions/sbk-5.0/bin/sbk -class pulsar -help
+**For File Systems:**
+- Use buffered I/O for better performance
+- Implement proper file handle management
+- Consider memory-mapped files for high throughput
 
-usage: sbk -class pulsar -out SystemLogger
-Storage Benchmark Kit
+**For Cloud Storage:**
+- Handle network timeouts and retries
+- Use multipart uploads for large files
+- Implement proper authentication
 
- -ackQuorum <arg>       AckQuorum default: 1
- -admin <arg>           Admin URI, required to create the partitioned
-                        topic, default: null
- -broker <arg>          Broker URI, default: tcp://localhost:6650
- -cluster <arg>         Cluster name (optional parameter)
- -deduplication <arg>   Enable or Disable Deduplication; default: false
- -ensembleSize <arg>    EnsembleSize default: 1
- -help                  Help message
- -maxlatency <arg>      Maximum latency;
-                        use '-time' for time unit; default:180000 ms
- -millisecsleep <arg>   Idle sleep in milliseconds; default: 0 ms
- -minlatency <arg>      Minimum latency;
-                        use '-time' for time unit; default:0 ms
- -partitions <arg>      Number of partitions of the topic, default: 1
- -readers <arg>         Number of readers
- -records <arg>         Number of records(events) if 'seconds' not
-                        specified;
-                        otherwise, Maximum records per second by
-                        writer(s); and/or
-                        Number of records per second by reader(s)
- -ro <arg>              Readonly Benchmarking,
-                        Applicable only if both writers and readers are
-                        set; default: false
- -rq <arg>              Benchmark Reade Requests; default: false
- -rsec <arg>            Number of seconds/step for readers, default: 0
- -rstep <arg>           Number of readers/step, default: 1
- -seconds <arg>         Number of seconds to run
-                        if not specified, runs forever
- -size <arg>            Size of each message (event or record)
- -sync <arg>            Each Writer calls flush/sync after writing <arg>
-                        number of of events(records); and/or
-                        <arg> number of events(records) per Write or Read
-                        Transaction
- -threads <arg>         io threads per Topic, default: 1
- -throughput <arg>      If > 0, throughput in MB/s
-                        If 0, writes/reads 'records'
-                        If -1, get the maximum throughput (default: -1)
- -time <arg>            Latency Time Unit [ms:MILLISECONDS,
-                        mcs:MICROSECONDS, ns:NANOSECONDS]; default: ms
- -topic <arg>           Topic name, default : test
- -wq <arg>              Benchmark Write Requests; default: false
- -writeQuorum <arg>     WriteQuorum default: 1
- -writers <arg>         Number of writers
- -wsec <arg>            Number of seconds/step for writers, default: 0
- -wstep <arg>           Number of writers/step, default: 1
+#### 📋 Complete Implementation Checklist
 
-Please report issues at https://github.com/kmgowda/SBK
+- [ ] Run `./gradlew addDriver -Pdriver="your-name"`
+- [ ] Add dependencies in `build.gradle`
+- [ ] Implement 7 methods in main storage class
+- [ ] Implement writer class methods
+- [ ] Implement reader class methods
+- [ ] Add error handling and validation
+- [ ] Test with `./gradlew build`
+- [ ] Verify driver appears in help output
+- [ ] Run basic benchmark tests
 
+#### 🔧 Advanced Features
+
+**Custom Data Types:**
+If you need to work with data other than `byte[]`, override `getDataType()`:
+```java
+public DataType<String> getDataType() {
+    return new String();  // For text data
+}
 ```
 
-### Add your driver to SBK Manually
+**Configuration Management:**
+Use the generated `Config` class to handle complex configurations:
+```java
+// In your main class
+private YourStorageNameConfig config;
+
+// Load configuration in addArgs()
+config = mapper.readValue(
+    Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("YourStorageName.properties")),
+    YourStorageNameConfig.class);
+```
+
+**Async vs Sync Operations:**
+- Use `writeAsync()` for non-blocking operations
+- Implement `sync()` for explicit flush operations
+- SBK automatically handles timing and latency measurement
+
+**Async Reader Class** (`YourStorageNameReader.java`):
+```java
+public class YourStorageNameReader extends AsyncReader<byte[]> {
+    
+    // Read data synchronously (required)
+    public CompletableFuture<T> readAsync(int size) throws IOException {
+        // Read data from your storage system
+        // SBK automatically measures read latency
+    }
+    
+    // Close reader (required)
+    public void close() throws IOException {
+        // Cleanup reader resources
+    }
+}
+```
+
+#### 🐛 Common Pitfalls to Avoid
+
+1. **Blocking Operations**: Never block in `writeAsync()` or `readAsync()`
+2. **Resource Leaks**: Always implement proper cleanup in `close()` methods
+3. **Thread Safety**: Each writer/reader instance is used by a single thread
+4. **Error Handling**: Wrap storage-specific exceptions in `IOException`
+5. **Configuration**: Validate all parameters in `parseArgs()` before using
+
+#### 📚 Example Drivers for Reference
+
+- **Simple File System**: `drivers/file`
+- **Database (PostgreSQL)**: `drivers/postgresql`
+- **Message Queue (Kafka)**: `drivers/kafka`
+- **Cloud Storage (S3)**: `drivers/minio`
+
+Review these examples to understand best practices for your storage type.
+
+### 📖 Manual Driver Setup (Alternative Method)
+
 1. Create the gradle subproject preferable with the name **driver-<your driver(storage device) name>**.
 
     * See the Example:[[Pulsar driver](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar)]   
@@ -702,9 +913,11 @@ Please report issues at https://github.com/kmgowda/SBK
 2. Create the package **io.sbk.< your driver name>** 
 
     * See the Example: [[Pulsar driver package](https://github.com/kmgowda/sbk/tree/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar)]   
-    
 
-3. In your driver package you have to implement the Interface: [[Storage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html)]
+3. Add the java library of the driver via MavenCentral or Github packages in the dependencies of the driver build.
+   gradle file. [Add packages](drivers/sbk-template/build.gradle)
+
+4. In your driver package you have to implement the Interface: [[Storage](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Storage.html)]
 
     * See the Example:  [[Pulsar class](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/Pulsar.java)]
     
@@ -730,7 +943,7 @@ Please report issues at https://github.com/kmgowda/SBK
         * If your Benchmark,  Reader and Writer classes operates on different data type such as String or custom data type, then you have to override this default implementation.
 
     
-4. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html)]
+5. Implement the Writer Interface: [[Writer](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html)]
 
     * See the Example: [[Pulsar Writer](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/src/main/java/io/sbk/driver/Pulsar/PulsarWriter.java)]
     
@@ -745,7 +958,7 @@ Please report issues at https://github.com/kmgowda/SBK
       d). In case , if you want to have your own recordWrite implementation to write data and record the start and end time, then you can override: [[recordWrite](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Writer.html#recordWrite(io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.Status,io.perl.SendChannel,int))]
 
 
-5. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html)]
+6. Implement the Reader Interface: [[Reader](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html)]
 
     * you have to implement the following methods of Reader class:
         
@@ -760,19 +973,24 @@ Please report issues at https://github.com/kmgowda/SBK
       ii). Close the Reader: [[close](https://kmgowda.github.io/SBK/sbk-api/javadoc/io/sbk/api/Reader.html#close()) ] 
 
 
-6.  Add the Gradle dependency [ compile project(":sbk-api")] to your sub-project (driver)
+7. Add the Gradle dependency [ compile project(":sbk-api")] to your sub-project (driver)
 
     * see the Example:[[Pulsar Gradle Build](https://github.com/kmgowda/sbk/blob/master/drivers/pulsar/build.gradle)]
 
 
-7. Add your subproject to the main gradle as dependency.
+8. Add your subproject to the main gradle as dependency.
 
     * see the Example: [[SBK Gradle](build-drivers.gradle)]
     
     * make sure that gradle settings file: [[SBK Gradle Settings](settings-drivers.gradle)] has your Storage driver subproject name
 
+9. make sure that you driver is added in [build-drivers.gradle](build-drivers.gradle) and [settings-drivers.gradle]
+(settings-driver.gradle) files
 
-8. That's all ; Now, Build the SBK included your driver with the command:
+10.   make sure that your packages are allowed for compilation by adding an entry in the file checkstyle
+   [import-control](checkstyle/import-control.xml) file
+
+11.   That's all ; Now, Build the SBK included your driver with the command:
 
 ```
 ./gradlew build
@@ -785,6 +1003,9 @@ tar -xvf ./build/distributions/sbk.tar -C ./build/distributions/.
 ```
 
 9.  To invoke the benchmarking of the driver you have to issue the parameters "-class < your driver name>"
+
+> 💡 **Recommendation**: Use the automated template system (`./gradlew addDriver`) for faster, error-free setup.
+
 
 
 ## Use SBK git hub packages
@@ -977,20 +1198,18 @@ refer [SBK Charts](https://github.com/kmgowda/sbk-charts) for further details.
 4. The SBK uses the SBP: Storage Benchmark Protocol and SBM: Storage Benchmark Monitor for distributed performance benchmarking, refer [SBP](docs/sbp.pdf)
 
 
-## SBK and PerL
-The core of the SBK is PerL (Performance Logger), see the details [here](./perl)                            
-                            
-## SBK Discussions
-___
+## 🤝 Join Our Community
 
-<p align="center">
-   Join SBK Slack Channel
-</p>
+### 📞 **Get Connected**
+- **GitHub Issues**: [Report bugs or request features](https://github.com/kmgowda/SBK/issues)
+- **Pull Requests**: [Contribute code](https://github.com/kmgowda/SBK/pulls)
+- **Discussions**: [Ask questions and share ideas](https://github.com/kmgowda/SBK/discussions)
 
-<p align="center">
-    <a href="https://sbkcrew.slack.com/?from=SBK">
-        <img src="images/slack-logo.png" alt="SBK-Slack" width="50" height="50">
-    </a>
-</p>
+### 📈 **Impact Metrics**
+- **50+ Storage Drivers**: From databases to message queues
+- **Used by Major Companies**: Production deployments worldwide
+- **Regular Releases**: Continuous improvements and features
 
-___
+---
+
+*SBK: Where Performance Meets Precision* ⚡

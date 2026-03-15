@@ -10,9 +10,9 @@
 package io.sbk.driver.Couchbase;
 
 import com.couchbase.client.java.manager.bucket.BucketType;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.couchbase.client.core.error.BucketNotFoundException;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.manager.bucket.BucketManager;
@@ -43,8 +43,7 @@ public class Couchbase implements Storage<String> {
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             config = mapper.readValue(
                     Objects.requireNonNull(Couchbase.class.getClassLoader().getResourceAsStream(CONFIGFILE)),

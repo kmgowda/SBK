@@ -22,14 +22,14 @@ import java.util.concurrent.TimeoutException;
 /**
  * Class SbkGemMain.
  */
-final public class SbkGemMain {
+public abstract class SbkGemMain {
 
     /**
      * This method is the main method of Sbk-Gem module.
      *
      * @param args String[]
      */
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         try {
             SbkGem.run(args, null, null, null);
         } catch (UnrecognizedOptionException ex) {

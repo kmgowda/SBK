@@ -168,18 +168,18 @@ final public class Sbk {
 
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.Sbk.class.getClassLoader().getResourceAsStream(BANNERFILE)));
         Printer.log.info(Config.DESC);
-        Printer.log.info(Config.NAME.toUpperCase() + " Version: " + version);
-        Printer.log.info(Config.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
-        Printer.log.info("Arguments List: " + Arrays.toString(args));
-        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
-        Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
-        Printer.log.info("Storage Drivers Package: " + sbkStoragePackageName);
-        Printer.log.info("Logger Package: " + sbkLoggerPackageName);
-        Printer.log.info(Config.SBK_APP_NAME + ": " + Objects.requireNonNullElse(sbkApplicationName, ""));
-        Printer.log.info(Config.SBK_APP_HOME + ": " + Objects.requireNonNullElse(sbkAppHome, ""));
-        Printer.log.info(Config.SBK_CLASS_NAME + ": " + Objects.requireNonNullElse(sbkClassName, ""));
-        Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': " + argsClassName);
-        Printer.log.info("'" + Config.LOGGER_OPTION_ARG + "': " + argsLoggerName);
+        Printer.log.info("{} Version: {}", Config.NAME.toUpperCase(), version);
+        Printer.log.info("{} Website: " + Config.SBK_WEBSITE_NAME, Config.NAME.toUpperCase());
+        Printer.log.info("Arguments List: {}", Arrays.toString(args));
+        Printer.log.info("Java Runtime Version: {}", System.getProperty("java.runtime.version"));
+        Printer.log.info("SBP Version Major: {}, Minor: {}", sbpVersion.major, sbpVersion.minor);
+        Printer.log.info("Storage Drivers Package: {}", sbkStoragePackageName);
+        Printer.log.info("Logger Package: {}", sbkLoggerPackageName);
+        Printer.log.info(Config.SBK_APP_NAME + ": {}", Objects.requireNonNullElse(sbkApplicationName, ""));
+        Printer.log.info(Config.SBK_APP_HOME + ": {}", Objects.requireNonNullElse(sbkAppHome, ""));
+        Printer.log.info(Config.SBK_CLASS_NAME + ": {}", Objects.requireNonNullElse(sbkClassName, ""));
+        Printer.log.info("'" + Config.CLASS_OPTION_ARG + "': {}", argsClassName);
+        Printer.log.info("'" + Config.LOGGER_OPTION_ARG + "': {}", argsLoggerName);
         packageStore.printClasses("Storage");
         loggerStore.printClasses("Logger");
 
@@ -241,8 +241,7 @@ final public class Sbk {
             }
         }
 
-        Printer.log.info("Arguments to Driver '" + storageDevice.getClass().getSimpleName() + "' : " +
-                Arrays.toString(nextArgs));
+        Printer.log.info("Arguments to Driver '{}' : {}", storageDevice.getClass().getSimpleName(), Arrays.toString(nextArgs));
 
         params = new SbkParameters(usageLine);
         rwLogger.addArgs(params);
@@ -266,6 +265,9 @@ final public class Sbk {
             System.out.println("\n" + ex.getHelpText());
             throw ex;
         }
+
+        Printer.log.info("Action : {}", params.getAction().toString());
+        Printer.log.info("Threads Type: {}", params.getThreadType().toString());
 
         final DataType<Object> dType = (DataType<Object>) storageDevice.getDataType();
         if (dType == null) {

@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(":sbk-api")
+
+    // ChromaDB Java client
+    implementation 'io.github.amikos-tech:chromadb-java-client:0.1.7'
+    
+    // HTTP client for ChromaDB REST API (already included in chromadb-java-client)
+    // implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    
+    // JSON processing (already included in chromadb-java-client)
+    // implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    // implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+}

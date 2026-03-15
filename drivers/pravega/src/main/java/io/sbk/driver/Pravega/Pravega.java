@@ -10,9 +10,9 @@
 
 package io.sbk.driver.Pravega;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.control.impl.ControllerImpl;
@@ -45,8 +45,7 @@ public class Pravega implements Storage<byte[]> {
 
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             config = mapper.readValue(Objects.requireNonNull(Pravega.class.getClassLoader().getResourceAsStream(CONFIGFILE)),
                     PravegaConfig.class);

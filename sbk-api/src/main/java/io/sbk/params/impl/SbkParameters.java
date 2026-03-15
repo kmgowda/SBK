@@ -14,6 +14,7 @@ import io.sbk.action.Action;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
+import io.sbk.thread.ThreadType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -77,6 +78,9 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     private Action action;
 
     @Getter
+    private ThreadType threadType;
+
+    @Getter
     private int idleSleepMilliSeconds;
 
 
@@ -126,6 +130,8 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                            Readonly Benchmarking,
                            Applicable only if both writers and readers are set; default: false""");
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: 0 ms");
+        addOption("thread", true,
+                "Thread Type [p: platform, f: fork-join, v:virtual], default: p");
     }
 
     /**
@@ -216,6 +222,13 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         } else if (writersCount > 0) {
             action = Action.Writing;
         }
+
+        String threadString = getOptionValue("thread", "p");
+        threadType = switch (threadString.toLowerCase()) {
+            case "f" -> ThreadType.ForkJoin;
+            case "v" -> ThreadType.Virtual;
+            default -> ThreadType.Platform;
+        };
 
     }
 }

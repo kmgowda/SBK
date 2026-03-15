@@ -1,7 +1,7 @@
 version: '3'
 services:
   prometheus:
-    image: prom/prometheus:v3.7.3
+    image: prom/prometheus:v3.10.0
     hostname: prometheus
     volumes:
       - ./prometheus:/etc/prometheus

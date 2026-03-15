@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/yahoo/HaloDB")
+        credentials {
+            username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME") ?: "sbk-public"
+            password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN") ?: "\u0067hp_FBqmGRV6KLTcFjwnDTvozvlhs3VNja4F67B5"
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    api project(":sbk-api")
+
+    // Source: GitHub Packages - https://github.com/yahoo/HaloDB/packages/811580
+    api "com.oath.halodb:halodb:0.5.6"
+}

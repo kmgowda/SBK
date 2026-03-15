@@ -11,6 +11,7 @@ io.sbk.main
 io.sbk.params
 io.sbk.params.impl
 io.sbk.system
+io.sbk.thread
 io.sbk.utils
 io.sbp.api
 io.sbp.config

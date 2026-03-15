@@ -13,13 +13,15 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConfirmListener;
+
+import java.time.Instant;
+import java.util.Date;
 import com.rabbitmq.client.Connection;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Writer;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -109,7 +111,7 @@ public class RabbitMQWriter implements Writer<byte[]> {
     }
 
     public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
-        BasicProperties.Builder builder = DEFAULT_PROPS.builder().timestamp(new Date());
+        BasicProperties.Builder builder = DEFAULT_PROPS.builder().timestamp(Date.from(Instant.now()));
         if (isPersist) {
             builder.deliveryMode(2);
         }

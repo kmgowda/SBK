@@ -11,10 +11,10 @@
 package io.perl.test;
 
 import io.perl.api.impl.ElasticWait;
-import org.junit.Test;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -28,7 +28,7 @@ public class ElasticWaitTest {
     @Test
     public void testInitialization() {
         ElasticWait wait = new ElasticWait(1000, 1000, 100);
-        assertNotNull("ElasticWait should be initialized", wait);
+        assertNotNull(wait, "ElasticWait should be initialized");
     }
 
     /**
@@ -39,7 +39,7 @@ public class ElasticWaitTest {
         ElasticWait wait = new ElasticWait(1000, 1000, 100);
         wait.waitAndCheck(); // increment idleCount
         wait.reset();
-        assertFalse("After reset, waitAndCheck should return false", wait.waitAndCheck());
+        assertFalse(wait.waitAndCheck(), "After reset, waitAndCheck should return false");
     }
 
     /**
@@ -48,13 +48,13 @@ public class ElasticWaitTest {
     @Test
     public void testWaitAndCheck() {
         ElasticWait wait = new ElasticWait(1000, 1000, 1);
-        assertFalse("Initial waitAndCheck should return false", wait.waitAndCheck());
+        assertFalse(wait.waitAndCheck(), "Initial waitAndCheck should return false");
 
         // Force multiple waits to exceed elasticCount
         for (int i = 0; i < 1000; i++) {
             wait.waitAndCheck();
         }
-        assertTrue("After multiple waits, should return true", wait.waitAndCheck());
+        assertTrue(wait.waitAndCheck(), "After multiple waits, should return true");
     }
 
     /**
@@ -70,7 +70,7 @@ public class ElasticWaitTest {
             triggered = wait.waitAndCheck();
         }
         wait.waitAndCheck();
-        assertTrue("UpdateElastic should adjust the wait threshold", triggered);
+        assertTrue(triggered, "UpdateElastic should adjust the wait threshold");
     }
 
     /**
@@ -87,7 +87,7 @@ public class ElasticWaitTest {
         }
 
         wait.setElastic(500); // Set elastic with half the interval
-        assertFalse("Initial check after setElastic should be false", wait.waitAndCheck());
+        assertFalse(wait.waitAndCheck(), "Initial check after setElastic should be false");
     }
 
     /**
@@ -99,6 +99,6 @@ public class ElasticWaitTest {
         wait.updateElastic(999); // Try to update with almost full window interval
 
         // Should not trigger immediately due to minimum interval
-        assertFalse("Should respect minimum interval", wait.waitAndCheck());
+        assertFalse(wait.waitAndCheck(), "Should respect minimum interval");
     }
 }

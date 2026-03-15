@@ -58,8 +58,7 @@ public non-sealed interface RWLogger extends Logger, CountRW, WriteRequestsLogge
 
     /**
      * Print the "Total" roll-up, typically at the end of a benchmark run.
-     * Parameters mirror {@link RWPrint#print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, double, long, double, double, long, long, long, long, long, long, long[], long[])}.
-     *
+     * Parameters mirror {@link RWPrint#print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])} 
      * @param writers                         number of active writers
      * @param maxWriters                      maximum writers seen
      * @param readers                         number of active readers

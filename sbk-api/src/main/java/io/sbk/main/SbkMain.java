@@ -22,9 +22,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * Main class of SBK.
  */
-public final class SbkMain {
+public abstract class SbkMain {
 
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         try {
             Sbk.run(args, null, null, null);
         } catch (UnrecognizedOptionException ex) {

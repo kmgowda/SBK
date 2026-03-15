@@ -22,14 +22,14 @@ import java.util.concurrent.TimeoutException;
 /**
  * Class SbkGemYalMain.
  */
-public final class SbkGemYalMain {
+public abstract class SbkGemYalMain {
 
     /**
      * The main Method of sbk-gem-yal module.
      *
      * @param args String[]
      */
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
         try {
             SbkGemYal.run(args, null, null, null);
         } catch (HelpException ex) {

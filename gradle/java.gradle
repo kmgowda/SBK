@@ -14,9 +14,20 @@ plugins.withId('java') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
+    // Validate Java version
+    def currentJavaVersion = JavaVersion.current()
+    def expectedJavaVersion = JavaVersion.VERSION_25
+    
+    if (currentJavaVersion != expectedJavaVersion) {
+        throw new GradleException(
+            "Java version mismatch! Expected: ${expectedJavaVersion}, but found: ${currentJavaVersion}. " +
+            "Please install Java ${expectedJavaVersion.majorVersion} and set JAVA_HOME appropriately."
+        )
+    }
+
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = expectedJavaVersion
+        targetCompatibility = expectedJavaVersion
     }
 
 
@@ -85,12 +96,20 @@ plugins.withId('java') {
         maxParallelForks = System.properties['maxParallelForks'] ? System.properties['maxParallelForks'].toInteger() : 1
         minHeapSize = "128m"
         maxHeapSize = "512m"
+        
+        // Use JUnit 5 platform for test discovery and execution
+        useJUnitPlatform()
     }
 
     dependencies {
         // The production code uses the SLF4J logging API at api time
         api "org.slf4j:slf4j-api:$slf4jVersion"
-        api "junit:junit:$junitVersion"
+        api "org.junit.jupiter:junit-jupiter-api:$junitVersion"
         api "org.mockito:mockito-core:${mockitoVersion}"
+        
+        // JUnit 5 test engine and runtime for test discovery and execution
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+        testImplementation "org.junit.platform:junit-platform-launcher"
     }
 }

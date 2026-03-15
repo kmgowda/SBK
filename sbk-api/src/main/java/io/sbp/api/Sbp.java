@@ -10,9 +10,9 @@
 
 package io.sbp.api;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbp.config.SbpVersion;
 
 import java.io.IOException;
@@ -21,8 +21,7 @@ public class Sbp {
     final private static String VERSION_FILE = "sbp-version.properties";
 
     public static SbpVersion getVersion() throws IOException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         return mapper.readValue(Sbp.class.getClassLoader().getResourceAsStream(VERSION_FILE),
                 SbpVersion.class);
     }

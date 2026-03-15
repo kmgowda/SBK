@@ -9,9 +9,8 @@
  */
 package io.perl.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.time.Time;
 
 import java.io.IOException;
@@ -124,8 +123,7 @@ final public class PerlConfig extends LatencyConfig {
      * @throws IOException  If it occurs.
      */
     public static PerlConfig build(InputStream in) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         return mapper.readValue(Objects.requireNonNull(in), PerlConfig.class);
     }
 

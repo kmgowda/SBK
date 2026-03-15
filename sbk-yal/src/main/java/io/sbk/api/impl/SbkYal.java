@@ -10,9 +10,9 @@
 
 package io.sbk.api.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
@@ -88,8 +88,7 @@ public final class SbkYal {
         Printer.log.info("Arguments List: " + Arrays.toString(args));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
 
         yalConfig = mapper.readValue(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                 YalConfig.class);

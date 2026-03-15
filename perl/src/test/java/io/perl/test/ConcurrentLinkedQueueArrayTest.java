@@ -9,12 +9,12 @@
  */
 package io.perl.test;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.perl.api.impl.ConcurrentLinkedQueueArray;
 
 /**
@@ -26,7 +26,7 @@ public class ConcurrentLinkedQueueArrayTest {
 
     private ConcurrentLinkedQueueArray<String> queueArray;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         queueArray = new ConcurrentLinkedQueueArray<>(3);
     }
