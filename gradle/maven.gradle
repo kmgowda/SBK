@@ -22,7 +22,7 @@ plugins.withId('maven-publish') {
 
     /*
       Use command : ./gradlew publish  -Pmaven -Pgithub
-      -Pmaven - parameter to publish in maven central
+      -Pmaven - parameter to publish in maven central   #### This is not working since November 2025
       -Pgithub - parameter to publish to Git hub
      */
     publishing {
@@ -178,7 +178,8 @@ $ ./gradlew clean
 3) Stage all artifacts to a local directory
 $ ./gradlew publish
 
-4) Deploy and release    // This dopes full release
+4) Deploy and release    // This make full release   , since  stage = "UPLOAD" , this command will fail
+   you should login to sontype : https://central.sonatype.com/publishing/deployments and make the release manually
 $ ./gradlew jreleaserFullRelease
 
 or
