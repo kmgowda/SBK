@@ -497,7 +497,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     }
 
     @Override
-    public final void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+    public final void print(long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                             long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
                             long[] percentileLatencyCounts) {
@@ -535,32 +535,25 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                 req.writeTimeoutEvents, perf.writeTimeoutEventsPerSec, req.readTimeoutEvents, perf.readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
+                reportTime, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
-    @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders,
-                      long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-                      double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                      long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
-                      long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                      long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
-                      long writeTimeoutEvents, double writeTimeoutEventsPerSec,
-                      long readTimeoutEvents, double readTimeoutEventsPerSec,
-                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                      double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                      long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
-                      long[] percentileLatencyCounts) {
-        try {
-            throw new IOException("The print method is not overridden/implemented\n");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+    public abstract void print(int writers, int maxWriters, int readers, int maxReaders,
+                                long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                                double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
+                                long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
+                                long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
+                                long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                                long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                                long readTimeoutEvents, double readTimeoutEventsPerSec,
+                                long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                                double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                                long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                                long[] percentileLatencyCounts);
 
     @Override
-    public final void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+    public final void printTotal(long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                                  double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                                  long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         final ReadWriteRequests req = getReadAndWriteRequests();
@@ -600,7 +593,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
                 writeReadPendingRecords, writeReadPendingBytes,
                 writeTimeoutEvents, perf.writeTimeoutEventsPerSec, readTimeoutEvents, perf.readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
+                reportTime, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
 
         readRequestRecords = readRequestBytes = writeRequestRecords = writeRequestBytes = 0;
@@ -608,22 +601,15 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         readResponsePendingRecords = readResponsePendingBytes = 0;
     }
 
-    @Override
-    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
-                           long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-                           double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
-                           long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
-                           long writeResponsePendingBytes, long readResponsePendingRecords,
-                           long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
-                           long writeTimeoutEvents, double writeTimeoutEventsPerSec,
-                           long readTimeoutEvents, double readTimeoutEventsPerSec,
-                           double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                           double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        try {
-            throw new IOException("The printTotal method is not overridden/implemented\n");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+    public abstract void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+                                 long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                                 double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
+                                 long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
+                                 long writeResponsePendingBytes, long readResponsePendingRecords,
+                                 long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                                 long writeTimeoutEvents, double writeTimeoutEventsPerSec,
+                                 long readTimeoutEvents, double readTimeoutEventsPerSec,
+                                 long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                                 double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                                 long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 }

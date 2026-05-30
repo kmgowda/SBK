@@ -36,6 +36,7 @@ public interface RWPrint {
      * @param writeTimeoutEventsPerSec          Timeout Write Events/sec
      * @param readTimeoutEvents                 Timeout Read Events
      * @param readTimeoutEventsPerSec           Timeout Write Events/sec
+     * @param reportTime                        absolute timestamp of the report (in milliseconds since epoch)
      * @param seconds                           reporting duration in seconds
      * @param bytes                             number of bytes read/write
      * @param records                           data to write.
@@ -60,7 +61,7 @@ public interface RWPrint {
                long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                long readTimeoutEvents, double readTimeoutEventsPerSec,
-               double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+               long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 }

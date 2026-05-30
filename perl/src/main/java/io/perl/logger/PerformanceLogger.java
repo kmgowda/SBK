@@ -52,6 +52,7 @@ public interface PerformanceLogger extends Print, ReportLatency {
      * interval-level metrics. Implementations must interpret latency-related
      * parameters in the time unit returned by {@link #getTimeUnit()}.
      *
+     * @param reportTime                    Absolute timestamp of the report (in milliseconds since epoch)
      * @param seconds                       Reporting duration in seconds
      * @param bytes                         Number of bytes read/write
      * @param records                       Number of records processed in the interval
@@ -68,9 +69,10 @@ public interface PerformanceLogger extends Print, ReportLatency {
      * @param percentileLatencies           Array holding latency values for configured percentiles
      * @param percentileLatencyCounts       Parallel array of counts for each percentile bucket (may be null)
      */
-    void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                    long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
-                    long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
+    void printTotal(long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                    double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                    long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                    long[] percentileLatencyCounts);
 
     /**
      * Default no-op implementation to record per-event latency. Implementations

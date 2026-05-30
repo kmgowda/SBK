@@ -203,10 +203,13 @@ public abstract class ResultsLogger implements PerformanceLogger {
     }
 
     @Override
-    public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+    public void print(long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
                       long[] percentileLatencies, long[] percentileLatencyCounts) {
         final StringBuilder out = new StringBuilder(prefix);
+        java.time.Instant instant = java.time.Instant.ofEpochMilli(reportTime);
+        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+        out.append(" Date: ").append(zdt.toLocalDate()).append(" Time: ").append(zdt.toLocalTime());
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
                 percentileLatencies);
@@ -214,11 +217,14 @@ public abstract class ResultsLogger implements PerformanceLogger {
     }
 
     @Override
-    public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+    public void printTotal(long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
                            long[] percentileLatencyCounts) {
         final StringBuilder out = new StringBuilder("Total : "+ prefix);
+        java.time.Instant instant = java.time.Instant.ofEpochMilli(reportTime);
+        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+        out.append(" Date: ").append(zdt.toLocalDate()).append(" Time: ").append(zdt.toLocalTime());
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
                 avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2,
                 percentileLatencies);

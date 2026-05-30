@@ -77,7 +77,7 @@ public class Sl4jLogger extends SystemLogger {
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                       long readTimeoutEvents, double readTimeoutEventsPerSec,
-                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                      long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder(getPrefix());
@@ -133,6 +133,7 @@ public class Sl4jLogger extends SystemLogger {
      * @param percentileLatencies            percentile latency values
      * @param percentileLatencyCounts        percentile latency counts
      */
+    @Override
     public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
@@ -141,7 +142,7 @@ public class Sl4jLogger extends SystemLogger {
                            long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                            long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                            long readTimeoutEvents, double readTimeoutEventsPerSec,
-                           double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder("Total " + getPrefix());

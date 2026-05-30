@@ -109,7 +109,7 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
         final double mbPerSec = elapsedSec > 0 ? (this.totalBytes / (Bytes.BYTES_PER_MB * 1.0)) / elapsedSec : 0;
         final double avgLatency = totalLatencyRecords > 0 ? this.totalLatency / (double) totalLatencyRecords : 0;
         final long minLatency = this.minLatency == Long.MAX_VALUE ? 0 : this.minLatency;
-        logger.print(elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
+        logger.print(endTime, elapsedSec, this.totalBytes, this.totalRecords, recsPerSec, mbPerSec,
                 avgLatency, minLatency, this.maxLatency, this.invalidLatencyRecords,
                 this.lowerLatencyDiscardRecords, this.higherLatencyDiscardRecords,
                 slc[0], slc[1], this.percentiles.latencies, this.percentiles.latenciesCount);

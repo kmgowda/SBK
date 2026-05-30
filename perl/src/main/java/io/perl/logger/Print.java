@@ -80,6 +80,7 @@ public interface Print {
      * corresponds to the latency value at index <code>i</code> in
      * <code>percentileLatencies</code>.
      *
+     * @param reportTime                Absolute timestamp of the report (in milliseconds since epoch)
      * @param seconds                   Reporting duration in seconds
      * @param bytes                     Number of bytes read/write in the interval
      * @param records                   Number of records processed in the interval
@@ -96,7 +97,7 @@ public interface Print {
      * @param percentileLatencies       Array of percentile latency values (parallel to percentileLatencyCounts)
      * @param percentileLatencyCounts   Array of counts for each percentile bucket; may be null
      */
-    void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-               long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+    void print(long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 }

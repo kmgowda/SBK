@@ -79,11 +79,14 @@ public class SystemLogger extends AbstractRWLogger {
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                       long readTimeoutEvents, double readTimeoutEventsPerSec,
-                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                      long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
                       long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder(getPrefix());
+        java.time.Instant instant = java.time.Instant.ofEpochMilli(reportTime);
+        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+        out.append(" Date: ").append(zdt.toLocalDate()).append(" Time: ").append(zdt.toLocalTime());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
@@ -120,6 +123,7 @@ public class SystemLogger extends AbstractRWLogger {
      * @param writeTimeoutEventsPerSec       write timeout events per second
      * @param readTimeoutEvents              read timeout events count
      * @param readTimeoutEventsPerSec        read timeout events per second
+     * @param reportTime                     absolute timestamp of the report (in milliseconds since epoch)
      * @param seconds                        reporting seconds
      * @param bytes                          total bytes processed
      * @param records                        total records processed
@@ -144,10 +148,13 @@ public class SystemLogger extends AbstractRWLogger {
                            long readResponsePendingBytes, long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                            long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                            long readTimeoutEvents, double readTimeoutEventsPerSec,
-                           double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                           long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder("Total " + getPrefix());
+        java.time.Instant instant = java.time.Instant.ofEpochMilli(reportTime);
+        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+        out.append(" Date: ").append(zdt.toLocalDate()).append(" Time: ").append(zdt.toLocalTime());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestsMbPerSec, readRequestRecords, readRequestRecordsPerSec,

@@ -163,7 +163,7 @@ public sealed class PrintMetrics extends Metrics implements Print permits Promet
     }
 
     @Override
-    final public void print(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+    final public void print(long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                             double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                             long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         this.bytes.increment(bytes);

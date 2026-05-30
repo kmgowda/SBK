@@ -142,6 +142,7 @@ public class PrometheusLogger extends CSVLogger {
      * @param writeTimeoutEventsPerSec      write timeout events per second
      * @param readTimeoutEvents             read timeout events count
      * @param readTimeoutEventsPerSec       read timeout events per second
+     * @param reportTime                    absolute timestamp of the report (in milliseconds since epoch)
      * @param seconds                       reporting interval seconds
      * @param bytes                         total bytes processed in interval
      * @param records                       total records processed in interval
@@ -166,7 +167,7 @@ public class PrometheusLogger extends CSVLogger {
                               long writeReadPendingRecords, long writeReadPendingBytes,
                               long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                               long readTimeoutEvents, double readTimeoutEventsPerSec,
-                              double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                              long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                               long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
@@ -174,14 +175,14 @@ public class PrometheusLogger extends CSVLogger {
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                reportTime, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
                 writesRequests, writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests,
                 readRequestsPerSec, writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
                 readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                reportTime, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
@@ -194,7 +195,7 @@ public class PrometheusLogger extends CSVLogger {
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                       long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                       long readTimeoutEvents, double readTimeoutEventsPerSec,
-                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                      long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         printer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
@@ -203,7 +204,7 @@ public class PrometheusLogger extends CSVLogger {
                 readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
                 writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
+                reportTime, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
                 lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 }

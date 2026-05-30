@@ -25,12 +25,15 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, long writeTimeoutEvents,
                       double writeTimeoutEventsPerSec, long readTimeoutEvents, double readTimeoutEventsPerSec,
-                      double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
+                      long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                       long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder(SBM_PREFIX);
         appendConnections(out, connections, maxConnections);
         out.append(getPrefix());
+        java.time.Instant instant = java.time.Instant.ofEpochMilli(reportTime);
+        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+        out.append(" Date: ").append(zdt.toLocalDate()).append(" Time: ").append(zdt.toLocalTime());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestsRecordsPerSec,
@@ -52,13 +55,16 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                            long readResponsePendingRecords, long readResponsePendingBytes,
                            long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                            long writeTimeoutEvents, double writeTimeoutEventsPerSec, long readTimeoutEvents,
-                           double readTimeoutEventsPerSec, double seconds, long bytes, long records,
+                           double readTimeoutEventsPerSec, long reportTime, double seconds, long bytes, long records,
                            double recsPerSec, double mbPerSec, double avgLatency, long minLatency,
                            long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         StringBuilder out = new StringBuilder("Total : " + SBM_PREFIX);
         appendConnections(out, connections, maxConnections);
         out.append(getPrefix());
+        java.time.Instant instant = java.time.Instant.ofEpochMilli(reportTime);
+        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+        out.append(" Date: ").append(zdt.toLocalDate()).append(" Time: ").append(zdt.toLocalTime());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,

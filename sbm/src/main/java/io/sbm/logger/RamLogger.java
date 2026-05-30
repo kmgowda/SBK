@@ -30,7 +30,7 @@ public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnecti
                long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                long readTimeoutEvents, double readTimeoutEventsPerSec,
-               double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+               long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 
@@ -42,7 +42,7 @@ public interface RamLogger extends Logger, ReportLatencies, SetRW, CountConnecti
                     long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                     long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                     long readTimeoutEvents, double readTimeoutEventsPerSec,
-                    double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                    long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                     double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                     long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 }

@@ -81,6 +81,7 @@ public non-sealed interface RWLogger extends Logger, CountRW, WriteRequestsLogge
      * @param writeTimeoutEventsPerSec        write timeout events per second
      * @param readTimeoutEvents               read timeout events count
      * @param readTimeoutEventsPerSec         read timeout events per second
+     * @param reportTime                      absolute timestamp of the report (in milliseconds since epoch)
      * @param seconds                         total time in seconds
      * @param bytes                           total bytes processed
      * @param records                         total records processed
@@ -105,7 +106,7 @@ public non-sealed interface RWLogger extends Logger, CountRW, WriteRequestsLogge
                     long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                     long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                     long readTimeoutEvents, double readTimeoutEventsPerSec,
-                    double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                    long reportTime, double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                     double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                     long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 }
