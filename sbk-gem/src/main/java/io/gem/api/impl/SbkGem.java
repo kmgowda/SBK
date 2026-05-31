@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -376,12 +377,8 @@ final public class SbkGem {
         ramArgsList.add(className);
         ramArgsList.add("-action");
         ramArgsList.add(actionString);
-        ramArgsList.add("-time");
-        ramArgsList.add(time.getTimeUnit().name());
-        ramArgsList.add("-minlatency");
-        ramArgsList.add(String.valueOf(logger.getMinLatency()));
-        ramArgsList.add("-maxlatency");
-        ramArgsList.add(String.valueOf(logger.getMaxLatency()));
+        /* Add the parsed args such as time, min and max latency and CSV file */
+        Collections.addAll(ramArgsList, logger.getParsedArgs());
         ramArgsList.add("-port");
         ramArgsList.add(String.valueOf(params.getSbmPort()));
         ramArgsList.add("-wq");
