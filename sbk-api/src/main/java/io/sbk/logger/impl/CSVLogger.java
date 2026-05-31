@@ -131,7 +131,7 @@ public class CSVLogger extends SystemLogger {
         super.open(params, storageName, action, time);
         if (csvEnable) {
             openCSV();
-            Printer.log.info("SBK CSV Logger Started");
+            Printer.log.info("SBK CSV Logger Started; CSV file: "+csvFile);
         }
     }
 
@@ -312,7 +312,7 @@ public class CSVLogger extends SystemLogger {
         super.close(params);
         if (csvEnable) {
             csvWriter.close();
-            Printer.log.info("SBK CSV Logger Shutdown");
+            Printer.log.info("SBK CSV Logger Shutdown; Results flushed to file: "+csvFile);
         }
     }
 }

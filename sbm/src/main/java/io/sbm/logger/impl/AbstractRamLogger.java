@@ -220,6 +220,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         }
+
         print(reportTime, connections.get(), maxConnections.get(), writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,

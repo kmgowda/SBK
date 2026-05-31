@@ -41,7 +41,6 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(out);
-
     }
 
     @Override
