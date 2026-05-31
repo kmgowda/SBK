@@ -11,7 +11,8 @@
 package io.sbk.logger.impl;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 
@@ -31,6 +32,10 @@ public class SystemLogger extends AbstractRWLogger {
     public SystemLogger() {
         super();
         dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    }
+
+    protected String getTimeStamp(long reportTime) {
+        return Instant.ofEpochMilli(reportTime).atZone(ZoneId.systemDefault()).format(dateTimeFormatter);
     }
 
     /**
@@ -151,7 +156,7 @@ public class SystemLogger extends AbstractRWLogger {
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
                       long[] percentileLatencyCounts) {
-        String timestamp = LocalDateTime.ofEpochSecond(reportTime / 1000, 0, null).format(dateTimeFormatter);
+        String timestamp = getTimeStamp(reportTime);
         StringBuilder out = new StringBuilder(timestamp + ", " + getPrefix());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
@@ -280,7 +285,7 @@ public class SystemLogger extends AbstractRWLogger {
                            double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        String timestamp = LocalDateTime.ofEpochSecond(reportTime / 1000, 0, null).format(dateTimeFormatter);
+        String timestamp = getTimeStamp(reportTime);
         StringBuilder out = new StringBuilder(timestamp + ", Total " + getPrefix());
         appendResultString(out, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,

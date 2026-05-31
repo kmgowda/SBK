@@ -187,7 +187,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
     }
 
     @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders,
+    public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
@@ -220,7 +220,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         }
-        print(connections.get(), maxConnections.get(), writers, maxWriters, readers, maxReaders,
+        print(reportTime, connections.get(), maxConnections.get(), writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
@@ -230,9 +230,8 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
-    @Override
-    public abstract void print(int connections, int maxConnections, int writers, int maxWriters, int readers,
-                               int maxReaders, long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+    public abstract void print(long reportTime, int connections, int maxConnections, int writers, int maxWriters,
+                               int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                                double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                                long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
                                long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
@@ -243,7 +242,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                                long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 
     @Override
-    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+    public void printTotal(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                            long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
@@ -267,7 +266,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         }
 
-        printTotal(connections.get(), maxConnections.get(), writers, maxWriters, readers, maxReaders,
+        printTotal(reportTime, connections.get(), maxConnections.get(), writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
@@ -277,9 +276,7 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
-
-    @Override
-    public abstract void printTotal(int connections, int maxConnections, int writers, int maxWriters,
+    public abstract void printTotal(long reportTime, int connections, int maxConnections, int writers, int maxWriters,
                                     int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec,
                                     long writeRequestRecords, double writeRequestRecordsPerSec, long readRequestBytes,
                                     double readRequestMbPerSec, long readRequestRecords, double readRequestRecordsPerSec,
