@@ -210,12 +210,12 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         }
         if (isCsvEnable()) {
-            writeToCSV(SBM_PREFIX, REGULAR_PRINT, connections.get(), maxConnections.get(),
-                    writers, maxWriters, readers, maxReaders,
-                    writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
-                    readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
-                    writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                    readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+            writeToCSV(SBM_PREFIX, REGULAR_PRINT, reportTime, connections.get(), maxConnections.get(),
+                    writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                    writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
+                    readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords,
+                    writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
+                    writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                     writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
                     seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                     invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
@@ -231,14 +231,16 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
     }
 
     public abstract void print(long reportTime, int connections, int maxConnections, int writers, int maxWriters,
-                               int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-                               double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
-                               long readRequestRecords, double readRequestsRecordsPerSec, long writeResponsePendingRecords,
-                               long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                               long writeReadRequestPendingRecords, long writeReadRequestPendingBytes, long writeTimeoutEvents,
-                               double writeTimeoutEventsPerSec, long readTimeoutEvents, double readTimeoutEventsPerSec,
-                               double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
-                               long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                               int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec,
+                               long writeRequestRecords, double writeRequestRecordsPerSec, long readRequestBytes,
+                               double readRequestMbPerSec, long readRequestRecords, double readRequestsRecordsPerSec,
+                               long writeResponsePendingRecords, long writeResponsePendingBytes,
+                               long readResponsePendingRecords, long readResponsePendingBytes,
+                               long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                               long writeTimeoutEvents, double writeTimeoutEventsPerSec, long readTimeoutEvents,
+                               double readTimeoutEventsPerSec, double seconds, long bytes, long records,
+                               double recsPerSec, double mbPerSec, double avgLatency, long minLatency,
+                               long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                                long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts);
 
     @Override
@@ -250,12 +252,12 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                            long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                            long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                            long readTimeoutEvents, double readTimeoutEventsPerSec,
-                           double seconds, long bytes,
-                           long records, double recsPerSec, double mbPerSec,
+                           double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
+                           long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                           long[] percentileLatencyCounts) {
         if (isCsvEnable()) {
-            writeToCSV(SBM_PREFIX, TOTAL_PRINT, connections.get(), maxConnections.get(),
+            writeToCSV(SBM_PREFIX, TOTAL_PRINT, reportTime, connections.get(), maxConnections.get(),
                     writers, maxWriters, readers, maxReaders,
                     writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                     readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
