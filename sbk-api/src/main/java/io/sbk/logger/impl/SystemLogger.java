@@ -75,7 +75,7 @@ public class SystemLogger extends AbstractRWLogger {
      * @param percentileLatencyCounts        percentile latency counts
      */
     @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders,
+    final public void print(int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
@@ -206,7 +206,7 @@ public class SystemLogger extends AbstractRWLogger {
      * @param percentileLatencyCounts        percentile latency counts
      */
     @Override
-    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+    final public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                            long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
