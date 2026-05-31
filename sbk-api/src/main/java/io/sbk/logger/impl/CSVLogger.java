@@ -101,7 +101,7 @@ public class CSVLogger extends SystemLogger {
      * @throws IOException If an exception occurred.
      */
     final public void openCSV() throws IOException {
-        final StringBuilder headerBuilder = new StringBuilder("ID,Header,Type,Connections,MaxConnections");
+        final StringBuilder headerBuilder = new StringBuilder("ID,Date,Time,Header,Type,Connections,MaxConnections");
         headerBuilder.append(",Storage,Action,LatencyTimeUnit");
         headerBuilder.append(",Writers,Readers,MaxWriters,MaxReaders");
         headerBuilder.append(",WriteRequestMB,WriteRequestRecords,WriteRequestRecords/Sec,WriteRequestMB/Sec");
@@ -131,7 +131,7 @@ public class CSVLogger extends SystemLogger {
         super.open(params, storageName, action, time);
         if (csvEnable) {
             openCSV();
-            Printer.log.info("SBK CSV Logger Started");
+            Printer.log.info("SBK CSV Logger Started; CSV file: "+csvFile);
         }
     }
 
@@ -140,6 +140,7 @@ public class CSVLogger extends SystemLogger {
      *
      * @param header                         String
      * @param type                           String
+     * @param reportTime                     long
      * @param connections                    long
      * @param maxConnections                 long
      * @param writers                        number of active writers
@@ -180,7 +181,7 @@ public class CSVLogger extends SystemLogger {
      * @param percentileLatencies            Array of percentile latency values.
      * @param percentileLatencyCounts        Array of percentile latency counts
      */
-    final public void writeToCSV(String header, String type, long connections, long maxConnections,
+    final public void writeToCSV(String header, String type, long reportTime, long connections, long maxConnections,
                                  int writers, int maxWriters, int readers, int maxReaders,
                                  long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                                  double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
@@ -195,8 +196,12 @@ public class CSVLogger extends SystemLogger {
                                  double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                                  long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
         final double mBytes = (bytes * 1.0) / Bytes.BYTES_PER_MB;
+        String timestamp = getTimeStamp(reportTime);
+        String[] dateTimeParts = timestamp.split(" ");
+        String date = dateTimeParts[0];
+        String time = dateTimeParts[1];
         StringBuilder data = new StringBuilder(
-                String.format("%16d,%s,%s,%s,%s"
+                String.format("%16d,%s,%s,%s,%s,%s,%s"
                                 + ",%s,%s,%s"
                                 + ",%5d,%5d,%5d,%5d"
                                 + ",%11.1f,%16d,%11.1f,%8.2f"
@@ -208,7 +213,7 @@ public class CSVLogger extends SystemLogger {
                                 + ",%13d,%8.2f"
                                 + ",%8d,%11.1f,%16d,%11.1f,%8.2f,%8.1f,%7d,%7d"
                                 + ",%8d,%8d,%8d,%2d,%2d",
-                        ++csvRowCounter, header, type, connections, maxConnections,
+                        ++csvRowCounter, date, time, header, type, connections, maxConnections,
                         getStorageName(), getAction().name(), getTimeUnit().toString(),
                         writers, readers, maxWriters, maxReaders,
                         (writeRequestBytes * 1.0) / Bytes.BYTES_PER_MB, writeRequestRecords, writeRequestRecordsPerSec,
@@ -234,7 +239,7 @@ public class CSVLogger extends SystemLogger {
 
 
     @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders,
+    public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
@@ -246,15 +251,16 @@ public class CSVLogger extends SystemLogger {
                       long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
-                writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
-                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
-                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
+        super.print(reportTime, writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
+                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
+                readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
+                writeReadRequestPendingBytes, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents,
+                readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies,
+                percentileLatencyCounts);
         if (csvEnable) {
-            writeToCSV(Config.NAME, REGULAR_PRINT, 0, 0,
+            writeToCSV( Config.NAME, REGULAR_PRINT, reportTime, 0, 0,
                     writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
                     writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
                     readRequestRecords, readRequestRecordsPerSec,   writeResponsePendingRecords,
@@ -267,7 +273,7 @@ public class CSVLogger extends SystemLogger {
     }
 
     @Override
-    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+    public void printTotal(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                            long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
@@ -280,16 +286,15 @@ public class CSVLogger extends SystemLogger {
                            long records, double recsPerSec, double mbPerSec,
                            double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                            long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        super.printTotal(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
-                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestsMbPerSec, readRequestRecords,
-                readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
+        super.printTotal(reportTime, writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestsMbPerSec,
+                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
                 readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
-                writeReadRequestPendingBytes,
-                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
+                writeReadRequestPendingBytes, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents,
+                readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
+                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         if (csvEnable) {
-            writeToCSV(Config.NAME, TOTAL_PRINT, 0, 0,
+            writeToCSV( Config.NAME, TOTAL_PRINT, reportTime,  0, 0,
                     writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
                     writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestsMbPerSec,
                     readRequestRecords, readRequestRecordsPerSec,   writeResponsePendingRecords,
@@ -307,7 +312,7 @@ public class CSVLogger extends SystemLogger {
         super.close(params);
         if (csvEnable) {
             csvWriter.close();
-            Printer.log.info("SBK CSV Logger Shutdown");
+            Printer.log.info("SBK CSV Logger Shutdown; Results flushed to file: "+csvFile);
         }
     }
 }

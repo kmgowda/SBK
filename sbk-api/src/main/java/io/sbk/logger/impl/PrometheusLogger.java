@@ -9,18 +9,15 @@
  */
 package io.sbk.logger.impl;
 
-
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
-import io.sbk.logger.RWPrint;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
 import io.time.Time;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -33,8 +30,6 @@ public class PrometheusLogger extends CSVLogger {
     private MetricsConfig metricsConfig;
     private boolean contextDisabled;
     private SbkPrometheusServer prometheusServer;
-    private RWPrint printer;
-
 
     public PrometheusLogger() {
         super();
@@ -95,12 +90,10 @@ public class PrometheusLogger extends CSVLogger {
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
         if (contextDisabled) {
-            printer = super::print;
             prometheusServer = null;
         } else {
             prometheusServer = getPrometheusRWMetricsServer();
             prometheusServer.start();
-            printer = this::printMetrics;
         }
         Printer.log.info("SBK PrometheusLogger Started");
     }
@@ -117,78 +110,10 @@ public class PrometheusLogger extends CSVLogger {
         Printer.log.info("SBK PrometheusLogger Shutdown");
     }
 
-    /**
-     * Print to both the base outputs and the Prometheus registry when metrics are enabled.
-     *
-     * @param writers                       number of active writers
-     * @param maxWriters                    maximum writers seen
-     * @param readers                       number of active readers
-     * @param maxReaders                    maximum readers seen
-     * @param writeRequestBytes             write request bytes in this interval
-     * @param writeRequestsMbPerSec         write request throughput in MB/sec
-     * @param writesRequests                write request count
-     * @param writeRequestsPerSec           write requests per second
-     * @param readRequestBytes              read request bytes in this interval
-     * @param readRequestsMBPerSec          read request throughput in MB/sec
-     * @param readRequests                  read request count
-     * @param readRequestsPerSec            read requests per second
-     * @param writeResponsePendingRecords   pending write response records
-     * @param writeResponsePendingBytes     pending write response bytes
-     * @param readResponsePendingRecords    pending read response records
-     * @param readResponsePendingBytes      pending read response bytes
-     * @param writeReadPendingRecords       write-read pending records delta
-     * @param writeReadPendingBytes         write-read pending bytes delta
-     * @param writeTimeoutEvents            write timeout events count
-     * @param writeTimeoutEventsPerSec      write timeout events per second
-     * @param readTimeoutEvents             read timeout events count
-     * @param readTimeoutEventsPerSec       read timeout events per second
-     * @param seconds                       reporting interval seconds
-     * @param bytes                         total bytes processed in interval
-     * @param records                       total records processed in interval
-     * @param recsPerSec                    records per second
-     * @param mbPerSec                      MB per second
-     * @param avgLatency                    average latency
-     * @param minLatency                    minimum latency
-     * @param maxLatency                    maximum latency
-     * @param invalid                       invalid/negative latency count
-     * @param lowerDiscard                  discarded below min latency
-     * @param higherDiscard                 discarded above max latency
-     * @param slc1                          sliding latency coverage 1
-     * @param slc2                          sliding latency coverage 2
-     * @param percentileLatencies           percentile latency values
-     * @param percentileLatencyCounts       percentile latency counts
-     */
-    private void printMetrics(int writers, int maxWriters, int readers, int maxReaders,
-                              long writeRequestBytes, double writeRequestsMbPerSec, long writesRequests,
-                              double writeRequestsPerSec, long readRequestBytes, double readRequestsMBPerSec,
-                              long readRequests, double readRequestsPerSec, long writeResponsePendingRecords,
-                              long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
-                              long writeReadPendingRecords, long writeReadPendingBytes,
-                              long writeTimeoutEvents, double writeTimeoutEventsPerSec,
-                              long readTimeoutEvents, double readTimeoutEventsPerSec,
-                              double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
-                              double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
-                              long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec, writesRequests,
-                writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests, readRequestsPerSec,
-                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
-                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
-        prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
-                writesRequests, writeRequestsPerSec, readRequestBytes, readRequestsMBPerSec, readRequests,
-                readRequestsPerSec, writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                readResponsePendingBytes, writeReadPendingRecords, writeReadPendingBytes,
-                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
-                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
-    }
-
     @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders,
-                      long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
-                      double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
+    public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
+                      long writeRequestBytes, double writeRequestsMbPerSec, long writeRequestRecords,
+                      double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                       long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
                       long writeResponsePendingBytes, long readResponsePendingRecords, long readResponsePendingBytes,
                       long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
@@ -197,13 +122,21 @@ public class PrometheusLogger extends CSVLogger {
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        printer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
-                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
-                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
-                readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
-                writeReadRequestPendingBytes,
+        super.print(reportTime, writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
+                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestsMbPerSec, readRequestRecords,
+                readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
                 writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
-                lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
+                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
+        if (prometheusServer != null) {
+            prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestsMbPerSec,
+                    writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestsMbPerSec, readRequestRecords,
+                    readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                    readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                    writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
+                    seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
+                    invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
+        }
     }
 }

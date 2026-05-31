@@ -364,7 +364,7 @@ public class GrpcLogger extends PrometheusLogger {
     }
 
     @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders,
+    public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
@@ -376,13 +376,14 @@ public class GrpcLogger extends PrometheusLogger {
                       double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
                       long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
                       long[] percentileLatencyCounts) {
-        super.print(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec, writeRequestRecords,
-                writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
-                writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
-                readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
-                writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
-                seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard,
-                higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
+        super.print(reportTime, writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
+                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
+                readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
+                writeReadRequestPendingBytes, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents,
+                readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
+                minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies,
+                percentileLatencyCounts);
         if (enable) {
             sendLatenciesRecord();
         }

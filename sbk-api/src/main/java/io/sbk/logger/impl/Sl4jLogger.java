@@ -30,6 +30,7 @@ public class Sl4jLogger extends SystemLogger {
     /**
      * Log the periodic results using SLF4J at info level.
      *
+     * @param reportTime                     local report time
      * @param writers                        number of active writers
      * @param maxWriters                     maximum writers seen
      * @param readers                        number of active readers
@@ -69,7 +70,7 @@ public class Sl4jLogger extends SystemLogger {
      * @param percentileLatencyCounts        percentile latency counts
      */
     @Override
-    public void print(int writers, int maxWriters, int readers, int maxReaders,
+    public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                       long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
@@ -95,6 +96,7 @@ public class Sl4jLogger extends SystemLogger {
     /**
      * Log the final accumulated totals using SLF4J at info level.
      *
+     * @param reportTime                     local report time
      * @param writers                        number of active writers
      * @param maxWriters                     maximum writers seen
      * @param readers                        number of active readers
@@ -133,7 +135,7 @@ public class Sl4jLogger extends SystemLogger {
      * @param percentileLatencies            percentile latency values
      * @param percentileLatencyCounts        percentile latency counts
      */
-    public void printTotal(int writers, int maxWriters, int readers, int maxReaders,
+    public void printTotal(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                            long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                            double writeRequestRecordsPerSec, long readRequestBytes, double readRequestsMbPerSec,
                            long readRequestRecords, double readRequestRecordsPerSec, long writeResponsePendingRecords,
