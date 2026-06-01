@@ -29,9 +29,26 @@ buildscript {
         //classpath group: 'ru.vyarus', name:'gradle-mkdocs-plugin', version: mkdocsPluginVersion
     }
 
-    println "Build JVM Version      : " + Jvm.current()
-    println "Build Gradle Version   : $gradle.gradleVersion"
-    println "Build SBK Version      : $sbkVersion"
+    // Determine JDK source and path
+    def jdkSource = "System Default"
+    def jdkPath = System.getProperty("java.home")
+
+    def sbkJavaHome = System.getenv("SBK_JAVA_HOME")
+    def javaHome = System.getenv("JAVA_HOME")
+
+    if (sbkJavaHome != null && !sbkJavaHome.isEmpty()) {
+        jdkSource = "SBK_JAVA_HOME"
+        jdkPath = sbkJavaHome
+    } else if (javaHome != null && !javaHome.isEmpty()) {
+        jdkSource = "JAVA_HOME"
+        jdkPath = javaHome
+    }
+
+    println "Build JVM Version  	: " + Jvm.current()
+    println "Build JDK Source    	: " + jdkSource
+    println "Build JDK Path      	: " + jdkPath
+    println "Build Gradle Version	: " + gradle.gradleVersion
+    println "Build SBK Version  	: " + sbkVersion
 }
 
 
