@@ -28,6 +28,50 @@ plugins.withId('application') {
         }
     }
 
+    // Configure start scripts to use appropriate Java
+    startScripts {
+        doLast {
+            def javaHome = System.getenv('SBK_JAVA_HOME') ?: System.getenv('JAVA_HOME')
+            if (javaHome) {
+                // For Unix scripts - replace the entire Java detection section
+                def javaDetectionLogic = """# Determine the Java command to use to start the JVM.
+JAVACMD="${javaHome}/bin/java"
+if [ ! -x "\$JAVACMD" ] ; then
+    die "ERROR: Java executable not found at \$JAVACMD"
+fi"""
+                // Find the start and end of the Java detection section
+                def startMarker = '# Determine the Java command to use to start the JVM.'
+                def sectionEndMarker = '# Increase the maximum file descriptors'
+                
+                def startIndex = unixScript.text.indexOf(startMarker)
+                def endIndex = unixScript.text.indexOf(sectionEndMarker, startIndex)
+                
+                if (startIndex != -1 && endIndex != -1) {
+                    unixScript.text = unixScript.text.substring(0, startIndex) + javaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
+                }
+                
+                // For Windows scripts
+                def windowsJavaLogic = """REM Determine the Java command to use to start the JVM.
+set "JAVACMD=${javaHome}\\\\bin\\\\java.exe"
+if not exist "%JAVACMD%" (
+    echo ERROR: Java executable not found at %JAVACMD%
+    exit /b 1
+)
+
+"""
+                def winStartMarker = 'REM Determine the Java command to use to start the JVM.'
+                def winSectionEndMarker = 'REM Increase the maximum file descriptors'
+                
+                def winStartIndex = windowsScript.text.indexOf(winStartMarker)
+                def winEndIndex = windowsScript.text.indexOf(winSectionEndMarker, winStartIndex)
+                
+                if (winStartIndex != -1 && winEndIndex != -1) {
+                    windowsScript.text = windowsScript.text.substring(0, winStartIndex) + windowsJavaLogic + windowsScript.text.substring(winEndIndex)
+                }
+            }
+        }
+    }
+
     application {
         applicationDistribution.from(pathingJar) {
             into "lib"
