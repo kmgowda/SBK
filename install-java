@@ -45,7 +45,8 @@ def download_install_java():
     print()
     if len(lt) > 0:
         print("Successfully Installed JDK " + JDK_VERSION + " in the path: " + lt[0])
-        print("Set JAVA_HOME environment variable to " + lt[0] + JAVA_HOME_DIR)
+        print("Set SBK_JAVA_HOME environment variable to " + lt[0] + JAVA_HOME_DIR)
+        print("Or set JAVA_HOME environment variable to " + lt[0] + JAVA_HOME_DIR)
     else:
         print("JDK " + JDK_VERSION + " installation failed!")
 
@@ -61,6 +62,33 @@ def get_java_version(text):
 
 
 def check_java_version():
+    # Check if SBK_JAVA_HOME is set and validate that Java version
+    sbk_java_home = os.environ.get('SBK_JAVA_HOME')
+    if sbk_java_home:
+        java_exe = os.path.join(sbk_java_home, 'bin', 'java')
+        if os.path.exists(java_exe):
+            process = subprocess.Popen([java_exe, '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                       universal_newlines=True)
+            stdout, stderr = process.communicate()
+            val1, val2 = get_java_version(stdout), get_java_version(stderr)
+            ret = val1 >= JDK_VERSION or val2 >= JDK_VERSION
+            if ret:
+                print("SBK_JAVA_HOME is set to: " + sbk_java_home)
+                print("stdout Java Major version: " + val1)
+                print("stderr Java Major version: " + val2)
+                return True
+            else:
+                print("SBK_JAVA_HOME is set to: " + sbk_java_home)
+                print("But Java version is not " + JDK_VERSION + " or higher")
+                print("stdout Java Major version: " + val1)
+                print("stderr Java Major version: " + val2)
+                return False
+        else:
+            print("SBK_JAVA_HOME is set to: " + sbk_java_home)
+            print("But java executable not found at: " + java_exe)
+            return False
+
+    # Fall back to checking system java
     process = subprocess.Popen(['java', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                universal_newlines=True)
     stdout, stderr = process.communicate()

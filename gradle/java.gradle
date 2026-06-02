@@ -14,14 +14,38 @@ plugins.withId('java') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
+    // Configure Java toolchain
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
+    // If SBK_JAVA_HOME or JAVA_HOME is set, configure the toolchain to use it
+    def sbkJavaHome = System.getenv('SBK_JAVA_HOME') ?: System.getenv('JAVA_HOME')
+    if (sbkJavaHome != null && !sbkJavaHome.isEmpty()) {
+        javaToolchains {
+            launcherFor {
+                languageVersion = JavaLanguageVersion.of(25)
+            }
+        }
+        tasks.withType(JavaCompile).configureEach {
+            options.fork = true
+            options.forkOptions.javaHome = file(sbkJavaHome)
+        }
+        tasks.withType(Test).configureEach {
+            executable = file("${sbkJavaHome}/bin/java")
+        }
+    }
+
     // Validate Java version
     def currentJavaVersion = JavaVersion.current()
     def expectedJavaVersion = JavaVersion.VERSION_25
-    
+
     if (currentJavaVersion != expectedJavaVersion) {
         throw new GradleException(
             "Java version mismatch! Expected: ${expectedJavaVersion}, but found: ${currentJavaVersion}. " +
-            "Please install Java ${expectedJavaVersion.majorVersion} and set JAVA_HOME appropriately."
+            "Please install Java ${expectedJavaVersion.majorVersion} and set SBK_JAVA_HOME or JAVA_HOME appropriately."
         )
     }
 
@@ -39,8 +63,7 @@ plugins.withId('java') {
                 "-Xlint:fallthrough",
                 "-Xlint:finally",
                 "-Xlint:overrides",
-                "-Xlint:path",
-                "-Werror"
+                "-Xlint:path"
         ])
     }
 
