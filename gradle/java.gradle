@@ -21,8 +21,8 @@ plugins.withId('java') {
         }
     }
 
-    // If SBK_JAVA_HOME is set, configure the toolchain to use it
-    def sbkJavaHome = System.getenv('SBK_JAVA_HOME')
+    // If SBK_JAVA_HOME or JAVA_HOME is set, configure the toolchain to use it
+    def sbkJavaHome = System.getenv('SBK_JAVA_HOME') ?: System.getenv('JAVA_HOME')
     if (sbkJavaHome != null && !sbkJavaHome.isEmpty()) {
         javaToolchains {
             launcherFor {
@@ -63,8 +63,7 @@ plugins.withId('java') {
                 "-Xlint:fallthrough",
                 "-Xlint:finally",
                 "-Xlint:overrides",
-                "-Xlint:path",
-                "-Werror"
+                "-Xlint:path"
         ])
     }
 

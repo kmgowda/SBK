@@ -31,43 +31,95 @@ plugins.withId('application') {
     // Configure start scripts to use appropriate Java
     startScripts {
         doLast {
-            def javaHome = System.getenv('SBK_JAVA_HOME') ?: System.getenv('JAVA_HOME')
-            if (javaHome) {
-                // For Unix scripts - replace the entire Java detection section
-                def javaDetectionLogic = """# Determine the Java command to use to start the JVM.
-JAVACMD="${javaHome}/bin/java"
-if [ ! -x "\$JAVACMD" ] ; then
-    die "ERROR: Java executable not found at \$JAVACMD"
-fi"""
-                // Find the start and end of the Java detection section
-                def startMarker = '# Determine the Java command to use to start the JVM.'
-                def sectionEndMarker = '# Increase the maximum file descriptors'
-                
-                def startIndex = unixScript.text.indexOf(startMarker)
-                def endIndex = unixScript.text.indexOf(sectionEndMarker, startIndex)
-                
-                if (startIndex != -1 && endIndex != -1) {
-                    unixScript.text = unixScript.text.substring(0, startIndex) + javaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
-                }
-                
-                // For Windows scripts
-                def windowsJavaLogic = """REM Determine the Java command to use to start the JVM.
-set "JAVACMD=${javaHome}\\\\bin\\\\java.exe"
-if not exist "%JAVACMD%" (
-    echo ERROR: Java executable not found at %JAVACMD%
-    exit /b 1
-)
+            // For Unix scripts - inject SBK_JAVA_HOME runtime check
+            def unixJavaDetectionLogic = '''# Determine the Java command to use to start the JVM.
+# Check SBK_JAVA_HOME first, then JAVA_HOME, then default java
+if [ -n "$SBK_JAVA_HOME" ] ; then
+    if [ -x "$SBK_JAVA_HOME/bin/java" ] ; then
+        JAVACMD="$SBK_JAVA_HOME/bin/java"
+    else
+        die "ERROR: SBK_JAVA_HOME is set to an invalid directory: $SBK_JAVA_HOME/bin/java does not exist."
+    fi
+elif [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/bin/java" ] ; then
+        JAVACMD="$JAVA_HOME/bin/java"
+    else
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME/bin/java does not exist."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: SBK_JAVA_HOME and JAVA_HOME are not set and no 'java' command could be found in your PATH."
+    fi
+fi'''
+            
+            def startMarker = '# Determine the Java command to use to start the JVM.'
+            def sectionEndMarker = '# Increase the maximum file descriptors'
+            
+            def startIndex = unixScript.text.indexOf(startMarker)
+            def endIndex = unixScript.text.indexOf(sectionEndMarker, startIndex)
+            
+            if (startIndex != -1 && endIndex != -1) {
+                unixScript.text = unixScript.text.substring(0, startIndex) + unixJavaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
+            }
+            
+            // For Windows scripts - inject SBK_JAVA_HOME runtime check
+            def windowsJavaLogic = '''@rem Find java.exe
+@rem Check SBK_JAVA_HOME first, then JAVA_HOME, then system java
+if defined SBK_JAVA_HOME goto findJavaFromSbkJavaHome
 
-"""
-                def winStartMarker = 'REM Determine the Java command to use to start the JVM.'
-                def winSectionEndMarker = 'REM Increase the maximum file descriptors'
-                
-                def winStartIndex = windowsScript.text.indexOf(winStartMarker)
-                def winEndIndex = windowsScript.text.indexOf(winSectionEndMarker, winStartIndex)
-                
-                if (winStartIndex != -1 && winEndIndex != -1) {
-                    windowsScript.text = windowsScript.text.substring(0, winStartIndex) + windowsJavaLogic + windowsScript.text.substring(winEndIndex)
-                }
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: SBK_JAVA_HOME and JAVA_HOME are not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the SBK_JAVA_HOME or JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromSbkJavaHome
+set SBK_JAVA_HOME=%SBK_JAVA_HOME:"=%
+set JAVA_EXE=%SBK_JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: SBK_JAVA_HOME is set to an invalid directory: %SBK_JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the SBK_JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+'''
+            def winStartMarker = '@rem Find java.exe'
+            def winEndMarker = ':execute'
+            
+            def winStartIndex = windowsScript.text.indexOf(winStartMarker)
+            def winEndIndex = windowsScript.text.indexOf(winEndMarker, winStartIndex)
+            
+            if (winStartIndex != -1 && winEndIndex != -1) {
+                windowsScript.text = windowsScript.text.substring(0, winStartIndex) + windowsJavaLogic + windowsScript.text.substring(winEndIndex)
             }
         }
     }
