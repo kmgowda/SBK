@@ -61,7 +61,7 @@ include 'drivers:linkedbq'
 include 'drivers:atomicq'
 include 'drivers:syncq'
 include 'drivers:elasticsearch'
-include 'drivers:halodb'
+// include 'drivers:halodb' // disabled: GitHub Packages quota exceeded
 include 'drivers:chromadb'
 include 'drivers:solr'
 /* include 'drivers:sbktemplate' */
