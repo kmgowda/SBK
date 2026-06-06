@@ -42,9 +42,10 @@ import java.util.concurrent.atomic.AtomicLongArray;
 /**
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
-public class GrpcLogger extends PrometheusLogger {
+public class GrpcLogger extends SystemLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
     private final static int LATENCY_MAP_BYTES = 16;
+    private final static String NO_HOST_STRING = "none";
 
     private SbmHostConfig sbmHostConfig;
     private boolean enable;
@@ -102,9 +103,9 @@ public class GrpcLogger extends PrometheusLogger {
             throw new IllegalArgumentException(ex);
         }
         maxLatencyBytes = sbmHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
-        sbmHostConfig.host = DISABLE_STRING;
+        sbmHostConfig.host = NO_HOST_STRING;
         params.addOption("sbm", true, "SBM host" +
-                "; '" + DISABLE_STRING + "' disables this option, default: " + sbmHostConfig.host);
+                "; '" + NO_HOST_STRING + "' disables this option, default: " + sbmHostConfig.host);
         params.addOption("sbmport", true, "SBM Port" +
                 "; default: " + sbmHostConfig.port);
         //params.addOption("blocking", true, "blocking calls to SBM; default: false");
@@ -117,7 +118,7 @@ public class GrpcLogger extends PrometheusLogger {
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
         sbmHostConfig.host = params.getOptionValue("sbm", sbmHostConfig.host);
-        enable = !sbmHostConfig.host.equalsIgnoreCase("no");
+        enable = !sbmHostConfig.host.equalsIgnoreCase(NO_HOST_STRING);
         if (!enable) {
             return;
         }
