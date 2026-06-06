@@ -9,5 +9,11 @@ repositories {
 
 dependencies {
     api project(":sbk-api")
-    api 'io.minio:minio:6.0.8'
+    // MinIO 8.5.17 (Jan 2025) is the last release before the SDK began sending
+    // AWS-SDK-v2-style `x-amz-sdk-checksum-algorithm` on every PutObject. Some
+    // older S3-compatible backends (Dell ObjectScale / ECS / ViPR, older Ceph
+    // RGW) reject that header with HTTP 400 "InvalidRequest". 8.5.17 keeps the
+    // modern builder API we use (PutObjectArgs, SetObjectTagsArgs, …) but
+    // omits the new mandatory checksum default.
+    api 'io.minio:minio:8.5.17'
 }

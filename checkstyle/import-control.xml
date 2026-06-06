@@ -61,6 +61,7 @@
     <allow pkg="io.nats" />
     <allow pkg="com.github.brainlag.nsq" />
     <allow pkg="io.minio" />
+    <allow pkg="okhttp3" />
     <allow pkg="org.xmlpull" />
     <allow pkg="com.apple" />
     <allow pkg="com.mongodb" />
