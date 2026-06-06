@@ -1199,6 +1199,7 @@ refer [SBK Charts](https://github.com/kmgowda/sbk-charts) for further details.
 2. The SBK uses the multiple concurrent queues for fast performance benchmarking, refer [Design of SBK](docs/sbk.pdf)
 3. The SBK implements SLC(Sliding Latency Coverage) factors to summarize the latency percentiles, refer [SLC](docs/sbk-slc.pdf)
 4. The SBK uses the SBP: Storage Benchmark Protocol and SBM: Storage Benchmark Monitor for distributed performance benchmarking, refer [SBP](docs/sbp.pdf)
+5. The SBK internal details, refer[SBK Internals](docs/sbk-internals.md)
 
 
 ## 🤝 Join Our Community
