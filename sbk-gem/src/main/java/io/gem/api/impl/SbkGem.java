@@ -362,7 +362,7 @@ final public class SbkGem {
         sbkArgsBuilder.append(" -maxlatency ").append(logger.getMaxLatency());
         sbkArgsBuilder.append(" -wq ").append(logger.getMaxWriterIDs() > 0);
         sbkArgsBuilder.append(" -rq ").append(logger.getMaxReaderIDs() > 0);
-        sbkArgsBuilder.append(" -context no");
+        //sbkArgsBuilder.append(" -context no");   // There is promethius port now
         sbkArgsBuilder.append(" -sbm ").append(params.getLocalHost());
         sbkArgsBuilder.append(" -sbmport ").append(params.getSbmPort());
 
