@@ -185,7 +185,6 @@ plugins.withId('maven-publish') {
                         checksums = true
                         sourceJar = true
                         javadocJar = true
-                        docsJar = true
                         applyMavenCentralRules = true
                     }
                 }
