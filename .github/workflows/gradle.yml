@@ -51,11 +51,30 @@ jobs:
       run: chmod +x gradlew
     - name: Build distribution
       run: ./gradlew installDist distZip distTar
+    - name: Create documentation archive
+      run: |
+        mkdir -p docs-archive
+        cp AGENTS.md docs-archive/
+        cp INSTRUCTIONS.md docs-archive/
+        cp README.md docs-archive/
+        cp .cursorrules docs-archive/
+        cp .aider.conf.yml docs-archive/
+        cp -r docs docs-archive/
+        cp -r .devin/skills docs-archive/
+        cd docs-archive
+        tar -czf ../sbk-agent-docs.tar.gz *
     - name: Upload release assets
       uses: softprops/action-gh-release@v1
       with:
         files: |
           build/distributions/*.zip
           build/distributions/*.tar
+          sbk-agent-docs.tar.gz
+          AGENTS.md
+          INSTRUCTIONS.md
+          docs/AGENT_RECIPES.md
+          docs/DRIVER_SPECIFICATION.md
+          docs/AGENT_TOOLKIT.md
+          docs/sbk-internals.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

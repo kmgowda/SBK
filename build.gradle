@@ -609,13 +609,25 @@ application {
         from("docs") {
             include "AGENT_RECIPES.md"
             include "DRIVER_SPECIFICATION.md"
+            include "AGENT_TOOLKIT.md"
             include "sbk-internals.md"
         }
     }
 
-    // Include AGENTS.md and README.md at the root of the distribution
+    // Include AGENTS.md, INSTRUCTIONS.md, and README.md at the root of the distribution
     applicationDistribution.from("AGENTS.md")
+    applicationDistribution.from("INSTRUCTIONS.md")
     applicationDistribution.from("README.md")
+
+    // Include agent-specific configurations in the distribution
+    applicationDistribution.into(".devin") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(".devin") {
+            include "skills/**/*"
+        }
+    }
+    applicationDistribution.from(".cursorrules")
+    applicationDistribution.from(".aider.conf.yml")
 }
 
 

@@ -20,6 +20,37 @@ plugins.withId('maven-publish') {
         withSourcesJar()
     }
 
+    // Create a documentation JAR containing agent documentation
+    tasks.register('docsJar', Jar) {
+        archiveBaseName = project.name
+        archiveClassifier = 'docs'
+        from('AGENTS.md') {
+            into 'docs'
+        }
+        from('INSTRUCTIONS.md') {
+            into 'docs'
+        }
+        from('README.md') {
+            into 'docs'
+        }
+        from('docs') {
+            include 'AGENT_RECIPES.md'
+            include 'DRIVER_SPECIFICATION.md'
+            include 'AGENT_TOOLKIT.md'
+            include 'sbk-internals.md'
+            into 'docs'
+        }
+        from('.devin/skills') {
+            into 'devin-skills'
+        }
+        from('.cursorrules') {
+            into 'agent-configs'
+        }
+        from('.aider.conf.yml') {
+            into 'agent-configs'
+        }
+    }
+
     /*
       Use command : ./gradlew publish  -Pmaven -Pgithub
       -Pmaven - parameter to publish in maven central   #### This is not working since November 2025
@@ -61,6 +92,7 @@ plugins.withId('maven-publish') {
         publications {
             mavenJava(MavenPublication) {
                 from(components.java)
+                artifact(tasks.docsJar)
 
                 pom {
                     groupId = group
@@ -120,13 +152,12 @@ plugins.withId('maven-publish') {
             variables = '/Users/kmg/.jreleaser/config.toml'
         }
 
-        /*
         release {
             github {
                 enabled = true
-                skipRelease = true
-                skipTag = true
-                // overwrite = true
+                skipRelease = false
+                skipTag = false
+                overwrite = true
             }
         }
 
@@ -134,7 +165,6 @@ plugins.withId('maven-publish') {
             active = 'ALWAYS'
             enabled = true
         }
-        */
 
         signing {
             active = 'ALWAYS'
@@ -154,6 +184,7 @@ plugins.withId('maven-publish') {
                         checksums = true
                         sourceJar = true
                         javadocJar = true
+                        docsJar = true
                         applyMavenCentralRules = true
                     }
                 }
