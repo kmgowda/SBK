@@ -75,6 +75,7 @@ jobs:
           docs/AGENT_RECIPES.md
           docs/DRIVER_SPECIFICATION.md
           docs/AGENT_TOOLKIT.md
+          docs/AGENT_DOCUMENTATION_DISTRIBUTION.md
           docs/sbk-internals.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
