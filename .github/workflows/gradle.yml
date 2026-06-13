@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up JDK 25
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v4
       with:
         java-version: 25
     - name: Grant execute permission for gradlew
@@ -29,7 +29,7 @@ jobs:
     - name: Build distribution
       run: ./gradlew installDist
     - name: Upload distribution artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: sbk-distribution
         path: build/install/sbk/
@@ -40,9 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'created'
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up JDK 25
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v4
       with:
         java-version: 25
     - name: Grant execute permission for gradlew
