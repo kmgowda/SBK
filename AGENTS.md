@@ -5,13 +5,19 @@ Licensed under the Apache License, Version 2.0.
 
 # AGENTS.md — AI Agent Guide for the SBK Repository
 
-> **Audience.** This file is the standard entry point for AI coding agents
-> (Devin, Claude Code, Cursor, GitHub Copilot, Continue, Aider, OpenAI
-> Codex, etc.) working in this repository. It tells the agent **what
-> SBK is, how to build and verify it, what conventions to follow, where
-> things live, and what the common gotchas are**.
+> **Universal entry point for all AI agents.** This file is the standard
+> entry point for AI coding agents (Devin, Claude Code, Cursor, GitHub
+> Copilot, Continue, Aider, OpenAI Codex, Windsurf, etc.) working in this
+> repository. It tells the agent **what SBK is, how to build and verify it,
+> what conventions to follow, where things live, and what the common
+> gotchas are**.
 >
-> Humans: see <ref_file file="/root/projects/SBK/README.md" /> for the
+> **Agent-specific configurations:**
+> - Devin: See `.devin/skills/` for executable skills
+> - Cursor: See `.cursorrules` for Cursor-specific rules
+> - Aider: See `.aider.conf.yml` for Aider configuration
+>
+> **Humans:** see <ref_file file="/root/projects/SBK/README.md" /> for the
 > end-user manual, and <ref_file file="/root/projects/SBK/docs/sbk-internals.md" />
 > for the internal design.
 

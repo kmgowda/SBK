@@ -1,0 +1,120 @@
+# Aider AI Configuration for SBK Repository
+
+# Aider configuration for the Storage Benchmark Kit (SBK) project
+# This file helps Aider understand project conventions and workflows
+
+# Model settings (adjust based on your API access)
+model: gpt-4
+# model: claude-3-opus-20240229
+
+# Input/output settings
+input-history-file: .aider.input.history
+chat-history-file: .aider.chat.history
+
+# File exclusions (don't let Aider modify these)
+exclude:
+  - build/
+  - .gradle/
+  - "*.class"
+  - "*.jar"
+  - "*.zip"
+  - "*.tar"
+  - ".git/"
+  - ".idea/"
+  - ".vscode/"
+  - node_modules/
+
+# Read-only files (Aider can read but not modify)
+read-only:
+  - gradlew
+  - gradlew.bat
+  - "*.gradle"
+  - "gradle.properties"
+
+# Auto-commits
+auto-commits: true
+commit-prompt: |
+  {commit_message}
+  
+  Generated with Aider AI assistance.
+  Co-Authored-By: Aider <aider@example.com>
+
+# SBK-specific instructions
+# These are prepended to each chat session
+system-prompt: |
+  You are working on the SBK (Storage Benchmark Kit) repository - a Java framework for benchmarking storage systems.
+
+  PROJECT CONTEXT:
+  - Language: Java (JDK 25 required)
+  - Build: Gradle (wrapper: ./gradlew)
+  - Structure: 6 core modules + ~55 storage drivers
+  - License: Apache 2.0
+
+  CRITICAL CONVENTIONS:
+  1. JDK 25 is REQUIRED - set SBK_JAVA_HOME or JAVA_HOME
+  2. New drivers MUST be added to BOTH settings-drivers.gradle AND build-drivers.gradle
+  3. Checkstyle is strict - single-statement if blocks need braces, all public methods need Javadoc
+  4. No synchronized blocks in driver hot paths (writeAsync/read methods)
+  5. Checkstyle/import-control.xml needs new top-level packages whitelisted
+
+  BUILD WORKFLOW:
+  - Verify: ./gradlew :module:check (fast) or ./gradlew check (full)
+  - Build distribution: ./gradlew installDist
+  - Clean rebuild if dependency changes: rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks
+
+  DRIVER DEVELOPMENT:
+  - Scaffold: drivers/sbktemplate/
+  - Files: <Name>.java, <Name>Writer.java, <Name>Reader.java, <Name>Config.java
+  - Properties: <name>.properties in src/main/resources/
+  - Package naming: io.sbk.driver.<Name> (PascalCase)
+  - README.md required with examples
+
+  COMMON GOTCHAS:
+  - Pathing JAR gets stale after dependency changes - clean rebuild needed
+  - halodb driver is disabled (GitHub Packages quota)
+  - MinIO SDK pinned to 8.5.17 (not 9.x) for backend compatibility
+  - Drivers must handle InterruptedIOException as clean shutdown
+
+  VERIFICATION CHECKLIST:
+  - ./gradlew check passes
+  - ./gradlew installDist succeeds
+  - No checkstyle violations
+  - Driver changes tested against real backend
+  - Documentation updated
+
+  DOCUMENTATION:
+  - AGENTS.md - Main AI agent guide (READ THIS FIRST)
+  - docs/AGENT_RECIPES.md - Step-by-step recipes
+  - docs/DRIVER_SPECIFICATION.md - Driver spec template
+  - docs/sbk-internals.md - Architecture documentation
+  - README.md - User manual
+
+  OUT OF SCOPE (requires user approval):
+  - git push, git tag, remote operations
+  - Modifying license headers or LICENSE file
+  - Changing SBK version
+  - Adding new top-level Gradle subprojects
+  - Re-enabling halodb
+  - Upgrading MinIO SDK from 8.5.17
+  - Force-pushing or rewriting history
+
+  Before making changes, read AGENTS.md and the relevant recipe in docs/AGENT_RECIPES.md.
+
+# Always read these files before each session
+always-read:
+  - AGENTS.md
+  - docs/AGENT_RECIPES.md
+
+# Suggest these commands for verification
+suggest-commands:
+  - "./gradlew check"
+  - "./gradlew installDist"
+  - "./gradlew :drivers:<name>:check"
+
+# Map file types to languages
+map-tokens:
+  java: java
+  gradle: groovy
+  md: markdown
+  yml: yaml
+  yaml: yaml
