@@ -11,6 +11,9 @@
 package io.gem.main;
 
 import io.gem.api.impl.SbkGem;
+import io.gem.config.GemConfig;
+import io.sbk.config.Config;
+import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
@@ -30,6 +33,11 @@ public abstract class SbkGemMain {
      * @param args String[]
      */
     static void main(final String[] args) {
+        if (SbkUtils.hasVersion(args)) {
+            final String version = io.gem.api.impl.SbkGem.class.getPackage().getImplementationVersion();
+            System.out.println(GemConfig.NAME.toUpperCase() + " Version: " + version);
+            System.exit(0);
+        }
         try {
             SbkGem.run(args, null, null, null);
         } catch (UnrecognizedOptionException ex) {

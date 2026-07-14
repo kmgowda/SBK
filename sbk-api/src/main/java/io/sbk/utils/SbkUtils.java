@@ -108,6 +108,10 @@ final public class SbkUtils {
             return hasArg(args, Config.HELP_OPTION_ARG);
     }
 
+    public static boolean hasVersion(String[] args) {
+            return hasArg(args, Config.VERSION_OPTION_ARG) || hasArg(args, Config.VERSION_OPTION_ARG_SHORT);
+    }
+
     public static String[] mapToArgs(Map<String, String> map, boolean addArgPrefix) {
         final List<String> lt = new ArrayList<>();
         map.forEach((k, v) -> {

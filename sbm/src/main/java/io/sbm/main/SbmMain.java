@@ -10,6 +10,8 @@
 
 package io.sbm.main;
 
+import io.sbk.config.Config;
+import io.sbk.utils.SbkUtils;
 import io.sbm.api.impl.Sbm;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -30,6 +32,11 @@ public abstract class SbmMain {
      * @param args String[]
      */
     static void main(final String[] args) {
+        if (SbkUtils.hasVersion(args)) {
+            final String version = io.sbm.api.impl.Sbm.class.getPackage().getImplementationVersion();
+            System.out.println(io.sbm.config.SbmConfig.NAME.toUpperCase() + " Version: " + version);
+            System.exit(0);
+        }
         try {
             Sbm.run(args, null, null);
         } catch (UnrecognizedOptionException ex) {

@@ -11,7 +11,9 @@
 package io.gem.main;
 
 import io.gem.api.impl.SbkGemYal;
+import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
+import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
@@ -30,6 +32,11 @@ public abstract class SbkGemYalMain {
      * @param args String[]
      */
     static void main(final String[] args) {
+        if (SbkUtils.hasVersion(args)) {
+            final String version = io.gem.api.impl.SbkGemYal.class.getPackage().getImplementationVersion();
+            System.out.println("SBK-GEM-YAL Version: " + version);
+            System.exit(0);
+        }
         try {
             SbkGemYal.run(args, null, null, null);
         } catch (HelpException ex) {
