@@ -12,7 +12,6 @@ package io.gem.main;
 
 import io.gem.api.impl.SbkGem;
 import io.gem.config.GemConfig;
-import io.sbk.config.Config;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;

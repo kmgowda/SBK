@@ -10,7 +10,6 @@
 
 package io.sbm.main;
 
-import io.sbk.config.Config;
 import io.sbk.utils.SbkUtils;
 import io.sbm.api.impl.Sbm;
 import org.apache.commons.cli.ParseException;

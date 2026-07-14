@@ -11,7 +11,6 @@
 package io.gem.main;
 
 import io.gem.api.impl.SbkGemYal;
-import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
