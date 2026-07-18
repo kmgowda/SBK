@@ -45,12 +45,23 @@ public final class SshUtils {
     public static ClientSession createSession(SshClient client, ConnectionConfig connConfig, long timeoutSeconds)
             throws IOException {
         // Connect to the server
-        final ConnectFuture cf = client.connect(connConfig.getUserName(), connConfig.getHost(), connConfig.getPort());
-        final ClientSession session = cf.verify().getSession();
+        final ClientSession session;
+        try {
+            final ConnectFuture cf = client.connect(connConfig.getUserName(), connConfig.getHost(),
+                    connConfig.getPort());
+            session = cf.verify().getSession();
+        } catch (IOException ex) {
+            throw new IOException("SSH connection failed: " + ex.getMessage(), ex);
+        }
 
-        if (StringUtils.isNotEmpty(connConfig.getPassword())) {
-            session.addPasswordIdentity(connConfig.getPassword());
+        try {
+            if (StringUtils.isNotEmpty(connConfig.getPassword())) {
+                session.addPasswordIdentity(connConfig.getPassword());
+            }
             session.auth().verify(TimeUnit.SECONDS.toMillis(timeoutSeconds));
+        } catch (IOException ex) {
+            session.close(true);
+            throw new IOException("SSH authentication failed: " + ex.getMessage(), ex);
         }
         return session;
     }

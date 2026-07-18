@@ -14,6 +14,7 @@ package io.gem.api.impl;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.gem.config.GemConfig;
+import io.gem.exception.SbkGemParameterException;
 import io.gem.api.GemBenchmark;
 import io.gem.api.GemLoggerPackage;
 import io.gem.api.RemoteResponse;
@@ -133,9 +134,10 @@ final public class SbkGem {
      * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                           logger will be used.
      * @return Benchmark Interface
-     * @throws HelpException  if '-help' option is supplied.
-     * @throws ParseException If an exception occurred while parsing command line arguments.
-     * @throws IOException    If an exception occurred due to write or read failures.
+     * @throws HelpException            if '-help' option is supplied.
+     * @throws SbkGemParameterException if invalid or insufficient benchmark parameters are supplied.
+     * @throws ParseException           If an exception occurred while parsing command line arguments.
+     * @throws IOException              If an exception occurred due to write or read failures.
      * @throws InstantiationException    if the exception occurred due to initiation failures.
      * @throws ClassNotFoundException    If the storage class driver is not found.
      * @throws InvocationTargetException if the exception occurs.
@@ -291,12 +293,11 @@ final public class SbkGem {
         }
 
         String[] processArgs = nextArgs;
-        int iteration = 1;
+        int i = 1;
 
         while (processArgs != null) {
-            Printer.log.info("SBK-GEM [" + iteration + "]: Arguments to process : "
-                    + Arrays.toString(processArgs));
-            iteration++;
+            Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " + Arrays.toString(processArgs));
+            i++;
             try {
                 params.parseArgs(processArgs);
                 logger.parseArgs(params);
@@ -304,31 +305,25 @@ final public class SbkGem {
                     storageDevice.parseArgs(params);
                 }
             } catch (UnrecognizedOptionException ex) {
-                final String unrecognizedOption = ex.getOption();
-                if (storageDevice != null || unrecognizedOption == null || unrecognizedOption.startsWith("--")) {
-                    Printer.log.error(ex.toString());
-                    params.printHelp();
-                    throw ex;
-                }
-
-                /*
-                 * The selected storage driver may only be installed on the remote nodes. In that case GEM cannot
-                 * register its driver-specific options locally. Remove each unknown option/value pair from the
-                 * parser's working copy, but keep nextArgs unchanged so those options are forwarded to remote SBK.
-                 */
+                final String optionName = Objects.requireNonNullElse(ex.getOption(), "").replaceFirst("^-+", "");
+                Printer.log.warn(ex.toString());
                 final String[] remainingArgs = SbkUtils.removeOptionArgsAndValues(processArgs,
-                        new String[]{unrecognizedOption});
+                        new String[]{ex.getOption(), Config.ARG_PREFIX + optionName,
+                                Config.ARG_PREFIX + Config.ARG_PREFIX + optionName});
                 if (Arrays.equals(processArgs, remainingArgs)) {
-                    Printer.log.error(ex.toString());
+                    Printer.log.error("SBK-GEM: Unable to segregate unrecognized option: " + ex.getOption());
                     params.printHelp();
                     throw ex;
                 }
-                Printer.log.info("SBK-GEM: Passing remote storage option through: " + unrecognizedOption);
                 processArgs = remainingArgs;
                 continue;
             } catch (HelpException ex) {
                 System.out.println("\n" + ex.getHelpText());
                 throw ex;
+            } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
+                params.printHelp();
+                throw new SbkGemParameterException(ex);
             }
             break;
         }

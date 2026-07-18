@@ -67,15 +67,32 @@ final public class SshSession {
     }
 
     @Synchronized
-    private void createSession(long timeoutSeconds) {
+    private void createSession(long timeoutSeconds) throws IOException {
         Printer.log.info("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' starting...");
         try {
             client.start();
             session = SshUtils.createSession(client, connection, timeoutSeconds);
-            Printer.log.info("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' Success.");
+            Printer.log.info("SBK-GEM: Authenticated ssh session to '" + connection.getUserName() + "@" +
+                    connection.getHost() + ":" + connection.getPort() + "' established successfully.");
         } catch (IOException e) {
-            Printer.log.error("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' time out!");
             session = null;
+            final String password = connection.getPassword();
+            final boolean authenticationFailure = e.getMessage() != null &&
+                    e.getMessage().startsWith("SSH authentication failed:");
+            final String failureHint;
+            if (authenticationFailure && (password == null || password.isEmpty())) {
+                failureHint = " No password was supplied; configure -gempass, SBK_GEM_SSH_PASSWD, " +
+                        "or SSH public-key authentication.";
+            } else if (authenticationFailure) {
+                failureHint = " Verify the configured SSH password or public-key authentication.";
+            } else {
+                failureHint = " Verify the remote host, SSH port, and network connectivity.";
+            }
+            final String error = "SBK-GEM: SSH connection or authentication failed for '" +
+                    connection.getUserName() + "@" + connection.getHost() + ":" + connection.getPort() + "': " +
+                    e.getMessage() + "." + failureHint;
+            Printer.log.error(error);
+            throw new IOException(error, e);
         }
     }
 
@@ -87,7 +104,13 @@ final public class SshSession {
      * @return CompletableFuture
      */
     public CompletableFuture<Void> createSessionAsync(long timeoutSeconds) {
-        return CompletableFuture.runAsync(() -> createSession(timeoutSeconds), executor);
+        return CompletableFuture.runAsync(() -> {
+            try {
+                createSession(timeoutSeconds);
+            } catch (IOException ex) {
+                throw new CompletionException(ex);
+            }
+        }, executor);
     }
 
     @Synchronized

@@ -139,6 +139,7 @@ final public class SbkGemYal {
         }
 
         final String[] mergeArgs = SbkUtils.mergeArgs(gemArgs, nextArgs);
+        Printer.log.info("SBK-GEM-YAL: Merged YAML and command-line arguments: " + Arrays.toString(mergeArgs));
         String[] sbkGemArgs = mergeArgs;
         if (isPrintOption) {
             sbkGemArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);

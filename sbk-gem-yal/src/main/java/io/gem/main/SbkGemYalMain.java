@@ -11,6 +11,7 @@
 package io.gem.main;
 
 import io.gem.api.impl.SbkGemYal;
+import io.gem.exception.SbkGemParameterException;
 import io.sbk.exception.HelpException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
@@ -43,6 +44,8 @@ public abstract class SbkGemYalMain {
             System.exit(0);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);
+        } catch (SbkGemParameterException ex) {
+            System.exit(1);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                  ExecutionException | ClassNotFoundException | InvocationTargetException | InstantiationException |
                  NoSuchMethodException | IllegalAccessException ex) {

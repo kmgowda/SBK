@@ -12,6 +12,7 @@ package io.gem.main;
 
 import io.gem.api.impl.SbkGem;
 import io.gem.config.GemConfig;
+import io.gem.exception.SbkGemParameterException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -41,6 +42,8 @@ public abstract class SbkGemMain {
             SbkGem.run(args, null, null, null);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);
+        } catch (SbkGemParameterException ex) {
+            System.exit(1);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                  ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
                  NoSuchMethodException | IllegalAccessException ex) {

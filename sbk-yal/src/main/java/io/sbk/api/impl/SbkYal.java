@@ -131,6 +131,7 @@ public final class SbkYal {
             throw new HelpException(ex.toString());
         }
         final String[] mergeArgs = SbkUtils.mergeArgs(yalArgs, nextArgs);
+        Printer.log.info("SBK-YAL: Merged YAML and command-line arguments: " + Arrays.toString(mergeArgs));
         String[] sbkArgs = mergeArgs;
         if (isPrintOption) {
             sbkArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);

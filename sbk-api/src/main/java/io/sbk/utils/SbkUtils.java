@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,7 +28,7 @@ final public class SbkUtils {
         if (args == null) {
             return new String[0];
         }
-        if (args.length < 2) {
+        if (args.length < 1) {
             return args;
         }
         final List<String> optsList =  Stream.of(opts).collect(Collectors.toList());
@@ -126,7 +126,7 @@ final public class SbkUtils {
     }
 
     public static Map<String, String> argsToMap(String[] args, boolean removeArgPrefix) {
-        final Map<String, String> map = new HashMap<>();
+        final Map<String, String> map = new LinkedHashMap<>();
         for (int i = 0; i < args.length; i += 2) {
             String name = args[i].strip();
             final String key = name.startsWith(Config.ARG_PREFIX) && removeArgPrefix ? args[i].substring(1) : name;
@@ -140,10 +140,29 @@ final public class SbkUtils {
     }
 
     public static String[] mergeArgs(String[] s1, String[] s2) {
-        final Map<String, String> kv1 = argsToMap(s1, false);
-        final Map<String, String> kv2 = argsToMap(s2, false);
-        kv1.putAll(kv2);
-        return mapToArgs(kv1, false);
+        final Map<String, String> merged = new LinkedHashMap<>();
+        mergeArgsInto(merged, s1);
+        mergeArgsInto(merged, s2);
+        return mapToArgs(merged, true);
+    }
+
+    private static void mergeArgsInto(Map<String, String> merged, String[] args) {
+        if (args == null) {
+            return;
+        }
+        for (int i = 0; i < args.length; i += 2) {
+            final String option = normalizeOptionName(args[i]);
+            final String value = i + 1 < args.length ? args[i + 1].strip() : "";
+            merged.put(option, value);
+        }
+    }
+
+    private static String normalizeOptionName(String option) {
+        String normalized = option.strip();
+        while (normalized.startsWith(Config.ARG_PREFIX)) {
+            normalized = normalized.substring(Config.ARG_PREFIX.length());
+        }
+        return normalized;
     }
 
 }
