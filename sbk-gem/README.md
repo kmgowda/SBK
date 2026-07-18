@@ -36,7 +36,7 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 
 ## Prerequisites
 
-- JDK 25 on the local GEM host and compatible Java on each remote host.
+- JDK 25 on the local GEM host. Remote hosts need either a compatible Java runtime or enough writable disk space and permission for `javacopy` provisioning.
 - SSH reachability and authentication for every target.
 - A writable remote installation/work directory.
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`.
@@ -62,7 +62,15 @@ Display the current connection, remote-installation, SBM, and benchmark options:
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
 
-By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged only when that command exists, succeeds, and reports the exact expected version. Missing executables, failed probes, and version mismatches cause SBK-GEM to replace the distribution on that node. Set `-copy true` to skip version checks and force a fresh copy to every node. Set `-delete false` when the reconciled installation should remain available for later runs.
+By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged only when that command exists, succeeds, and reports the exact expected version. Missing executables, failed probes, and version mismatches cause SBK-GEM to replace the distribution on that node. Set `-copy true` to skip version checks and force a fresh copy to every node. `-delete` defaults to `false`, preserving reconciled and pre-existing installations for later runs; use `-delete true` only when post-run cleanup is explicitly required.
+
+SBK-GEM also reconciles Java independently on every node:
+
+- `-javaversion <major>` selects the required Java major version; the default is `25`.
+- `-javacopy true|false` controls whether SBK-GEM may copy the JVM running SBK-GEM when the required remote Java is unavailable; the default is `true`.
+- `-javadir <home>` optionally identifies a remote Java home containing `bin/java`. When omitted, SBK-GEM discovers Java from the remote `PATH`. If a copy is necessary without `javadir`, it installs Java in a reusable `sbk-java-<major>` directory beside the GEM working directory.
+
+For each remote launch, GEM exports the selected node-specific `SBK_JAVA_HOME` and prepends `$SBK_JAVA_HOME/bin` to `PATH`. SBK’s generated launcher therefore uses the verified runtime. Automatic copying is rejected when the local JVM major version differs from `-javaversion`, because copying that JVM could not satisfy the request.
 
 Before a multi-host run:
 
@@ -79,7 +87,7 @@ Before a multi-host run:
 1. `SbkGemMain` delegates to `SbkGem`.
 2. GEM parses connection, remote-path, SBM, and forwarded SBK arguments.
 3. It constructs an embedded `SbmBenchmark`.
-4. `SbkGemBenchmark` establishes SSH sessions, checks Java, and reconciles the SBK version on every node.
+4. `SbkGemBenchmark` establishes SSH sessions, discovers or provisions Java, and reconciles the SBK version on every node.
 5. GEM appends `-out GrpcLogger`, the SBM callback host, and the SBM port to remote commands.
 6. Remote SBK processes run their selected driver against the storage system.
 7. Measurements return to embedded SBM and are reported as aggregate windows and totals.

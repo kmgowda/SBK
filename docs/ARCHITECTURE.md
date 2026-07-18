@@ -250,8 +250,8 @@ sequenceDiagram
 
     Operator->>GEM: start connections and SBK arguments
     GEM->>SBM: start embedded aggregator
-    GEM->>HostA: check version, conditionally copy, start SBK
-    GEM->>HostB: check version, conditionally copy, start SBK
+    GEM->>HostA: reconcile Java and SBK, export SBK_JAVA_HOME, start SBK
+    GEM->>HostB: reconcile Java and SBK, export SBK_JAVA_HOME, start SBK
     HostA->>Storage: driver operations
     HostB->>Storage: driver operations
     HostA->>SBM: GrpcLogger measurements
@@ -261,7 +261,7 @@ sequenceDiagram
 
 SBP messages and gRPC services are generated from protobuf definitions in `sbk-api/src/main/proto`. SBM receives client registrations and latency records through `SbmGrpcService`, queues them in `SbmLatencyBenchmark`, and merges them into periodic and total windows. The default gRPC port is 9717.
 
-SBK-GEM uses Apache MINA SSHD for connection, copy, and command execution. Before launch it checks the executable and exact SBK version on every host, copying only to missing or mismatched targets unless force-copy is enabled. It constructs remote SBK arguments with `GrpcLogger` pointing back to its embedded SBM instance.
+SBK-GEM uses Apache MINA SSHD for connection, copy, and command execution. Before launch it checks the requested Java major version and exact SBK version on every host. It can reuse Java from `PATH` or a configured Java home, or copy its local JVM when provisioning is enabled. Each launch exports the verified node-specific `SBK_JAVA_HOME`. SBK is copied only to missing or mismatched targets unless force-copy is enabled. GEM constructs remote SBK arguments with `GrpcLogger` pointing back to its embedded SBM instance.
 
 ## Configuration layers
 

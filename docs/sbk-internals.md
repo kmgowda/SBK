@@ -1691,8 +1691,16 @@ sequenceDiagram
         SSH->>N2: SSH connect + password auth
     end
 
-    GEM->>SSH: runCommandAsync("java -version") on each
-    Note over GEM: assert versions match local
+    GEM->>SSH: discover java from PATH on each node
+    alt requested Java is available
+        Note over GEM: remember node-specific SBK_JAVA_HOME
+    else Java is missing or mismatched
+        GEM->>SSH: probe javadir when configured
+        opt still unresolved and javacopy is true
+            Note over GEM: locate local JVM via java.home
+            GEM->>SSH: copy local JVM and verify its version
+        end
+    end
 
     alt -copy true (force mode)
         Note over GEM: skip SBK probes
@@ -1709,7 +1717,7 @@ sequenceDiagram
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
 
-    GEM->>SSH: runCommandAsync(sbkCommand) on each node
+    GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
     Note over SSH: remote command starts SBK with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
 
     par remote SBK runs in parallel
@@ -1737,6 +1745,16 @@ work is then deduplicated by `(host, remote directory)`, so repeated
 workload entries sharing one installation do not race to replace it.
 `-copy true` is deliberately stronger: it skips every version probe and
 replaces SBK on all unique remote targets.
+
+Java reconciliation is separate from SBK reconciliation. `javaversion`
+defines the required major release (25 by default). GEM first discovers
+`java` from each node's `PATH`; unresolved nodes are checked at `javadir`
+when one is supplied. With `javacopy=true`, GEM locates its own runtime
+through `System.getProperty("java.home")`, copies that complete directory,
+and verifies the copied `bin/java`. A local JVM with another major version
+is rejected rather than copied. The final SSH command exports each node's
+verified `SBK_JAVA_HOME` and prepends its `bin` directory to `PATH`, matching
+the lookup order in SBK's generated launcher scripts.
 
 ### 7.2 What SBK-GEM is and isn't
 

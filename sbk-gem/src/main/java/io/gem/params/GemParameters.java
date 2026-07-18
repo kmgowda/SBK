@@ -70,6 +70,27 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
     boolean isCopy();
 
     /**
+     * Check whether SBK-GEM may copy its Java runtime to remote nodes.
+     *
+     * @return true when Java copying is enabled
+     */
+    boolean isJavaCopy();
+
+    /**
+     * Get the required remote Java major version.
+     *
+     * @return Java major version
+     */
+    int getJavaVersion();
+
+    /**
+     * Get the optional remote Java home.
+     *
+     * @return remote Java home, or an empty value when automatic discovery is used
+     */
+    String getJavaDir();
+
+    /**
      * checks if parameters are deleted.
      *
      * @return true ro false.

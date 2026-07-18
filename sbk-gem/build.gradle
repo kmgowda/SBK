@@ -65,3 +65,11 @@ tasks.register('updateDocs') {
         }
     }
 }
+
+tasks.named('test') {
+    dependsOn tasks.named('jar')
+    inputs.file(tasks.named('jar').flatMap { it.archiveFile })
+    doFirst {
+        systemProperty 'io.sbk.test.jar', tasks.named('jar').get().archiveFile.get().asFile.absolutePath
+    }
+}
