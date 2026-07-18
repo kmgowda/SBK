@@ -62,7 +62,13 @@ Display the current connection, remote-installation, SBM, and benchmark options:
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
 
-By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged only when that command exists, succeeds, and reports the exact expected version. Missing executables, failed probes, and version mismatches cause SBK-GEM to replace the distribution on that node. Set `-copy true` to skip version checks and force a fresh copy to every node. `-delete` defaults to `false`, preserving reconciled and pre-existing installations for later runs; use `-delete true` only when post-run cleanup is explicitly required.
+By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged when that command exists, succeeds, and reports the exact expected version. The three deployment lifecycle options are independent:
+
+- `-copy true|false` permits SBK-GEM to copy SBK when it is missing or mismatched; the default is `true`. With `false`, a missing or mismatched installation is reported as an error.
+- `-delete true|false` controls whether an existing mismatched installation is removed before replacement; the default is `true`. A missing installation never needs pre-copy deletion.
+- `-deleteafter true|false` controls whether the remote deployment is removed after benchmarking; the default is `false`, allowing the verified installation to be reused.
+
+After any copy, SBK-GEM verifies the copied version. It then resolves and checks the exact absolute executable path independently on every node before starting SBM or launching a benchmark.
 
 SBK-GEM also reconciles Java independently on every node:
 

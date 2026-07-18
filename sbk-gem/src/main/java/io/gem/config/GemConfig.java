@@ -80,7 +80,7 @@ final public class GemConfig {
      */
     public String sbkcommand;
     /**
-     * Whether to force-copy SBK to remote nodes without checking their installed versions.
+     * Whether SBK-GEM may copy missing or mismatched SBK installations to remote nodes.
      */
     public boolean copy;
     /**
@@ -100,9 +100,13 @@ final public class GemConfig {
      */
     public String javadir;
     /**
-     * Whether to delete SBK from remote nodes after run.
+     * Whether to delete an existing mismatched SBK installation before copying.
      */
     public boolean delete;
+    /**
+     * Whether to delete the remote SBK deployment after the benchmark.
+     */
+    public boolean deleteafter;
 
 
     //override by props file

@@ -48,7 +48,9 @@ final class SbkGemJavaOptionsTest {
         assertTrue(config.javacopy);
         assertEquals(25, config.javaversion);
         assertTrue(config.javadir == null || config.javadir.isEmpty());
-        assertFalse(config.delete);
+        assertTrue(config.copy);
+        assertTrue(config.delete);
+        assertFalse(config.deleteafter);
     }
 
     @Test
@@ -87,6 +89,25 @@ final class SbkGemJavaOptionsTest {
         assertEquals("custom-bin/custom-sbk", parameters.getSbkCommand());
     }
 
+    @Test
+    void parsesSbkDeploymentLifecycleOverrides() throws Exception {
+        final Path binDirectory = temporaryDirectory.resolve("bin");
+        final Path command = binDirectory.resolve("sbk");
+        Files.createDirectories(binDirectory);
+        Files.createFile(command);
+        assertTrue(command.toFile().setExecutable(true));
+
+        final GemConfig config = defaultConfig(temporaryDirectory);
+        final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
+                9717, 10);
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
+                "-copy", "false", "-delete", "false", "-deleteafter", "true"});
+
+        assertFalse(parameters.isCopy());
+        assertFalse(parameters.isDelete());
+        assertTrue(parameters.isDeleteAfter());
+    }
+
     private static GemConfig defaultConfig(Path sbkDirectory) {
         final GemConfig config = new GemConfig();
         config.nodes = "localhost";
@@ -95,11 +116,12 @@ final class SbkGemJavaOptionsTest {
         config.gemport = 22;
         config.sbkdir = sbkDirectory.toString();
         config.sbkcommand = "bin/sbk";
-        config.copy = false;
+        config.copy = true;
         config.javacopy = true;
         config.javaversion = 25;
         config.javadir = "";
-        config.delete = false;
+        config.delete = true;
+        config.deleteafter = false;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";
         return config;

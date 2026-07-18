@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -60,6 +61,27 @@ final class RemoteJavaDeploymentTest {
 
         assertTrue(prefix.contains("export SBK_JAVA_HOME='/opt/SBK Java/jdk'\\''s'"));
         assertTrue(prefix.contains("export PATH=\"$SBK_JAVA_HOME/bin:$PATH\""));
+    }
+
+    @Test
+    void buildsNodeSpecificRemoteSbkCommands() {
+        final String firstCommand = RemoteJavaDeployment.launchCommand("/opt/jdk-25",
+                "/opt/sbk/bin/sbk -class file");
+        final String secondCommand = RemoteJavaDeployment.launchCommand("/srv/java/jdk-25",
+                "/srv/sbk/bin/sbk -class file");
+
+        assertTrue(firstCommand.startsWith("export SBK_JAVA_HOME='/opt/jdk-25';"));
+        assertTrue(firstCommand.endsWith("/opt/sbk/bin/sbk -class file"));
+        assertTrue(secondCommand.startsWith("export SBK_JAVA_HOME='/srv/java/jdk-25';"));
+        assertTrue(secondCommand.endsWith("/srv/sbk/bin/sbk -class file"));
+    }
+
+    @Test
+    void rejectsRemoteLaunchWithoutResolvedJavaHome() {
+        assertThrows(IllegalArgumentException.class,
+                () -> RemoteJavaDeployment.launchCommand("", "/opt/sbk/bin/sbk"));
+        assertThrows(IllegalArgumentException.class,
+                () -> RemoteJavaDeployment.launchCommand("/opt/jdk-25", ""));
     }
 
     @Test

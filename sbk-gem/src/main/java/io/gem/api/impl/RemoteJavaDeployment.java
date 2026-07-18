@@ -107,9 +107,30 @@ final class RemoteJavaDeployment {
      *
      * @param javaHome selected remote Java home
      * @return POSIX-shell export prefix
+     * @throws IllegalArgumentException if the selected Java home is empty
      */
     static String environmentPrefix(String javaHome) {
+        if (javaHome == null || javaHome.isBlank()) {
+            throw new IllegalArgumentException("Remote SBK_JAVA_HOME must not be empty");
+        }
         return "export SBK_JAVA_HOME=" + RemoteSbkDeployment.shellQuote(javaHome) +
                 "; export PATH=\"$SBK_JAVA_HOME/bin:$PATH\"; ";
+    }
+
+    /**
+     * Build a remote SBK launch command using the Java home resolved for one
+     * specific node. The exported value is inherited by the SBK launcher, which
+     * selects {@code $SBK_JAVA_HOME/bin/java} before {@code JAVA_HOME} or PATH.
+     *
+     * @param javaHome Java home resolved or installed on the target node
+     * @param sbkCommand complete SBK command to execute on that node
+     * @return POSIX-shell command exporting the node's Java home before SBK starts
+     * @throws IllegalArgumentException if the Java home or SBK command is empty
+     */
+    static String launchCommand(String javaHome, String sbkCommand) {
+        if (sbkCommand == null || sbkCommand.isBlank()) {
+            throw new IllegalArgumentException("Remote SBK command must not be empty");
+        }
+        return environmentPrefix(javaHome) + sbkCommand;
     }
 }

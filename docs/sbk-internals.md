@@ -1702,18 +1702,22 @@ sequenceDiagram
         end
     end
 
-    alt -copy true (force mode)
-        Note over GEM: skip SBK probes
-        GEM->>SSH: replace SBK on every node
-    else default reconciliation mode
-        GEM->>SSH: run "sbk -version" on every node
-        par inspect nodes concurrently
-            SSH->>N1: executable and exact-version probe
-            SSH->>N2: executable and exact-version probe
-        end
-        Note over GEM: select only missing or mismatched nodes
-        GEM->>SSH: replace SBK on selected nodes
+    GEM->>SSH: run "sbk -version" on every node
+    par inspect nodes concurrently
+        SSH->>N1: executable and exact-version probe
+        SSH->>N2: executable and exact-version probe
     end
+    Note over GEM: select only missing or mismatched nodes
+    alt copy is true (default)
+        opt mismatch and delete is true (default)
+            GEM->>SSH: delete the outdated installation
+        end
+        GEM->>SSH: copy SBK to selected nodes and verify version
+    else copy is false and a node is unresolved
+        GEM-->>User: fail with host and expected version
+    end
+
+    GEM->>SSH: resolve and verify absolute SBK executable per node
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
 
@@ -1743,8 +1747,12 @@ exists, exits successfully, and prints the exact SBK version embedded
 in the local SBK-GEM package. All nodes are probed concurrently. Copy
 work is then deduplicated by `(host, remote directory)`, so repeated
 workload entries sharing one installation do not race to replace it.
-`-copy true` is deliberately stronger: it skips every version probe and
-replaces SBK on all unique remote targets.
+`copy=true` permits this reconciliation and is the default; it does not
+force replacement of a matching installation. `delete=true` removes an
+existing mismatch before copying, while `deleteafter=false` keeps the
+verified deployment after benchmarking. Every copied target is probed
+again for the expected version, and every launch uses an executable path
+that the remote node resolved to an absolute path and confirmed executable.
 
 Java reconciliation is separate from SBK reconciliation. `javaversion`
 defines the required major release (25 by default). GEM first discovers

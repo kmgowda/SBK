@@ -35,7 +35,8 @@ import java.util.Objects;
  * GEM (Group Execution Monitor) parameters and argument parsing.
  *
  * <p>Extends {@link SbkDriversParameters} to include SBK driver/logger help, and adds GEM-specific
- * options for remote orchestration (nodes, SSH creds/port, SBK and Java deployment, copy/delete,
+ * options for remote orchestration (nodes, SSH creds/port, SBK and Java deployment,
+ * copy/delete/deleteafter,
  * local SBM host/port/idle sleep). Populates typed getters and constructs {@link ConnectionConfig}
  * instances for each target node.
  *
@@ -43,7 +44,7 @@ import java.util.Objects;
  * - -nodes: comma/space/newline-separated hostnames
  * - -gemuser, -gempass, -gemport
  * - -sbkdir, -sbkcommand
- * - -copy, -delete, -javacopy, -javaversion, -javadir
+ * - -copy, -delete, -deleteafter, -javacopy, -javaversion, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
  */
@@ -106,21 +107,21 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkdir);
         addOption("sbkcommand", true,
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
-        addOption("copy", true, "Force-copy SBK to every remote host without a version check; default: " +
-                config.copy);
+        addOption("copy", true, "Copy SBK when missing or mismatched; default: " + config.copy);
         addOption("javacopy", true, "Copy the local Java runtime when the expected remote Java is unavailable; " +
                 "default: " + config.javacopy);
         addOption("javaversion", true, "Required remote Java major version; default: " + config.javaversion);
         addOption("javadir", true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));
-        addOption("delete", true, "Delete SBK package after benchmark; default: " + config.delete);
+        addOption("delete", true, "Delete a mismatched remote SBK before copying; default: " + config.delete);
+        addOption("deleteafter", true, "Delete remote SBK after benchmarking; default: " + config.deleteafter);
         addOption("localhost", true, "this local SBM host name, default: " + localHost);
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
                 " ms");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-copy", "-javacopy", "-javaversion", "-javadir", "-delete", "-localhost", "-sbmport",
-                "-sbmsleepms"};
+                "-copy", "-javacopy", "-javaversion", "-javadir", "-delete", "-deleteafter", "-localhost",
+                "-sbmport", "-sbmsleepms"};
         this.parsedArgs = null;
     }
 
@@ -155,6 +156,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         config.javaversion = Integer.parseInt(getOptionValue("javaversion", Integer.toString(config.javaversion)));
         config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
         config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
+        config.deleteafter = Boolean.parseBoolean(getOptionValue("deleteafter",
+                Boolean.toString(config.deleteafter)));
 
         if (config.javaversion <= 0) {
             throw new IllegalArgumentException("The Java major version must be greater than zero");
@@ -165,7 +168,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
                 "-javacopy", Boolean.toString(config.javacopy), "-javaversion",
                 Integer.toString(config.javaversion), "-javadir", config.javadir, "-delete",
-                Boolean.toString(config.delete), "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
+                Boolean.toString(config.delete), "-deleteafter", Boolean.toString(config.deleteafter),
+                "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
 
         connections = new ConnectionConfig[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
@@ -241,5 +245,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     @Override
     public boolean isDelete() {
         return config.delete;
+    }
+
+    @Override
+    public boolean isDeleteAfter() {
+        return config.deleteafter;
     }
 }
