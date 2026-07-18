@@ -12,10 +12,14 @@ You may obtain a copy of the License at
 
 > **Audience.** This document is written for **computer-science engineering
 > students, graduate researchers, and engineers** who want to understand how
-> SBK is built — not just what it does. Every claim here is traceable to
-> Java source in this repository; class names, method signatures, and file
-> paths are real and current. Read top-to-bottom for a guided tour, or jump
-> to any section using the table of contents.
+> SBK is built — not just what it does. Claims link to the Java, protobuf,
+> properties, and Gradle sources that define current behavior. Read
+> top-to-bottom for a guided tour, or jump to any section using the table of
+> contents. Performance statements are architectural explanations, not fixed
+> latency or throughput guarantees for every JVM and host. The guide assumes
+> basic Java knowledge, but it does **not** assume prior experience with
+> benchmarking frameworks, lock-free queues, histograms, gRPC, or distributed
+> systems. New terms are defined before they are used.
 
 ---
 
@@ -46,6 +50,54 @@ source code uses the variant spelling `Yml` in identifiers
 (`SbkYmlMap`, `YmlMap`, `getYmlArgs()`), the text reproduces those
 identifiers verbatim.
 
+### Beginner vocabulary
+
+These terms recur throughout the guide:
+
+| Term | Plain-language meaning |
+|---|---|
+| **Operation** | One storage action, such as one object PUT, file write, queue send, or database read. |
+| **Latency** | Elapsed time between an operation's recorded start and completion. |
+| **Throughput** | Work completed per unit of time, usually records/s or MiB/s. |
+| **Worker / producer** | A task that calls a storage driver. It produces latency records for PerL. |
+| **Recorder / consumer** | The PerL task that consumes latency records and updates statistics. |
+| **Hot path** | Code executed for every measured operation; small costs here multiply by operation count. |
+| **Queue** | A thread-safe hand-off structure: workers add records, the recorder removes them. |
+| **Latency bucket** | A latency value and its observation count; for example, `5 ms -> 120 operations`. |
+| **Window** | Statistics collected for a bounded interval. SBK reports periodic windows and a total window. |
+| **Percentile** | A latency boundary. p99 means 99% of valid observations are at or below that value. |
+| **SPI** | A small Java interface implemented by plugins such as storage drivers or loggers. |
+| **Back pressure / backlog** | Records accumulate because a downstream stage is slower than its producers. |
+
+### The one-operation mental model
+
+Before studying classes, follow one write through the system. Every detailed
+diagram later in the document expands one box from this picture:
+
+```mermaid
+flowchart LR
+    CLI["1. CLI selects<br/>driver + workload"] --> H["2. Harness creates<br/>worker tasks"]
+    H --> D["3. Driver calls<br/>storage API"]
+    D --> T["4. Completion produces<br/>start/end timestamps"]
+    T --> Q["5. PerL channel enqueues<br/>a TimeStamp record"]
+    Q --> R["6. Recorder updates<br/>latency window"]
+    R --> L["7. Logger emits<br/>periodic + total results"]
+    L -. optional distributed path .-> P["8. SBP sends counts<br/>to SBM"]
+
+    classDef input fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef work fill:#dcfce7,stroke:#166534,color:#000
+    classDef measure fill:#fef3c7,stroke:#a16207,color:#000
+    classDef distributed fill:#f3e8ff,stroke:#7e22ce,color:#000
+    class CLI,H input
+    class D,T work
+    class Q,R,L measure
+    class P distributed
+```
+
+The crucial separation is between boxes 3–4 (doing and timing storage work)
+and boxes 5–7 (aggregating and reporting measurements). SBK exists largely to
+make that separation reusable and consistent across storage technologies.
+
 ---
 
 ## Table of contents
@@ -75,8 +127,45 @@ stores, relational databases, file systems, in-memory caches. The same
 harness drives all of them through a single, very small SPI (Service
 Provider Interface).
 
+Why is a framework needed? A small benchmark often mixes storage calls,
+timestamping, percentile calculation, logging, retries, and thread management
+inside one loop. That makes it difficult to know whether a result describes
+the storage system or the benchmark program. It also makes comparisons unfair
+when every backend gets a different measurement loop.
+
+```mermaid
+flowchart TB
+    subgraph ADHOC["Ad-hoc benchmark: concerns mixed together"]
+        LOOP["One loop"] --> IO1["Storage call"]
+        LOOP --> TIME1["Timestamps"]
+        LOOP --> MATH1["Statistics"]
+        LOOP --> PRINT1["Console / file output"]
+        LOOP --> THREAD1["Thread coordination"]
+    end
+
+    subgraph SBKDESIGN["SBK: explicit boundaries"]
+        HARNESS["Harness<br/>workload + lifecycle"] --> DRIVER["Driver SPI<br/>storage-specific call"]
+        HARNESS --> CHANNEL["PerL channel<br/>measurement hand-off"]
+        CHANNEL --> RECORDER["Recorder<br/>statistics + windows"]
+        RECORDER --> LOGGER["Logger SPI<br/>output destination"]
+    end
+
+    PROBLEM["Mixed concerns make<br/>results hard to compare"] --> ADHOC
+    GOAL["Shared measurement path makes<br/>experiments easier to reason about"] --> SBKDESIGN
+
+    classDef risk fill:#fee2e2,stroke:#991b1b,color:#000
+    classDef boundary fill:#dcfce7,stroke:#166534,color:#000
+    class LOOP,IO1,TIME1,MATH1,PRINT1,THREAD1,PROBLEM risk
+    class HARNESS,DRIVER,CHANNEL,RECORDER,LOGGER,GOAL boundary
+```
+
+SBK does not remove every source of measurement error. Instead, it gives
+storage systems a common harness and makes the remaining choices—driver
+completion semantics, latency range, time unit, durability, concurrency,
+warm-up, and environment—visible and documentable.
+
 The framework's stated design principle, quoted verbatim from
-<ref_file file="/root/projects/SBK/README.md" />:
+[README](../README.md):
 
 > "The design principle of SBK is the **Performance Benchmarking of *'Any
 > Storage System'* with *'Any Type of data payload'* and *'Any Time
@@ -98,27 +187,22 @@ In practice that means:
 
 ### Three design properties that make SBK unusual
 
-1. **Every operation is measured.** SBK does *not* sample. Every PUT,
-   every GET, every record contributes one data point to a histogram.
-   This is in deliberate contrast to YCSB, COSBench, and many
-   load-generation tools that use reservoir sampling at high request
-   rates to keep memory bounded. The README puts it as
-   *"100% accurate percentiles without sampling"*. SBK pays for that
-   accuracy with carefully engineered data structures (§3).
+1. **Operations are recorded without reservoir sampling.** Each completed
+   operation submitted to PerL contributes its latency and record count to a
+   latency distribution. Array and HashMap windows preserve exact integer
+   latency values within the configured range; the optional HdrHistogram
+   extension trades exact values for bounded, three-significant-digit
+   precision. Invalid and out-of-range values are counted separately rather
+   than silently treated as valid samples (§3).
 
-2. **The hot path is lock-free.** Worker threads (writers/readers)
-   deposit their latency records into **lock-free concurrent queues**
-   (Java's `ConcurrentLinkedQueue` — the Michael-Scott non-blocking
-   algorithm, CAS-only, no `synchronized` blocks anywhere on the
-   producer or consumer path). A `ConcurrentLinkedQueueArray` stacks
-   many of these queues so that even at high producer counts, no
-   single queue's tail pointer becomes a CAS contention point. The
-   recorder is the *only* consumer. This eliminates lock-induced
-   stalls entirely from the harness's hot path, which is what makes
-   SBK suitable for benchmarking systems whose own per-request
-   latency floor is on the order of microseconds — the harness
-   itself must not be the bottleneck, and it cannot be, because there
-   is no mutex it could be waiting on.
+2. **Measurement hand-off uses non-blocking queues.** Worker threads submit
+   timestamp records through Java `ConcurrentLinkedQueue` instances. There is
+   no application-level mutex in this producer/consumer hand-off. PerL shards
+   traffic across an array of queues to reduce contention, while a single
+   recorder owns each latency window. Lock-free does not mean zero cost:
+   enqueue/dequeue operations can retry CAS instructions, and queue nodes plus
+   `TimeStamp` records allocate. It does mean that progress does not depend on
+   another thread releasing a lock (§3).
 
 3. **The framework is its own ecosystem.** **PerL** (Performance Logger,
    the latency library) is a reusable Java library independent of SBK;
@@ -134,7 +218,7 @@ This document walks through each of those pieces in turn.
 ## 2. The ecosystem at a glance
 
 SBK is a multi-project Gradle build. The six modules listed in
-<ref_file file="/root/projects/SBK/settings.gradle" /> form two layers — a
+[settings.gradle](../settings.gradle) form two layers — a
 **library/SPI layer** and a **launcher layer** — plus a distributed
 **aggregator** and **orchestrator**.
 
@@ -201,6 +285,32 @@ discovery itself happens via a small package-scanning helper in
 not Java's `java.lang.reflect`). The same pattern is used for
 `GemLogger` discovery in SBK-GEM.
 
+Think of discovery as a runtime plugin directory: the command supplies a short
+name, package scanning finds candidate Java classes, and SBK instantiates the
+matching implementation before it asks that implementation to register and
+parse its own flags.
+
+```mermaid
+flowchart LR
+    ARG["CLI<br/>-class minio<br/>-out CSVLogger"] --> SCAN["Package scanner"]
+    SCAN --> STORES["Storage implementations<br/>MinIO, Kafka, File, ..."]
+    SCAN --> LOGGERS["Logger implementations<br/>System, CSV, Prometheus, ..."]
+    STORES --> MATCHS{"Simple name matches<br/>minio?"}
+    LOGGERS --> MATCHL{"Simple name matches<br/>CSVLogger?"}
+    MATCHS -->|yes| DRIVER["Instantiate MinIO"]
+    MATCHL -->|yes| LOGGER["Instantiate CSVLogger"]
+    DRIVER --> FLAGS["Register + parse<br/>driver flags"]
+    LOGGER --> FLAGS
+    FLAGS --> BENCH["Construct SbkBenchmark"]
+
+    classDef input fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef plugin fill:#fce7f3,stroke:#9d174d,color:#000
+    classDef runtime fill:#dcfce7,stroke:#166534,color:#000
+    class ARG,SCAN input
+    class STORES,LOGGERS,MATCHS,MATCHL,DRIVER,LOGGER plugin
+    class FLAGS,BENCH runtime
+```
+
 [reflections]: https://github.com/ronmamo/reflections
 
 ---
@@ -233,10 +343,38 @@ per second:
 5. **Forward** the data to one or more output sinks (console, CSV,
    Prometheus, gRPC).
 
-Doing all five of these on the writer thread would tank throughput.
-PerL's solution: **move all of this off the writer thread, onto a
-single dedicated recorder thread**, communicating via lock-free
-queues.
+Doing all five on every writer would add statistics and output work directly
+to the operation loop, making the worker more likely to become the bottleneck.
+PerL's solution is to **move aggregation off the writer thread and onto a
+single recorder task**, communicating through non-blocking queues.
+
+A useful analogy is a restaurant pass. Cooks (workers) finish dishes and place
+small tickets on the pass (queues). One expediter (recorder) reads tickets and
+updates the order board (latency windows). Cooks do not stop to calculate the
+restaurant's average preparation time or print a report after every dish.
+
+```mermaid
+flowchart LR
+    subgraph PRODUCERS["Workers: latency-sensitive work"]
+        OP["Call storage"] --> STAMP["Capture completion"]
+        STAMP --> TICKET["Create TimeStamp"]
+    end
+    subgraph HANDOFF["Queue hand-off"]
+        TICKET --> ENQ["enqueue"]
+    end
+    subgraph CONSUMER["Recorder: aggregate work"]
+        ENQ --> POLL["poll"]
+        POLL --> COUNT["update counts"]
+        COUNT --> PCT["compute reports<br/>at boundaries"]
+    end
+
+    classDef hot fill:#fee2e2,stroke:#991b1b,color:#000
+    classDef queue fill:#dbeafe,stroke:#1e40af,color:#000
+    classDef cold fill:#dcfce7,stroke:#166534,color:#000
+    class OP,STAMP,TICKET hot
+    class ENQ,POLL queue
+    class COUNT,PCT cold
+```
 
 ### 3.2 The PerL architecture
 
@@ -277,9 +415,9 @@ flowchart LR
     QN -- poll() --> RUN
 
     RUN -- record() --> PER
-    RUN -- record() --> TOT
-    TOT -. mirrors to .-> EXT
-    PER -- stopWindow() every 5s --> LOG
+    PER -- "stopWindow(): print + copy distribution" --> TOT
+    TOT -. optional overflow/extension .-> EXT
+    PER -- periodic report (5s default) --> LOG
     TOT -- stop() at end --> LOG
 ```
 
@@ -287,7 +425,7 @@ flowchart LR
 
 #### Pillar 1 — `CQueuePerl`: the orchestrator
 
-<ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/CQueuePerl.java" />
+[CQueuePerl.java](../perl/src/main/java/io/perl/api/impl/CQueuePerl.java)
 ties everything together. On construction it:
 
 ```java
@@ -305,28 +443,85 @@ array. A worker calls `perlChannel.send(startTime, endTime, records,
 bytes)` on its hot path — that's the *only* thing it has to do.
 
 Each `CQueueChannel` is implemented as a
-`ConcurrentLinkedQueueArray` — an **array of lock-free
-`java.util.concurrent.ConcurrentLinkedQueue` instances**. The
-"lock-free" property is the structural one that matters: there is
-**no `synchronized` block, no `ReentrantLock`, no mutex anywhere on
-the producer or consumer path**. Both `offer()` (enqueue) and
-`poll()` (dequeue) are implemented with the Michael-Scott non-blocking
-algorithm — atomic compare-and-swap (CAS) operations on the queue's
-head and tail pointers. That is the JDK-level guarantee that no
-thread can ever block waiting for another thread to release a lock,
-because there are no locks to release.
+`ConcurrentLinkedQueueArray` — an array of Java
+`ConcurrentLinkedQueue` instances. Enqueue and dequeue are
+**non-blocking queue operations**: the hand-off does not acquire an
+application mutex or monitor. The JDK implementation uses CAS and can retry
+under contention, so “lock-free” is a progress guarantee rather than a claim
+that each call executes exactly one atomic instruction.
 
-The array-of-queues design layered on top is an additional
-optimisation: producers spread their writes across multiple queues
-(indexed by `wIndex`, rotated by the recorder via `rIndex`). This
-reduces *CAS contention* on any single queue's tail pointer when
-many workers are running, but the lock-freedom property is what each
-underlying queue gives us — the array merely scales it across cores.
+The array-of-queues design is the scaling layer. `CQueuePerl` normally
+creates one channel per configured worker. Each channel contains
+`qPerWorker` queues (10 by default, with a minimum of 3). A worker-facing
+`PerlChannel` advances its private `wIndex` for each send, while the recorder
+advances `rIndex` while polling. This spreads updates over more queue head and
+tail locations as worker count grows and reduces the chance that many cores
+continually update one queue. `maxQs`, when non-zero, changes the topology to
+a configured total queue count instead of the per-worker default.
+
+The producer still allocates a `TimeStamp`, and `ConcurrentLinkedQueue` may
+allocate an internal node. This is a deliberate exchange: small short-lived
+objects and non-blocking hand-off keep percentile calculation, sorting, and
+logger I/O out of the storage-operation call path.
+
+The two-level topology is easy to miss in code. With two workers and the
+default `qPerWorker=10`, the conceptual layout is:
+
+```mermaid
+flowchart LR
+    W1["Worker 1<br/>private PerlChannel"] --> C1["CQueueChannel 1"]
+    W2["Worker 2<br/>private PerlChannel"] --> C2["CQueueChannel 2"]
+
+    subgraph A1["Queue array inside channel 1"]
+        Q10["q0"]
+        Q11["q1"]
+        Q12["q2"]
+        Q19["... q9"]
+    end
+    subgraph A2["Queue array inside channel 2"]
+        Q20["q0"]
+        Q21["q1"]
+        Q22["q2"]
+        Q29["... q9"]
+    end
+
+    C1 -->|wIndex rotates| Q10
+    C1 --> Q11
+    C1 --> Q12
+    C1 --> Q19
+    C2 -->|wIndex rotates| Q20
+    C2 --> Q21
+    C2 --> Q22
+    C2 --> Q29
+
+    Q10 --> R["One recorder<br/>polls channels + queues"]
+    Q11 --> R
+    Q12 --> R
+    Q19 --> R
+    Q20 --> R
+    Q21 --> R
+    Q22 --> R
+    Q29 --> R
+
+    classDef worker fill:#dcfce7,stroke:#166534,color:#000
+    classDef channel fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef queue fill:#fef3c7,stroke:#a16207,color:#000
+    classDef recorder fill:#f3e8ff,stroke:#7e22ce,color:#000
+    class W1,W2 worker
+    class C1,C2 channel
+    class Q10,Q11,Q12,Q19,Q20,Q21,Q22,Q29 queue
+    class R recorder
+```
+
+`wIndex` prevents one worker from repeatedly touching one queue. The recorder
+uses each channel's `rIndex` to inspect those queues in turn. Queue sharding
+reduces shared-location contention; the one recorder still defines the drain
+capacity of this PerL instance.
 
 #### Pillar 2 — `PerformanceRecorderIdleBusyWait`: the single consumer
 
 The recorder thread runs the loop in
-<ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java" />:
+[PerformanceRecorderIdleBusyWait.java](../perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java):
 
 ```java
 while (doWork) {
@@ -359,13 +554,43 @@ There are **two variants** of the recorder, chosen by config:
 
 | Variant | When chosen | Behavior on empty queue |
 |---|---|---|
-| `PerformanceRecorderIdleBusyWait` | `sleepMS = 0` (default) | Adaptive (`ElasticWait`) busy-wait — minimum **1 µs** idle, scales up. |
+| `PerformanceRecorderIdleBusyWait` | `sleepMS = 0` (default) | Calls `LockSupport.parkNanos(idleNS)` between empty scans and uses `ElasticWait` to decide when to check the clock. The configured default is **1 ms**; the enforced minimum is **1 µs**. |
 | `PerformanceRecorderIdleSleep` | `sleepMS > 0` | Thread sleeps for `min(sleepMS, windowIntervalMS)`. |
 
-Busy-wait is the default because **PerL is designed to keep latency on
-nanosecond-class storage systems**. A `Thread.sleep(1)` here would
-artificially lengthen the measured tail of any system whose actual p99
-is sub-millisecond.
+Despite the historical class name, `PerformanceRecorderIdleBusyWait` is not a
+tight CPU spin: it parks with `LockSupport`. The delay affects how quickly the
+recorder drains a newly non-empty queue and how much temporary queue backlog
+can build. It does **not** add directly to the measured operation latency,
+because workers capture `endTime` before enqueueing the record.
+
+```mermaid
+flowchart TD
+    START["Recorder task starts"] --> SCAN["Poll next channel / queue"]
+    SCAN --> FOUND{"Record found?"}
+    FOUND -->|yes| END{"End sentinel?"}
+    END -->|yes| FINAL["Stop windows<br/>print total<br/>exit"]
+    END -->|no| RECORD["Compute elapsed latency<br/>update periodic window"]
+    RECORD --> ROTATE{"Window interval passed?"}
+    ROTATE -->|yes| REPORT["Print/copy periodic window<br/>reset periodic window"]
+    ROTATE -->|no| SCAN
+    REPORT --> SCAN
+    FOUND -->|no| IDLE["ElasticWait park + count<br/>or configured sleep"]
+    IDLE --> CHECK{"Time-check batch reached?"}
+    CHECK -->|no| SCAN
+    CHECK -->|yes| CLOCK["Query clock once<br/>rotate if due"]
+    CLOCK --> SCAN
+
+    classDef decision fill:#fef3c7,stroke:#a16207,color:#000
+    classDef work fill:#dcfce7,stroke:#166534,color:#000
+    classDef idle fill:#dbeafe,stroke:#1e40af,color:#000
+    class FOUND,END,ROTATE,CHECK decision
+    class START,SCAN,RECORD,REPORT,FINAL work
+    class IDLE,CLOCK idle
+```
+
+This diagram explains why the class has two responsibilities: it drains work
+quickly when records exist, and it keeps time-based reports moving even when
+no operation completes for a while.
 
 #### Pillar 3 — `ElasticWait`: amortising clock queries
 
@@ -385,10 +610,11 @@ while (queueEmpty()) {
 }
 ```
 
-The problem is that line `long now = time.getCurrentTime()`. At
-`idleNS = 1000` (the PerL default — 1 µs), this loop spins **one
-million times per second per idle recorder**, calling
-`System.nanoTime()` or `System.currentTimeMillis()` on every iteration.
+The problem is the `time.getCurrentTime()` call on every empty scan. Even
+when the park duration is short, scheduler wake-up behavior is platform
+dependent and a clock query per scan is unnecessary work. PerL's configured
+default is `idleNS=1_000_000` (1 ms); `1_000` ns (1 µs) is the enforced
+minimum, not the default.
 
 Those Java clock methods are not free:
 
@@ -397,14 +623,13 @@ Those Java clock methods are not free:
   involves a memory fence and, on some platforms, an actual syscall.
 - `System.currentTimeMillis()` on some JVMs has historically suffered
   from per-thread cache-line contention.
-- **Crucially, the worker threads are already calling these same
-  clock methods** for every record's `startTime` and `endTime`. If the
-  recorder thread also spins on the clock at megahertz rates, the two
-  contend on the same time-source infrastructure, and the measurement
-  thread starts to perturb the very thing it is measuring.
+- Worker threads already call the selected `Time` implementation to capture
+  operation boundaries. Avoiding redundant recorder-side calls reduces
+  harness work and shared time-source traffic, especially when queues are
+  frequently empty.
 
 `ElasticWait`
-(<ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/ElasticWait.java" />)
+([ElasticWait.java](../perl/src/main/java/io/perl/api/impl/ElasticWait.java))
 solves this by **converting time-checks into counter-checks**. The
 clock is queried only once per "elastic batch" of idle spins, and the
 batch size is auto-calibrated to match the configured window
@@ -443,12 +668,20 @@ while (queueEmpty()) {
 }
 ```
 
-So instead of *N* clock calls per *N* parks, we get *1* clock call
-per *elasticCount* parks. With the defaults (`idleNS=1000`,
-`windowIntervalMS=5000`), `elasticCount` settles around
-**5 000 000** — so the clock is sampled roughly every 5 seconds, not
-every microsecond. That is **a six-orders-of-magnitude reduction** in
-clock-query frequency on the recorder thread.
+So instead of *N* clock calls for *N* empty-queue parks, PerL normally makes
+one clock call after an adaptive batch. At construction:
+
+```text
+countRatio    = 1_000_000 ns per ms / idleNS
+minIdleCount  = countRatio * minIntervalMS
+elasticCount  = minIdleCount
+```
+
+With the configured `idleNS=1_000_000`, `countRatio` starts at `1`. With the
+minimum `idleNS=1_000`, it starts at `1_000`. These are target counts derived
+from requested park time; `LockSupport.parkNanos` may oversleep, so the code
+later calibrates from observed elapsed time rather than assuming ideal timer
+resolution.
 
 ##### The calibration loop
 
@@ -460,11 +693,10 @@ work like this:
 | `setElastic(actualElapsedMs)` | After a window rotation | Sets `elasticCount = (totalCount × windowIntervalMS) / actualElapsedMs`. I.e., "given we managed `totalCount` parks in `actualElapsedMs` ms, how many parks would fit in `windowIntervalMS`?" |
 | `updateElastic(elapsedMs)` | After a clock check that did *not* rotate the window | Sets `elasticCount = countRatio × (windowIntervalMS - elapsedMs)`. I.e., "we're partway through the window; aim the next check at the remaining time." |
 
-The `countRatio = NS_PER_MS / idleNS = 1_000_000` is constant for a
-given `idleNS`. The calibration is self-correcting: if `LockSupport`
-oversleeps (which it can, by tens of microseconds on a busy host),
-`setElastic` shrinks `elasticCount` on the next rotation so we don't
-miss the next window boundary.
+The `countRatio = NS_PER_MS / idleNS` is constant for a given configuration;
+its numeric value is not constant across configurations. The calibration is
+self-correcting: if `LockSupport` oversleeps, `setElastic` uses the observed
+park throughput to estimate the next batch size.
 
 There is also a floor — `minIdleCount` — so that pathological
 clock-resolution issues can never make `elasticCount` collapse to
@@ -503,10 +735,11 @@ system for the time:
 | **Queue empty, batch complete** | **1** clock call (then re-calibrate) |
 | **Benchmark start / end** | **1** clock call each |
 
-So at the full event rate of the storage system, the recorder thread
-contributes **zero clock contention** to the worker threads. ElasticWait
-is the structural reason the harness can measure nanosecond-class
-storage systems without distorting them.
+On the record-processing path the recorder reuses worker timestamps instead
+of issuing a clock call per record. `ElasticWait` similarly amortises clock
+queries on the empty path. This reduces recorder overhead; it does not claim
+that the harness contributes zero system-wide contention or zero measurement
+cost.
 
 ```mermaid
 sequenceDiagram
@@ -528,43 +761,48 @@ sequenceDiagram
 
     Note over W,C: Phase 2 - queue empty, back-off begins
     R->>E: waitAndCheck()
-    E->>E: park 1 microsecond, increment count
+    E->>E: park idleNS, increment count
     E-->>R: false (not yet)
     R->>E: waitAndCheck()
-    E->>E: park 1 microsecond, increment count
+    E->>E: park idleNS, increment count
     E-->>R: false (not yet)
-    Note over R,E: ... thousands of parks ...<br/>(zero clock calls)
+    Note over R,E: adaptive batch of parks<br/>(no clock call per park)
     R->>E: waitAndCheck()
-    E->>E: park 1 microsecond, increment count
+    E->>E: park idleNS, increment count
     E-->>R: true (batch done)
     R->>C: now() - ONE clock call
     Note over R: rotate window if due,<br/>recalibrate elasticCount
 ```
 
-#### Pillar 4 — Three latency-storage backends
+#### Pillar 4 — Memory-aware latency storage
 
-The recorder writes to a `LatencyRecordWindow`. PerL chooses **one of
-three implementations at startup**, based on the configured
-`(minLatency, maxLatency)` range and memory budget. This choice is made
-by `PerlBuilder.buildLatencyRecordWindow()`:
+The recorder writes to a `LatencyRecordWindow`. For each periodic window,
+`PerlBuilder.buildLatencyRecordWindow()` chooses either an array or a HashMap
+from the configured latency range and memory budget. The whole-run window is
+a HashMap buffer with an optional HDR or CSV overflow/extension strategy.
 
 ```mermaid
-flowchart TD
-    START["Window factory"] --> Q1{"latencyRange × 8B<br/>fits in<br/>maxArraySizeMB?"}
-    Q1 -->|Yes| ARR["ArrayLatencyRecorder<br/>long array indexed by latency value<br/>O(1) reportLatency<br/>~64 MB default budget"]
-    Q1 -->|No| HM["HashMapLatencyRecorder<br/>HashMap of Long to Long<br/>O(1) average reportLatency<br/>~192 MB default budget"]
+flowchart LR
+    CFG["Latency range + memory limits"] --> PERIODIC{"Periodic window<br/>range * 8 bytes fits?"}
+    PERIODIC -->|yes| ARRAY["ArrayLatencyRecorder<br/>direct integer index<br/>exact values in range"]
+    PERIODIC -->|no| MAP["HashMapLatencyRecorder<br/>stores observed values<br/>bounded by configured estimate"]
 
-    HM --> EXT{"Backend?"}
-    EXT -->|"PerlConfig.histogram=true"| HDR["HdrExtendedLatencyRecorder<br/>Sparse compressed histogram<br/>~2 MB for full microsecond range"]
-    EXT -->|"PerlConfig.csv=true"| CSV["CSVExtendedLatencyRecorder<br/>Streams raw samples to disk<br/>(default 1 GB CSV cap)"]
-    EXT -->|default| NONE["Same HashMap used"]
+    CFG --> TOTAL["Total-window HashMap buffer"]
+    TOTAL --> MODE{"Optional extension"}
+    MODE -->|histogram=false, csv=false| MAPTOTAL["HashMap total<br/>prints/resets when full"]
+    MODE -->|histogram=true| HDR["HdrExtendedLatencyRecorder<br/>flushes a full buffer into HDR<br/>3 significant digits"]
+    MODE -->|csv=true| CSV["CSVExtendedLatencyRecorder<br/>streams extension data to file<br/>bounded by csvFileSizeGB"]
 
-    classDef impl fill:#ddd6fe,stroke:#5b21b6,color:#000
-    class ARR,HM,HDR,CSV,NONE impl
+    classDef decision fill:#fef3c7,stroke:#a16207,color:#000
+    classDef exact fill:#dcfce7,stroke:#166534,color:#000
+    classDef bounded fill:#e0e7ff,stroke:#4338ca,color:#000
+    class PERIODIC,MODE decision
+    class ARRAY,MAP,MAPTOTAL exact
+    class HDR,CSV bounded
 ```
 
 The defaults in
-<ref_file file="/root/projects/SBK/perl/src/main/resources/perl.properties" />:
+[perl.properties](../perl/src/main/resources/perl.properties):
 
 ```properties
 maxArraySizeMB=64           # Use Array backend if latency range fits
@@ -575,15 +813,21 @@ csv=false                   # Optional raw-CSV total backend
 csvFileSizeGB=1
 ```
 
-**Why three backends?** The Array backend is the fastest (one indexed
-write, zero allocations) but only works when the latency range
-(`maxLatency - minLatency`) fits in your memory budget. For
-nanosecond-resolution measurements over a 180-second window, that may
-exceed budget — at which point PerL transparently falls back to the
-HashMap backend. If you also enable HdrHistogram, the total-window
-extension uses a sparse compressed representation that handles a 7+
-decade range in roughly 2 MB. The point: PerL adapts to your
-configuration *without you having to know which structure is in play*.
+**How available memory changes the design:** an array has predictable memory
+and direct indexing, but its size is proportional to the configured latency
+range, whether or not every value occurs. A HashMap stores only observed
+integer latency values, but each distinct value has object/table overhead and
+its configured limit is an estimate rather than an exact heap cap. Increasing
+`maxArraySizeMB`, `maxHashMapSizeMB`, or `totalMaxHashMapSizeMB` lets PerL keep
+larger exact-value distributions before a window must be printed/reset or an
+extension must absorb it.
+
+HdrHistogram is not an exact-value fallback: it uses three significant digits
+(`LatencyConfig.HDR_SIGNIFICANT_DIGITS`). It is useful when bounded footprint
+across a wide latency range matters more than retaining every integer value.
+CSV preserves a stream for offline work but adds disk I/O and a configured
+file-size limit. These tradeoffs must be recorded with published benchmark
+results.
 
 #### Pillar 5 — The window machinery
 
@@ -604,56 +848,55 @@ sequenceDiagram
         Worker->>Channel: send(start, end, n, bytes)
         Channel-->>Rec: poll()
         Rec->>Per: record(start, end, n, bytes)
-        Rec->>Tot: record(start, end, n, bytes)
     end
 
     Note over Worker,Log: t=5s  periodic boundary
-    Rec->>Per: stopWindow(t5) — print stats
-    Per->>Log: printPeriodic(records, MB, lat percentiles)
+    Rec->>Per: stopWindow(t5) -- print stats
+    Per->>Log: print periodic records, bytes, percentiles
+    Per->>Tot: copy aggregate record and latency counts
     Rec->>Per: startWindow(t5)
 
     Note over Worker,Log: t=N  benchmark ends
     Rec->>Per: stopWindow(tN)
-    Rec->>Tot: stop(tN) — print final
-    Tot->>Log: printTotal(...)
+    Per->>Tot: copy final partial window
+    Rec->>Tot: stop(tN) -- print final
+    Tot->>Log: print total results
 ```
 
-The recorder maintains two windows at all times. The **periodic window**
-is reset every `printingIntervalSeconds` (5 by default), so you get
-live progress; the **total window** holds the whole-run cumulative
-distribution and is only printed at the end. Both windows share the
-storage backend logic.
+The recorder maintains two logical windows. Incoming operations first update
+the **periodic window**. At rotation, `window.print(..., totalWindow)` computes
+the periodic report and copies aggregate counters plus latency counts into the
+**total window** before the periodic window resets. The total window is printed
+at the end, and may also be flushed/reset if its configured storage fills.
 
 ### 3.4 Why this design is fast
 
 Six concrete reasons, traceable to specific code:
 
-1. **No locks on the hot path.** `CQueueChannel.send()` and the
-   underlying `ConcurrentLinkedQueue.offer()` are both lock-free (CAS).
-2. **No allocation on the hot path** for the producer beyond a
-   short-lived `TimeStamp` object — and that one is small (4 longs).
+1. **Non-blocking hand-off.** `CQueueChannel.send()` delegates to a
+   `ConcurrentLinkedQueue`; progress does not depend on a mutex owner, though
+   CAS retries and allocation are still possible.
+2. **Small producer-side record.** The producer creates a `TimeStamp`, and
+   the JDK queue may create a node. Percentile computation and logger I/O stay
+   on the recorder side.
 3. **One consumer.** A single recorder thread eliminates contention on
    the windows; no synchronisation is needed because only one thread
    ever reads the queue and writes to the histogram.
-4. **Lock-free concurrent queues — across the board.** PerL never
-   uses a `synchronized` block or any `Lock` for inter-thread
-   handoff. Every queue is a `ConcurrentLinkedQueue` (Michael-Scott
-   non-blocking algorithm; CAS-only). To keep that lock-freedom
-   *scalable* under high concurrency, the queues are organized as an
-   array (`ConcurrentLinkedQueueArray`), with producers distributed
-   across the array via `wIndex` and the consumer rotating through it
-   via `rIndex`. The array layout is an optimisation; the lock-free
-   guarantee is the foundation.
-5. **Clock-query amortisation via `ElasticWait`** (Pillar 3 above).
-   The recorder's clock-query rate is six orders of magnitude lower
-   than the naive `park-then-check-time` design would yield. The
-   recorder never competes with the workers for the system clock —
-   it reuses the workers' own timestamps as its notion of "now" while
-   processing, and only consults the actual clock once per multi-
-   million-iteration idle batch.
-6. **Adaptive idle.** When queues are empty, the recorder doesn't burn
-   100% CPU — `ElasticWait` ramps idle time from 1 µs up to the window
-   interval, then back down on the next non-empty cycle.
+4. **Queue sharding follows worker concurrency.** With `maxQs=0`, PerL creates
+   channels from worker count and multiple queues per channel. More workers
+   therefore bring more queue state rather than forcing all producers through
+   one tail pointer.
+5. **Clock-query amortisation via `ElasticWait`.** The recorder reuses
+   `TimeStamp.endTime` while processing and checks the clock only after an
+   adaptive batch of empty-queue parks.
+6. **Configurable memory and precision.** Array, HashMap, HDR, and CSV modes
+   let operators choose between direct indexing, sparse exact values, bounded
+   approximate histograms, and offline raw output.
+
+These properties raise the point at which the harness becomes the limiting
+stage; they do not prove that it can never bottleneck. Measure queue backlog,
+GC, CPU saturation, and discarded latency counts when pushing the framework
+near the host's limits.
 
 ---
 
@@ -665,7 +908,7 @@ SBK its *"any storage system"* property.
 ### 4.1 The Storage SPI — seven methods
 
 A driver implements one Java interface:
-<ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/api/Storage.java" />:
+[Storage.java](../sbk-api/src/main/java/io/sbk/api/Storage.java):
 
 ```java
 public interface Storage<T> {
@@ -687,6 +930,40 @@ boilerplate.
 
 That is the **entire SPI**. Everything else — threading, latency
 recording, output formatting, distribution — is the harness's job.
+
+The seven methods fall into three phases. A driver is configured first,
+opened once, asked to create per-worker readers/writers, and finally closed:
+
+```mermaid
+flowchart LR
+    subgraph CONFIGURE["Phase 1: configure"]
+        A["addArgs<br/>declare flags"] --> P["parseArgs<br/>read values"]
+    end
+    subgraph OPEN["Phase 2: run"]
+        P --> O["openStorage<br/>create shared SDK client"]
+        O --> W["createWriter<br/>per writer ID"]
+        O --> R["createReader<br/>per reader ID"]
+        D["getDataType<br/>define payload"] --> W
+        D --> R
+        W --> OPS["Worker operations"]
+        R --> OPS
+    end
+    subgraph CLOSE["Phase 3: release"]
+        OPS --> C["close writer / reader"]
+        C --> CS["closeStorage<br/>release shared client"]
+    end
+
+    classDef configure fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef run fill:#dcfce7,stroke:#166534,color:#000
+    classDef close fill:#fee2e2,stroke:#991b1b,color:#000
+    class A,P configure
+    class O,W,R,D,OPS run
+    class C,CS close
+```
+
+The boundary matters because storage-specific code remains inside the driver.
+For example, `openStorage` may construct a MinIO client or database session,
+while `SbkBenchmark` remains unaware of credentials, buckets, brokers, or SQL.
 
 ### 4.2 SBK-API class diagram
 
@@ -786,7 +1063,7 @@ classDiagram
 
 ### 4.3 SbkBenchmark — the orchestrator
 
-<ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java" />
+[SbkBenchmark.java](../sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java)
 owns the lifecycle of one benchmark run. Reading the constructor
 (simplified):
 
@@ -813,15 +1090,57 @@ public SbkBenchmark(ParameterOptions params, Storage<Object> storage,
 
 Three things to notice:
 
-1. **Two independent PerL instances.** Writers and readers have their own
-   recorder threads, queues, and windows. They never share state.
-2. **Thread-model selectable at runtime.** `-threadtype virtual` switches
-   the workers to JVM virtual threads (lightweight, ideal for I/O-bound
-   drivers); `ForkJoin` and the default `Executors.newFixedThreadPool`
-   are also available.
+1. **Direction-specific PerL instances.** A write PerL is built for normal
+   writing actions when writers are configured; a read PerL is built when
+   readers are configured. Each instance owns its channels, recorder, and
+   windows, while both use the same `RWLogger` and the benchmark's shared
+   five-thread `perlExecutor`.
+2. **Thread model is selectable at runtime.** `-thread v` selects a fixed
+   executor whose workers are virtual threads; `-thread f` selects a
+   `ForkJoinPool`; `-thread p` (the default) selects a fixed platform-thread
+   pool. The pool size is `writers + readers + 23`, providing capacity for
+   worker and coordination tasks. More workers can expose more storage and
+   CPU parallelism, but useful scaling ends when the driver, storage target,
+   recorder, network, memory allocator, or CPU becomes saturated.
 3. **A separate `ScheduledExecutorService`** schedules the duration
    watchdog so the main scheduler doesn't get stuck behind a long-running
    write.
+
+```mermaid
+flowchart TB
+    BENCH["SbkBenchmark<br/>one run's owner"]
+
+    BENCH --> MAIN["Main executor<br/>writers + readers + coordination"]
+    MAIN --> W["SbkWriter tasks"]
+    MAIN --> R["SbkReader tasks"]
+    MAIN --> STEP["staged-start / completion tasks"]
+
+    BENCH --> PE["perlExecutor<br/>ForkJoinPool(5)"]
+    PE --> WP["write PerL recorder<br/>when applicable"]
+    PE --> RP["read PerL recorder<br/>when readers exist"]
+
+    BENCH --> TE["timeoutExecutor<br/>scheduled virtual thread"]
+    TE --> STOP["duration watchdog<br/>calls stop"]
+
+    W --> STORAGE["Storage driver writers"]
+    R --> STORAGE2["Storage driver readers"]
+    WP --> LOGGER["shared RWLogger"]
+    RP --> LOGGER
+
+    classDef owner fill:#f3e8ff,stroke:#7e22ce,color:#000
+    classDef executor fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef task fill:#dcfce7,stroke:#166534,color:#000
+    classDef external fill:#fef3c7,stroke:#a16207,color:#000
+    class BENCH owner
+    class MAIN,PE,TE executor
+    class W,R,STEP,WP,RP,STOP task
+    class STORAGE,STORAGE2,LOGGER external
+```
+
+The executors are separate so storage workers, measurement consumers, and the
+stop timer do not all wait in the same task queue. They still share the same
+JVM, CPU cores, heap, and garbage collector, so isolation is architectural—not
+physical.
 
 `start()` spawns one `SbkWriter` per `-writers` and one `SbkReader` per
 `-readers`. Each `SbkWriter.run()` is wrapped in
@@ -831,10 +1150,15 @@ concurrently. A `chainFuture = allOf(writersCB, readersCB)` triggers
 
 ### 4.4 Logger SPI — the other plug point
 
+The logger is the output-side plugin, mirroring the storage driver on the
+input/work side. The logger choices and their destinations are visualized in
+§10.2; the bootstrap sequence in §4.5 shows exactly when a logger is selected,
+opened, called, and closed.
+
 Drivers are the *consumers* of latency events (they generate them);
 loggers are the *producers* of human/machine-readable output. The
 contract is `RWLogger`
-(<ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/logger/RWLogger.java" />):
+([RWLogger.java](../sbk-api/src/main/java/io/sbk/logger/RWLogger.java)):
 
 ```java
 public non-sealed interface RWLogger
@@ -857,7 +1181,7 @@ logger discovery use the same package-scan helper.
 ### 4.5 Wiring a single benchmark — the bootstrap
 
 This is the control flow when a user runs
-`./sbk -class minio -writers 4 -size 1048576 -seconds 60`:
+`./build/install/sbk/bin/sbk -class minio -writers 4 -size 1048576 -seconds 60`:
 
 ```mermaid
 sequenceDiagram
@@ -866,28 +1190,29 @@ sequenceDiagram
     participant Sbk as Sbk.run
     participant Bench as SbkBenchmark
     participant Store as "MinIO (Storage)"
-    participant Log as PrometheusLogger
+    participant Log as SystemLogger
     participant Perl as CQueuePerl
 
-    User->>Main: ./sbk -class minio ...
+    User->>Main: sbk -class minio ...
     Main->>Sbk: run(args, "sbk", "io.sbk.driver", "io.sbk.logger")
     Sbk->>Sbk: buildBenchmark(args)
     Note over Sbk: 1. Scan packages, load drivers and loggers
     Sbk->>Store: new MinIO()
-    Sbk->>Log:   new PrometheusLogger()
+    Sbk->>Log: no -out supplied, new SystemLogger()
     Sbk->>Store: addArgs(params)<br/>// register driver-specific flags
     Sbk->>Log:   addArgs(params)<br/>// register logger flags
     Sbk->>Sbk: params.parseArgs(cliArgs)
     Sbk->>Store: parseArgs(params)
     Sbk->>Log:   parseArgs(params)
     Sbk->>Bench: new SbkBenchmark(params, storage, dType, logger, time)
+    Note over Bench,Perl: constructor builds PerL instances and executors
 
     Sbk->>Bench: start()
     Bench->>Log:   open(params)
     Bench->>Store: openStorage(params)
     Bench->>Store: createWriter(i, params)  ×N
     Bench->>Perl: writePerl.run(seconds, records)
-    Note over Perl: PerL recorder thread starts<br/>(busy-wait loop)
+    Note over Perl: PerL recorder task starts<br/>(park-based empty-queue loop)
     Bench->>Bench: spawn 4× SbkWriter.run() via executor
 
     loop per operation
@@ -907,7 +1232,7 @@ sequenceDiagram
 The whole boot — argument parsing, class discovery, instantiation,
 PerL wiring, executor sizing, timeout scheduling — happens in roughly
 the 300 lines of
-<ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/api/impl/Sbk.java" />.
+[Sbk.java](../sbk-api/src/main/java/io/sbk/api/impl/Sbk.java).
 The actual benchmark loop is in `SbkWriter`/`SbkReader` and finishes via
 the chained `CompletableFuture`s set up in `SbkBenchmark.start()`.
 
@@ -961,8 +1286,8 @@ flowchart TB
 
 The two YAL variants — **SBK-YAL** (SBK YML Arguments Loader) and
 **SBK-GEM-YAL** (SBK-GEM YML Arguments Loader) — are intentionally thin
-shells. They do three things, exemplified by
-<ref_file file="/root/projects/SBK/sbk-yal/src/main/java/io/sbk/api/impl/SbkYal.java" />:
+shells. They do four things, exemplified by
+[SbkYal.java](../sbk-yal/src/main/java/io/sbk/api/impl/SbkYal.java):
 
 1. Parse the YML file with the Jackson dataformat library (`SbkYmlMap`
    looks for an `sbkArgs:` key; `SbkGemYmlMap` looks for an
@@ -984,11 +1309,32 @@ sbkArgs:
   url:      https://my.s3.endpoint:9021
 ```
 
-You can override any of these from the CLI: `./sbk-yal --file run.yml -seconds 600`.
+You can override any of these from the CLI:
+`./build/install/sbk-yal/bin/sbk-yal -file run.yml -seconds 600`.
 (The default filename, set in `sbk-yal.properties`, is `./sbk.yml`.)
 
 The same pattern applies to `sbk-gem-yal`, which uses `SbkGemYmlMap`
 looking for an `sbkGemArgs:` key, then delegates to `SbkGem.run()`.
+
+```mermaid
+flowchart LR
+    YML["sbk.yml<br/>sbkArgs map"] --> LOAD["Jackson YML parser"]
+    LOAD --> TOKENS["Convert entries<br/>to -flag value tokens"]
+    CLI["Additional CLI flags"] --> MERGE["SbkUtils.mergeArgs"]
+    TOKENS --> MERGE
+    MERGE --> RULE["CLI value wins<br/>when a flag appears twice"]
+    RULE --> RUN["Sbk.run<br/>same path as normal CLI"]
+
+    classDef config fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef transform fill:#fef3c7,stroke:#a16207,color:#000
+    classDef execute fill:#dcfce7,stroke:#166534,color:#000
+    class YML,CLI config
+    class LOAD,TOKENS,MERGE,RULE transform
+    class RUN execute
+```
+
+YAL is therefore not a second benchmark engine. It is an argument adapter;
+after merging, the ordinary SBK bootstrap, driver, PerL, and logger code run.
 
 ---
 
@@ -1009,57 +1355,51 @@ historically as *"SBK-RAM: Results Aggregation Monitor"* — same thing.)
 
 ```mermaid
 flowchart TB
-    subgraph NODE1["Client node 1"]
-        S1["SBK<br/>writers + readers"] --> G1["GrpcLogger"]
-    end
-    subgraph NODE2["Client node 2"]
-        S2["SBK<br/>writers + readers"] --> G2["GrpcLogger"]
-    end
-    subgraph NODE3["Client node 3"]
-        S3["SBK<br/>writers + readers"] --> G3["GrpcLogger"]
-    end
-    subgraph NODE4["Client node N"]
-        SN["SBK"] --> GN["GrpcLogger"]
+    subgraph CLIENTS["Load-generator hosts"]
+        direction LR
+        C1["SBK client 1<br/>workers + local PerL"] --> L1["GrpcLogger<br/>batch latency counts"]
+        C2["SBK client 2<br/>workers + local PerL"] --> L2["GrpcLogger<br/>batch latency counts"]
+        CN["SBK client N<br/>workers + local PerL"] --> LN["GrpcLogger<br/>batch latency counts"]
     end
 
-    subgraph SBM_HOST["SBM host"]
-        SBM_SRV["<b>SBM gRPC server</b><br/>port 9717"]
-        AGG["SbmLatencyBenchmark<br/>lock-free queue array + window"]
-        REC["<b>SbmTotalWindowLatencyPeriodicRecorder</b><br/>merges client histograms"]
-        SBM_LOG["SbmPrometheusLogger<br/>(port 9719)"]
+    subgraph TARGET["Storage system under test"]
+        SUT["Shared storage cluster<br/>S3, Kafka, database, filesystem, ..."]
     end
 
-    G1 -- "addLatenciesRecord(record)" --> SBM_SRV
-    G2 -- "addLatenciesRecord(record)" --> SBM_SRV
-    G3 -- "addLatenciesRecord(record)" --> SBM_SRV
-    GN -- "addLatenciesRecord(record)" --> SBM_SRV
-
-    SBM_SRV --> AGG
-    AGG     --> REC
-    REC     --> SBM_LOG
-
-    subgraph STORAGE["Storage system under test"]
-        SUT["Cluster (S3, Kafka, …)"]
+    subgraph CONTROL["SBP control plane"]
+        VER["Version check"] --> CFG["Configuration check"] --> REG["Client registration"]
     end
 
-    S1 --> SUT
-    S2 --> SUT
-    S3 --> SUT
-    SN --> SUT
+    subgraph SBM_HOST["SBM aggregation host"]
+        RPC["gRPC service<br/>port 9717"] --> QA["Queue array<br/>clientID modulo maxQueues"]
+        QA --> ONE["Single aggregation consumer"]
+        ONE --> MERGE["Merge counters + latency counts"]
+        MERGE --> REPORT["Combined reports<br/>stdout / Prometheus 9719"]
+    end
 
-    classDef cli fill:#dcfce7,stroke:#166534,color:#000
-    classDef sbm fill:#fef3c7,stroke:#a16207,color:#000
-    classDef sut fill:#fecaca,stroke:#991b1b,color:#000
-    class S1,S2,S3,SN,G1,G2,G3,GN cli
-    class SBM_SRV,AGG,REC,SBM_LOG sbm
-    class SUT sut
+    C1 --> SUT
+    C2 --> SUT
+    CN --> SUT
+    L1 --> VER
+    L2 --> VER
+    LN --> VER
+    REG --> RPC
+
+    classDef client fill:#dcfce7,stroke:#166534,color:#000
+    classDef protocol fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef server fill:#fef3c7,stroke:#a16207,color:#000
+    classDef target fill:#fee2e2,stroke:#991b1b,color:#000
+    class C1,C2,CN,L1,L2,LN client
+    class VER,CFG,REG protocol
+    class RPC,QA,ONE,MERGE,REPORT server
+    class SUT target
 ```
 
 ### 6.2 The SBP gRPC contract
 
 **SBP** — **Storage Benchmark Protocol** — is the wire protocol clients
 use to talk to SBM. It is a gRPC service defined in
-`sbk-api/src/main/proto/sbp.proto`, with six RPCs:
+[`sbp.proto`](../sbk-api/src/main/proto/sbp.proto), with six RPCs:
 
 | RPC | Request | Response | Purpose |
 |---|---|---|---|
@@ -1089,22 +1429,75 @@ message MessageLatenciesRecord {
 }
 ```
 
-**This is the key design choice**: clients ship pre-aggregated
-*histograms*, not raw samples. A client that has just observed one
-million PUTs at p50 ≈ 300 ms can encode the entire distribution into a
-map of perhaps ~200 entries (latency-value → count). Across N clients
-that's `200N` bytes per push, not `8 × 1_000_000 × N` bytes of raw
-samples. Bandwidth and SBM-side memory both stay bounded.
+The differentiating design choice is the `latency` map: a client sends one
+entry per **distinct recorded latency value**, with the number of operations
+that observed that value. It also sends totals, valid/invalid/discard counts,
+bytes, active/max reader and writer counts, and request/timeout counters.
+SBM therefore receives enough information to recompute a global percentile
+distribution; it does not attempt the mathematically invalid operation of
+averaging client percentiles.
+
+`GrpcLogger` batches this data at periodic logger output and also flushes when
+its estimated latency-map payload reaches `maxRecordSizeMB` (4 MiB by
+default). The network saving depends on the workload:
+
+```text
+raw representation       proportional to number of operations
+SBP latency map           proportional to number of distinct latency values
+```
+
+If a million operations occupy 200 integer latency values, the map is much
+smaller than a million raw samples. If nearly every operation has a distinct
+nanosecond value, the benefit is smaller and the size threshold creates more
+batches. Protobuf map entries also have encoding overhead, so entry count must
+not be described as byte count.
+
+#### SBP connection and data lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as GrpcLogger
+    participant S as SBM gRPC service
+    participant Q as SbmLatencyBenchmark
+    participant A as Aggregation window
+
+    C->>S: getVersion()
+    S-->>C: major, minor
+    Note over C: reject a major-version mismatch
+    C->>S: getConfig()
+    S-->>C: storage, action, time unit, latency range
+    Note over C: require storage/action/time-unit match
+    C->>S: registerClient(config)
+    S-->>C: clientID
+
+    loop periodic output or size-triggered flush
+        C->>C: aggregate latency to count + counters
+        C->>S: addLatenciesRecord(clientID, sequence, map, totals)
+        S->>Q: enqueue by clientID modulo maxQueues
+        Q->>A: merge accepted record
+        S-->>C: Empty acknowledgment
+    end
+
+    C->>S: closeClient(clientID)
+    S-->>C: Empty acknowledgment
+```
+
+The major SBP version is enforced by `GrpcLogger`. Storage name, action, and
+time unit must match the server configuration; latency-range and request-log
+differences currently produce warnings. `sequenceNumber` is populated by the
+client, but the current SBM implementation does not validate it, deduplicate
+records, or retry missing records. SBP therefore provides aggregation
+semantics, not exactly-once delivery. Treat transport failures, client exits,
+invalid/discard counts, and connection logs as part of result validation.
 
 ### 6.3 SBM's internal architecture
 
-SBM is itself a multi-thread application — but it borrows the same
-**lock-free-queue-array + single-consumer** pattern PerL uses on the
-client side. The queues here are also `ConcurrentLinkedQueue`
-instances (held inside a `ConcurrentLinkedQueueArray`), so the gRPC
-worker threads enqueue with a single CAS and never block each other.
-The single background consumer drains them and feeds the aggregation
-window:
+SBM borrows PerL's **non-blocking queue-array + single-consumer** shape.
+Inbound gRPC threads enqueue complete `MessageLatenciesRecord` batches into
+`ConcurrentLinkedQueue` instances. A background task drains the queues and is
+the sole owner of the aggregation window. Queue operations can allocate and
+retry CAS under contention, but do not wait for an application mutex.
 
 ```mermaid
 flowchart TB
@@ -1118,10 +1511,10 @@ flowchart TB
         ENQ["addLatenciesRecord(record)<br/>then registry.enQueue(record)"]
     end
 
-    subgraph QUEUES["SbmLatencyBenchmark lock-free queue array<br/>ConcurrentLinkedQueueArray"]
+    subgraph QUEUES["SbmLatencyBenchmark queue array"]
         SQ1["Queue 0"]
         SQ2["Queue 1"]
-        SQN["Queue maxQs-1<br/>(default 16 queues)"]
+        SQN["Queue maxQueues-1<br/>(default 10 queues)"]
     end
 
     subgraph BG["Background consumer thread"]
@@ -1147,23 +1540,23 @@ flowchart TB
     MERGE -->|"window rotates every 5 s"| OUT["stdout + Prometheus :9719"]
 ```
 
-Just like PerL on the client side:
+The important details are:
 
-- **Multiple inbound producers** (one per gRPC call) deposit into the
-  **lock-free queue array**. Each individual queue is a JDK
-  `ConcurrentLinkedQueue` (`offer()` is CAS-only — no
-  `synchronized` blocks anywhere on the path from a gRPC call to the
-  queue tail). The array stripes load across `maxQs` such queues to
-  reduce CAS contention; the queue for a given record is
-  `clientID % maxQs`, so every client lands in a deterministic queue
-  and per-client ordering is preserved.
+- **Multiple inbound producers** deposit into the queue array. The queue index
+  is `clientID % maxQueues`, so all records from one client use the same queue
+  and different clients are spread over the configured queues. This mapping
+  alone is not an ordering or exactly-once guarantee; the server currently
+  does not inspect `sequenceNumber`.
 - **A single background thread** drains all queues round-robin and
-  feeds them into a `LatencyRecordWindow` (the same PerL window class
-  the clients use!). Single-consumer means no synchronisation is
-  needed inside the window either — histogram updates are plain
-  `++` on local data.
+  feeds them into a `LatencyRecordWindow`, reusing PerL's latency-window
+  machinery. Single ownership means the non-thread-safe window does not need
+  concurrent updates.
 - **Window rotation** — every 5 s by default — produces a combined
   periodic line on stdout and ticks the Prometheus gauges.
+- **Empty-queue behavior differs from client PerL.** `SbmLatencyBenchmark`
+  sleeps for `idleMS` (10 ms by default) when no record is found; it does not
+  use `ElasticWait`. This is appropriate because SBP transports batches, not
+  one message per storage operation.
 
 ### 6.4 Histogram merging
 
@@ -1171,26 +1564,98 @@ Aggregating histograms is the one place SBM does mathematics. When
 client A reports `{100ms→500, 200ms→300}` and client B reports
 `{100ms→700, 300ms→200}`, the merged histogram is:
 
+```mermaid
+flowchart LR
+    A["Client A<br/>100 ms: 500<br/>200 ms: 300"] --> ADD["Add counts<br/>for equal latency keys"]
+    B["Client B<br/>100 ms: 700<br/>300 ms: 200"] --> ADD
+    ADD --> M["Merged distribution<br/>100 ms: 1200<br/>200 ms: 300<br/>300 ms: 200"]
+    M --> CUM["Sort keys + cumulative counts"]
+    CUM --> P["Compute global<br/>p50 / p95 / p99 / ..."]
+
+    WRONG["Do not average<br/>client p99 values"] -. invalid shortcut .-> P
+
+    classDef client fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef merge fill:#dcfce7,stroke:#166534,color:#000
+    classDef warning fill:#fee2e2,stroke:#991b1b,color:#000
+    class A,B client
+    class ADD,M,CUM,P merge
+    class WRONG warning
+```
+
 ```
 {100ms → 1200,  200ms → 300,  300ms → 200}
 ```
 
 Concretely
-(<ref_file file="/root/projects/SBK/sbm/src/main/java/io/sbm/api/impl/SbmTotalWindowLatencyPeriodicRecorder.java" />):
+([SbmTotalWindowLatencyPeriodicRecorder.java](../sbm/src/main/java/io/sbm/api/impl/SbmTotalWindowLatencyPeriodicRecorder.java)):
 
 ```java
 record.getLatencyMap().forEach(window::reportLatency);
 ```
 
 `window.reportLatency(latency, count)` increments the bucket count by
-`count`. After all clients have reported, percentiles are computed from
-the merged distribution exactly as for a single client (cumulative
-sum). The math is identical; only the *source* of the counts changes.
+`count`. After accepted client records are merged, percentiles are computed
+from the combined counts exactly as for a single integer-bucket distribution.
+Addition of bucket counts is associative and commutative, so merge order does
+not alter the mathematical result.
 
-This is why SBM doesn't have to know how many clients are running, or
-their individual percentiles, or anything else — it just adds counts.
-**Histogram merging is associative** — you can merge in any order and
-get the same answer.
+SBM tracks registered connections and per-client reader/writer maxima, but it
+does not need each client's precomputed percentile. The merge is lossless
+relative to the latency/count maps that actually arrive. It cannot reconstruct
+records lost in transport, discarded outside a configured range, quantized by
+an upstream representation, duplicated, or omitted by a failed client.
+
+### 6.5 Why SBP is a distributed-benchmarking differentiator
+
+SBP separates **workload generation** from **result aggregation** without
+reducing each node to averages or already-computed percentiles:
+
+| Distributed concern | SBP/SBM response |
+|---|---|
+| One client cannot saturate the target | Add SBK client hosts; each retains its local worker/PerL pipeline. |
+| Per-client p99 values cannot be averaged | Transfer latency-to-count maps and recompute p99 after merging. |
+| Clients accidentally run incompatible tests | Check protocol major version, storage name, action, and time unit before registration. |
+| Raw samples would create excessive network traffic | Batch repeated latency values as counts and flush periodically/at a size threshold. |
+| Concurrent RPC handlers would contend on one aggregate | Enqueue batches into a sharded queue array; one consumer owns the aggregate window. |
+| A single report is needed for the cluster load | Sum records, bytes, request counters, reader/writer counts, and latency buckets at SBM. |
+
+```mermaid
+flowchart TB
+    subgraph SCALEOUT["Horizontal load generation"]
+        C1["Client host 1<br/>CPU + network"]
+        C2["Client host 2<br/>CPU + network"]
+        CN["Client host N<br/>CPU + network"]
+    end
+    TARGET["Shared storage target"]
+    C1 --> TARGET
+    C2 --> TARGET
+    CN --> TARGET
+
+    C1 -->|SBP latency counts| SBM["SBM<br/>one aggregation authority"]
+    C2 -->|SBP latency counts| SBM
+    CN -->|SBP latency counts| SBM
+    SBM --> RESULT["One combined distribution<br/>and cluster-wide report"]
+
+    LIMIT1["Client-side limits"] -. constrain load .-> SCALEOUT
+    LIMIT2["SBM CPU / queues / memory"] -. constrain aggregation .-> SBM
+    LIMIT3["Target capacity"] -. constrains useful scaling .-> TARGET
+
+    classDef client fill:#dcfce7,stroke:#166534,color:#000
+    classDef target fill:#fee2e2,stroke:#991b1b,color:#000
+    classDef aggregate fill:#f3e8ff,stroke:#7e22ce,color:#000
+    classDef limit fill:#fef3c7,stroke:#a16207,color:#000
+    class C1,C2,CN client
+    class TARGET target
+    class SBM,RESULT aggregate
+    class LIMIT1,LIMIT2,LIMIT3 limit
+```
+
+This architecture scales load generation horizontally while keeping one
+well-defined aggregation point. Its practical ceiling is determined by SBP
+batch cardinality and rate, gRPC/network capacity, `maxQueues`, the single SBM
+consumer, and the aggregation-window memory settings. For large studies,
+monitor the SBM host and increase batching before assuming that adding clients
+will produce linear throughput.
 
 ---
 
@@ -1258,6 +1723,10 @@ sequenceDiagram
 
 ### 7.2 What SBK-GEM is and isn't
 
+Use the sequence diagram in §7.1 as the map for this section: GEM owns the SSH
+and launch steps, SBM owns aggregation, and each remote SBK process still owns
+its storage workers and local PerL pipeline.
+
 SBK-GEM is a **pure orchestrator**:
 
 - It does **not** aggregate latency numbers itself.
@@ -1273,6 +1742,10 @@ standalone without SBK-GEM if your nodes are already set up — just
 point each one's `-out GrpcLogger -sbm <host>` at it.
 
 ### 7.3 SSH implementation
+
+In the §7.1 diagram, the `SshSession[]` participant expands into the classes
+described below. It is transport/orchestration infrastructure, not part of the
+per-operation measurement path.
 
 SBK-GEM uses **Apache Mina SSHD** (a pure-Java SSH client; no native
 binary, no `ssh` shell-out). Each remote node is a `SshSession`:
@@ -1303,134 +1776,231 @@ binary once, not twice.
 
 ## 8. Why is SBK a high-performance framework?
 
-There is a tension at the core of any benchmarking tool: it has to be
-*at least as fast as the thing it's measuring*. If the harness's own
-recording overhead becomes the bottleneck, the latencies you measure
-are the harness's tail, not the storage's tail. SBK is engineered
-specifically to push the harness's overhead out of the way of the
-measurement.
+There is a tension at the core of a benchmark harness: it must generate enough
+load to expose the storage limit while doing little enough measurement work
+that it does not become the observed limit. SBK addresses this with a staged
+pipeline. The stages scale in different ways, and understanding those
+boundaries is more useful than a blanket “zero overhead” claim.
 
-Here are the concrete design choices that make this work, with the
-property each one buys:
+### 8.1 Separate load generation from measurement aggregation
 
-### 8.1 No sampling — every operation contributes
+The red/blue/green pipeline diagram in §3.1 visualizes this separation; §3.2
+then names the concrete PerL classes behind each stage.
 
-Many benchmark tools (YCSB, sysbench, fio's `lat_log` mode at high
-rates) sample down once they exceed some sample budget. This biases
-the tail: the 99.9th percentile is computed from a reservoir that
-*might not contain* the rare slow samples that define p99.9.
+Writer and reader tasks perform driver operations and capture operation
+boundaries. They submit compact `(startTime, endTime, records, bytes)` records
+to PerL. A different task drains those records, updates latency distributions,
+rotates windows, and invokes the logger. Consequently, sorting percentile
+buckets and exporting console/CSV/Prometheus/gRPC data do not execute inline
+with a synchronous driver call.
 
-SBK records every single operation. The PerL `LatencyRecordWindow`
-backends are explicitly designed for this:
+For an asynchronous driver, the default `Writer.recordWrite` sends the record
+when the returned `CompletableFuture` completes. Drivers may override these
+helpers, so driver documentation must define what completion means (accepted,
+acknowledged, committed, flushed, or end-to-end consumed).
 
-- **Array backend** at O(1) per sample with zero allocation;
-- **HashMap backend** at O(1) average for arbitrary latency ranges;
-- **HdrHistogram backend** for the total-window — sparse compressed
-  storage for nanosecond resolution across a 7+ decade range.
+### 8.2 Use non-blocking, sharded queue hand-off
 
-### 8.2 Lock-free concurrent queues on the hot path
+See the two-level channel/queue topology in §3.3 Pillar 1. It shows why adding
+workers also adds queue shards instead of directing every worker to one queue.
 
-The worker thread's only contact with PerL is
-`perlChannel.send(start, end, n, bytes)`, which boils down to
-`ConcurrentLinkedQueue.offer()` — a single atomic compare-and-swap
-on the queue's tail pointer. **No `synchronized` block, no
-`ReentrantLock`, no monitor entry of any kind** on the producer
-path. This is the Michael-Scott non-blocking queue algorithm in
-the JDK, and it is the structural property the rest of PerL is
-built around: a worker thread *cannot* be blocked by another
-thread for queue-handoff reasons, because there is no lock to
-wait on. The recorder side (`poll()`) has the same property.
+`ConcurrentLinkedQueue` removes application-level mutex ownership from the
+worker-to-recorder hand-off. `ConcurrentLinkedQueueArray` then distributes
+traffic over several queues instead of one shared head/tail pair. With the
+default topology, worker count increases the number of channels and each
+channel contains 10 queues. This is how PerL avoids turning one central queue
+into the first point of contention as more producer tasks run on more cores.
 
-### 8.3 Lock-free queues, scaled by an array layout
+This is not cost-free: `TimeStamp` and queue-node allocation add GC pressure,
+and CAS may retry. Queue sharding reduces contention; it does not abolish CPU,
+memory, or scheduler limits.
 
-A single lock-free queue is fast, but if N producers all CAS the
-same tail pointer simultaneously, they keep retrying each other's
-updates — CAS contention grows with N. PerL preserves lock-freedom
-under high concurrency by stacking many lock-free queues into a
-`ConcurrentLinkedQueueArray`: `qPerWorker × workers` queues
-(default 10 × N). Producers route to queues via `wIndex`; the
-single consumer rotates through them via `rIndex`. So each
-individual queue still has only a small number of producers
-touching it, the CAS retries stay rare, and the per-record cost
-remains O(1) lock-free.
+### 8.3 Scale the worker stage with CPU and I/O concurrency
 
-### 8.4 Single-consumer recorder
+`SbkBenchmark` sizes its main executor as `writers + readers + 23` and supports
+three modes:
 
-By construction there is exactly *one* recorder thread per direction
-(read or write). The windows it writes to are never read by anyone
-else during recording, so **no synchronisation is needed inside the
-windows**. This is one of the biggest wins: the histogram updates,
-which happen at the full event rate, are plain `++` on local data
-structures.
+| CLI | Executor | Best fit |
+|---|---|---|
+| `-thread p` | Fixed platform-thread pool | Default; predictable OS-thread behavior. |
+| `-thread f` | `ForkJoinPool` | CPU-oriented or fork/join-friendly work. |
+| `-thread v` | Fixed executor creating virtual threads | Many blocking I/O tasks, subject to driver behavior and JVM carrier availability. |
 
-### 8.5 Adaptive busy-wait
-
-When all queues are empty, the recorder spins for `idleNS` ns (default
-1 µs), then doubles, then doubles again, up to one window interval.
-This adaptive back-off (`ElasticWait`) keeps CPU usage low at low
-event rates while introducing minimum latency at high event rates.
-Crucially the minimum is 1 µs — sub-millisecond storage systems get a
-fair shake.
-
-### 8.6 Clock-query amortisation via `ElasticWait`
-
-This deserves its own line because it is what allows the harness to
-*not* perturb the system it is measuring. Worker threads call
-`time.getCurrentTime()` twice per operation (once for `startTime`,
-once for `endTime`); if the recorder thread also called the clock on
-every idle spin (megahertz rates with the default 1 µs idle), the
-two would contend on the same OS time-source. PerL's recorder
-contributes **zero clock calls per record processed** and roughly
-**one clock call per window interval** when idle — i.e., one every
-~5 seconds, not one every µs. See Pillar 3 in §3.3 for the full
-mechanism; the structural property is that the harness shares the
-system clock with the workers without competing for it.
-
-### 8.7 Single-binary distribution; no native dependencies
-
-PerL is pure Java. The hot path doesn't call into JNI; there are no
-syscalls per record. This makes the whole stack JIT-friendly and means
-the recorded `endTime - startTime` mostly reflects the I/O it's
-measuring, not the harness.
-
-### 8.8 JVM-native concurrency primitives
-
-`CompletableFuture`, `ForkJoinPool`, and (optionally) virtual threads
-mean the harness scales with the JVM's evolving concurrency story.
-Virtual threads in particular are a major win for I/O-bound drivers:
-you can run thousands of "writer threads" against an HTTP-based S3
-service at the cost of a few platform threads.
-
-### 8.9 The distributed picture also scales
-
-For workloads where a single client can't saturate the system, SBK-GEM
-+ SBM linearly scale the workload across N machines. Each client uses
-the same PerL pipeline locally; only the **histograms** (not the raw
-samples) cross the network. Bandwidth scales with **number of distinct
-latency values**, not number of operations.
+Increasing `-writers` or `-readers` exposes more independent operations to the
+JVM and storage client. It can use additional CPU cores and outstanding I/O
+capacity until another stage saturates. The usual ceilings are driver
+connection pools, target-side limits, network bandwidth, CPU, allocation/GC,
+and PerL's single recorder for that direction.
 
 ```mermaid
 flowchart LR
-    subgraph CLIENT["One SBK client"]
-        DRV["Driver"] -->|nanos to micros| HOT["perlChannel.send()<br/>(CAS-only)"]
-        HOT -->|microseconds| Q["Lock-free queue array<br/>(CAS-only enqueue)"]
-        Q -->|amortised| REC["Recorder thread"]
-        REC -->|every 5s| WIN["Periodic window"]
-        WIN -->|seconds| LOG["Logger"]
-    end
-    LOG -->|periodic histogram batch| SBM["SBM aggregator"]
+    MORE["Increase writers / readers"] --> READY{"Unused CPU or<br/>I/O capacity exists?"}
+    READY -->|yes| PAR["More operations overlap<br/>throughput may rise"]
+    PAR --> NEXT{"Which resource<br/>saturates next?"}
+    NEXT --> CPU["CPU cores"]
+    NEXT --> NET["Network"]
+    NEXT --> SDK["SDK connection pool"]
+    NEXT --> STORE["Storage target"]
+    NEXT --> REC["PerL recorder"]
+    NEXT --> GC["Heap / GC"]
+    READY -->|no| BACKLOG["Extra tasks add queueing,<br/>context switching, or backlog"]
 
-    classDef hot fill:#ef4444,color:#fff,stroke:#7f1d1d
-    classDef warm fill:#fbbf24,color:#000,stroke:#92400e
-    classDef cool fill:#a7f3d0,color:#000,stroke:#065f46
-    class HOT,Q hot
-    class REC warm
-    class WIN,LOG,SBM cool
+    classDef action fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef gain fill:#dcfce7,stroke:#166534,color:#000
+    classDef decision fill:#fef3c7,stroke:#a16207,color:#000
+    classDef limit fill:#fee2e2,stroke:#991b1b,color:#000
+    class MORE action
+    class PAR gain
+    class READY,NEXT decision
+    class CPU,NET,SDK,STORE,REC,GC,BACKLOG limit
 ```
 
-Reading this diagram: red = nanosecond-budget (on the worker thread,
-must be minimal); orange = amortised work on the recorder thread; green
-= "human time" — once-per-window or once-per-batch logging.
+The correct worker count is therefore empirical. Increase concurrency in
+steps and stop when throughput flattens, latency/backlog grows unexpectedly,
+or the resource relevant to the experiment reaches its intended limit.
+
+### 8.4 Keep one owner for each latency window
+
+The recorder decision-flow diagram in §3.3 Pillar 2 shows this ownership in
+motion: only the recorder reaches the window-update and rotation boxes.
+
+There is normally one recorder consumer for writes and one for reads. Each
+consumer alone mutates its periodic and total windows, so the window
+implementations can remain non-thread-safe and avoid per-bucket locking. This
+is a major efficiency property, but also an explicit scaling boundary: if one
+recorder cannot drain its queues at the generated event rate, adding workers
+will increase backlog rather than useful benchmark throughput.
+
+### 8.5 Use available memory deliberately
+
+PerL's storage strategy turns heap capacity into a tunable measurement
+resource:
+
+- A wider exact array range consumes more memory even for unobserved values.
+- A HashMap consumes memory with the number of distinct observed integer
+  latency values and has per-entry overhead.
+- A larger periodic/total map budget reduces how often full windows must be
+  printed and reset.
+- HdrHistogram bounds a wide distribution with three-significant-digit
+  precision; CSV trades heap retention for file I/O and disk capacity.
+- Queue count also consumes memory, and a recorder that falls behind retains
+  more queued objects.
+
+More heap can preserve larger exact distributions and absorb transient queue
+backlog, but excessive heap is not automatically faster: it may lengthen GC
+cycles. Record JVM heap, GC configuration, PerL properties, invalid values,
+and lower/higher discard counts with the benchmark result.
+
+```mermaid
+flowchart TD
+    HEAP["Available JVM heap"] --> QUEUE["Queue objects<br/>in-flight TimeStamp records"]
+    HEAP --> PERIODIC["Periodic window<br/>array or HashMap"]
+    HEAP --> TOTAL["Total-window<br/>HashMap buffer"]
+    DISK["Available disk"] --> CSV["Optional CSV extension"]
+    TOTAL --> MODE{"When exact buffer fills"}
+    MODE -->|plain HashMap| FLUSH["Print / reset total segment"]
+    MODE -->|HDR enabled| HDR["Fold counts into<br/>3-digit HDR representation"]
+    MODE -->|CSV enabled| CSV
+    QUEUE --> PRESSURE["If recorder falls behind:<br/>backlog + allocation + GC pressure"]
+
+    classDef resource fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef structure fill:#dcfce7,stroke:#166534,color:#000
+    classDef decision fill:#fef3c7,stroke:#a16207,color:#000
+    classDef risk fill:#fee2e2,stroke:#991b1b,color:#000
+    class HEAP,DISK resource
+    class QUEUE,PERIODIC,TOTAL,HDR,CSV,FLUSH structure
+    class MODE decision
+    class PRESSURE risk
+```
+
+### 8.6 Amortise idle-path work with `ElasticWait`
+
+The sequence diagram in §3.3 Pillar 3 contrasts the busy record path with the
+empty-queue park/check path.
+
+When queues contain records, the recorder uses each record's `endTime` for
+window checks. When all queues are empty, it parks for `idleNS` and increments
+counters; it queries the clock only after an adaptive batch. `setElastic`
+calibrates the next batch from observed elapsed time, compensating for
+`parkNanos` oversleep. This reduces clock-query and empty-poll overhead without
+changing the operation latency already captured by the worker.
+
+The configured default is 1 ms and the enforced minimum is 1 µs. Operators
+can instead set `sleepMS` to select the simpler sleeping recorder. Lower idle
+values favor prompt draining at the cost of more wake-ups; higher values favor
+lower idle CPU consumption at the cost of temporary queue backlog.
+
+### 8.7 Preserve every accepted observation, with explicit precision limits
+
+The memory-strategy diagrams in §3.3 Pillar 4 and §8.5 show where exact
+integer buckets end and optional HDR quantization begins.
+
+PerL does not reservoir-sample completed records submitted to it. Exact array
+and HashMap modes retain integer latency buckets within the configured range.
+HdrHistogram deliberately quantizes to three significant digits. Values below
+or above the configured range and invalid latencies are counted separately.
+Therefore, “no sampling” is accurate; “zero approximation under every
+configuration” is not.
+
+### 8.8 Scale beyond one load-generator host with SBP
+
+When a client host reaches its CPU, network, or connection limit before the
+storage system is saturated, SBK-GEM can run SBK on more hosts and SBM can
+combine their SBP latency/count batches. Load generation then scales
+horizontally, while aggregation remains centralized and mathematically
+correct for all accepted buckets. Scaling is not guaranteed to be linear:
+the storage target, network, gRPC service, SBM queue array, single aggregation
+consumer, or SBM memory can become the next limit.
+
+```mermaid
+flowchart LR
+    subgraph CORES["CPU and I/O concurrency"]
+        W1["Writer / Reader 1"]
+        W2["Writer / Reader 2"]
+        WN["Writer / Reader N"]
+    end
+
+    subgraph HANDOFF["Contention isolation"]
+        Q1["Concurrent queue shard"]
+        Q2["Concurrent queue shard"]
+        QN["Concurrent queue shard"]
+    end
+
+    subgraph OWNER["Single-owner measurement stage"]
+        R["Recorder for one direction"] --> P["Periodic exact window"]
+        P --> T["Total window / optional extension"]
+    end
+
+    subgraph OUTPUT["Amortised output"]
+        L["System / CSV / Prometheus / gRPC logger"] --> S["Optional SBP + SBM aggregation"]
+    end
+
+    W1 --> Q1
+    W2 --> Q2
+    WN --> QN
+    Q1 --> R
+    Q2 --> R
+    QN --> R
+    P --> L
+    T --> L
+
+    MEM["Available heap<br/>window budgets + queue backlog"] -. capacity .-> HANDOFF
+    MEM -. precision / retention .-> OWNER
+
+    classDef workers fill:#dcfce7,stroke:#166534,color:#000
+    classDef queues fill:#dbeafe,stroke:#1e40af,color:#000
+    classDef recorder fill:#fef3c7,stroke:#a16207,color:#000
+    classDef output fill:#f3e8ff,stroke:#7e22ce,color:#000
+    class W1,W2,WN workers
+    class Q1,Q2,QN,MEM queues
+    class R,P,T recorder
+    class L,S output
+```
+
+The diagram shows both kinds of scaling: cores and outstanding I/O expand the
+producer stage; heap and latency-window configuration expand buffering and
+distribution retention. The single owner keeps aggregation inexpensive but
+must be observed as a capacity boundary.
 
 ---
 
@@ -1440,6 +2010,9 @@ How would a CS student writing a new driver actually do it? Let's walk
 through it.
 
 ### 9.1 The Storage SPI in 7 methods
+
+Refer back to the three-phase driver lifecycle diagram in §4.1 while reading
+the interface below: configure, run, then release.
 
 ```java
 public interface Storage<T> {
@@ -1458,6 +2031,9 @@ recording, output, distribution. A driver author concentrates on the
 storage system.
 
 ### 9.2 Skeleton driver in ~30 lines
+
+The runtime discovery diagram in §9.3 shows how this class becomes reachable
+from `-class acmekv` after it is compiled into the distribution.
 
 Suppose you wanted to benchmark a hypothetical `acme-kv` key-value
 store. The skeleton would be:
@@ -1497,8 +2073,8 @@ The `AcmeKvWriter` only needs to implement
 
 Then add the driver to `settings-drivers.gradle` and `build-drivers.gradle`,
 implement `AcmeKvWriter` + `AcmeKvReader` in 20 lines each, and you can
-benchmark it with `./sbk -class acmekv -host my-acme:1234 -writers 4
--size 1024 -seconds 60`.
+benchmark it with `./build/install/sbk/bin/sbk -class acmekv
+-host my-acme:1234 -writers 4 -size 1024 -seconds 60`.
 
 ### 9.3 What happens at runtime — driver discovery
 
@@ -1575,7 +2151,7 @@ public class InfluxLogger extends AbstractRWLogger {
 ```
 
 Drop the class into `io.sbk.logger.impl`, run
-`./sbk -class minio -out InfluxLogger ...`, and you have InfluxDB
+`./build/install/sbk/bin/sbk -class minio -out InfluxLogger ...`, and you have InfluxDB
 metrics. **No changes to the harness.**
 
 ### 10.2 Five shipping logger options at a glance
@@ -1599,8 +2175,9 @@ flowchart LR
     class SYS,SLF,CSV,PRM,GRP opt
 ```
 
-The selection is made via the `-out` flag (default
-`PrometheusLogger`). The same class-name discovery used for drivers is
+The selection is made via the `-out` flag (default `SystemLogger`). Select
+`-out PrometheusLogger` explicitly when an HTTP metrics endpoint is required.
+The same class-name discovery used for drivers is
 used for loggers, so adding a new one is purely additive.
 
 ---
@@ -1610,9 +2187,9 @@ used for loggers, so adding a new one is purely additive.
 Let's trace one specific command through the entire stack:
 
 ```bash
-./sbk -class minio -url https://10.249.249.223:9021 \
-      -key user -secret pass -bucket bench \
-      -extra-headers x-emc-namespace=ns1 \
+./build/install/sbk/bin/sbk -class minio -url https://s3.example.test:9021 \
+      -key '<access-key>' -secret '<secret-key>' -bucket bench \
+      -extra-headers x-emc-namespace='<namespace>' \
       -writers 4 -size 1048576 -seconds 60
 ```
 
@@ -1626,15 +2203,15 @@ sequenceDiagram
     participant Sbk as Sbk.buildBenchmark
     participant Pkg as Package scanner
     participant Drv as MinIO driver
-    participant Log as PrometheusLogger
+    participant Log as SystemLogger
     participant Bench as SbkBenchmark
 
     JVM->>Main: main(args)
     Main->>Sbk: run(args, "sbk", "io.sbk.driver", "io.sbk.logger")
-    Sbk->>Pkg: scan io.sbk.driver.* → 55 classes
-    Sbk->>Pkg: scan io.sbk.logger.* → 5 classes
+    Sbk->>Pkg: scan configured storage package
+    Sbk->>Pkg: scan configured logger package
     Sbk->>Drv: instantiate MinIO()
-    Sbk->>Log: instantiate PrometheusLogger()
+    Sbk->>Log: no -out supplied, instantiate SystemLogger()
     Sbk->>Drv: addArgs(params)  — declare flags
     Sbk->>Log: addArgs(params)  — declare flags
     Sbk->>Sbk: parse command line
@@ -1649,30 +2226,31 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Bench as SbkBenchmark
-    participant Log as PrometheusLogger
+    participant Log as SystemLogger
     participant Drv as MinIO
     participant Mc as MinioClient (SDK)
     participant PerlW as writePerl (CQueuePerl)
 
+    Note over Bench,PerlW: PerlBuilder.build ran in SbkBenchmark constructor
     Bench->>Log: open(params, storageName, action, time)
-    Note over Log: Start Prometheus server on :9718
     Bench->>Drv: openStorage(params)
     Drv->>Mc: MinioClient.builder()<br/>.endpoint(url).credentials(...).region("us-east-1").build()
     Drv->>Mc: bucketExists("bench") → false
     Drv->>Mc: makeBucket("bench")
     Bench->>Drv: createWriter(0..3, params)  ×4
-    Bench->>PerlW: PerlBuilder.build(log, time, perlCfg, perlExec)
     Note over PerlW: spawn 1 recorder thread<br/>via perlExec (ForkJoinPool(5))
     Bench->>PerlW: writePerl.run(60, 0)
     Note over PerlW: recorder starts<br/>periodicRecorder.start(t0)
-    Bench->>Bench: spawn 4 SbkWriter via executor (4 platform threads)
+    Bench->>Bench: submit 4 SbkWriter tasks<br/>to platform-thread executor
 ```
 
 ### 11.3 The benchmark loop (60 seconds)
 
-Per second the system performs (roughly): 4 writers × (1/avg_lat) ops
-≈ 4 × (1000/300) = ~13 PUTs/s at 100 ms avg latency, or higher with
-better hardware. Each PUT runs through this pipeline:
+For a closed-loop synchronous example with four writers and 300 ms average
+operation latency, the rough upper estimate is `4 × (1000/300)`, or about 13
+PUTs/s. At 100 ms it would be about 40 PUTs/s. SDK concurrency, retries,
+rate-limiting, batching, and asynchronous completion can change this model.
+Each completed PUT runs through this pipeline:
 
 ```mermaid
 sequenceDiagram
@@ -1681,7 +2259,7 @@ sequenceDiagram
     participant Drv as MinIOWriter
     participant Sdk as MinIO SDK (OkHttp)
     participant Net as Network
-    participant Ch as PerlChannel<br/>(CAS-only producer)
+    participant Ch as PerlChannel<br/>(non-blocking hand-off)
     participant Q as ConcurrentLinkedQueue
     participant R as Recorder thread
     participant Win as Periodic window
@@ -1693,7 +2271,7 @@ sequenceDiagram
     Net-->>Sdk: 200 OK (avg ~300 ms over WAN)
     Sdk-->>Drv: return
     Drv->>Ch: perlChannel.send(t, now(), 1, size)
-    Ch->>Q: enqueue TimeStamp (CAS on tail)
+    Ch->>Q: enqueue TimeStamp
 
     Note over R: meanwhile, recorder loop:
     Q-->>R: receive() (CAS on head)
@@ -1701,10 +2279,11 @@ sequenceDiagram
     Note over Win: ++histogram[end - start]<br/>totalBytes += size
 ```
 
-The worker has done its job the moment it returns from
-`perlChannel.send()` — that takes nanoseconds. Everything else (the
-recorder, the windowing, the percentile computation) is happening on a
-separate thread.
+For a synchronous driver, the worker has completed measurement hand-off when
+`perlChannel.send()` returns. For an asynchronous driver, the default helper
+performs the send from the completion callback. Queue hand-off is intentionally
+small, but its latency depends on allocation, contention, GC, JVM, and host;
+the repository does not promise a fixed nanosecond cost.
 
 ### 11.4 The window rotation (every 5 s)
 
@@ -1714,15 +2293,15 @@ sequenceDiagram
     participant R as Recorder
     participant Win as Periodic window
     participant Tot as Total window
-    participant Log as PrometheusLogger
+    participant Log as SystemLogger
 
     Note over R: every 5 s, after recording an event:
     R->>Win: if elapsed > 5000ms then stopWindow(t)
     Win->>Win: compute 21 percentiles from histogram
     Win->>Log: printPeriodic(records, recPerSec, mbPerSec, avgLat, ..., p50, p95, p99, p99.9, p99.99, ...)
     R->>Win: startWindow(t) -- reset histogram
-    Note over Log: print stdout line +<br/>update Prometheus gauges
-    Note over Tot: Total window keeps accumulating<br/>never reset until run end
+    Note over Log: print stdout line
+    Note over Tot: Total accumulates across periods<br/>and may print/reset if configured storage fills
 ```
 
 ### 11.5 The end
@@ -1734,7 +2313,7 @@ sequenceDiagram
     participant Wk as 4 SbkWriters
     participant PerlW as writePerl
     participant Win as Total window
-    participant Log as PrometheusLogger
+    participant Log as SystemLogger
     participant Drv as MinIO
     participant Exec as executor
 
@@ -1753,11 +2332,10 @@ sequenceDiagram
     Note over Bench: future.complete(null) then main exits
 ```
 
-The exact format of the final stdout line (lifted from a real ObjectScale
-run earlier in this session):
+An abbreviated example of the final stdout line is:
 
 ```
-2026-06-06 20:00:07, Total Minio Writing  1 writers, 0 readers, ...
+2026-01-01 12:00:00, Total Minio Writing  1 writers, 0 readers, ...
    148 records, 2.5 records/sec, 0.00 MB/sec,
    405.5 ms avg latency, 291 ms min latency, 9010 ms max latency;
    SLC-1: 0, SLC-2: 9;
@@ -1765,9 +2343,11 @@ run earlier in this session):
    889 ms 95th, 990 ms 99th, 9010 ms 99.5th, 9010 ms 99.99th
 ```
 
-Each percentile in that line corresponds to one cumulative-sum lookup
-into the total-window histogram. **The whole distribution is intact**
-— SBK doesn't sample, doesn't bin coarsely, and doesn't approximate.
+Percentiles are derived from cumulative latency counts in the total window.
+PerL does not reservoir-sample submitted operations. Exactness is bounded by
+the selected time unit and latency range; invalid and out-of-range observations
+are reported separately, and HdrHistogram mode uses three-significant-digit
+quantization.
 
 ---
 
@@ -1803,11 +2383,11 @@ This means:
   SBK never touches the wire — it just measures how long the
   vendor's API call took.
 
-The harness, the latency recorder, the percentile machinery, the
-periodic reports — **all of that is byte-for-byte identical** between
-the two cases. That is precisely what makes cross-vendor comparisons
-fair: the *only* thing that differs is the driver's `writeAsync` /
-`read` implementation.
+The harness, PerL pipeline, and logger contracts are shared between the two
+cases. Driver payload types, operation/completion semantics, SDK retries,
+batching, connection pools, and durability guarantees can differ. Fair
+cross-vendor comparisons therefore require both the common harness settings
+and equivalent driver/storage semantics to be documented.
 
 ### 12.2 Example A — local file system benchmarking
 
@@ -1819,7 +2399,7 @@ Command:
 ```
 
 This runs the `File` driver — see
-<ref_file file="/root/projects/SBK/drivers/file/src/main/java/io/sbk/driver/File/File.java" />.
+[File.java](../drivers/file/src/main/java/io/sbk/driver/File/File.java).
 Every layer in the stack is on the same host:
 
 ```mermaid
@@ -1869,12 +2449,11 @@ page cache. To measure the storage device honestly, the user adds
 README), which drives the latency up by several orders of magnitude
 and exposes the real device behaviour.
 
-**What latency floor is the harness adding?** With `-sync 0` (buffered)
-and 4 KiB records, the File driver's `writeAsync` call is itself only
-a few microseconds. The PerL hot path (`perlChannel.send()`) is sub-
-microsecond. So the harness overhead is a single-digit percentage of
-the smallest measurable PUT — even on the most extreme case the
-framework supports.
+**What latency floor is the harness adding?** The answer is host- and
+configuration-dependent. Buffered file calls can be fast enough that timestamp
+queries, allocation, queue hand-off, JIT state, and GC are material. Measure a
+control driver and the File driver on the target JVM instead of assuming a
+fixed sub-microsecond or percentage overhead.
 
 ### 12.3 Example B — remote S3 (MinIO / ObjectScale) benchmarking
 
@@ -1882,14 +2461,14 @@ Command (from the MinIO driver README):
 
 ```bash
 ./build/install/sbk/bin/sbk -class minio \
-  -url https://10.249.249.223:9021 \
-  -key user -secret pass -bucket bench \
-  -extra-headers x-emc-namespace=ns1 \
+  -url https://s3.example.test:9021 \
+  -key '<access-key>' -secret '<secret-key>' -bucket bench \
+  -extra-headers x-emc-namespace='<namespace>' \
   -writers 4 -size 1048576 -seconds 60
 ```
 
 Now the driver acts as an HTTP/TLS client. See
-<ref_file file="/root/projects/SBK/drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIOWriter.java" />.
+[MinIOWriter.java](../drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIOWriter.java).
 
 ```mermaid
 flowchart TB
@@ -1905,7 +2484,7 @@ flowchart TB
         SDK["MinIO Java SDK<br/>PutObjectArgs.builder()"]
         OK["OkHttp client<br/>(TLS, connection pool)"]
         PERL["PerL recorder"]
-        LOG["PrometheusLogger :9718"]
+        LOG["SystemLogger<br/>stdout"]
     end
 
     NET(("🌐 Network<br/>(HTTPS / TLS)"))
@@ -1975,7 +2554,7 @@ or a Ceph RGW gateway, the *only* difference in the numbers is the
 storage system itself. Any latency comparison made this way is
 genuinely apples-to-apples.
 
-### 12.4 Side-by-side: the only thing that changes is the driver
+### 12.4 Side-by-side: the stable harness and variable driver boundary
 
 ```mermaid
 flowchart LR
@@ -2014,12 +2593,12 @@ flowchart LR
     class D1,D2,D3,D4 diff
 ```
 
-The driver layer (yellow) is the **only** thing that differs across
-storage backends. The green harness — `SbkBenchmark`, `SbkWriter`,
-`SbkReader`, PerL, `RWLogger` — is identical bit-for-bit. That is the
-property that lets a researcher compare RocksDB to Cassandra to S3 on
-exactly the same latency-measurement methodology, with no
-methodology-attributable noise creeping in.
+The green harness classes are reused across storage backends; the yellow
+driver/SDK boundary changes. This removes many accidental differences from
+hand-written benchmark clients, but it cannot make unlike storage semantics
+identical. A rigorous comparison aligns durability, acknowledgment point,
+payload, batching, retry policy, concurrency, warm-up, and target state in
+addition to using the same SBK flags.
 
 ---
 
@@ -2042,12 +2621,12 @@ SBK is the right substrate.
 
 | Property | What it gives you | Code evidence |
 |---|---|---|
-| **No-sample percentiles** | The p99.9 and p99.99 you publish are computed from **every** operation, not a reservoir sample. There is no sampling-bias term in your tail. | `LatencyRecordWindow.reportLatency()` increments a histogram bucket on every call. <ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/HashMapLatencyRecorder.java" /> + <ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/ArrayLatencyRecorder.java" />. |
-| **Lock-free concurrent queues end-to-end** | The measurement does **not** distort the latency you measure: the worker thread executes a single CAS to enqueue (no `synchronized`, no `Lock`, no allocation beyond a 32-byte `TimeStamp`); the single consumer dequeues with another CAS. A `ConcurrentLinkedQueueArray` stripes the load so the lock-free property holds even with many concurrent workers. SBM uses the same primitive on its server side. | `CQueueChannel.send()` → `ConcurrentLinkedQueue.offer()`. <ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/CQueuePerl.java" /> and <ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/ConcurrentLinkedQueueArray.java" />. |
-| **Single-consumer recording** | No contention between workers and recorder; histogram updates are `++` on local data. The harness will not become the bottleneck before the storage system does. | `PerformanceRecorderIdleBusyWait.run()` — one thread reads from all channels. <ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java" />. |
-| **No clock contention between measurer and measured** | The recorder makes 0 clock calls per record processed, and ~1 per window interval when idle. Workers do not compete with the harness for `System.nanoTime()`/`currentTimeMillis()`, so the harness does not perturb its own measurements. | `ElasticWait.waitAndCheck()` (counter-based back-off) + `PerformanceRecorderIdleBusyWait.run()` (reuses `t.endTime` instead of re-querying). <ref_file file="/root/projects/SBK/perl/src/main/java/io/perl/api/impl/ElasticWait.java" />. See §3.3 Pillar 3. |
-| **Identical methodology across vendors** | Comparison between, say, S3 and Cassandra has zero methodology-attributable variance. Only the driver's `writeAsync` differs (§12.4). | The same `SbkBenchmark`, `SbkWriter`, `PerL`, `RWLogger` instantiate identically for every `-class <driver>`. See <ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/api/impl/Sbk.java" />. |
-| **Distributed measurement is mathematically sound** | When you scale your study to N client machines, SBM aggregates **histograms**, which are associative. Merging is order-independent and lossless — unlike combining per-client averages or per-client percentiles, which is mathematically wrong. | `SbmTotalWindowLatencyPeriodicRecorder.addLatenciesRecord(record)`: `record.getLatencyMap().forEach(window::reportLatency)`. <ref_file file="/root/projects/SBK/sbm/src/main/java/io/sbm/api/impl/SbmTotalWindowLatencyPeriodicRecorder.java" />. |
+| **No reservoir sampling** | Every completed operation submitted to PerL contributes its count; invalid and out-of-range values remain visible as counters. Precision still depends on time unit, range, and backend. | `HashMapLatencyRecorder` and `ArrayLatencyRecorder` implement exact integer buckets; HDR uses three significant digits. |
+| **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `CQueueChannel.send()` delegates to `ConcurrentLinkedQueueArray.add()`. |
+| **Single-owner recording** | One consumer owns each direction's non-thread-safe windows, avoiding concurrent bucket updates. Its drain rate remains a capacity limit to monitor. | `PerformanceRecorderIdleBusyWait.run()` reads all channels for one PerL instance. |
+| **Amortised recorder clock checks** | Records carry worker timestamps; the empty path parks and checks time after an adaptive batch instead of on every poll. | `ElasticWait` plus `PerformanceRecorderIdleBusyWait`. |
+| **Shared harness across vendors** | Driver comparisons reuse orchestration, timing interfaces, PerL, and logger contracts. Equivalent durability/completion and SDK settings still require experimental control. | `Sbk`, `SbkBenchmark`, `SbkWriter`, and `SbkReader`. |
+| **Mergeable distributed distributions** | SBM adds latency counts and recomputes combined percentiles instead of averaging per-client percentiles. The result covers accepted SBP records, not missing or duplicated transport data. | `SbmTotalWindowLatencyPeriodicRecorder.addLatenciesRecord()`. |
 
 ### 13.2 Why "histograms are mergeable" matters for distributed studies
 
@@ -2058,10 +2637,9 @@ It depends on the underlying distributions and the number of samples
 each client produced. The correct way is to merge the raw
 distributions and recompute.
 
-SBK does this correctly because it ships **histograms** (the full
-distribution per period) over SBP rather than pre-computed
-percentiles. SBM then merges histograms before computing
-percentiles. The mathematics is in §6.4.
+SBP ships latency-to-count maps rather than pre-computed percentiles. SBM then
+merges those maps before computing percentiles. The mathematics and delivery
+limitations are in §6.4.
 
 If your study uses N client machines and reports a single p99, you
 need this property — and most ad-hoc benchmarking scripts get it
@@ -2071,7 +2649,7 @@ wrong.
 
 SBK publishes two summary statistics specific to its design — **SLC1**
 and **SLC2** — defined in the README and the design PDF
-<ref_file file="/root/projects/SBK/docs/sbk-slc.pdf" />. From the README:
+[sbk-slc.pdf](sbk-slc.pdf). From the README:
 
 > *"The SLC1 indicates the coefficient of dispersion from lower
 > latency percentile to median percentile. … The SLC2 indicates the
@@ -2095,7 +2673,7 @@ your "Experimental Setup" section makes the study fully reproducible:
 2. **Driver** used (e.g. `minio`, `cassandra`, `kafka`).
 3. **PerL configuration**: `qPerWorker`, `idleNS`, `maxArraySizeMB`,
    `maxHashMapSizeMB`, `histogram` (yes/no). Defaults are in
-   <ref_file file="/root/projects/SBK/perl/src/main/resources/perl.properties" />.
+   [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
    `-records`, `-throughput`, and any driver-specific flags.
 5. **Storage configuration** (cluster size, replication, region,
@@ -2107,8 +2685,9 @@ your "Experimental Setup" section makes the study fully reproducible:
    or `-out CSVLogger` (with the CSV file attached as supplementary
    material).
 
-Every one of these can be controlled via flags or properties, so the
-exact run is bit-reproducible from the same command.
+Together these details make the experiment repeatable. A command alone is not
+bit-reproducible across different JVMs, hosts, networks, SDK behavior, storage
+state, or random key generation; retain the environment and raw output too.
 
 ### 13.5 When *not* to use SBK for a study
 
@@ -2123,19 +2702,18 @@ Being explicit about scope strengthens any methodology section:
 - **Root-causing internal storage-system behaviour.** SBK measures
   external behaviour. For "*why* is the p99 high?" you also need
   bpftrace, eBPF, perf, or vendor-specific tools.
-- **Sub-microsecond inter-process IPC studies.** PerL's busy-wait
-  idle is configured at 1 µs minimum; for benchmarks where the
-  measured latency is below 1 µs, the harness's recording floor
-  starts to matter. Most storage benchmarks are nowhere near this
-  regime, but local IPC ring-buffer benchmarks may be.
+- **Very low-latency microbenchmarks without an overhead baseline.** PerL's
+  park minimum is 1 µs and its configured default is 1 ms, while timestamp,
+  allocation, queue, JIT, and GC costs depend on the host. Measure and publish
+  a control baseline before using SBK for sub-microsecond claims.
 
 ### 13.6 Tradeoffs SBK makes (and why they are usually the right ones)
 
 | Tradeoff | Why SBK chooses this |
 |---|---|
-| **Memory grows with distinct latency values** | The default 192 MB HashMap budget covers nanosecond resolution over hour-long runs for almost any storage system. If you exhaust it, SBK degrades gracefully to HdrHistogram (~2 MB sparse). |
-| **One CPU core caps recording rate** | Histogram updates take ~10 ns; even 100 M ops/sec is < 100 % of one core. In return, the histogram needs no synchronisation. For 99 % of storage benchmarks this is invisible. |
-| **JVM warm-up in the first 1–2 seconds** | SBK is Java. The standard `-seconds 60` defaults absorb warm-up. For sub-10-second studies, discard the first window (and SBK prints periodic windows so you can do this without re-running). |
+| **Memory grows with range or distinct latency values** | Array memory follows configured range; HashMap memory follows distinct values. Configured budgets bound selection/flush behavior. HDR offers bounded approximate precision when enabled; it is not an automatic exact fallback under every configuration. |
+| **One consumer owns each direction's windows** | This avoids synchronization in bucket updates but caps recorder throughput. Benchmark the intended event rate and watch CPU, GC, and queue growth instead of assuming a fixed operations/second limit. |
+| **JVM warm-up is workload- and JVM-dependent** | Use explicit warm-up runs or discard documented initial windows based on observed stabilization; do not assume a fixed 1–2-second warm-up. |
 | **End-to-end latency is per-driver** | The harness cannot know whether a driver's payload format supports embedding a timestamp. Drivers that do (e.g. Kafka, Pravega) measure true E2E; others measure per-operation. The driver README should make this explicit. |
 
 ### 13.7 In summary — when to choose SBK
@@ -2146,11 +2724,9 @@ Being explicit about scope strengthens any methodology section:
 > comparisons** that require identical measurement methodology.
 
 The framework gives you, by design and with code-level evidence, the
-properties that an academic-grade methodology requires: no-sample
-fidelity, **lock-free concurrent queues** that connect the workers to
-the recorder without ever taking a mutex, identical instrumentation
-across heterogeneous storage systems, and mathematically-correct
-distributed aggregation.
+properties useful to an academic methodology: no reservoir sampling,
+non-blocking concurrent-queue hand-off, shared harness instrumentation across
+heterogeneous storage systems, and count-based distributed aggregation.
 
 You still own the workload design, the SUT configuration, and the
 analysis. SBK is the *measurement substrate* — and on that axis it
@@ -2165,23 +2741,23 @@ deeper:
 
 ### In this repository
 
-- <ref_file file="/root/projects/SBK/README.md" /> — product overview, build, and quick start
+- [README](../README.md) — product overview, build, and quick start
 - `docs/README.md` — documentation index and reading paths
 - `docs/ARCHITECTURE.md` — concise source-linked architecture and code flow
 - `docs/REPOSITORY_MAP.md` — directory and ownership map
 - `docs/DRIVER_GUIDE.md` — driver inventory and implementation contract
-- <ref_file file="/root/projects/SBK/perl/README.md" /> — PerL library notes
-- <ref_file file="/root/projects/SBK/sbm/README.md" /> — SBM deployment guide
-- <ref_file file="/root/projects/SBK/sbk-gem/README.md" /> — SBK-GEM deployment guide
-- <ref_file file="/root/projects/SBK/sbk-yal/README.md" /> — YML format
-- <ref_file file="/root/projects/SBK/drivers/minio/README.md" /> — example driver doc + S3-specific tutorial
+- [PerL README](../perl/README.md) — PerL library notes
+- [SBM README](../sbm/README.md) — SBM deployment guide
+- [SBK-GEM README](../sbk-gem/README.md) — SBK-GEM deployment guide
+- [SBK-YAL README](../sbk-yal/README.md) — YML format
+- [MinIO driver README](../drivers/minio/README.md) — example driver doc + S3-specific tutorial
 
 ### Original design documents (PDFs in this repo)
 
-- <ref_file file="/root/projects/SBK/docs/sbk.pdf" /> — original SBK design paper, especially the concurrent-queue architecture
-- <ref_file file="/root/projects/SBK/docs/sbp.pdf" /> — SBP (Storage Benchmark Protocol) wire-format specification
-- <ref_file file="/root/projects/SBK/docs/sbk-slc.pdf" /> — SLC1/SLC2 (Sliding Latency Coverage) factor definitions
-- <ref_file file="/root/projects/SBK/docs/kafka-pravega.pdf" /> — comparison benchmark that motivated SBK
+- [sbk.pdf](sbk.pdf) — original SBK design paper, especially the concurrent-queue architecture
+- [sbp.pdf](sbp.pdf) — SBP (Storage Benchmark Protocol) wire-format specification
+- [sbk-slc.pdf](sbk-slc.pdf) — SLC1/SLC2 (Sliding Latency Coverage) factor definitions
+- [kafka-pravega.pdf](kafka-pravega.pdf) — comparison benchmark that motivated SBK
 
 ### Source-code reading order suggested for new contributors
 
@@ -2202,8 +2778,7 @@ driver or logger contribution is short work.
 
 ---
 
-*This architecture document was generated by reading every relevant
-class in the SBK source tree against the existing README and PDF
-documentation. Every class name, method signature, file path, and
-configuration default cited above can be verified directly against the
-code in this repository.*
+*This document describes the current source tree and links to the principal
+implementation files. Architecture documentation can drift: when behavior and
+this document disagree, verify the checked-out Java, protobuf, properties, and
+Gradle sources and update this guide in the same change.*

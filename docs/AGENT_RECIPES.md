@@ -526,8 +526,9 @@ mermaid diagrams or sections.
 
 ### 6.1 Verify mermaid syntax before committing
 
-The doc has 22 mermaid diagrams. They must render in GitHub's mermaid
-viewer **and** in `@mermaid-js/mermaid-cli` v11+. Test locally:
+All mermaid diagrams in the document must render in GitHub's mermaid viewer
+**and** in `@mermaid-js/mermaid-cli` v11+. Test them locally without relying
+on a hard-coded diagram count:
 
 ```bash
 # 1. Install mermaid-cli (Node 18+ required)
