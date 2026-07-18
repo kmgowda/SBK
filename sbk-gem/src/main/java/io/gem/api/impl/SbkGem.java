@@ -290,20 +290,47 @@ final public class SbkGem {
             throw new HelpException(helpText);
         }
 
-        Printer.log.info("SBK-GEM: Arguments to process : " + Arrays.toString(nextArgs));
-        try {
-            params.parseArgs(nextArgs);
-            logger.parseArgs(params);
-            if (storageDevice != null) {
-                storageDevice.parseArgs(params);
+        String[] processArgs = nextArgs;
+        int iteration = 1;
+
+        while (processArgs != null) {
+            Printer.log.info("SBK-GEM [" + iteration + "]: Arguments to process : "
+                    + Arrays.toString(processArgs));
+            iteration++;
+            try {
+                params.parseArgs(processArgs);
+                logger.parseArgs(params);
+                if (storageDevice != null) {
+                    storageDevice.parseArgs(params);
+                }
+            } catch (UnrecognizedOptionException ex) {
+                final String unrecognizedOption = ex.getOption();
+                if (storageDevice != null || unrecognizedOption == null || unrecognizedOption.startsWith("--")) {
+                    Printer.log.error(ex.toString());
+                    params.printHelp();
+                    throw ex;
+                }
+
+                /*
+                 * The selected storage driver may only be installed on the remote nodes. In that case GEM cannot
+                 * register its driver-specific options locally. Remove each unknown option/value pair from the
+                 * parser's working copy, but keep nextArgs unchanged so those options are forwarded to remote SBK.
+                 */
+                final String[] remainingArgs = SbkUtils.removeOptionArgsAndValues(processArgs,
+                        new String[]{unrecognizedOption});
+                if (Arrays.equals(processArgs, remainingArgs)) {
+                    Printer.log.error(ex.toString());
+                    params.printHelp();
+                    throw ex;
+                }
+                Printer.log.info("SBK-GEM: Passing remote storage option through: " + unrecognizedOption);
+                processArgs = remainingArgs;
+                continue;
+            } catch (HelpException ex) {
+                System.out.println("\n" + ex.getHelpText());
+                throw ex;
             }
-        } catch (UnrecognizedOptionException ex) {
-            Printer.log.error(ex.toString());
-            params.printHelp();
-            throw ex;
-        } catch (HelpException ex) {
-            System.out.println("\n" + ex.getHelpText());
-            throw ex;
+            break;
         }
 
         if (storageDevice != null) {
