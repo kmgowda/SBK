@@ -12,6 +12,7 @@ package io.sbk.main;
 
 import io.sbk.api.impl.SbkYal;
 import io.sbk.exception.HelpException;
+import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
@@ -26,6 +27,11 @@ import java.util.concurrent.TimeoutException;
 public abstract class SbkYalMain {
 
     static void main(final String[] args) {
+        if (SbkUtils.hasVersion(args)) {
+            final String version = io.sbk.api.impl.SbkYal.class.getPackage().getImplementationVersion();
+            System.out.println("SBK-YAL Version: " + version);
+            System.exit(0);
+        }
         try {
             SbkYal.run(args, null, null, null);
         } catch (UnrecognizedOptionException | HelpException ex) {

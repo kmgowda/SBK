@@ -19,6 +19,7 @@ import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -116,7 +117,7 @@ final public class SshSession {
             try {
                 SshUtils.runCommand(sshSession, cmd, timeoutSeconds, response);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new CompletionException(e);
             }
             return response;
         }, executor);
@@ -136,7 +137,7 @@ final public class SshSession {
             try {
                 SshUtils.copyDirectory(sshSession, srcPath, dstPath);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new CompletionException(e);
             }
         }, executor);
     }

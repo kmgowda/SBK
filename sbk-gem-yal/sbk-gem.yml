@@ -21,3 +21,11 @@ sbkGemArgs:
   gemuser: kmg 
   gempass: 1234
   sbkdir: /Users/kmg/projects/SBK/build/install/sbk
+  # Optional: true always copies SBK; false/omitted copies only when missing or outdated.
+  copy: false
+  # Keep the reconciled remote installation for subsequent runs.
+  delete: false
+  # Java provisioning defaults: copy local Java 25 only when it is unavailable remotely.
+  javacopy: true
+  javaversion: 25
+  # javadir: /opt/sbk-java

@@ -11,6 +11,8 @@
 package io.sbk.main;
 
 import io.sbk.api.impl.Sbk;
+import io.sbk.config.Config;
+import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
@@ -25,6 +27,11 @@ import java.util.concurrent.TimeoutException;
 public abstract class SbkMain {
 
     static void main(final String[] args) {
+        if (SbkUtils.hasVersion(args)) {
+            final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
+            System.out.println(Config.NAME.toUpperCase() + " Version: " + version);
+            System.exit(0);
+        }
         try {
             Sbk.run(args, null, null, null);
         } catch (UnrecognizedOptionException ex) {

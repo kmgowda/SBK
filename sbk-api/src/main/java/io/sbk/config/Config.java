@@ -76,6 +76,16 @@ final public class Config {
     public final static String HELP_OPTION = "help";
 
     /**
+     * <code>VERSION_OPTION = "version";</code>.
+     */
+    public final static String VERSION_OPTION = "version";
+
+    /**
+     * <code>VERSION_OPTION_SHORT = "v";</code>.
+     */
+    public final static String VERSION_OPTION_SHORT = "v";
+
+    /**
      * <code>ARG_PREFIX = "-";</code>.
      */
     public final static String ARG_PREFIX = "-";
@@ -94,5 +104,15 @@ final public class Config {
      * <code>HELP_OPTION_ARG = ARG_PREFIX + HELP_OPTION;</code>.
      */
     public final static String HELP_OPTION_ARG = ARG_PREFIX + HELP_OPTION;
+
+    /**
+     * <code>VERSION_OPTION_ARG = ARG_PREFIX + VERSION_OPTION;</code>.
+     */
+    public final static String VERSION_OPTION_ARG = ARG_PREFIX + VERSION_OPTION;
+
+    /**
+     * <code>VERSION_OPTION_ARG_SHORT = ARG_PREFIX + VERSION_OPTION_SHORT;</code>.
+     */
+    public final static String VERSION_OPTION_ARG_SHORT = ARG_PREFIX + VERSION_OPTION_SHORT;
 
 }

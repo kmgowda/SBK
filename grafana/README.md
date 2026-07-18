@@ -1,105 +1,50 @@
-# Grafana Docker Compose
+# Grafana and Prometheus assets
 
-The Grafana docker compose consists of Grafana and prometheus docker images.
-The [grafana docker compose](https://github.com/kmgowda/SBK/blob/master/grafana/docker-compose.yml) contains the [dashboards](https://github.com/kmgowda/SBK/tree/master/grafana/dashboards) which can be directly deployed for the performance analytics.
+This directory contains a local Docker Compose monitoring stack, Grafana provisioning/configuration, Prometheus target files, dashboards, and Kubernetes examples for observing SBK and SBM metrics.
 
-if you are running SBK as docker image or as SBK as performance benchmarking application,
-this grafana docker compose can be used deploy the performance graphs.
+## Local Compose stack
 
-As an example, just follow the below steps to see the performance graphs
+Review host paths, ports, and image tags in `docker-compose.yml`, then start from this directory:
 
-1. Run the [grafana docker compose](https://github.com/kmgowda/SBK/blob/master/grafana/docker-compose.yml)
-
-   ```
-   <SBK dir/grafana>% docker compose up 
-   ```
-
-1. login to [grafana local host port 3000](http://localhost:3000) with username **admin** and password **admin**
-1. In the dashboards' menu you choose the dashboard of the storage system on which you want to conduct the performance benchmarking.
-1. For example, if you are running the SBK performance benchmarking of file system as follows
-
-   ```
-    <SBK dir>% ./build/install/sbk/bin/sbk -class file -writers 1 -size 100 -seconds 60
-   ```
-1. you can choose the [File system dashboard](https://github.com/kmgowda/SBK/blob/master/grafana/dashboards/sbk-file.json) to see the performance results graphs. 
-
-
-# Grafana with kubernetes
-
-1. Update the [prometheus mount path](https://github.com/kmgowda/SBK/blob/master/grafana/prometheus-deployment.yaml#L36) to your local <SBK folder>/grafana/prometheus folder. 
-1. Update the [Grafana dashboards path](https://github.com/kmgowda/SBK/blob/master/grafana/grafana-deployment.yaml#L41) to your local <SBK folder>/grafana/dashboards folder.    
-1. Update the [Grafana provisioning path](https://github.com/kmgowda/SBK/blob/master/grafana/grafana-deployment.yaml#L45) to your local <SBK folder>/grafana/provisioning folder, 
-1. Update the [Grafana config file](https://github.com/kmgowda/SBK/blob/master/grafana/grafana-deployment.yaml#L49) 
-   to you local <SBK folder>/grafana/config.ini,  
-1. Use the below command to run the grafana , prometheus pods and deployments
-
-   ```
-   <SBK dir/grafana>% kubectl apply -f grafana-deployment.yaml -f grafana-service.yaml -f prometheus-deployment.yaml -f  prometheus-service.yaml
-     
-   ```
-   
-   output is as follows:
-   ```
-   kmg@kmgs-MBP grafana % kubectl apply -f grafana-deployment.yaml -f grafana-service.yaml -f prometheus-deployment.yaml -f  prometheus-service.yaml 
-   deployment.apps/grafana created
-   service/grafana configured
-   deployment.apps/prometheus created
-   service/prometheus configured
-   ```
-1. you can check the status of the deployments with the below command:
-
-   ```
-   kubectl get svc
-   ```
-   
-   output is as follows:
-
-   ```
-   kmg@kmgs-MBP grafana % kubectl get svc                                                         
-   NAME          TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-   grafana       ClusterIP      10.105.242.78   <none>        3000/TCP         37s
-   kubernetes    ClusterIP      10.96.0.1       <none>        443/TCP          7m47s
-   prometheus    ClusterIP      10.108.47.252   <none>        9090/TCP         37s   
-   ```
-1. Note that,  there is no external IP for grafana, in case if you have the grafana container's ip address to mapped 
-   to your localhost then use the below command:
-   ```
-   kubectl expose deployment grafana --type=LoadBalancer --name=grafana-ext
-   ```
-   the execution of above command is one time activity; if you delete and recreate the grafana service, you need not 
-   execute the above command again.
-
-1. Optionally you can expose the prometheus port too as follows
-   ```
-   kubectl expose deployment prometheus --type=LoadBalancer --name=prometheus-ext
-   ```
-
-1. now, you will get the external IP address for grafana service. check the output as follows.
-   ```
-   kmg@kmgs-MBP grafana % kubectl get svc
-   NAME          TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-   grafana       ClusterIP      10.105.242.78   <none>        3000/TCP         14m
-   grafana-ext   LoadBalancer   10.97.215.174   localhost     3000:31011/TCP   14m
-   kubernetes    ClusterIP      10.96.0.1       <none>        443/TCP          21m
-   prometheus    ClusterIP      10.108.47.252   <none>        9090/TCP         14m 
-   ```
-1. now you can log in to the grafana service [grafana local host port 3000](http://localhost:3000)  with username 
-   'admin' and password 'admin'.
-
-
-Helper kubctl commands to clean the pods , deployment and services
-
+```bash
+cd grafana
+docker compose up -d
+docker compose ps
 ```
-kubectl delete --all pods 
-kubectl delete --all deployments
-kubectl delete --all namespaces 
+
+Open the Grafana address configured by the Compose file and select the provisioned SBK dashboard. Stop the stack with:
+
+```bash
+docker compose down
 ```
- 
-# Grafana and Prometheus with Node metrics
-while running the grafana docker compose, if you are interested in profiling the system along with SBK metrics, you can use this dashboard :
-https://github.com/kmgowda/SBK/blob/master/grafana/dashboards/node-metrics.json.
 
-But, you should run the node exporter to get the system metrics ; you can find the prometheus node exporter here : 
-https://prometheus.io/docs/guides/node-exporter/
+Do not use default dashboard credentials on a shared network.
 
-just run the node exporter, the prometheus settings are already configured with this docker compose: https://github.com/kmgowda/SBK/blob/master/grafana/docker-compose.yml
+## Prometheus targets
+
+Target files under `prometheus/` separate concerns:
+
+- `targets.json`: SBK Prometheus endpoints.
+- `sbm-targets.json`: SBM Prometheus endpoints.
+- `jmx-targets.json` and `sbm-jmx-targets.json`: JMX exporter targets.
+- `node-exporters.json`: host metrics.
+- `prometheus.yml`: scrape configuration.
+
+Replace example addresses with endpoints reachable from the Prometheus container. Container-local `localhost` does not normally refer to the benchmark host.
+
+## Kubernetes manifests
+
+The Grafana and Prometheus deployment/service manifests are examples. Review volume paths, storage, namespaces, security context, credentials, service exposure, and resource limits before applying them. Host paths in example manifests are environment-specific.
+
+## Interpreting dashboards
+
+Dashboards visualize emitted measurements; they do not correct an invalid experiment. Correlate SBK throughput and latency with client CPU, JVM behavior, network saturation, storage load, errors, discarded latency counts, and active worker counts. Preserve the dashboard revision and Prometheus configuration with published results.
+
+## Updating dashboards
+
+- Keep metric names aligned with `SbkPrometheusServer` and `SbmPrometheusServer`.
+- Avoid dashboard queries tied to one host or driver unless clearly labeled.
+- Export changed dashboard JSON into `dashboards/` and review the diff for embedded credentials or environment-specific identifiers.
+- Validate both an SBK target and, when applicable, an SBM target.
+
+See [SBM](../sbm/README.md), [distributed architecture](../docs/ARCHITECTURE.md#distributed-flow), and [container guidance](../dockers/README.md).
