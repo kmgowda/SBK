@@ -21,3 +21,5 @@ sbkGemArgs:
   gemuser: kmg 
   gempass: 1234
   sbkdir: /Users/kmg/projects/SBK/build/install/sbk
+  # Optional: true always copies SBK; false/omitted copies only when missing or outdated.
+  copy: false

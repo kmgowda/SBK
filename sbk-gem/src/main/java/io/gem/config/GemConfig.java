@@ -75,9 +75,13 @@ final public class GemConfig {
      */
     public String sbkcommand;
     /**
-     * Whether to copy SBK to remote nodes before running.
+     * Whether to force-copy SBK to remote nodes without checking their installed versions.
      */
     public boolean copy;
+    /**
+     * Expected SBK version, normally taken from the SBK-GEM package manifest.
+     */
+    public String sbkVersion;
     /**
      * Whether to delete SBK from remote nodes after run.
      */

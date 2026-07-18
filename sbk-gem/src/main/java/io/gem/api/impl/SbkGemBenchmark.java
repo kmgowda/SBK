@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +46,7 @@ import java.util.concurrent.TimeoutException;
  *
  * <p>Responsibilities:
  * - Establish SSH sessions to all nodes and validate remote Java versions.
- * - Optionally delete/copy SBK directory on remote hosts.
+ * - Reconcile the expected SBK version on every remote host.
  * - Start SBM locally, then execute SBK remotely and collect results.
  * - Aggregate remote outputs into {@link io.gem.api.RemoteResponse}[] and shutdown cleanly.
  */
@@ -191,74 +192,12 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         Printer.log.info("SBK-GEM: Matching Java Major Version: " + javaMajorVersion + " Success..");
         final String remoteDir = Paths.get(params.getSbkDir()).getFileName().toString();
-
-        if (params.isCopy()) {
-
-            if (remoteDirectoryDelete()) {
-                Printer.log.info("SBK-GEM: Removing the remote directory: '" + remoteDir + "'  Success..");
-            } else {
-                String errStr = "SBK-GEM: Removing the remote directory: '" + remoteDir + "'  failed..";
-                Printer.log.info(errStr);
-                throw new InterruptedException(errStr);
-            }
-
-            consMap.reset();
-            for (int i = 0; i < nodes.length; i++) {
-                if (consMap.isVisited(nodes[i].connection)) {
-                    cfArray[i] = new CompletableFuture<>();
-                    cfArray[i].complete(null);
-                } else {
-                    consMap.visit(nodes[i].connection);
-                    cfArray[i] = nodes[i].runCommandAsync("mkdir -p " + nodes[i].connection.getDir(),
-                            true, config.remoteTimeoutSeconds );
-                }
-            }
-
-            final CompletableFuture<Void> mkDirFuture = CompletableFuture.allOf(cfArray);
-            for (int i = 0; !mkDirFuture.isDone(); i++) {
-                try {
-                    mkDirFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
-                } catch (TimeoutException ex) {
-                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for command 'mkdir -p' timeout");
-                }
-            }
-
-            if (!mkDirFuture.isDone()) {
-                final String errMsg = "SBK-GEM, command:  'mkdir' time out after " + config.maxIterations + " iterations";
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-
-            Printer.log.info("SBK-GEM: Creating remote directory: '" + remoteDir + "'  Success..");
-            consMap.reset();
-            for (int i = 0; i < nodes.length; i++) {
-                if (consMap.isVisited(nodes[i].connection)) {
-                    cfArray[i] = new CompletableFuture<>();
-                    cfArray[i].complete(null);
-                } else {
-                    consMap.visit(nodes[i].connection);
-                    cfArray[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
-                }
-            }
-            final CompletableFuture<Void> copyCB = CompletableFuture.allOf(cfArray);
-
-            for (int i = 0; !copyCB.isDone(); i++) {
-                try {
-                    copyCB.get(config.timeoutSeconds, TimeUnit.SECONDS);
-                } catch (TimeoutException ex) {
-                    Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for copy command to complete");
-                }
-            }
-
-            if (copyCB.isCompletedExceptionally()) {
-                final String errMsg = "SBK-GEM, command:  copy command failed!";
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-
-            Printer.log.info("Copy SBK application: '" + params.getSbkCommand() + "' to remote nodes Success..");
-
-        } //end of copy
+        final boolean[] copyTargets = findCopyTargets(remoteDir);
+        if (hasSelectedTarget(copyTargets)) {
+            copySbkToRemoteTargets(copyTargets, remoteDir);
+        } else {
+            Printer.log.info("SBK-GEM: SBK version " + config.sbkVersion + " is already available on every host");
+        }
 
         // start SBM
         sbmBenchmark.start();
@@ -293,34 +232,130 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return retFuture.toCompletableFuture();
     }
 
-    private boolean remoteDirectoryDelete() throws InterruptedException, ConnectException {
-        final CompletableFuture<?>[] rmCfArray = new CompletableFuture[nodes.length];
+    @SuppressWarnings("unchecked")
+    private boolean[] findCopyTargets(String remoteDir) throws ConnectException, InterruptedException,
+            ExecutionException {
+        final boolean[] copyTargets = new boolean[nodes.length];
+        if (params.isCopy()) {
+            Arrays.fill(copyTargets, true);
+            Printer.log.info("SBK-GEM: Force-copy requested; skipping remote SBK version checks");
+            return copyTargets;
+        }
+
+        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            final String remoteCommand = nodes[i].connection.getDir() + "/" + remoteDir + "/" +
+                    params.getSbkCommand();
+            probes[i] = nodes[i].runCommandAsync(RemoteSbkDeployment.versionProbeCommand(remoteCommand), true,
+                    config.remoteTimeoutSeconds);
+        }
+        waitFor(CompletableFuture.allOf(probes), "remote SBK version checks");
+
+        for (int i = 0; i < nodes.length; i++) {
+            final SshResponse response = probes[i].get();
+            copyTargets[i] = RemoteSbkDeployment.requiresCopy(false, response, config.sbkVersion);
+            if (copyTargets[i]) {
+                Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() + "' is missing SBK version " +
+                        config.sbkVersion + " or has a different version; scheduling copy");
+            } else {
+                Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() + "' already has SBK version " +
+                        config.sbkVersion + "; skipping copy");
+            }
+        }
+        return copyTargets;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void copySbkToRemoteTargets(boolean[] copyTargets, String remoteDir) throws ConnectException,
+            InterruptedException, ExecutionException {
+        if (!remoteDirectoryDelete(copyTargets)) {
+            final String errMsg = "SBK-GEM: Removing remote directory '" + remoteDir + "' failed";
+            Printer.log.error(errMsg);
+            throw new InterruptedException(errMsg);
+        }
+        Printer.log.info("SBK-GEM: Removing selected remote SBK directories Success..");
+
+        final CompletableFuture<SshResponse>[] mkdirFutures = new CompletableFuture[nodes.length];
         consMap.reset();
         for (int i = 0; i < nodes.length; i++) {
-            if (consMap.isVisited(nodes[i].connection)) {
-                rmCfArray[i] = new CompletableFuture<>();
-                rmCfArray[i].complete(null);
+            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
+                mkdirFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
             } else {
                 consMap.visit(nodes[i].connection);
-                rmCfArray[i] = nodes[i].runCommandAsync("rm -rf " + nodes[i].connection.getDir(),
+                final String command = "mkdir -p " + RemoteSbkDeployment.shellQuote(nodes[i].connection.getDir());
+                mkdirFutures[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
+            }
+        }
+        waitFor(CompletableFuture.allOf(mkdirFutures), "remote directory creation");
+        for (CompletableFuture<SshResponse> mkdirFuture : mkdirFutures) {
+            if (mkdirFuture.get().returnCode != 0) {
+                throw new InterruptedException("SBK-GEM: Creating a remote SBK directory failed");
+            }
+        }
+        Printer.log.info("SBK-GEM: Creating selected remote directories Success..");
+
+        final CompletableFuture<?>[] copyFutures = new CompletableFuture[nodes.length];
+        consMap.reset();
+        for (int i = 0; i < nodes.length; i++) {
+            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
+                copyFutures[i] = CompletableFuture.completedFuture(null);
+            } else {
+                consMap.visit(nodes[i].connection);
+                copyFutures[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
+            }
+        }
+        waitFor(CompletableFuture.allOf(copyFutures), "SBK copy");
+        Printer.log.info("SBK-GEM: Copying SBK application to selected remote hosts Success..");
+    }
+
+    private void waitFor(CompletableFuture<?> future, String operation) throws InterruptedException,
+            ExecutionException {
+        for (int i = 0; i < config.maxIterations && !future.isDone(); i++) {
+            try {
+                future.get(config.timeoutSeconds, TimeUnit.SECONDS);
+            } catch (TimeoutException ex) {
+                Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for " + operation + " timeout");
+            }
+        }
+        if (!future.isDone()) {
+            final String errMsg = "SBK-GEM: " + operation + " timed out after " + config.maxIterations +
+                    " iterations";
+            Printer.log.error(errMsg);
+            throw new InterruptedException(errMsg);
+        }
+        future.get();
+    }
+
+    private static boolean hasSelectedTarget(boolean[] selected) {
+        for (boolean value : selected) {
+            if (value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean remoteDirectoryDelete(boolean[] deleteTargets) throws InterruptedException, ConnectException,
+            ExecutionException {
+        final CompletableFuture<SshResponse>[] rmCfArray = new CompletableFuture[nodes.length];
+        consMap.reset();
+        for (int i = 0; i < nodes.length; i++) {
+            if (!deleteTargets[i] || consMap.isVisited(nodes[i].connection)) {
+                rmCfArray[i] = CompletableFuture.completedFuture(new SshResponse(true));
+            } else {
+                consMap.visit(nodes[i].connection);
+                rmCfArray[i] = nodes[i].runCommandAsync("rm -rf " +
+                                RemoteSbkDeployment.shellQuote(nodes[i].connection.getDir()),
                         true, config.remoteTimeoutSeconds );
             }
         }
         final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(rmCfArray);
-
-        for (int i = 0; i < config.maxIterations && !rmFuture.isDone(); i++) {
-            try {
-                rmFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
-            } catch (TimeoutException | ExecutionException ex) {
-                Printer.log.info("SBK-GEM [" + (i + 1) + "]: remote directory delete timeout");
+        waitFor(rmFuture, "remote directory deletion");
+        for (CompletableFuture<SshResponse> rmResult : rmCfArray) {
+            if (rmResult.get().returnCode != 0) {
+                return false;
             }
-        }
-
-        if (!rmFuture.isDone()) {
-            final String errMsg = "SBK-GEM: command:  'rm -rf' time out after " + config.maxIterations +
-                    " iterations";
-            Printer.log.error(errMsg);
-            throw new InterruptedException(errMsg);
         }
         return true;
     }
@@ -349,8 +384,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
             state = State.END;
             if (params.isDelete()) {
                 try {
-                    remoteDirectoryDelete();
-                } catch (InterruptedException | ConnectException rmEx) {
+                    final boolean[] deleteTargets = new boolean[nodes.length];
+                    Arrays.fill(deleteTargets, true);
+                    remoteDirectoryDelete(deleteTargets);
+                } catch (InterruptedException | ConnectException | ExecutionException rmEx) {
                     rmEx.printStackTrace();
                 }
             }

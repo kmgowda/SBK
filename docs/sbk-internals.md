@@ -1694,9 +1694,17 @@ sequenceDiagram
     GEM->>SSH: runCommandAsync("java -version") on each
     Note over GEM: assert versions match local
 
-    opt -copy true
-        GEM->>SSH: "rm -rf remoteDir && mkdir -p"
-        GEM->>SSH: SCP recursive upload (sbk install dir)
+    alt -copy true (force mode)
+        Note over GEM: skip SBK probes
+        GEM->>SSH: replace SBK on every node
+    else default reconciliation mode
+        GEM->>SSH: run "sbk -version" on every node
+        par inspect nodes concurrently
+            SSH->>N1: executable and exact-version probe
+            SSH->>N2: executable and exact-version probe
+        end
+        Note over GEM: select only missing or mismatched nodes
+        GEM->>SSH: replace SBK on selected nodes
     end
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
@@ -1718,8 +1726,17 @@ sequenceDiagram
 
     SSH-->>GEM: RemoteResponse(exitCode, stdout, stderr) per node
     GEM->>SBM: sbmBenchmark.stop()
-    GEM-->>User: printRemoteResults()
+GEM-->>User: printRemoteResults()
 ```
+
+The reconciliation step avoids transferring a full distribution on
+every run. A probe counts as a match only when the remote executable
+exists, exits successfully, and prints the exact SBK version embedded
+in the local SBK-GEM package. All nodes are probed concurrently. Copy
+work is then deduplicated by `(host, remote directory)`, so repeated
+workload entries sharing one installation do not race to replace it.
+`-copy true` is deliberately stronger: it skips every version probe and
+replaces SBK on all unique remote targets.
 
 ### 7.2 What SBK-GEM is and isn't
 

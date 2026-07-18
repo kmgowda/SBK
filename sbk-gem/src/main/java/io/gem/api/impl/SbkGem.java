@@ -257,6 +257,7 @@ final public class SbkGem {
             gemConfig.sbkdir = sbkAppHome;
         }
         gemConfig.remoteDir = appName;
+        gemConfig.sbkVersion = Objects.requireNonNullElse(version, "");
         if (StringUtils.isNotEmpty(version)) {
             gemConfig.remoteDir += "-" + version;
         }

@@ -16,7 +16,7 @@ limitations under the License.
 
 # SBK-GEM: Group Execution Monitor
 
-SBK-GEM runs one SBK workload across multiple hosts. It uses Apache MINA SSHD to connect to remote machines, transfer or locate an SBK distribution, execute the same benchmark arguments on each host, and aggregate client measurements through an embedded SBM instance.
+SBK-GEM runs one SBK workload across multiple hosts. It uses Apache MINA SSHD to connect to remote machines, reconcile the expected SBK distribution on every host, execute the same benchmark arguments, and aggregate client measurements through an embedded SBM instance.
 
 ## Responsibilities
 
@@ -24,8 +24,8 @@ SBK-GEM runs one SBK workload across multiple hosts. It uses Apache MINA SSHD to
 flowchart TB
     OP[Operator] --> GEM[SBK-GEM]
     GEM --> SBM[Embedded SBM]
-    GEM -->|SSH and copy| A[Remote host A / SBK]
-    GEM -->|SSH and copy| B[Remote host B / SBK]
+    GEM -->|SSH, version check, conditional copy| A[Remote host A / SBK]
+    GEM -->|SSH, version check, conditional copy| B[Remote host B / SBK]
     A --> STORAGE[Target storage]
     B --> STORAGE
     A -->|GrpcLogger| SBM
@@ -62,6 +62,8 @@ Display the current connection, remote-installation, SBM, and benchmark options:
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
 
+By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged only when that command exists, succeeds, and reports the exact expected version. Missing executables, failed probes, and version mismatches cause SBK-GEM to replace the distribution on that node. Set `-copy true` to skip version checks and force a fresh copy to every node. Set `-delete false` when the reconciled installation should remain available for later runs.
+
 Before a multi-host run:
 
 1. Run the intended SBK command successfully on one target host.
@@ -77,7 +79,7 @@ Before a multi-host run:
 1. `SbkGemMain` delegates to `SbkGem`.
 2. GEM parses connection, remote-path, SBM, and forwarded SBK arguments.
 3. It constructs an embedded `SbmBenchmark`.
-4. `SbkGemBenchmark` establishes SSH sessions and prepares the remote distribution.
+4. `SbkGemBenchmark` establishes SSH sessions, checks Java, and reconciles the SBK version on every node.
 5. GEM appends `-out GrpcLogger`, the SBM callback host, and the SBM port to remote commands.
 6. Remote SBK processes run their selected driver against the storage system.
 7. Measurements return to embedded SBM and are reported as aggregate windows and totals.

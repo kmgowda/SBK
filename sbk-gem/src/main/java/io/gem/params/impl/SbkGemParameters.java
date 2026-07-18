@@ -104,7 +104,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkdir);
         addOption("sbkcommand", true,
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
-        addOption("copy", true, "Copy the SBK package to remote hosts; default: " + config.copy);
+        addOption("copy", true, "Force-copy SBK to every remote host without a version check; default: " +
+                config.copy);
         addOption("delete", true, "Delete SBK package after benchmark; default: " + config.delete);
         addOption("localhost", true, "this local SBM host name, default: " + localHost);
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
@@ -143,7 +144,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
         config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
 
-        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.sbkcommand, "-gempass",
+        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser, "-gempass",
                 config.gempass, "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
                 "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
                 "-delete", Boolean.toString(config.delete), "-localhost", localHost, "-sbmport",
