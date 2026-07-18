@@ -100,7 +100,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 remote hostnames separated by ',';
                 default:""" + config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
-        addOption("gempass", true, "ssh user password of the remote hosts, default: " + config.gempass);
+        addOption(GemConfig.GEM_PASS_OPTION, true, "ssh user password of the remote hosts, default: " +
+                (StringUtils.isEmpty(config.gempass) ? "not set" : "******"));
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkdir);
         addOption("sbkcommand", true,
@@ -142,9 +143,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 .replace("[,] +", ",")
                 .split("[ ,\n]+");
         config.gemuser = getOptionValue("gemuser", config.gemuser);
-        config.gempass = getOptionValue("gempass", config.gempass);
+        config.gempass = getOptionValue(GemConfig.GEM_PASS_OPTION, config.gempass);
         config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
         config.sbkdir = getOptionValue("sbkdir", config.sbkdir);
+        config.sbkcommand = getOptionValue("sbkcommand", config.sbkcommand);
         localHost = getOptionValue("localhost", localHost);
         sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
         sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));
@@ -158,8 +160,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             throw new IllegalArgumentException("The Java major version must be greater than zero");
         }
 
-        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser, "-gempass",
-                config.gempass, "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
+        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
+                "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
                 "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
                 "-javacopy", Boolean.toString(config.javacopy), "-javaversion",
                 Integer.toString(config.javaversion), "-javadir", config.javadir, "-delete",

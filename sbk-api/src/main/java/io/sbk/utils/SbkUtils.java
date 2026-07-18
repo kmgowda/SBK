@@ -15,13 +15,55 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final public class SbkUtils {
+
+    /**
+     * Return a copy of command-line arguments with values belonging to sensitive
+     * options replaced by a fixed mask. Both {@code -option value} and
+     * {@code --option=value} forms are supported, without modifying the source
+     * array.
+     *
+     * @param args command-line arguments
+     * @param sensitiveOptions sensitive option names, with or without leading dashes
+     * @return copied arguments with sensitive values redacted
+     */
+    public static @NotNull String[] redactOptionValues(String[] args, String[] sensitiveOptions) {
+        if (args == null) {
+            return new String[0];
+        }
+        final String[] redacted = Arrays.copyOf(args, args.length);
+        if (sensitiveOptions == null || sensitiveOptions.length == 0) {
+            return redacted;
+        }
+        final Set<String> sensitiveNames = Stream.of(sensitiveOptions)
+                .map(SbkUtils::normalizeOptionName)
+                .map(name -> name.toLowerCase(Locale.ROOT))
+                .collect(Collectors.toSet());
+        for (int i = 0; i < redacted.length; i++) {
+            final String argument = redacted[i];
+            final int equalsIndex = argument.indexOf('=');
+            final String option = equalsIndex >= 0 ? argument.substring(0, equalsIndex) : argument;
+            if (!option.startsWith(Config.ARG_PREFIX) ||
+                    !sensitiveNames.contains(normalizeOptionName(option).toLowerCase(Locale.ROOT))) {
+                continue;
+            }
+            if (equalsIndex >= 0) {
+                redacted[i] = argument.substring(0, equalsIndex + 1) + "******";
+            } else if (i + 1 < redacted.length) {
+                redacted[i + 1] = "******";
+            }
+        }
+        return redacted;
+    }
 
     @Contract("null, _ -> new")
     public static @NotNull String[] removeOptionArgsAndValues(String[] args, String[] opts) {

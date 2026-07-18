@@ -184,7 +184,8 @@ final public class SbkGem {
         Printer.log.info(GemConfig.DESC);
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
-        Printer.log.info("Arguments List: " + Arrays.toString(args));
+        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactOptionValues(args,
+                new String[]{GemConfig.GEM_PASS_OPTION})));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: " + sbkStoragePackageName);
@@ -296,7 +297,9 @@ final public class SbkGem {
         int i = 1;
 
         while (processArgs != null) {
-            Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " + Arrays.toString(processArgs));
+            Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " +
+                    Arrays.toString(SbkUtils.redactOptionValues(processArgs,
+                            new String[]{GemConfig.GEM_PASS_OPTION})));
             i++;
             try {
                 params.parseArgs(processArgs);

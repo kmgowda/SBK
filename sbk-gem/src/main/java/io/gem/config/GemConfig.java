@@ -49,6 +49,11 @@ final public class GemConfig {
      */
     final public static String SBK_GEM_SSH_PASSWD = "SBK_GEM_SSH_PASSWD";
 
+    /**
+     * Command-line option name used to supply the SSH password.
+     */
+    final public static String GEM_PASS_OPTION = "gempass";
+
     //override by props file or command line parameters
     /**
      * <code>String nodes</code>.

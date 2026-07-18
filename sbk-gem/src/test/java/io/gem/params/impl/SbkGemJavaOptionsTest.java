@@ -70,6 +70,23 @@ final class SbkGemJavaOptionsTest {
         assertEquals("/opt/java-21", parameters.getJavaDir());
     }
 
+    @Test
+    void parsesSbkCommandCliOverride() throws Exception {
+        final Path customBinDirectory = temporaryDirectory.resolve("custom-bin");
+        final Path customCommand = customBinDirectory.resolve("custom-sbk");
+        Files.createDirectories(customBinDirectory);
+        Files.createFile(customCommand);
+        assertTrue(customCommand.toFile().setExecutable(true));
+
+        final GemConfig config = defaultConfig(temporaryDirectory);
+        final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
+                9717, 10);
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
+                "-sbkcommand", "custom-bin/custom-sbk"});
+
+        assertEquals("custom-bin/custom-sbk", parameters.getSbkCommand());
+    }
+
     private static GemConfig defaultConfig(Path sbkDirectory) {
         final GemConfig config = new GemConfig();
         config.nodes = "localhost";

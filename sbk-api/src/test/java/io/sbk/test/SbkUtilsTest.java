@@ -131,4 +131,14 @@ public class SbkUtilsTest {
         assertArrayEquals(new String[]{"-writers", "1"},
                 SbkUtils.mergeArgs(new String[]{"-writers", "1"}, null));
     }
+
+    @Test
+    public void testRedactOptionValues() {
+        final String[] args = {"-gemuser", "root", "-gempass", "secret", "--size", "100",
+                "--GEMPASS=second-secret"};
+
+        assertArrayEquals(new String[]{"-gemuser", "root", "-gempass", "******", "--size", "100",
+                "--GEMPASS=******"}, SbkUtils.redactOptionValues(args, new String[]{"gempass"}));
+        assertEquals("secret", args[3]);
+    }
 }
