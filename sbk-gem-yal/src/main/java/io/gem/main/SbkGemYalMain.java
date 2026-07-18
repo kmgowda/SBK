@@ -14,6 +14,7 @@ import io.gem.api.impl.SbkGemYal;
 import io.sbk.exception.HelpException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -39,6 +40,8 @@ public abstract class SbkGemYalMain {
         try {
             SbkGemYal.run(args, null, null, null);
         } catch (HelpException ex) {
+            System.exit(0);
+        } catch (UnrecognizedOptionException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                  ExecutionException | ClassNotFoundException | InvocationTargetException | InstantiationException |

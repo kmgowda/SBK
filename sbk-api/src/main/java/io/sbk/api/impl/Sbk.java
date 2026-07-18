@@ -220,11 +220,20 @@ final public class Sbk {
             final InputParameterOptions helpParams = new SbkDriversParameters(usageLine,
                     packageStore.getClassNames(), loggerNames);
             rwLogger.addArgs(helpParams);
-            final String helpText = helpParams.getHelpText();
-            System.out.println("\n" + helpText);
             if (nextArgs.length == 0 || SbkUtils.hasHelp(nextArgs)) {
+                final String helpText = helpParams.getHelpText();
+                System.out.println("\n" + helpText);
                 throw new HelpException(helpText);
             }
+            try {
+                helpParams.parseArgs(nextArgs);
+            } catch (UnrecognizedOptionException ex) {
+                Printer.log.error(ex.toString());
+                helpParams.printHelp();
+                throw ex;
+            }
+            final String helpText = helpParams.getHelpText();
+            System.out.println("\n" + helpText);
             throw new ParseException("The option '-"+Config.CLASS_OPTION+"' is not supplied");
         } else {
             try {
@@ -258,8 +267,8 @@ final public class Sbk {
             rwLogger.parseArgs(params);
             storageDevice.parseArgs(params);
         } catch (UnrecognizedOptionException ex) {
-            params.printHelp();
             Printer.log.error(ex.toString());
+            params.printHelp();
             throw ex;
         } catch (HelpException ex) {
             System.out.println("\n" + ex.getHelpText());

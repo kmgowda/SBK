@@ -34,7 +34,9 @@ public abstract class SbkYalMain {
         }
         try {
             SbkYal.run(args, null, null, null);
-        } catch (UnrecognizedOptionException | HelpException ex) {
+        } catch (HelpException ex) {
+            System.exit(0);
+        } catch (UnrecognizedOptionException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                 ExecutionException | ClassNotFoundException |  InvocationTargetException | InstantiationException |

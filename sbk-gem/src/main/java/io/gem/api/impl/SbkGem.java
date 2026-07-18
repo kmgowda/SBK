@@ -290,36 +290,20 @@ final public class SbkGem {
             throw new HelpException(helpText);
         }
 
-        String[] processArgs = nextArgs;
-        int i = 1;
-
-        while (true) {
-            Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " + Arrays.toString(processArgs));
-            i++;
-            try {
-                params.parseArgs(processArgs);
-                logger.parseArgs(params);
-                if (storageDevice != null) {
-                    storageDevice.parseArgs(params);
-                }
-            } catch (UnrecognizedOptionException ex) {
-                if (storageDevice != null) {
-                    Printer.log.error(ex.toString());
-                    params.printHelp();
-                    throw ex;
-                }
-                Printer.log.warn(ex.toString());
-                processArgs = SbkUtils.removeOptionArgsAndValues(processArgs, new String[]{ex.getOption()});
-                if (processArgs == null) {
-                    params.printHelp();
-                    throw new ParseException("SBK-GEM: Insufficient command line arguments");
-                }
-                continue;
-            } catch (HelpException ex) {
-                System.out.println("\n" + ex.getHelpText());
-                throw ex;
+        Printer.log.info("SBK-GEM: Arguments to process : " + Arrays.toString(nextArgs));
+        try {
+            params.parseArgs(nextArgs);
+            logger.parseArgs(params);
+            if (storageDevice != null) {
+                storageDevice.parseArgs(params);
             }
-            break;
+        } catch (UnrecognizedOptionException ex) {
+            Printer.log.error(ex.toString());
+            params.printHelp();
+            throw ex;
+        } catch (HelpException ex) {
+            System.out.println("\n" + ex.getHelpText());
+            throw ex;
         }
 
         if (storageDevice != null) {

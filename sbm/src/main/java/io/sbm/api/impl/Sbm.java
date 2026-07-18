@@ -176,8 +176,8 @@ final public class Sbm {
             params.parseArgs(args);
             logger.parseArgs(params);
         } catch (UnrecognizedOptionException ex) {
-            params.printHelp();
             Printer.log.error(ex.toString());
+            params.printHelp();
             throw ex;
         } catch (HelpException ex) {
             System.out.println("\n" + ex.getHelpText());

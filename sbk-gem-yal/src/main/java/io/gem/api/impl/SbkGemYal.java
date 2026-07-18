@@ -24,6 +24,7 @@ import io.sbk.params.YmlMap;
 import io.sbk.params.impl.SbkYalParameters;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -109,7 +110,13 @@ final public class SbkGemYal {
         } catch (HelpException ex) {
             params.printHelp();
             throw ex;
-        } catch (ParseException | IllegalArgumentException ignored) {
+        } catch (ParseException | IllegalArgumentException ex) {
+            if (ex instanceof UnrecognizedOptionException unrecognized &&
+                    unrecognized.getOption().startsWith("--")) {
+                Printer.log.error(unrecognized.toString());
+                params.printHelp();
+                throw unrecognized;
+            }
             Printer.log.warn("SBK-GEM-YAL: Overriding options are supplied!");
             if (SbkUtils.hasHelp(args)) {
                 params.printHelp();
