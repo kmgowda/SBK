@@ -1,54 +1,57 @@
 <!--
 Copyright (c) KMG. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
+Licensed under the Apache License, Version 2.0.
 -->
 
-# SBK Kubernetes Deployments
-The SBK with preconfigured storage driver can be deployed as Kubernetes pod.
-As an example, to deploy rabbitmq SBK pod, you can refer to the file: https://github.com/kmgowda/SBK/blob/kmg-kubernetes-2/config/kubernetes/sbk-rabbitmq-k8-sample.sh
-and configuration file : https://github.com/kmgowda/SBK/blob/kmg-kubernetes-2/config/kubernetes/sbk-rabbitmq-k8-sample.yaml. 
-Make sure that you use the appropriate IP address of RabbitMQ server.
+# SBK Kubernetes examples
 
+This directory contains an example RabbitMQ benchmark manifest and helper script. They are starting points for a controlled benchmark namespace, not production-ready deployment templates.
 
-## Kubernetes setup with Dockers Desktop and Web Dashboard
-1. If you already have the Oracle Virtual box and minikube installed in your system, then I suggest uninstall them to avoid compatibility issues with docker desktop.
-2. Install [Docker Desktop](https://www.docker.com/products/docker-desktop)
-3. Enable the Kubernetes in Docker desktop . Path: Docker Dashboard -> settings -> Kubernetes
-4. Set up the kubernetes Dashboard, using below command: 
-```
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
-```
-  * For reference and for some more details, refer to this page: https://collabnix.com/kubernetes-dashboard-on-docker-desktop-for-windows-2-0-0-3-in-2-minutes
-  
-5.  Start the kubectl Proxy using below command:
-```
-kubectl proxy
-```
-6. Now try to log-in to local host dashboard using browser, copy & paste the link: 
-   http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
+Files:
 
-7. The browser asks the authentication login, to get the authentication login token using the below command:
-```
-kubectl -n kube-system describe secret default
-```
-This command displays the token which is generally a larger size string, copy it and use it for authentication of step 6. link: http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
+- [`sbk-rabbitmq-k8-sample.yaml`](sbk-rabbitmq-k8-sample.yaml): example Pod/workload configuration.
+- [`sbk-rabbitmq-k8-sample.sh`](sbk-rabbitmq-k8-sample.sh): helper commands for that example.
 
+## Before applying
 
-## SBK docker image with Kubernetes and command line arguments
-you can directly run the SBK image with command line arguments , below is an example
-```
-kubectl run sbk --restart=Never --expose=true  --port=9718 --hostport=9718  --image=kmgowda/sbk:latest -- -class  rabbitmq  -broker 192.168.0.192 -topic kmg-topic-11  -writers 5  -readers 1 -size 100 -seconds 60
+1. Review the manifest and image tag.
+2. Replace backend addresses and topic names.
+3. Put credentials in an appropriate Kubernetes Secret rather than the manifest or command line.
+4. Set CPU and memory requests/limits deliberately; throttling changes benchmark results.
+5. Select nodes, storage classes, and network paths that match the experiment.
+6. Use a disposable namespace and backend data set.
+7. Confirm the pod can reach the backend and, for `GrpcLogger`, the SBM service.
+
+```bash
+kubectl create namespace sbk-benchmark
+kubectl -n sbk-benchmark apply -f kubernetes/sbk-rabbitmq-k8-sample.yaml
+kubectl -n sbk-benchmark logs -f <pod-name>
 ```
 
-to pass the command line arguments to SBK image , **"--"** prefix is used before **-class** argument.
+Inspect the manifest's actual resource name before replacing `<pod-name>`.
 
+## One-off run
 
-Example benchmarking command for a file write with busy box is as follows:
+For a short local-file smoke test:
+
+```bash
+kubectl -n sbk-benchmark run sbk-file \
+  --restart=Never \
+  --image=kmgowda/sbk:latest \
+  -- \
+  -class file -file /tmp/sbk.bin -writers 1 -size 4096 -seconds 15
 ```
-kubectl run sbk --restart=Never --expose=true  --port=9718 --hostport=9718  --image=kmgowda/sbk:latest -- -class  file  -writers 1  -size 100 -seconds 60
+
+Pin an immutable image version or digest for recorded experiments. Ephemeral container files disappear with the pod; mount a volume when data must survive for a later read test.
+
+## Benchmark validity
+
+Record pod requests/limits, node type, placement, container runtime, CNI, service routing, image digest, JVM settings, and backend locality. Check CPU throttling, restarts, eviction, and network errors before accepting results. A Kubernetes service mesh or proxy can materially change latency.
+
+Clean up the dedicated namespace only after preserving required logs and results:
+
+```bash
+kubectl delete namespace sbk-benchmark
 ```
+
+See [container guidance](../dockers/README.md), [Grafana/Prometheus](../grafana/README.md), and the [reproducibility checklist](../docs/sbk-internals.md#134-reproducibility-checklist-for-an-sbk-based-study).

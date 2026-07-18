@@ -77,5 +77,10 @@ jobs:
           docs/AGENT_TOOLKIT.md
           docs/AGENT_DOCUMENTATION_DISTRIBUTION.md
           docs/sbk-internals.md
+          docs/README.md
+          docs/ARCHITECTURE.md
+          docs/REPOSITORY_MAP.md
+          docs/DRIVER_GUIDE.md
+          docs/DOCUMENTATION_GUIDE.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

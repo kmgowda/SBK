@@ -24,30 +24,36 @@ plugins.withId('maven-publish') {
     tasks.register('docsJar', Jar) {
         archiveBaseName = project.name
         archiveClassifier = 'docs'
-        from('AGENTS.md') {
+        from(rootProject.file('AGENTS.md')) {
             into 'docs'
         }
-        from('INSTRUCTIONS.md') {
+        from(rootProject.file('INSTRUCTIONS.md')) {
             into 'docs'
         }
-        from('README.md') {
+        from(rootProject.file('README.md')) {
             into 'docs'
+            rename { 'PROJECT_README.md' }
         }
-        from('docs') {
+        from(rootProject.file('docs')) {
+            include 'README.md'
             include 'AGENT_RECIPES.md'
             include 'DRIVER_SPECIFICATION.md'
             include 'AGENT_TOOLKIT.md'
             include 'AGENT_DOCUMENTATION_DISTRIBUTION.md'
             include 'sbk-internals.md'
+            include 'ARCHITECTURE.md'
+            include 'REPOSITORY_MAP.md'
+            include 'DRIVER_GUIDE.md'
+            include 'DOCUMENTATION_GUIDE.md'
             into 'docs'
         }
-        from('.devin/skills') {
+        from(rootProject.file('.devin/skills')) {
             into 'devin-skills'
         }
-        from('.cursorrules') {
+        from(rootProject.file('.cursorrules')) {
             into 'agent-configs'
         }
-        from('.aider.conf.yml') {
+        from(rootProject.file('.aider.conf.yml')) {
             into 'agent-configs'
         }
     }

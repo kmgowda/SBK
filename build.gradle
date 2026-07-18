@@ -612,6 +612,11 @@ application {
             include "AGENT_TOOLKIT.md"
             include "AGENT_DOCUMENTATION_DISTRIBUTION.md"
             include "sbk-internals.md"
+            include "README.md"
+            include "ARCHITECTURE.md"
+            include "REPOSITORY_MAP.md"
+            include "DRIVER_GUIDE.md"
+            include "DOCUMENTATION_GUIDE.md"
         }
     }
 

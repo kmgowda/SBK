@@ -86,7 +86,7 @@ The framework's stated design principle, quoted verbatim from
 
 In practice that means:
 
-- **Storage agnostic.** ~55 drivers ship in this repo today (Kafka,
+- **Storage agnostic.** 52 drivers are enabled in the aggregate build today (Kafka,
   Pulsar, Pravega, BookKeeper, S3, HDFS, Cassandra, MongoDB, Redis,
   RocksDB, PostgreSQL, …). Adding a new one is a matter of implementing
   one Java interface with seven methods.
@@ -156,7 +156,7 @@ flowchart TB
         GYAL["<b>SBK-GEM-YAL</b><br/>YML + SSH<br/>SbkGemYalMain.main()"]
     end
 
-    subgraph DRIVERS["🔌 Drivers (~55 in tree)"]
+    subgraph DRIVERS["🔌 Drivers (52 enabled)"]
         DRV["Kafka · Pulsar · Pravega · S3<br/>HDFS · Cassandra · MongoDB · Redis<br/>JDBC · RocksDB · File · …"]
     end
 
@@ -2091,7 +2091,7 @@ methodology section.
 If you publish results obtained with SBK, including the following in
 your "Experimental Setup" section makes the study fully reproducible:
 
-1. **SBK version and commit hash** (e.g. v10.0, commit `5a623178`).
+1. **SBK version and commit hash** from the exact build under test.
 2. **Driver** used (e.g. `minio`, `cassandra`, `kafka`).
 3. **PerL configuration**: `qPerWorker`, `idleNS`, `maxArraySizeMB`,
    `maxHashMapSizeMB`, `histogram` (yes/no). Defaults are in
@@ -2165,7 +2165,11 @@ deeper:
 
 ### In this repository
 
-- <ref_file file="/root/projects/SBK/README.md" /> — the user manual (~1200 lines)
+- <ref_file file="/root/projects/SBK/README.md" /> — product overview, build, and quick start
+- `docs/README.md` — documentation index and reading paths
+- `docs/ARCHITECTURE.md` — concise source-linked architecture and code flow
+- `docs/REPOSITORY_MAP.md` — directory and ownership map
+- `docs/DRIVER_GUIDE.md` — driver inventory and implementation contract
 - <ref_file file="/root/projects/SBK/perl/README.md" /> — PerL library notes
 - <ref_file file="/root/projects/SBK/sbm/README.md" /> — SBM deployment guide
 - <ref_file file="/root/projects/SBK/sbk-gem/README.md" /> — SBK-GEM deployment guide

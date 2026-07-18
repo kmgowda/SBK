@@ -34,7 +34,7 @@ The Solr driver can be configured using the following parameters:
 
 1. **Solr Installation**: Ensure you have Apache Solr 8.x or later installed and running
 2. **SolrCloud Mode**: For distributed benchmarks, set up SolrCloud with ZooKeeper
-3. **Java**: Java 8 or later required
+3. **Java**: JDK 25, matching the SBK build requirement
 4. **Network Access**: Ensure the SBK framework can access your Solr instance
 
 ### Setting up SolrCloud

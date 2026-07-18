@@ -32,7 +32,8 @@ driver SPI.
 
 - **Languages.** Java only (no Kotlin, no Scala). Build with Gradle (wrapper
   in tree: `./gradlew`). JDK 25 required.
-- **Modules.** 6 core modules + ~55 storage drivers. Each module is a
+- **Modules.** 6 core modules + 52 enabled storage drivers. The source tree also
+  contains disabled drivers and a driver template. Each module is a
   Gradle subproject.
 - **License.** Apache 2.0.
 - **Branch model.** Trunk-based; PRs target `master`.
@@ -47,7 +48,7 @@ driver SPI.
 | `sbk-yal/` | YML-driven launcher (single-node). | Rarely. |
 | `sbk-gem/` | **SBK-GEM** — SSH-based distributed launcher. | When changing the multi-host orchestration. |
 | `sbk-gem-yal/` | YML-driven SBK-GEM. | Rarely. |
-| `drivers/<name>/` | One subdirectory per storage backend. **~55 driver subprojects**, each a small wrapper around a vendor SDK. | When adding or fixing a driver. **This is the most common change.** |
+| `drivers/<name>/` | One subdirectory per storage backend. **52 are enabled in the aggregate build**; disabled drivers and a template also remain in tree. | When adding or fixing a driver. **This is the most common change.** |
 
 **For new drivers, see <ref_file file="/root/projects/SBK/docs/DRIVER_SPECIFICATION.md" />
 (spec template + worked example) and
@@ -188,7 +189,7 @@ RGW) reject with HTTP 400 *InvalidRequest*. The comment in the
 
 ### 4.4 The pathing JAR can get stale after dependency changes
 
-The `bin/sbk` script puts only `sbk-pathing-10.0.jar` + `sbk-10.0.jar`
+The `bin/sbk` script puts only the versioned pathing JAR and main SBK JAR
 on the classpath; everything else (your driver's vendor SDK, transitive
 deps) is reached through the pathing jar's `Class-Path:` manifest. When
 you change dependencies (especially driver vendor SDK versions),
@@ -341,5 +342,5 @@ should re-read this file and the relevant linked docs.
    `synchronized` blocks, etc.)?
 
 When in doubt, **prefer reading existing code over making assumptions**.
-This codebase has 55 drivers; any specific pattern you need has almost
+This codebase has more than 50 driver implementations; any specific pattern you need has almost
 certainly been done before.

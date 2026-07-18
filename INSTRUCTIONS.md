@@ -1,161 +1,67 @@
-# AI Agent Instructions for SBK Repository
+<!--
+Copyright (c) KMG. All Rights Reserved.
 
-> **Quick start for all AI agents.** Read this file first, then see AGENTS.md for complete details.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-## What is SBK?
+    http://www.apache.org/licenses/LICENSE-2.0
 
-SBK (Storage Benchmark Kit) is a Java framework for benchmarking storage systems (S3, databases, message queues, file systems, etc.).
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 
-- **Language:** Java (JDK 25 REQUIRED)
-- **Build:** Gradle (wrapper: `./gradlew`)
-- **Structure:** 6 core modules + ~55 storage drivers
-- **License:** Apache 2.0
+# SBK coding-agent instructions
 
-## Before You Start
+This is the compact compatibility entry point for tools that look for `INSTRUCTIONS.md`. The authoritative repository rules are in [AGENTS.md](AGENTS.md); read that file before changing code.
 
-1. **Read AGENTS.md** - This is the main guide for all agents
-2. **Check JDK version** - SBK requires JDK 25 (set SBK_JAVA_HOME or JAVA_HOME)
-3. **Understand the build workflow** - See "Build commands" below
+## Required context
 
-## Critical Conventions (Read This!)
+- [README.md](README.md): product overview, build, and first run.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): module boundaries and runtime flow.
+- [docs/REPOSITORY_MAP.md](docs/REPOSITORY_MAP.md): code navigation.
+- [docs/AGENT_RECIPES.md](docs/AGENT_RECIPES.md): exact task procedures.
+- [docs/DRIVER_GUIDE.md](docs/DRIVER_GUIDE.md): driver contract and verification.
 
-### Build System
-- New drivers MUST be added to **BOTH** `settings-drivers.gradle` AND `build-drivers.gradle`
-- JDK 25 is required - build will fail with JDK 11 or other versions
-- Use `./gradlew check` to verify changes
-- Use `./gradlew installDist` to build distribution
+## Non-negotiable facts
 
-### Code Style
-- 4 spaces, no tabs
-- All public methods need Javadoc with @param, @return, @throws
-- Single-statement if blocks MUST have braces
-- No synchronized blocks in driver hot paths (writeAsync/read)
-- Lombok is available
+- SBK is a Java 25 multi-project Gradle build; use `./gradlew`.
+- The dependency direction is `perl <- sbk-api <- drivers`.
+- Drivers implement `Storage<T>` and should leave general scheduling and timing to the harness.
+- Every enabled driver appears in both `settings-drivers.gradle` and `build-drivers.gradle`.
+- Checkstyle is strict, including import-package allow-listing.
+- Do not add synchronization or avoidable allocation to driver operation paths.
+- Do not hand-edit generated Javadocs.
+- HaloDB and Ignite are disabled; `sbktemplate` is not a runtime driver.
+- MinIO 8.5.17 is intentionally pinned for older S3-compatible backend behavior.
 
-### Common Gotchas
-- Checkstyle/import-control.xml needs new top-level packages whitelisted
-- Pathing JAR can get stale after dependency changes - clean rebuild needed
-- halodb driver is disabled (GitHub Packages quota issue)
-- MinIO SDK is pinned to 8.5.17 (not 9.x) for backend compatibility
-- Drivers must handle InterruptedIOException as clean shutdown
+## Normal workflow
 
-## Build Commands
+1. Inspect the working tree and preserve unrelated changes.
+2. Read the affected source, its module build file, and the nearest documentation.
+3. Make a focused change.
+4. Run the affected module check.
+5. Run the full build and distribution verification when feasible.
+6. Smoke-test driver behavior against the relevant backend.
+7. Update documentation and report exact verification results.
 
 ```bash
-# Verify changes (fast for single module)
-./gradlew :drivers:<name>:check
-
-# Full project verification
+git status --short
+./gradlew :<module>:check
 ./gradlew check
-
-# Build distribution
 ./gradlew installDist
-
-# Clean rebuild (if dependency changes or NoClassDefFoundError)
-rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks
+git diff --check
 ```
 
-## Driver Development Quick Reference
-
-### Adding a new driver
-1. Copy from `drivers/sbktemplate/`
-2. Rename packages/classes (SbkTemplate → YourDriver)
-3. Add vendor SDK to build.gradle
-4. Add to settings-drivers.gradle: `include 'drivers:yourdriver'`
-5. Add to build-drivers.gradle: `api project(':drivers:yourdriver')`
-6. Update checkstyle/import-control.xml if new packages
-7. Implement Storage<T>, Writer<T>, Reader<T>
-8. Add README.md with examples
-9. Verify: `./gradlew :drivers:yourdriver:check`, `./gradlew check`, `./gradlew installDist`
-
-### Modifying an existing driver
-1. Add flag in addArgs()
-2. Add field to Config class
-3. Add default to properties file
-4. Parse in parseArgs()
-5. Use the flag in openStorage/createWriter/createReader
-6. Update README.md
-7. Verify: `./gradlew :drivers:<name>:check`
-
-## Verification Checklist
-
-Before marking a task complete:
-- [ ] ./gradlew check passes
-- [ ] ./gradlew installDist succeeds
-- [ ] No checkstyle violations
-- [ ] Driver changes tested against real backend
-- [ ] Documentation updated
-- [ ] Both Gradle files updated for new drivers
-
-## Documentation
-
-- **AGENTS.md** - Main AI agent guide (READ THIS FIRST - comprehensive)
-- **docs/AGENT_RECIPES.md** - Step-by-step recipes
-- **docs/DRIVER_SPECIFICATION.md** - Driver spec template
-- **docs/sbk-internals.md** - Architecture documentation
-- **README.md** - User manual
-
-## Agent-Specific Configurations
-
-- **Devin:** See `.devin/skills/` for executable skills (sbk-driver-development, sbk-build-verify, sbk-benchmark-runner)
-- **Cursor:** See `.cursorrules` for Cursor-specific rules
-- **Aider:** See `.aider.conf.yml` for Aider configuration
-- **All others:** Start with AGENTS.md (this is the universal entry point)
-
-## Performance Benchmarking
+After dependency changes:
 
 ```bash
-# Basic benchmark
-./build/install/sbk/bin/sbk -class <driver> -writers N -size <bytes> -seconds <duration>
-
-# Example: MinIO with 8 writers, 1 MiB records, 60 seconds
-./build/install/sbk/bin/sbk -class minio -writers 8 -size 1048576 -seconds 60
+./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
-## Out of Scope (Requires User Approval)
+## Actions requiring explicit authority
 
-- git push, git tag, or remote operations
-- Modifying license headers or LICENSE file
-- Changing SBK version
-- Adding new top-level Gradle subprojects (new drivers are fine)
-- Re-enabling halodb
-- Upgrading MinIO SDK from 8.5.17
-- Force-pushing or rewriting history
-
-## Architecture Invariants
-
-- PerL hot path is lock-free - don't add synchronization in drivers
-- No sampling in measurement - every operation is timed
-- Harness already times operations - don't add System.nanoTime() in drivers
-- Shutdown is asynchronous - handle InterruptedIOException gracefully
-
-## Need More Detail?
-
-**Read AGENTS.md** - It contains:
-- Complete module map and architecture
-- Detailed build/run/verify instructions
-- All 8 common gotchas with explanations
-- Repository conventions (file structure, code style)
-- Two AI workflows (vibe coding vs spec-driven)
-- Out-of-scope actions list
-- Quick agent self-check questions
-
-**Then read docs/AGENT_RECIPES.md** for step-by-step procedures:
-- Recipe 1: Add a new storage driver
-- Recipe 2: Modify an existing driver
-- Recipe 5: Debug a driver that fails at runtime
-- Recipe 8: Run a benchmark against a new cluster
-
-**Then read docs/DRIVER_SPECIFICATION.md** for formal driver development:
-- Fillable spec template
-- Worked example (MinIO driver)
-- Acceptance checklist
-
-## Summary
-
-1. Read AGENTS.md first
-2. Check JDK version (must be 25)
-3. Follow the build workflow
-4. Remember the critical conventions (dual Gradle files, checkstyle, no sync in hot path)
-5. Use the verification checklist
-6. Consult agent-specific configs if available
+Do not infer permission to publish, push, tag, rewrite history, change the project version or license, add a new top-level module, re-enable HaloDB, or upgrade the pinned MinIO client. See [AGENTS.md](AGENTS.md) for the complete constraints and definition of done.
