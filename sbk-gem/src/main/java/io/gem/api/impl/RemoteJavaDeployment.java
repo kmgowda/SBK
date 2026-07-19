@@ -12,6 +12,8 @@ package io.gem.api.impl;
 
 import io.gem.api.SshResponse;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,26 +64,20 @@ final class RemoteJavaDeployment {
      * @param configuredJavaHome explicitly configured remote Java home, or null
      * @param expectedMajor requested Java major version
      * @return remote Java home to probe before copying and to use as the copy destination
+     * @throws IllegalArgumentException when the remote connection directory is not absolute
      */
     static String destinationJavaHome(String connectionDir, String configuredJavaHome, int expectedMajor) {
+        if (connectionDir == null || !connectionDir.startsWith("/")) {
+            throw new IllegalArgumentException("Remote connection directory must be absolute: " + connectionDir);
+        }
+        final String absoluteConnectionDir = normalizeAbsoluteRemotePath(connectionDir);
         if (configuredJavaHome != null) {
-            return configuredJavaHome;
+            return normalizeAbsoluteRemotePath(configuredJavaHome.startsWith("/") ? configuredJavaHome :
+                    absoluteConnectionDir + "/" + configuredJavaHome);
         }
-        String normalizedDir = connectionDir;
-        while (normalizedDir.length() > 1 && normalizedDir.endsWith("/")) {
-            normalizedDir = normalizedDir.substring(0, normalizedDir.length() - 1);
-        }
-        final int separator = normalizedDir.lastIndexOf('/');
-        final String parent;
-        if (separator < 0) {
-            parent = ".";
-        } else if (separator == 0) {
-            parent = "/";
-        } else {
-            parent = normalizedDir.substring(0, separator);
-        }
-        return "/".equals(parent) ? parent + "sbk-java-" + expectedMajor :
-                parent + "/sbk-java-" + expectedMajor;
+        final int separator = absoluteConnectionDir.lastIndexOf('/');
+        final String parent = separator == 0 ? "/" : absoluteConnectionDir.substring(0, separator);
+        return normalizeAbsoluteRemotePath(parent + "/sbk-java-" + expectedMajor);
     }
 
     /**
@@ -111,7 +107,26 @@ final class RemoteJavaDeployment {
             return null;
         }
         final Matcher matcher = JAVA_HOME_PATTERN.matcher(response.stdOutputStream.toString());
-        return matcher.find() ? matcher.group(1).trim() : null;
+        if (!matcher.find()) {
+            return null;
+        }
+        final String javaHome = matcher.group(1).trim();
+        return javaHome.startsWith("/") ? normalizeAbsoluteRemotePath(javaHome) : null;
+    }
+
+    private static String normalizeAbsoluteRemotePath(String path) {
+        final Deque<String> segments = new ArrayDeque<>();
+        for (String segment : path.split("/")) {
+            if (segment.isEmpty() || ".".equals(segment)) {
+                continue;
+            }
+            if ("..".equals(segment)) {
+                segments.pollLast();
+            } else {
+                segments.addLast(segment);
+            }
+        }
+        return "/" + String.join("/", segments);
     }
 
     /**

@@ -135,6 +135,18 @@ final class RemoteSbkDeploymentTest {
     }
 
     @Test
+    void resolvesRemoteDirectoryToAbsolutePath() throws IOException {
+        final String probe = RemoteSbkDeployment.directoryPathProbeCommand("work dir");
+        final SshResponse response = response(0, "/home/user/work dir\n");
+
+        assertEquals("case 'work dir' in /*) printf '%s\\n' 'work dir';; *) printf '%s/%s\\n' " +
+                "\"$(pwd -P)\" 'work dir';; esac", probe);
+        assertEquals("/home/user/work dir", RemoteSbkDeployment.absoluteDirectoryPath(response));
+        assertNull(RemoteSbkDeployment.absoluteDirectoryPath(response(0, "relative/work dir\n")));
+        assertNull(RemoteSbkDeployment.absoluteDirectoryPath(response(1, "/home/user/work dir\n")));
+    }
+
+    @Test
     void rejectsFailedOrRelativeExecutableResolution() throws IOException {
         assertNull(RemoteSbkDeployment.absoluteExecutablePath(response(1, "/home/user/sbk/bin/sbk\n")));
         assertNull(RemoteSbkDeployment.absoluteExecutablePath(response(0, "relative/sbk/bin/sbk\n")));

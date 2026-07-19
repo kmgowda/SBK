@@ -17,14 +17,6 @@ plugins.withId('application') {
                 ((application.applicationDefaultJvmArgs ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
     }
 
-    // Include shared SBK runtime options in every generated launcher, including
-    // additional CreateStartScripts tasks registered by the root project.
-    tasks.withType(CreateStartScripts).configureEach {
-        doFirst {
-            defaultJvmOpts = ((defaultJvmOpts ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
-        }
-    }
-
     tasks.register('pathingJar', Jar) {
         archiveAppendix = 'pathing'
 
@@ -38,8 +30,12 @@ plugins.withId('application') {
         }
     }
 
-    // Configure start scripts to use appropriate Java
-    startScripts {
+    // Configure every standard and custom start script to use the same JVM
+    // options and SBK_JAVA_HOME -> JAVA_HOME -> PATH selection order.
+    tasks.withType(CreateStartScripts).configureEach {
+        doFirst {
+            defaultJvmOpts = ((defaultJvmOpts ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
+        }
         doLast {
             // For Unix scripts - inject SBK_JAVA_HOME runtime check with fallback
             def unixJavaDetectionLogic = '''# Determine the Java command to use to start the JVM.
@@ -114,6 +110,24 @@ goto fail
                 windowsScript.text = windowsScript.text.substring(0, winStartIndex) + windowsJavaLogic + windowsScript.text.substring(winEndIndex)
             }
         }
+    }
+
+    def verifySbkJavaHomeStartScripts = tasks.register('verifySbkJavaHomeStartScripts') {
+        dependsOn tasks.withType(CreateStartScripts)
+        doLast {
+            tasks.withType(CreateStartScripts).each { scriptTask ->
+                if (!scriptTask.unixScript.text.contains('SBK_JAVA_HOME/bin/java')) {
+                    throw new GradleException("${scriptTask.path} Unix launcher does not honor SBK_JAVA_HOME")
+                }
+                if (!scriptTask.windowsScript.text.contains('%SBK_JAVA_HOME%/bin/java.exe')) {
+                    throw new GradleException("${scriptTask.path} Windows launcher does not honor SBK_JAVA_HOME")
+                }
+            }
+        }
+    }
+
+    tasks.named('check').configure {
+        dependsOn verifySbkJavaHomeStartScripts
     }
 
     application {

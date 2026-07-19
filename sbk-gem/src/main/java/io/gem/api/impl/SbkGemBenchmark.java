@@ -162,7 +162,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
         final CompletableFuture<SshResponse>[] cfResults = new CompletableFuture[nodes.length];
-        final String[] javaHomes = prepareRemoteJava();
+        final String[] absoluteConnectionDirs = resolveRemoteConnectionDirectories();
+        final String[] javaHomes = prepareRemoteJava(absoluteConnectionDirs);
         final String remoteDir = Paths.get(params.getSbkDir()).getFileName().toString();
         final SbkDeploymentPlan deploymentPlan = planRemoteSbkDeployment(remoteDir, javaHomes);
         if (hasSelectedTarget(deploymentPlan.copyTargets())) {
@@ -222,8 +223,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @SuppressWarnings("unchecked")
-    private String[] prepareRemoteJava() throws ConnectException, InterruptedException, ExecutionException,
-            IOException {
+    private String[] prepareRemoteJava(String[] absoluteConnectionDirs) throws ConnectException,
+            InterruptedException, ExecutionException, IOException {
         final int expectedVersion = params.getJavaVersion();
         final String[] javaHomes = new String[nodes.length];
         final boolean[] unresolved = new boolean[nodes.length];
@@ -248,7 +249,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             for (int i = 0; i < nodes.length; i++) {
                 if (unresolved[i]) {
                     destinationJavaHomes[i] = RemoteJavaDeployment.destinationJavaHome(
-                            nodes[i].connection.getDir(), configuredJavaHome, expectedVersion);
+                            absoluteConnectionDirs[i], configuredJavaHome, expectedVersion);
                     homeProbes[i] = nodes[i].runCommandAsync(
                             RemoteJavaDeployment.homeProbeCommand(destinationJavaHomes[i]), true,
                             config.remoteTimeoutSeconds);
@@ -273,7 +274,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 throw new InterruptedException("SBK-GEM: Java " + expectedVersion +
                         " is unavailable on one or more nodes and javacopy is false");
             }
-            copyJavaToRemoteTargets(unresolved, javaHomes, configuredJavaHome, expectedVersion);
+            copyJavaToRemoteTargets(unresolved, javaHomes, absoluteConnectionDirs, configuredJavaHome,
+                    expectedVersion);
         }
 
         for (int i = 0; i < nodes.length; i++) {
@@ -285,7 +287,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @SuppressWarnings("unchecked")
-    private void copyJavaToRemoteTargets(boolean[] copyTargets, String[] javaHomes, String configuredJavaHome,
+    private void copyJavaToRemoteTargets(boolean[] copyTargets, String[] javaHomes,
+                                         String[] absoluteConnectionDirs, String configuredJavaHome,
                                          int expectedVersion) throws IOException, ConnectException,
             InterruptedException, ExecutionException {
         final Path localJavaHome = Paths.get(System.getProperty("java.home")).toAbsolutePath().normalize();
@@ -310,7 +313,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         for (int i = 0; i < nodes.length; i++) {
             if (copyTargets[i]) {
                 targets[i] = RemoteJavaDeployment.destinationJavaHome(
-                        nodes[i].connection.getDir(), configuredJavaHome, expectedVersion);
+                        absoluteConnectionDirs[i], configuredJavaHome, expectedVersion);
                 if (!isSafeRemoteDirectory(targets[i])) {
                     throw new IOException("Refusing to replace unsafe remote Java directory: " + targets[i]);
                 }
@@ -387,6 +390,32 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private Map.Entry<String, String> javaTargetKey(int index, String target) {
         return Map.entry(nodes[index].connection.getHost().toLowerCase(), target == null ? "" :
                 target.toLowerCase());
+    }
+
+    @SuppressWarnings("unchecked")
+    private String[] resolveRemoteConnectionDirectories() throws ConnectException, InterruptedException,
+            ExecutionException {
+        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            probes[i] = nodes[i].runCommandAsync(RemoteSbkDeployment.directoryPathProbeCommand(
+                    nodes[i].connection.getDir()), true, config.remoteTimeoutSeconds);
+        }
+        waitFor(CompletableFuture.allOf(probes), "remote working-directory discovery");
+
+        final String[] directories = new String[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            final SshResponse response = probes[i].get();
+            directories[i] = RemoteSbkDeployment.absoluteDirectoryPath(response);
+            if (directories[i] == null) {
+                final String remoteError = response.errOutputStream.toString().trim();
+                final String errMsg = "SBK-GEM: Unable to resolve remote directory '" +
+                        nodes[i].connection.getDir() + "' on host '" + nodes[i].connection.getHost() + "'" +
+                        (remoteError.isEmpty() ? "" : ": " + remoteError);
+                Printer.log.error(errMsg);
+                throw new InterruptedException(errMsg);
+            }
+        }
+        return directories;
     }
 
     private static String normalizeRemotePath(String path) {

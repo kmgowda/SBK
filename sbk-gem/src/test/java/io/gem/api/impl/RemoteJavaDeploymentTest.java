@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +44,14 @@ final class RemoteJavaDeploymentTest {
 
         assertTrue(RemoteJavaDeployment.hasExpectedVersion(response, 25));
         assertEquals("/opt/jdk-25", RemoteJavaDeployment.javaHome(response));
+    }
+
+    @Test
+    void rejectsRelativeDiscoveredJavaHome() throws IOException {
+        final SshResponse response = response(0, "SBK_JAVA_HOME=./sbk-java-25\n",
+                "openjdk version \"25.0.2\"\n");
+
+        assertNull(RemoteJavaDeployment.javaHome(response));
     }
 
     @Test
@@ -99,15 +108,21 @@ final class RemoteJavaDeploymentTest {
     }
 
     @Test
+    void resolvesRelativeConfiguredJavaHomeAgainstRemoteDirectory() {
+        assertEquals("/srv/sbk-gem-10.2/java/jdk-25", RemoteJavaDeployment.destinationJavaHome(
+                "/srv/sbk-gem-10.2", "java/jdk-25", 25));
+    }
+
+    @Test
     void resolvesManagedJavaHomeBesideRemoteSbkDirectory() {
         assertEquals("/srv/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
                 "/srv/sbk-gem-10.2", null, 25));
         assertEquals("/srv/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
                 "/srv/sbk-gem-10.2///", null, 25));
-        assertEquals("./sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
-                "sbk-gem-10.2", null, 25));
         assertEquals("/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
                 "/sbk-gem-10.2", null, 25));
+        assertThrows(IllegalArgumentException.class, () -> RemoteJavaDeployment.destinationJavaHome(
+                "sbk-gem-10.2", null, 25));
     }
 
     private static SshResponse response(int returnCode, String standardOutput, String errorOutput)
