@@ -324,7 +324,7 @@ final public class SbkGem {
                 System.out.println("\n" + ex.getHelpText());
                 throw ex;
             } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
+                Printer.log.error("SBK-GEM: Invalid arguments", ex);
                 params.printHelp();
                 throw new SbkGemParameterException(ex);
             }

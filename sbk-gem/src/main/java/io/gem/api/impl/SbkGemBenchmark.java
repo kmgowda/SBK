@@ -416,6 +416,17 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 continue;
             }
 
+            if (response == null || response.returnCode != 0 && response.returnCode != 127) {
+                final String remoteError = response == null ? "no response" :
+                        response.errOutputStream.toString().trim();
+                final String errMsg = "SBK-GEM: Host '" + nodes[i].connection.getHost() +
+                        "' SBK version probe failed" +
+                        (response == null ? "" : " with return code " + response.returnCode) +
+                        (remoteError.isEmpty() ? "" : ": " + remoteError);
+                Printer.log.error(errMsg);
+                throw new InterruptedException(errMsg);
+            }
+
             if (!params.isCopy()) {
                 final String errMsg = "SBK-GEM: Host '" + nodes[i].connection.getHost() +
                         "' does not have expected SBK version " + config.sbkVersion +

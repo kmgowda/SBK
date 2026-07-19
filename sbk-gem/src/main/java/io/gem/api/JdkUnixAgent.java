@@ -51,7 +51,11 @@ final class JdkUnixAgent extends AbstractAgentProxy {
             channel.connect(UnixDomainSocketAddress.of(Path.of(socketPath)));
         } catch (IOException | RuntimeException ex) {
             open.set(false);
-            channel.close();
+            try {
+                channel.close();
+            } catch (IOException closeException) {
+                ex.addSuppressed(closeException);
+            }
             throw ex;
         }
     }

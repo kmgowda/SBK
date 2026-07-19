@@ -102,6 +102,8 @@ final class RemoteJavaDeploymentTest {
     void resolvesManagedJavaHomeBesideRemoteSbkDirectory() {
         assertEquals("/srv/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
                 "/srv/sbk-gem-10.2", null, 25));
+        assertEquals("/srv/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
+                "/srv/sbk-gem-10.2///", null, 25));
         assertEquals("./sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
                 "sbk-gem-10.2", null, 25));
         assertEquals("/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(

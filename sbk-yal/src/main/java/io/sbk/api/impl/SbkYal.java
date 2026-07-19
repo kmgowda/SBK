@@ -105,7 +105,7 @@ public final class SbkYal {
             throw ex;
         } catch (ParseException | IllegalArgumentException ex) {
             if (ex instanceof UnrecognizedOptionException unrecognized &&
-                    unrecognized.getOption().startsWith("--")) {
+                    unrecognized.getOption() != null && unrecognized.getOption().startsWith("--")) {
                 Printer.log.error(unrecognized.toString());
                 params.printHelp();
                 throw unrecognized;

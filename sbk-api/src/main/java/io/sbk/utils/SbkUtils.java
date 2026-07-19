@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final public class SbkUtils {
+public final class SbkUtils {
 
     /**
      * Return a copy of command-line arguments with values belonging to sensitive
@@ -48,18 +48,24 @@ final public class SbkUtils {
                 .map(SbkUtils::normalizeOptionName)
                 .map(name -> name.toLowerCase(Locale.ROOT))
                 .collect(Collectors.toSet());
-        for (int i = 0; i < redacted.length; i++) {
+        int i = 0;
+        while (i < redacted.length) {
             final String argument = redacted[i];
             final int equalsIndex = argument.indexOf('=');
             final String option = equalsIndex >= 0 ? argument.substring(0, equalsIndex) : argument;
             if (!option.startsWith(Config.ARG_PREFIX) ||
                     !sensitiveNames.contains(normalizeOptionName(option).toLowerCase(Locale.ROOT))) {
+                i++;
                 continue;
             }
             if (equalsIndex >= 0) {
                 redacted[i] = argument.substring(0, equalsIndex + 1) + "******";
+                i++;
             } else if (i + 1 < redacted.length) {
                 redacted[i + 1] = "******";
+                i += 2;
+            } else {
+                i++;
             }
         }
         return redacted;

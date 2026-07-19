@@ -88,12 +88,15 @@ final class RemoteSbkDeploymentTest {
     void deletesOnlyExistingMismatchWhenEnabled() throws IOException {
         final SshResponse mismatch = response(0, "SBK Version: " + expectedVersion + "-different\n");
         final SshResponse missing = response(127, "");
+        final SshResponse probeFailure = response(126, "");
         final SshResponse matching = response(0, "SBK Version: " + expectedVersion + "\n");
 
         assertTrue(RemoteSbkDeployment.requiresDeleteBeforeCopy(true, mismatch, expectedVersion));
         assertFalse(RemoteSbkDeployment.requiresDeleteBeforeCopy(false, mismatch, expectedVersion));
         assertFalse(RemoteSbkDeployment.requiresDeleteBeforeCopy(true, missing, expectedVersion));
+        assertFalse(RemoteSbkDeployment.requiresDeleteBeforeCopy(true, probeFailure, expectedVersion));
         assertFalse(RemoteSbkDeployment.requiresDeleteBeforeCopy(true, matching, expectedVersion));
+        assertFalse(RemoteSbkDeployment.requiresCopy(true, probeFailure, expectedVersion));
     }
 
     @Test

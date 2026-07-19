@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -132,8 +133,9 @@ public final class SshUtils {
     }
 
     private static boolean hasCauseMessage(Throwable failure, String message) {
+        final Set<Throwable> visited = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = failure;
-        while (cause != null) {
+        while (cause != null && visited.add(cause)) {
             if (cause.getMessage() != null && cause.getMessage().contains(message)) {
                 return true;
             }

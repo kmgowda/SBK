@@ -97,7 +97,8 @@ final class RemoteSbkDeployment {
      * @return true when copying is enabled and the expected version is unavailable
      */
     static boolean requiresCopy(boolean copyEnabled, SshResponse response, String expectedVersion) {
-        return copyEnabled && !hasExpectedVersion(response, expectedVersion);
+        return copyEnabled && response != null && (response.returnCode == 0 || response.returnCode == 127) &&
+                !hasExpectedVersion(response, expectedVersion);
     }
 
     /**
@@ -109,7 +110,7 @@ final class RemoteSbkDeployment {
      * @return true when a remote executable exists but does not provide the expected version
      */
     static boolean requiresDeleteBeforeCopy(boolean deleteEnabled, SshResponse response, String expectedVersion) {
-        return deleteEnabled && response != null && response.returnCode != 127 &&
+        return deleteEnabled && response != null && response.returnCode == 0 &&
                 !hasExpectedVersion(response, expectedVersion);
     }
 

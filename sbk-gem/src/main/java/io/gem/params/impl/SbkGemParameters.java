@@ -255,6 +255,11 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         return config.delete;
     }
 
+    /**
+     * Check whether remote SBK deployments are deleted after benchmarking.
+     *
+     * @return true when post-benchmark deletion is enabled
+     */
     @Override
     public boolean isDeleteAfter() {
         return config.deleteafter;

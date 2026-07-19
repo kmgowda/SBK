@@ -67,14 +67,18 @@ final class RemoteJavaDeployment {
         if (configuredJavaHome != null) {
             return configuredJavaHome;
         }
-        final int separator = connectionDir.lastIndexOf('/');
+        String normalizedDir = connectionDir;
+        while (normalizedDir.length() > 1 && normalizedDir.endsWith("/")) {
+            normalizedDir = normalizedDir.substring(0, normalizedDir.length() - 1);
+        }
+        final int separator = normalizedDir.lastIndexOf('/');
         final String parent;
         if (separator < 0) {
             parent = ".";
         } else if (separator == 0) {
             parent = "/";
         } else {
-            parent = connectionDir.substring(0, separator);
+            parent = normalizedDir.substring(0, separator);
         }
         return "/".equals(parent) ? parent + "sbk-java-" + expectedMajor :
                 parent + "/sbk-java-" + expectedMajor;
