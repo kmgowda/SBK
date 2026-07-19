@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -104,6 +105,21 @@ final class RemoteSbkDeploymentTest {
         final String probe = RemoteSbkDeployment.versionProbeCommand("work dir/sbk's/bin/sbk");
 
         assertTrue(probe.contains("'work dir/sbk'\\''s/bin/sbk' -version"));
+    }
+
+    @Test
+    void quotesEveryRemoteCommandToken() {
+        final String command = RemoteSbkDeployment.shellJoin(List.of("/opt/SBK dir/bin/sbk", "-file",
+                "/tmp/a file; touch /tmp/not-created", "value's"));
+
+        assertEquals("'/opt/SBK dir/bin/sbk' '-file' '/tmp/a file; touch /tmp/not-created' 'value'\\''s'",
+                command);
+    }
+
+    @Test
+    void parsesOnlyAuthoritativeVersionLine() {
+        assertEquals(expectedVersion, RemoteSbkDeployment.parseVersion("SBK Version: " + expectedVersion + "\n"));
+        assertNull(RemoteSbkDeployment.parseVersion("SBK-GEM Version: " + expectedVersion + "\n"));
     }
 
     @Test

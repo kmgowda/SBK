@@ -12,6 +12,7 @@ package io.gem.api.impl;
 
 import io.gem.api.SshResponse;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,6 +90,20 @@ final class RemoteSbkDeployment {
     }
 
     /**
+     * Extract the SBK version from launcher output.
+     *
+     * @param output output produced by {@code sbk -version}
+     * @return parsed version, or {@code null} when the output is invalid
+     */
+    static String parseVersion(String output) {
+        if (output == null) {
+            return null;
+        }
+        final Matcher matcher = VERSION_PATTERN.matcher(output);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    /**
      * Decide whether an SBK copy is required.
      *
      * @param copyEnabled whether copying missing or mismatched SBK is enabled
@@ -122,5 +137,16 @@ final class RemoteSbkDeployment {
      */
     static String shellQuote(String value) {
         return "'" + value.replace("'", "'\\''") + "'";
+    }
+
+    /**
+     * Serialize argument tokens for a POSIX shell without allowing a token to be reinterpreted.
+     *
+     * @param tokens command and argument tokens
+     * @return safely quoted shell command
+     */
+    static String shellJoin(List<String> tokens) {
+        return tokens.stream().map(RemoteSbkDeployment::shellQuote).reduce((left, right) -> left + " " + right)
+                .orElseThrow(() -> new IllegalArgumentException("Command tokens must not be empty"));
     }
 }

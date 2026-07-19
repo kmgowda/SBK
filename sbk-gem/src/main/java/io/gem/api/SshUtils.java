@@ -155,24 +155,20 @@ public final class SshUtils {
      */
     public static void runCommand(final @NotNull ClientSession session, String cmd, long timeoutSeconds,
                                   @NotNull SshResponse response) throws IOException {
-        // Create the exec and channel its output/error streams
-        final ChannelExec execChannel = session.createExecChannel(cmd);
-        execChannel.setErr(response.errOutputStream);
-        execChannel.setOut(response.stdOutputStream);
-
-        // Execute and wait
-        execChannel.open();
-        final Set<?> events = execChannel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED),
-                TimeUnit.SECONDS.toMillis(timeoutSeconds));
-
-        // Check if timed out
-        if (events.contains(ClientChannelEvent.TIMEOUT)) {
-            throw new IOException("The cmd: " + cmd + " timeout !");
-        }
-
-        if (session.isOpen()) {
-            response.returnCode = execChannel.getExitStatus();
-            execChannel.close(true);
+        try (ChannelExec execChannel = session.createExecChannel(cmd)) {
+            execChannel.setErr(response.errOutputStream);
+            execChannel.setOut(response.stdOutputStream);
+            final long timeoutMillis = TimeUnit.SECONDS.toMillis(timeoutSeconds);
+            execChannel.open().verify(timeoutMillis);
+            final Set<?> events = execChannel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), timeoutMillis);
+            if (events.contains(ClientChannelEvent.TIMEOUT)) {
+                throw new IOException("The cmd: " + cmd + " timeout !");
+            }
+            final Integer exitStatus = execChannel.getExitStatus();
+            if (exitStatus == null) {
+                throw new IOException("The cmd: " + cmd + " closed without an SSH exit status");
+            }
+            response.returnCode = exitStatus;
         }
     }
 

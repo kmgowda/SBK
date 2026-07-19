@@ -161,10 +161,12 @@ final public class SshSession {
      *
      * @param srcPath   String
      * @param dstPath   String
+     * @param timeoutSeconds maximum copy duration in seconds
      * @return CompletableFuture
      * @throws ConnectException If connection exception occurs.
      */
-    public CompletableFuture<Void> copyDirectoryAsync(String srcPath, String dstPath) throws ConnectException {
+    public CompletableFuture<Void> copyDirectoryAsync(String srcPath, String dstPath, long timeoutSeconds)
+            throws ConnectException {
         final ClientSession sshSession = getSession();
         return CompletableFuture.runAsync(() -> {
             try {
@@ -172,7 +174,7 @@ final public class SshSession {
             } catch (IOException e) {
                 throw new CompletionException(e);
             }
-        }, executor);
+        }, executor).orTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
     }
 
 

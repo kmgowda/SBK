@@ -53,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -143,12 +144,13 @@ final public class SbkGem {
      * @throws InvocationTargetException if the exception occurs.
      * @throws NoSuchMethodException     if the exception occurs.
      * @throws IllegalAccessException    if the exception occurs.
+     * @throws InterruptedException      if local SBK version discovery is interrupted
      */
     @Contract("_, _, _, _ -> new")
     public static @NotNull GemBenchmark buildBenchmark(final String[] args, final String applicationName,
                                                        final String storagePackageName, final String loggerPackageName)
             throws ParseException, IOException, HelpException, ClassNotFoundException, InvocationTargetException,
-            NoSuchMethodException, IllegalAccessException, InstantiationException {
+            NoSuchMethodException, IllegalAccessException, InstantiationException, InterruptedException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
@@ -259,11 +261,7 @@ final public class SbkGem {
         if (StringUtils.isNotEmpty(sbkAppHome)) {
             gemConfig.sbkdir = sbkAppHome;
         }
-        gemConfig.remoteDir = appName;
-        gemConfig.sbkVersion = Objects.requireNonNullElse(version, "");
-        if (StringUtils.isNotEmpty(version)) {
-            gemConfig.remoteDir += "-" + version;
-        }
+        gemConfig.remoteDir = appName + (StringUtils.isEmpty(version) ? "" : "-" + version);
 
         if (StringUtils.isEmpty(className)) {
             storageDevice = null;
@@ -292,6 +290,29 @@ final public class SbkGem {
             System.out.println("\n" + helpText);
             throw new HelpException(helpText);
         }
+
+        final String requestedSbkDir = firstNonEmpty(SbkUtils.getArgValue(nextArgs, "-sbkdir"),
+                SbkUtils.getArgValue(nextArgs, "--sbkdir"));
+        final String requestedSbkCommand = firstNonEmpty(SbkUtils.getArgValue(nextArgs, "-sbkcommand"),
+                SbkUtils.getArgValue(nextArgs, "--sbkcommand"));
+        if (StringUtils.isNotEmpty(requestedSbkDir)) {
+            gemConfig.sbkdir = requestedSbkDir;
+        }
+        if (StringUtils.isNotEmpty(requestedSbkCommand)) {
+            gemConfig.sbkcommand = requestedSbkCommand;
+        }
+        if (StringUtils.isEmpty(gemConfig.sbkdir) || StringUtils.isEmpty(gemConfig.sbkcommand)) {
+            throw new IOException("The local SBK directory and command are required for version discovery");
+        }
+        final Path localSbkCommand = Path.of(gemConfig.sbkdir, gemConfig.sbkcommand).toAbsolutePath().normalize();
+        gemConfig.sbkVersion = LocalSbkDeployment.discoverVersion(localSbkCommand,
+                gemConfig.remoteTimeoutSeconds);
+        gemConfig.remoteDir = appName + "-" + gemConfig.sbkVersion;
+        if (StringUtils.isNotEmpty(version) && !version.equals(gemConfig.sbkVersion)) {
+            Printer.log.warn("SBK-GEM version " + version + " is deploying local SBK version " +
+                    gemConfig.sbkVersion + " from " + localSbkCommand);
+        }
+        Printer.log.info("SBK-GEM: Local SBK distribution version: " + gemConfig.sbkVersion);
 
         String[] processArgs = nextArgs;
         int i = 1;
@@ -360,25 +381,24 @@ final public class SbkGem {
         // remove GEM and logger parameter options
         final String[] sbkArgsList = SbkUtils.removeOptionArgsAndValues(
                 SbkUtils.removeOptionArgsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
-        final StringBuilder sbkArgsBuilder = new StringBuilder(Config.CLASS_OPTION_ARG + " " + className);
-        for (String arg : sbkArgsList) {
-            sbkArgsBuilder.append(" ");
-            sbkArgsBuilder.append(arg);
-        }
-        sbkArgsBuilder.append(" -out ").append(GrpcLogger.class.getSimpleName());
+        final List<String> sbkCommandArgs = new ArrayList<>();
+        sbkCommandArgs.add(Config.CLASS_OPTION_ARG);
+        sbkCommandArgs.add(className);
+        Collections.addAll(sbkCommandArgs, sbkArgsList);
+        sbkCommandArgs.add("-out");
+        sbkCommandArgs.add(GrpcLogger.class.getSimpleName());
         time = PerlBuilder.buildTime(logger);
-        sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
-        sbkArgsBuilder.append(" -minlatency ").append(logger.getMinLatency());
-        sbkArgsBuilder.append(" -maxlatency ").append(logger.getMaxLatency());
-        sbkArgsBuilder.append(" -wq ").append(logger.getMaxWriterIDs() > 0);
-        sbkArgsBuilder.append(" -rq ").append(logger.getMaxReaderIDs() > 0);
-        //sbkArgsBuilder.append(" -context no");   // There is promethius port now
-        sbkArgsBuilder.append(" -sbm ").append(params.getLocalHost());
-        sbkArgsBuilder.append(" -sbmport ").append(params.getSbmPort());
+        addOption(sbkCommandArgs, "-time", time.getTimeUnit().name());
+        addOption(sbkCommandArgs, "-minlatency", Long.toString(logger.getMinLatency()));
+        addOption(sbkCommandArgs, "-maxlatency", Long.toString(logger.getMaxLatency()));
+        addOption(sbkCommandArgs, "-wq", Boolean.toString(logger.getMaxWriterIDs() > 0));
+        addOption(sbkCommandArgs, "-rq", Boolean.toString(logger.getMaxReaderIDs() > 0));
+        addOption(sbkCommandArgs, "-sbm", params.getLocalHost());
+        addOption(sbkCommandArgs, "-sbmport", Integer.toString(params.getSbmPort()));
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());
-        Printer.log.info("Arguments to remote SBK command: " + sbkArgsBuilder);
+        Printer.log.info("Arguments to remote SBK command: " + sbkCommandArgs);
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
         sbmConfig.maxConnections = params.getConnections().length;
@@ -416,8 +436,17 @@ final public class SbkGem {
             throw ex;
         }
         Printer.log.info("SBK-GEM: Arguments to SBM command verification Success..");
-        return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, ramLogger, time), gemConfig, params,
-                sbkArgsBuilder.toString());
+        return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, ramLogger, time, true), gemConfig, params,
+                sbkCommandArgs);
+    }
+
+    private static String firstNonEmpty(String first, String second) {
+        return StringUtils.isNotEmpty(first) ? first : second;
+    }
+
+    private static void addOption(List<String> arguments, String option, String value) {
+        arguments.add(option);
+        arguments.add(value);
     }
 
 

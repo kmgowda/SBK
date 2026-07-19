@@ -33,6 +33,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -57,7 +59,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private final Benchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
-    private final String sbkArgs;
+    private final List<String> sbkArgs;
     private final CompletableFuture<RemoteResponse[]> retFuture;
     private final RemoteResponse[] remoteResults;
     private final ExecutorService executor;
@@ -67,22 +69,26 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @GuardedBy("this")
     private State state;
 
+    @GuardedBy("this")
+    private boolean sbmStarted;
+
     /**
      * Constructor SbkGemBenchmark is responsible for initializing all values.
      *
      * @param sbmBenchmark  Benchmark
      * @param config        NotNull GemConfig
      * @param params        NotNull GemParameters
-     * @param sbkArgs       String
+     * @param sbkArgs       normalized remote SBK argument tokens
      */
-    public SbkGemBenchmark(Benchmark sbmBenchmark, @NotNull GemConfig config, @NotNull GemParameters params, String sbkArgs) {
+    public SbkGemBenchmark(Benchmark sbmBenchmark, @NotNull GemConfig config, @NotNull GemParameters params,
+                           List<String> sbkArgs) {
         this.sbmBenchmark = sbmBenchmark;
         this.config = config;
-        this.config.remoteTimeoutSeconds = Long.MAX_VALUE;
         this.params = params;
-        this.sbkArgs = sbkArgs;
+        this.sbkArgs = List.copyOf(sbkArgs);
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
+        this.sbmStarted = false;
         final ConnectionConfig[] connections = params.getConnections();
         if (config.fork) {
             executor = new ForkJoinPool(connections.length + 10);
@@ -113,6 +119,18 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK GEM Benchmark Started");
+        try {
+            return startPreparedBenchmark();
+        } catch (IOException | InterruptedException | ExecutionException | RuntimeException ex) {
+            shutdown(ex);
+            throw ex;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    private CompletableFuture<RemoteResponse[]> startPreparedBenchmark() throws IOException, InterruptedException,
+            ExecutionException {
         final CompletableFuture<?>[] cfArray = new CompletableFuture[nodes.length];
 
         for (int i = 0; i < nodes.length; i++) {
@@ -156,36 +174,51 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final String[] absoluteSbkCommands = resolveRemoteSbkCommands(remoteDir);
 
         // start SBM
+        synchronized (this) {
+            sbmStarted = true;
+        }
         sbmBenchmark.start();
 
         // Start remote SBK instances
         final SshResponse[] sbkResults = new SshResponse[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
+            final List<String> commandTokens = new ArrayList<>(sbkArgs.size() + 1);
+            commandTokens.add(absoluteSbkCommands[i]);
+            commandTokens.addAll(sbkArgs);
             final String command = RemoteJavaDeployment.launchCommand(javaHomes[i],
-                    RemoteSbkDeployment.shellQuote(absoluteSbkCommands[i]) + " " + sbkArgs);
+                    RemoteSbkDeployment.shellJoin(commandTokens));
             Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
                     "' remote SBK command: " + command);
-            cfResults[i] = nodes[i].runCommandAsync(command, false, config.remoteTimeoutSeconds );
+            cfResults[i] = nodes[i].runCommandAsync(command, false, benchmarkTimeoutSeconds());
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfResults);
-        sbkFuture.exceptionally(ex -> {
-            shutdown(ex);
-            return null;
-        });
-
-        sbkFuture.thenAccept(x -> {
+        sbkFuture.whenComplete((ignored, failure) -> {
+            if (failure != null) {
+                shutdown(unwrapCompletionFailure(failure));
+                return;
+            }
             for (int i = 0; i < cfResults.length; i++) {
-                try {
-                    sbkResults[i] = cfResults[i].get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
+                sbkResults[i] = cfResults[i].join();
             }
             fillSshResults(sbkResults);
-            shutdown(null);
+            final IOException remoteFailure = remoteCommandFailure(remoteResults);
+            if (remoteFailure != null) {
+                SbkGem.printRemoteResults(remoteResults, false);
+                shutdown(remoteFailure);
+            } else {
+                shutdown(null);
+            }
         });
 
         return retFuture.toCompletableFuture();
+    }
+
+    private long benchmarkTimeoutSeconds() {
+        final long benchmarkSeconds = params.getTotalSecondsToRun();
+        if (benchmarkSeconds <= 0 || benchmarkSeconds >= Long.MAX_VALUE - config.remoteTimeoutSeconds) {
+            return Long.MAX_VALUE;
+        }
+        return benchmarkSeconds + config.remoteTimeoutSeconds;
     }
 
     @SuppressWarnings("unchecked")
@@ -309,7 +342,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
             if (!copyTargets[i] || !visited.add(key)) {
                 copyFutures[i] = CompletableFuture.completedFuture(null);
             } else {
-                copyFutures[i] = nodes[i].copyDirectoryAsync(localJavaHome.toString(), parents[i]);
+                copyFutures[i] = nodes[i].copyDirectoryAsync(localJavaHome.toString(), parents[i],
+                        config.remoteTimeoutSeconds);
             }
         }
         waitFor(CompletableFuture.allOf(copyFutures), "Java runtime copy");
@@ -552,7 +586,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 copyFutures[i] = CompletableFuture.completedFuture(null);
             } else {
                 consMap.visit(nodes[i].connection);
-                copyFutures[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir());
+                copyFutures[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir(),
+                        config.remoteTimeoutSeconds);
             }
         }
         waitFor(CompletableFuture.allOf(copyFutures), "SBK copy");
@@ -609,6 +644,28 @@ final public class SbkGemBenchmark implements GemBenchmark {
             }
         }
         return false;
+    }
+
+    private static Throwable unwrapCompletionFailure(Throwable failure) {
+        Throwable cause = failure;
+        while ((cause instanceof CompletionException || cause instanceof ExecutionException) &&
+                cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
+    }
+
+    static IOException remoteCommandFailure(RemoteResponse[] results) {
+        final StringBuilder failures = new StringBuilder();
+        for (RemoteResponse result : results) {
+            if (result.returnCode != 0) {
+                if (!failures.isEmpty()) {
+                    failures.append(", ");
+                }
+                failures.append(result.host).append(" returned ").append(result.returnCode);
+            }
+        }
+        return failures.isEmpty() ? null : new IOException("SBK-GEM: Remote SBK execution failed: " + failures);
     }
 
     @SuppressWarnings("unchecked")
@@ -670,7 +727,11 @@ final public class SbkGemBenchmark implements GemBenchmark {
             for (SshSession node : nodes) {
                 node.stop();
             }
-            sbmBenchmark.stop();
+            if (sbmStarted) {
+                sbmBenchmark.stop();
+                sbmStarted = false;
+            }
+            executor.shutdown();
             if (ex != null) {
                 Printer.log.warn("SBK GEM Benchmark Shutdown with Exception " + ex);
                 retFuture.completeExceptionally(ex);

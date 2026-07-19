@@ -92,7 +92,7 @@ final public class GemConfig {
      */
     public boolean copy;
     /**
-     * Expected SBK version, normally taken from the SBK-GEM package manifest.
+     * Expected SBK version, discovered from the local SBK distribution selected by {@link #sbkdir}.
      */
     public String sbkVersion;
     /**
