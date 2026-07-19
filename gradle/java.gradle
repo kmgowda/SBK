@@ -8,6 +8,14 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
+
+if (project == rootProject) {
+    // JVM options shared by every SBK runtime, generated launcher, and container.
+    ext.sbkRuntimeJvmArgs = [
+            '-XX:+UseCompactObjectHeaders'
+    ]
+}
+
 plugins.withId('java') {
     apply plugin: 'java-library'
     apply plugin: 'checkstyle'

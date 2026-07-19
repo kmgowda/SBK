@@ -13,6 +13,16 @@ plugins.withId('application') {
         configurations.archives.artifacts.removeAll {
             it.hasProperty('archiveTask') && (it.archiveTask == distZip || it.archiveTask == distTar)
         }
+        application.applicationDefaultJvmArgs =
+                ((application.applicationDefaultJvmArgs ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
+    }
+
+    // Include shared SBK runtime options in every generated launcher, including
+    // additional CreateStartScripts tasks registered by the root project.
+    tasks.withType(CreateStartScripts).configureEach {
+        doFirst {
+            defaultJvmOpts = ((defaultJvmOpts ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
+        }
     }
 
     tasks.register('pathingJar', Jar) {

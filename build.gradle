@@ -170,18 +170,6 @@ allprojects {
         applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + className,
                                      '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
 
-        /*
-        applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + className,
-                                     '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false',
-                                     '--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED',
-                                     '--add-exports=java.base/sun.nio.ch=ALL-UNNAMED',
-                                     '--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED',
-                                     '--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED',
-                                     '--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED',
-                                     '--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED',
-                                     '--illegal-access=permit']
-         */
-
         startScripts {
         def projectName = project.name
         def rootProjectName = rootProject.name
@@ -779,6 +767,7 @@ gradle.rootProject {
         container {
             creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
             mainClass = SbkMainClass
+            jvmFlags = rootProject.ext.sbkRuntimeJvmArgs
             ports = ['9718/tcp']
         }
 
