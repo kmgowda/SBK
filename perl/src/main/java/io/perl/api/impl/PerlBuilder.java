@@ -38,6 +38,10 @@ import java.util.concurrent.ForkJoinPool;
  */
 public final class PerlBuilder {
 
+    /** Creates a PerL component builder. */
+    public PerlBuilder() {
+    }
+
     /**
      * Build 'Time' object based on Performance logger. The returned Time
      * implementation matches the logger's {@link TimeUnit}.

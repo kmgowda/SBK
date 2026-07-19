@@ -15,10 +15,12 @@ import io.perl.api.Queue;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-/*
+/**
  * Concurrent Queue Implementation using VarHandle References.
  * DON'T USE THIS CLASS.
  * Use Java native 'ConcurrentLinkedQueue', because the ConcurrentLinkedQueue does better Garbage collection.
+ *
+ * @param <T> queued element type
  */
 final public class CQueue<T> implements Queue<T> {
 
@@ -55,12 +57,20 @@ final public class CQueue<T> implements Queue<T> {
         }
     }
 
+    /**
+     * Creates an empty VarHandle-based queue.
+     */
     public CQueue() {
         this.firstNode = new Node<>(null);
         this.head = firstNode;
         this.tail = firstNode;
     }
 
+    /**
+     * Attempts one non-blocking dequeue operation.
+     *
+     * @return next element, or {@code null} when unavailable
+     */
     public T pollOnce() {
         final Object cur = NEXT.getAndSet(head, null);
         if (cur == null) {

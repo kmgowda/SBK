@@ -23,6 +23,11 @@ import java.util.Set;
  */
 public final class RWLoggerPackage extends Package<RWLogger> {
 
+    /**
+     * Creates a scanner for the supplied logger package.
+     *
+     * @param packageName package containing logger implementations
+     */
     public RWLoggerPackage(String packageName) {
         super(packageName);
     }

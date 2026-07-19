@@ -108,4 +108,9 @@ public class LatencyConfig {
      * <code>int csvFileSizeGB</code>.
      */
     public int csvFileSizeGB;
+
+    /** Creates an empty latency configuration for property binding. */
+    public LatencyConfig() {
+    }
+
 }

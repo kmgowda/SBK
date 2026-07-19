@@ -73,6 +73,21 @@ final public class SbmBenchmark implements Benchmark {
      */
     public SbmBenchmark(SbmConfig sbmConfig, RamParameterOptions params,
                         @NotNull RamLogger logger, Time time) throws IOException {
+        this(sbmConfig, params, logger, time, false);
+    }
+
+    /**
+     * Create an SBM benchmark with optional coordinated client release.
+     *
+     * @param sbmConfig Configuration parameters
+     * @param params Benchmarking input parameters
+     * @param logger output logger
+     * @param time time interface
+     * @param coordinatedStart when true, release client registrations together after all expected clients arrive
+     * @throws IOException if initialization fails
+     */
+    public SbmBenchmark(SbmConfig sbmConfig, RamParameterOptions params,
+                        @NotNull RamLogger logger, Time time, boolean coordinatedStart) throws IOException {
         this.sbmConfig = sbmConfig;
         this.params = params;
         this.logger = logger;
@@ -87,7 +102,8 @@ final public class SbmBenchmark implements Benchmark {
         latencyRecorder = createLatencyRecorder();
         benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, params.getIdleSleepMilliSeconds(), time, latencyRecorder,
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
-        service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark);
+        service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark,
+                coordinatedStart);
         server = ServerBuilder.forPort(params.getPort()).addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
         state = State.BEGIN;

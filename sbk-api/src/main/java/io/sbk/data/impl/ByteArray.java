@@ -21,6 +21,9 @@ import java.util.Random;
 final public class ByteArray implements DataType<byte[]> {
     final Random random;
 
+    /**
+     * Creates a byte-array data generator.
+     */
     public ByteArray() {
         random = new Random();
     }

@@ -52,6 +52,12 @@ final public class Sbm {
     final static String BANNER_FILE = "sbm-banner.txt";
 
     /**
+     * Creates an SBM bootstrap helper.
+     */
+    public Sbm() {
+    }
+
+    /**
      * Run the Performance Benchmarking .
      *
      * @param args              command line arguments.
@@ -176,8 +182,8 @@ final public class Sbm {
             params.parseArgs(args);
             logger.parseArgs(params);
         } catch (UnrecognizedOptionException ex) {
-            params.printHelp();
             Printer.log.error(ex.toString());
+            params.printHelp();
             throw ex;
         } catch (HelpException ex) {
             System.out.println("\n" + ex.getHelpText());

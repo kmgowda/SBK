@@ -1686,9 +1686,9 @@ sequenceDiagram
     User->>GEM: sbk-gem -nodes h1,h2 -class minio ...
     GEM->>SSH: createSessionAsync(h1)
     GEM->>SSH: createSessionAsync(h2)
-    par auth in parallel
-        SSH->>N1: SSH connect + password auth
-        SSH->>N2: SSH connect + password auth
+    par connect, verify host key, and authenticate
+        SSH->>N1: SSH + known_hosts + agent/key/password
+        SSH->>N2: SSH + known_hosts + agent/key/password
     end
 
     GEM->>SSH: discover java from PATH on each node
@@ -1702,18 +1702,22 @@ sequenceDiagram
         end
     end
 
-    alt -copy true (force mode)
-        Note over GEM: skip SBK probes
-        GEM->>SSH: replace SBK on every node
-    else default reconciliation mode
-        GEM->>SSH: run "sbk -version" on every node
-        par inspect nodes concurrently
-            SSH->>N1: executable and exact-version probe
-            SSH->>N2: executable and exact-version probe
-        end
-        Note over GEM: select only missing or mismatched nodes
-        GEM->>SSH: replace SBK on selected nodes
+    GEM->>SSH: run "sbk -version" on every node
+    par inspect nodes concurrently
+        SSH->>N1: executable and exact-version probe
+        SSH->>N2: executable and exact-version probe
     end
+    Note over GEM: select only missing or mismatched nodes
+    alt copy is true (default)
+        opt mismatch and delete is true (default)
+            GEM->>SSH: delete the outdated installation
+        end
+        GEM->>SSH: copy SBK to selected nodes and verify version
+    else copy is false and a node is unresolved
+        GEM-->>User: fail with host and expected version
+    end
+
+    GEM->>SSH: resolve and verify absolute SBK executable per node
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
 
@@ -1743,8 +1747,12 @@ exists, exits successfully, and prints the exact SBK version embedded
 in the local SBK-GEM package. All nodes are probed concurrently. Copy
 work is then deduplicated by `(host, remote directory)`, so repeated
 workload entries sharing one installation do not race to replace it.
-`-copy true` is deliberately stronger: it skips every version probe and
-replaces SBK on all unique remote targets.
+`copy=true` permits this reconciliation and is the default; it does not
+force replacement of a matching installation. `delete=true` removes an
+existing mismatch before copying, while `deleteafter=false` keeps the
+verified deployment after benchmarking. Every copied target is probed
+again for the expected version, and every launch uses an executable path
+that the remote node resolved to an absolute path and confirmed executable.
 
 Java reconciliation is separate from SBK reconciliation. `javaversion`
 defines the required major release (25 by default). GEM first discovers
@@ -1784,6 +1792,46 @@ per-operation measurement path.
 
 SBK-GEM uses **Apache Mina SSHD** (a pure-Java SSH client; no native
 binary, no `ssh` shell-out). Each remote node is a `SshSession`:
+
+Connection setup deliberately follows the local user's SSH trust and credential
+model. By default, the server key must match an entry in
+`~/.ssh/known_hosts`, or the file selected by `-knownhosts <path>`; an unknown or
+changed server is rejected before GEM copies or executes anything. The explicit
+`-hostkeycheck false` escape hatch is only for isolated environments because it
+allows an attacker to impersonate a benchmark node. For client
+authentication, GEM can use identities exposed by `SSH_AUTH_SOCK` and key files
+selected by the local OpenSSH configuration (including conventional `~/.ssh`
+keys). An explicit `-gempass` value, or `SBK_GEM_SSH_PASSWD`, enables password
+authentication as an optional fallback. Therefore, an empty password is not an
+error: it means "attempt passwordless public-key authentication." Using an SSH
+agent is the normal way to make a passphrase-protected key available without
+putting the passphrase in an SBK file.
+
+```mermaid
+flowchart LR
+    START["Connect to node"] --> HOST{"Host key matches known_hosts?"}
+    HOST -->|No| REJECT["Reject unknown or changed server"]
+    HOST -->|Yes| AGENT["Try identities from ssh-agent"]
+    AGENT --> FILES["Try OpenSSH-configured key files"]
+    FILES --> PASS{"Optional password configured?"}
+    PASS -->|Yes| PASSWORD["Try password authentication"]
+    PASS -->|No| RESULT{"Any authentication succeeded?"}
+    PASSWORD --> RESULT
+    RESULT -->|Yes| READY["Authenticated SshSession"]
+    RESULT -->|No| FAIL["Report host-specific authentication failure"]
+
+    classDef good fill:#dcfce7,stroke:#166534,color:#000
+    classDef bad fill:#fee2e2,stroke:#991b1b,color:#000
+    classDef decision fill:#fef3c7,stroke:#a16207,color:#000
+    class READY good
+    class REJECT,FAIL bad
+    class HOST,PASS,RESULT decision
+```
+
+Both TCP connection establishment and SSH authentication use the configured
+timeout. Failures preserve the node, user, port, and underlying cause so a bad
+credential or unreachable host is reported at the SSH boundary rather than
+later as a misleading Java-discovery timeout.
 
 ```java
 public CompletableFuture<SshResponse> runCommandAsync(

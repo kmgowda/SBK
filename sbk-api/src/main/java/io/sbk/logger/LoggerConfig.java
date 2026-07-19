@@ -19,14 +19,21 @@ import io.time.TimeUnit;
  * runtime behavior.
  */
 public final class LoggerConfig {
-    /* Reporting interval in seconds for periodic prints. */
+    /** Reporting interval in seconds for periodic prints. */
     public int reportingSeconds;
-    /* Time unit used to interpret configured min/max latency. */
+    /** Time unit used to interpret configured minimum and maximum latency. */
     public TimeUnit timeUnit;
-    /* Default minimum latency bound expressed in {@link #timeUnit}. */
+    /** Default minimum latency bound expressed in {@link #timeUnit}. */
     public long minLatency;
-    /* Default maximum latency bound expressed in {@link #timeUnit}. */
+    /** Default maximum latency bound expressed in {@link #timeUnit}. */
     public long maxLatency;
-    /* Comma-separated percentile list (e.g., "50, 75, 95, 99, 99.9"). */
+    /** Comma-separated percentile list (e.g., "50, 75, 95, 99, 99.9"). */
     public String percentiles;
+
+    /**
+     * Creates an empty logger configuration for property binding.
+     */
+    public LoggerConfig() {
+    }
+
 }

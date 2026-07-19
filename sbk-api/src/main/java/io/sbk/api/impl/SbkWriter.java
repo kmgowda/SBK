@@ -61,6 +61,19 @@ final public class SbkWriter extends Worker implements RunBenchmark {
 
     final private WriteRequestsLogger requestsLogger;
 
+    /**
+     * Creates a benchmark writer worker.
+     *
+     * @param writerID writer identifier
+     * @param params benchmark parameters
+     * @param perlChannel performance channel
+     * @param dType storage data type
+     * @param time benchmark time source
+     * @param writer storage writer
+     * @param wCount shared writer counter
+     * @param requestsLogger request metrics logger
+     * @param executor benchmark executor
+     */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkWriter(int writerID, ParameterOptions params, PerlChannel perlChannel,
                      @NotNull DataType<Object> dType, Time time, DataWriter<Object> writer,

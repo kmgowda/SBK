@@ -18,6 +18,9 @@ import io.time.Time;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Performance recorder that sleeps briefly when no channel has data.
+ */
 public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
     final private int sleepMS;
 

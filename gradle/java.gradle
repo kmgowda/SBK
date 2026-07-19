@@ -8,6 +8,14 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
+
+if (project == rootProject) {
+    // JVM options shared by every SBK runtime, generated launcher, and container.
+    ext.sbkRuntimeJvmArgs = [
+            '-XX:+UseCompactObjectHeaders'
+    ]
+}
+
 plugins.withId('java') {
     apply plugin: 'java-library'
     apply plugin: 'checkstyle'
@@ -67,6 +75,19 @@ plugins.withId('java') {
         ])
     }
 
+    // Driver configuration fields are commonly documented in their properties
+    // files, so drivers tolerate missing comments. Core modules keep every
+    // doclint check enabled because they define SBK's public APIs.
+    tasks.withType(Javadoc).configureEach {
+        def doclintChecks = project.path.startsWith(':drivers:')
+                ? 'all,-missing'
+                : 'all'
+        options.addBooleanOption("Xdoclint:${doclintChecks}", true)
+        if (project.path == ':sbk-api') {
+            exclude 'io/sbp/grpc/**'
+        }
+    }
+
     tasks.register('sourcesJar', Jar) {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveClassifier = 'sources'
@@ -78,8 +99,7 @@ plugins.withId('java') {
     tasks.register('generateJavadoc', Javadoc) {
         source = sourceSets.main.allJava
         classpath = sourceSets.main.runtimeClasspath
-        options.addBooleanOption("Xdoclint:-missing", true)
-        failOnError = false
+        failOnError = true
     }
 
     tasks.register('javadocJar', Jar) {

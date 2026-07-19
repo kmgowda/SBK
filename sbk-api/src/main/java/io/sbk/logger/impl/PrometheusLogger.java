@@ -31,21 +31,38 @@ public class PrometheusLogger extends CSVLogger {
     private boolean contextDisabled;
     private SbkPrometheusServer prometheusServer;
 
+    /** Creates a Prometheus logger with no server initialized. */
     public PrometheusLogger() {
         super();
         prometheusServer = null;
         metricsConfig = null;
     }
 
+    /**
+     * Creates the Prometheus server used to export read/write metrics.
+     *
+     * @return configured metrics server
+     * @throws IOException when the metrics server cannot be initialized
+     */
     public SbkPrometheusServer getPrometheusRWMetricsServer() throws IOException {
         return new SbkPrometheusServer(Config.NAME, getAction().name(), getStorageName(),
                 getPercentiles(), getTime(), metricsConfig);
     }
 
+    /**
+     * Opens the bundled Prometheus metrics configuration.
+     *
+     * @return metrics configuration stream, or {@code null} when unavailable
+     */
     public InputStream getMetricsConfigStream() {
         return PrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
     }
 
+    /**
+     * Returns the active metrics configuration.
+     *
+     * @return metrics configuration
+     */
     protected final MetricsConfig getMetricsConfig() {
         return this.metricsConfig;
     }

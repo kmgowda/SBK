@@ -86,6 +86,9 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         }
     }
 
+    /**
+     * Creates a logger with empty writer, reader, and request counters.
+     */
     public AbstractRWLogger() {
         super();
         this.writers = new AtomicInteger(0);
@@ -302,42 +305,92 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         VAR_HANDLE_ARRAY.getAndAdd(readTimeoutEventsArray, readerId, timeoutEvents);
     }
 
+    /**
+     * Opens the default logger configuration resource.
+     *
+     * @return logger configuration stream, or {@code null} when unavailable
+     */
     public InputStream getLoggerConfigStream() {
         return SystemLogger.class.getClassLoader().getResourceAsStream(LOGGER_FILE);
     }
 
+    /**
+     * Returns the configured storage name.
+     *
+     * @return storage name
+     */
     protected final String getStorageName() {
         return this.storageName;
     }
 
+    /**
+     * Returns the configured time source.
+     *
+     * @return time source
+     */
     protected final Time getTime() {
         return this.time;
     }
 
+    /**
+     * Returns the benchmark action.
+     *
+     * @return benchmark action
+     */
     protected final Action getAction() {
         return this.action;
     }
 
+    /**
+     * Sets the number of writer request-counter slots.
+     *
+     * @param maxWriterRequestIds number of writer slots
+     */
     protected final void setMaxWritersIds(int maxWriterRequestIds) {
         this.maxWriterRequestIds = maxWriterRequestIds;
     }
 
+    /**
+     * Sets the number of reader request-counter slots.
+     *
+     * @param maxReaderRequestIds number of reader slots
+     */
     protected final void setMaxReadersIds(int maxReaderRequestIds) {
         this.maxReaderRequestIds = maxReaderRequestIds;
     }
 
+    /**
+     * Returns the current writer count.
+     *
+     * @return current writer count
+     */
     protected final int getWritersCount() {
         return this.writers.get();
     }
 
+    /**
+     * Returns the current reader count.
+     *
+     * @return current reader count
+     */
     protected final int getReadersCount() {
         return this.readers.get();
     }
 
+    /**
+     * Returns the maximum observed writer count.
+     *
+     * @return maximum observed writer count
+     */
     protected final int getMaxWritersCount() {
         return this.maxWriters.get();
     }
 
+    /**
+     * Returns the maximum observed reader count.
+     *
+     * @return maximum observed reader count
+     */
     protected final int getMaxReadersCount() {
         return this.maxReaders.get();
     }
@@ -362,20 +415,52 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         maxReaders.set(Math.max(maxReaders.get(), val));
     }
 
+    /**
+     * Reports whether write-request metrics are enabled.
+     *
+     * @return {@code true} when write requests are measured
+     */
     public final boolean isWriteRequestsEnabled() {
         return this.isRequestWrites;
     }
 
+    /**
+     * Reports whether read-request metrics are enabled.
+     *
+     * @return {@code true} when read requests are measured
+     */
     public final boolean isReadRequestsEnabled() {
         return this.isRequestReads;
     }
 
+    /**
+     * Appends writer and reader concurrency counts.
+     *
+     * @param out destination buffer
+     * @param writers current writers
+     * @param maxWriters maximum writers
+     * @param readers current readers
+     * @param maxReaders maximum readers
+     */
     protected final void appendWritesAndReaders(@NotNull StringBuilder out, int writers, int maxWriters,
                                                 int readers, int maxReaders ) {
         out.append(String.format(" %5d writers, %5d readers, ", writers, readers));
         out.append(String.format(" %5d max writers, %5d max readers, ", maxWriters, maxReaders));
     }
 
+    /**
+     * Appends write- and read-request throughput values.
+     *
+     * @param out destination buffer
+     * @param writeRequestBytes write-request bytes
+     * @param writeRequestMbPerSec write-request throughput
+     * @param writesRequestRecords write-request records
+     * @param writeRequestRecordsPerSec write requests per second
+     * @param readRequestBytes read-request bytes
+     * @param readRequestMbPerSec read-request throughput
+     * @param readRequestRecords read-request records
+     * @param readRequestRecordsPerSec read requests per second
+     */
     protected final void appendWriteAndReadRequests(@NotNull StringBuilder out, long writeRequestBytes,
                                                     double writeRequestMbPerSec, long writesRequestRecords,
                                                     double writeRequestRecordsPerSec, long readRequestBytes,
@@ -391,6 +476,17 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 readRequestRecordsPerSec, readRequestMbPerSec));
     }
 
+    /**
+     * Appends pending request and response counts.
+     *
+     * @param out destination buffer
+     * @param writeResponsePendingRecords pending write-response records
+     * @param writeResponsePendingBytes pending write-response bytes
+     * @param readResponsePendingBytes pending read-response bytes
+     * @param readResponsePendingRecords pending read-response records
+     * @param writeReadRequestPendingRecords pending combined request records
+     * @param writeReadRequestPendingBytes pending combined request bytes
+     */
     protected final void appendWriteAndReadRequestsPending(@NotNull StringBuilder out,
                                                            long writeResponsePendingRecords,
                                                            long writeResponsePendingBytes,
@@ -406,6 +502,15 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 (writeReadRequestPendingBytes * 1.0) / Bytes.BYTES_PER_MB, writeReadRequestPendingRecords));
     }
 
+    /**
+     * Appends write and read timeout counters.
+     *
+     * @param out destination buffer
+     * @param writeTimeoutEvents write timeout events
+     * @param writeTimeoutEventsPerSec write timeout events per second
+     * @param readTimeoutEvents read timeout events
+     * @param readeTimeoutEventsPerSec read timeout events per second
+     */
     protected final void appendWriteAndReadTimeoutEvents(@NotNull StringBuilder out,
                                                          long writeTimeoutEvents,
                                                          double writeTimeoutEventsPerSec,
@@ -469,6 +574,48 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         }
     }
 
+    /**
+     * Appends a complete read/write benchmark result.
+     *
+     * @param out destination buffer
+     * @param writers current writers
+     * @param maxWriters maximum writers
+     * @param readers current readers
+     * @param maxReaders maximum readers
+     * @param writeRequestBytes write-request bytes
+     * @param writeRequestMbPerSec write-request throughput
+     * @param writeRequestRecords write-request records
+     * @param writeRequestRecordsPerSec write requests per second
+     * @param readRequestBytes read-request bytes
+     * @param readRequestMBPerSec read-request throughput
+     * @param readRequestRecords read-request records
+     * @param readRequestRecordsPerSec read requests per second
+     * @param writeResponsePendingRecords pending write-response records
+     * @param writeResponsePendingBytes pending write-response bytes
+     * @param readResponsePendingBytes pending read-response bytes
+     * @param readResponsePendingRecords pending read-response records
+     * @param writeReadRequestPendingRecords pending combined request records
+     * @param writeReadRequestPendingBytes pending combined request bytes
+     * @param writeTimeoutEvents write timeout events
+     * @param writeTimeoutEventsPerSec write timeout events per second
+     * @param readTimeoutEvents read timeout events
+     * @param readTimeoutEventsPerSec read timeout events per second
+     * @param seconds elapsed seconds
+     * @param bytes completed bytes
+     * @param records completed records
+     * @param recsPerSec completed records per second
+     * @param mbPerSec completed megabytes per second
+     * @param avgLatency average latency
+     * @param minLatency minimum latency
+     * @param maxLatency maximum latency
+     * @param invalid invalid latency count
+     * @param lowerDiscard latencies below the configured range
+     * @param higherDiscard latencies above the configured range
+     * @param slc1 first SLC count
+     * @param slc2 second SLC count
+     * @param percentileLatencies percentile latency values
+     * @param percentileLatencyCounts percentile sample counts
+     */
     protected final void appendResultString(StringBuilder out, int writers, int maxWriters, int readers, int maxReaders,
                                             long writeRequestBytes, double writeRequestMbPerSec,
                                             long writeRequestRecords, double writeRequestRecordsPerSec,

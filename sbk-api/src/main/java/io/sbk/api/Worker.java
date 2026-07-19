@@ -41,10 +41,20 @@ import io.sbk.params.Parameters;
  * </ul>
  */
 public abstract class Worker {
+    /** Worker identifier assigned by the benchmark harness. */
     public final int id;
+    /** Benchmark parameters shared with this worker. */
     public final Parameters params;
+    /** Performance channel used to publish measurements. */
     public final PerlChannel perlChannel;
 
+    /**
+     * Creates a benchmark worker.
+     *
+     * @param workerID worker identifier
+     * @param params benchmark parameters
+     * @param perlChannel performance channel
+     */
     public Worker(int workerID, Parameters params, PerlChannel perlChannel) {
         this.id = workerID;
         this.params = params;

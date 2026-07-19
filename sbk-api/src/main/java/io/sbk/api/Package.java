@@ -38,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * of concrete classes for the target package. The class stores the
  * discovered types in stable arrays and exposes sorted lookup functions used
  * by the CLI and helper utilities.
+ *
+ * @param <T> discovered implementation type
  */
 public abstract class Package<T> {
     final private static int MAX_PRINT_WIDTH = 80;
@@ -46,6 +48,11 @@ public abstract class Package<T> {
     final private String[] names;
     final private StringCompareIgnoreCase stringComparator;
 
+    /**
+     * Discovers concrete implementations in a package.
+     *
+     * @param packageName package to scan
+     */
     public Package(String packageName) {
         final Map<String, Class<? extends T>> classMap = new HashMap<>();
         getClasses(packageName).forEach(x -> {
@@ -85,14 +92,35 @@ public abstract class Package<T> {
         return (T) Class.forName(storageFullPath).getConstructor().newInstance();
     }
 
+    /**
+     * Reports whether discovery found no implementations.
+     *
+     * @return {@code true} when no implementations were found
+     */
     protected boolean isEmpty() {
         return simpleNames.length == 0;
     }
 
+    /**
+     * Returns discovered simple class names in case-insensitive sort order.
+     *
+     * @return discovered class names
+     */
     public String[] getClassNames() {
         return simpleNames.clone();
     }
 
+    /**
+     * Instantiates a discovered implementation by simple class name.
+     *
+     * @param classNAme case-insensitive simple class name
+     * @return new implementation instance
+     * @throws ClassNotFoundException when the name was not discovered
+     * @throws NoSuchMethodException when the implementation has no default constructor
+     * @throws InvocationTargetException when its constructor fails
+     * @throws InstantiationException when the class cannot be instantiated
+     * @throws IllegalAccessException when the constructor is inaccessible
+     */
     public @NotNull T getClass(String classNAme) throws ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
         final int i = Arrays.binarySearch(simpleNames, classNAme, stringComparator);
@@ -102,6 +130,11 @@ public abstract class Package<T> {
         return getClassInstance(names[i]);
     }
 
+    /**
+     * Logs the discovered implementation names.
+     *
+     * @param header category printed before the class list
+     */
     public void printClasses(String header) {
         final String printStr = header + " Classes in package '" + packageName + "': " + simpleNames.length;
         final StringBuilder builder = new StringBuilder(printStr);

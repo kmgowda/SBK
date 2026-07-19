@@ -23,6 +23,7 @@ import io.sbk.params.impl.SbkYalParameters;
 import io.sbk.params.impl.SbkYmlMap;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -39,8 +40,15 @@ import java.util.concurrent.TimeoutException;
 public final class SbkYal {
     final static String CONFIG_FILE = "sbk-yal.properties";
     final static String NAME = "sbk-yal";
+
     final static String DESC = "Storage Benchmark Kit-YML Arguments Loader";
     final static String BANNER_FILE = "sbk-yal-banner.txt";
+
+    /**
+     * Creates an SBK YAML launcher.
+     */
+    public SbkYal() {
+    }
 
     /**
      * Run the Performance Benchmarking .
@@ -102,7 +110,13 @@ public final class SbkYal {
         } catch (HelpException ex) {
             params.printHelp();
             throw ex;
-        } catch (ParseException | IllegalArgumentException ignored) {
+        } catch (ParseException | IllegalArgumentException ex) {
+            if (ex instanceof UnrecognizedOptionException unrecognized &&
+                    unrecognized.getOption() != null && unrecognized.getOption().startsWith("--")) {
+                Printer.log.error(unrecognized.toString());
+                params.printHelp();
+                throw unrecognized;
+            }
             Printer.log.warn("SBK-YAL: Overriding options are supplied!");
             if (SbkUtils.hasHelp(args)) {
                 params.printHelp();
@@ -124,6 +138,7 @@ public final class SbkYal {
             throw new HelpException(ex.toString());
         }
         final String[] mergeArgs = SbkUtils.mergeArgs(yalArgs, nextArgs);
+        Printer.log.info("SBK-YAL: Merged YAML and command-line arguments: " + Arrays.toString(mergeArgs));
         String[] sbkArgs = mergeArgs;
         if (isPrintOption) {
             sbkArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);

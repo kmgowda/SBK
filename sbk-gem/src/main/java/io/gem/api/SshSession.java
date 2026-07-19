@@ -63,19 +63,46 @@ final public class SshSession {
     public SshSession(ConnectionConfig conn, ExecutorService executor) {
         this.connection = conn;
         this.executor = executor;
-        this.client = SshClient.setUpDefaultClient();
+        this.client = SshUtils.createClient(conn);
+        if (!conn.isHostKeyCheck()) {
+            Printer.log.warn("SBK-GEM: SSH host-key verification is disabled for host '" + conn.getHost() + "'");
+        }
     }
 
     @Synchronized
-    private void createSession(long timeoutSeconds) {
+    private void createSession(long timeoutSeconds) throws IOException {
         Printer.log.info("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' starting...");
         try {
             client.start();
             session = SshUtils.createSession(client, connection, timeoutSeconds);
-            Printer.log.info("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' Success.");
+            Printer.log.info("SBK-GEM: Authenticated ssh session to '" + connection.getUserName() + "@" +
+                    connection.getHost() + ":" + connection.getPort() + "' established successfully.");
         } catch (IOException e) {
-            Printer.log.error("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' time out!");
             session = null;
+            final String password = connection.getPassword();
+            final boolean authenticationFailure = e.getMessage() != null &&
+                    e.getMessage().startsWith("SSH authentication failed:");
+            final boolean hostKeyFailure = e.getMessage() != null &&
+                    e.getMessage().startsWith("SSH host key verification failed:");
+            final String failureHint;
+            if (hostKeyFailure) {
+                failureHint = " Verify or replace the host entry in " +
+                        (connection.getKnownHosts() == null || connection.getKnownHosts().isEmpty()
+                                ? "~/.ssh/known_hosts."
+                                : connection.getKnownHosts() + ".");
+            } else if (authenticationFailure && (password == null || password.isEmpty())) {
+                failureHint = " No password was supplied; configure -gempass, SBK_GEM_SSH_PASSWD, " +
+                        "or SSH public-key authentication.";
+            } else if (authenticationFailure) {
+                failureHint = " Verify the configured SSH password or public-key authentication.";
+            } else {
+                failureHint = " Verify the remote host, SSH port, network connectivity, and known_hosts entry.";
+            }
+            final String error = "SBK-GEM: SSH connection or authentication failed for '" +
+                    connection.getUserName() + "@" + connection.getHost() + ":" + connection.getPort() + "': " +
+                    e.getMessage() + "." + failureHint;
+            Printer.log.error(error);
+            throw new IOException(error, e);
         }
     }
 
@@ -87,7 +114,13 @@ final public class SshSession {
      * @return CompletableFuture
      */
     public CompletableFuture<Void> createSessionAsync(long timeoutSeconds) {
-        return CompletableFuture.runAsync(() -> createSession(timeoutSeconds), executor);
+        return CompletableFuture.runAsync(() -> {
+            try {
+                createSession(timeoutSeconds);
+            } catch (IOException ex) {
+                throw new CompletionException(ex);
+            }
+        }, executor);
     }
 
     @Synchronized
@@ -128,10 +161,12 @@ final public class SshSession {
      *
      * @param srcPath   String
      * @param dstPath   String
+     * @param timeoutSeconds maximum copy duration in seconds
      * @return CompletableFuture
      * @throws ConnectException If connection exception occurs.
      */
-    public CompletableFuture<Void> copyDirectoryAsync(String srcPath, String dstPath) throws ConnectException {
+    public CompletableFuture<Void> copyDirectoryAsync(String srcPath, String dstPath, long timeoutSeconds)
+            throws ConnectException {
         final ClientSession sshSession = getSession();
         return CompletableFuture.runAsync(() -> {
             try {
@@ -139,7 +174,7 @@ final public class SshSession {
             } catch (IOException e) {
                 throw new CompletionException(e);
             }
-        }, executor);
+        }, executor).orTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
     }
 
 

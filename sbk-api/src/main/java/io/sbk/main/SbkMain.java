@@ -26,6 +26,12 @@ import java.util.concurrent.TimeoutException;
  */
 public abstract class SbkMain {
 
+    /**
+     * Creates an SBK command-line entry point.
+     */
+    public SbkMain() {
+    }
+
     static void main(final String[] args) {
         if (SbkUtils.hasVersion(args)) {
             final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();

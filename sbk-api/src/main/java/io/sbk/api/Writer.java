@@ -43,6 +43,8 @@ import java.util.concurrent.TimeoutException;
  *
  * <p>Original short description preserved:
  * <blockquote>Interface for Writers.</blockquote>
+ *
+ * @param <T> storage record type
  */
 public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
 

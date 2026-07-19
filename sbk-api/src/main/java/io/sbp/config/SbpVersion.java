@@ -10,11 +10,16 @@
 
 package io.sbp.config;
 
+/** Storage Benchmark Protocol major and minor version. */
 final public class SbpVersion {
+    /** Value used when no valid version has been loaded. */
     public final static int INVALID_VERSION = -1;
+    /** Protocol major version. */
     public int major;
+    /** Protocol minor version. */
     public int minor;
 
+    /** Creates an invalid version that can be populated by property binding. */
     public  SbpVersion() {
         major = INVALID_VERSION;
         minor = INVALID_VERSION;

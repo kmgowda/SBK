@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -47,6 +49,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     private final CountConnections countConnections;
     private final SbmRegistry registry;
     private final RamParameters params;
+    private final List<PendingRegistration> pendingRegistrations;
+    private boolean startReleased;
 
 
     /**
@@ -61,6 +65,22 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      */
     public SbmGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
                           CountConnections countConnections, SbmRegistry registry) {
+        this(params, time, minLatency, maxLatency, countConnections, registry, false);
+    }
+
+    /**
+     * Create the SBP service with optional registration barrier support.
+     *
+     * @param params SBM parameters
+     * @param time latency time implementation
+     * @param minLatency minimum accepted latency
+     * @param maxLatency maximum accepted latency
+     * @param countConnections connection metrics
+     * @param registry latency-record registry
+     * @param coordinatedStart whether all expected clients must register before any registration completes
+     */
+    public SbmGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
+                          CountConnections countConnections, SbmRegistry registry, boolean coordinatedStart) {
         super();
         connections = new AtomicInteger(0);
         Config.Builder builder = Config.newBuilder();
@@ -73,6 +93,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         this.params = params;
         this.countConnections = countConnections;
         this.registry = registry;
+        this.pendingRegistrations = new ArrayList<>();
+        this.startReleased = !coordinatedStart;
     }
 
     @Override
@@ -130,13 +152,24 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public void registerClient(io.sbp.grpc.Config request,
-                               @NotNull io.grpc.stub.StreamObserver<io.sbp.grpc.ClientID> responseObserver) {
-        // Allocate a client ID and account the new connection
-        responseObserver.onNext(ClientID.newBuilder().setId(registry.getID()).build());
-        responseObserver.onCompleted();
+    public synchronized void registerClient(io.sbp.grpc.Config request,
+                                            @NotNull io.grpc.stub.StreamObserver<io.sbp.grpc.ClientID>
+                                                    responseObserver) {
+        final ClientID clientID = ClientID.newBuilder().setId(registry.getID()).build();
         countConnections.incrementConnections();
-        connections.incrementAndGet();
+        final int registered = connections.incrementAndGet();
+        if (startReleased) {
+            completeRegistration(responseObserver, clientID);
+            return;
+        }
+        pendingRegistrations.add(new PendingRegistration(responseObserver, clientID));
+        if (registered >= params.getMaxConnections()) {
+            startReleased = true;
+            for (PendingRegistration registration : pendingRegistrations) {
+                completeRegistration(registration.observer(), registration.clientID());
+            }
+            pendingRegistrations.clear();
+        }
     }
 
 
@@ -168,5 +201,13 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
             responseObserver.onNext(Empty.newBuilder().build());
             responseObserver.onCompleted();
         }
+    }
+
+    private static void completeRegistration(io.grpc.stub.StreamObserver<ClientID> observer, ClientID clientID) {
+        observer.onNext(clientID);
+        observer.onCompleted();
+    }
+
+    private record PendingRegistration(io.grpc.stub.StreamObserver<ClientID> observer, ClientID clientID) {
     }
 }

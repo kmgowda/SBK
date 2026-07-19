@@ -20,7 +20,9 @@ import io.time.Time;
 import org.eclipse.collections.api.iterator.MutableLongIterator;
 import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
 
-
+/**
+ * Records latency frequencies in a primitive long-to-long hash map.
+ */
 final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
     final private LongLongHashMap latencies;
     final private long maxMapSizeBytes;

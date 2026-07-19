@@ -11,9 +11,11 @@
 package io.gem.main;
 
 import io.gem.api.impl.SbkGemYal;
+import io.gem.exception.SbkGemParameterException;
 import io.sbk.exception.HelpException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -24,6 +26,12 @@ import java.util.concurrent.TimeoutException;
  * Class SbkGemYalMain.
  */
 public abstract class SbkGemYalMain {
+
+    /**
+     * Creates an SBK-GEM-YAL command-line entry point.
+     */
+    public SbkGemYalMain() {
+    }
 
     /**
      * The main Method of sbk-gem-yal module.
@@ -39,7 +47,11 @@ public abstract class SbkGemYalMain {
         try {
             SbkGemYal.run(args, null, null, null);
         } catch (HelpException ex) {
+            System.exit(0);
+        } catch (UnrecognizedOptionException ex) {
             System.exit(2);
+        } catch (SbkGemParameterException ex) {
+            System.exit(1);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                  ExecutionException | ClassNotFoundException | InvocationTargetException | InstantiationException |
                  NoSuchMethodException | IllegalAccessException ex) {

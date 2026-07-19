@@ -14,6 +14,7 @@ package io.gem.api.impl;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.gem.config.GemConfig;
+import io.gem.exception.SbkGemParameterException;
 import io.gem.api.GemBenchmark;
 import io.gem.api.GemLoggerPackage;
 import io.gem.api.RemoteResponse;
@@ -52,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,7 +78,14 @@ import java.util.concurrent.TimeoutException;
 final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
     final static String SBM_CONFIG_FILE = "sbm.properties";
+
     final static String BANNER_FILE = "gem-banner.txt";
+
+    /**
+     * Creates an SBK-GEM orchestration helper.
+     */
+    public SbkGem() {
+    }
 
     /**
      * Run the Performance Benchmarking .
@@ -133,20 +142,22 @@ final public class SbkGem {
      * @param loggerPackageName  Logger object to write the benchmarking results; if it is 'null' , the default Prometheus
      *                           logger will be used.
      * @return Benchmark Interface
-     * @throws HelpException  if '-help' option is supplied.
-     * @throws ParseException If an exception occurred while parsing command line arguments.
-     * @throws IOException    If an exception occurred due to write or read failures.
+     * @throws HelpException            if '-help' option is supplied.
+     * @throws SbkGemParameterException if invalid or insufficient benchmark parameters are supplied.
+     * @throws ParseException           If an exception occurred while parsing command line arguments.
+     * @throws IOException              If an exception occurred due to write or read failures.
      * @throws InstantiationException    if the exception occurred due to initiation failures.
      * @throws ClassNotFoundException    If the storage class driver is not found.
      * @throws InvocationTargetException if the exception occurs.
      * @throws NoSuchMethodException     if the exception occurs.
      * @throws IllegalAccessException    if the exception occurs.
+     * @throws InterruptedException      if local SBK version discovery is interrupted
      */
     @Contract("_, _, _, _ -> new")
     public static @NotNull GemBenchmark buildBenchmark(final String[] args, final String applicationName,
                                                        final String storagePackageName, final String loggerPackageName)
             throws ParseException, IOException, HelpException, ClassNotFoundException, InvocationTargetException,
-            NoSuchMethodException, IllegalAccessException, InstantiationException {
+            NoSuchMethodException, IllegalAccessException, InstantiationException, InterruptedException {
         final GemParameterOptions params;
         final RamParameterOptions ramParams;
         final GemConfig gemConfig;
@@ -182,7 +193,8 @@ final public class SbkGem {
         Printer.log.info(GemConfig.DESC);
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
-        Printer.log.info("Arguments List: " + Arrays.toString(args));
+        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactOptionValues(args,
+                new String[]{GemConfig.GEM_PASS_OPTION})));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: " + sbkStoragePackageName);
@@ -201,16 +213,16 @@ final public class SbkGem {
                 GemConfig.class);
 
         if (StringUtils.isEmpty(gemConfig.gempass)) {
-            Printer.log.warn("SBK-GEM: The ssh password is not set in the gem.properties file, " +
+            Printer.log.info("SBK-GEM: The SSH password is not set in gem.properties; " +
                     "checking " + GemConfig.SBK_GEM_SSH_PASSWD + " environment variable");
             String envPass = System.getenv(GemConfig.SBK_GEM_SSH_PASSWD);
             if (StringUtils.isNotEmpty(envPass)) {
                 gemConfig.gempass = envPass;
-                Printer.log.warn("SBK-GEM: Using password from "+ GemConfig.SBK_GEM_SSH_PASSWD +
+                Printer.log.info("SBK-GEM: Using password from "+ GemConfig.SBK_GEM_SSH_PASSWD +
                         " environment variable");
             } else {
-                Printer.log.warn("SBK-GEM: The ssh password is not set in the " + GemConfig.SBK_GEM_SSH_PASSWD +
-                        " environment variable");
+                Printer.log.info("SBK-GEM: No SSH password configured; attempting ssh-agent and key-file " +
+                        "authentication");
             }
         }
 
@@ -256,11 +268,7 @@ final public class SbkGem {
         if (StringUtils.isNotEmpty(sbkAppHome)) {
             gemConfig.sbkdir = sbkAppHome;
         }
-        gemConfig.remoteDir = appName;
-        gemConfig.sbkVersion = Objects.requireNonNullElse(version, "");
-        if (StringUtils.isNotEmpty(version)) {
-            gemConfig.remoteDir += "-" + version;
-        }
+        gemConfig.remoteDir = appName + (StringUtils.isEmpty(version) ? "" : "-" + version);
 
         if (StringUtils.isEmpty(className)) {
             storageDevice = null;
@@ -290,11 +298,36 @@ final public class SbkGem {
             throw new HelpException(helpText);
         }
 
+        final String requestedSbkDir = firstNonEmpty(SbkUtils.getArgValue(nextArgs, "-sbkdir"),
+                SbkUtils.getArgValue(nextArgs, "--sbkdir"));
+        final String requestedSbkCommand = firstNonEmpty(SbkUtils.getArgValue(nextArgs, "-sbkcommand"),
+                SbkUtils.getArgValue(nextArgs, "--sbkcommand"));
+        if (StringUtils.isNotEmpty(requestedSbkDir)) {
+            gemConfig.sbkdir = requestedSbkDir;
+        }
+        if (StringUtils.isNotEmpty(requestedSbkCommand)) {
+            gemConfig.sbkcommand = requestedSbkCommand;
+        }
+        if (StringUtils.isEmpty(gemConfig.sbkdir) || StringUtils.isEmpty(gemConfig.sbkcommand)) {
+            throw new IOException("The local SBK directory and command are required for version discovery");
+        }
+        final Path localSbkCommand = Path.of(gemConfig.sbkdir, gemConfig.sbkcommand).toAbsolutePath().normalize();
+        gemConfig.sbkVersion = LocalSbkDeployment.discoverVersion(localSbkCommand,
+                gemConfig.remoteTimeoutSeconds);
+        gemConfig.remoteDir = appName + "-" + gemConfig.sbkVersion;
+        if (StringUtils.isNotEmpty(version) && !version.equals(gemConfig.sbkVersion)) {
+            Printer.log.warn("SBK-GEM version " + version + " is deploying local SBK version " +
+                    gemConfig.sbkVersion + " from " + localSbkCommand);
+        }
+        Printer.log.info("SBK-GEM: Local SBK distribution version: " + gemConfig.sbkVersion);
+
         String[] processArgs = nextArgs;
         int i = 1;
 
-        while (true) {
-            Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " + Arrays.toString(processArgs));
+        while (processArgs != null) {
+            Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " +
+                    Arrays.toString(SbkUtils.redactOptionValues(processArgs,
+                            new String[]{GemConfig.GEM_PASS_OPTION})));
             i++;
             try {
                 params.parseArgs(processArgs);
@@ -303,21 +336,25 @@ final public class SbkGem {
                     storageDevice.parseArgs(params);
                 }
             } catch (UnrecognizedOptionException ex) {
-                if (storageDevice != null) {
-                    Printer.log.error(ex.toString());
+                final String optionName = Objects.requireNonNullElse(ex.getOption(), "").replaceFirst("^-+", "");
+                Printer.log.warn(ex.toString());
+                final String[] remainingArgs = SbkUtils.removeOptionArgsAndValues(processArgs,
+                        new String[]{ex.getOption(), Config.ARG_PREFIX + optionName,
+                                Config.ARG_PREFIX + Config.ARG_PREFIX + optionName});
+                if (Arrays.equals(processArgs, remainingArgs)) {
+                    Printer.log.error("SBK-GEM: Unable to segregate unrecognized option: " + ex.getOption());
                     params.printHelp();
                     throw ex;
                 }
-                Printer.log.warn(ex.toString());
-                processArgs = SbkUtils.removeOptionArgsAndValues(processArgs, new String[]{ex.getOption()});
-                if (processArgs == null) {
-                    params.printHelp();
-                    throw new ParseException("SBK-GEM: Insufficient command line arguments");
-                }
+                processArgs = remainingArgs;
                 continue;
             } catch (HelpException ex) {
                 System.out.println("\n" + ex.getHelpText());
                 throw ex;
+            } catch (IllegalArgumentException ex) {
+                Printer.log.error("SBK-GEM: Invalid arguments", ex);
+                params.printHelp();
+                throw new SbkGemParameterException(ex);
             }
             break;
         }
@@ -351,25 +388,24 @@ final public class SbkGem {
         // remove GEM and logger parameter options
         final String[] sbkArgsList = SbkUtils.removeOptionArgsAndValues(
                 SbkUtils.removeOptionArgsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
-        final StringBuilder sbkArgsBuilder = new StringBuilder(Config.CLASS_OPTION_ARG + " " + className);
-        for (String arg : sbkArgsList) {
-            sbkArgsBuilder.append(" ");
-            sbkArgsBuilder.append(arg);
-        }
-        sbkArgsBuilder.append(" -out ").append(GrpcLogger.class.getSimpleName());
+        final List<String> sbkCommandArgs = new ArrayList<>();
+        sbkCommandArgs.add(Config.CLASS_OPTION_ARG);
+        sbkCommandArgs.add(className);
+        Collections.addAll(sbkCommandArgs, sbkArgsList);
+        sbkCommandArgs.add("-out");
+        sbkCommandArgs.add(GrpcLogger.class.getSimpleName());
         time = PerlBuilder.buildTime(logger);
-        sbkArgsBuilder.append(" -time ").append(time.getTimeUnit().name());
-        sbkArgsBuilder.append(" -minlatency ").append(logger.getMinLatency());
-        sbkArgsBuilder.append(" -maxlatency ").append(logger.getMaxLatency());
-        sbkArgsBuilder.append(" -wq ").append(logger.getMaxWriterIDs() > 0);
-        sbkArgsBuilder.append(" -rq ").append(logger.getMaxReaderIDs() > 0);
-        //sbkArgsBuilder.append(" -context no");   // There is promethius port now
-        sbkArgsBuilder.append(" -sbm ").append(params.getLocalHost());
-        sbkArgsBuilder.append(" -sbmport ").append(params.getSbmPort());
+        addOption(sbkCommandArgs, "-time", time.getTimeUnit().name());
+        addOption(sbkCommandArgs, "-minlatency", Long.toString(logger.getMinLatency()));
+        addOption(sbkCommandArgs, "-maxlatency", Long.toString(logger.getMaxLatency()));
+        addOption(sbkCommandArgs, "-wq", Boolean.toString(logger.getMaxWriterIDs() > 0));
+        addOption(sbkCommandArgs, "-rq", Boolean.toString(logger.getMaxReaderIDs() > 0));
+        addOption(sbkCommandArgs, "-sbm", params.getLocalHost());
+        addOption(sbkCommandArgs, "-sbmport", Integer.toString(params.getSbmPort()));
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());
-        Printer.log.info("Arguments to remote SBK command: " + sbkArgsBuilder);
+        Printer.log.info("Arguments to remote SBK command: " + sbkCommandArgs);
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
         sbmConfig.maxConnections = params.getConnections().length;
@@ -407,8 +443,17 @@ final public class SbkGem {
             throw ex;
         }
         Printer.log.info("SBK-GEM: Arguments to SBM command verification Success..");
-        return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, ramLogger, time), gemConfig, params,
-                sbkArgsBuilder.toString());
+        return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, ramLogger, time, true), gemConfig, params,
+                sbkCommandArgs);
+    }
+
+    private static String firstNonEmpty(String first, String second) {
+        return StringUtils.isNotEmpty(first) ? first : second;
+    }
+
+    private static void addOption(List<String> arguments, String option, String value) {
+        arguments.add(option);
+        arguments.add(value);
     }
 
 

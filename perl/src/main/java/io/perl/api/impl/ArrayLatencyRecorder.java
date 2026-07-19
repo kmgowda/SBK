@@ -43,7 +43,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     public ArrayLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax, long totalRecordsMax,
                                 long bytesMax, double[] percentiles, Time time) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
-        final int size = (int) Math.min(highLatency - lowLatency, Integer.MAX_VALUE);
+        final int size = (int) Math.min(highLatency - lowLatency + 1, Integer.MAX_VALUE);
         this.latencies = new long[size];
         this.maxMemorySizeBytes = (long) LatencyConfig.LATENCY_VALUE_SIZE_BYTES * size;
         this.minIndex = size;

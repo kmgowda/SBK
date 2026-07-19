@@ -102,23 +102,48 @@ public abstract class ResultsLogger implements PerformanceLogger {
                 LatencyConfig.DEFAULT_MIN_LATENCY, LatencyConfig.DEFAULT_MAX_LATENCY);
     }
 
+    /**
+     * Sets the label prefixed to formatted results.
+     *
+     * @param prefix result prefix
+     */
     protected void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 
 
+    /**
+     * Sets the unit used to display latency values.
+     *
+     * @param timeUnit latency time unit
+     */
     protected void setTimeUnit(TimeUnit timeUnit) {
         this.timeUnit = timeUnit;
     }
 
+    /**
+     * Returns preformatted percentile labels.
+     *
+     * @return percentile labels
+     */
     protected final String[] getPercentileNames() {
         return this.percentileNames;
     }
 
+    /**
+     * Sets the minimum accepted latency.
+     *
+     * @param minLatency minimum latency
+     */
     protected final void setMinLatency(long minLatency) {
         this.minLatency = minLatency;
     }
 
+    /**
+     * Sets the maximum accepted latency.
+     *
+     * @param maxLatency maximum latency
+     */
     protected final void setMaxLatency(long maxLatency) {
         this.maxLatency = maxLatency;
     }
@@ -138,6 +163,11 @@ public abstract class ResultsLogger implements PerformanceLogger {
         return maxLatency;
     }
 
+    /**
+     * Sorts and stores the percentiles used for reporting.
+     *
+     * @param percentiles percentile values
+     */
     protected final void setPercentiles(double[] percentiles) {
         this.percentiles = percentiles;
         Arrays.sort(percentiles);
@@ -147,6 +177,11 @@ public abstract class ResultsLogger implements PerformanceLogger {
         }
     }
 
+    /**
+     * Returns the label prefixed to formatted results.
+     *
+     * @return result prefix
+     */
     protected final String getPrefix() {
         return this.prefix;
     }

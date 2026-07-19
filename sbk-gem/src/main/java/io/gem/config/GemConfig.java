@@ -49,6 +49,11 @@ final public class GemConfig {
      */
     final public static String SBK_GEM_SSH_PASSWD = "SBK_GEM_SSH_PASSWD";
 
+    /**
+     * Command-line option name used to supply the SSH password.
+     */
+    final public static String GEM_PASS_OPTION = "gempass";
+
     //override by props file or command line parameters
     /**
      * <code>String nodes</code>.
@@ -63,6 +68,14 @@ final public class GemConfig {
      */
     public String gempass;
     /**
+     * Whether remote SSH host keys must match an entry in {@link #knownhosts}.
+     */
+    public boolean hostkeycheck;
+    /**
+     * Optional known-hosts file path; an empty value uses the launching user's default file.
+     */
+    public String knownhosts;
+    /**
      * SSH port.
      */
     public int gemport;
@@ -75,11 +88,11 @@ final public class GemConfig {
      */
     public String sbkcommand;
     /**
-     * Whether to force-copy SBK to remote nodes without checking their installed versions.
+     * Whether SBK-GEM may copy missing or mismatched SBK installations to remote nodes.
      */
     public boolean copy;
     /**
-     * Expected SBK version, normally taken from the SBK-GEM package manifest.
+     * Expected SBK version, discovered from the local SBK distribution selected by {@link #sbkdir}.
      */
     public String sbkVersion;
     /**
@@ -95,9 +108,13 @@ final public class GemConfig {
      */
     public String javadir;
     /**
-     * Whether to delete SBK from remote nodes after run.
+     * Whether to delete an existing mismatched SBK installation before copying.
      */
     public boolean delete;
+    /**
+     * Whether to delete the remote SBK deployment after the benchmark.
+     */
+    public boolean deleteafter;
 
 
     //override by props file
@@ -121,4 +138,11 @@ final public class GemConfig {
      * Whether to fork a {@code ForkJoinPool} for execution (vs fixed thread pool).
      */
     public boolean fork;
+
+    /**
+     * Creates an empty GEM configuration for property binding.
+     */
+    public GemConfig() {
+    }
+
 }

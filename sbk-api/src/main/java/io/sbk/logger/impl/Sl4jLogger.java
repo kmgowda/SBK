@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class Sl4jLogger extends SystemLogger {
     final private Logger log;
 
+    /** Creates an SLF4J-backed benchmark logger. */
     public Sl4jLogger() {
         super();
         log = LoggerFactory.getLogger("SBK");

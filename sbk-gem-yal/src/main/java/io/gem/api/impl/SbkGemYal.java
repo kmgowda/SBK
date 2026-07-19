@@ -13,6 +13,7 @@ package io.gem.api.impl;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.gem.config.GemConfig;
 import io.gem.params.impl.SbkGemYmlMap;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.config.Config;
@@ -24,6 +25,7 @@ import io.sbk.params.YmlMap;
 import io.sbk.params.impl.SbkYalParameters;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -40,8 +42,15 @@ import java.util.concurrent.TimeoutException;
 final public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
+
     final static String DESC = "Storage Benchmark Kit-Group Execution Monitor-YML Arguments Loader";
     final static String BANNER_FILE = "gem-yal-banner.txt";
+
+    /**
+     * Creates an SBK-GEM YAML launcher.
+     */
+    public SbkGemYal() {
+    }
 
     /**
      * Run the Performance Benchmarking .
@@ -91,7 +100,8 @@ final public class SbkGemYal {
         Printer.log.info(IOUtils.toString(SbkGemYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
         Printer.log.info(SbkGemYal.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
-        Printer.log.info("Arguments List: " + Arrays.toString(args));
+        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactOptionValues(args,
+                new String[]{GemConfig.GEM_PASS_OPTION})));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
@@ -109,7 +119,13 @@ final public class SbkGemYal {
         } catch (HelpException ex) {
             params.printHelp();
             throw ex;
-        } catch (ParseException | IllegalArgumentException ignored) {
+        } catch (ParseException | IllegalArgumentException ex) {
+            if (ex instanceof UnrecognizedOptionException unrecognized &&
+                    unrecognized.getOption() != null && unrecognized.getOption().startsWith("--")) {
+                Printer.log.error(unrecognized.toString());
+                params.printHelp();
+                throw unrecognized;
+            }
             Printer.log.warn("SBK-GEM-YAL: Overriding options are supplied!");
             if (SbkUtils.hasHelp(args)) {
                 params.printHelp();
@@ -132,6 +148,9 @@ final public class SbkGemYal {
         }
 
         final String[] mergeArgs = SbkUtils.mergeArgs(gemArgs, nextArgs);
+        Printer.log.info("SBK-GEM-YAL: Merged YAML and command-line arguments: " +
+                Arrays.toString(SbkUtils.redactOptionValues(mergeArgs,
+                        new String[]{GemConfig.GEM_PASS_OPTION})));
         String[] sbkGemArgs = mergeArgs;
         if (isPrintOption) {
             sbkGemArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);

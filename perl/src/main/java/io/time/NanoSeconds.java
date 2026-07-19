@@ -15,6 +15,10 @@ package io.time;
  */
 final public class NanoSeconds implements Time {
 
+    /** Creates a nanosecond-resolution time source. */
+    public NanoSeconds() {
+    }
+
     /**
      * get the Time Unit.
      *

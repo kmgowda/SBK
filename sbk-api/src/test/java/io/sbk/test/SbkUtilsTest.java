@@ -33,7 +33,7 @@ public class SbkUtilsTest {
         assertArrayEquals(new String[]{"-b", "2"}, result);
 
         assertArrayEquals(new String[0], SbkUtils.removeOptionArgsAndValues(null, opts));
-        assertArrayEquals(new String[]{"-a"}, SbkUtils.removeOptionArgsAndValues(new String[]{"-a"}, opts));
+        assertArrayEquals(new String[0], SbkUtils.removeOptionArgsAndValues(new String[]{"-a"}, opts));
     }
 
     @Test
@@ -108,9 +108,37 @@ public class SbkUtilsTest {
         String[] s1 = {"-a", "1", "-b", "2"};
         String[] s2 = {"-b", "3", "-c", "4"};
         String[] merged = SbkUtils.mergeArgs(s1, s2);
+        assertArrayEquals(new String[]{"-a", "1", "-b", "3", "-c", "4"}, merged);
         Map<String, String> map = SbkUtils.argsToMap(merged, false);
         assertEquals("1", map.get("-a"));
         assertEquals("3", map.get("-b"));
         assertEquals("4", map.get("-c"));
+    }
+
+    @Test
+    public void testMergeArgsNormalizesOptionsAndUsesLastOverride() {
+        String[] yamlArgs = {"-class", "file", "-size", "100", "-readers", "1"};
+        String[] cliArgs = {"--size", "200", "-seconds", "60", "-size", "300"};
+
+        assertArrayEquals(new String[]{"-class", "file", "-size", "300", "-readers", "1",
+                "-seconds", "60"}, SbkUtils.mergeArgs(yamlArgs, cliArgs));
+    }
+
+    @Test
+    public void testMergeArgsAcceptsMissingInputs() {
+        assertArrayEquals(new String[]{"-writers", "2"},
+                SbkUtils.mergeArgs(null, new String[]{"-writers", "2"}));
+        assertArrayEquals(new String[]{"-writers", "1"},
+                SbkUtils.mergeArgs(new String[]{"-writers", "1"}, null));
+    }
+
+    @Test
+    public void testRedactOptionValues() {
+        final String[] args = {"-gemuser", "root", "-gempass", "secret", "--size", "100",
+                "--GEMPASS=second-secret"};
+
+        assertArrayEquals(new String[]{"-gemuser", "root", "-gempass", "******", "--size", "100",
+                "--GEMPASS=******"}, SbkUtils.redactOptionValues(args, new String[]{"gempass"}));
+        assertEquals("secret", args[3]);
     }
 }

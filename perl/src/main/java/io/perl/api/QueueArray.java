@@ -12,6 +12,8 @@ package io.perl.api;
 /**
  * Represents an array of {@link Queue} instances. This abstraction is used when
  * the PerL framework allocates one queue per worker thread or IO channel.
+ *
+ * @param <T> queued element type
  */
 public interface QueueArray<T> {
 

@@ -13,7 +13,6 @@ package io.sbk.params.impl;
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
 import io.sbk.params.ParseInputOptions;
-import io.sbk.system.Printer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -21,9 +20,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -60,6 +58,12 @@ public class SbkInputOptions implements ParseInputOptions {
         addOption(Config.HELP_OPTION, false, "Help message");
     }
 
+    /**
+     * Creates an SBK command-line option parser.
+     *
+     * @param name benchmark name
+     * @param header help-text header
+     */
     public SbkInputOptions(String name, String header) {
         this(name, header, Config.SBK_FOOTER, false);
     }
@@ -92,19 +96,12 @@ public class SbkInputOptions implements ParseInputOptions {
      */
     @Override
     final public String getHelpText() {
-        final OutputStream outStream = new ByteArrayOutputStream();
-        final PrintStream helpStream = new PrintStream(outStream);
-        final PrintStream oldOut = System.out;
-        try {
-            System.setOut(helpStream); // Redirect System.out to our PrintStream
-            formatter.printHelp(benchmarkName, header, options, footer, false);
-        } catch (Exception ex) {
-            System.setOut(oldOut);
-            Printer.log.error(ex.toString());
-        } finally {
-            System.setOut(oldOut); // Restore original System.out
-        }
-        return outStream.toString();
+        final StringWriter helpText = new StringWriter();
+        final PrintWriter helpWriter = new PrintWriter(helpText);
+        formatter.printHelp(helpWriter, formatter.getWidth(), benchmarkName, header, options,
+                formatter.getLeftPadding(), formatter.getDescPadding(), footer, false);
+        helpWriter.flush();
+        return helpText.toString();
     }
 
 

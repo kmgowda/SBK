@@ -32,6 +32,12 @@ public final class ConnectionConfig {
     private final String password;
 
     @Getter
+    private final boolean hostKeyCheck;
+
+    @Getter
+    private final String knownHosts;
+
+    @Getter
     private final int port;
 
     @Getter
@@ -43,15 +49,20 @@ public final class ConnectionConfig {
      * @param host      remote host name or IP
      * @param userName  SSH user name
      * @param password  SSH password (may be empty if key auth is used upstream)
-     * @param port      SSH port
-     * @param dir       remote working directory (e.g., target SBK path)
+     * @param port          SSH port
+     * @param dir           remote working directory (e.g., target SBK path)
+     * @param hostKeyCheck  whether the server key must be present in known hosts
+     * @param knownHosts    optional known-hosts path; empty selects the user's default file
      */
-    public ConnectionConfig(String host, String userName, String password, int port, String dir) {
+    public ConnectionConfig(String host, String userName, String password, int port, String dir,
+                            boolean hostKeyCheck, String knownHosts) {
         this.host = host;
         this.userName = userName;
         this.password = password;
         this.port = port;
         this.dir = dir;
+        this.hostKeyCheck = hostKeyCheck;
+        this.knownHosts = knownHosts;
     }
 
 }

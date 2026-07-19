@@ -231,6 +231,50 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
+    /**
+     * Prints one SBM reporting window with connection and workload metrics.
+     *
+     * @param reportTime report timestamp
+     * @param connections active connections
+     * @param maxConnections maximum connections
+     * @param writers active writers
+     * @param maxWriters maximum writers
+     * @param readers active readers
+     * @param maxReaders maximum readers
+     * @param writeRequestBytes write-request bytes
+     * @param writeRequestMbPerSec write-request throughput
+     * @param writeRequestRecords write-request records
+     * @param writeRequestRecordsPerSec write requests per second
+     * @param readRequestBytes read-request bytes
+     * @param readRequestMbPerSec read-request throughput
+     * @param readRequestRecords read-request records
+     * @param readRequestsRecordsPerSec read requests per second
+     * @param writeResponsePendingRecords pending write-response records
+     * @param writeResponsePendingBytes pending write-response bytes
+     * @param readResponsePendingRecords pending read-response records
+     * @param readResponsePendingBytes pending read-response bytes
+     * @param writeReadRequestPendingRecords pending combined request records
+     * @param writeReadRequestPendingBytes pending combined request bytes
+     * @param writeTimeoutEvents write timeout events
+     * @param writeTimeoutEventsPerSec write timeout events per second
+     * @param readTimeoutEvents read timeout events
+     * @param readTimeoutEventsPerSec read timeout events per second
+     * @param seconds elapsed seconds
+     * @param bytes completed bytes
+     * @param records completed records
+     * @param recsPerSec completed records per second
+     * @param mbPerSec completed megabytes per second
+     * @param avgLatency average latency
+     * @param minLatency minimum latency
+     * @param maxLatency maximum latency
+     * @param invalid invalid latency count
+     * @param lowerDiscard latencies below the configured range
+     * @param higherDiscard latencies above the configured range
+     * @param slc1 first SLC count
+     * @param slc2 second SLC count
+     * @param percentileLatencies percentile latency values
+     * @param percentileLatencyCounts percentile sample counts
+     */
     public abstract void print(long reportTime, int connections, int maxConnections, int writers, int maxWriters,
                                int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec,
                                long writeRequestRecords, double writeRequestRecordsPerSec, long readRequestBytes,
@@ -279,6 +323,50 @@ public abstract class AbstractRamLogger extends PrometheusLogger implements RamL
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
+    /**
+     * Prints cumulative SBM results with connection and workload metrics.
+     *
+     * @param reportTime report timestamp
+     * @param connections active connections
+     * @param maxConnections maximum connections
+     * @param writers active writers
+     * @param maxWriters maximum writers
+     * @param readers active readers
+     * @param maxReaders maximum readers
+     * @param writeRequestBytes write-request bytes
+     * @param writeRequestMbPerSec write-request throughput
+     * @param writeRequestRecords write-request records
+     * @param writeRequestRecordsPerSec write requests per second
+     * @param readRequestBytes read-request bytes
+     * @param readRequestMbPerSec read-request throughput
+     * @param readRequestRecords read-request records
+     * @param readRequestRecordsPerSec read requests per second
+     * @param writeResponsePendingRecords pending write-response records
+     * @param writeResponsePendingBytes pending write-response bytes
+     * @param readResponsePendingRecords pending read-response records
+     * @param readResponsePendingBytes pending read-response bytes
+     * @param writeReadRequestPendingRecords pending combined request records
+     * @param writeReadRequestPendingBytes pending combined request bytes
+     * @param writeTimeoutEvents write timeout events
+     * @param writeTimeoutEventsPerSec write timeout events per second
+     * @param readTimeoutEvents read timeout events
+     * @param readTimeoutEventsPerSec read timeout events per second
+     * @param seconds elapsed seconds
+     * @param bytes completed bytes
+     * @param records completed records
+     * @param recsPerSec completed records per second
+     * @param mbPerSec completed megabytes per second
+     * @param avgLatency average latency
+     * @param minLatency minimum latency
+     * @param maxLatency maximum latency
+     * @param invalid invalid latency count
+     * @param lowerDiscard latencies below the configured range
+     * @param higherDiscard latencies above the configured range
+     * @param slc1 first SLC count
+     * @param slc2 second SLC count
+     * @param percentileLatencies percentile latency values
+     * @param percentileLatencyCounts percentile sample counts
+     */
     public abstract void printTotal(long reportTime, int connections, int maxConnections, int writers, int maxWriters,
                                     int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec,
                                     long writeRequestRecords, double writeRequestRecordsPerSec, long readRequestBytes,

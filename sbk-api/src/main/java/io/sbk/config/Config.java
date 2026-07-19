@@ -115,4 +115,10 @@ final public class Config {
      */
     public final static String VERSION_OPTION_ARG_SHORT = ARG_PREFIX + VERSION_OPTION_SHORT;
 
+    /**
+     * Creates an SBK constants container.
+     */
+    public Config() {
+    }
+
 }

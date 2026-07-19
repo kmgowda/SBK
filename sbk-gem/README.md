@@ -37,13 +37,37 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 ## Prerequisites
 
 - JDK 25 on the local GEM host. Remote hosts need either a compatible Java runtime or enough writable disk space and permission for `javacopy` provisioning.
-- SSH reachability and authentication for every target.
+- SSH reachability, a trusted `known_hosts` entry, and authentication for every target.
 - A writable remote installation/work directory.
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`.
 - Network reachability from remote hosts to the target storage system.
 - Consistent SBK distribution and driver dependencies on every host.
 
 Use dedicated benchmark hosts and least-privilege SSH credentials. Do not put passwords or private keys in committed files.
+
+### SSH authentication and host verification
+
+Passwordless public-key login is the recommended configuration. Run SBK-GEM as
+the same local account whose SSH configuration and credentials can reach the
+remote benchmark account. SBK-GEM can use keys exposed by the local SSH agent
+(`SSH_AUTH_SOCK`) and identity files selected by the local OpenSSH configuration,
+including the conventional files under `~/.ssh`. An agent is the preferred way
+to use passphrase-protected keys because their passphrases do not have to be put
+in SBK configuration.
+
+The `-gempass` option and `SBK_GEM_SSH_PASSWD` environment variable are optional
+password-authentication fallbacks. Leave both unset for passwordless login. Do
+not store `gempass` in a committed YML or properties file.
+
+Remote host identity is checked against the local user's OpenSSH
+`~/.ssh/known_hosts` data by default. Use `-knownhosts <path>` to select a
+dedicated trust file. Add and verify each node's host key before starting a
+benchmark; an unknown or changed key is rejected. `-hostkeycheck false` is an
+explicit opt-out for isolated, disposable environments and weakens protection
+against server impersonation, so it should not be used for normal benchmarks.
+A successful command-line `ssh` connection is a useful preflight check, but run
+it as the exact operating system user that will launch SBK-GEM so it reads the
+same agent, key files, SSH configuration, and `known_hosts` file.
 
 ## Build
 
@@ -62,7 +86,13 @@ Display the current connection, remote-installation, SBM, and benchmark options:
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
 
-By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged only when that command exists, succeeds, and reports the exact expected version. Missing executables, failed probes, and version mismatches cause SBK-GEM to replace the distribution on that node. Set `-copy true` to skip version checks and force a fresh copy to every node. `-delete` defaults to `false`, preserving reconciled and pre-existing installations for later runs; use `-delete true` only when post-run cleanup is explicitly required.
+By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged when that command exists, succeeds, and reports the exact expected version. The three deployment lifecycle options are independent:
+
+- `-copy true|false` permits SBK-GEM to copy SBK when it is missing or mismatched; the default is `true`. With `false`, a missing or mismatched installation is reported as an error.
+- `-delete true|false` controls whether an existing mismatched installation is removed before replacement; the default is `true`. A missing installation never needs pre-copy deletion.
+- `-deleteafter true|false` controls whether the remote deployment is removed after benchmarking; the default is `false`, allowing the verified installation to be reused.
+
+After any copy, SBK-GEM verifies the copied version. It then resolves and checks the exact absolute executable path independently on every node before starting SBM or launching a benchmark.
 
 SBK-GEM also reconciles Java independently on every node:
 
@@ -75,7 +105,7 @@ For each remote launch, GEM exports the selected node-specific `SBK_JAVA_HOME` a
 Before a multi-host run:
 
 1. Run the intended SBK command successfully on one target host.
-2. Verify non-interactive SSH connectivity under the exact benchmark account.
+2. Verify non-interactive SSH connectivity under the exact local and remote accounts, including host-key verification.
 3. Verify the remote install directory and Java runtime.
 4. Verify that the remote host can reach the target backend.
 5. Verify that the remote host can reach the advertised SBM host and port.
@@ -111,7 +141,9 @@ Diagnose distributed failures by boundary:
 
 | Symptom | Check |
 |---|---|
-| Cannot connect | DNS, route, SSH port, account, key permissions, host-key policy |
+| Cannot connect | DNS, route, SSH port, account, `SSH_AUTH_SOCK`, identity-file permissions, and `known_hosts` |
+| Authentication rejected | Remote `authorized_keys`, requested user, agent contents, configured identity files, or optional password |
+| Host key rejected | Missing or changed entry in the SBK-GEM user's `~/.ssh/known_hosts`; verify the key out of band before updating it |
 | Copy/install fails | Remote permissions, disk space, path, archive integrity |
 | Remote Java failure | Java 25 compatibility, `JAVA_HOME`, executable permissions |
 | Driver not found | Same distribution on all hosts, both driver registration files, pathing JAR |

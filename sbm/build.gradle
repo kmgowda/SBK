@@ -79,6 +79,7 @@ jib {
     container {
         creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
         mainClass = SbmMainClass
+        jvmFlags = rootProject.ext.sbkRuntimeJvmArgs
         ports = ['9717/tcp', '9719/tcp']
     }
 

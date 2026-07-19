@@ -16,6 +16,7 @@ import io.sbp.grpc.MessageLatenciesRecord;
  * Interface RamRegistry.
  */
 public interface SbmRegistry {
+     /** First identifier assigned to an SBM client. */
      final static long BASE_CLIENT_ID_VALUE = 1;
 
     /**

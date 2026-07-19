@@ -11,15 +11,22 @@ package io.perl.api.impl;
 
 import io.perl.api.QueueArray;
 
-/*
+/**
  * Concurrent Queue Array based on CQueue Implementation.
  * DON'T USE THIS CLASS.
  * Use ConcurrentLinkedQueueArray, because the ConcurrentLinkedQueue does better Garbage collection.
+ *
+ * @param <T> queued element type
  */
 @SuppressWarnings("unchecked")
 public class CQueueArray<T> implements QueueArray<T> {
     final private CQueue<T>[] cQueues;
 
+    /**
+     * Creates the requested number of queues.
+     *
+     * @param size number of queues
+     */
     public CQueueArray(int size) {
         this.cQueues = new CQueue[size];
         for (int i = 0; i < cQueues.length; i++) {

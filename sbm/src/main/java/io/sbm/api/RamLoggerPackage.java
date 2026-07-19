@@ -24,6 +24,11 @@ import java.util.Set;
  */
 public class RamLoggerPackage extends Package<RamLogger> {
 
+    /**
+     * Creates a scanner for the supplied logger package.
+     *
+     * @param packageName package containing SBM logger implementations
+     */
     public RamLoggerPackage(String packageName) {
         super(packageName);
     }

@@ -52,6 +52,13 @@ public enum TimeUnit {
         }
     };
 
+    /**
+     * Resolves a time unit from its case-insensitive short name.
+     *
+     * @param value short name ({@code ms}, {@code mcs}, or {@code ns})
+     * @return matching time unit
+     * @throws IllegalArgumentException when the value is unknown
+     */
     @JsonCreator
     public static TimeUnit fromString(String value) {
         for (TimeUnit unit : TimeUnit.values()) {

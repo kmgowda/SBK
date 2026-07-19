@@ -39,4 +39,11 @@ final public class YalConfig {
      * <code>String yamlFileName</code>.
      */
     public String yamlFileName;
+
+    /**
+     * Creates an empty YAML launcher configuration for property binding.
+     */
+    public YalConfig() {
+    }
+
 }

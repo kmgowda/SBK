@@ -63,9 +63,9 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
 
 
     /**
-     * checks if parameters are copy.
+     * Check whether copying missing or mismatched SBK installations is enabled.
      *
-     * @return true or false.
+     * @return true when SBK copying is enabled
      */
     boolean isCopy();
 
@@ -91,9 +91,16 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
     String getJavaDir();
 
     /**
-     * checks if parameters are deleted.
+     * Check whether a mismatched SBK installation may be deleted before replacement.
      *
-     * @return true ro false.
+     * @return true when pre-copy deletion is enabled
      */
     boolean isDelete();
+
+    /**
+     * Check whether remote SBK deployments should be deleted after benchmarking.
+     *
+     * @return true when post-benchmark deletion is enabled
+     */
+    boolean isDeleteAfter();
 }

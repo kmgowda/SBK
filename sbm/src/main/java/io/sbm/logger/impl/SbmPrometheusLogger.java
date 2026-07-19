@@ -17,6 +17,12 @@ package io.sbm.logger.impl;
  */
 public class SbmPrometheusLogger extends AbstractRamLogger {
 
+    /**
+     * Creates a Prometheus logger for aggregated SBM results.
+     */
+    public SbmPrometheusLogger() {
+    }
+
     @Override
     public void print(long reportTime, int connections, int maxConnections, int writers, int maxWriters, int readers,
                       int maxReaders, long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,

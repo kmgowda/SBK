@@ -48,4 +48,11 @@ final public class SbmConfig extends LatencyConfig {
      * <code>int idleMS</code>.
      */
     public int idleMS;
+
+    /**
+     * Creates an empty SBM configuration for property binding.
+     */
+    public SbmConfig() {
+    }
+
 }
