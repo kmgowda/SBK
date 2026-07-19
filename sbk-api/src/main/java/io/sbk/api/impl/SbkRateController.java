@@ -36,6 +36,7 @@ final public class SbkRateController implements RateController {
     private int recordsPerSec;
     private long toSleepNs;
 
+    /** Creates an inactive rate controller. */
     public SbkRateController() {
         this.recordsPerSec = 0;
         this.toSleepNs = 0;

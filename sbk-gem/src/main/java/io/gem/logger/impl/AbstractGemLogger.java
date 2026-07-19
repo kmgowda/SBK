@@ -21,6 +21,13 @@ import io.sbm.logger.impl.SbmPrometheusLogger;
  * appropriate CLI parameters when launching remote SBK instances.
  */
 public abstract class AbstractGemLogger extends SbmPrometheusLogger implements GemLogger {
+
+    /**
+     * Creates a GEM logger backed by the SBM Prometheus logger.
+     */
+    public AbstractGemLogger() {
+    }
+
     @Override
     public abstract String[] getOptionsArgs();
 

@@ -78,7 +78,14 @@ import java.util.concurrent.TimeoutException;
 final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
     final static String SBM_CONFIG_FILE = "sbm.properties";
+
     final static String BANNER_FILE = "gem-banner.txt";
+
+    /**
+     * Creates an SBK-GEM orchestration helper.
+     */
+    public SbkGem() {
+    }
 
     /**
      * Run the Performance Benchmarking .

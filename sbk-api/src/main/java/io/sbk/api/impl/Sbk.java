@@ -71,6 +71,12 @@ final public class Sbk {
     final static String BANNERFILE = "banner.txt";
 
     /**
+     * Creates an SBK bootstrap helper.
+     */
+    public Sbk() {
+    }
+
+    /**
      * Run the Performance Benchmarking .
      *
      * @param args               command line arguments.

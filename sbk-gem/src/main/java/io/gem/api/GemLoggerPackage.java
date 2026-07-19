@@ -25,6 +25,11 @@ import java.util.Set;
  */
 public final class GemLoggerPackage extends Package<GemLogger> {
 
+    /**
+     * Creates a scanner for the supplied logger package.
+     *
+     * @param packageName package containing GEM logger implementations
+     */
     public GemLoggerPackage(String packageName) {
         super(packageName);
     }

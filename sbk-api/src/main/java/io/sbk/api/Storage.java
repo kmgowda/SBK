@@ -50,6 +50,8 @@ import java.util.Objects;
  *       occur; the harness will surface these back to the user and stop the
  *       benchmark run.</li>
  * </ul>
+ *
+ * @param <T> storage record type
  */
 public interface Storage<T> {
 

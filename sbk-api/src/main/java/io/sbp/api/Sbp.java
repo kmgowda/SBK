@@ -17,9 +17,24 @@ import io.sbp.config.SbpVersion;
 
 import java.io.IOException;
 
+/**
+ * Loads the Storage Benchmark Protocol version used by SBK and SBM.
+ */
 public class Sbp {
     final private static String VERSION_FILE = "sbp-version.properties";
 
+    /**
+     * Creates an SBP version-resource accessor.
+     */
+    public Sbp() {
+    }
+
+    /**
+     * Loads the protocol version from the bundled properties resource.
+     *
+     * @return configured SBP version
+     * @throws IOException when the version resource cannot be read
+     */
     public static SbpVersion getVersion() throws IOException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         return mapper.readValue(Sbp.class.getClassLoader().getResourceAsStream(VERSION_FILE),

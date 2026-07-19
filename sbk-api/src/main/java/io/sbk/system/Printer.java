@@ -12,7 +12,16 @@ package io.sbk.system;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Central SBK application logger. */
 final public class Printer {
     final private static String LOGGER_NAME = "SBK";
+    /** Logger used by SBK framework components. */
     final public static Logger log = LoggerFactory.getLogger(LOGGER_NAME);
+
+    /**
+     * Creates an SBK printer facade.
+     */
+    public Printer() {
+    }
+
 }

@@ -15,6 +15,10 @@ package io.time;
  */
 final public class MilliSeconds implements Time {
 
+    /** Creates a millisecond-resolution time source. */
+    public MilliSeconds() {
+    }
+
     /**
      * get the Time Unit.
      *

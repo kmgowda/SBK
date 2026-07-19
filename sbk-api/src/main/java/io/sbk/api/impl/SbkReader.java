@@ -67,6 +67,19 @@ final public class SbkReader extends Worker implements RunBenchmark {
     final private RateController rCnt;
     final private BiConsumer perf;
 
+    /**
+     * Creates a benchmark reader worker.
+     *
+     * @param readerId reader identifier
+     * @param params benchmark parameters
+     * @param perlChannel performance channel
+     * @param dType storage data type
+     * @param time benchmark time source
+     * @param reader storage reader
+     * @param rCount shared reader counter
+     * @param readRequestsLogger request metrics logger
+     * @param executor benchmark executor
+     */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkReader(int readerId, ParameterOptions params, PerlChannel perlChannel,
                      DataType<Object> dType, Time time, DataReader<Object> reader,

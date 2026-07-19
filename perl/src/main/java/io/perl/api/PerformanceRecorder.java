@@ -20,9 +20,13 @@ import javax.annotation.Nonnull;
  * (for example busy-wait vs sleep strategies).
  */
 abstract public class PerformanceRecorder {
+    /** Periodic reporting interval in milliseconds. */
     final protected int windowIntervalMS;
+    /** Time source used by the recorder. */
     final protected Time time;
+    /** Aggregator receiving samples from all channels. */
     final protected PeriodicRecorder periodicRecorder;
+    /** Producer channels consumed by this recorder. */
     final protected Channel[] channels;
 
     /**

@@ -13,10 +13,20 @@ package io.perl.api.impl;
 import io.perl.api.QueueArray;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Array of concurrent linked queues used to isolate producer channels.
+ *
+ * @param <T> queued element type
+ */
 @SuppressWarnings("unchecked")
 public class ConcurrentLinkedQueueArray<T> implements QueueArray<T> {
     final private ConcurrentLinkedQueue<T>[] cQueues;
 
+    /**
+     * Creates the requested number of queues.
+     *
+     * @param size number of queues
+     */
     public ConcurrentLinkedQueueArray(int size) {
         this.cQueues = new ConcurrentLinkedQueue[size];
         for (int i = 0; i < cQueues.length; i++) {

@@ -28,6 +28,12 @@ import java.util.concurrent.TimeoutException;
 public abstract class SbkGemMain {
 
     /**
+     * Creates an SBK-GEM command-line entry point.
+     */
+    public SbkGemMain() {
+    }
+
+    /**
      * This method is the main method of Sbk-Gem module.
      *
      * @param args String[]

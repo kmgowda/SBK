@@ -41,6 +41,8 @@ import java.io.IOException;
  *
  * <p>Original brief description preserved for compatibility:
  * <blockquote>Interface for Readers.</blockquote>
+ *
+ * @param <T> storage record type
  */
 public non-sealed interface Reader<T> extends DataRecordsReader<T> {
 

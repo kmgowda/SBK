@@ -22,6 +22,7 @@ final public class SbkString implements DataType<String> {
     final static String FORMAT_STRING = "%0" + TIME_HEADER_SIZE + "d";
     final Random random;
 
+    /** Creates a string data generator. */
     public SbkString() {
         random = new Random();
     }

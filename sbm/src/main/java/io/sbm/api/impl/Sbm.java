@@ -52,6 +52,12 @@ final public class Sbm {
     final static String BANNER_FILE = "sbm-banner.txt";
 
     /**
+     * Creates an SBM bootstrap helper.
+     */
+    public Sbm() {
+    }
+
+    /**
      * Run the Performance Benchmarking .
      *
      * @param args              command line arguments.

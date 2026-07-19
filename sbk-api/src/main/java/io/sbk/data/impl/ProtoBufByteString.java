@@ -22,6 +22,7 @@ import java.util.Random;
 final public class ProtoBufByteString implements DataType<ByteString> {
     final Random random;
 
+    /** Creates a protobuf byte-string data generator. */
     public ProtoBufByteString() {
         random = new Random();
     }
@@ -101,4 +102,3 @@ final public class ProtoBufByteString implements DataType<ByteString> {
     }
 
 }
-

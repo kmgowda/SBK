@@ -29,11 +29,18 @@ import java.time.format.DateTimeFormatter;
 public class SystemLogger extends AbstractRWLogger {
     private  DateTimeFormatter dateTimeFormatter;
 
+    /** Creates a system-output benchmark logger. */
     public SystemLogger() {
         super();
         dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     }
 
+    /**
+     * Formats a report timestamp in the local time zone.
+     *
+     * @param reportTime epoch-millisecond report time
+     * @return formatted timestamp
+     */
     protected String getTimeStamp(long reportTime) {
         return Instant.ofEpochMilli(reportTime).atZone(ZoneId.systemDefault()).format(dateTimeFormatter);
     }

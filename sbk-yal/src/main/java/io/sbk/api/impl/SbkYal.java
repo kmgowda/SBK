@@ -40,8 +40,15 @@ import java.util.concurrent.TimeoutException;
 public final class SbkYal {
     final static String CONFIG_FILE = "sbk-yal.properties";
     final static String NAME = "sbk-yal";
+
     final static String DESC = "Storage Benchmark Kit-YML Arguments Loader";
     final static String BANNER_FILE = "sbk-yal-banner.txt";
+
+    /**
+     * Creates an SBK YAML launcher.
+     */
+    public SbkYal() {
+    }
 
     /**
      * Run the Performance Benchmarking .

@@ -30,11 +30,16 @@ package io.sbk.api;
  * share a single {@code Status} instance across concurrent operations.
  */
 final public class Status {
+    /** Operation start timestamp. */
     public long startTime;
+    /** Operation completion timestamp. */
     public long endTime;
+    /** Number of processed records. */
     public int records;
+    /** Number of processed bytes. */
     public int bytes;
 
+    /** Creates an empty operation status. */
     public Status() {
         this.startTime = 0;
         this.endTime = 0;

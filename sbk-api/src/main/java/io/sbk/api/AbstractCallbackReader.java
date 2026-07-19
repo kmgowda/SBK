@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * storage drivers can extend. It centralises the timing and PerL reporting
  * logic while leaving the concrete 'consume' method for driver-specific
  * payload handling.
+ *
+ * @param <T> storage record type
  */
 public abstract non-sealed class AbstractCallbackReader<T> implements DataReader<T> {
     private DataType<T> dataType;
@@ -38,6 +40,13 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     private Worker reader;
     private double msToRun;
     private long recordsCount;
+
+    /**
+     * Creates a callback-based reader whose runtime state is supplied by
+     * {@link #initialize(Worker, long, long, DataType, Time, Callback)}.
+     */
+    public AbstractCallbackReader() {
+    }
 
     /**
      * set the Callback and start the CallBack Reader.

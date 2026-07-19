@@ -23,4 +23,9 @@ final public class PerlPrinter {
     final private static String LOGGER_NAME = PerlConfig.NAME;
     /** Logger instance for PerL internals. */
     final public static Logger log = LoggerFactory.getLogger(LOGGER_NAME);
+
+    /** Creates a PerL logging helper. */
+    public PerlPrinter() {
+    }
+
 }

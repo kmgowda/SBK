@@ -138,4 +138,11 @@ final public class GemConfig {
      * Whether to fork a {@code ForkJoinPool} for execution (vs fixed thread pool).
      */
     public boolean fork;
+
+    /**
+     * Creates an empty GEM configuration for property binding.
+     */
+    public GemConfig() {
+    }
+
 }

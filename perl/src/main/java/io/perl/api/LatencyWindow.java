@@ -32,10 +32,10 @@ import org.jetbrains.annotations.NotNull;
  */
 abstract public sealed class LatencyWindow extends LatencyRecorder permits LatencyRecordWindow {
 
-    /* configured percentiles helper */
+    /** Configured percentile calculator. */
     final protected LatencyPercentiles percentiles;
 
-    /* time helper used for elapsed conversions */
+    /** Time source used for elapsed-time conversion. */
     final protected Time time;
 
     /* sliding latency coverage result */

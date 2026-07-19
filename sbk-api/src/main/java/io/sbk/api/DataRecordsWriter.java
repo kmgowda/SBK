@@ -46,6 +46,8 @@ import java.util.concurrent.CompletableFuture;
  *   <li>Override {@link #sync()} if your driver requires an explicit durability
  *       call (e.g., fsync or flush) after batches of writes.</li>
  * </ul>
+ *
+ * @param <T> storage record type
  */
 public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Writer {
 

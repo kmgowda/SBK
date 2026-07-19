@@ -32,6 +32,8 @@ import java.io.IOException;
  *   <li>Methods ending with "RW" are intended for workloads where concurrent writers are also active.</li>
  *   <li>Rate-controlled variants accept a {@link RateController} to allow the harness to throttle throughput.</li>
  * </ul>
+ *
+ * @param <T> storage record type
  */
 public sealed interface DataReader<T> permits AbstractCallbackReader, DataRecordsReader {
 
@@ -281,4 +283,3 @@ public sealed interface DataReader<T> permits AbstractCallbackReader, DataRecord
     void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                         RateController rController, ReadRequestsLogger logger) throws EOFException, IOException;
 }
-

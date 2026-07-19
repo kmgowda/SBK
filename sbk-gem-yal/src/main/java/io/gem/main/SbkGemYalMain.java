@@ -28,6 +28,12 @@ import java.util.concurrent.TimeoutException;
 public abstract class SbkGemYalMain {
 
     /**
+     * Creates an SBK-GEM-YAL command-line entry point.
+     */
+    public SbkGemYalMain() {
+    }
+
+    /**
      * The main Method of sbk-gem-yal module.
      *
      * @param args String[]

@@ -21,6 +21,7 @@ import java.util.Random;
 final public class NioByteBuffer implements DataType<ByteBuffer> {
     final Random random;
 
+    /** Creates a direct-byte-buffer data generator. */
     public NioByteBuffer() {
         random = new Random();
     }

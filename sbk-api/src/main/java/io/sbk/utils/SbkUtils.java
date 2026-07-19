@@ -24,7 +24,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/** Utility methods for inspecting, filtering, and merging SBK arguments. */
 public final class SbkUtils {
+
+    /**
+     * Creates an SBK argument utility.
+     */
+    public SbkUtils() {
+    }
 
     /**
      * Return a copy of command-line arguments with values belonging to sensitive
@@ -71,6 +78,13 @@ public final class SbkUtils {
         return redacted;
     }
 
+    /**
+     * Removes each named option and its following value once.
+     *
+     * @param args source arguments
+     * @param opts option names to remove
+     * @return filtered arguments
+     */
     @Contract("null, _ -> new")
     public static @NotNull String[] removeOptionArgsAndValues(String[] args, String[] opts) {
         if (args == null) {
@@ -94,6 +108,13 @@ public final class SbkUtils {
         return ret.toArray(new String[0]);
     }
 
+    /**
+     * Removes each named option once while retaining other arguments.
+     *
+     * @param args source arguments
+     * @param opts option names to remove
+     * @return filtered arguments
+     */
     @Contract("null, _ -> new")
     public static @NotNull String[] removeOptionArgs(String[] args, String[] opts) {
         if (args == null) {
@@ -116,6 +137,13 @@ public final class SbkUtils {
         return ret.toArray(new String[0]);
     }
 
+    /**
+     * Finds the value following an option.
+     *
+     * @param args source arguments
+     * @param argName option name
+     * @return option value, or an empty string when absent
+     */
     public static String getArgValue(String[] args, String argName) {
         if (args == null || args.length < 2) {
             return "";
@@ -132,14 +160,33 @@ public final class SbkUtils {
         return "";
     }
 
+    /**
+     * Returns the selected storage class name.
+     *
+     * @param args source arguments
+     * @return storage class name, or an empty string when absent
+     */
     public static String getClassName(String[] args) {
         return getArgValue(args, Config.CLASS_OPTION_ARG);
     }
 
+    /**
+     * Returns the selected logger name.
+     *
+     * @param args source arguments
+     * @return logger name, or an empty string when absent
+     */
     public static String getLoggerName(String[] args) {
         return getArgValue(args, Config.LOGGER_OPTION_ARG);
     }
 
+    /**
+     * Tests whether an argument is present.
+     *
+     * @param args source arguments
+     * @param argName argument to find
+     * @return {@code true} when present
+     */
     public static boolean hasArg(String[] args, String argName) {
         if (args == null) {
             return false;
@@ -152,14 +199,33 @@ public final class SbkUtils {
         return false;
     }
 
+    /**
+     * Tests whether the help option is present.
+     *
+     * @param args source arguments
+     * @return {@code true} when help was requested
+     */
     public static boolean hasHelp(String[] args) {
             return hasArg(args, Config.HELP_OPTION_ARG);
     }
 
+    /**
+     * Tests whether either version option is present.
+     *
+     * @param args source arguments
+     * @return {@code true} when version information was requested
+     */
     public static boolean hasVersion(String[] args) {
             return hasArg(args, Config.VERSION_OPTION_ARG) || hasArg(args, Config.VERSION_OPTION_ARG_SHORT);
     }
 
+    /**
+     * Converts ordered option/value mappings to an argument array.
+     *
+     * @param map option/value mappings
+     * @param addArgPrefix whether to prepend the standard argument prefix
+     * @return argument array
+     */
     public static String[] mapToArgs(Map<String, String> map, boolean addArgPrefix) {
         final List<String> lt = new ArrayList<>();
         map.forEach((k, v) -> {
@@ -173,6 +239,13 @@ public final class SbkUtils {
         return lt.toArray(new String[0]);
     }
 
+    /**
+     * Converts option/value argument pairs to an ordered map.
+     *
+     * @param args option/value argument pairs
+     * @param removeArgPrefix whether to remove the standard argument prefix
+     * @return ordered option/value mappings
+     */
     public static Map<String, String> argsToMap(String[] args, boolean removeArgPrefix) {
         final Map<String, String> map = new LinkedHashMap<>();
         for (int i = 0; i < args.length; i += 2) {
@@ -187,6 +260,13 @@ public final class SbkUtils {
         return map;
     }
 
+    /**
+     * Merges two option/value arrays, with the second array taking precedence.
+     *
+     * @param s1 base arguments
+     * @param s2 overriding arguments
+     * @return merged argument array without duplicate options
+     */
     public static String[] mergeArgs(String[] s1, String[] s2) {
         final Map<String, String> merged = new LinkedHashMap<>();
         mergeArgsInto(merged, s1);

@@ -30,6 +30,8 @@ import java.io.IOException;
  *   <li>Provide efficient implementations for the workload entry points when
  *       the default helpers are not sufficient for the driver's optimized path.</li>
  * </ul>
+ *
+ * @param <T> storage record type
  */
 public sealed interface DataWriter<T> permits DataRecordsWriter {
 

@@ -50,6 +50,8 @@ import java.io.IOException;
  *
  * <p>Original brief description preserved for compatibility:
  * <blockquote>Interface for Data Record Readers.</blockquote>
+ *
+ * @param <T> storage record type
  */
 public sealed interface DataRecordsReader<T> extends DataReader<T> permits AsyncReader, Reader {
 
@@ -635,6 +637,11 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
                 throws EOFException, IOException;
     }
 
+    /**
+     * Records timed reads and forwards request metrics to an RW logger.
+     *
+     * @param <T> storage record type
+     */
     interface RecordTimeRequests<T> {
 
         /**

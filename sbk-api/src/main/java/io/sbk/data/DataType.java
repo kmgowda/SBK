@@ -11,6 +11,8 @@ package io.sbk.data;
 
 /**
  * Interface for Data Type operations.
+ *
+ * @param <T> represented data type
  */
 public interface DataType<T> {
     /**

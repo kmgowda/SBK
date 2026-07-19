@@ -48,6 +48,12 @@ import java.util.concurrent.TimeUnit;
 public final class SshUtils {
 
     /**
+     * Creates an SSH utility facade for remote SBK orchestration.
+     */
+    public SshUtils() {
+    }
+
+    /**
      * Create an SSH client configured for host-key and optional SSH-agent authentication.
      *
      * @param connConfig connection and host-key policy

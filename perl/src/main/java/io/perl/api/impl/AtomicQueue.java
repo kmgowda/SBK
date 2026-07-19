@@ -14,10 +14,12 @@ import io.perl.api.Queue;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-/*
+/**
  * Concurrent Queue Implementation using Atomic References.
  * DON'T USE THIS CLASS.
  * Use Java native 'ConcurrentLinkedQueue', because the ConcurrentLinkedQueue does better Garbage collection.
+ *
+ * @param <T> queued element type
  */
 final public class AtomicQueue<T> implements Queue<T> {
 
@@ -35,12 +37,20 @@ final public class AtomicQueue<T> implements Queue<T> {
     final private AtomicReference<Node<T>> tail;
 
 
+    /**
+     * Creates an empty atomic-reference queue.
+     */
     public AtomicQueue() {
         this.firstNode = new Node<>(null);
         this.head = new AtomicReference<>(firstNode);
         this.tail = new AtomicReference<>(firstNode);
     }
 
+    /**
+     * Attempts one non-blocking dequeue operation.
+     *
+     * @return next element, or {@code null} when unavailable
+     */
     public T pollOnce() {
         final Node<T> curHead = head.getAndSet(null);
         if (curHead == null) {

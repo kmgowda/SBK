@@ -15,7 +15,9 @@ import io.sbk.exception.HelpException;
 import io.sbk.params.YalParameters;
 import org.apache.commons.cli.ParseException;
 
+/** Parses YAML-launcher command-line parameters. */
 public class SbkYalParameters extends SbkInputOptions implements YalParameters {
+    /** YAML launcher configuration populated during parsing. */
     protected YalConfig config;
 
     /**

@@ -38,6 +38,8 @@ import java.util.concurrent.TimeoutException;
  *       PerL events and propagate exceptions (including timeouts) to the
  *       configured logger or PerL channel.</li>
  * </ul>
+ *
+ * @param <T> storage record type
  */
 public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
 

@@ -26,6 +26,12 @@ import java.util.concurrent.TimeoutException;
  */
 public abstract class SbkYalMain {
 
+    /**
+     * Creates an SBK-YAL command-line entry point.
+     */
+    public SbkYalMain() {
+    }
+
     static void main(final String[] args) {
         if (SbkUtils.hasVersion(args)) {
             final String version = io.sbk.api.impl.SbkYal.class.getPackage().getImplementationVersion();

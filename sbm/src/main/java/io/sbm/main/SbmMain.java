@@ -26,6 +26,12 @@ import java.util.concurrent.TimeoutException;
 public abstract class SbmMain {
 
     /**
+     * Creates an SBM command-line entry point.
+     */
+    public SbmMain() {
+    }
+
+    /**
      * The main method for SBM module.
      *
      * @param args String[]

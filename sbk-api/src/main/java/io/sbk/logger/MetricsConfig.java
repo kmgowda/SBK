@@ -18,10 +18,17 @@ import io.time.TimeUnit;
  * exposing metrics and to set the latency {@link #latencyTimeUnit}.
  */
 public final class MetricsConfig {
-    /* HTTP port for the metrics endpoint. */
+    /** HTTP port for the metrics endpoint. */
     public int port;
-    /* HTTP path/context under which metrics are served (e.g., "/metrics"). */
+    /** HTTP path under which metrics are served, such as {@code /metrics}. */
     public String context;
-    /* Time unit used to publish latency metrics. */
+    /** Time unit used to publish latency metrics. */
     public TimeUnit latencyTimeUnit;
+
+    /**
+     * Creates an empty metrics configuration for property binding.
+     */
+    public MetricsConfig() {
+    }
+
 }

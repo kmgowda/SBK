@@ -68,10 +68,20 @@ public class CSVLogger extends SystemLogger {
     }
 
 
+    /**
+     * Reports whether CSV output is enabled.
+     *
+     * @return {@code true} when CSV output is enabled
+     */
     protected final boolean isCsvEnable() {
         return this.csvEnable;
     }
 
+    /**
+     * Returns the configured CSV output path.
+     *
+     * @return CSV output path
+     */
     protected final String getCsvFile() {
         return this.csvFile;
     }

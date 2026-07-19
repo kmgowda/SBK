@@ -104,6 +104,9 @@ final public class PerlConfig extends LatencyConfig {
      */
     public int maxQs;
 
+    /** Creates an empty PerL configuration for property binding. */
+    public PerlConfig() {
+    }
 
     /**
      * Build configuration by loading the default {@code perl.properties} from the classpath.

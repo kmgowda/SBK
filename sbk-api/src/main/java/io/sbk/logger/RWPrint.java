@@ -9,6 +9,7 @@
  */
 package io.sbk.logger;
 
+/** Prints periodic read/write benchmark results. */
 public interface RWPrint {
 
     /**

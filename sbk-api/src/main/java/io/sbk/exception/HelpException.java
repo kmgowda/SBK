@@ -19,6 +19,7 @@ import lombok.Getter;
  */
 final public class HelpException extends Exception {
 
+    /** Rendered help text associated with this control-flow exception. */
     @Getter
     private final String helpText;
 

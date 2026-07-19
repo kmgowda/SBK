@@ -47,6 +47,16 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     final private long totalRecords;
     private long beginTime;
 
+    /**
+     * Creates the deprecated callback-based benchmark reader.
+     *
+     * @param readerId reader identifier
+     * @param params benchmark parameters
+     * @param perlChannel performance channel
+     * @param idMax maximum reader identifier
+     * @param dataType storage data type
+     * @param time benchmark time source
+     */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbkCallbackReader(int readerId, ParameterOptions params, PerlChannel perlChannel, int idMax,
                              DataType<Object> dataType, Time time) {

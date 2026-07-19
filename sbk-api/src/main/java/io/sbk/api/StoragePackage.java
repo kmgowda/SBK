@@ -21,6 +21,11 @@ import java.util.Set;
  */
 @NotThreadSafe
 final public class StoragePackage extends Package<Storage<?>> {
+    /**
+     * Creates a scanner for the supplied storage package.
+     *
+     * @param packageName package containing storage implementations
+     */
     public StoragePackage(String packageName) {
         super(packageName);
     }

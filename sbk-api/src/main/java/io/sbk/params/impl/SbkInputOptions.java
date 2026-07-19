@@ -58,6 +58,12 @@ public class SbkInputOptions implements ParseInputOptions {
         addOption(Config.HELP_OPTION, false, "Help message");
     }
 
+    /**
+     * Creates an SBK command-line option parser.
+     *
+     * @param name benchmark name
+     * @param header help-text header
+     */
     public SbkInputOptions(String name, String header) {
         this(name, header, Config.SBK_FOOTER, false);
     }

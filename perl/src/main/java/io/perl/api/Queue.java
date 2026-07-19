@@ -25,10 +25,14 @@ package io.perl.api;
  *
  * <p>Thread-safety is implementation-specific; callers should prefer
  * implementations that match their concurrency requirements.</p>
+ *
+ * @param <T> queued element type
  */
 public interface Queue<T> {
     /**
      * Return data of type T from queue, or {@code null} if none is available.
+     *
+     * @return next element, or {@code null} when the queue is empty
      */
     T poll();
 

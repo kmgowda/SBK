@@ -15,10 +15,18 @@ import lombok.Synchronized;
 
 import java.util.LinkedList;
 
+/**
+ * Synchronized queue implementation backed by a linked list.
+ *
+ * @param <T> queued element type
+ */
 public class SyncQueue<T> implements Queue<T> {
 
     private final LinkedList<T> list;
 
+    /**
+     * Creates an empty synchronized queue.
+     */
     public SyncQueue() {
         list = new LinkedList<>();
     }

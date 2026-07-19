@@ -42,8 +42,15 @@ import java.util.concurrent.TimeoutException;
 final public class SbkGemYal {
     final static String CONFIG_FILE = "gem-yal.properties";
     final static String NAME = "sbk-gem-yal";
+
     final static String DESC = "Storage Benchmark Kit-Group Execution Monitor-YML Arguments Loader";
     final static String BANNER_FILE = "gem-yal-banner.txt";
+
+    /**
+     * Creates an SBK-GEM YAML launcher.
+     */
+    public SbkGemYal() {
+    }
 
     /**
      * Run the Performance Benchmarking .

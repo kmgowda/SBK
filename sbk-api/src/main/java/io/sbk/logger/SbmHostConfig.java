@@ -16,10 +16,17 @@ package io.sbk.logger;
  * Used by {@code io.sbk.logger.impl.GrpcLogger} to connect and stream metrics to SBM.
  */
 public final class SbmHostConfig {
-    /* Hostname or IP address of the SBM server. */
+    /** Hostname or IP address of the SBM server. */
     public String host;
-    /* Port of the SBM server. */
+    /** Port of the SBM server. */
     public int port;
-    /* Maximum record payload size (in MB) permitted when sending latencies. */
+    /** Maximum record payload size in MB when sending latencies. */
     public int maxRecordSizeMB;
+
+    /**
+     * Creates an empty SBM host configuration for property binding.
+     */
+    public SbmHostConfig() {
+    }
+
 }

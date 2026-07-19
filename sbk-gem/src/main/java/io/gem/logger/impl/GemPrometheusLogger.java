@@ -24,6 +24,12 @@ import io.sbm.logger.impl.SbmPrometheusLogger;
 public final class GemPrometheusLogger extends SbmPrometheusLogger implements GemLogger {
 
     /**
+     * Creates a Prometheus logger for GEM benchmark results.
+     */
+    public GemPrometheusLogger() {
+    }
+
+    /**
      * List of logger-specific CLI options that GEM should include when composing the
      * remote SBK command line.
      *
