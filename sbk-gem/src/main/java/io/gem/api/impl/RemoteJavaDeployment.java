@@ -52,6 +52,35 @@ final class RemoteJavaDeployment {
     }
 
     /**
+     * Resolve the remote Java destination used by SBK-GEM.
+     *
+     * <p>An explicitly configured Java home takes precedence. Otherwise, the
+     * managed Java directory is placed beside the remote SBK working
+     * directory so a runtime copied during an earlier execution can be reused.
+     *
+     * @param connectionDir remote SBK working directory
+     * @param configuredJavaHome explicitly configured remote Java home, or null
+     * @param expectedMajor requested Java major version
+     * @return remote Java home to probe before copying and to use as the copy destination
+     */
+    static String destinationJavaHome(String connectionDir, String configuredJavaHome, int expectedMajor) {
+        if (configuredJavaHome != null) {
+            return configuredJavaHome;
+        }
+        final int separator = connectionDir.lastIndexOf('/');
+        final String parent;
+        if (separator < 0) {
+            parent = ".";
+        } else if (separator == 0) {
+            parent = "/";
+        } else {
+            parent = connectionDir.substring(0, separator);
+        }
+        return "/".equals(parent) ? parent + "sbk-java-" + expectedMajor :
+                parent + "/sbk-java-" + expectedMajor;
+    }
+
+    /**
      * Determine whether a probe found the requested Java major version.
      *
      * @param response remote response

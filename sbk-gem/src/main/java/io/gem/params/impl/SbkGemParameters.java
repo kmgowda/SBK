@@ -103,6 +103,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
         addOption(GemConfig.GEM_PASS_OPTION, true, "ssh user password of the remote hosts, default: " +
                 (StringUtils.isEmpty(config.gempass) ? "not set" : "******"));
+        addOption("hostkeycheck", true, "Verify remote SSH host keys against known_hosts; default: " +
+                config.hostkeycheck);
+        addOption("knownhosts", true, "Known-hosts file; an empty value uses ~/.ssh/known_hosts; default: " +
+                (StringUtils.isEmpty(config.knownhosts) ? "default" : config.knownhosts));
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkdir);
         addOption("sbkcommand", true,
@@ -119,9 +123,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
                 " ms");
-        this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-gemport", "-sbkdir", "-sbkcommand",
-                "-copy", "-javacopy", "-javaversion", "-javadir", "-delete", "-deleteafter", "-localhost",
-                "-sbmport", "-sbmsleepms"};
+        this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
+                "-gemport", "-sbkdir", "-sbkcommand", "-copy", "-javacopy", "-javaversion", "-javadir",
+                "-delete", "-deleteafter", "-localhost", "-sbmport", "-sbmsleepms"};
         this.parsedArgs = null;
     }
 
@@ -145,6 +149,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 .split("[ ,\n]+");
         config.gemuser = getOptionValue("gemuser", config.gemuser);
         config.gempass = getOptionValue(GemConfig.GEM_PASS_OPTION, config.gempass);
+        config.hostkeycheck = Boolean.parseBoolean(getOptionValue("hostkeycheck",
+                Boolean.toString(config.hostkeycheck)));
+        config.knownhosts = getOptionValue("knownhosts", Objects.requireNonNullElse(config.knownhosts, ""));
         config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
         config.sbkdir = getOptionValue("sbkdir", config.sbkdir);
         config.sbkcommand = getOptionValue("sbkcommand", config.sbkcommand);
@@ -164,6 +171,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         }
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
+                "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
                 "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
                 "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
                 "-javacopy", Boolean.toString(config.javacopy), "-javaversion",
@@ -174,7 +182,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         connections = new ConnectionConfig[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             connections[i] = new ConnectionConfig(nodes[i], config.gemuser, config.gempass, config.gemport,
-                    config.remoteDir);
+                    config.remoteDir, config.hostkeycheck, config.knownhosts);
         }
 
         if (StringUtils.isEmpty(config.sbkdir)) {

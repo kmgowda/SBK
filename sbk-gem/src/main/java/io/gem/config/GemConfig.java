@@ -68,6 +68,14 @@ final public class GemConfig {
      */
     public String gempass;
     /**
+     * Whether remote SSH host keys must match an entry in {@link #knownhosts}.
+     */
+    public boolean hostkeycheck;
+    /**
+     * Optional known-hosts file path; an empty value uses the launching user's default file.
+     */
+    public String knownhosts;
+    /**
      * SSH port.
      */
     public int gemport;

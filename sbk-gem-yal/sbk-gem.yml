@@ -19,7 +19,12 @@ sbkGemArgs:
   time: ns 
   seconds: 60 
   gemuser: kmg 
-  gempass: 1234
+  # Passwordless SSH is preferred. SBK-GEM uses ssh-agent and local SSH key files.
+  # Set gempass only when the remote account requires password authentication.
+  # gempass:
+  # Verify server keys by default. Use a dedicated trust file when needed.
+  hostkeycheck: true
+  # knownhosts: /home/kmg/.ssh/known_hosts
   sbkdir: /Users/kmg/projects/SBK/build/install/sbk
   # Allow copying SBK when it is missing or outdated (default: true).
   copy: true

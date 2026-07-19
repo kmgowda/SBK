@@ -92,6 +92,22 @@ final class RemoteJavaDeploymentTest {
         assertTrue(command.contains("SBK_JAVA_HOME=%s"));
     }
 
+    @Test
+    void reusesConfiguredJavaHomeAsCopyDestination() {
+        assertEquals("/opt/jdk-25", RemoteJavaDeployment.destinationJavaHome(
+                "/srv/sbk-gem-10.2", "/opt/jdk-25", 25));
+    }
+
+    @Test
+    void resolvesManagedJavaHomeBesideRemoteSbkDirectory() {
+        assertEquals("/srv/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
+                "/srv/sbk-gem-10.2", null, 25));
+        assertEquals("./sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
+                "sbk-gem-10.2", null, 25));
+        assertEquals("/sbk-java-25", RemoteJavaDeployment.destinationJavaHome(
+                "/sbk-gem-10.2", null, 25));
+    }
+
     private static SshResponse response(int returnCode, String standardOutput, String errorOutput)
             throws IOException {
         final SshResponse response = new SshResponse(true);

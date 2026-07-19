@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -124,12 +125,21 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 connsFuture.get(config.timeoutSeconds, TimeUnit.SECONDS);
             } catch (TimeoutException ex) {
                 Printer.log.info("SBK-GEM [" + (i + 1) + "]: Waiting for ssh session to remote hosts timeout");
+            } catch (ExecutionException ex) {
+                throw remoteSessionFailure(ex);
             }
         }
-        if (!connsFuture.isDone() || connsFuture.isCompletedExceptionally()) {
+        if (!connsFuture.isDone()) {
             final String errMsg = "SBK-GEM, remote session failed after " + config.maxIterations + " iterations";
             Printer.log.error(errMsg);
             throw new InterruptedException(errMsg);
+        }
+        if (connsFuture.isCompletedExceptionally()) {
+            try {
+                connsFuture.join();
+            } catch (CompletionException ex) {
+                throw remoteSessionFailure(ex);
+            }
         }
         Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
@@ -199,22 +209,28 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
 
         final String configuredJavaHome = normalizeRemotePath(params.getJavaDir());
-        if (hasSelectedTarget(unresolved) && configuredJavaHome != null) {
+        if (hasSelectedTarget(unresolved)) {
+            final String[] destinationJavaHomes = new String[nodes.length];
             final CompletableFuture<SshResponse>[] homeProbes = new CompletableFuture[nodes.length];
             for (int i = 0; i < nodes.length; i++) {
                 if (unresolved[i]) {
+                    destinationJavaHomes[i] = RemoteJavaDeployment.destinationJavaHome(
+                            nodes[i].connection.getDir(), configuredJavaHome, expectedVersion);
                     homeProbes[i] = nodes[i].runCommandAsync(
-                            RemoteJavaDeployment.homeProbeCommand(configuredJavaHome), true,
+                            RemoteJavaDeployment.homeProbeCommand(destinationJavaHomes[i]), true,
                             config.remoteTimeoutSeconds);
                 } else {
                     homeProbes[i] = CompletableFuture.completedFuture(new SshResponse(true));
                 }
             }
-            waitFor(CompletableFuture.allOf(homeProbes), "configured remote Java checks");
+            waitFor(CompletableFuture.allOf(homeProbes), "remote Java destination checks");
             for (int i = 0; i < nodes.length; i++) {
                 if (unresolved[i] && RemoteJavaDeployment.hasExpectedVersion(homeProbes[i].get(), expectedVersion)) {
-                    javaHomes[i] = configuredJavaHome;
+                    javaHomes[i] = destinationJavaHomes[i];
                     unresolved[i] = false;
+                    Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
+                            "' already has Java " + expectedVersion + " at '" + javaHomes[i] +
+                            "'; skipping copy");
                 }
             }
         }
@@ -260,9 +276,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final String[] parents = new String[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             if (copyTargets[i]) {
-                targets[i] = configuredJavaHome == null ?
-                        remoteJoin(remoteParent(nodes[i].connection.getDir()), "sbk-java-" + expectedVersion) :
-                        configuredJavaHome;
+                targets[i] = RemoteJavaDeployment.destinationJavaHome(
+                        nodes[i].connection.getDir(), configuredJavaHome, expectedVersion);
                 if (!isSafeRemoteDirectory(targets[i])) {
                     throw new IOException("Refusing to replace unsafe remote Java directory: " + targets[i]);
                 }
@@ -658,6 +673,18 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @Override
     public void stop() {
         shutdown(null);
+    }
+
+    private static IOException remoteSessionFailure(Throwable failure) {
+        Throwable cause = failure;
+        while ((cause instanceof CompletionException || cause instanceof ExecutionException) &&
+                cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        if (cause instanceof IOException ioException) {
+            return ioException;
+        }
+        return new IOException("SBK-GEM: Remote SSH session establishment failed: " + cause.getMessage(), cause);
     }
 
     private record SbkDeploymentPlan(boolean[] copyTargets, boolean[] deleteTargets) {

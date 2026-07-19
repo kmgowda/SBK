@@ -51,6 +51,8 @@ final class SbkGemJavaOptionsTest {
         assertTrue(config.copy);
         assertTrue(config.delete);
         assertFalse(config.deleteafter);
+        assertTrue(config.hostkeycheck);
+        assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
     }
 
     @Test
@@ -108,12 +110,32 @@ final class SbkGemJavaOptionsTest {
         assertTrue(parameters.isDeleteAfter());
     }
 
+    @Test
+    void parsesSshHostKeyOverrides() throws Exception {
+        final Path binDirectory = temporaryDirectory.resolve("bin");
+        final Path command = binDirectory.resolve("sbk");
+        Files.createDirectories(binDirectory);
+        Files.createFile(command);
+        assertTrue(command.toFile().setExecutable(true));
+
+        final GemConfig config = defaultConfig(temporaryDirectory);
+        final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
+                9717, 10);
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
+                "-hostkeycheck", "false", "-knownhosts", "/tmp/sbk-known-hosts"});
+
+        assertFalse(parameters.getConnections()[0].isHostKeyCheck());
+        assertEquals("/tmp/sbk-known-hosts", parameters.getConnections()[0].getKnownHosts());
+    }
+
     private static GemConfig defaultConfig(Path sbkDirectory) {
         final GemConfig config = new GemConfig();
         config.nodes = "localhost";
         config.gemuser = "user";
         config.gempass = "";
         config.gemport = 22;
+        config.hostkeycheck = true;
+        config.knownhosts = "";
         config.sbkdir = sbkDirectory.toString();
         config.sbkcommand = "bin/sbk";
         config.copy = true;

@@ -63,7 +63,10 @@ final public class SshSession {
     public SshSession(ConnectionConfig conn, ExecutorService executor) {
         this.connection = conn;
         this.executor = executor;
-        this.client = SshClient.setUpDefaultClient();
+        this.client = SshUtils.createClient(conn);
+        if (!conn.isHostKeyCheck()) {
+            Printer.log.warn("SBK-GEM: SSH host-key verification is disabled for host '" + conn.getHost() + "'");
+        }
     }
 
     @Synchronized
@@ -79,14 +82,21 @@ final public class SshSession {
             final String password = connection.getPassword();
             final boolean authenticationFailure = e.getMessage() != null &&
                     e.getMessage().startsWith("SSH authentication failed:");
+            final boolean hostKeyFailure = e.getMessage() != null &&
+                    e.getMessage().startsWith("SSH host key verification failed:");
             final String failureHint;
-            if (authenticationFailure && (password == null || password.isEmpty())) {
+            if (hostKeyFailure) {
+                failureHint = " Verify or replace the host entry in " +
+                        (connection.getKnownHosts() == null || connection.getKnownHosts().isEmpty()
+                                ? "~/.ssh/known_hosts."
+                                : connection.getKnownHosts() + ".");
+            } else if (authenticationFailure && (password == null || password.isEmpty())) {
                 failureHint = " No password was supplied; configure -gempass, SBK_GEM_SSH_PASSWD, " +
                         "or SSH public-key authentication.";
             } else if (authenticationFailure) {
                 failureHint = " Verify the configured SSH password or public-key authentication.";
             } else {
-                failureHint = " Verify the remote host, SSH port, and network connectivity.";
+                failureHint = " Verify the remote host, SSH port, network connectivity, and known_hosts entry.";
             }
             final String error = "SBK-GEM: SSH connection or authentication failed for '" +
                     connection.getUserName() + "@" + connection.getHost() + ":" + connection.getPort() + "': " +
