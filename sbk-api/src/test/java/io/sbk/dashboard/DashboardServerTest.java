@@ -61,6 +61,21 @@ final class DashboardServerTest {
     }
 
     @Test
+    void connectsOverPlainHttpWhenServerListensOnAllInterfaces() throws Exception {
+        try (DashboardServer server = new DashboardServer("0.0.0.0", 0, 2)) {
+            server.start();
+            final DashboardConfig config = config(server.getAddress().getPort());
+            config.host = "0.0.0.0";
+            try (DashboardClient client = DashboardClient.connect(config, run("plain-http-run"))) {
+                assertEquals("http", client.getRunUri().getScheme());
+                assertEquals("127.0.0.1", client.getRunUri().getHost());
+                assertEquals(200, get(URI.create("http://127.0.0.1:" + server.getAddress().getPort()
+                        + "/api/v1/health")).statusCode());
+            }
+        }
+    }
+
+    @Test
     void rejectsASecondActiveBenchmarkWithOwnershipDetails() throws Exception {
         try (DashboardServer server = new DashboardServer("127.0.0.1", 0, 2)) {
             server.start();

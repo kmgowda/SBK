@@ -65,7 +65,7 @@ public final class DashboardClient implements AutoCloseable {
      */
     public static DashboardClient connect(DashboardConfig config, DashboardRun run)
             throws IOException, InterruptedException {
-        final URI baseUri = URI.create("http://" + config.host + ":" + config.port);
+        final URI baseUri = URI.create("http://" + connectionHost(config.host) + ":" + config.port);
         final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
         final Health health = health(httpClient, baseUri);
         if (health == Health.INCOMPATIBLE) {
@@ -83,6 +83,17 @@ public final class DashboardClient implements AutoCloseable {
             client.openBrowser();
         }
         return client;
+    }
+
+    /**
+     * Selects a reachable local address when the server is configured to listen on every network interface.
+     * Wildcard addresses are valid bind addresses but are not suitable dashboard destinations for HTTP clients.
+     *
+     * @param host configured dashboard host or bind address
+     * @return host used by the local dashboard publisher and browser URL
+     */
+    static String connectionHost(String host) {
+        return "0.0.0.0".equals(host) ? "127.0.0.1" : host;
     }
 
     /**
