@@ -28,7 +28,7 @@ flowchart LR
     B[SBK client B / GrpcLogger] --> G
     G --> Q[Concurrent ingestion queues]
     Q --> R[Aggregate recorder]
-    R --> O[Prometheus and result output]
+    R --> O[Prometheus, local web dashboard, or result output]
 ```
 
 The default gRPC port is `9717`. Container configuration also exposes the configured metrics port. Keep the gRPC service on a trusted benchmark network unless an external security layer is provided.
@@ -56,6 +56,15 @@ Start with defaults:
 ./sbm/build/install/sbm/bin/sbm
 ```
 
+Start a dependency-free local live dashboard instead of Prometheus:
+
+```bash
+./sbm/build/install/sbm/bin/sbm -out SbmWebLogger -class file -action r
+```
+
+The browser dashboard defaults to `http://127.0.0.1:9720` and displays aggregate SBM connection, workload,
+throughput, request-pressure, timeout, and latency-percentile data.
+
 Then point one or more installed SBK clients at it:
 
 ```bash
@@ -78,6 +87,7 @@ Use a hostname or address reachable from every SBK client. Firewalls, containers
 | `SbmLatencyBenchmark` | Concurrent queue ingestion and window dispatch |
 | `SbmTotalWindowLatencyPeriodicRecorder` | Periodic and total aggregate windows |
 | `SbmPrometheusLogger` | Aggregated output and metrics |
+| `SbmWebLogger` | Aggregated output and local live dashboard publication |
 
 Protocol sources are under `sbk-api/src/main/proto`; generated Java/gRPC sources are build products.
 

@@ -134,6 +134,11 @@ Before a multi-host run:
 | `SshUtils` | SSH and file-transfer helpers |
 | `ConnectionConfig` | Remote connection model |
 | `GemPrometheusLogger` | GEM/SBM aggregate metrics output |
+| `GemWebLogger` | GEM adapter for the embedded SBM local live dashboard |
+
+Select `-out GemWebLogger` for dependency-free aggregate graphs at `http://127.0.0.1:9720`. Remote SBK processes
+still use `GrpcLogger`; the embedded SBM publishes the combined cluster result to the local dashboard. Dashboard
+options are listed by `sbk-gem -out GemWebLogger -help` and are forwarded only to the local SBM logger.
 
 ## Failure domains
 

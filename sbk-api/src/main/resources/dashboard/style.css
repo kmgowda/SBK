@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
+:root {
+    color-scheme: dark;
+    --bg: #07111f;
+    --panel: rgba(15, 30, 50, .88);
+    --panel-border: rgba(137, 180, 220, .16);
+    --text: #edf7ff;
+    --muted: #8ca4ba;
+    --cyan: #39d5ff;
+    --green: #46e6a7;
+    --violet: #9b8cff;
+    --orange: #ffb454;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 15% -10%, rgba(57, 213, 255, .18), transparent 32rem),
+        radial-gradient(circle at 95% 10%, rgba(155, 140, 255, .14), transparent 28rem),
+        var(--bg);
+}
+
+header, main { width: min(1500px, calc(100% - 40px)); margin: auto; }
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    padding: 30px 0 22px;
+}
+
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(1.5rem, 3vw, 2.4rem); letter-spacing: -.04em; }
+.eyebrow { color: var(--cyan); font-size: .72rem; font-weight: 800; letter-spacing: .2em; margin-bottom: 7px; }
+.run-picker { display: grid; gap: 6px; min-width: 270px; }
+.run-picker label, .panel-title span { color: var(--muted); font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; }
+select {
+    width: 100%; padding: 10px 12px; color: var(--text); background: #10233a;
+    border: 1px solid var(--panel-border); border-radius: 9px;
+}
+
+.identity {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 24px; border: 1px solid var(--panel-border); border-radius: 16px;
+    background: linear-gradient(110deg, rgba(17, 42, 67, .95), rgba(18, 27, 48, .86));
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .22);
+}
+.identity h2 { margin: 8px 0 5px; }
+.identity p { color: var(--muted); }
+.status { display: inline-block; padding: 4px 9px; border-radius: 999px; font-size: .68rem; font-weight: 900; letter-spacing: .1em; }
+.status.running { color: #042518; background: var(--green); box-shadow: 0 0 24px rgba(70, 230, 167, .35); }
+.status.complete { color: #061a2a; background: var(--cyan); }
+.status.waiting { color: #392408; background: var(--orange); }
+.elapsed { font: 700 clamp(1.8rem, 4vw, 3.3rem)/1 ui-monospace, SFMono-Regular, monospace; color: #d8f7ff; }
+
+.cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 13px; margin: 15px 0; }
+.cards article, .panel {
+    border: 1px solid var(--panel-border); border-radius: 14px; background: var(--panel);
+    box-shadow: 0 14px 45px rgba(0, 0, 0, .17); backdrop-filter: blur(12px);
+}
+.cards article { padding: 15px 17px; }
+.cards span { display: block; color: var(--muted); font-size: .76rem; margin-bottom: 7px; }
+.cards strong { font-size: clamp(1.15rem, 2vw, 1.7rem); font-variant-numeric: tabular-nums; }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; padding-bottom: 35px; }
+.panel { min-height: 310px; padding: 17px; overflow: hidden; }
+.panel.wide { grid-column: span 2; }
+.panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; }
+.panel h3 { font-size: 1rem; }
+canvas { display: block; width: 100%; height: 250px; }
+.wide canvas { height: 280px; }
+.metrics-table { display: grid; gap: 1px; margin-top: 16px; border-radius: 10px; overflow: hidden; background: var(--panel-border); }
+.metrics-table div { display: flex; justify-content: space-between; padding: 12px 13px; background: #0c1c2e; }
+.metrics-table span { color: var(--muted); }
+.metrics-table strong { font-variant-numeric: tabular-nums; }
+code { color: var(--cyan); }
+
+@media (max-width: 900px) {
+    header { align-items: start; gap: 20px; flex-direction: column; }
+    .run-picker { width: 100%; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .grid { grid-template-columns: 1fr; }
+    .panel.wide { grid-column: auto; }
+}
+
+@media (max-width: 520px) {
+    header, main { width: min(100% - 22px, 1500px); }
+    .identity { align-items: start; gap: 18px; flex-direction: column; }
+    .cards { grid-template-columns: 1fr; }
+}

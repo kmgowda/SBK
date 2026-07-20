@@ -9,6 +9,19 @@
  */
 package io.sbm.logger.impl;
 
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.sbk.action.Action;
+import io.sbk.config.Config;
+import io.sbk.logger.MetricsConfig;
+import io.sbk.params.InputOptions;
+import io.sbk.params.ParsedOptions;
+import io.sbk.system.Printer;
+import io.time.Time;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Concrete SBM logger that prints to stdout and exports metrics via Prometheus.
  *
@@ -16,11 +29,98 @@ package io.sbm.logger.impl;
  * connection counts, request/response stats, throughput, and latency percentiles.
  */
 public class SbmPrometheusLogger extends AbstractRamLogger {
+    private static final String CONFIG_FILE = "sbm-metrics.properties";
+    private MetricsConfig metricsConfig;
+    private boolean contextDisabled;
+    private SbmPrometheusServer prometheusServer;
 
     /**
      * Creates a Prometheus logger for aggregated SBM results.
      */
     public SbmPrometheusLogger() {
+    }
+
+    /**
+     * Opens the bundled SBM metrics configuration.
+     *
+     * @return metrics configuration stream
+     */
+    public InputStream getMetricsConfigStream() {
+        return SbmPrometheusLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+    }
+
+    /**
+     * Returns the parsed metrics configuration for GEM argument forwarding.
+     *
+     * @return active metrics configuration
+     */
+    protected final MetricsConfig getMetricsConfig() {
+        return metricsConfig;
+    }
+
+    @Override
+    public void addArgs(InputOptions params) throws IllegalArgumentException {
+        super.addArgs(params);
+        try {
+            metricsConfig = new ObjectMapper(new JavaPropsFactory()).readValue(getMetricsConfigStream(),
+                    MetricsConfig.class);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Unable to load " + CONFIG_FILE, ex);
+        }
+        params.addOption("context", true, "Prometheus metric context; 'no' disables this option; default: "
+                + metricsConfig.port + metricsConfig.context);
+    }
+
+    @Override
+    public void parseArgs(ParsedOptions params) throws IllegalArgumentException {
+        super.parseArgs(params);
+        final String parsedContext = params.getOptionValue("context",
+                metricsConfig.port + metricsConfig.context);
+        contextDisabled = parsedContext.equalsIgnoreCase(DISABLE_STRING);
+        if (!contextDisabled) {
+            final String[] values = parsedContext.split("/", 2);
+            metricsConfig.port = Integer.parseInt(values[0]);
+            if (values.length == 2 && values[1] != null) {
+                metricsConfig.context = "/" + values[1];
+            }
+        }
+    }
+
+    @Override
+    public void open(ParsedOptions params, String storageName, Action action, Time time) throws IOException {
+        super.open(params, storageName, action, time);
+        if (!contextDisabled) {
+            prometheusServer = new SbmPrometheusServer(Config.NAME, action.name(), storageName,
+                    getPercentiles(), time, metricsConfig);
+            prometheusServer.start();
+        }
+        Printer.log.info("SBM PrometheusLogger Started");
+    }
+
+    @Override
+    public void close(ParsedOptions params) throws IOException {
+        if (prometheusServer != null) {
+            prometheusServer.stop();
+            prometheusServer = null;
+        }
+        super.close(params);
+        Printer.log.info("SBM PrometheusLogger Shutdown");
+    }
+
+    @Override
+    public void incrementConnections() {
+        super.incrementConnections();
+        if (prometheusServer != null) {
+            prometheusServer.incrementConnections();
+        }
+    }
+
+    @Override
+    public void decrementConnections() {
+        super.decrementConnections();
+        if (prometheusServer != null) {
+            prometheusServer.decrementConnections();
+        }
     }
 
     @Override
@@ -34,6 +134,14 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                       double seconds, long bytes, long records, double recsPerSec, double mbPerSec, double avgLatency,
                       long minLatency, long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                       long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
+        publishMetrics(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
+                readRequestRecords, readRequestsRecordsPerSec, writeResponsePendingRecords,
+                writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
+                writeReadRequestPendingRecords, writeReadRequestPendingBytes, writeTimeoutEvents,
+                writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec, seconds, bytes, records,
+                recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard,
+                slc1, slc2, percentileLatencies, percentileLatencyCounts);
         String timestamp = getTimeStamp(reportTime);
         StringBuilder out = new StringBuilder(timestamp+", "+SBM_PREFIX);
         appendConnections(out, connections, maxConnections);
@@ -62,6 +170,14 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                            double recsPerSec, double mbPerSec, double avgLatency, long minLatency,
                            long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
+        publishMetrics(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
+                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords,
+                writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
+                writeReadRequestPendingRecords, writeReadRequestPendingBytes, writeTimeoutEvents,
+                writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec, seconds, bytes, records,
+                recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard,
+                slc1, slc2, percentileLatencies, percentileLatencyCounts);
         String timestamp = getTimeStamp(reportTime);
         StringBuilder out = new StringBuilder(timestamp+" Total : " + SBM_PREFIX);
         appendConnections(out, connections, maxConnections);
@@ -75,5 +191,30 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                 seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency,
                 invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(out);
+    }
+
+    private void publishMetrics(int writers, int maxWriters, int readers, int maxReaders,
+                                long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
+                                double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
+                                long readRequestRecords, double readRequestRecordsPerSec,
+                                long writeResponsePendingRecords, long writeResponsePendingBytes,
+                                long readResponsePendingRecords, long readResponsePendingBytes,
+                                long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
+                                long writeTimeoutEvents, double writeTimeoutEventsPerSec, long readTimeoutEvents,
+                                double readTimeoutEventsPerSec, double seconds, long bytes, long records,
+                                double recsPerSec, double mbPerSec, double avgLatency, long minLatency,
+                                long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
+                                long slc1, long slc2, long[] percentileLatencies,
+                                long[] percentileLatencyCounts) {
+        if (prometheusServer != null) {
+            prometheusServer.print(writers, maxWriters, readers, maxReaders, writeRequestBytes,
+                    writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes,
+                    readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
+                    writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,
+                    readResponsePendingBytes, writeReadRequestPendingRecords, writeReadRequestPendingBytes,
+                    writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec,
+                    seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid,
+                    lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies, percentileLatencyCounts);
+        }
     }
 }
