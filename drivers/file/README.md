@@ -11,6 +11,27 @@ You may obtain a copy of the License at
 The File system driver for SBK supports single Writer , single reader and multiple readers performance benchmarking.
 SBK does not support the End to End latency for file system stream benchmarking.
 
+## Live filesystem read graphs with WebLogger
+
+WebLogger provides local live graphs without Docker, Prometheus, or Grafana. A read benchmark requires an existing
+file, and its record size must match the size used to create that file:
+
+```bash
+# Prepare a 1 GiB input file.
+./build/install/sbk/bin/sbk \
+  -class file -file /tmp/sbk-weblogger.dat \
+  -writers 1 -size 1024 -records 1048576
+
+# Benchmark reads for 60 seconds with live graphs at http://127.0.0.1:9720.
+./build/install/sbk/bin/sbk \
+  -class file -file /tmp/sbk-weblogger.dat \
+  -readers 1 -size 1024 -seconds 60 \
+  -out WebLogger
+```
+
+See the [WebLogger guide](../../docs/WEB_LOGGER.md) for dashboard options, lifecycle, distributed usage, and
+security guidance.
+
 ## File write Benchmarking with SBK and FIO
 The FIO (Flexible I/O tester) supports multiple files writing at a time. whereas SBK uses single file for write/read operation.
 Both FIO And SBK can be used with Write operations with buffering and writes can be with in sync (Sync to file system).
@@ -412,5 +433,4 @@ Total : File Reading     0 Writers,     1 Readers,      0 Max Writers,     1 Max
 
 
 ```
-
 

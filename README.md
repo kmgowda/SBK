@@ -33,6 +33,7 @@ Choose the guide that matches your task:
 | Build and run SBK | This README |
 | Understand modules and runtime flow | [Architecture and code flow](docs/ARCHITECTURE.md) |
 | Browse all documentation | [Documentation index](docs/README.md) |
+| View live graphs without Docker | [WebLogger guide](docs/WEB_LOGGER.md) |
 | Add or modify a storage driver | [Driver guide](docs/DRIVER_GUIDE.md) |
 | Make a code contribution | [Contributing guide](CONTRIBUTING.md) |
 | Follow a task-specific procedure | [Engineering recipes](docs/AGENT_RECIPES.md) |
@@ -50,7 +51,7 @@ flowchart LR
     WORKERS --> DRIVER
     WORKERS --> CHANNEL[PerL channels]
     CHANNEL --> RECORDER[Latency recorder]
-    RECORDER --> OUTPUT[Console / CSV / Prometheus / gRPC]
+    RECORDER --> OUTPUT[Console / CSV / Web dashboard / Prometheus / gRPC]
     OUTPUT -->|gRPC mode| SBM[SBM aggregator]
     GEM[SBK-GEM] -->|SSH orchestration| CLI
     GEM --> SBM
@@ -167,7 +168,7 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-sync N` | Records per flush/sync or transaction |
 | `-ro true` | With readers and writers configured, read without writing new records |
 | `-thread p\|f\|v` | Platform, fork-join, or virtual worker executor |
-| `-out NAME` | Output logger, such as `SystemLogger`, `CSVLogger`, `PrometheusLogger`, or `GrpcLogger` |
+| `-out NAME` | Output logger, such as `SystemLogger`, `CSVLogger`, `WebLogger`, `PrometheusLogger`, or `GrpcLogger` |
 
 Always treat `-help` as authoritative because drivers and loggers add their own options at runtime.
 
@@ -194,8 +195,56 @@ SBK currently ships these logger implementations:
 - `SystemLogger`: human-readable periodic and final output.
 - `Sl4jLogger`: SLF4J-backed output.
 - `CSVLogger`: results written in CSV form.
+- `WebLogger`: console/CSV output plus an embedded, dependency-free live browser dashboard.
 - `PrometheusLogger`: CSV behavior plus Prometheus metrics exposure.
 - `GrpcLogger`: forwards measurements to SBM for distributed aggregation.
+
+### Local live dashboard
+
+Use `WebLogger` when you want live graphs without Docker, Prometheus, or Grafana:
+
+```bash
+./build/install/sbk/bin/sbk -class file -file /tmp/sbk.bin \
+  -writers 4 -size 4096 -seconds 60 -out WebLogger
+```
+
+For a filesystem read benchmark, first create an input file and then read it with `WebLogger`. The record size must
+match between preparation and reading:
+
+```bash
+# Prepare a 1 GiB file: 1,048,576 records x 1,024 bytes.
+./build/install/sbk/bin/sbk \
+  -class file -file /tmp/sbk-weblogger.dat \
+  -writers 1 -size 1024 -records 1048576
+
+# Measure filesystem reads for 60 seconds and display live graphs.
+./build/install/sbk/bin/sbk \
+  -class file -file /tmp/sbk-weblogger.dat \
+  -readers 1 -size 1024 -seconds 60 \
+  -out WebLogger
+```
+
+SBK opens `http://127.0.0.1:9720` in the default browser. The lightweight Java server retains bounded history in
+memory and streams new summaries with server-sent events. A later SBK process reuses a compatible server already on
+that port. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
+WebLogger benchmark already owns it. Completed graphs remain available while a browser is connected; after the
+benchmark has finished and no browser has been connected for one minute, the server exits automatically. Use
+`-dashboardopen false` on headless hosts, `-dashboardstart false` to require a pre-existing server, and
+`-dashboardport PORT` to select another port. Run `sbk -out WebLogger -help` for the complete option set.
+See the [WebLogger guide](docs/WEB_LOGGER.md) for every option, dashboard lifecycle, distributed usage, security,
+and troubleshooting.
+
+Distributed monitoring uses the same dashboard and data model:
+
+```bash
+# Standalone SBM aggregate dashboard
+sbm -out SbmWebLogger -class file -action r
+
+# SBK-GEM aggregate dashboard; remote nodes continue sending results through GrpcLogger
+sbk-gem -out GemWebLogger -class file -nodes host1,host2 -writers 2 -size 4096 -seconds 60
+```
+
+The default listener is loopback-only. Bind it to a non-loopback address only on a trusted benchmark network.
 
 ## Distributed execution
 

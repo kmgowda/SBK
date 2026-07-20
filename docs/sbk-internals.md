@@ -1165,7 +1165,7 @@ public non-sealed interface RWLogger
         extends Logger, CountRW, WriteRequestsLogger, ReadRequestsLogger, RWPrint { ... }
 ```
 
-Five shipping implementations:
+Six shipping implementations:
 
 | Class | Output target | When to use |
 |---|---|---|
@@ -1173,6 +1173,7 @@ Five shipping implementations:
 | `Sl4jLogger` | SLF4J facade | Integrating SBK into another Java app |
 | `CSVLogger` | CSV file | Post-run analysis with pandas / Excel |
 | `PrometheusLogger` | Prometheus scrape endpoint (port 9718) | Real-time Grafana dashboards |
+| `WebLogger` | Embedded HTTP server and browser dashboard (port 9720) | Dependency-free local live graphs |
 | `GrpcLogger` | gRPC to SBM | Distributed benchmarks (§6) |
 
 Selected at runtime by `-out <ClassName>`. The driver discovery and
@@ -2237,7 +2238,7 @@ Drop the class into `io.sbk.logger.impl`, run
 `./build/install/sbk/bin/sbk -class minio -out InfluxLogger ...`, and you have InfluxDB
 metrics. **No changes to the harness.**
 
-### 10.2 Five shipping logger options at a glance
+### 10.2 Six shipping logger options at a glance
 
 ```mermaid
 flowchart LR
@@ -2246,22 +2247,57 @@ flowchart LR
         SLF["<b>Sl4jLogger</b><br/>SLF4J facade"]
         CSV["<b>CSVLogger</b><br/>file output"]
         PRM["<b>PrometheusLogger</b><br/>:9718 scrape"]
-        GRP["<b>GrpcLogger</b><br/>→ SBM (gRPC)"]
+        WEB["<b>WebLogger</b><br/>:9720 local dashboard"]
+        GRP["<b>GrpcLogger</b><br/>to SBM (gRPC)"]
     end
     USE1["Local interactive"] --> SYS
     USE2["Embedded in Java app"] --> SLF
     USE3["Post-run analysis"] --> CSV
     USE4["Live dashboards"] --> PRM
-    USE5["Distributed runs"] --> GRP
+    USE5["Live graphs without Docker"] --> WEB
+    USE6["Distributed runs"] --> GRP
 
     classDef opt fill:#ecfeff,stroke:#0e7490,color:#000
-    class SYS,SLF,CSV,PRM,GRP opt
+    class SYS,SLF,CSV,PRM,WEB,GRP opt
 ```
 
 The selection is made via the `-out` flag (default `SystemLogger`). Select
 `-out PrometheusLogger` explicitly when an HTTP metrics endpoint is required.
+Select `-out WebLogger` when a self-contained browser dashboard is preferred.
 The same class-name discovery used for drivers is
 used for loggers, so adding a new one is purely additive.
+
+### 10.3 How WebLogger stays alive after a benchmark
+
+`WebLogger`, `SbmWebLogger`, and `GemWebLogger` use the same dashboard client
+and server protocol. The logger publishes the already-computed periodic and
+total summaries; it does not sample storage operations or insert HTTP work into
+the writer/reader hot path. The server keeps a bounded history and streams new
+summaries to browsers with server-sent events (SSE).
+
+```mermaid
+flowchart LR
+    HOT["Writer and reader hot paths"] --> PERL["PerL measurement pipeline"]
+    PERL --> SUMMARY["Periodic and total summaries"]
+    SUMMARY --> LOGGER["WebLogger family"]
+    LOGGER -->|HTTP publish| SERVER["Reusable dashboard server"]
+    SERVER --> HISTORY["Bounded run history"]
+    SERVER -->|SSE| BROWSER["Browser graphs"]
+
+    classDef hot fill:#fee2e2,stroke:#b91c1c,color:#000
+    classDef control fill:#e0f2fe,stroke:#0369a1,color:#000
+    classDef view fill:#dcfce7,stroke:#15803d,color:#000
+    class HOT,PERL hot
+    class SUMMARY,LOGGER,SERVER,HISTORY control
+    class BROWSER view
+```
+
+Only one benchmark owns a dashboard server at a time. A completed run remains
+available while a browser renews its lease. With no active SBK, SBM, or SBK-GEM
+publisher and no browser lease, the server exits after a one-minute idle grace
+period. A browser or new benchmark connecting during that grace period cancels
+the pending shutdown. See the [WebLogger guide](WEB_LOGGER.md) for commands,
+options, distributed modes, security, and troubleshooting.
 
 ---
 
