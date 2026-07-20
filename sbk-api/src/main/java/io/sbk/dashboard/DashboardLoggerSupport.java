@@ -97,8 +97,10 @@ public final class DashboardLoggerSupport implements AutoCloseable {
      * @param action      benchmark action
      * @param timeUnit    latency time unit
      * @param percentiles configured percentile labels
+     * @throws IOException if another benchmark is already using the dashboard
      */
-    public void open(String source, String storage, Action action, TimeUnit timeUnit, double[] percentiles) {
+    public void open(String source, String storage, Action action, TimeUnit timeUnit, double[] percentiles)
+            throws IOException {
         ensureConfig();
         this.percentiles = percentiles.clone();
         this.runId = UUID.randomUUID().toString();
@@ -108,6 +110,10 @@ public final class DashboardLoggerSupport implements AutoCloseable {
         try {
             client = DashboardClient.connect(config, run);
             Printer.log.info("SBK Dashboard: {}", client.getRunUri());
+        } catch (DashboardClient.DashboardBusyException ex) {
+            client = null;
+            Printer.log.error("{} WebLogger cannot start: {}", source, ex.getMessage());
+            throw ex;
         } catch (IOException ex) {
             client = null;
             Printer.log.warn("SBK dashboard is unavailable; benchmark will continue without live graphs: {}",

@@ -230,6 +230,7 @@ Primary sources:
 | `SystemLogger` | Default terminal output |
 | `Sl4jLogger` | SLF4J logging path |
 | `CSVLogger` | CSV result persistence |
+| `WebLogger` | Console/CSV behavior plus dependency-free local live graphs; see [WebLogger guide](WEB_LOGGER.md) |
 | `PrometheusLogger` | Metrics endpoint plus inherited result behavior |
 | `GrpcLogger` | SBP/gRPC forwarding to SBM |
 

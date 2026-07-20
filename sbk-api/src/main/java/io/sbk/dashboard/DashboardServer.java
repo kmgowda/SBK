@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,24 +26,42 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Lightweight local HTTP server that stores bounded SBK histories and serves the browser dashboard.
  */
 public final class DashboardServer implements AutoCloseable {
     /** Dashboard HTTP API version. */
-    public static final int API_VERSION = 1;
+    public static final int API_VERSION = 2;
+    /** Time an unused dashboard remains available after its benchmark exits. */
+    public static final Duration DEFAULT_IDLE_TIMEOUT = Duration.ofMinutes(1);
+    private static final Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofSeconds(5);
     private static final String API_PREFIX = "/api/v1/";
     private static final String RESOURCE_PREFIX = "/dashboard/";
     private static final String SSE_OWNED_ATTRIBUTE = "sbk.dashboard.sseOwned";
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final HttpServer server;
     private final ExecutorService executor;
+    private final ScheduledExecutorService scheduler;
     private final int retention;
     private final ConcurrentHashMap<String, RunState> runs;
+    private final Duration idleTimeout;
+    private final Duration heartbeatInterval;
+    private final Object lifecycleLock;
+    private final AtomicBoolean closed;
+    private final CountDownLatch termination;
+    private final Map<String, Long> browsers;
+    private String activeRunId;
+    private ScheduledFuture<?> idleShutdown;
+    private boolean shuttingDown;
 
     /**
      * Creates a dashboard server bound to the supplied address.
@@ -54,13 +73,43 @@ public final class DashboardServer implements AutoCloseable {
      * @throws IllegalArgumentException if retention is not positive
      */
     public DashboardServer(String host, int port, int retention) throws IOException {
+        this(host, port, retention, DEFAULT_IDLE_TIMEOUT, DEFAULT_HEARTBEAT_INTERVAL);
+    }
+
+    /**
+     * Creates a dashboard server with configurable lifecycle timings.
+     *
+     * @param host              local address on which to listen
+     * @param port              TCP port
+     * @param retention         maximum snapshots retained per run
+     * @param idleTimeout       delay before an inactive dashboard without browsers stops
+     * @param heartbeatInterval interval used to detect disconnected browser event streams
+     * @throws IOException if the server cannot bind
+     * @throws IllegalArgumentException if a size or duration is not positive
+     */
+    DashboardServer(String host, int port, int retention, Duration idleTimeout, Duration heartbeatInterval)
+            throws IOException {
         if (retention < 1) {
             throw new IllegalArgumentException("Dashboard retention must be greater than zero");
         }
+        if (idleTimeout.isZero() || idleTimeout.isNegative()) {
+            throw new IllegalArgumentException("Dashboard idle timeout must be greater than zero");
+        }
+        if (heartbeatInterval.isZero() || heartbeatInterval.isNegative()) {
+            throw new IllegalArgumentException("Dashboard heartbeat interval must be greater than zero");
+        }
         this.retention = retention;
+        this.idleTimeout = idleTimeout;
+        this.heartbeatInterval = heartbeatInterval;
         this.runs = new ConcurrentHashMap<>();
+        this.lifecycleLock = new Object();
+        this.closed = new AtomicBoolean();
+        this.termination = new CountDownLatch(1);
+        this.browsers = new ConcurrentHashMap<>();
         this.server = HttpServer.create(new InetSocketAddress(host, port), 32);
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
+        this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+                .name("sbk-dashboard-idle-monitor").daemon().factory());
         server.setExecutor(executor);
         server.createContext(API_PREFIX, this::handleApi);
         server.createContext("/", this::handleResource);
@@ -82,11 +131,29 @@ public final class DashboardServer implements AutoCloseable {
         return server.getAddress();
     }
 
+    /**
+     * Waits until this server is closed explicitly or by its idle lifecycle policy.
+     *
+     * @throws InterruptedException if the waiting thread is interrupted
+     */
+    public void awaitTermination() throws InterruptedException {
+        termination.await();
+    }
+
     @Override
     public void close() {
+        if (!closed.compareAndSet(false, true)) {
+            return;
+        }
+        synchronized (lifecycleLock) {
+            shuttingDown = true;
+            cancelIdleShutdown();
+        }
         runs.values().forEach(RunState::close);
         server.stop(0);
+        scheduler.shutdown();
         executor.close();
+        termination.countDown();
     }
 
     private void handleApi(HttpExchange exchange) throws IOException {
@@ -108,9 +175,30 @@ public final class DashboardServer implements AutoCloseable {
                         sendText(exchange, 400, "runId is required", "text/plain; charset=utf-8");
                         return;
                     }
-                    runs.computeIfAbsent(run.runId(), ignored -> new RunState(run, retention));
-                    sendJson(exchange, 201, run);
+                    final String conflict = register(run);
+                    if (conflict != null) {
+                        sendText(exchange, 409, conflict, "text/plain; charset=utf-8");
+                    } else {
+                        sendJson(exchange, 201, run);
+                    }
                 }
+                return;
+            }
+            if ((API_PREFIX + "browser/connect").equals(path)
+                    || (API_PREFIX + "browser/disconnect").equals(path)) {
+                requireMethod(exchange, "POST");
+                final Map<?, ?> request = MAPPER.readValue(exchange.getRequestBody(), Map.class);
+                final String browserId = Objects.toString(request.get("browserId"), "");
+                if (browserId.isBlank()) {
+                    sendText(exchange, 400, "browserId is required", "text/plain; charset=utf-8");
+                    return;
+                }
+                if (path.endsWith("/connect")) {
+                    browserSeen(browserId);
+                } else {
+                    browserGone(browserId);
+                }
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
             handleRunApi(exchange, path);
@@ -154,6 +242,7 @@ public final class DashboardServer implements AutoCloseable {
             case "complete" -> {
                 requireMethod(exchange, "POST");
                 state.complete();
+                benchmarkCompleted(state.run.runId());
                 exchange.sendResponseHeaders(204, -1);
             }
             case "history" -> {
@@ -233,7 +322,90 @@ public final class DashboardServer implements AutoCloseable {
         }
     }
 
-    private static final class RunState {
+    private String register(DashboardRun run) {
+        synchronized (lifecycleLock) {
+            if (shuttingDown) {
+                return "SBK dashboard is shutting down; retry the benchmark";
+            }
+            if (activeRunId != null) {
+                final RunState active = runs.get(activeRunId);
+                final String owner = active == null ? activeRunId
+                        : active.run.source() + " run " + active.run.runId();
+                return "SBK dashboard is already in use by active " + owner
+                        + "; only one SBK, SBM, or SBK-GEM WebLogger benchmark may run at a time";
+            }
+            if (runs.putIfAbsent(run.runId(), new RunState(run, retention)) != null) {
+                return "Dashboard runId already exists: " + run.runId();
+            }
+            cancelIdleShutdown();
+            activeRunId = run.runId();
+            return null;
+        }
+    }
+
+    private void benchmarkCompleted(String runId) {
+        synchronized (lifecycleLock) {
+            if (runId.equals(activeRunId)) {
+                activeRunId = null;
+                scheduleIdleShutdownIfUnused();
+            }
+        }
+    }
+
+    private void browserSeen(String browserId) {
+        synchronized (lifecycleLock) {
+            browsers.put(browserId, System.currentTimeMillis());
+            if (activeRunId == null) {
+                scheduleIdleShutdownIfUnused();
+            }
+        }
+    }
+
+    private void browserGone(String browserId) {
+        synchronized (lifecycleLock) {
+            browsers.remove(browserId);
+            if (activeRunId == null) {
+                scheduleIdleShutdownIfUnused();
+            }
+        }
+    }
+
+    private void scheduleIdleShutdownIfUnused() {
+        if (activeRunId != null || shuttingDown) {
+            return;
+        }
+        cancelIdleShutdown();
+        final long now = System.currentTimeMillis();
+        final long lastBrowserSeen = browsers.values().stream().mapToLong(Long::longValue).max().orElse(now);
+        final long delay = Math.max(1, lastBrowserSeen + idleTimeout.toMillis() - now);
+        idleShutdown = scheduler.schedule(this::closeIfUnused, delay, TimeUnit.MILLISECONDS);
+    }
+
+    private void closeIfUnused() {
+        synchronized (lifecycleLock) {
+            idleShutdown = null;
+            if (activeRunId != null || shuttingDown) {
+                return;
+            }
+            final long expiry = System.currentTimeMillis() - idleTimeout.toMillis();
+            browsers.entrySet().removeIf(entry -> entry.getValue() <= expiry);
+            if (!browsers.isEmpty()) {
+                scheduleIdleShutdownIfUnused();
+                return;
+            }
+            shuttingDown = true;
+        }
+        close();
+    }
+
+    private void cancelIdleShutdown() {
+        if (idleShutdown != null) {
+            idleShutdown.cancel(false);
+            idleShutdown = null;
+        }
+    }
+
+    private final class RunState {
         private final DashboardRun run;
         private final int retention;
         private final ArrayDeque<DashboardSnapshot> history;
@@ -275,7 +447,7 @@ public final class DashboardServer implements AutoCloseable {
             exchange.getResponseHeaders().set("Cache-Control", "no-cache");
             exchange.getResponseHeaders().set("Connection", "keep-alive");
             exchange.sendResponseHeaders(200, 0);
-            final SseClient client = new SseClient(exchange.getResponseBody());
+            final SseClient client = new SseClient(exchange.getResponseBody(), heartbeatInterval);
             clients.add(client);
             try {
                 client.run();
@@ -299,11 +471,13 @@ public final class DashboardServer implements AutoCloseable {
         private static final String WAKE_EVENT = "";
         private final OutputStream output;
         private final ArrayBlockingQueue<String> events;
+        private final Duration heartbeatInterval;
         private volatile boolean open;
 
-        private SseClient(OutputStream output) {
+        private SseClient(OutputStream output, Duration heartbeatInterval) {
             this.output = output;
             this.events = new ArrayBlockingQueue<>(1);
+            this.heartbeatInterval = heartbeatInterval;
             this.open = true;
         }
 
@@ -319,11 +493,11 @@ public final class DashboardServer implements AutoCloseable {
             output.flush();
             while (open) {
                 try {
-                    final String event = events.take();
+                    final String event = events.poll(heartbeatInterval.toMillis(), TimeUnit.MILLISECONDS);
                     if (!open) {
                         return;
                     }
-                    output.write(event.getBytes(StandardCharsets.UTF_8));
+                    output.write((event == null ? ": heartbeat\n\n" : event).getBytes(StandardCharsets.UTF_8));
                     output.flush();
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();

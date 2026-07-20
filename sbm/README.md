@@ -63,7 +63,13 @@ Start a dependency-free local live dashboard instead of Prometheus:
 ```
 
 The browser dashboard defaults to `http://127.0.0.1:9720` and displays aggregate SBM connection, workload,
-throughput, request-pressure, timeout, and latency-percentile data.
+throughput, request-pressure, timeout, and latency-percentile data. It permits one active WebLogger benchmark,
+keeps completed graphs while a browser remains connected, and exits after one minute without a connected browser.
+An existing idle dashboard is reused; an active SBK, SBM, or SBK-GEM dashboard owner causes SBM to exit with an
+ownership error.
+
+See the [WebLogger guide](../docs/WEB_LOGGER.md) for dashboard options, lifecycle, browser leases, security, and a
+complete distributed example.
 
 Then point one or more installed SBK clients at it:
 

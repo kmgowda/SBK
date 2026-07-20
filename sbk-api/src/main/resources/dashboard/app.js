@@ -12,6 +12,26 @@
 const colors = ['#39d5ff', '#46e6a7', '#9b8cff', '#ffb454'];
 const state = {run: null, completed: false, snapshots: [], events: null};
 const elements = Object.fromEntries([...document.querySelectorAll('[id]')].map(item => [item.id, item]));
+const browserId = sessionStorage.getItem('sbkDashboardBrowserId') || crypto.randomUUID();
+sessionStorage.setItem('sbkDashboardBrowserId', browserId);
+
+function updateBrowserLease() {
+    fetch('/api/v1/browser/connect', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({browserId}),
+        keepalive: true
+    }).catch(() => {});
+}
+
+function releaseBrowserLease() {
+    navigator.sendBeacon('/api/v1/browser/disconnect', JSON.stringify({browserId}));
+}
+
+updateBrowserLease();
+setInterval(updateBrowserLease, 15000);
+window.addEventListener('pagehide', releaseBrowserLease);
+window.addEventListener('pageshow', updateBrowserLease);
 
 function compact(value) {
     return Intl.NumberFormat(undefined, {notation: 'compact', maximumFractionDigits: 2}).format(value || 0);

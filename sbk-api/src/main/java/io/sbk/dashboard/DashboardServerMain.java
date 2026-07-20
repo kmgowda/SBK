@@ -10,7 +10,6 @@
 package io.sbk.dashboard;
 
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Standalone entry point for the reusable local SBK dashboard server.
@@ -49,6 +48,6 @@ public abstract class DashboardServerMain {
         final DashboardServer dashboardServer = new DashboardServer(host, port, retention);
         Runtime.getRuntime().addShutdownHook(new Thread(dashboardServer::close));
         dashboardServer.start();
-        new CountDownLatch(1).await();
+        dashboardServer.awaitTermination();
     }
 }

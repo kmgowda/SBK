@@ -148,6 +148,9 @@ public final class DashboardClient implements AutoCloseable {
                 .POST(HttpRequest.BodyPublishers.ofByteArray(MAPPER.writeValueAsBytes(body)))
                 .build();
         final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() == 409) {
+            throw new DashboardBusyException(response.body());
+        }
         if (response.statusCode() != expectedStatus) {
             throw new IOException("Dashboard returned HTTP " + response.statusCode() + ": " + response.body());
         }
@@ -210,7 +213,7 @@ public final class DashboardClient implements AutoCloseable {
                 "-retention", Integer.toString(config.retention));
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);
         builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
-        builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        builder.redirectError(ProcessBuilder.Redirect.DISCARD);
         builder.start();
     }
 
@@ -233,5 +236,17 @@ public final class DashboardClient implements AutoCloseable {
         AVAILABLE,
         UNAVAILABLE,
         INCOMPATIBLE
+    }
+
+    /** Indicates that another benchmark owns the dashboard's single active-run lease. */
+    public static final class DashboardBusyException extends IOException {
+        /**
+         * Creates a dashboard ownership exception.
+         *
+         * @param message ownership conflict details returned by the dashboard server
+         */
+        private DashboardBusyException(String message) {
+            super(message);
+        }
     }
 }
