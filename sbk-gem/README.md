@@ -136,12 +136,15 @@ Before a multi-host run:
 | `GemPrometheusLogger` | GEM/SBM aggregate metrics output |
 | `GemWebLogger` | GEM adapter for the embedded SBM local live dashboard |
 
-Select `-out GemWebLogger` for dependency-free aggregate graphs at `http://127.0.0.1:9720`. Remote SBK processes
-still use `GrpcLogger`; the embedded SBM publishes the combined cluster result to the local dashboard. Dashboard
+Select `-out GemWebLogger` for dependency-free aggregate graphs. The dashboard uses plain HTTP and listens on all
+interfaces at port 9720 by default; open `http://127.0.0.1:9720` locally or
+`http://<sbk-gem-host>:9720` remotely. Remote SBK processes still use `GrpcLogger`; the embedded SBM publishes the
+combined cluster result to the local dashboard. Dashboard
 options are listed by `sbk-gem -out GemWebLogger -help` and are forwarded only to the local SBM logger. A running
 idle dashboard is reused, but an active SBK, SBM, or SBK-GEM WebLogger owner causes SBK-GEM to exit with a clear
 ownership error. After a run, graphs remain available while a browser is connected; the unused dashboard exits
-after one minute.
+after one minute. Dashboard HTTP access does not use SBK-GEM's SSH connections and is not encrypted; expose it only
+on a trusted benchmark network.
 
 See the [WebLogger guide](../docs/WEB_LOGGER.md) for dashboard options, ownership and shutdown behavior, network
 security, and complete SBK, SBM, and SBK-GEM examples.

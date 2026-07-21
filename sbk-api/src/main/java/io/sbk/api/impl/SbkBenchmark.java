@@ -75,6 +75,7 @@ final public class SbkBenchmark implements Benchmark {
     final private RWLogger rwLogger;
     final private ExecutorService executor;
     final private ExecutorService perlExecutor;
+    final private ExecutorService lifecycleExecutor;
     final private ParameterOptions params;
     final private Perl writePerl;
     final private Perl readPerl;
@@ -114,6 +115,8 @@ final public class SbkBenchmark implements Benchmark {
         };
 
         this.perlExecutor = new ForkJoinPool(5);
+        this.lifecycleExecutor = Executors.newSingleThreadExecutor(Thread.ofPlatform()
+                .name("sbk-benchmark-lifecycle").factory());
 
         if (params.getWritersCount() > 0 && params.getAction() == Action.Writing) {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
@@ -281,7 +284,10 @@ final public class SbkBenchmark implements Benchmark {
             }, executor).thenAccept(d -> {
                 try {
                     CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0])).get();
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    Printer.log.info("Writer coordination interrupted during shutdown");
+                } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
             });
@@ -333,7 +339,10 @@ final public class SbkBenchmark implements Benchmark {
             }, executor).thenAccept(d -> {
                         try {
                             CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0])).get();
-                        } catch (InterruptedException | ExecutionException e) {
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            Printer.log.info("Reader coordination interrupted during shutdown");
+                        } catch (ExecutionException e) {
                             e.printStackTrace();
                         }
                     }
@@ -353,27 +362,44 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (params.getTotalSecondsToRun() > 0) {
-            timeoutExecutor.schedule(this::stop, params.getTotalSecondsToRun() + 1, TimeUnit.SECONDS);
+            timeoutExecutor.schedule(() -> requestShutdown(null),
+                    params.getTotalSecondsToRun() + 1, TimeUnit.SECONDS);
         }
 
         if (wStatFuture != null && !wStatFuture.isDone()) {
             wStatFuture.exceptionally(ex -> {
-                shutdown(ex);
+                requestShutdown(ex);
                 return null;
             });
         }
 
         if (rStatFuture != null && !rStatFuture.isDone()) {
             rStatFuture.exceptionally(ex -> {
-                shutdown(ex);
+                requestShutdown(ex);
                 return null;
             });
         }
-        rwLogger.setExceptionHandler(this::shutdown);
+        rwLogger.setExceptionHandler(this::requestShutdown);
         assert chainFuture != null;
-        chainFuture.thenRunAsync(this::stop, executor);
+        chainFuture.whenComplete((ignored, ex) -> requestShutdown(ex));
 
         return retFuture.toCompletableFuture();
+    }
+
+    /**
+     * Schedules automatic benchmark shutdown away from worker, timeout, PerL, and logger threads.
+     *
+     * <p>The shutdown path interrupts and awaits the worker executor. Running that path on a worker
+     * would interrupt the shutdown thread itself and produce a false shutdown warning.
+     *
+     * @param ex failure that initiated shutdown, or {@code null} for normal completion
+     */
+    @Synchronized
+    private void requestShutdown(Throwable ex) {
+        if (state == State.END || lifecycleExecutor.isShutdown()) {
+            return;
+        }
+        lifecycleExecutor.execute(() -> shutdown(ex));
     }
 
     /**
@@ -390,37 +416,39 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         state = State.END;
-        if (writePerl != null) {
-            writePerl.stop();
-        }
-        if (readPerl != null) {
-            readPerl.stop();
-        }
+        timeoutExecutor.shutdownNow();
+        executor.shutdownNow();
         readers.forEach(c -> {
             try {
                 c.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Printer.log.warn("Unable to close an SBK reader during shutdown", e);
             }
         });
         writers.forEach(c -> {
             try {
                 c.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Printer.log.warn("Unable to close an SBK writer during shutdown", e);
             }
         });
+        if (writePerl != null) {
+            writePerl.stop();
+        }
+        if (readPerl != null) {
+            readPerl.stop();
+        }
         try {
             storage.closeStorage(params);
             rwLogger.close(params);
         } catch (IOException e) {
-            e.printStackTrace();
+            Printer.log.warn("Unable to close SBK storage or logger during shutdown", e);
         }
-        executor.shutdown();
         try {
             executor.awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            ex.printStackTrace();
+            Thread.currentThread().interrupt();
+            Printer.log.warn("Interrupted while waiting for SBK workers to stop", e);
         }
 
         if (ex != null) {
@@ -430,6 +458,7 @@ final public class SbkBenchmark implements Benchmark {
             Printer.log.info("SBK Benchmark Shutdown");
             retFuture.complete(null);
         }
+        lifecycleExecutor.shutdown();
 
     }
 

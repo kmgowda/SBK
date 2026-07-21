@@ -12,6 +12,7 @@ package io.sbk.dashboard;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -58,6 +59,47 @@ final class DashboardServerTest {
             assertTrue(get(baseUri.resolve("/api/v1/health")).body().contains("sbk-dashboard"));
             assertTrue(get(baseUri.resolve("/")).body().contains("SBK Live Dashboard"));
         }
+    }
+
+    @Test
+    void connectsOverPlainHttpWhenServerListensOnAllInterfaces() throws Exception {
+        try (DashboardServer server = new DashboardServer("0.0.0.0", 0, 2)) {
+            server.start();
+            final DashboardConfig config = config(server.getAddress().getPort());
+            config.host = "0.0.0.0";
+            try (DashboardClient client = DashboardClient.connect(config, run("plain-http-run"))) {
+                assertEquals("http", client.getRunUri().getScheme());
+                assertEquals("127.0.0.1", client.getRunUri().getHost());
+                assertTrue(client.getRunLinks().stream().anyMatch(link -> "Hostname".equals(link.label())));
+                assertEquals(200, get(URI.create("http://127.0.0.1:" + server.getAddress().getPort()
+                        + "/api/v1/health")).statusCode());
+            }
+        }
+    }
+
+    @Test
+    void createsCopyPasteLinksForHostnameAndHostAddresses() throws Exception {
+        final var links = DashboardClient.dashboardLinks("0.0.0.0", 9720, "test-run", "benchmark-host",
+                java.util.List.of(InetAddress.getByName("127.0.0.1"), InetAddress.getByName("10.2.3.4"),
+                        InetAddress.getByName("8.8.8.8")));
+
+        assertEquals("http://127.0.0.1:9720/?run=test-run", links.get(0).uri().toString());
+        assertTrue(links.stream().anyMatch(link -> "Hostname".equals(link.label())
+                && "benchmark-host".equals(link.uri().getHost())));
+        assertTrue(links.stream().anyMatch(link -> "Public IP".equals(link.label())
+                && "8.8.8.8".equals(link.uri().getHost())));
+        assertTrue(links.stream().anyMatch(link -> "Private IP".equals(link.label())
+                && "10.2.3.4".equals(link.uri().getHost())));
+    }
+
+    @Test
+    void doesNotAdvertiseRemoteLinksForLoopbackBinding() throws Exception {
+        final var links = DashboardClient.dashboardLinks("127.0.0.1", 9720, "test-run", "benchmark-host",
+                java.util.List.of(InetAddress.getByName("10.2.3.4")));
+
+        assertEquals(1, links.size());
+        assertEquals("Configured", links.getFirst().label());
+        assertEquals("127.0.0.1", links.getFirst().uri().getHost());
     }
 
     @Test
@@ -161,6 +203,93 @@ final class DashboardServerTest {
             assertTimeoutPreemptively(Duration.ofSeconds(2), server::close);
             events.body().close();
         }
+    }
+
+    @Test
+    void abandonedRunWithoutBrowserStopsDashboard() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("abandoned-run"))).statusCode());
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void abandonedRunRemainsForAttachedBrowserAndReleasesOwnership() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("browser-retained-abandoned-run"))).statusCode());
+
+        String runs = "";
+        for (int refresh = 0; refresh < 10 && !runs.contains("\"abandoned\":true"); refresh++) {
+            post(baseUri.resolve("/api/v1/browser/connect"), "{\"browserId\":\"lease-browser\"}");
+            Thread.sleep(100);
+            runs = get(baseUri.resolve("/api/v1/runs")).body();
+        }
+        assertTrue(runs.contains("\"abandoned\":true"));
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("replacement-run"))).statusCode());
+        assertEquals(204, post(baseUri.resolve("/api/v1/runs/replacement-run/complete"), "{}").statusCode());
+        post(baseUri.resolve("/api/v1/browser/disconnect"), "{\"browserId\":\"lease-browser\"}");
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void clientHeartbeatRenewsActiveRunLease() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+
+        try (DashboardClient ignored = DashboardClient.connect(config(server.getAddress().getPort()),
+                run("heartbeat-run"), Duration.ofMillis(75))) {
+            Thread.sleep(800);
+            assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
+            assertTrue(get(baseUri.resolve("/api/v1/runs")).body().contains("\"completed\":false"));
+        }
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void snapshotsRenewActiveRunLease() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("snapshot-lease-run"))).statusCode());
+
+        for (int sequence = 1; sequence <= 6; sequence++) {
+            Thread.sleep(100);
+            assertEquals(204, post(baseUri.resolve("/api/v1/runs/snapshot-lease-run/snapshots"),
+                    MAPPER.writeValueAsString(snapshot("snapshot-lease-run", sequence))).statusCode());
+        }
+        assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
+        assertTrue(get(baseUri.resolve("/api/v1/runs")).body().contains("\"completed\":false"));
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void dashboardWithoutBenchmarkOrBrowserStopsAfterIdleTimeout() throws Exception {
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2,
+                Duration.ofMillis(200), Duration.ofMillis(20));
+        server.start();
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
     }
 
     private static DashboardSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {

@@ -26,6 +26,7 @@ import io.sbk.logger.RWLogger;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbk.params.impl.SbkParameters;
 import io.sbk.system.Printer;
+import io.sbk.utils.ApplicationShutdownHook;
 import io.sbk.utils.SbkUtils;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
@@ -109,12 +110,13 @@ final public class Sbk {
             return;
         }
 
-        final CompletableFuture<Void> ret = benchmark.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println();
-            benchmark.stop();
-        }));
-        ret.get();
+        final Thread shutdownHook = ApplicationShutdownHook.register(Config.NAME.toUpperCase(), benchmark::stop);
+        try {
+            final CompletableFuture<Void> ret = benchmark.start();
+            ret.get();
+        } finally {
+            ApplicationShutdownHook.remove(shutdownHook);
+        }
     }
 
 

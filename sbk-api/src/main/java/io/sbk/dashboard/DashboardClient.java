@@ -16,12 +16,22 @@ import io.sbk.system.Printer;
 import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -35,6 +45,7 @@ public final class DashboardClient implements AutoCloseable {
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
     private static final Duration START_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration LEASE_HEARTBEAT_INTERVAL = Duration.ofSeconds(15);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final HttpClient httpClient;
     private final URI baseUri;
@@ -42,14 +53,18 @@ public final class DashboardClient implements AutoCloseable {
     private final ArrayBlockingQueue<DashboardSnapshot> pending;
     private final AtomicBoolean closing;
     private final Thread publisherThread;
+    private final Duration leaseHeartbeatInterval;
+    private final List<DashboardLink> runLinks;
 
-    private DashboardClient(HttpClient httpClient, URI baseUri, DashboardRun run) throws IOException,
-            InterruptedException {
+    private DashboardClient(HttpClient httpClient, URI baseUri, DashboardConfig config, DashboardRun run,
+            Duration leaseHeartbeatInterval) throws IOException, InterruptedException {
         this.httpClient = httpClient;
         this.baseUri = baseUri;
         this.runId = run.runId();
         this.pending = new ArrayBlockingQueue<>(1);
         this.closing = new AtomicBoolean(false);
+        this.leaseHeartbeatInterval = leaseHeartbeatInterval;
+        this.runLinks = dashboardLinks(config.host, config.port, runId, localHostname(), localAddresses());
         postJson("/api/v1/runs", run, 201);
         this.publisherThread = Thread.ofVirtual().name("sbk-dashboard-publisher-" + runId).start(this::publishLoop);
     }
@@ -65,7 +80,15 @@ public final class DashboardClient implements AutoCloseable {
      */
     public static DashboardClient connect(DashboardConfig config, DashboardRun run)
             throws IOException, InterruptedException {
-        final URI baseUri = URI.create("http://" + config.host + ":" + config.port);
+        return connect(config, run, LEASE_HEARTBEAT_INTERVAL);
+    }
+
+    static DashboardClient connect(DashboardConfig config, DashboardRun run, Duration leaseHeartbeatInterval)
+            throws IOException, InterruptedException {
+        if (leaseHeartbeatInterval.isZero() || leaseHeartbeatInterval.isNegative()) {
+            throw new IllegalArgumentException("Dashboard lease heartbeat interval must be greater than zero");
+        }
+        final URI baseUri = URI.create("http://" + connectionHost(config.host) + ":" + config.port);
         final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
         final Health health = health(httpClient, baseUri);
         if (health == Health.INCOMPATIBLE) {
@@ -78,11 +101,23 @@ public final class DashboardClient implements AutoCloseable {
             startServer(config);
             waitUntilHealthy(httpClient, baseUri);
         }
-        final DashboardClient client = new DashboardClient(httpClient, baseUri, run);
+        final DashboardClient client = new DashboardClient(httpClient, baseUri, config, run,
+                leaseHeartbeatInterval);
         if (config.open) {
             client.openBrowser();
         }
         return client;
+    }
+
+    /**
+     * Selects a reachable local address when the server is configured to listen on every network interface.
+     * Wildcard addresses are valid bind addresses but are not suitable dashboard destinations for HTTP clients.
+     *
+     * @param host configured dashboard host or bind address
+     * @return host used by the local dashboard publisher and browser URL
+     */
+    static String connectionHost(String host) {
+        return "0.0.0.0".equals(host) ? "127.0.0.1" : host;
     }
 
     /**
@@ -92,6 +127,38 @@ public final class DashboardClient implements AutoCloseable {
      */
     public URI getRunUri() {
         return URI.create(baseUri + "/?run=" + runId);
+    }
+
+    /**
+     * Returns copy-paste dashboard links reachable through the configured bind address.
+     *
+     * @return local link followed by hostname and available host-address links
+     */
+    public List<DashboardLink> getRunLinks() {
+        return new ArrayList<>(runLinks);
+    }
+
+    static List<DashboardLink> dashboardLinks(String bindHost, int port, String runId, String hostname,
+            List<InetAddress> addresses) {
+        final boolean wildcard = "0.0.0.0".equals(bindHost);
+        final Map<String, String> hosts = new LinkedHashMap<>();
+        hosts.put(connectionHost(bindHost), wildcard ? "Local" : "Configured");
+        if (wildcard) {
+            if (hostname != null && !hostname.isBlank()) {
+                hosts.putIfAbsent(hostname, "Hostname");
+            }
+            addresses.stream()
+                    .filter(Inet4Address.class::isInstance)
+                    .filter(address -> !address.isAnyLocalAddress() && !address.isLoopbackAddress()
+                            && !address.isLinkLocalAddress() && !address.isMulticastAddress())
+                    .sorted(Comparator.comparing(InetAddress::isSiteLocalAddress)
+                            .thenComparing(InetAddress::getHostAddress))
+                    .forEach(address -> hosts.putIfAbsent(address.getHostAddress(),
+                            address.isSiteLocalAddress() ? "Private IP" : "Public IP"));
+        }
+        final List<DashboardLink> links = new ArrayList<>(hosts.size());
+        hosts.forEach((host, label) -> links.add(new DashboardLink(label, runUri(host, port, runId))));
+        return List.copyOf(links);
     }
 
     /**
@@ -125,18 +192,26 @@ public final class DashboardClient implements AutoCloseable {
     }
 
     private void publishLoop() {
+        long nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
         while (!closing.get() || !pending.isEmpty()) {
             try {
-                final DashboardSnapshot snapshot = pending.poll(250, TimeUnit.MILLISECONDS);
+                final long heartbeatWait = Math.max(1,
+                        TimeUnit.NANOSECONDS.toMillis(nextHeartbeat - System.nanoTime()));
+                final DashboardSnapshot snapshot = pending.poll(Math.min(250, heartbeatWait), TimeUnit.MILLISECONDS);
                 if (snapshot != null) {
                     postJson("/api/v1/runs/" + runId + "/snapshots", snapshot, 204);
+                    nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
+                } else if (!closing.get() && System.nanoTime() >= nextHeartbeat) {
+                    postJson("/api/v1/runs/" + runId + "/heartbeat", Map.of(), 204);
+                    nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 return;
             } catch (IOException ex) {
-                Printer.log.warn("SBK dashboard snapshot publication failed: {}",
+                Printer.log.warn("SBK dashboard publication failed: {}",
                         Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
+                nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
             }
         }
     }
@@ -217,6 +292,50 @@ public final class DashboardClient implements AutoCloseable {
         builder.start();
     }
 
+    private static String localHostname() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (IOException ex) {
+            return "";
+        }
+    }
+
+    private static List<InetAddress> localAddresses() {
+        final List<InetAddress> addresses = new ArrayList<>();
+        try {
+            final InetAddress primaryAddress = InetAddress.getLocalHost();
+            if (!primaryAddress.isAnyLocalAddress() && !primaryAddress.isLoopbackAddress()
+                    && !primaryAddress.isLinkLocalAddress()) {
+                return List.of(primaryAddress);
+            }
+        } catch (IOException ex) {
+            // Fall back to interface enumeration when the local hostname cannot be resolved.
+        }
+        try {
+            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            if (interfaces == null) {
+                return addresses;
+            }
+            while (interfaces.hasMoreElements()) {
+                final Enumeration<InetAddress> interfaceAddresses = interfaces.nextElement().getInetAddresses();
+                while (interfaceAddresses.hasMoreElements()) {
+                    addresses.add(interfaceAddresses.nextElement());
+                }
+            }
+        } catch (SocketException ex) {
+            return List.of();
+        }
+        return addresses;
+    }
+
+    private static URI runUri(String host, int port, String runId) {
+        try {
+            return new URI("http", null, host, port, "/", "run=" + runId, null);
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException("Invalid dashboard address: " + host, ex);
+        }
+    }
+
     @SuppressFBWarnings(value = "ENV_USE_PROPERTY_INSTEAD_OF_ENV",
             justification = "SBK_JAVA_HOME and JAVA_HOME are documented SBK launcher overrides")
     private static String resolveJavaExecutable() {
@@ -236,6 +355,15 @@ public final class DashboardClient implements AutoCloseable {
         AVAILABLE,
         UNAVAILABLE,
         INCOMPATIBLE
+    }
+
+    /**
+     * A labeled, copy-paste URL for one dashboard network address.
+     *
+     * @param label address type, such as hostname or public IP
+     * @param uri   complete dashboard run URL
+     */
+    public record DashboardLink(String label, URI uri) {
     }
 
     /** Indicates that another benchmark owns the dashboard's single active-run lease. */

@@ -20,6 +20,8 @@ WebLogger displays SBK measurements in a local browser without Docker, Prometheu
 periodic and total measurements printed by SBK, so enabling it does not add measurement sampling or storage-driver
 work. The dashboard server is implemented with the JDK HTTP server, retains a bounded in-memory history, and sends
 new summaries to browsers with server-sent events (SSE).
+The browser also synchronizes bounded history every two seconds, so graphs recover automatically if an SSE stream
+is delayed, interrupted, or unavailable through an HTTP intermediary.
 
 Use the logger matching the application:
 
@@ -29,7 +31,10 @@ Use the logger matching the application:
 | `sbm` | `SbmWebLogger` | Aggregated results received from distributed SBK clients |
 | `sbk-gem` or `sbk-gem-yal` | `GemWebLogger` | Cluster aggregate produced by GEM's embedded SBM |
 
-The default dashboard URL is <http://127.0.0.1:9720>. The exact run URL is printed when the logger starts.
+The local dashboard URL is <http://127.0.0.1:9720>. The server listens on `0.0.0.0` by default and prints separate
+copy-paste run links for loopback, the machine hostname, and its available public/private IPv4 addresses. A browser
+on another system can use one of those hostname or IP links when network and firewall policy allow the connection.
+The default transport is unsecured HTTP; WebLogger does not start SSH and does not enable TLS or HTTPS.
 
 ## Quick start: filesystem read benchmark
 
@@ -77,7 +82,7 @@ Logger options appear only after selecting the WebLogger class. Treat generated 
 
 | Option | Default | Meaning |
 |---|---:|---|
-| `-dashboardhost HOST` | `127.0.0.1` | Address on which the local HTTP server listens |
+| `-dashboardhost HOST` | `0.0.0.0` | Address on which the plain HTTP server listens |
 | `-dashboardport PORT` | `9720` | Dashboard HTTP port |
 | `-dashboardstart true\|false` | `true` | Start a compatible server when none is reachable |
 | `-dashboardopen true\|false` | `true` | Ask the local desktop to open the run URL |
@@ -98,16 +103,24 @@ The server lifecycle is:
 
 1. The first WebLogger application starts a server when one is not already reachable.
 2. A compatible idle server is reused; another server process is not started.
-3. When the benchmark finishes, its bounded history and final snapshot remain in server memory.
-4. An open browser renews a lightweight lease every 15 seconds, keeping the completed graphs available.
-5. If a browser connects during the one-minute idle grace period, the pending shutdown is cancelled while that
+3. The active logger renews its run lease every 15 seconds. Publishing a measurement snapshot also renews the same
+   lease, so normal reporting traffic needs no separate heartbeat.
+4. When the benchmark finishes normally, its bounded history and final snapshot remain in server memory.
+5. If the benchmark process disappears without completing its run, one minute without a snapshot or logger
+   heartbeat marks the run as abandoned and releases dashboard ownership. A new benchmark can then register.
+6. An open browser renews a separate lightweight lease every 15 seconds, keeping completed or abandoned graphs
+   available.
+7. If a browser connects during the one-minute idle grace period, the pending shutdown is cancelled while that
    browser remains connected.
-6. If SBK, SBM, or SBK-GEM connects during the grace period, it becomes the active run and cancels the pending
+8. If SBK, SBM, or SBK-GEM connects during the grace period, it becomes the active run and cancels the pending
    shutdown.
-7. When no benchmark is active and no browser lease is present for one minute, the server exits gracefully.
+9. When an abandoned run has no attached browser, the server exits as soon as the one-minute run lease expires.
+   In every other idle state, the server exits after one minute with neither benchmark nor browser activity.
 
 Closing a browser releases its lease. If a browser or network disappears without a clean close, the lease expires
-from its last renewal, so a dead TCP connection cannot keep the process alive indefinitely.
+from its last renewal, so a dead TCP connection cannot keep the process alive indefinitely. The logger and browser
+leases are independent: an attached browser preserves old graphs, but it cannot retain ownership for a dead
+benchmark.
 
 ## Distributed WebLogger modes
 
@@ -141,15 +154,24 @@ GEM starts an embedded SBM. Remote SBK processes send SBP/gRPC measurements to t
 
 ## Network and security
 
-The default loopback binding restricts access to the benchmark host. To view a remote loopback dashboard, prefer an
-SSH tunnel rather than exposing the port:
+The default `0.0.0.0` binding accepts unsecured HTTP connections on every network interface. WebLogger neither
+starts SSH nor enables TLS/HTTPS. A remote browser can therefore connect directly:
+
+```text
+http://<benchmark-host>:9720
+```
+
+The dashboard has no authentication or encryption. Use the default only on an isolated, trusted benchmark network
+protected by host and network firewall rules. To restrict access to the benchmark host, set
+`-dashboardhost 127.0.0.1`.
+
+An SSH tunnel remains an optional security measure when the dashboard is bound to loopback:
 
 ```bash
 ssh -L 9720:127.0.0.1:9720 user@benchmark-host
 ```
 
-Then open <http://127.0.0.1:9720> locally. The dashboard has no authentication or TLS. Bind
-`-dashboardhost 0.0.0.0` only on an isolated, trusted benchmark network protected by host and network controls.
+Then open <http://127.0.0.1:9720> locally.
 
 ## Troubleshooting
 
@@ -158,10 +180,12 @@ Then open <http://127.0.0.1:9720> locally. The dashboard has no authentication o
 | Browser does not open | Copy the printed URL manually, or use `-dashboardopen false` on headless systems |
 | Dashboard unavailable | Check `-dashboardhost`, `-dashboardport`, local firewall rules, and whether startup is disabled |
 | Port is incompatible | Stop the unrelated/older service or select another `-dashboardport` |
+| Dashboard remains on an older UI after upgrading SBK | Close every dashboard browser tab, wait one idle minute for the old server to exit, and retry |
 | Dashboard already in use | Wait for the named active benchmark to finish; do not combine independent experiments |
+| Dashboard reports an abandoned run | The logger stopped publishing snapshots and heartbeats for one minute, usually because its SBK, SBM, or SBK-GEM process was killed or lost connectivity; correct the failure and start a new benchmark |
 | Read benchmark reports no useful data | Create and verify the input file first; use the same record size for preparation and reading |
 | Graph disappears after completion | Keep a browser page connected; otherwise the server intentionally exits after one idle minute |
-| Remote browser cannot connect | Keep loopback binding and use an SSH tunnel, or review trusted-network routing explicitly |
+| Remote browser cannot connect | Verify port 9720 is allowed by the benchmark host firewall and use `http://<benchmark-host>:9720` |
 
 The implementation is under `sbk-api/src/main/java/io/sbk/dashboard`. `DashboardLoggerSupport` is shared by SBK,
 SBM, and SBK-GEM; `DashboardServer` owns run registration, bounded histories, browser leases, SSE, and idle shutdown.

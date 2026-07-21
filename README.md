@@ -224,13 +224,20 @@ match between preparation and reading:
   -out WebLogger
 ```
 
-SBK opens `http://127.0.0.1:9720` in the default browser. The lightweight Java server retains bounded history in
+SBK opens `http://127.0.0.1:9720` in the default browser. By default, the lightweight Java server accepts plain HTTP
+on all network interfaces at port 9720, retains bounded history in
 memory and streams new summaries with server-sent events. A later SBK process reuses a compatible server already on
-that port. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
+that port. Startup prints copy-paste dashboard links for loopback, hostname, and available public/private host IPv4
+addresses. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
 WebLogger benchmark already owns it. Completed graphs remain available while a browser is connected; after the
-benchmark has finished and no browser has been connected for one minute, the server exits automatically. Use
+benchmark has finished and no browser has been connected for one minute, the server exits automatically. Snapshots
+and 15-second logger heartbeats renew the active-run lease. If a benchmark is killed without completing, one minute
+without either signal marks that run abandoned and releases dashboard ownership; an attached browser may continue
+viewing its graphs without preventing a new run. Use
 `-dashboardopen false` on headless hosts, `-dashboardstart false` to require a pre-existing server, and
-`-dashboardport PORT` to select another port. Run `sbk -out WebLogger -help` for the complete option set.
+`-dashboardport PORT` to select another port. No SSH tunnel, TLS certificate, or HTTPS setup is enabled or required
+by default. From another system, open `http://<benchmark-host>:9720`; use this only on a trusted benchmark network.
+Run `sbk -out WebLogger -help` for the complete option set.
 See the [WebLogger guide](docs/WEB_LOGGER.md) for every option, dashboard lifecycle, distributed usage, security,
 and troubleshooting.
 
@@ -244,7 +251,8 @@ sbm -out SbmWebLogger -class file -action r
 sbk-gem -out GemWebLogger -class file -nodes host1,host2 -writers 2 -size 4096 -seconds 60
 ```
 
-The default listener is loopback-only. Bind it to a non-loopback address only on a trusted benchmark network.
+The dashboard listener defaults to `0.0.0.0` for direct HTTP access. Restrict it with
+`-dashboardhost 127.0.0.1` when remote browser access is not required.
 
 ## Distributed execution
 

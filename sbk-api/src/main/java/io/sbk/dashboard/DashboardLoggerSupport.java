@@ -109,7 +109,8 @@ public final class DashboardLoggerSupport implements AutoCloseable {
                 timeUnit.name(), version, System.getProperty("java.runtime.version"), System.currentTimeMillis());
         try {
             client = DashboardClient.connect(config, run);
-            Printer.log.info("SBK Dashboard: {}", client.getRunUri());
+            client.getRunLinks().forEach(link -> Printer.log.info("SBK Dashboard ({}): {}",
+                    link.label(), link.uri()));
         } catch (DashboardClient.DashboardBusyException ex) {
             client = null;
             Printer.log.error("{} WebLogger cannot start: {}", source, ex.getMessage());

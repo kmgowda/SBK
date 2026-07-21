@@ -31,7 +31,7 @@ public abstract class DashboardServerMain {
      * @throws IllegalArgumentException if an option or value is invalid
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        String host = "127.0.0.1";
+        String host = "0.0.0.0";
         int port = 9720;
         int retention = 3600;
         for (int index = 0; index < args.length; index += 2) {

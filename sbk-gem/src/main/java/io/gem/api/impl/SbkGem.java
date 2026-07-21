@@ -31,6 +31,7 @@ import io.sbk.logger.impl.GrpcLogger;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbm.logger.RamLogger;
+import io.sbk.utils.ApplicationShutdownHook;
 import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
 import io.sbm.config.SbmConfig;
@@ -120,14 +121,14 @@ final public class SbkGem {
         } catch (HelpException ex) {
             return null;
         }
-        final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
-        ret.thenAccept(results -> printRemoteResults(results, false));
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println();
-            benchmark.stop();
-        }));
-        return ret.get();
+        final Thread shutdownHook = ApplicationShutdownHook.register("SBK-GEM", benchmark::stop);
+        try {
+            final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
+            ret.thenAccept(results -> printRemoteResults(results, false));
+            return ret.get();
+        } finally {
+            ApplicationShutdownHook.remove(shutdownHook);
+        }
     }
 
 
