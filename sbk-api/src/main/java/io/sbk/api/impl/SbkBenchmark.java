@@ -281,7 +281,10 @@ final public class SbkBenchmark implements Benchmark {
             }, executor).thenAccept(d -> {
                 try {
                     CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0])).get();
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    Printer.log.info("Writer coordination interrupted during shutdown");
+                } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
             });
@@ -333,7 +336,10 @@ final public class SbkBenchmark implements Benchmark {
             }, executor).thenAccept(d -> {
                         try {
                             CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0])).get();
-                        } catch (InterruptedException | ExecutionException e) {
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            Printer.log.info("Reader coordination interrupted during shutdown");
+                        } catch (ExecutionException e) {
                             e.printStackTrace();
                         }
                     }
@@ -390,37 +396,39 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         state = State.END;
-        if (writePerl != null) {
-            writePerl.stop();
-        }
-        if (readPerl != null) {
-            readPerl.stop();
-        }
+        timeoutExecutor.shutdownNow();
+        executor.shutdownNow();
         readers.forEach(c -> {
             try {
                 c.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Printer.log.warn("Unable to close an SBK reader during shutdown", e);
             }
         });
         writers.forEach(c -> {
             try {
                 c.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Printer.log.warn("Unable to close an SBK writer during shutdown", e);
             }
         });
+        if (writePerl != null) {
+            writePerl.stop();
+        }
+        if (readPerl != null) {
+            readPerl.stop();
+        }
         try {
             storage.closeStorage(params);
             rwLogger.close(params);
         } catch (IOException e) {
-            e.printStackTrace();
+            Printer.log.warn("Unable to close SBK storage or logger during shutdown", e);
         }
-        executor.shutdown();
         try {
             executor.awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            ex.printStackTrace();
+            Thread.currentThread().interrupt();
+            Printer.log.warn("Interrupted while waiting for SBK workers to stop", e);
         }
 
         if (ex != null) {

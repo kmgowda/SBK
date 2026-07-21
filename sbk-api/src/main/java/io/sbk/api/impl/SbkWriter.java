@@ -105,7 +105,11 @@ final public class SbkWriter extends Worker implements RunBenchmark {
                 perf.apply(secondsToRun, recordsCount);
                 Printer.log.info("Writer " + id + " exited");
             } catch (IOException ex) {
-                ex.printStackTrace();
+                if (Thread.currentThread().isInterrupted()) {
+                    Printer.log.info("Writer " + id + " interrupted during shutdown");
+                } else {
+                    ex.printStackTrace();
+                }
             }
             wCount.decrementWriters();
         }, executor);

@@ -16,6 +16,7 @@ import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
+import io.sbk.utils.ApplicationShutdownHook;
 import io.sbk.utils.SbkUtils;
 import io.sbm.api.RamLoggerPackage;
 import io.sbm.config.SbmConfig;
@@ -87,13 +88,13 @@ final public class Sbm {
         } catch (HelpException ex) {
             return;
         }
-        final CompletableFuture<Void> ret = benchmark.start();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println();
-            benchmark.stop();
-        }));
-        ret.get();
+        final Thread shutdownHook = ApplicationShutdownHook.register("SBM", benchmark::stop);
+        try {
+            final CompletableFuture<Void> ret = benchmark.start();
+            ret.get();
+        } finally {
+            ApplicationShutdownHook.remove(shutdownHook);
+        }
     }
 
 
