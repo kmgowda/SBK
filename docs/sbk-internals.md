@@ -2280,24 +2280,53 @@ flowchart LR
     HOT["Writer and reader hot paths"] --> PERL["PerL measurement pipeline"]
     PERL --> SUMMARY["Periodic and total summaries"]
     SUMMARY --> LOGGER["WebLogger family"]
-    LOGGER -->|HTTP publish| SERVER["Reusable dashboard server"]
+    LOGGER -->|Snapshot or 15-second heartbeat| LEASE["Active-run lease"]
+    LEASE --> SERVER["Reusable dashboard server"]
     SERVER --> HISTORY["Bounded run history"]
     SERVER -->|SSE| BROWSER["Browser graphs"]
+    BROWSER -->|15-second heartbeat| BLEASE["Browser lease"]
+    BLEASE --> SERVER
 
     classDef hot fill:#fee2e2,stroke:#b91c1c,color:#000
     classDef control fill:#e0f2fe,stroke:#0369a1,color:#000
     classDef view fill:#dcfce7,stroke:#15803d,color:#000
     class HOT,PERL hot
-    class SUMMARY,LOGGER,SERVER,HISTORY control
-    class BROWSER view
+    class SUMMARY,LOGGER,LEASE,SERVER,HISTORY control
+    class BROWSER,BLEASE view
 ```
 
-Only one benchmark owns a dashboard server at a time. A completed run remains
-available while a browser renews its lease. With no active SBK, SBM, or SBK-GEM
-publisher and no browser lease, the server exits after a one-minute idle grace
-period. A browser or new benchmark connecting during that grace period cancels
-the pending shutdown. See the [WebLogger guide](WEB_LOGGER.md) for commands,
-options, distributed modes, security, and troubleshooting.
+Only one benchmark owns a dashboard server at a time. Registration starts an
+active-run lease. Each snapshot renews it, and a 15-second client heartbeat
+renews it during quiet reporting intervals. If neither arrives for one minute,
+the server marks the run abandoned and releases `activeRunId`; this prevents a
+crashed SBK, SBM, or SBK-GEM process from permanently blocking later runs.
+
+The browser has an independent 15-second lease. A fresh browser lease preserves
+the abandoned or completed run's graphs, but does not preserve benchmark
+ownership. If the run lease expires with no browser attached, the server exits
+immediately. Otherwise it remains available until there has been neither an
+active publisher nor a browser lease for one minute.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: Server starts
+    Idle --> Active: Logger registers run
+    Active --> Active: Snapshot or logger heartbeat
+    Active --> Completed: Logger completes normally
+    Active --> Abandoned: No logger activity for one minute
+    Abandoned --> Active: New logger registers
+    Completed --> Active: New logger registers
+    Completed --> Retained: Browser lease is active
+    Abandoned --> Retained: Browser lease is active
+    Completed --> Stopped: No browser for one minute
+    Abandoned --> Stopped: No browser at lease expiry
+    Retained --> Retained: Browser heartbeat
+    Retained --> Stopped: No publisher or browser for one minute
+    Stopped --> [*]
+```
+
+See the [WebLogger guide](WEB_LOGGER.md) for commands, options, distributed
+modes, security, and troubleshooting.
 
 ---
 

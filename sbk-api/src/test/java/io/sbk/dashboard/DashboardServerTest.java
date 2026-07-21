@@ -178,6 +178,93 @@ final class DashboardServerTest {
         }
     }
 
+    @Test
+    void abandonedRunWithoutBrowserStopsDashboard() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("abandoned-run"))).statusCode());
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void abandonedRunRemainsForAttachedBrowserAndReleasesOwnership() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("browser-retained-abandoned-run"))).statusCode());
+
+        String runs = "";
+        for (int refresh = 0; refresh < 10 && !runs.contains("\"abandoned\":true"); refresh++) {
+            post(baseUri.resolve("/api/v1/browser/connect"), "{\"browserId\":\"lease-browser\"}");
+            Thread.sleep(100);
+            runs = get(baseUri.resolve("/api/v1/runs")).body();
+        }
+        assertTrue(runs.contains("\"abandoned\":true"));
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("replacement-run"))).statusCode());
+        assertEquals(204, post(baseUri.resolve("/api/v1/runs/replacement-run/complete"), "{}").statusCode());
+        post(baseUri.resolve("/api/v1/browser/disconnect"), "{\"browserId\":\"lease-browser\"}");
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void clientHeartbeatRenewsActiveRunLease() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+
+        try (DashboardClient ignored = DashboardClient.connect(config(server.getAddress().getPort()),
+                run("heartbeat-run"), Duration.ofMillis(75))) {
+            Thread.sleep(800);
+            assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
+            assertTrue(get(baseUri.resolve("/api/v1/runs")).body().contains("\"completed\":false"));
+        }
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void snapshotsRenewActiveRunLease() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("snapshot-lease-run"))).statusCode());
+
+        for (int sequence = 1; sequence <= 6; sequence++) {
+            Thread.sleep(100);
+            assertEquals(204, post(baseUri.resolve("/api/v1/runs/snapshot-lease-run/snapshots"),
+                    MAPPER.writeValueAsString(snapshot("snapshot-lease-run", sequence))).statusCode());
+        }
+        assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
+        assertTrue(get(baseUri.resolve("/api/v1/runs")).body().contains("\"completed\":false"));
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
+    @Test
+    void dashboardWithoutBenchmarkOrBrowserStopsAfterIdleTimeout() throws Exception {
+        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2,
+                Duration.ofMillis(200), Duration.ofMillis(20));
+        server.start();
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+    }
+
     private static DashboardSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {
         final long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
         DashboardSnapshot[] snapshots = new DashboardSnapshot[0];

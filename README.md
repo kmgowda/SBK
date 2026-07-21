@@ -229,7 +229,10 @@ on all network interfaces at port 9720, retains bounded history in
 memory and streams new summaries with server-sent events. A later SBK process reuses a compatible server already on
 that port. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
 WebLogger benchmark already owns it. Completed graphs remain available while a browser is connected; after the
-benchmark has finished and no browser has been connected for one minute, the server exits automatically. Use
+benchmark has finished and no browser has been connected for one minute, the server exits automatically. Snapshots
+and 15-second logger heartbeats renew the active-run lease. If a benchmark is killed without completing, one minute
+without either signal marks that run abandoned and releases dashboard ownership; an attached browser may continue
+viewing its graphs without preventing a new run. Use
 `-dashboardopen false` on headless hosts, `-dashboardstart false` to require a pre-existing server, and
 `-dashboardport PORT` to select another port. No SSH tunnel, TLS certificate, or HTTPS setup is enabled or required
 by default. From another system, open `http://<benchmark-host>:9720`; use this only on a trusted benchmark network.

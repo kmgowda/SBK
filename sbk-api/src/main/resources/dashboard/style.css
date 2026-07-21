@@ -63,6 +63,7 @@ select {
 .status { display: inline-block; padding: 4px 9px; border-radius: 999px; font-size: .68rem; font-weight: 900; letter-spacing: .1em; }
 .status.running { color: #042518; background: var(--green); box-shadow: 0 0 24px rgba(70, 230, 167, .35); }
 .status.complete { color: #061a2a; background: var(--cyan); }
+.status.abandoned { color: #2b0710; background: #ff6b88; }
 .status.waiting { color: #392408; background: var(--orange); }
 .elapsed { font: 700 clamp(1.8rem, 4vw, 3.3rem)/1 ui-monospace, SFMono-Regular, monospace; color: #d8f7ff; }
 

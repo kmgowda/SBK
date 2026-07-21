@@ -35,6 +35,7 @@ public final class DashboardClient implements AutoCloseable {
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
     private static final Duration START_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration LEASE_HEARTBEAT_INTERVAL = Duration.ofSeconds(15);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final HttpClient httpClient;
     private final URI baseUri;
@@ -42,14 +43,16 @@ public final class DashboardClient implements AutoCloseable {
     private final ArrayBlockingQueue<DashboardSnapshot> pending;
     private final AtomicBoolean closing;
     private final Thread publisherThread;
+    private final Duration leaseHeartbeatInterval;
 
-    private DashboardClient(HttpClient httpClient, URI baseUri, DashboardRun run) throws IOException,
-            InterruptedException {
+    private DashboardClient(HttpClient httpClient, URI baseUri, DashboardRun run, Duration leaseHeartbeatInterval)
+            throws IOException, InterruptedException {
         this.httpClient = httpClient;
         this.baseUri = baseUri;
         this.runId = run.runId();
         this.pending = new ArrayBlockingQueue<>(1);
         this.closing = new AtomicBoolean(false);
+        this.leaseHeartbeatInterval = leaseHeartbeatInterval;
         postJson("/api/v1/runs", run, 201);
         this.publisherThread = Thread.ofVirtual().name("sbk-dashboard-publisher-" + runId).start(this::publishLoop);
     }
@@ -65,6 +68,14 @@ public final class DashboardClient implements AutoCloseable {
      */
     public static DashboardClient connect(DashboardConfig config, DashboardRun run)
             throws IOException, InterruptedException {
+        return connect(config, run, LEASE_HEARTBEAT_INTERVAL);
+    }
+
+    static DashboardClient connect(DashboardConfig config, DashboardRun run, Duration leaseHeartbeatInterval)
+            throws IOException, InterruptedException {
+        if (leaseHeartbeatInterval.isZero() || leaseHeartbeatInterval.isNegative()) {
+            throw new IllegalArgumentException("Dashboard lease heartbeat interval must be greater than zero");
+        }
         final URI baseUri = URI.create("http://" + connectionHost(config.host) + ":" + config.port);
         final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
         final Health health = health(httpClient, baseUri);
@@ -78,7 +89,7 @@ public final class DashboardClient implements AutoCloseable {
             startServer(config);
             waitUntilHealthy(httpClient, baseUri);
         }
-        final DashboardClient client = new DashboardClient(httpClient, baseUri, run);
+        final DashboardClient client = new DashboardClient(httpClient, baseUri, run, leaseHeartbeatInterval);
         if (config.open) {
             client.openBrowser();
         }
@@ -136,18 +147,26 @@ public final class DashboardClient implements AutoCloseable {
     }
 
     private void publishLoop() {
+        long nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
         while (!closing.get() || !pending.isEmpty()) {
             try {
-                final DashboardSnapshot snapshot = pending.poll(250, TimeUnit.MILLISECONDS);
+                final long heartbeatWait = Math.max(1,
+                        TimeUnit.NANOSECONDS.toMillis(nextHeartbeat - System.nanoTime()));
+                final DashboardSnapshot snapshot = pending.poll(Math.min(250, heartbeatWait), TimeUnit.MILLISECONDS);
                 if (snapshot != null) {
                     postJson("/api/v1/runs/" + runId + "/snapshots", snapshot, 204);
+                    nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
+                } else if (!closing.get() && System.nanoTime() >= nextHeartbeat) {
+                    postJson("/api/v1/runs/" + runId + "/heartbeat", Map.of(), 204);
+                    nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 return;
             } catch (IOException ex) {
-                Printer.log.warn("SBK dashboard snapshot publication failed: {}",
+                Printer.log.warn("SBK dashboard publication failed: {}",
                         Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
+                nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
             }
         }
     }

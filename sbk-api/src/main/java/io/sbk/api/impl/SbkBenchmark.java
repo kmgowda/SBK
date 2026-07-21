@@ -75,6 +75,7 @@ final public class SbkBenchmark implements Benchmark {
     final private RWLogger rwLogger;
     final private ExecutorService executor;
     final private ExecutorService perlExecutor;
+    final private ExecutorService lifecycleExecutor;
     final private ParameterOptions params;
     final private Perl writePerl;
     final private Perl readPerl;
@@ -114,6 +115,8 @@ final public class SbkBenchmark implements Benchmark {
         };
 
         this.perlExecutor = new ForkJoinPool(5);
+        this.lifecycleExecutor = Executors.newSingleThreadExecutor(Thread.ofPlatform()
+                .name("sbk-benchmark-lifecycle").factory());
 
         if (params.getWritersCount() > 0 && params.getAction() == Action.Writing) {
             PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
@@ -359,27 +362,44 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (params.getTotalSecondsToRun() > 0) {
-            timeoutExecutor.schedule(this::stop, params.getTotalSecondsToRun() + 1, TimeUnit.SECONDS);
+            timeoutExecutor.schedule(() -> requestShutdown(null),
+                    params.getTotalSecondsToRun() + 1, TimeUnit.SECONDS);
         }
 
         if (wStatFuture != null && !wStatFuture.isDone()) {
             wStatFuture.exceptionally(ex -> {
-                shutdown(ex);
+                requestShutdown(ex);
                 return null;
             });
         }
 
         if (rStatFuture != null && !rStatFuture.isDone()) {
             rStatFuture.exceptionally(ex -> {
-                shutdown(ex);
+                requestShutdown(ex);
                 return null;
             });
         }
-        rwLogger.setExceptionHandler(this::shutdown);
+        rwLogger.setExceptionHandler(this::requestShutdown);
         assert chainFuture != null;
-        chainFuture.thenRunAsync(this::stop, executor);
+        chainFuture.whenComplete((ignored, ex) -> requestShutdown(ex));
 
         return retFuture.toCompletableFuture();
+    }
+
+    /**
+     * Schedules automatic benchmark shutdown away from worker, timeout, PerL, and logger threads.
+     *
+     * <p>The shutdown path interrupts and awaits the worker executor. Running that path on a worker
+     * would interrupt the shutdown thread itself and produce a false shutdown warning.
+     *
+     * @param ex failure that initiated shutdown, or {@code null} for normal completion
+     */
+    @Synchronized
+    private void requestShutdown(Throwable ex) {
+        if (state == State.END || lifecycleExecutor.isShutdown()) {
+            return;
+        }
+        lifecycleExecutor.execute(() -> shutdown(ex));
     }
 
     /**
@@ -438,6 +458,7 @@ final public class SbkBenchmark implements Benchmark {
             Printer.log.info("SBK Benchmark Shutdown");
             retFuture.complete(null);
         }
+        lifecycleExecutor.shutdown();
 
     }
 

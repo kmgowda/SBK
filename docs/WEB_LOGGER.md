@@ -102,16 +102,24 @@ The server lifecycle is:
 
 1. The first WebLogger application starts a server when one is not already reachable.
 2. A compatible idle server is reused; another server process is not started.
-3. When the benchmark finishes, its bounded history and final snapshot remain in server memory.
-4. An open browser renews a lightweight lease every 15 seconds, keeping the completed graphs available.
-5. If a browser connects during the one-minute idle grace period, the pending shutdown is cancelled while that
+3. The active logger renews its run lease every 15 seconds. Publishing a measurement snapshot also renews the same
+   lease, so normal reporting traffic needs no separate heartbeat.
+4. When the benchmark finishes normally, its bounded history and final snapshot remain in server memory.
+5. If the benchmark process disappears without completing its run, one minute without a snapshot or logger
+   heartbeat marks the run as abandoned and releases dashboard ownership. A new benchmark can then register.
+6. An open browser renews a separate lightweight lease every 15 seconds, keeping completed or abandoned graphs
+   available.
+7. If a browser connects during the one-minute idle grace period, the pending shutdown is cancelled while that
    browser remains connected.
-6. If SBK, SBM, or SBK-GEM connects during the grace period, it becomes the active run and cancels the pending
+8. If SBK, SBM, or SBK-GEM connects during the grace period, it becomes the active run and cancels the pending
    shutdown.
-7. When no benchmark is active and no browser lease is present for one minute, the server exits gracefully.
+9. When an abandoned run has no attached browser, the server exits as soon as the one-minute run lease expires.
+   In every other idle state, the server exits after one minute with neither benchmark nor browser activity.
 
 Closing a browser releases its lease. If a browser or network disappears without a clean close, the lease expires
-from its last renewal, so a dead TCP connection cannot keep the process alive indefinitely.
+from its last renewal, so a dead TCP connection cannot keep the process alive indefinitely. The logger and browser
+leases are independent: an attached browser preserves old graphs, but it cannot retain ownership for a dead
+benchmark.
 
 ## Distributed WebLogger modes
 
@@ -173,6 +181,7 @@ Then open <http://127.0.0.1:9720> locally.
 | Port is incompatible | Stop the unrelated/older service or select another `-dashboardport` |
 | Dashboard remains on an older UI after upgrading SBK | Close every dashboard browser tab, wait one idle minute for the old server to exit, and retry |
 | Dashboard already in use | Wait for the named active benchmark to finish; do not combine independent experiments |
+| Dashboard reports an abandoned run | The logger stopped publishing snapshots and heartbeats for one minute, usually because its SBK, SBM, or SBK-GEM process was killed or lost connectivity; correct the failure and start a new benchmark |
 | Read benchmark reports no useful data | Create and verify the input file first; use the same record size for preparation and reading |
 | Graph disappears after completion | Keep a browser page connected; otherwise the server intentionally exits after one idle minute |
 | Remote browser cannot connect | Verify port 9720 is allowed by the benchmark host firewall and use `http://<benchmark-host>:9720` |

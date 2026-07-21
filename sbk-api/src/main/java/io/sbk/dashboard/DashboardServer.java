@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class DashboardServer implements AutoCloseable {
     /** Dashboard HTTP API version. */
-    public static final int API_VERSION = 3;
+    public static final int API_VERSION = 4;
     /** Time an unused dashboard remains available after its benchmark exits. */
     public static final Duration DEFAULT_IDLE_TIMEOUT = Duration.ofMinutes(1);
     private static final Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofSeconds(5);
@@ -120,6 +120,9 @@ public final class DashboardServer implements AutoCloseable {
      */
     public void start() {
         server.start();
+        synchronized (lifecycleLock) {
+            scheduleIdleShutdownIfUnused();
+        }
     }
 
     /**
@@ -236,7 +239,19 @@ public final class DashboardServer implements AutoCloseable {
                 if (!state.run.runId().equals(snapshot.runId())) {
                     throw new IllegalArgumentException("Snapshot runId does not match URL");
                 }
+                if (!benchmarkSeen(state.run.runId())) {
+                    sendText(exchange, 409, "Dashboard run lease has expired", "text/plain; charset=utf-8");
+                    return;
+                }
                 state.add(snapshot);
+                exchange.sendResponseHeaders(204, -1);
+            }
+            case "heartbeat" -> {
+                requireMethod(exchange, "POST");
+                if (!benchmarkSeen(state.run.runId())) {
+                    sendText(exchange, 409, "Dashboard run lease has expired", "text/plain; charset=utf-8");
+                    return;
+                }
                 exchange.sendResponseHeaders(204, -1);
             }
             case "complete" -> {
@@ -339,7 +354,23 @@ public final class DashboardServer implements AutoCloseable {
             }
             cancelIdleShutdown();
             activeRunId = run.runId();
+            scheduleActiveRunExpiry(runs.get(activeRunId));
             return null;
+        }
+    }
+
+    private boolean benchmarkSeen(String runId) {
+        synchronized (lifecycleLock) {
+            if (!runId.equals(activeRunId) || shuttingDown) {
+                return false;
+            }
+            final RunState state = runs.get(runId);
+            if (state == null || state.completed) {
+                return false;
+            }
+            state.touch();
+            scheduleActiveRunExpiry(state);
+            return true;
         }
     }
 
@@ -367,6 +398,42 @@ public final class DashboardServer implements AutoCloseable {
             if (activeRunId == null) {
                 scheduleIdleShutdownIfUnused();
             }
+        }
+    }
+
+    private void scheduleActiveRunExpiry(RunState state) {
+        cancelIdleShutdown();
+        final long delay = Math.max(1, state.lastActivity + idleTimeout.toMillis() - System.currentTimeMillis());
+        idleShutdown = scheduler.schedule(() -> expireActiveRun(state.run.runId()), delay, TimeUnit.MILLISECONDS);
+    }
+
+    private void expireActiveRun(String runId) {
+        boolean closeNow = false;
+        synchronized (lifecycleLock) {
+            idleShutdown = null;
+            if (!runId.equals(activeRunId) || shuttingDown) {
+                return;
+            }
+            final RunState state = runs.get(runId);
+            final long expiry = System.currentTimeMillis() - idleTimeout.toMillis();
+            if (state != null && state.lastActivity > expiry) {
+                scheduleActiveRunExpiry(state);
+                return;
+            }
+            if (state != null) {
+                state.abandon();
+            }
+            activeRunId = null;
+            browsers.entrySet().removeIf(entry -> entry.getValue() <= expiry);
+            if (browsers.isEmpty()) {
+                shuttingDown = true;
+                closeNow = true;
+            } else {
+                scheduleIdleShutdownIfUnused();
+            }
+        }
+        if (closeNow) {
+            close();
         }
     }
 
@@ -411,12 +478,15 @@ public final class DashboardServer implements AutoCloseable {
         private final ArrayDeque<DashboardSnapshot> history;
         private final CopyOnWriteArrayList<SseClient> clients;
         private volatile boolean completed;
+        private volatile boolean abandoned;
+        private volatile long lastActivity;
 
         private RunState(DashboardRun run, int retention) {
             this.run = run;
             this.retention = retention;
             this.history = new ArrayDeque<>(retention);
             this.clients = new CopyOnWriteArrayList<>();
+            this.lastActivity = System.currentTimeMillis();
         }
 
         private synchronized void add(DashboardSnapshot snapshot) throws IOException {
@@ -434,11 +504,22 @@ public final class DashboardServer implements AutoCloseable {
 
         private void complete() {
             completed = true;
-            clients.forEach(client -> client.offer("event: complete\ndata: {}\n\n"));
+            clients.forEach(client -> client.offer("event: complete\ndata: {\"abandoned\":" + abandoned
+                    + "}\n\n"));
+        }
+
+        private void abandon() {
+            completed = true;
+            abandoned = true;
+            clients.forEach(client -> client.offer("event: complete\ndata: {\"abandoned\":true}\n\n"));
+        }
+
+        private void touch() {
+            lastActivity = System.currentTimeMillis();
         }
 
         private DashboardRunView view() {
-            return new DashboardRunView(run, completed);
+            return new DashboardRunView(run, completed, abandoned);
         }
 
         private void events(HttpExchange exchange) throws IOException {
@@ -464,7 +545,7 @@ public final class DashboardServer implements AutoCloseable {
         }
     }
 
-    private record DashboardRunView(DashboardRun run, boolean completed) {
+    private record DashboardRunView(DashboardRun run, boolean completed, boolean abandoned) {
     }
 
     private static final class SseClient implements AutoCloseable {

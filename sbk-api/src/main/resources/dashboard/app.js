@@ -10,7 +10,7 @@
 'use strict';
 
 const colors = ['#39d5ff', '#46e6a7', '#9b8cff', '#ffb454'];
-const state = {run: null, completed: false, snapshots: [], events: null, historyTimer: null};
+const state = {run: null, completed: false, abandoned: false, snapshots: [], events: null, historyTimer: null};
 const elements = Object.fromEntries([...document.querySelectorAll('[id]')].map(item => [item.id, item]));
 const generatedBrowserId = globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'
     ? globalThis.crypto.randomUUID()
@@ -68,12 +68,13 @@ function update() {
     elements.title.textContent = run.name || `${run.storage} ${run.action.replace(/_/g, ' ')}`;
     elements.subtitle.textContent = `${run.source} ${run.sbkVersion}  •  ${run.storage}  •  Java ${run.javaVersion}`;
     if (!snapshot) {
-        elements.status.textContent = 'WAITING';
-        elements.status.className = 'status waiting';
+        elements.status.textContent = state.abandoned ? 'ABANDONED' : 'WAITING';
+        elements.status.className = `status ${state.abandoned ? 'abandoned' : 'waiting'}`;
         return;
     }
-    elements.status.textContent = state.completed || snapshot.total ? 'COMPLETE' : 'RUNNING';
-    elements.status.className = `status ${state.completed || snapshot.total ? 'complete' : 'running'}`;
+    const status = state.abandoned ? 'ABANDONED' : state.completed || snapshot.total ? 'COMPLETE' : 'RUNNING';
+    elements.status.textContent = status;
+    elements.status.className = `status ${status.toLowerCase()}`;
     elements.elapsed.textContent = duration(snapshot.performance.seconds);
     elements.recordsRate.textContent = compact(snapshot.performance.recordsPerSec);
     elements.throughput.textContent = `${snapshot.performance.mbPerSec.toFixed(2)} MB/s`;
@@ -182,6 +183,7 @@ async function selectRun(runView) {
     if (state.historyTimer) clearInterval(state.historyTimer);
     state.run = runView.run;
     state.completed = runView.completed;
+    state.abandoned = runView.abandoned;
     state.snapshots = [];
     history.replaceState(null, '', `/?run=${state.run.runId}`);
     update();
@@ -197,7 +199,11 @@ async function selectRun(runView) {
         mergeSnapshot(JSON.parse(event.data));
         update();
     });
-    state.events.addEventListener('complete', () => { state.completed = true; update(); });
+    state.events.addEventListener('complete', event => {
+        state.completed = true;
+        state.abandoned = JSON.parse(event.data).abandoned === true;
+        update();
+    });
 }
 
 async function loadRuns() {
