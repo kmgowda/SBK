@@ -12,6 +12,7 @@ package io.sbk.dashboard;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -69,10 +70,36 @@ final class DashboardServerTest {
             try (DashboardClient client = DashboardClient.connect(config, run("plain-http-run"))) {
                 assertEquals("http", client.getRunUri().getScheme());
                 assertEquals("127.0.0.1", client.getRunUri().getHost());
+                assertTrue(client.getRunLinks().stream().anyMatch(link -> "Hostname".equals(link.label())));
                 assertEquals(200, get(URI.create("http://127.0.0.1:" + server.getAddress().getPort()
                         + "/api/v1/health")).statusCode());
             }
         }
+    }
+
+    @Test
+    void createsCopyPasteLinksForHostnameAndHostAddresses() throws Exception {
+        final var links = DashboardClient.dashboardLinks("0.0.0.0", 9720, "test-run", "benchmark-host",
+                java.util.List.of(InetAddress.getByName("127.0.0.1"), InetAddress.getByName("10.2.3.4"),
+                        InetAddress.getByName("8.8.8.8")));
+
+        assertEquals("http://127.0.0.1:9720/?run=test-run", links.get(0).uri().toString());
+        assertTrue(links.stream().anyMatch(link -> "Hostname".equals(link.label())
+                && "benchmark-host".equals(link.uri().getHost())));
+        assertTrue(links.stream().anyMatch(link -> "Public IP".equals(link.label())
+                && "8.8.8.8".equals(link.uri().getHost())));
+        assertTrue(links.stream().anyMatch(link -> "Private IP".equals(link.label())
+                && "10.2.3.4".equals(link.uri().getHost())));
+    }
+
+    @Test
+    void doesNotAdvertiseRemoteLinksForLoopbackBinding() throws Exception {
+        final var links = DashboardClient.dashboardLinks("127.0.0.1", 9720, "test-run", "benchmark-host",
+                java.util.List.of(InetAddress.getByName("10.2.3.4")));
+
+        assertEquals(1, links.size());
+        assertEquals("Configured", links.getFirst().label());
+        assertEquals("127.0.0.1", links.getFirst().uri().getHost());
     }
 
     @Test

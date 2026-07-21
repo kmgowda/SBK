@@ -31,8 +31,9 @@ Use the logger matching the application:
 | `sbm` | `SbmWebLogger` | Aggregated results received from distributed SBK clients |
 | `sbk-gem` or `sbk-gem-yal` | `GemWebLogger` | Cluster aggregate produced by GEM's embedded SBM |
 
-The local dashboard URL is <http://127.0.0.1:9720>. The server listens on `0.0.0.0` by default, so a browser on
-another system can use `http://<benchmark-host>:9720`. The exact local run URL is printed when the logger starts.
+The local dashboard URL is <http://127.0.0.1:9720>. The server listens on `0.0.0.0` by default and prints separate
+copy-paste run links for loopback, the machine hostname, and its available public/private IPv4 addresses. A browser
+on another system can use one of those hostname or IP links when network and firewall policy allow the connection.
 The default transport is unsecured HTTP; WebLogger does not start SSH and does not enable TLS or HTTPS.
 
 ## Quick start: filesystem read benchmark
