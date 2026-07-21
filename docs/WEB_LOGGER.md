@@ -20,6 +20,8 @@ WebLogger displays SBK measurements in a local browser without Docker, Prometheu
 periodic and total measurements printed by SBK, so enabling it does not add measurement sampling or storage-driver
 work. The dashboard server is implemented with the JDK HTTP server, retains a bounded in-memory history, and sends
 new summaries to browsers with server-sent events (SSE).
+The browser also synchronizes bounded history every two seconds, so graphs recover automatically if an SSE stream
+is delayed, interrupted, or unavailable through an HTTP intermediary.
 
 Use the logger matching the application:
 
@@ -169,6 +171,7 @@ Then open <http://127.0.0.1:9720> locally.
 | Browser does not open | Copy the printed URL manually, or use `-dashboardopen false` on headless systems |
 | Dashboard unavailable | Check `-dashboardhost`, `-dashboardport`, local firewall rules, and whether startup is disabled |
 | Port is incompatible | Stop the unrelated/older service or select another `-dashboardport` |
+| Dashboard remains on an older UI after upgrading SBK | Close every dashboard browser tab, wait one idle minute for the old server to exit, and retry |
 | Dashboard already in use | Wait for the named active benchmark to finish; do not combine independent experiments |
 | Read benchmark reports no useful data | Create and verify the input file first; use the same record size for preparation and reading |
 | Graph disappears after completion | Keep a browser page connected; otherwise the server intentionally exits after one idle minute |

@@ -10,9 +10,12 @@
 'use strict';
 
 const colors = ['#39d5ff', '#46e6a7', '#9b8cff', '#ffb454'];
-const state = {run: null, completed: false, snapshots: [], events: null};
+const state = {run: null, completed: false, snapshots: [], events: null, historyTimer: null};
 const elements = Object.fromEntries([...document.querySelectorAll('[id]')].map(item => [item.id, item]));
-const browserId = sessionStorage.getItem('sbkDashboardBrowserId') || crypto.randomUUID();
+const generatedBrowserId = globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'
+    ? globalThis.crypto.randomUUID()
+    : `sbk-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const browserId = sessionStorage.getItem('sbkDashboardBrowserId') || generatedBrowserId;
 sessionStorage.setItem('sbkDashboardBrowserId', browserId);
 
 function updateBrowserLease() {
@@ -59,13 +62,18 @@ function percentile(snapshot, target) {
 }
 
 function update() {
-    const snapshot = state.snapshots.at(-1);
-    if (!snapshot || !state.run) return;
+    const snapshot = state.snapshots[state.snapshots.length - 1];
+    if (!state.run) return;
     const run = state.run;
+    elements.title.textContent = run.name || `${run.storage} ${run.action.replace(/_/g, ' ')}`;
+    elements.subtitle.textContent = `${run.source} ${run.sbkVersion}  •  ${run.storage}  •  Java ${run.javaVersion}`;
+    if (!snapshot) {
+        elements.status.textContent = 'WAITING';
+        elements.status.className = 'status waiting';
+        return;
+    }
     elements.status.textContent = state.completed || snapshot.total ? 'COMPLETE' : 'RUNNING';
     elements.status.className = `status ${state.completed || snapshot.total ? 'complete' : 'running'}`;
-    elements.title.textContent = run.name || `${run.storage} ${run.action.replaceAll('_', ' ')}`;
-    elements.subtitle.textContent = `${run.source} ${run.sbkVersion}  •  ${run.storage}  •  Java ${run.javaVersion}`;
     elements.elapsed.textContent = duration(snapshot.performance.seconds);
     elements.recordsRate.textContent = compact(snapshot.performance.recordsPerSec);
     elements.throughput.textContent = `${snapshot.performance.mbPerSec.toFixed(2)} MB/s`;
@@ -81,6 +89,28 @@ function update() {
     elements.totalRecords.textContent = compact(snapshot.performance.records);
     elements.totalBytes.textContent = bytes(snapshot.performance.bytes);
     drawAll();
+}
+
+function mergeSnapshot(snapshot) {
+    const existing = state.snapshots.findIndex(item => item.timestamp === snapshot.timestamp
+        && item.total === snapshot.total);
+    if (existing >= 0) {
+        state.snapshots[existing] = snapshot;
+    } else {
+        state.snapshots.push(snapshot);
+    }
+    state.snapshots.sort((left, right) => left.timestamp - right.timestamp);
+    if (state.snapshots.length > 3600) state.snapshots.splice(0, state.snapshots.length - 3600);
+}
+
+async function refreshHistory(runId) {
+    const response = await fetch(`/api/v1/runs/${runId}/history`, {cache: 'no-store'});
+    if (!response.ok) throw new Error(`History request returned HTTP ${response.status}`);
+    const snapshots = await response.json();
+    if (!state.run || state.run.runId !== runId) return;
+    snapshots.forEach(mergeSnapshot);
+    if (snapshots.some(snapshot => snapshot.total)) state.completed = true;
+    update();
 }
 
 function drawChart(canvas, series) {
@@ -149,23 +179,30 @@ function drawAll() {
 
 async function selectRun(runView) {
     if (state.events) state.events.close();
+    if (state.historyTimer) clearInterval(state.historyTimer);
     state.run = runView.run;
     state.completed = runView.completed;
-    const response = await fetch(`/api/v1/runs/${state.run.runId}/history`);
-    state.snapshots = await response.json();
+    state.snapshots = [];
     history.replaceState(null, '', `/?run=${state.run.runId}`);
     update();
-    state.events = new EventSource(`/api/v1/runs/${state.run.runId}/events`);
+    const runId = state.run.runId;
+    await refreshHistory(runId);
+    state.historyTimer = setInterval(() => {
+        refreshHistory(runId).catch(error => {
+            elements.subtitle.textContent = `Dashboard refresh error: ${error.message}`;
+        });
+    }, 2000);
+    state.events = new EventSource(`/api/v1/runs/${runId}/events`);
     state.events.addEventListener('snapshot', event => {
-        state.snapshots.push(JSON.parse(event.data));
-        if (state.snapshots.length > 3600) state.snapshots.shift();
+        mergeSnapshot(JSON.parse(event.data));
         update();
     });
     state.events.addEventListener('complete', () => { state.completed = true; update(); });
 }
 
 async function loadRuns() {
-    const response = await fetch('/api/v1/runs');
+    const response = await fetch('/api/v1/runs', {cache: 'no-store'});
+    if (!response.ok) throw new Error(`Runs request returned HTTP ${response.status}`);
     const runs = await response.json();
     runs.sort((a, b) => b.run.startedAt - a.run.startedAt);
     elements.runs.innerHTML = '';
