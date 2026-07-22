@@ -169,7 +169,7 @@ final class DashboardServerTest {
 
     @Test
     void browserConnectingDuringIdleGraceCancelsOriginalShutdown() throws Exception {
-        final Duration idleTimeout = Duration.ofMillis(500);
+        final Duration idleTimeout = Duration.ofSeconds(2);
         final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
@@ -179,20 +179,20 @@ final class DashboardServerTest {
             client.publish(snapshot("browser-grace-run", 1));
         }
 
-        Thread.sleep(250);
-        for (int refresh = 0; refresh < 6; refresh++) {
+        Thread.sleep(1000);
+        for (int refresh = 0; refresh < 16; refresh++) {
             post(baseUri.resolve("/api/v1/browser/connect"), "{\"browserId\":\"late-browser\"}");
             Thread.sleep(100);
         }
         assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
 
         post(baseUri.resolve("/api/v1/browser/disconnect"), "{\"browserId\":\"late-browser\"}");
-        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+        assertTimeoutPreemptively(Duration.ofSeconds(3), server::awaitTermination);
     }
 
     @Test
     void benchmarkConnectingDuringIdleGraceCancelsOriginalShutdown() throws Exception {
-        final Duration idleTimeout = Duration.ofMillis(500);
+        final Duration idleTimeout = Duration.ofSeconds(2);
         final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
@@ -202,9 +202,9 @@ final class DashboardServerTest {
             first.publish(snapshot("first-grace-run", 1));
         }
 
-        Thread.sleep(250);
+        Thread.sleep(1000);
         try (DashboardClient second = DashboardClient.connect(config(port), run("second-grace-run"))) {
-            Thread.sleep(400);
+            Thread.sleep(1500);
             assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
             second.publish(snapshot("second-grace-run", 2));
             assertEquals(1, waitForHistory(baseUri, "second-grace-run", 1).length);
