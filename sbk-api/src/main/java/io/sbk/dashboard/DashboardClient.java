@@ -283,7 +283,7 @@ public final class DashboardClient implements AutoCloseable {
     private static void startServer(DashboardConfig config) throws IOException {
         final String javaExecutable = resolveJavaExecutable();
         final ProcessBuilder builder = new ProcessBuilder(javaExecutable, "-XX:+UseCompactObjectHeaders", "-cp",
-                System.getProperty("java.class.path"), DashboardServerMain.class.getName(),
+                System.getProperty("java.class.path"), SbkDashboardServerMain.class.getName(),
                 "-host", config.host, "-port", Integer.toString(config.port),
                 "-retention", Integer.toString(config.retention));
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);

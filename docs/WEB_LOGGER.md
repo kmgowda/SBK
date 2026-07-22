@@ -18,7 +18,8 @@ limitations under the License.
 
 WebLogger displays SBK measurements in a local browser without Docker, Prometheus, or Grafana. It uses the same
 periodic and total measurements printed by SBK, so enabling it does not add measurement sampling or storage-driver
-work. The dashboard server is implemented with the JDK HTTP server, retains a bounded in-memory history, and sends
+work. The dashboard server runs as the `SbkDashboardServerMain` process, is implemented with the JDK HTTP server,
+retains a bounded in-memory history, and sends
 new summaries to browsers with server-sent events (SSE).
 The browser also synchronizes bounded history every two seconds, so graphs recover automatically if an SSE stream
 is delayed, interrupted, or unavailable through an HTTP intermediary.

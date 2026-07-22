@@ -14,12 +14,12 @@ import java.io.IOException;
 /**
  * Standalone entry point for the reusable local SBK dashboard server.
  */
-public abstract class DashboardServerMain {
+public abstract class SbkDashboardServerMain {
 
     /**
      * Creates a dashboard server entry point.
      */
-    public DashboardServerMain() {
+    public SbkDashboardServerMain() {
     }
 
     /**
