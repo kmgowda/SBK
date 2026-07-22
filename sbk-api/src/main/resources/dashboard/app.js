@@ -53,6 +53,11 @@ function duration(seconds) {
     return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
 }
 
+function elapsedSeconds(run, snapshot) {
+    if (snapshot.total) return snapshot.performance.seconds;
+    return Math.max(0, (snapshot.timestamp - run.startedAt) / 1000);
+}
+
 function percentile(snapshot, target) {
     const labels = snapshot.latency.percentileLabels;
     if (!labels.length) return 0;
@@ -75,7 +80,7 @@ function update() {
     const status = state.abandoned ? 'ABANDONED' : state.completed || snapshot.total ? 'COMPLETE' : 'RUNNING';
     elements.status.textContent = status;
     elements.status.className = `status ${status.toLowerCase()}`;
-    elements.elapsed.textContent = duration(snapshot.performance.seconds);
+    elements.elapsed.textContent = duration(elapsedSeconds(run, snapshot));
     elements.recordsRate.textContent = compact(snapshot.performance.recordsPerSec);
     elements.throughput.textContent = `${snapshot.performance.mbPerSec.toFixed(2)} MB/s`;
     elements.p99.textContent = `${compact(percentile(snapshot, 99))} ${run.timeUnit}`;
