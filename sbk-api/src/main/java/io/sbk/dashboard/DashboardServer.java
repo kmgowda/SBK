@@ -346,8 +346,9 @@ public final class DashboardServer implements AutoCloseable {
                 final RunState active = runs.get(activeRunId);
                 final String owner = active == null ? activeRunId
                         : active.run.source() + " run " + active.run.runId();
-                return "SBK dashboard is already in use by active " + owner
-                        + "; only one SBK, SBM, or SBK-GEM WebLogger benchmark may run at a time";
+                return "SBK dashboard port " + server.getAddress().getPort() + " is already serving active " + owner
+                        + "; only one SBK, SBM, or SBK-GEM WebLogger benchmark may use a dashboard port at a time. "
+                        + "Use '-dashboardport <different-port>' to start another SbkDashboardServerMain";
             }
             if (runs.putIfAbsent(run.runId(), new RunState(run, retention)) != null) {
                 return "Dashboard runId already exists: " + run.runId();

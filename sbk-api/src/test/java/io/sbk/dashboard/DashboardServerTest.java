@@ -111,8 +111,31 @@ final class DashboardServerTest {
                 final DashboardClient.DashboardBusyException exception = assertThrows(
                         DashboardClient.DashboardBusyException.class,
                         () -> DashboardClient.connect(config, run("competing-run")));
-                assertTrue(exception.getMessage().contains("already in use by active SBK run active-run"));
+                assertTrue(exception.getMessage().contains("dashboard port " + server.getAddress().getPort()));
+                assertTrue(exception.getMessage().contains("already serving active SBK run active-run"));
                 assertTrue(exception.getMessage().contains("only one SBK, SBM, or SBK-GEM"));
+                assertTrue(exception.getMessage().contains("-dashboardport <different-port>"));
+                assertTrue(exception.getMessage().contains("SbkDashboardServerMain"));
+            }
+        }
+    }
+
+    @Test
+    void allowsActiveBenchmarksOnDifferentDashboardPorts() throws Exception {
+        try (DashboardServer firstServer = new DashboardServer("127.0.0.1", 0, 2);
+             DashboardServer secondServer = new DashboardServer("127.0.0.1", 0, 2)) {
+            firstServer.start();
+            secondServer.start();
+            final URI firstBaseUri = URI.create("http://127.0.0.1:" + firstServer.getAddress().getPort());
+            final URI secondBaseUri = URI.create("http://127.0.0.1:" + secondServer.getAddress().getPort());
+            try (DashboardClient first = DashboardClient.connect(config(firstServer.getAddress().getPort()),
+                    run("first-port-run"));
+                 DashboardClient second = DashboardClient.connect(config(secondServer.getAddress().getPort()),
+                         run("second-port-run"))) {
+                first.publish(snapshot("first-port-run", 1));
+                second.publish(snapshot("second-port-run", 2));
+                assertEquals(1, waitForHistory(firstBaseUri, "first-port-run", 1).length);
+                assertEquals(1, waitForHistory(secondBaseUri, "second-port-run", 1).length);
             }
         }
     }

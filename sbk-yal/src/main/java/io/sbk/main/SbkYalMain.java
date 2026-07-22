@@ -11,6 +11,7 @@
 package io.sbk.main;
 
 import io.sbk.api.impl.SbkYal;
+import io.sbk.dashboard.DashboardClient.DashboardBusyException;
 import io.sbk.exception.HelpException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
@@ -40,6 +41,8 @@ public abstract class SbkYalMain {
         }
         try {
             SbkYal.run(args, null, null, null);
+        } catch (DashboardBusyException ex) {
+            System.exit(1);
         } catch (HelpException ex) {
             System.exit(0);
         } catch (UnrecognizedOptionException ex) {

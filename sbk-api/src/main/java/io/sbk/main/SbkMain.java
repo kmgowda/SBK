@@ -12,6 +12,7 @@ package io.sbk.main;
 
 import io.sbk.api.impl.Sbk;
 import io.sbk.config.Config;
+import io.sbk.dashboard.DashboardClient.DashboardBusyException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -40,6 +41,8 @@ public abstract class SbkMain {
         }
         try {
             Sbk.run(args, null, null, null);
+        } catch (DashboardBusyException ex) {
+            System.exit(1);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |

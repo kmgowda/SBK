@@ -12,6 +12,7 @@ package io.gem.main;
 
 import io.gem.api.impl.SbkGemYal;
 import io.gem.exception.SbkGemParameterException;
+import io.sbk.dashboard.DashboardClient.DashboardBusyException;
 import io.sbk.exception.HelpException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
@@ -46,6 +47,8 @@ public abstract class SbkGemYalMain {
         }
         try {
             SbkGemYal.run(args, null, null, null);
+        } catch (DashboardBusyException ex) {
+            System.exit(1);
         } catch (HelpException ex) {
             System.exit(0);
         } catch (UnrecognizedOptionException ex) {

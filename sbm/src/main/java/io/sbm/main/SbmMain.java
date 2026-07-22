@@ -10,6 +10,7 @@
 
 package io.sbm.main;
 
+import io.sbk.dashboard.DashboardClient.DashboardBusyException;
 import io.sbk.utils.SbkUtils;
 import io.sbm.api.impl.Sbm;
 import org.apache.commons.cli.ParseException;
@@ -44,6 +45,8 @@ public abstract class SbmMain {
         }
         try {
             Sbm.run(args, null, null);
+        } catch (DashboardBusyException ex) {
+            System.exit(1);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |

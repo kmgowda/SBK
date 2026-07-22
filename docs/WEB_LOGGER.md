@@ -98,7 +98,9 @@ incompatible dashboard on the configured port is never treated as the SBK dashbo
 
 One dashboard server accepts one active `WebLogger`, `SbmWebLogger`, or `GemWebLogger` benchmark at a time. This
 prevents unrelated runs from being presented as one active experiment. A second active benchmark exits with an
-ownership error identifying the current run.
+ownership error identifying the current run and occupied port, and recommends
+`-dashboardport <different-port>`. Selecting another port starts an independent `SbkDashboardServerMain`, allowing
+multiple dashboards to run in parallel without mixing their benchmark streams.
 
 The server lifecycle is:
 
