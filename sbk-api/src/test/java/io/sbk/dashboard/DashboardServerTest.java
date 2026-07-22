@@ -317,6 +317,13 @@ final class DashboardServerTest {
         assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
     }
 
+    @Test
+    void convertsDashboardMinutesToFiveSecondSnapshots() {
+        assertEquals(2160, SbkDashboardServerMain.retentionSnapshots(180));
+        assertEquals(12, SbkDashboardServerMain.retentionSnapshots(1));
+        assertThrows(IllegalArgumentException.class, () -> SbkDashboardServerMain.retentionSnapshots(0));
+    }
+
     private static DashboardSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {
         final long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
         DashboardSnapshot[] snapshots = new DashboardSnapshot[0];
@@ -348,7 +355,7 @@ final class DashboardServerTest {
         config.port = port;
         config.start = false;
         config.open = false;
-        config.retention = 2;
+        config.minutes = 1;
         config.name = "test";
         return config;
     }

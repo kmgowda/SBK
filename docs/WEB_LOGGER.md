@@ -87,7 +87,7 @@ Logger options appear only after selecting the WebLogger class. Treat generated 
 | `-dashboardport PORT` | `9720` | Dashboard HTTP port |
 | `-dashboardstart true\|false` | `true` | Start a compatible server when none is reachable |
 | `-dashboardopen true\|false` | `true` | Ask the local desktop to open the run URL |
-| `-dashboardretention N` | `3600` | Maximum snapshots retained for each run |
+| `-dashboardminutes N` | `180` | Minutes of snapshots retained for each run (three hours by default) |
 | `-dashboardname NAME` | empty | Human-readable name shown for the run |
 
 `-dashboardstart false` is useful when an operator manages the dashboard process separately. If no compatible

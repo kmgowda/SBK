@@ -31,7 +31,7 @@ final class GemWebLoggerTest {
         logger.addArgs(parameters);
         parameters.parseArgs(new String[]{"-class", "file", "-action", "r", "-dashboardhost", "127.0.0.1",
                 "-dashboardport", "9876", "-dashboardstart", "false", "-dashboardopen", "false",
-                "-dashboardretention", "42", "-dashboardname", "gem-test", "-time", "ns"});
+                "-dashboardminutes", "42", "-dashboardname", "gem-test", "-time", "ns"});
         logger.parseArgs(parameters);
 
         final String[] options = logger.getOptionsArgs();
@@ -39,6 +39,7 @@ final class GemWebLoggerTest {
         assertTrue(Arrays.asList(options).contains("-dashboardport"));
         assertEquals("9876", valueOf(parsed, "-dashboardport"));
         assertEquals("false", valueOf(parsed, "-dashboardstart"));
+        assertEquals("42", valueOf(parsed, "-dashboardminutes"));
         assertEquals("gem-test", valueOf(parsed, "-dashboardname"));
         assertTrue(Arrays.asList(new GemLoggerPackage("io.gem.logger").getClassNames())
                 .contains(GemWebLogger.class.getSimpleName()));

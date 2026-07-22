@@ -21,8 +21,8 @@ public final class DashboardConfig {
     public boolean start;
     /** Whether SBK should open the dashboard in the default browser. */
     public boolean open;
-    /** Maximum number of snapshots retained for each benchmark run. */
-    public int retention;
+    /** Number of minutes of snapshots retained for each benchmark run. */
+    public int minutes;
     /** Optional human-readable benchmark name. */
     public String name;
 

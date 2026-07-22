@@ -285,7 +285,7 @@ public final class DashboardClient implements AutoCloseable {
         final ProcessBuilder builder = new ProcessBuilder(javaExecutable, "-XX:+UseCompactObjectHeaders", "-cp",
                 System.getProperty("java.class.path"), SbkDashboardServerMain.class.getName(),
                 "-host", config.host, "-port", Integer.toString(config.port),
-                "-retention", Integer.toString(config.retention));
+                "-minutes", Integer.toString(config.minutes));
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);
         builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
         builder.redirectError(ProcessBuilder.Redirect.DISCARD);

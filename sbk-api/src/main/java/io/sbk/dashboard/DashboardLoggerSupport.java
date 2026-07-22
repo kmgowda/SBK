@@ -35,8 +35,8 @@ public final class DashboardLoggerSupport implements AutoCloseable {
     public static final String START_OPTION = "dashboardstart";
     /** Dashboard browser-open CLI option. */
     public static final String OPEN_OPTION = "dashboardopen";
-    /** Dashboard retention CLI option. */
-    public static final String RETENTION_OPTION = "dashboardretention";
+    /** Dashboard history duration CLI option. */
+    public static final String MINUTES_OPTION = "dashboardminutes";
     /** Dashboard run-name CLI option. */
     public static final String NAME_OPTION = "dashboardname";
     private static final String CONFIG_FILE = "dashboard.properties";
@@ -62,7 +62,7 @@ public final class DashboardLoggerSupport implements AutoCloseable {
         params.addOption(PORT_OPTION, true, "Local dashboard port; default: " + config.port);
         params.addOption(START_OPTION, true, "Start dashboard server when unavailable; default: " + config.start);
         params.addOption(OPEN_OPTION, true, "Open dashboard in the local browser; default: " + config.open);
-        params.addOption(RETENTION_OPTION, true, "Snapshots retained per run; default: " + config.retention);
+        params.addOption(MINUTES_OPTION, true, "Minutes of snapshots retained per run; default: " + config.minutes);
         params.addOption(NAME_OPTION, true, "Optional dashboard run name; default: empty");
     }
 
@@ -78,14 +78,14 @@ public final class DashboardLoggerSupport implements AutoCloseable {
         config.port = Integer.parseInt(params.getOptionValue(PORT_OPTION, Integer.toString(config.port)));
         config.start = Boolean.parseBoolean(params.getOptionValue(START_OPTION, Boolean.toString(config.start)));
         config.open = Boolean.parseBoolean(params.getOptionValue(OPEN_OPTION, Boolean.toString(config.open)));
-        config.retention = Integer.parseInt(params.getOptionValue(RETENTION_OPTION,
-                Integer.toString(config.retention)));
+        config.minutes = Integer.parseInt(params.getOptionValue(MINUTES_OPTION,
+                Integer.toString(config.minutes)));
         config.name = params.getOptionValue(NAME_OPTION, Objects.requireNonNullElse(config.name, ""));
         if (config.port < 1 || config.port > 65535) {
             throw new IllegalArgumentException("Dashboard port must be between 1 and 65535");
         }
-        if (config.retention < 1) {
-            throw new IllegalArgumentException("Dashboard retention must be greater than zero");
+        if (config.minutes < 1) {
+            throw new IllegalArgumentException("Dashboard history minutes must be greater than zero");
         }
     }
 
@@ -209,7 +209,7 @@ public final class DashboardLoggerSupport implements AutoCloseable {
      */
     public String[] getOptionsArgs() {
         return new String[]{"-" + HOST_OPTION, "-" + PORT_OPTION, "-" + START_OPTION, "-" + OPEN_OPTION,
-                "-" + RETENTION_OPTION, "-" + NAME_OPTION};
+                "-" + MINUTES_OPTION, "-" + NAME_OPTION};
     }
 
     /**
@@ -221,7 +221,7 @@ public final class DashboardLoggerSupport implements AutoCloseable {
         ensureConfig();
         return new String[]{"-" + HOST_OPTION, config.host, "-" + PORT_OPTION, Integer.toString(config.port),
                 "-" + START_OPTION, Boolean.toString(config.start), "-" + OPEN_OPTION,
-                Boolean.toString(config.open), "-" + RETENTION_OPTION, Integer.toString(config.retention),
+                Boolean.toString(config.open), "-" + MINUTES_OPTION, Integer.toString(config.minutes),
                 "-" + NAME_OPTION, Objects.requireNonNullElse(config.name, "")};
     }
 

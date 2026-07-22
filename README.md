@@ -225,8 +225,9 @@ match between preparation and reading:
 ```
 
 SBK opens `http://127.0.0.1:9720` in the default browser. By default, the lightweight Java server accepts plain HTTP
-on all network interfaces at port 9720, retains bounded history in
-memory and streams new summaries with server-sent events. A later SBK process reuses a compatible server already on
+on all network interfaces at port 9720, retains the latest 180 minutes of snapshots in
+memory and streams new summaries with server-sent events. Change that duration with `-dashboardminutes N`.
+A later SBK process reuses a compatible server already on
 that port. Startup prints copy-paste dashboard links for loopback, hostname, and available public/private host IPv4
 addresses. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
 WebLogger benchmark already owns it. Completed graphs remain available while a browser is connected; after the

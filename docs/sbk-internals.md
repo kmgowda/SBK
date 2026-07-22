@@ -2272,8 +2272,9 @@ used for loggers, so adding a new one is purely additive.
 `WebLogger`, `SbmWebLogger`, and `GemWebLogger` use the same dashboard client
 and server protocol. The logger publishes the already-computed periodic and
 total summaries; it does not sample storage operations or insert HTTP work into
-the writer/reader hot path. The server keeps a bounded history and streams new
-summaries to browsers with server-sent events (SSE).
+the writer/reader hot path. The server keeps a bounded history--180 minutes by
+default, configurable with `-dashboardminutes`--and streams new summaries to
+browsers with server-sent events (SSE).
 
 ```mermaid
 flowchart LR
