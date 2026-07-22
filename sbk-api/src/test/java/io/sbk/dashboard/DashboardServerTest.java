@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 final class DashboardServerTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
     @Test
     void reusesRunningServerAndRetainsOnlyConfiguredHistory() throws Exception {
@@ -174,10 +175,11 @@ final class DashboardServerTest {
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
-        try (DashboardClient client = DashboardClient.connect(config(server.getAddress().getPort()),
-                run("browser-grace-run"))) {
-            client.publish(snapshot("browser-grace-run", 1));
-        }
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("browser-grace-run"))).statusCode());
+        assertEquals(204, post(baseUri.resolve("/api/v1/runs/browser-grace-run/snapshots"),
+                MAPPER.writeValueAsString(snapshot("browser-grace-run", 1))).statusCode());
+        assertEquals(204, post(baseUri.resolve("/api/v1/runs/browser-grace-run/complete"), "{}").statusCode());
 
         Thread.sleep(1000);
         for (int refresh = 0; refresh < 16; refresh++) {
@@ -329,12 +331,12 @@ final class DashboardServerTest {
     }
 
     private static HttpResponse<String> get(URI uri) throws Exception {
-        return HttpClient.newHttpClient().send(HttpRequest.newBuilder(uri).GET().build(),
+        return HTTP_CLIENT.send(HttpRequest.newBuilder(uri).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
     }
 
     private static HttpResponse<String> post(URI uri, String body) throws Exception {
-        return HttpClient.newHttpClient().send(HttpRequest.newBuilder(uri)
+        return HTTP_CLIENT.send(HttpRequest.newBuilder(uri)
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(body)).build(),
                 HttpResponse.BodyHandlers.ofString());
