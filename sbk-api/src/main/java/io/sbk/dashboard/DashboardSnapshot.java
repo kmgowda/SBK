@@ -14,13 +14,12 @@ package io.sbk.dashboard;
  *
  * @param runId       benchmark run identifier
  * @param timestamp   snapshot time in epoch milliseconds
- * @param total       whether this is the final cumulative snapshot
  * @param workers     active and maximum worker/connection counts
  * @param requests    request, pending-operation, and timeout statistics
  * @param performance completed data and throughput statistics
  * @param latency     latency distribution summary
  */
-public record DashboardSnapshot(String runId, long timestamp, boolean total, WorkerMetrics workers,
+public record DashboardSnapshot(String runId, long timestamp, WorkerMetrics workers,
                                 RequestMetrics requests, PerformanceMetrics performance,
                                 LatencyMetrics latency) {
 

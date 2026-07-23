@@ -77,7 +77,7 @@ public class WebLogger extends CSVLogger {
                 readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
                 maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies,
                 percentileLatencyCounts);
-        publish(false, writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
+        publish(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
                 writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
                 readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
                 readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
@@ -108,17 +108,9 @@ public class WebLogger extends CSVLogger {
                 writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec, seconds, bytes, records,
                 recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard,
                 slc1, slc2, percentileLatencies, percentileLatencyCounts);
-        publish(true, writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
-                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
-                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords, writeResponsePendingBytes,
-                readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
-                writeReadRequestPendingBytes, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents,
-                readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency, minLatency,
-                maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies,
-                percentileLatencyCounts);
     }
 
-    private void publish(boolean total, int writers, int maxWriters, int readers, int maxReaders,
+    private void publish(int writers, int maxWriters, int readers, int maxReaders,
                          long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                          double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
                          long readRequestRecords, double readRequestRecordsPerSec,
@@ -130,7 +122,7 @@ public class WebLogger extends CSVLogger {
                          double recsPerSec, double mbPerSec, double avgLatency, long minLatency, long maxLatency,
                          long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
                          long[] percentileLatencies, long[] percentileLatencyCounts) {
-        dashboard.publish(total, 0, 0, writers, maxWriters, readers, maxReaders, writeRequestBytes,
+        dashboard.publish(0, 0, writers, maxWriters, readers, maxReaders, writeRequestBytes,
                 writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes,
                 readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords,
                 writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,

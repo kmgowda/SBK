@@ -170,14 +170,7 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                            double recsPerSec, double mbPerSec, double avgLatency, long minLatency,
                            long maxLatency, long invalid, long lowerDiscard, long higherDiscard,
                            long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        publishMetrics(writers, maxWriters, readers, maxReaders, writeRequestBytes, writeRequestMbPerSec,
-                writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes, readRequestMbPerSec,
-                readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords,
-                writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
-                writeReadRequestPendingRecords, writeReadRequestPendingBytes, writeTimeoutEvents,
-                writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec, seconds, bytes, records,
-                recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard,
-                slc1, slc2, percentileLatencies, percentileLatencyCounts);
+        // Prometheus gauges represent the latest regular reporting window; cumulative totals would distort them.
         String timestamp = getTimeStamp(reportTime);
         StringBuilder out = new StringBuilder(timestamp+" Total : " + SBM_PREFIX);
         appendConnections(out, connections, maxConnections);

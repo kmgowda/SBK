@@ -69,7 +69,10 @@ disable automatic browser opening and connect through an appropriate secure tunn
 
 The graphs show completed record rate and throughput, write/read request rates, worker and connection counts,
 pending requests, timeout and invalid-latency counts, average/minimum/maximum latency, and configured latency
-percentiles. The final total snapshot remains selectable after the benchmark finishes.
+percentiles. Every point represents one regular SBK reporting window (five seconds by default). Cumulative
+`printTotal` results produced at shutdown or by a total-buffer flush are deliberately excluded because mixing
+cumulative and interval values would distort the live graphs. The last interval snapshot remains selectable after
+the benchmark finishes.
 
 ## Dashboard options
 
@@ -108,7 +111,8 @@ The server lifecycle is:
 2. A compatible idle server is reused; another server process is not started.
 3. The active logger renews its run lease every 15 seconds. Publishing a measurement snapshot also renews the same
    lease, so normal reporting traffic needs no separate heartbeat.
-4. When the benchmark finishes normally, its bounded history and final snapshot remain in server memory.
+4. When the benchmark finishes normally, its bounded interval history remains in server memory. Completion is
+   tracked as run metadata rather than as a cumulative performance snapshot.
 5. If the benchmark process disappears without completing its run, one minute without a snapshot or logger
    heartbeat marks the run as abandoned and releases dashboard ownership. A new benchmark can then register.
 6. An open browser renews a separate lightweight lease every 15 seconds, keeping completed or abandoned graphs
