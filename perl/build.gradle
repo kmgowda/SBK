@@ -75,7 +75,7 @@ tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
         languageVersion = JavaLanguageVersion.of(25)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
-    args 'io.perl.benchmark.QueueBenchmark.*',
+    args 'io.perl.(benchmark.QueueBenchmark|api.impl.CQueueRetentionBenchmark).*',
             '-wi', '3',
             '-i', '5',
             '-f', '3',
@@ -124,6 +124,14 @@ tasks.register('cqueuePerformanceTest') {
         def jdkMpsc = result(
                 'io.perl.benchmark.QueueBenchmark.jdkFourProducersOneConsumer')
                 .secondaryMetrics.jdkMpscProducer
+        def cqueueAllocation = result(
+                'io.perl.benchmark.QueueBenchmark.cqueueRoundTrip')
+                .secondaryMetrics['gc.alloc.rate.norm']
+        def jdkAllocation = result(
+                'io.perl.benchmark.QueueBenchmark.jdkQueueRoundTrip')
+                .secondaryMetrics['gc.alloc.rate.norm']
+        def retention = result(
+                'io.perl.api.impl.CQueueRetentionBenchmark.boundedRetiredHeap')
 
         if (cqueueLatency.score >= jdkLatency.score * 0.95) {
             throw new GradleException(String.format(
@@ -143,10 +151,21 @@ tasks.register('cqueuePerformanceTest') {
             throw new GradleException(
                     'CQueue and JDK MPSC throughput confidence intervals overlap')
         }
+        if (cqueueAllocation.score > jdkAllocation.score + 1.0) {
+            throw new GradleException(String.format(
+                    'CQueue allocates %.3f B/op versus JDK %.3f B/op',
+                    cqueueAllocation.score, jdkAllocation.score))
+        }
+        if (retention.primaryMetric.score <= 0) {
+            throw new GradleException(
+                    'CQueue stalled-producer retained-heap benchmark did not make progress')
+        }
 
         logger.lifecycle(String.format(
-                'CQueue performance verified: %.3f versus %.3f ns/op; %.0f versus %.0f MPSC ops/s',
-                cqueueLatency.score, jdkLatency.score, cqueueMpsc.score, jdkMpsc.score))
+                'CQueue verified: %.3f versus %.3f ns/op; %.0f versus %.0f MPSC ops/s; '
+                        + '%.3f versus %.3f B/op; stalled-producer heap remained bounded',
+                cqueueLatency.score, jdkLatency.score, cqueueMpsc.score, jdkMpsc.score,
+                cqueueAllocation.score, jdkAllocation.score))
         logger.lifecycle("JMH report: ${cqueuePerformanceReport.get().asFile}")
     }
 }

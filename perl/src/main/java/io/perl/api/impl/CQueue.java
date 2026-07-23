@@ -56,18 +56,16 @@ import java.util.Objects;
  * unreachable as the consumer advances. The padded head and tail objects add
  * constant per-queue memory overhead, not per-element overhead.</p>
  *
- * <p>This specialization does <strong>not</strong> provide better reclamation
- * in every workload. JDK 25 {@code ConcurrentLinkedQueue} self-links retired
- * heads and unlinks dead nodes to prevent a stalled traversal or iterator
- * from retaining a long linked chain and to reduce cross-generational links.
- * {@code CQueue} has no equivalent self-link recovery: a producer suspended
- * while holding a stale node can keep consumed successor nodes reachable
- * until that producer resumes or exits. The JDK queue is therefore the safer
- * choice when threads may stall indefinitely or general-purpose collection
- * operations are required. PerL's production queue array currently uses the
- * JDK queue for this stronger GC-retention behavior; {@code CQueue} is intended
- * for controlled MPSC deployments where lower coordination cost is the
- * priority.</p>
+ * <p>Retired heads are self-linked in batches of
+ * {@value #RETIRE_BATCH_SIZE}. A producer that was suspended while holding a
+ * retired node detects the self-link and restarts from a release-published
+ * recovery head. Batching amortizes the extra retirement store while bounding
+ * the chain retained by a stale producer cursor. JDK 25
+ * {@code ConcurrentLinkedQueue} still provides the stronger general-purpose
+ * reclamation implementation because it also handles iterators, multiple
+ * consumers, and interior dead-node removal. PerL's production queue array
+ * currently uses that JDK queue; {@code CQueue} is intended for controlled
+ * MPSC deployments where lower coordination cost is the priority.</p>
  *
  * <h2>Usage constraints</h2>
  * <ul>
@@ -82,6 +80,8 @@ import java.util.Objects;
  * @param <T> queued element type
  */
 final public class CQueue<T> implements Queue<T> {
+
+    static final int RETIRE_BATCH_SIZE = 16;
 
     static final private class Node<T> {
         @SuppressWarnings("unused")
@@ -112,6 +112,9 @@ final public class CQueue<T> implements Queue<T> {
         @SuppressWarnings("unused")
         private long pad06;
         private Node<T> head;
+        private Node<T> recoveryHead;
+        private Node<T> retirementBoundary;
+        private int retiredNodes;
         @SuppressWarnings("unused")
         private long pad10;
         @SuppressWarnings("unused")
@@ -166,6 +169,7 @@ final public class CQueue<T> implements Queue<T> {
     private static final VarHandle TAIL;
     private static final VarHandle ITEM;
     private static final VarHandle NEXT;
+    private static final VarHandle RECOVERY_HEAD;
 
     private final HeadRef<T> headRef;
     private final TailRef<T> tailRef;
@@ -176,6 +180,8 @@ final public class CQueue<T> implements Queue<T> {
             TAIL = l.findVarHandle(TailRef.class, "tail", CQueue.Node.class);
             ITEM = l.findVarHandle(Node.class, "item", Object.class);
             NEXT = l.findVarHandle(CQueue.Node.class, "next", CQueue.Node.class);
+            RECOVERY_HEAD = l.findVarHandle(
+                    HeadRef.class, "recoveryHead", CQueue.Node.class);
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -189,6 +195,8 @@ final public class CQueue<T> implements Queue<T> {
         this.headRef = new HeadRef<>();
         this.tailRef = new TailRef<>();
         this.headRef.head = sentinel;
+        this.headRef.recoveryHead = sentinel;
+        this.headRef.retirementBoundary = sentinel;
         this.tailRef.tail = sentinel;
     }
 
@@ -204,15 +212,28 @@ final public class CQueue<T> implements Queue<T> {
         final T item = (T) ITEM.get(next);
         ITEM.set(next, null);
         headRef.head = next;
+        final int retiredNodes = headRef.retiredNodes + 1;
+        if (retiredNodes == RETIRE_BATCH_SIZE) {
+            retireTo(next);
+        } else {
+            headRef.retiredNodes = retiredNodes;
+        }
         return item;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean add(T data) {
+        return add(data, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    boolean add(T data, Runnable afterTailRead) {
         final Node<T> newNode = new Node<>(Objects.requireNonNull(data, "data"));
         Node<T> tailNode = (Node<T>) TAIL.getAcquire(tailRef);
         Node<T> current = tailNode;
+        if (afterTailRead != null) {
+            afterTailRead.run();
+        }
 
         while (true) {
             final Node<T> next = (Node<T>) NEXT.getAcquire(current);
@@ -223,6 +244,12 @@ final public class CQueue<T> implements Queue<T> {
                     }
                     return true;
                 }
+            } else if (next == current) {
+                final Node<T> recoveryHead =
+                        (Node<T>) RECOVERY_HEAD.getAcquire(headRef);
+                TAIL.weakCompareAndSetRelease(tailRef, tailNode, recoveryHead);
+                tailNode = recoveryHead;
+                current = recoveryHead;
             } else {
                 final Node<T> latestTail = (Node<T>) TAIL.getAcquire(tailRef);
                 if (current != tailNode && tailNode != latestTail) {
@@ -240,5 +267,32 @@ final public class CQueue<T> implements Queue<T> {
         while (poll() != null) {
             // Drain through the normal single-consumer path so the queue remains reusable.
         }
+        if (headRef.retiredNodes != 0) {
+            retireTo(headRef.head);
+        }
+    }
+
+    int retainedRetiredNodeCount() {
+        Node<T> node = headRef.retirementBoundary;
+        final Node<T> head = headRef.head;
+        int count = 0;
+        while (node != head && count < RETIRE_BATCH_SIZE) {
+            @SuppressWarnings("unchecked")
+            final Node<T> next = (Node<T>) NEXT.getAcquire(node);
+            if (next == null || next == node) {
+                break;
+            }
+            node = next;
+            count++;
+        }
+        return count;
+    }
+
+    private void retireTo(Node<T> newBoundary) {
+        final Node<T> oldBoundary = headRef.retirementBoundary;
+        RECOVERY_HEAD.setRelease(headRef, newBoundary);
+        headRef.retirementBoundary = newBoundary;
+        headRef.retiredNodes = 0;
+        NEXT.setRelease(oldBoundary, oldBoundary);
     }
 }

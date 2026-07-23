@@ -63,16 +63,16 @@ that `CQueue` produces less garbage:
 |---|---|---|
 | Allocation per enqueue | One linked node | One linked node |
 | Payload release after poll | Clears the consumed item | Clears the consumed item |
-| Retired-head handling | Becomes unreachable as the single consumer advances | CAS-advances the head and self-links the retired head |
-| Stalled traversal retention | A suspended producer holding a stale node can retain consumed successors temporarily | Self-links redirect stale traversals and prevent long-chain retention |
+| Retired-head handling | Self-links one retirement boundary every 16 dequeues | CAS-advances the head and self-links the retired head |
+| Stalled traversal retention | Producers detect a self-link and restart from a published recovery head; retained retired chains are bounded by the batch | Self-links redirect stale traversals and prevent long-chain retention |
 | Interior dead-node cleanup | Not applicable; operation is unsupported | Traversals opportunistically unlink dead nodes |
 | Per-queue overhead | Padded head and tail holders | Unpadded head and tail references |
 
-Therefore, JDK 25 `ConcurrentLinkedQueue` has the stronger general-purpose GC
-handling and retention defenses. `CQueue` has lower coordination cost for a
-strictly controlled MPSC topology, but it still allocates one node for every
-record. A producer that may remain suspended indefinitely is a reason to
-prefer the JDK queue.
+JDK 25 `ConcurrentLinkedQueue` remains the stronger general-purpose GC
+implementation because it also handles iterators, multiple consumers, and
+interior dead-node removal. `CQueue` amortizes its reclamation work over
+16 dequeues and allows a suspended producer to recover without adding a
+consumer compare-and-set. It still allocates one node for every record.
 
 Production `CQueuePerl` currently uses `ConcurrentLinkedQueueArray` for the
 stronger reclamation behavior. `CQueueArray` remains available for controlled
@@ -116,10 +116,14 @@ least 2% higher four-producer/one-consumer throughput, with non-overlapping
 99.9% confidence intervals. Its JSON report is written to
 `perl/build/reports/jmh/cqueue-performance.json`. The report also contains JMH
 GC-profiler metrics such as allocation rate and normalized bytes allocated.
-Compare normalized allocation for equivalent operations; a faster queue can
-show a higher allocation rate per second merely because it completes more
-operations. This environment-sensitive test is intentionally separate from
-`check`; correctness and stress tests remain part of the normal build.
+It verifies that normalized CQueue allocation does not exceed the equivalent
+JDK operation by more than one byte. A stalled-producer soak benchmark also
+checks that the retired-node chain remains below the 16-node retirement batch
+while continuing to allocate and reclaim nodes. Compare normalized allocation
+for equivalent operations; a faster queue can show a higher allocation rate
+per second merely because it completes more operations. This
+environment-sensitive test is intentionally separate from `check`;
+correctness and stress tests remain part of the normal build.
 
 ## Use as a library
 

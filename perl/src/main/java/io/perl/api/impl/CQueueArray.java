@@ -16,10 +16,11 @@ import io.perl.api.QueueArray;
  *
  * <p>This implementation is retained for controlled performance experiments.
  * Production PerL uses {@link ConcurrentLinkedQueueArray}: although both
- * implementations allocate one node per enqueue, the JDK queue self-links
- * retired heads and provides stronger protection against linked-node retention
- * when a participating thread stalls. Each index in this array must still have
- * exactly one consumer.</p>
+ * implementations allocate one node per enqueue and both recover from stale
+ * retired heads, the JDK queue also covers multiple consumers, iterators, and
+ * interior dead-node removal. {@code CQueue} instead amortizes self-linking over
+ * {@value CQueue#RETIRE_BATCH_SIZE} dequeues for its narrower MPSC contract.
+ * Each index in this array must still have exactly one consumer.</p>
  *
  * @param <T> queued element type
  */
