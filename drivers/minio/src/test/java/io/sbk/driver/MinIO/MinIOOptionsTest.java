@@ -15,6 +15,7 @@ import io.sbk.params.impl.SbkDriversParameters;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -90,6 +91,13 @@ public class MinIOOptionsTest {
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
                         "-partition-count", "2", "-partition-index", "2"));
+    }
+
+    @Test
+    public void endpointTransportDefaultsToPlainHttp() {
+        assertEquals("http://node1:9000", MinIO.normalizeEndpoint("node1:9000"));
+        assertEquals("http://node2:9000", MinIO.normalizeEndpoint(" http://node2:9000 "));
+        assertEquals("https://node3:9443", MinIO.normalizeEndpoint("https://node3:9443"));
     }
 
     private static void parse(String... args) throws Exception {

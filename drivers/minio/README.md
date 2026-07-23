@@ -168,10 +168,12 @@ configured):
 
 The launchable script will be at `./build/install/sbk/bin/sbk`.
 
-Smoke-test against MinIO's public sandbox `play.min.io` (no credentials needed):
+Smoke-test against MinIO's public sandbox `play.min.io` (no credentials
+needed). The public sandbox accepts HTTPS only, so opt in explicitly:
 
 ```bash
-./build/install/sbk/bin/sbk -class minio -writers 1 -size 100 -seconds 30
+./build/install/sbk/bin/sbk -class minio -url https://play.min.io \
+  -writers 1 -size 100 -seconds 30
 ```
 
 What you'll see in the log (the columns are explained in
@@ -215,14 +217,14 @@ Command-line flags override the properties file.
 
 | Flag | Default | Purpose |
 |---|---|---|
-| `-url <url>` | `https://play.min.io` | S3 endpoint URL, including scheme and port |
-| `-endpoints <csv>` | empty | Optional endpoint pool. Workers are assigned round-robin; setup and catalog discovery use the first endpoint. |
+| `-url <url>` | `http://play.min.io` | S3 endpoint URL. Plain HTTP is the default; a value without a scheme is prefixed with `http://`. Use an explicit `https://` URL to enable TLS. |
+| `-endpoints <csv>` | empty | Optional endpoint pool. Values without schemes use plain HTTP. Workers are assigned round-robin; setup and catalog discovery use the first endpoint. |
 | `-bucket <name>` | `sbk` | Bucket to read / write |
 | `-key <access-key>` | (play.min.io sandbox key) | S3 access key |
 | `-secret <secret-key>` | (play.min.io sandbox secret) | S3 secret key. The value is never echoed by `-help`. |
 | `-region <region>` | `us-east-1` (driver default) | AWS region for SigV4 signing. **Always set** so the SDK skips `GetBucketLocation`, which many non-AWS backends mishandle. |
 | `-recreate true|false` | `false` | Destructively empty and recreate the bucket before a writer run. Mixed writer/reader runs do not override this safety setting. |
-| `-insecure true|false` | `false` | Skip TLS certificate validation. Enable explicitly only for lab clusters with self-signed certificates. |
+| `-insecure true|false` | `false` | Skip certificate validation for explicit HTTPS endpoints. This does not select HTTP; transport is controlled by each endpoint URL scheme. |
 | `-auth-version 2|4` | `4` | S3 signature version. The MinIO SDK is **always SigV4**; `2` is accepted but logs a warning and falls back to SigV4. |
 
 ### Object naming
@@ -407,22 +409,26 @@ you need raw single-request service latency.
 
 ### 1. `play.min.io` (public sandbox)
 
-Zero-config smoke test. Use this first to confirm the driver and your network
-work end-to-end before pointing at a real cluster.
+Use this first to confirm the driver and your network work end-to-end before
+pointing at a real cluster. The public sandbox does not listen on plain HTTP,
+so its HTTPS URL must be selected explicitly.
 
 ```bash
 # Write benchmark, 30 seconds, 100-byte objects, 1 client
-./build/install/sbk/bin/sbk -class minio -writers 1 -size 100 -seconds 30
+./build/install/sbk/bin/sbk -class minio -url https://play.min.io \
+  -writers 1 -size 100 -seconds 30
 ```
 
 ```bash
 # Read benchmark over the objects you just wrote
-./build/install/sbk/bin/sbk -class minio -readers 1 -size 100 -seconds 30
+./build/install/sbk/bin/sbk -class minio -url https://play.min.io \
+  -readers 1 -size 100 -seconds 30
 ```
 
 The driver ships with `play.min.io` credentials baked into
-[`minio.properties`](src/main/resources/minio.properties), so `-url`, `-key`,
-`-secret` can be omitted for this scenario.
+[`minio.properties`](src/main/resources/minio.properties), so `-key` and
+`-secret` can be omitted for this scenario. The explicit `-url` overrides
+SBK's plain-HTTP transport default.
 
 ### 2. Local MinIO server in Docker
 

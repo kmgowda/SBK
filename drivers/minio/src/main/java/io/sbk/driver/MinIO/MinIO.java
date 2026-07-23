@@ -102,7 +102,8 @@ public class MinIO implements Storage<byte[]> {
         }
 
         // Connection
-        params.addOption("url",      true, "S3 endpoint URL, default: " + config.url);
+        params.addOption("url",      true, "S3 endpoint URL; values without a scheme use plain HTTP,"
+                + " default: " + config.url);
         params.addOption("endpoints", true, "Comma-separated S3 endpoints distributed across workers,"
                 + " default: '" + nullToEmpty(config.endpoints) + "'");
         params.addOption("bucket",   true, "Bucket name, default: " + config.bucketName);
@@ -111,7 +112,8 @@ public class MinIO implements Storage<byte[]> {
                 + (nullToEmpty(config.secretKey).isEmpty() ? "not configured" : "configured"));
         params.addOption("region",   true, "AWS region (SigV4), default: '" + nullToEmpty(config.region) + "'");
         params.addOption("recreate", true, "Recreate bucket if present, default: " + config.reCreate);
-        params.addOption("insecure", true, "Skip TLS cert validation, default: " + config.insecure);
+        params.addOption("insecure", true, "Skip certificate validation for explicit HTTPS endpoints,"
+                + " default: " + config.insecure);
 
         // Workload
         params.addOption("write-operation", true, "Writer S3 operation [put|update|copy|delete|tag-set"
@@ -905,7 +907,18 @@ public class MinIO implements Storage<byte[]> {
 
     private List<String> configuredEndpoints() {
         List<String> values = parseList(config.endpoints);
-        return values.isEmpty() ? List.of(config.url) : values;
+        return (values.isEmpty() ? List.of(config.url) : values).stream()
+                .map(MinIO::normalizeEndpoint)
+                .toList();
+    }
+
+    static String normalizeEndpoint(String endpoint) {
+        String value = endpoint.trim();
+        if (value.regionMatches(true, 0, "http://", 0, "http://".length())
+                || value.regionMatches(true, 0, "https://", 0, "https://".length())) {
+            return value;
+        }
+        return "http://" + value;
     }
 
     private int globalAsyncLimit() {
