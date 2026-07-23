@@ -216,12 +216,13 @@ Command-line flags override the properties file.
 | Flag | Default | Purpose |
 |---|---|---|
 | `-url <url>` | `https://play.min.io` | S3 endpoint URL, including scheme and port |
+| `-endpoints <csv>` | empty | Optional endpoint pool. Workers are assigned round-robin; setup and catalog discovery use the first endpoint. |
 | `-bucket <name>` | `sbk` | Bucket to read / write |
 | `-key <access-key>` | (play.min.io sandbox key) | S3 access key |
-| `-secret <secret-key>` | (play.min.io sandbox secret) | S3 secret key |
+| `-secret <secret-key>` | (play.min.io sandbox secret) | S3 secret key. The value is never echoed by `-help`. |
 | `-region <region>` | `us-east-1` (driver default) | AWS region for SigV4 signing. **Always set** so the SDK skips `GetBucketLocation`, which many non-AWS backends mishandle. |
-| `-recreate true|false` | `false` (auto `true` if both writers and readers given) | Drop and recreate the bucket on `openStorage` |
-| `-insecure true|false` | `true` | Skip TLS certificate validation. Useful for lab clusters with self-signed certs. |
+| `-recreate true|false` | `false` | Destructively empty and recreate the bucket before a writer run. Mixed writer/reader runs do not override this safety setting. |
+| `-insecure true|false` | `false` | Skip TLS certificate validation. Enable explicitly only for lab clusters with self-signed certificates. |
 | `-auth-version 2|4` | `4` | S3 signature version. The MinIO SDK is **always SigV4**; `2` is accepted but logs a warning and falls back to SigV4. |
 
 ### Object naming
@@ -238,6 +239,12 @@ Writers execute the operation selected by `-write-operation`; readers execute
 the operation selected by `-read-operation`. Each timed record is one logical
 operation. Every S3 request is constructed and executed by MinIO SDK builders
 and clients—the driver does not contain a separate S3 protocol implementation.
+
+Use `-write-mix "put=80,copy=20"` or
+`-read-mix "get=90,stat=10"` for deterministic weighted workloads. Weights
+need not add to 100. Each worker follows an exact repeating weighted cycle,
+with a worker-specific starting position; writer mixes may contain only
+mutating operations and reader mixes only read operations.
 
 | Flag/value | Worker | MinIO SDK operation | Existing objects required? |
 |---|---|---|---|
@@ -260,10 +267,11 @@ and clients—the driver does not contain a separate S3 protocol implementation.
 `create`, `overwrite`, `head`, and `range-read` are accepted aliases for
 `put`, `update`, `stat`, and `range-get`.
 
-The object catalog is loaded once when storage opens. This prevents an
-unmeasured LIST or HEAD request from being added before every timed GET. In a
-combined PUT/GET run, completed PUTs are published to readers through a
-blocking queue.
+The object catalog is loaded once when an operation needs existing objects.
+Pure PUT, LIST, and bucket workloads avoid that startup scan. This prevents an
+unmeasured LIST or HEAD request from being added before every timed GET without
+making write-only startup proportional to the bucket size. In a combined
+PUT/GET run, completed PUTs are published to readers through a blocking queue.
 
 ### Bounded asynchronous mode
 
@@ -271,13 +279,18 @@ blocking queue.
 |---|---|---|
 | `-async true|false` | `false` | Select `MinioAsyncClient` instead of synchronous operations |
 | `-async-depth <1..1024>` | `32` | Maximum in-flight SDK futures **per SBK worker** |
+| `-async-max-inflight <n>` | `0` (auto) | Process-wide in-flight ceiling shared by all workers. Auto derives `workers × async-depth`. |
+| `-async-max-memory-mb <MiB>` | `1024` | Reject a configuration whose conservative async-buffer estimate exceeds this budget; zero disables the guard. |
 
-Async mode applies backpressure before latency timing begins. Thus the
+Async mode applies worker-local and process-wide backpressure before latency
+timing begins. Thus the
 reported latency measures the remote S3 operation rather than local waiting
-for a concurrency slot. Memory remains bounded: PUT has at most
-`writers × async-depth` payload buffers and GET has the same number of reusable
-64 KiB response buffers. Start with a small depth such as 4 or 8 and increase
-it until throughput stops improving or tail latency becomes unacceptable.
+for a concurrency slot. Memory remains bounded by `-async-max-inflight`, and
+startup rejects an obviously unsafe buffer budget before connecting. PUT
+retains one object payload per in-flight request; GET retains a reusable
+64 KiB drain buffer per in-flight request. Start with a small depth such as 4
+or 8 and increase it until throughput stops improving or tail latency becomes
+unacceptable.
 
 The shared OkHttp dispatcher is also configurable:
 
@@ -298,6 +311,12 @@ either request-limit option is zero.
 | `-range-offset <bytes>` | `0` | First byte of a ranged GET |
 | `-range-length <bytes>` | `0` | Bytes per ranged GET; zero uses SBK `-size` |
 | `-list-max-keys <1..1000>` | `1000` | Maximum entries consumed by each timed LIST |
+| `-list-prefixes <csv>` | empty | Prefixes assigned round-robin across LIST readers, preventing every reader from scanning the same keyspace. |
+| `-object-file <path>` | empty | Load the startup catalog from local `key,size[,versionId]` CSV instead of listing S3. Blank lines and `#` comments are allowed. |
+| `-catalog-max-objects <n>` | `1000000` | Bound discovered or manifest object references retained in memory. |
+| `-partition-count <n>` | `1` | Split existing-object catalogs by stable key hash across distributed SBK/SBK-GEM processes. |
+| `-partition-index <0..n-1>` | `0` | Partition owned by this process. Generated keys include the partition when count is greater than one. |
+| `-run-manifest <path>` | empty | Write a credential-free JSON record of the effective endpoint count, bucket, operations, workers, size, async mode, and partition. |
 | `-bucket-targets <csv>` | empty | Explicit buckets for delete/stat; required for bucket delete |
 | `-bucket-prefix <p>` | `sbk-benchmark` | Prefix for unique bucket-create names |
 | `-cleanup-created-buckets true|false` | `true` | Remove successfully generated empty buckets at shutdown |
@@ -318,7 +337,7 @@ either request-limit option is zero.
 | Flag | Default | Purpose |
 |---|---|---|
 | `-part-size <bytes>` | `0` (disabled) | Trigger multipart upload when object size ≥ part size. Valid range: **5 MiB ≤ partSize ≤ 5 GiB** (S3 spec). |
-| `-mpu-concurrent-parts <n>` | `0` | Concurrent parts in flight per object. Accepted for forward-compat but **info-only with the current MinIO SDK 8.5.x** (the SDK manages multipart parallelism internally based on part size). |
+| `-mpu-concurrent-parts <n>` | `0` | Reserved for a future public MinIO SDK concurrent-parts API. It is currently information-only; MinIO SDK 8.5.17 uploads the parts of one `putObject` sequentially. Use multiple SBK writers or async object operations for parallelism. |
 
 ### S3 checksum validation
 
@@ -330,7 +349,7 @@ either request-limit option is zero.
 
 | Flag | Default | Purpose |
 |---|---|---|
-| `-tagging-enabled true|false` | `false` | When `true`, every PUT is followed by `SetObjectTags` |
+| `-tagging-enabled true|false` | `false` | Attach tags in the same native `PutObjectArgs` request. Use `-write-operation tag-set` to benchmark a separate `SetObjectTags` operation. |
 | `-tagging-tags "k1=v1,k2=v2,..."` | `""` | Tag set, applied to every written object |
 
 ### Bucket versioning
@@ -348,6 +367,20 @@ Useful when benchmarking storage with inline compression or deduplication.
 |---|---|---|
 | `-data-compressibility <0..100>` | `0` | Target compressibility percentage. Each 4 KiB chunk is split: `100-N`% random bytes (incompressible), `N`% zero bytes (highly compressible). `0` = fully random, `100` = all zeros. |
 | `-data-dedupable true|false` | `true` | When `false`, stamps every 4 KiB chunk with a 16-byte `(objectId, chunkOffset)` header that defeats inline deduplication. |
+| `-data-seed <long>` | `0` (random) | Non-zero seed makes generated payload streams reproducible for controlled comparisons. |
+| `-verify-read-size true|false` | `false` | Fail a GET/range-GET whose consumed response bytes differ from catalog/range metadata. |
+
+### Retry and connection warm-up
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `-retry-max-attempts <n>` | `1` | Total attempts for network I/O, HTTP 429, and HTTP 5xx failures. One disables retries. |
+| `-retry-backoff-ms <ms>` | `0` | Fixed delay between retry attempts. |
+| `-warmup-requests <n>` | `0` | Untimed `bucketExists` requests distributed across configured endpoints to establish HTTP/TLS connections before catalog discovery and measurement. |
+
+When retries are enabled, all attempts and backoff remain one logical timed
+SBK operation. This reports application-observed latency; use one attempt when
+you need raw single-request service latency.
 
 ### Server-side encryption
 
@@ -425,8 +458,8 @@ pre-populate the bucket):
   -readers 8 -size 1048576 -seconds 120
 ```
 
-Combined write-then-read in one invocation (driver auto-sets `-recreate true`
-when both writers and readers are specified):
+Combined write/read in one invocation. Completed PUTs are handed to readers;
+the bucket is recreated only when `-recreate true` is explicitly supplied:
 
 ```bash
 ./build/install/sbk/bin/sbk -class minio \
@@ -452,7 +485,9 @@ and supply an IAM user's keys:
   -writers 16 -size 1048576 -seconds 300
 ```
 
-For sizes ≥ 64 MiB, enable multipart upload so the SDK uploads in parallel:
+For sizes ≥ 64 MiB, enable multipart upload. MinIO SDK 8.5.17 uploads parts
+within one object sequentially; use multiple writers for parallel object
+uploads:
 
 ```bash
 ./build/install/sbk/bin/sbk -class minio \

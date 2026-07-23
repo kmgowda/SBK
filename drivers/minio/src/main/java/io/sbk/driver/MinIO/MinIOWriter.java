@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
 
 /**
  * Per-worker MinIO SDK writer for mutating S3 operations.
@@ -50,6 +51,7 @@ public class MinIOWriter implements Writer<byte[]> {
     private final int writerCount;
     private final MinIOConfig config;
     private final S3Operation operation;
+    private final S3OperationMix operationMix;
     private final MinioClient client;
     private final MinioAsyncClient asyncClient;
     private final S3ObjectCatalog catalog;
@@ -62,6 +64,7 @@ public class MinIOWriter implements Writer<byte[]> {
     private final Map<String, String> objectTags;
     private final ServerSideEncryption sse;
     private final S3AsyncExecutor asyncExecutor;
+    private final S3RetryPolicy retryPolicy;
     private long copySequence;
     private long bucketTargetSequence;
     private byte[] reusablePayload;
@@ -79,11 +82,13 @@ public class MinIOWriter implements Writer<byte[]> {
      * @param bucketTargets explicit bucket targets
      * @param createdBuckets generated buckets to clean up
      * @param runToken run discriminator
+     * @param globalAsyncPermits shared process-wide async permits
      * @throws IllegalArgumentException when tagging is enabled without tags
      */
     public MinIOWriter(int id, ParameterOptions params, MinIOConfig config, S3Operation operation,
                        MinioClient client, MinioAsyncClient asyncClient, S3ObjectCatalog catalog,
-                       List<String> bucketTargets, Queue<String> createdBuckets, String runToken) {
+                       List<String> bucketTargets, Queue<String> createdBuckets, String runToken,
+                       Semaphore globalAsyncPermits) {
         this.id = id;
         writerCount = Math.max(1, params.getWritersCount());
         this.config = config;
@@ -93,13 +98,17 @@ public class MinIOWriter implements Writer<byte[]> {
         this.catalog = catalog;
         this.bucketTargets = bucketTargets;
         this.createdBuckets = createdBuckets;
-        dataGenerator = new S3DataGenerator(config.dataCompressibility, config.dataDedupable);
+        long seed = config.dataSeed == 0 ? System.nanoTime() : config.dataSeed + id;
+        dataGenerator = new S3DataGenerator(config.dataCompressibility, config.dataDedupable, seed);
+        operationMix = S3OperationMix.parse(config.writeMix, operation, true, id);
         checksumAlgorithm = S3ChecksumUtil.Algorithm.fromString(config.checksumAlgorithm);
         keyGenerator = new S3ObjectKey(config, id, runToken);
         bucketNameGenerator = new S3BucketName(config.bucketPrefix, runToken, id);
         objectTags = parseTags(config.taggingTags);
         sse = config.sseEnabled ? new ServerSideEncryptionS3() : null;
-        asyncExecutor = config.async ? new S3AsyncExecutor(config.asyncDepth) : null;
+        asyncExecutor = config.async
+                ? new S3AsyncExecutor(config.asyncDepth, globalAsyncPermits) : null;
+        retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs);
         copySequence = 0;
         bucketTargetSequence = 0;
         reusablePayload = null;
@@ -191,27 +200,33 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     private PreparedOperation prepare(int size) {
-        return switch (operation) {
-            case PUT -> new PreparedOperation(nextPayload(size), keyGenerator.next(), null, size);
-            case UPDATE -> objectOperation(nextPayload(size), catalog.nextShared(), size);
-            case COPY -> objectOperation(null, catalog.nextShared(), -1);
-            case DELETE, TAG_SET, TAG_DELETE -> objectOperation(null,
-                    operation == S3Operation.DELETE ? catalog.claimDelete() : catalog.nextShared(), 0);
-            case BUCKET_CREATE -> new PreparedOperation(null, bucketNameGenerator.next(), null, 0);
+        S3Operation selected = operationMix.next();
+        return switch (selected) {
+            case PUT -> new PreparedOperation(selected, nextPayload(size),
+                    keyGenerator.next(), null, size);
+            case UPDATE -> objectOperation(selected, nextPayload(size), catalog.nextShared(), size);
+            case COPY -> objectOperation(selected, null, catalog.nextShared(), -1);
+            case DELETE, TAG_SET, TAG_DELETE -> objectOperation(selected, null,
+                    selected == S3Operation.DELETE ? catalog.claimDelete() : catalog.nextShared(), 0);
+            case BUCKET_CREATE -> new PreparedOperation(selected, null,
+                    bucketNameGenerator.next(), null, 0);
             case BUCKET_DELETE -> {
                 String bucket = nextBucketTarget();
-                yield bucket == null ? null : new PreparedOperation(null, bucket, null, 0);
+                yield bucket == null ? null
+                        : new PreparedOperation(selected, null, bucket, null, 0);
             }
-            default -> throw new IllegalStateException("Unsupported writer operation " + operation);
+            default -> throw new IllegalStateException("Unsupported writer operation " + selected);
         };
     }
 
-    private PreparedOperation objectOperation(byte[] payload, S3ObjectRef object, long bytes) {
+    private PreparedOperation objectOperation(S3Operation selected, byte[] payload,
+                                              S3ObjectRef object, long bytes) {
         if (object == null) {
             return null;
         }
         int effectiveBytes = safeBytes(bytes < 0 ? object.size() : bytes);
-        return new PreparedOperation(payload, object.key(), object.versionId(), effectiveBytes);
+        return new PreparedOperation(selected, payload, object.key(),
+                object.versionId(), effectiveBytes);
     }
 
     private byte[] nextPayload(int size) {
@@ -227,75 +242,81 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     private OperationResult executeSync(PreparedOperation prepared) throws Exception {
-        return switch (operation) {
+        return retryPolicy.execute(() -> executeSyncOnce(prepared));
+    }
+
+    private OperationResult executeSyncOnce(PreparedOperation prepared) throws Exception {
+        return switch (prepared.operation) {
             case PUT, UPDATE -> {
                 client.putObject(putArgs(prepared).build());
-                if (config.taggingEnabled) {
-                    client.setObjectTags(tagArgs(prepared.key).build());
-                }
-                yield new OperationResult(prepared.key, prepared.versionId, prepared.bytes);
+                yield new OperationResult(prepared.operation, prepared.key,
+                        prepared.versionId, prepared.bytes);
             }
             case COPY -> {
                 String destination = copyDestination();
                 client.copyObject(copyArgs(prepared, destination).build());
-                yield new OperationResult(destination, null, prepared.bytes);
+                yield new OperationResult(prepared.operation, destination, null, prepared.bytes);
             }
             case DELETE -> {
                 client.removeObject(removeArgs(prepared).build());
-                yield new OperationResult(null, null, 0);
+                yield new OperationResult(prepared.operation, null, null, 0);
             }
             case TAG_SET -> {
-                client.setObjectTags(tagArgs(prepared.key).build());
-                yield new OperationResult(null, null, 0);
+                client.setObjectTags(tagArgs(prepared).build());
+                yield new OperationResult(prepared.operation, null, null, 0);
             }
             case TAG_DELETE -> {
                 client.deleteObjectTags(deleteTagArgs(prepared).build());
-                yield new OperationResult(null, null, 0);
+                yield new OperationResult(prepared.operation, null, null, 0);
             }
             case BUCKET_CREATE -> {
                 client.makeBucket(makeBucketArgs(prepared.key).build());
                 createdBuckets.offer(prepared.key);
-                yield new OperationResult(null, null, 0);
+                yield new OperationResult(prepared.operation, null, null, 0);
             }
             case BUCKET_DELETE -> {
                 client.removeBucket(RemoveBucketArgs.builder().bucket(prepared.key).build());
-                yield new OperationResult(null, null, 0);
+                yield new OperationResult(prepared.operation, null, null, 0);
             }
-            default -> throw new IllegalStateException("Unsupported writer operation " + operation);
+            default -> throw new IllegalStateException("Unsupported writer operation "
+                    + prepared.operation);
         };
     }
 
     private CompletableFuture<OperationResult> executeAsync(PreparedOperation prepared) throws Exception {
-        return switch (operation) {
+        return retryPolicy.executeAsync(() -> executeAsyncOnce(prepared));
+    }
+
+    private CompletableFuture<OperationResult> executeAsyncOnce(
+            PreparedOperation prepared) throws Exception {
+        return switch (prepared.operation) {
             case PUT, UPDATE -> {
-                CompletableFuture<?> put = asyncClient.putObject(putArgs(prepared).build());
-                if (config.taggingEnabled) {
-                    SetObjectTagsArgs tags = tagArgs(prepared.key).build();
-                    put = put.thenCompose(ignored -> setObjectTagsAsync(tags));
-                }
-                yield put.thenApply(ignored ->
-                        new OperationResult(prepared.key, prepared.versionId, prepared.bytes));
+                yield asyncClient.putObject(putArgs(prepared).build()).thenApply(ignored ->
+                        new OperationResult(prepared.operation, prepared.key,
+                                prepared.versionId, prepared.bytes));
             }
             case COPY -> {
                 String destination = copyDestination();
                 yield asyncClient.copyObject(copyArgs(prepared, destination).build())
-                        .thenApply(ignored -> new OperationResult(destination, null, prepared.bytes));
+                        .thenApply(ignored -> new OperationResult(prepared.operation,
+                                destination, null, prepared.bytes));
             }
             case DELETE -> asyncClient.removeObject(removeArgs(prepared).build())
-                    .thenApply(ignored -> new OperationResult(null, null, 0));
-            case TAG_SET -> asyncClient.setObjectTags(tagArgs(prepared.key).build())
-                    .thenApply(ignored -> new OperationResult(null, null, 0));
+                    .thenApply(ignored -> new OperationResult(prepared.operation, null, null, 0));
+            case TAG_SET -> asyncClient.setObjectTags(tagArgs(prepared).build())
+                    .thenApply(ignored -> new OperationResult(prepared.operation, null, null, 0));
             case TAG_DELETE -> asyncClient.deleteObjectTags(deleteTagArgs(prepared).build())
-                    .thenApply(ignored -> new OperationResult(null, null, 0));
+                    .thenApply(ignored -> new OperationResult(prepared.operation, null, null, 0));
             case BUCKET_CREATE -> asyncClient.makeBucket(makeBucketArgs(prepared.key).build())
                     .thenApply(ignored -> {
                         createdBuckets.offer(prepared.key);
-                        return new OperationResult(null, null, 0);
+                        return new OperationResult(prepared.operation, null, null, 0);
                     });
             case BUCKET_DELETE -> asyncClient.removeBucket(
                             RemoveBucketArgs.builder().bucket(prepared.key).build())
-                    .thenApply(ignored -> new OperationResult(null, null, 0));
-            default -> throw new IllegalStateException("Unsupported writer operation " + operation);
+                    .thenApply(ignored -> new OperationResult(prepared.operation, null, null, 0));
+            default -> throw new IllegalStateException("Unsupported writer operation "
+                    + prepared.operation);
         };
     }
 
@@ -307,6 +328,9 @@ public class MinIOWriter implements Writer<byte[]> {
                         config.partSize > 0 ? config.partSize : -1L);
         if (sse != null) {
             builder.sse(sse);
+        }
+        if (config.taggingEnabled) {
+            builder.tags(objectTags);
         }
         if (checksumAlgorithm != null) {
             builder.headers(Map.of(checksumAlgorithm.headerName,
@@ -342,16 +366,13 @@ public class MinIOWriter implements Writer<byte[]> {
         return builder;
     }
 
-    private SetObjectTagsArgs.Builder tagArgs(String key) {
-        return SetObjectTagsArgs.builder().bucket(config.bucketName).object(key).tags(objectTags);
-    }
-
-    private CompletableFuture<?> setObjectTagsAsync(SetObjectTagsArgs tags) {
-        try {
-            return asyncClient.setObjectTags(tags);
-        } catch (Exception ex) {
-            return CompletableFuture.failedFuture(ex);
+    private SetObjectTagsArgs.Builder tagArgs(PreparedOperation prepared) {
+        SetObjectTagsArgs.Builder builder = SetObjectTagsArgs.builder()
+                .bucket(config.bucketName).object(prepared.key).tags(objectTags);
+        if (prepared.versionId != null && !prepared.versionId.isEmpty()) {
+            builder.versionId(prepared.versionId);
         }
+        return builder;
     }
 
     private DeleteObjectTagsArgs.Builder deleteTagArgs(PreparedOperation prepared) {
@@ -384,7 +405,8 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     private void publish(OperationResult result, long createdTime) {
-        if (result.key != null && (operation == S3Operation.PUT || operation == S3Operation.COPY)) {
+        if (result.key != null
+                && (result.operation == S3Operation.PUT || result.operation == S3Operation.COPY)) {
             catalog.publish(new S3ObjectRef(result.key, result.versionId, result.bytes, createdTime));
         }
     }
@@ -464,9 +486,10 @@ public class MinIOWriter implements Writer<byte[]> {
         sync();
     }
 
-    private record PreparedOperation(byte[] payload, String key, String versionId, int bytes) {
+    private record PreparedOperation(S3Operation operation, byte[] payload, String key,
+                                     String versionId, int bytes) {
     }
 
-    private record OperationResult(String key, String versionId, int bytes) {
+    private record OperationResult(S3Operation operation, String key, String versionId, int bytes) {
     }
 }

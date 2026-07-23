@@ -50,6 +50,22 @@ public final class S3ObjectCatalog {
     }
 
     /**
+     * Check whether the startup snapshot contains an object larger than the
+     * supplied byte offset.
+     *
+     * @param offset exclusive lower bound for object size
+     * @return true when at least one eligible object exists
+     */
+    public boolean hasObjectLargerThan(long offset) {
+        for (S3ObjectRef object : snapshot) {
+            if (object.size() > offset) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Select an existing object cyclically for update, copy, stat, or tagging.
      *
      * @return selected object, or {@code null} when the snapshot is empty
@@ -85,6 +101,31 @@ public final class S3ObjectCatalog {
         }
         long logicalIndex = readerId + sequence * Math.max(1, readerCount);
         return snapshot.get(index(logicalIndex, snapshot.size()));
+    }
+
+    /**
+     * Select the next reader object whose size is larger than the supplied
+     * offset. The bounded scan prevents an invalid range configuration from
+     * turning into an endless stream of zero-record iterations.
+     *
+     * @param readerId zero-based reader id
+     * @param readerCount total reader count
+     * @param sequence reader-local sequence number
+     * @param offset exclusive lower bound for object size
+     * @return an eligible object, or {@code null} when none exists
+     */
+    public S3ObjectRef nextForReader(int readerId, int readerCount, long sequence, long offset) {
+        if (snapshot.isEmpty()) {
+            return null;
+        }
+        long logicalIndex = readerId + sequence * Math.max(1, readerCount);
+        for (int i = 0; i < snapshot.size(); i++) {
+            S3ObjectRef object = snapshot.get(index(logicalIndex + i, snapshot.size()));
+            if (object.size() > offset) {
+                return object;
+            }
+        }
+        return null;
     }
 
     /**

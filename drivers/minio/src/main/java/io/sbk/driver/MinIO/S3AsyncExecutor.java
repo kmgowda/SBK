@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class S3AsyncExecutor {
     private final Semaphore permits;
+    private final Semaphore globalPermits;
     private final Set<CompletableFuture<?>> pending;
     private final AtomicReference<Throwable> failure;
 
@@ -40,10 +41,22 @@ public final class S3AsyncExecutor {
      * @throws IllegalArgumentException when depth is less than one
      */
     public S3AsyncExecutor(int depth) {
+        this(depth, null);
+    }
+
+    /**
+     * Create a worker-local tracker that also observes a process-wide limit.
+     *
+     * @param depth maximum operations in flight for one worker
+     * @param globalPermits shared process-wide permits, or {@code null}
+     * @throws IllegalArgumentException when depth is less than one
+     */
+    public S3AsyncExecutor(int depth, Semaphore globalPermits) {
         if (depth < 1) {
             throw new IllegalArgumentException("async-depth must be at least 1");
         }
         permits = new Semaphore(depth);
+        this.globalPermits = globalPermits;
         pending = ConcurrentHashMap.newKeySet();
         failure = new AtomicReference<>();
     }
@@ -55,9 +68,17 @@ public final class S3AsyncExecutor {
      */
     public void acquire() throws IOException {
         throwIfFailed();
+        boolean localAcquired = false;
         try {
             permits.acquire();
+            localAcquired = true;
+            if (globalPermits != null) {
+                globalPermits.acquire();
+            }
         } catch (InterruptedException ex) {
+            if (localAcquired) {
+                permits.release();
+            }
             Thread.currentThread().interrupt();
             throw new IOException("Interrupted while waiting for an async S3 concurrency slot", ex);
         }
@@ -65,6 +86,9 @@ public final class S3AsyncExecutor {
             throwIfFailed();
         } catch (IOException ex) {
             permits.release();
+            if (globalPermits != null) {
+                globalPermits.release();
+            }
             throw ex;
         }
     }
@@ -84,6 +108,9 @@ public final class S3AsyncExecutor {
                 failure.compareAndSet(null, unwrap(thrown));
             }
             permits.release();
+            if (globalPermits != null) {
+                globalPermits.release();
+            }
         });
         return future;
     }
@@ -93,6 +120,9 @@ public final class S3AsyncExecutor {
      */
     public void releaseFailedStart() {
         permits.release();
+        if (globalPermits != null) {
+            globalPermits.release();
+        }
     }
 
     /**

@@ -20,6 +20,8 @@ public class MinIOConfig {
 
     // ----- Connection / credentials -----
     public String url;
+    /** Optional comma-separated endpoints distributed across workers. */
+    public String endpoints;
     public String accessKey;
     public String secretKey;
     public String bucketName;
@@ -32,10 +34,18 @@ public class MinIOConfig {
     public String writeOperation;
     /** Operation executed by reader workers. */
     public String readOperation;
+    /** Weighted writer mix, for example put=80,copy=20. */
+    public String writeMix;
+    /** Weighted reader mix, for example get=90,stat=10. */
+    public String readMix;
     /** Use MinioAsyncClient with bounded in-flight operations. */
     public boolean async;
     /** Maximum async operations in flight per SBK worker. */
     public int asyncDepth;
+    /** Process-wide maximum in-flight operations; zero derives workers times depth. */
+    public int asyncMaxInflight;
+    /** Maximum estimated async buffer memory in MiB; zero disables the guard. */
+    public long asyncMaxMemoryMb;
 
     // ----- Object naming / layout -----
     /** When true, use filesystem-style hierarchical object keys (e.g. "a/b/c-uuid"). */
@@ -50,6 +60,12 @@ public class MinIOConfig {
     public long rangeLength;
     /** Maximum objects requested by each list benchmark operation. */
     public int listMaxKeys;
+    /** Optional comma-separated LIST prefixes assigned across reader workers. */
+    public String listPrefixes;
+    /** Optional local object manifest used instead of an S3 startup listing. */
+    public String objectFile;
+    /** Maximum object references retained in the startup catalog. */
+    public int catalogMaxObjects;
 
     // ----- Multipart upload (SPT: --part-size, --mpu-concurrent-parts) -----
     /** Part size in bytes; 0 disables multipart. SDK requires 5 MiB .. 5 GiB. */
@@ -86,6 +102,22 @@ public class MinIOConfig {
     public int dataCompressibility;
     /** When false, anti-dedup stamping is added every 4 KiB. */
     public boolean dataDedupable;
+    /** Reproducible payload seed; zero chooses a runtime seed. */
+    public long dataSeed;
+    /** Validate consumed GET bytes against catalog/range expectations. */
+    public boolean verifyReadSize;
+    /** Total attempts for retryable SDK failures, including the first. */
+    public int retryMaxAttempts;
+    /** Fixed delay between retry attempts in milliseconds. */
+    public long retryBackoffMs;
+    /** Untimed bucket-existence requests used to warm connections before catalog discovery. */
+    public int warmupRequests;
+    /** Total distributed partitions sharing the benchmark bucket. */
+    public int partitionCount;
+    /** Zero-based partition assigned to this process. */
+    public int partitionIndex;
+    /** Optional credential-free JSON run-manifest output path. */
+    public String runManifest;
 
     // ----- Server-side encryption (SPT: SSE-S3) -----
     /** Enable server-side encryption with S3-managed keys (SSE-S3). */

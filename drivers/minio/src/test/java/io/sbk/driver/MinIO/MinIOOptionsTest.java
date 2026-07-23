@@ -49,6 +49,21 @@ public class MinIOOptionsTest {
     }
 
     @Test
+    public void weightedMixesAndVerificationOptionsParse() {
+        assertDoesNotThrow(() -> parse("-writers", "1", "-readers", "1",
+                "-size", "100", "-seconds", "1",
+                "-write-mix", "put=80,copy=20",
+                "-read-mix", "get=90,stat=10",
+                "-data-seed", "42", "-verify-read-size", "true"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-write-mix", "put=0"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-write-mix", "get=100"));
+    }
+
+    @Test
     public void asyncAndOperationValidationRejectsUnsafeValues() {
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
@@ -62,6 +77,19 @@ public class MinIOOptionsTest {
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
                         "-read-operation", "delete"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "1048576", "-seconds", "1",
+                        "-async", "true", "-async-depth", "8",
+                        "-async-max-memory-mb", "1"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-catalog-max-objects", "0"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-retry-max-attempts", "0"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-partition-count", "2", "-partition-index", "2"));
     }
 
     private static void parse(String... args) throws Exception {

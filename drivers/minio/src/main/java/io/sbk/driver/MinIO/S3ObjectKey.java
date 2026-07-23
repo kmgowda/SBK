@@ -30,6 +30,8 @@ public final class S3ObjectKey {
     private final String bucketTag;
     private final String runToken;
     private final int writerId;
+    private final int partitionIndex;
+    private final int partitionCount;
     private long counter;
 
     /**
@@ -44,6 +46,8 @@ public final class S3ObjectKey {
         this.prefix = (cfg.prefix == null) ? "" : cfg.prefix.trim();
         this.bucketTag = (cfg.bucketName == null) ? "obj" : cfg.bucketName;
         this.writerId = writerId;
+        partitionIndex = cfg.partitionIndex;
+        partitionCount = cfg.partitionCount;
         this.runToken = runToken;
         counter = 0;
     }
@@ -66,8 +70,11 @@ public final class S3ObjectKey {
             sb.append(HEX[(int) (n >> 4) & 0xF]).append(HEX[(int) n & 0xF]).append('/');
             sb.append(HEX[(int) (n >> 12) & 0xF]).append(HEX[(int) (n >> 8) & 0xF]).append('/');
         }
-        sb.append(bucketTag).append('-').append(runToken).append('-').append(writerId)
-                .append('-').append(Long.toUnsignedString(n, 36));
+        sb.append(bucketTag).append('-').append(runToken).append('-').append(writerId);
+        if (partitionCount > 1) {
+            sb.append("-p").append(partitionIndex);
+        }
+        sb.append('-').append(Long.toUnsignedString(n, 36));
         return sb.toString();
     }
 }

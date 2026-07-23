@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Semaphore;
 
 /**
  * Per-worker MinIO SDK reader for GET, range GET, stat, tagging, and listing.
@@ -51,11 +52,14 @@ public class MinIOReader implements Reader<byte[]> {
     private final boolean mixedWorkload;
     private final MinIOConfig config;
     private final S3Operation operation;
+    private final S3OperationMix operationMix;
     private final MinioClient client;
     private final MinioAsyncClient asyncClient;
     private final S3ObjectCatalog catalog;
     private final List<String> bucketTargets;
+    private final List<String> listPrefixes;
     private final S3AsyncExecutor asyncExecutor;
+    private final S3RetryPolicy retryPolicy;
     private final ExecutorService responseExecutor;
     private long objectSequence;
     private long bucketSequence;
@@ -73,21 +77,29 @@ public class MinIOReader implements Reader<byte[]> {
      * @param asyncClient asynchronous MinIO client, or {@code null}
      * @param catalog shared object catalog
      * @param bucketTargets optional explicit bucket targets
+     * @param globalAsyncPermits shared process-wide async permits
      */
     public MinIOReader(int id, ParameterOptions params, MinIOConfig config, S3Operation operation,
                        MinioClient client, MinioAsyncClient asyncClient, S3ObjectCatalog catalog,
-                       List<String> bucketTargets) {
+                       List<String> bucketTargets, Semaphore globalAsyncPermits) {
         this.id = id;
         readerCount = Math.max(1, params.getReadersCount());
         configuredSize = params.getRecordSize();
-        mixedWorkload = params.getWritersCount() > 0;
+        S3OperationMix writerMix = S3OperationMix.parse(config.writeMix,
+                S3Operation.fromString(config.writeOperation), true, id);
+        mixedWorkload = params.getWritersCount() > 0
+                && (writerMix.contains(S3Operation.PUT) || writerMix.contains(S3Operation.COPY));
         this.config = config;
         this.operation = operation;
+        operationMix = S3OperationMix.parse(config.readMix, operation, false, id);
         this.client = client;
         this.asyncClient = asyncClient;
         this.catalog = catalog;
         this.bucketTargets = bucketTargets;
-        asyncExecutor = config.async ? new S3AsyncExecutor(config.asyncDepth) : null;
+        listPrefixes = parseList(config.listPrefixes);
+        asyncExecutor = config.async
+                ? new S3AsyncExecutor(config.asyncDepth, globalAsyncPermits) : null;
+        retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs);
         responseExecutor = config.async
                 ? Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
                         .name("sbk-minio-response-" + id + "-", 0).factory())
@@ -197,12 +209,13 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     private PreparedOperation prepare(int requestedSize) throws IOException {
-        if (operation == S3Operation.LIST || operation == S3Operation.BUCKET_LIST) {
-            return new PreparedOperation(null, null, 0, 0, 0);
+        S3Operation selected = operationMix.next();
+        if (selected == S3Operation.LIST || selected == S3Operation.BUCKET_LIST) {
+            return new PreparedOperation(selected, null, null, 0, 0, 0);
         }
-        if (operation == S3Operation.BUCKET_STAT) {
+        if (selected == S3Operation.BUCKET_STAT) {
             String bucket = nextBucketTarget();
-            return new PreparedOperation(bucket, null, 0, 0, 0);
+            return new PreparedOperation(selected, bucket, null, 0, 0, 0);
         }
         S3ObjectRef object;
         if (mixedWorkload) {
@@ -213,28 +226,31 @@ public class MinIOReader implements Reader<byte[]> {
                 throw new IOException("Interrupted while waiting for a completed S3 PUT", ex);
             }
         } else {
-            object = catalog.nextForReader(id, readerCount, objectSequence++);
+            object = selected == S3Operation.RANGE_GET
+                    ? catalog.nextForReader(id, readerCount, objectSequence++, config.rangeOffset)
+                    : catalog.nextForReader(id, readerCount, objectSequence++);
         }
         if (object == null) {
             return null;
         }
         long bytes = object.size();
         long offset = 0;
-        if (operation == S3Operation.RANGE_GET) {
+        if (selected == S3Operation.RANGE_GET) {
             offset = config.rangeOffset;
-            if (offset >= object.size()) {
-                return null;
-            }
             long requestedLength = config.rangeLength > 0 ? config.rangeLength
                     : (requestedSize > 0 ? requestedSize : configuredSize);
             bytes = Math.max(0, Math.min(requestedLength, object.size() - offset));
         }
-        return new PreparedOperation(object.key(), object.versionId(), offset, safeBytes(bytes),
-                object.createdTime());
+        return new PreparedOperation(selected, object.key(), object.versionId(), offset,
+                safeBytes(bytes), object.createdTime());
     }
 
     private int executeSync(PreparedOperation prepared) throws Exception {
-        return switch (operation) {
+        return retryPolicy.execute(() -> executeSyncOnce(prepared));
+    }
+
+    private int executeSyncOnce(PreparedOperation prepared) throws Exception {
+        int result = switch (prepared.operation) {
             case GET, RANGE_GET -> {
                 try (GetObjectResponse response = client.getObject(getArgs(prepared).build())) {
                     yield drain(response);
@@ -257,12 +273,20 @@ public class MinIOReader implements Reader<byte[]> {
                 client.listBuckets();
                 yield 0;
             }
-            default -> throw new IllegalStateException("Unsupported reader operation " + operation);
+            default -> throw new IllegalStateException("Unsupported reader operation "
+                    + prepared.operation);
         };
+        verifyBytes(prepared, result);
+        return result;
     }
 
     private CompletableFuture<Integer> executeAsync(PreparedOperation prepared) throws Exception {
-        return switch (operation) {
+        return retryPolicy.executeAsync(() -> executeAsyncOnce(prepared));
+    }
+
+    private CompletableFuture<Integer> executeAsyncOnce(
+            PreparedOperation prepared) throws Exception {
+        CompletableFuture<Integer> result = switch (prepared.operation) {
             case GET, RANGE_GET -> asyncClient.getObject(getArgs(prepared).build())
                     .thenApplyAsync(response -> {
                         try (response) {
@@ -283,8 +307,14 @@ public class MinIOReader implements Reader<byte[]> {
             case BUCKET_STAT -> asyncClient.bucketExists(
                     BucketExistsArgs.builder().bucket(prepared.key).build()).thenApply(ignored -> 0);
             case BUCKET_LIST -> asyncClient.listBuckets().thenApply(ignored -> 0);
-            default -> throw new IllegalStateException("Unsupported reader operation " + operation);
+            default -> throw new IllegalStateException("Unsupported reader operation "
+                    + prepared.operation);
         };
+        return config.verifyReadSize
+                ? result.thenApply(bytes -> {
+                    verifyBytes(prepared, bytes);
+                    return bytes;
+                }) : result;
     }
 
     private GetObjectArgs.Builder getArgs(PreparedOperation prepared) {
@@ -293,7 +323,7 @@ public class MinIOReader implements Reader<byte[]> {
         if (prepared.versionId != null && !prepared.versionId.isEmpty()) {
             builder.versionId(prepared.versionId);
         }
-        if (operation == S3Operation.RANGE_GET) {
+        if (prepared.operation == S3Operation.RANGE_GET) {
             builder.offset(prepared.offset).length((long) prepared.bytes);
         }
         return builder;
@@ -323,8 +353,10 @@ public class MinIOReader implements Reader<byte[]> {
                 .recursive(true)
                 .maxKeys(config.listMaxKeys)
                 .includeVersions(config.versioningEnabled);
-        if (config.prefix != null && !config.prefix.isEmpty()) {
-            builder.prefix(config.prefix);
+        String selectedPrefix = listPrefixes.isEmpty()
+                ? config.prefix : listPrefixes.get(Math.floorMod(id, listPrefixes.size()));
+        if (selectedPrefix != null && !selectedPrefix.isEmpty()) {
+            builder.prefix(selectedPrefix);
         }
         int count = 0;
         long bytes = 0;
@@ -374,8 +406,29 @@ public class MinIOReader implements Reader<byte[]> {
         return bucketTargets.get((int) Math.floorMod(index, bucketTargets.size()));
     }
 
+    private static List<String> parseList(String csv) {
+        if (csv == null || csv.isBlank()) {
+            return List.of();
+        }
+        return java.util.Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .toList();
+    }
+
     private IOException operationFailure(Exception ex) {
         return new IOException("MinIO " + operation + " operation failed: " + ex.getMessage(), ex);
+    }
+
+    private void verifyBytes(PreparedOperation prepared, int actualBytes) {
+        if (config.verifyReadSize
+                && (prepared.operation == S3Operation.GET
+                || prepared.operation == S3Operation.RANGE_GET)
+                && actualBytes != prepared.bytes) {
+            throw new S3CompletionException(new IOException("S3 " + prepared.operation
+                    + " response length " + actualBytes + " does not match expected "
+                    + prepared.bytes + " bytes for '" + prepared.key + "'"));
+        }
     }
 
     private static void markStopped(Status status, Time time) {
@@ -403,8 +456,8 @@ public class MinIOReader implements Reader<byte[]> {
         }
     }
 
-    private record PreparedOperation(String key, String versionId, long offset, int bytes,
-                                     long createdTime) {
+    private record PreparedOperation(S3Operation operation, String key, String versionId,
+                                     long offset, int bytes, long createdTime) {
     }
 
     private static final class S3CompletionException extends RuntimeException {

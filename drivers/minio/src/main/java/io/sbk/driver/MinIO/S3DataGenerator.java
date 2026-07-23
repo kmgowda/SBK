@@ -10,6 +10,7 @@
 
 package io.sbk.driver.MinIO;
 
+import java.util.SplittableRandom;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -37,16 +38,30 @@ public final class S3DataGenerator {
 
     private final int compressibility;
     private final boolean dedupable;
+    private final SplittableRandom random;
     private long objectId;
 
     public S3DataGenerator(int compressibility, boolean dedupable) {
+        this(compressibility, dedupable, ThreadLocalRandom.current().nextLong());
+    }
+
+    /**
+     * Create a generator with a reproducible random seed.
+     *
+     * @param compressibility zero to one hundred
+     * @param dedupable whether identical chunks may be generated
+     * @param seed payload seed
+     * @throws IllegalArgumentException when compressibility is outside zero to one hundred
+     */
+    public S3DataGenerator(int compressibility, boolean dedupable, long seed) {
         if (compressibility < 0 || compressibility > 100) {
             throw new IllegalArgumentException(
                     "compressibility must be 0..100, got " + compressibility);
         }
         this.compressibility = compressibility;
         this.dedupable = dedupable;
-        this.objectId = ThreadLocalRandom.current().nextLong();
+        random = new SplittableRandom(seed);
+        this.objectId = seed;
     }
 
     /** Bump the object-id so the anti-dedup stamp varies between objects. */
@@ -101,8 +116,7 @@ public final class S3DataGenerator {
         }
     }
 
-    private static void fillRandom(byte[] dst, int offset, int length) {
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+    private void fillRandom(byte[] dst, int offset, int length) {
         int position = offset;
         int end = offset + length;
         while (position + Long.BYTES <= end) {
