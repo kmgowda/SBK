@@ -9,6 +9,9 @@
  */
 package io.sbk.dashboard;
 
+import io.sbk.action.Action;
+import io.sbk.params.impl.SbkParameters;
+import io.time.TimeUnit;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +21,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -324,6 +330,37 @@ final class DashboardServerTest {
         assertThrows(IllegalArgumentException.class, () -> SbkDashboardServerMain.retentionSnapshots(0));
     }
 
+    @Test
+    void loggerSupportPublishesOnlyRegularIntervalResults() throws Exception {
+        try (DashboardServer server = new DashboardServer("127.0.0.1", 0, 4)) {
+            server.start();
+            final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+            final DashboardLoggerSupport support = new DashboardLoggerSupport();
+            final SbkParameters parameters = new SbkParameters("dashboard-test");
+            support.addArgs(parameters);
+            parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
+                    "-dashboardhost", "127.0.0.1", "-dashboardport",
+                    Integer.toString(server.getAddress().getPort()),
+                    "-dashboardstart", "false", "-dashboardopen", "false"});
+            support.parseArgs(parameters);
+
+            support.open("SBK", "File", Action.Writing, TimeUnit.ns,
+                    new double[]{50, 99});
+            final String runId = activeRunId(baseUri);
+            publish(support, false, 10);
+            assertEquals(1, waitForHistory(baseUri, runId, 1).length);
+            publish(support, true, 1000);
+            support.close();
+
+            final DashboardSnapshot[] history = MAPPER.readValue(
+                    get(baseUri.resolve("/api/v1/runs/" + runId + "/history")).body(),
+                    DashboardSnapshot[].class);
+            assertEquals(1, history.length);
+            assertEquals(10, history[0].performance().records());
+            assertFalse(history[0].total());
+        }
+    }
+
     private static DashboardSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {
         final long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
         DashboardSnapshot[] snapshots = new DashboardSnapshot[0];
@@ -372,5 +409,25 @@ final class DashboardServerTest {
                 new DashboardSnapshot.PerformanceMetrics(records, records * 100, records, records, 1),
                 new DashboardSnapshot.LatencyMetrics(10, 1, 20, 0, 0, 0, 0, 0,
                         new double[]{50, 99}, new long[]{10, 20}, new long[]{1, 1}));
+    }
+
+    private static String activeRunId(URI baseUri) throws Exception {
+        final List<?> runs = MAPPER.readValue(
+                get(baseUri.resolve("/api/v1/runs")).body(), List.class);
+        assertEquals(1, runs.size());
+        final Map<?, ?> view = (Map<?, ?>) runs.getFirst();
+        final Map<?, ?> run = (Map<?, ?>) view.get("run");
+        return run.get("runId").toString();
+    }
+
+    private static void publish(DashboardLoggerSupport support, boolean total, long records) {
+        support.publish(total, 0, 0, 1, 1, 0, 0,
+                records * 100, 1, records, 1,
+                0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0,
+                5, records * 100, records, records, 1,
+                10, 1, 20, 0, 0, 0, 0, 0,
+                new long[]{10, 20}, new long[]{1, 1});
     }
 }
