@@ -10,15 +10,26 @@
 
 package io.perl.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.Queue;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.Objects;
 
 /**
- * Concurrent Queue Implementation using VarHandle References.
- * DON'T USE THIS CLASS.
- * Use Java native 'ConcurrentLinkedQueue', because the ConcurrentLinkedQueue does better Garbage collection.
+ * A non-blocking multiple-producer, single-consumer queue.
+ *
+ * <p>Producers publish a new node by atomically linking it to the current last
+ * node. The sole consumer advances its thread-confined head and therefore does
+ * not perform a compare-and-set operation while dequeuing. Padded cursor
+ * holders prevent producer-tail and consumer-head cache-line contention. This
+ * queue is intended for SBK's many-producer performance-event paths, where
+ * exactly one recorder consumes the events.</p>
+ *
+ * <p>This class does not permit {@code null} elements. Only one thread may call
+ * {@link #poll()} or {@link #clear()}; using multiple consumers violates the
+ * queue contract.</p>
  *
  * @param <T> queued element type
  */
@@ -26,30 +37,95 @@ final public class CQueue<T> implements Queue<T> {
 
     static final private class Node<T> {
         @SuppressWarnings("unused")
-        public volatile T item;
+        private T item;
         @SuppressWarnings("unused")
-        public volatile Node<T> next;
+        private Node<T> next;
+
         Node(T item) {
-            this.item = item;
-            this.next = null;
+            ITEM.set(this, item);
         }
     }
 
-    private static final VarHandle HEAD;
+    @SuppressFBWarnings(value = "UUF_UNUSED_FIELD",
+            justification = "Fields isolate consumer state from producer cache lines")
+    static final private class HeadRef<T> {
+        @SuppressWarnings("unused")
+        private long pad00;
+        @SuppressWarnings("unused")
+        private long pad01;
+        @SuppressWarnings("unused")
+        private long pad02;
+        @SuppressWarnings("unused")
+        private long pad03;
+        @SuppressWarnings("unused")
+        private long pad04;
+        @SuppressWarnings("unused")
+        private long pad05;
+        @SuppressWarnings("unused")
+        private long pad06;
+        private Node<T> head;
+        @SuppressWarnings("unused")
+        private long pad10;
+        @SuppressWarnings("unused")
+        private long pad11;
+        @SuppressWarnings("unused")
+        private long pad12;
+        @SuppressWarnings("unused")
+        private long pad13;
+        @SuppressWarnings("unused")
+        private long pad14;
+        @SuppressWarnings("unused")
+        private long pad15;
+        @SuppressWarnings("unused")
+        private long pad16;
+    }
+
+    @SuppressFBWarnings(value = "UUF_UNUSED_FIELD",
+            justification = "Fields isolate producer state from consumer cache lines")
+    static final private class TailRef<T> {
+        @SuppressWarnings("unused")
+        private long pad00;
+        @SuppressWarnings("unused")
+        private long pad01;
+        @SuppressWarnings("unused")
+        private long pad02;
+        @SuppressWarnings("unused")
+        private long pad03;
+        @SuppressWarnings("unused")
+        private long pad04;
+        @SuppressWarnings("unused")
+        private long pad05;
+        @SuppressWarnings("unused")
+        private long pad06;
+        @SuppressWarnings("unused")
+        private volatile Node<T> tail;
+        @SuppressWarnings("unused")
+        private long pad10;
+        @SuppressWarnings("unused")
+        private long pad11;
+        @SuppressWarnings("unused")
+        private long pad12;
+        @SuppressWarnings("unused")
+        private long pad13;
+        @SuppressWarnings("unused")
+        private long pad14;
+        @SuppressWarnings("unused")
+        private long pad15;
+        @SuppressWarnings("unused")
+        private long pad16;
+    }
+
     private static final VarHandle TAIL;
     private static final VarHandle ITEM;
     private static final VarHandle NEXT;
 
-    final private Node<T> firstNode;
-    private volatile Node<T> head;
-    @SuppressWarnings("unused")
-    private volatile Node<T> tail;
+    private final HeadRef<T> headRef;
+    private final TailRef<T> tailRef;
 
     static {
         try {
             MethodHandles.Lookup l = MethodHandles.lookup();
-            HEAD = l.findVarHandle(CQueue.class, "head", CQueue.Node.class);
-            TAIL = l.findVarHandle(CQueue.class, "tail", CQueue.Node.class);
+            TAIL = l.findVarHandle(TailRef.class, "tail", CQueue.Node.class);
             ITEM = l.findVarHandle(Node.class, "item", Object.class);
             NEXT = l.findVarHandle(CQueue.Node.class, "next", CQueue.Node.class);
         } catch (ReflectiveOperationException e) {
@@ -58,66 +134,63 @@ final public class CQueue<T> implements Queue<T> {
     }
 
     /**
-     * Creates an empty VarHandle-based queue.
+     * Creates an empty MPSC queue.
      */
     public CQueue() {
-        this.firstNode = new Node<>(null);
-        this.head = firstNode;
-        this.tail = firstNode;
+        final Node<T> sentinel = new Node<>(null);
+        this.headRef = new HeadRef<>();
+        this.tailRef = new TailRef<>();
+        this.headRef.head = sentinel;
+        this.tailRef.tail = sentinel;
     }
 
-    /**
-     * Attempts one non-blocking dequeue operation.
-     *
-     * @return next element, or {@code null} when unavailable
-     */
-    public T pollOnce() {
-        final Object cur = NEXT.getAndSet(head, null);
-        if (cur == null) {
-            return null;
-        }
-        HEAD.set(this, cur);
-        return (T) ITEM.getAndSet(cur, null);
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
     public T poll() {
-        Object curHead = HEAD.get(this);
-        Object nxt = NEXT.get(curHead);
-
-        while (nxt != null && !HEAD.compareAndSet(this, curHead, nxt)) {
-            curHead = HEAD.get(this);
-            nxt = NEXT.get(curHead);
-        }
-
-        if (nxt == null) {
+        final Node<T> currentHead = headRef.head;
+        final Node<T> next = (Node<T>) NEXT.getAcquire(currentHead);
+        if (next == null) {
             return null;
         }
-        NEXT.set(curHead, null);
-        return (T) ITEM.getAndSet(nxt, null);
+
+        final T item = (T) ITEM.get(next);
+        ITEM.set(next, null);
+        headRef.head = next;
+        return item;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean add(T data) {
-        final Node<T> node = new Node<>(data);
-        final Object cur = TAIL.getAndSet(this, node);
-        NEXT.set(cur, node);
-        return true;
+        final Node<T> newNode = new Node<>(Objects.requireNonNull(data, "data"));
+        Node<T> tailNode = (Node<T>) TAIL.getAcquire(tailRef);
+        Node<T> current = tailNode;
+
+        while (true) {
+            final Node<T> next = (Node<T>) NEXT.getAcquire(current);
+            if (next == null) {
+                if (NEXT.compareAndSet(current, null, newNode)) {
+                    if (current != tailNode) {
+                        TAIL.weakCompareAndSetRelease(tailRef, tailNode, newNode);
+                    }
+                    return true;
+                }
+            } else {
+                final Node<T> latestTail = (Node<T>) TAIL.getAcquire(tailRef);
+                if (current != tailNode && tailNode != latestTail) {
+                    tailNode = latestTail;
+                    current = latestTail;
+                } else {
+                    current = next;
+                }
+            }
+        }
     }
 
     @Override
     public void clear() {
-        NEXT.set(firstNode, null);
-        Object first = HEAD.getAndSet(this, firstNode);
-        TAIL.set(this, firstNode);
-        /*
-           The below code helps JVM garbage collector to recycle;
-           without the below code, out of memory issues are observed
-        */
-        while ( first != null ) {
-            first = NEXT.getAndSet(first, null);
+        while (poll() != null) {
+            // Drain through the normal single-consumer path so the queue remains reusable.
         }
     }
-
-
 }

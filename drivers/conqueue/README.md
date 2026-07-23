@@ -16,7 +16,10 @@ limitations under the License.
 
 # Concurrent queue variant driver
 
-`-class conqueue` extends SBK's common in-process `ConcurrentQ` adapter with its configured queue implementation. It supports combined local writers and readers and is intended for queue/harness comparisons rather than external storage testing.
+`-class conqueue` extends SBK's common in-process `ConcurrentQ` adapter with
+PerL's non-blocking multiple-producer, single-consumer queue. It requires
+exactly one reader, accepts one or more writers, and is intended for
+queue/harness comparisons rather than external storage testing.
 
 ```bash
 ./build/install/sbk/bin/sbk -class conqueue -writers 1 -readers 1 -size 1024 -seconds 15

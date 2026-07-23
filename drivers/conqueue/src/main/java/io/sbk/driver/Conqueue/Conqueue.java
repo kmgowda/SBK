@@ -26,6 +26,14 @@ import java.io.IOException;
 public class Conqueue extends ConcurrentQ implements Storage<byte[]> {
 
     @Override
+    public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
+        super.parseArgs(params);
+        if (params.getReadersCount() != 1) {
+            throw new IllegalArgumentException("Conqueue requires exactly one reader");
+        }
+    }
+
+    @Override
     public void openStorage(final ParameterOptions params) throws IOException {
         this.queue = new CQueue<>();
     }
