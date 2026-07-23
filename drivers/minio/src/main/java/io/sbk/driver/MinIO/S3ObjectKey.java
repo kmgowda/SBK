@@ -10,9 +10,6 @@
 
 package io.sbk.driver.MinIO;
 
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * Object-key generator.
  *
@@ -31,21 +28,33 @@ public final class S3ObjectKey {
     private final boolean fsAccess;
     private final String prefix;
     private final String bucketTag;
-    private final AtomicLong counter = new AtomicLong();
+    private final String runToken;
+    private final int writerId;
+    private long counter;
 
-    public S3ObjectKey(MinIOConfig cfg) {
+    /**
+     * Create an object-key generator for one writer.
+     *
+     * @param cfg driver configuration
+     * @param writerId writer identifier
+     * @param runToken process/run discriminator
+     */
+    public S3ObjectKey(MinIOConfig cfg, int writerId, String runToken) {
         this.fsAccess = cfg.fsAccess;
         this.prefix = (cfg.prefix == null) ? "" : cfg.prefix.trim();
         this.bucketTag = (cfg.bucketName == null) ? "obj" : cfg.bucketName;
+        this.writerId = writerId;
+        this.runToken = runToken;
+        counter = 0;
     }
 
     /**
-     * Generate a fresh object key. Thread-safe.
+     * Generate a fresh object key for the owning writer.
      *
      * @return a unique key string
      */
     public String next() {
-        long n = counter.incrementAndGet();
+        long n = ++counter;
         StringBuilder sb = new StringBuilder(96);
         if (!prefix.isEmpty()) {
             sb.append(prefix);
@@ -57,7 +66,8 @@ public final class S3ObjectKey {
             sb.append(HEX[(int) (n >> 4) & 0xF]).append(HEX[(int) n & 0xF]).append('/');
             sb.append(HEX[(int) (n >> 12) & 0xF]).append(HEX[(int) (n >> 8) & 0xF]).append('/');
         }
-        sb.append(bucketTag).append('-').append(UUID.randomUUID());
+        sb.append(bucketTag).append('-').append(runToken).append('-').append(writerId)
+                .append('-').append(Long.toUnsignedString(n, 36));
         return sb.toString();
     }
 }

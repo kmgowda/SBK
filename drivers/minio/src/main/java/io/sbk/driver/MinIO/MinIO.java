@@ -11,6 +11,7 @@ package io.sbk.driver.MinIO;
 
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
+import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
 import io.minio.RemoveBucketArgs;
 import io.minio.RemoveObjectArgs;
@@ -29,6 +30,8 @@ import io.sbk.data.impl.ByteArray;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParameterOptions;
 import io.sbk.system.Printer;
+import okhttp3.ConnectionPool;
+import okhttp3.Dispatcher;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -37,30 +40,42 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
  * SBK driver for any S3-compatible object store (MinIO, AWS S3, Dell ECS,
  * Ceph RGW, SeaweedFS, etc).
  *
- * <p>The driver uses the MinIO Java SDK 9.x and supports the full feature
- * set of the Dell Storage Performance Tool (SPT) S3 driver:
- * multipart upload, S3 checksum, object tagging, bucket versioning,
- * fsAccess-style keys, data compressibility / anti-dedup shaping,
- * SSE-S3 encryption, and custom HTTP-client timeouts.
+ * <p>The driver uses the MinIO Java SDK 8.5.17 and supports object, bucket,
+ * synchronous, and bounded asynchronous workloads together with multipart
+ * upload, S3 checksums, object tagging, bucket versioning, fsAccess-style
+ * keys, data shaping, SSE-S3 encryption, and HTTP-client tuning.
  */
 public class MinIO implements Storage<byte[]> {
 
     private static final String CONFIGFILE = "minio.properties";
     private static final long MIN_PART_SIZE = 5L * 1024 * 1024;            // 5 MiB
     private static final long MAX_PART_SIZE = 5L * 1024 * 1024 * 1024;     // 5 GiB
+    private static final int MAX_ASYNC_DEPTH = 1024;
 
     private MinIOConfig config;
     private MinioClient mclient;
+    private MinioAsyncClient asyncClient;
     private DataType<byte[]> dType;
+    private S3Operation writeOperation;
+    private S3Operation readOperation;
+    private S3ObjectCatalog objectCatalog;
+    private List<String> bucketTargets;
+    private final Queue<String> createdBuckets = new ConcurrentLinkedQueue<>();
+    private String runToken;
 
     public String getConfigFile() {
         return CONFIGFILE;
@@ -87,9 +102,25 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("recreate", true, "Recreate bucket if present, default: " + config.reCreate);
         params.addOption("insecure", true, "Skip TLS cert validation, default: " + config.insecure);
 
+        // Workload
+        params.addOption("write-operation", true, "Writer S3 operation [put|update|copy|delete|tag-set"
+                + "|tag-delete|bucket-create|bucket-delete], default: " + config.writeOperation);
+        params.addOption("read-operation", true, "Reader S3 operation [get|range-get|stat|tag-get|list"
+                + "|bucket-stat|bucket-list], default: " + config.readOperation);
+        params.addOption("async", true, "Use bounded MinioAsyncClient operations, default: " + config.async);
+        params.addOption("async-depth", true, "Maximum in-flight operations per worker, default: "
+                + config.asyncDepth);
+
         // Object layout
         params.addOption("fs-access", true, "fs-style key layout, default: " + config.fsAccess);
         params.addOption("prefix",    true, "Object key prefix, default: '" + nullToEmpty(config.prefix) + "'");
+        params.addOption("copy-prefix", true, "Destination prefix for COPY, default: '"
+                + nullToEmpty(config.copyPrefix) + "'");
+        params.addOption("range-offset", true, "Ranged GET byte offset, default: " + config.rangeOffset);
+        params.addOption("range-length", true, "Ranged GET length (0 uses -size), default: "
+                + config.rangeLength);
+        params.addOption("list-max-keys", true, "Maximum objects consumed by each LIST operation, default: "
+                + config.listMaxKeys);
 
         // Multipart
         params.addOption("part-size",            true, "Multipart part size in bytes (0=disabled, min 5MiB), default: " + config.partSize);
@@ -110,6 +141,15 @@ public class MinIO implements Storage<byte[]> {
         // Versioning
         params.addOption("versioning-enabled", true, "Enable bucket versioning, default: " + config.versioningEnabled);
 
+        // Bucket workloads
+        params.addOption("bucket-targets", true, "Comma-separated explicit bucket targets, default: '"
+                + nullToEmpty(config.bucketTargets) + "'");
+        params.addOption("bucket-prefix", true, "Generated bucket prefix for bucket-create, default: '"
+                + nullToEmpty(config.bucketPrefix) + "'");
+        params.addOption("cleanup-created-buckets", true,
+                "Remove buckets generated by bucket-create on shutdown, default: "
+                        + config.cleanupCreatedBuckets);
+
         // Data shaping
         params.addOption("data-compressibility", true, "Compressibility % 0..100, default: " + config.dataCompressibility);
         params.addOption("data-dedupable",       true, "Dedup-friendly (false=anti-dedup stamp), default: " + config.dataDedupable);
@@ -121,6 +161,15 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("connect-timeout-ms", true, "HTTP connect timeout ms (0=default), default: " + config.connectTimeoutMs);
         params.addOption("read-timeout-ms",    true, "HTTP read timeout ms (0=default), default: " + config.readTimeoutMs);
         params.addOption("write-timeout-ms",   true, "HTTP write timeout ms (0=default), default: " + config.writeTimeoutMs);
+        params.addOption("http-max-requests", true, "OkHttp maximum async requests (0=auto), default: "
+                + config.httpMaxRequests);
+        params.addOption("http-max-requests-per-host", true,
+                "OkHttp maximum async requests per host (0=auto), default: "
+                        + config.httpMaxRequestsPerHost);
+        params.addOption("http-max-idle-connections", true,
+                "OkHttp maximum idle connections, default: " + config.httpMaxIdleConnections);
+        params.addOption("http-keepalive-seconds", true,
+                "OkHttp connection keep-alive seconds, default: " + config.httpKeepAliveSeconds);
 
         // Extra HTTP headers (Dell ECS / ObjectScale: x-emc-namespace=<ns>)
         params.addOption("extra-headers", true,
@@ -143,9 +192,43 @@ public class MinIO implements Storage<byte[]> {
         }
         config.insecure = Boolean.parseBoolean(params.getOptionValue("insecure", String.valueOf(config.insecure)));
 
+        // Workload
+        config.writeOperation = params.getOptionValue("write-operation", config.writeOperation);
+        config.readOperation = params.getOptionValue("read-operation", config.readOperation);
+        writeOperation = S3Operation.fromString(config.writeOperation);
+        readOperation = S3Operation.fromString(config.readOperation);
+        if (!writeOperation.isWriterOperation()) {
+            throw new IllegalArgumentException("-write-operation must be a mutating S3 operation; got "
+                    + config.writeOperation);
+        }
+        if (readOperation.isWriterOperation()) {
+            throw new IllegalArgumentException("-read-operation must be a read-only S3 operation; got "
+                    + config.readOperation);
+        }
+        config.async = Boolean.parseBoolean(params.getOptionValue("async", String.valueOf(config.async)));
+        config.asyncDepth = Integer.parseInt(params.getOptionValue("async-depth",
+                String.valueOf(config.asyncDepth)));
+        if (config.asyncDepth < 1 || config.asyncDepth > MAX_ASYNC_DEPTH) {
+            throw new IllegalArgumentException("async-depth must be between 1 and "
+                    + MAX_ASYNC_DEPTH);
+        }
+
         // Object layout
         config.fsAccess = Boolean.parseBoolean(params.getOptionValue("fs-access", String.valueOf(config.fsAccess)));
         config.prefix   = params.getOptionValue("prefix", nullToEmpty(config.prefix));
+        config.copyPrefix = params.getOptionValue("copy-prefix", nullToEmpty(config.copyPrefix));
+        config.rangeOffset = Long.parseLong(params.getOptionValue("range-offset",
+                String.valueOf(config.rangeOffset)));
+        config.rangeLength = Long.parseLong(params.getOptionValue("range-length",
+                String.valueOf(config.rangeLength)));
+        config.listMaxKeys = Integer.parseInt(params.getOptionValue("list-max-keys",
+                String.valueOf(config.listMaxKeys)));
+        if (config.rangeOffset < 0 || config.rangeLength < 0) {
+            throw new IllegalArgumentException("range-offset and range-length must not be negative");
+        }
+        if (config.listMaxKeys < 1 || config.listMaxKeys > 1000) {
+            throw new IllegalArgumentException("list-max-keys must be between 1 and 1000");
+        }
 
         // Multipart
         config.partSize          = Long.parseLong(params.getOptionValue("part-size",            String.valueOf(config.partSize)));
@@ -154,6 +237,9 @@ public class MinIO implements Storage<byte[]> {
             throw new IllegalArgumentException(
                     "part-size must be between " + MIN_PART_SIZE + " and " + MAX_PART_SIZE
                             + " bytes; got " + config.partSize);
+        }
+        if (config.mpuConcurrentParts < 0) {
+            throw new IllegalArgumentException("mpu-concurrent-parts must not be negative");
         }
 
         // Checksum
@@ -177,9 +263,23 @@ public class MinIO implements Storage<byte[]> {
         // Versioning
         config.versioningEnabled = Boolean.parseBoolean(params.getOptionValue("versioning-enabled", String.valueOf(config.versioningEnabled)));
 
+        // Bucket workloads
+        config.bucketTargets = params.getOptionValue("bucket-targets", nullToEmpty(config.bucketTargets));
+        config.bucketPrefix = params.getOptionValue("bucket-prefix", nullToEmpty(config.bucketPrefix));
+        config.cleanupCreatedBuckets = Boolean.parseBoolean(params.getOptionValue("cleanup-created-buckets",
+                String.valueOf(config.cleanupCreatedBuckets)));
+        bucketTargets = parseList(config.bucketTargets);
+        if (params.getWritersCount() > 0 && writeOperation == S3Operation.BUCKET_DELETE
+                && bucketTargets.isEmpty()) {
+            throw new IllegalArgumentException("bucket-delete requires explicit -bucket-targets");
+        }
+
         // Data shaping
         config.dataCompressibility = Integer.parseInt(params.getOptionValue("data-compressibility", String.valueOf(config.dataCompressibility)));
         config.dataDedupable       = Boolean.parseBoolean(params.getOptionValue("data-dedupable",       String.valueOf(config.dataDedupable)));
+        if (config.dataCompressibility < 0 || config.dataCompressibility > 100) {
+            throw new IllegalArgumentException("data-compressibility must be between 0 and 100");
+        }
 
         // SSE
         config.sseEnabled = Boolean.parseBoolean(params.getOptionValue("sse-enabled", String.valueOf(config.sseEnabled)));
@@ -188,22 +288,48 @@ public class MinIO implements Storage<byte[]> {
         config.connectTimeoutMs = Long.parseLong(params.getOptionValue("connect-timeout-ms", String.valueOf(config.connectTimeoutMs)));
         config.readTimeoutMs    = Long.parseLong(params.getOptionValue("read-timeout-ms",    String.valueOf(config.readTimeoutMs)));
         config.writeTimeoutMs   = Long.parseLong(params.getOptionValue("write-timeout-ms",   String.valueOf(config.writeTimeoutMs)));
+        config.httpMaxRequests = Integer.parseInt(params.getOptionValue("http-max-requests",
+                String.valueOf(config.httpMaxRequests)));
+        config.httpMaxRequestsPerHost = Integer.parseInt(params.getOptionValue("http-max-requests-per-host",
+                String.valueOf(config.httpMaxRequestsPerHost)));
+        config.httpMaxIdleConnections = Integer.parseInt(params.getOptionValue("http-max-idle-connections",
+                String.valueOf(config.httpMaxIdleConnections)));
+        config.httpKeepAliveSeconds = Long.parseLong(params.getOptionValue("http-keepalive-seconds",
+                String.valueOf(config.httpKeepAliveSeconds)));
+        if (config.connectTimeoutMs < 0 || config.readTimeoutMs < 0 || config.writeTimeoutMs < 0
+                || config.httpMaxRequests < 0 || config.httpMaxRequestsPerHost < 0
+                || config.httpMaxIdleConnections < 0 || config.httpKeepAliveSeconds < 1) {
+            throw new IllegalArgumentException("HTTP timeouts and request limits must not be negative"
+                    + " and keep-alive must be positive");
+        }
 
         // Extra headers
         config.extraHeaders = params.getOptionValue("extra-headers", nullToEmpty(config.extraHeaders));
 
+        runToken = Long.toUnsignedString(System.currentTimeMillis(), 36);
         dType = new ByteArray();
     }
 
     @Override
     public void openStorage(final ParameterOptions params) throws IOException {
         try {
-            mclient = buildClient();
+            mclient = buildClient(params);
+            if (config.async) {
+                asyncClient = buildAsyncClient(params);
+            }
             logFeatureBanner();
 
             if (config.insecure) {
                 Printer.log.info("Disabling TLS certificate validation");
                 mclient.ignoreCertCheck();
+                if (asyncClient != null) {
+                    asyncClient.ignoreCertCheck();
+                }
+            }
+
+            if (!usesMainBucket(params)) {
+                objectCatalog = new S3ObjectCatalog(Collections.emptyList());
+                return;
             }
 
             boolean exists = mclient.bucketExists(
@@ -242,12 +368,55 @@ public class MinIO implements Storage<byte[]> {
                                         /* mfaDelete */ null))
                                 .build());
             }
+            objectCatalog = loadObjectCatalog();
+            validateCatalog(params);
         } catch (IOException ioe) {
             throw ioe;
         } catch (Exception ex) {
             throw new IOException("Failed to open S3 storage at " + config.url
                     + " (bucket=" + config.bucketName + "): " + explain(ex), ex);
         }
+    }
+
+    private boolean usesMainBucket(ParameterOptions params) {
+        boolean writerUsesMainBucket = params.getWritersCount() > 0
+                && (writeOperation != S3Operation.BUCKET_CREATE
+                && writeOperation != S3Operation.BUCKET_DELETE);
+        boolean readerUsesMainBucket = params.getReadersCount() > 0
+                && (readOperation != S3Operation.BUCKET_STAT
+                && readOperation != S3Operation.BUCKET_LIST);
+        return writerUsesMainBucket || readerUsesMainBucket;
+    }
+
+    private void validateCatalog(ParameterOptions params) throws IOException {
+        boolean writerNeedsObjects = params.getWritersCount() > 0 && writeOperation.requiresObjectCatalog();
+        boolean readerNeedsObjects = params.getReadersCount() > 0 && readOperation.requiresObjectCatalog();
+        boolean mixedPutRead = params.getWritersCount() > 0 && params.getReadersCount() > 0
+                && writeOperation == S3Operation.PUT && readOperation.requiresObjectCatalog();
+        if (objectCatalog.size() == 0 && (writerNeedsObjects || readerNeedsObjects) && !mixedPutRead) {
+            throw new IOException("S3 " + (writerNeedsObjects ? writeOperation : readOperation)
+                    + " requires existing objects, but bucket '" + config.bucketName + "' is empty");
+        }
+    }
+
+    private S3ObjectCatalog loadObjectCatalog() throws Exception {
+        List<S3ObjectRef> objects = new ArrayList<>();
+        ListObjectsArgs.Builder builder = ListObjectsArgs.builder()
+                .bucket(config.bucketName)
+                .recursive(true)
+                .includeVersions(config.versioningEnabled);
+        if (config.prefix != null && !config.prefix.isEmpty()) {
+            builder.prefix(config.prefix);
+        }
+        for (Result<Item> result : mclient.listObjects(builder.build())) {
+            Item item = result.get();
+            if (!item.isDir() && !item.isDeleteMarker()) {
+                objects.add(new S3ObjectRef(item.objectName(),
+                        config.versioningEnabled ? item.versionId() : null, item.size(), 0));
+            }
+        }
+        Printer.log.info("Prepared S3 object catalog: " + objects.size() + " objects");
+        return new S3ObjectCatalog(objects);
     }
 
     /**
@@ -271,7 +440,7 @@ public class MinIO implements Storage<byte[]> {
         return e.getClass().getSimpleName() + ": " + e.getMessage();
     }
 
-    private MinioClient buildClient() {
+    private MinioClient buildClient(ParameterOptions params) {
         // Always set a region so the SDK skips GetBucketLocation on openStorage.
         // Many S3-compatible backends (MinIO, Dell ECS, Ceph RGW) return HTML
         // or a non-AWS XML body for GET /?location, which trips the SDK's
@@ -284,35 +453,50 @@ public class MinIO implements Storage<byte[]> {
                 .endpoint(config.url)
                 .credentials(config.accessKey, config.secretKey)
                 .region(effectiveRegion);
-
-        Map<String, String> extra = parseHeaders(config.extraHeaders);
-        boolean needCustomHttp = config.connectTimeoutMs > 0
-                || config.readTimeoutMs > 0
-                || config.writeTimeoutMs > 0
-                || !extra.isEmpty();
-
-        if (needCustomHttp) {
-            OkHttpClient.Builder httpB = new OkHttpClient.Builder();
-            if (config.connectTimeoutMs > 0) {
-                httpB.connectTimeout(config.connectTimeoutMs, TimeUnit.MILLISECONDS);
-            }
-            if (config.readTimeoutMs > 0) {
-                httpB.readTimeout(config.readTimeoutMs, TimeUnit.MILLISECONDS);
-            }
-            if (config.writeTimeoutMs > 0) {
-                httpB.writeTimeout(config.writeTimeoutMs, TimeUnit.MILLISECONDS);
-            }
-            if (!extra.isEmpty()) {
-                // Application interceptor — runs once per logical request and
-                // therefore stamps every S3 call (PUT, GET, HEAD, ...) with
-                // the same set of custom headers. Use header() rather than
-                // addHeader() so caller-supplied values can override SDK
-                // defaults if the user really wants to (e.g. authorization).
-                httpB.addInterceptor(new HeaderInjector(extra));
-            }
-            mb.httpClient(httpB.build(), true);
-        }
+        mb.httpClient(buildHttpClient(params), true);
         return mb.build();
+    }
+
+    private MinioAsyncClient buildAsyncClient(ParameterOptions params) {
+        String effectiveRegion = (config.region == null || config.region.isEmpty())
+                ? "us-east-1" : config.region;
+        return MinioAsyncClient.builder()
+                .endpoint(config.url)
+                .credentials(config.accessKey, config.secretKey)
+                .region(effectiveRegion)
+                .httpClient(buildHttpClient(params), true)
+                .build();
+    }
+
+    private OkHttpClient buildHttpClient(ParameterOptions params) {
+        int workers = Math.max(1, params.getWritersCount() + params.getReadersCount());
+        int derivedLimit = (int) Math.min(Integer.MAX_VALUE,
+                Math.max(64L, (long) workers * config.asyncDepth));
+        int maxRequests = config.httpMaxRequests > 0 ? config.httpMaxRequests : derivedLimit;
+        int maxRequestsPerHost = config.httpMaxRequestsPerHost > 0
+                ? config.httpMaxRequestsPerHost : derivedLimit;
+        Dispatcher dispatcher = new Dispatcher();
+        dispatcher.setMaxRequests(maxRequests);
+        dispatcher.setMaxRequestsPerHost(maxRequestsPerHost);
+
+        OkHttpClient.Builder httpB = new OkHttpClient.Builder()
+                .dispatcher(dispatcher)
+                .connectionPool(new ConnectionPool(config.httpMaxIdleConnections,
+                        config.httpKeepAliveSeconds, TimeUnit.SECONDS));
+        if (config.connectTimeoutMs > 0) {
+            httpB.connectTimeout(config.connectTimeoutMs, TimeUnit.MILLISECONDS);
+        }
+        if (config.readTimeoutMs > 0) {
+            httpB.readTimeout(config.readTimeoutMs, TimeUnit.MILLISECONDS);
+        }
+        if (config.writeTimeoutMs > 0) {
+            httpB.writeTimeout(config.writeTimeoutMs, TimeUnit.MILLISECONDS);
+        }
+        Map<String, String> extra = parseHeaders(config.extraHeaders);
+        if (!extra.isEmpty()) {
+            httpB.addInterceptor(new HeaderInjector(extra));
+        }
+        return httpB.build();
     }
 
     /**
@@ -340,6 +524,20 @@ public class MinIO implements Storage<byte[]> {
         return out;
     }
 
+    private static List<String> parseList(String csv) {
+        if (csv == null || csv.isBlank()) {
+            return Collections.emptyList();
+        }
+        List<String> values = new ArrayList<>();
+        for (String value : csv.split(",")) {
+            String trimmed = value.trim();
+            if (!trimmed.isEmpty()) {
+                values.add(trimmed);
+            }
+        }
+        return List.copyOf(values);
+    }
+
     /** OkHttp interceptor that injects a fixed set of headers on every request. */
     private static final class HeaderInjector implements Interceptor {
         private final Map<String, String> headers;
@@ -363,6 +561,10 @@ public class MinIO implements Storage<byte[]> {
         Printer.log.info("MinIO/S3 driver features:");
         Printer.log.info("  endpoint        = " + config.url);
         Printer.log.info("  bucket          = " + config.bucketName);
+        Printer.log.info("  write operation = " + writeOperation);
+        Printer.log.info("  read operation  = " + readOperation);
+        Printer.log.info("  client mode     = " + (config.async
+                ? "async (depth " + config.asyncDepth + " per worker)" : "synchronous"));
         String shownRegion = nullToEmpty(config.region).isEmpty()
                 ? "us-east-1 (default)" : config.region;
         Printer.log.info("  region          = " + shownRegion);
@@ -405,32 +607,67 @@ public class MinIO implements Storage<byte[]> {
 
     private void emptyBucket(String bucket) throws Exception {
         Iterable<Result<Item>> results = mclient.listObjects(
-                ListObjectsArgs.builder().bucket(bucket).recursive(true).build());
+                ListObjectsArgs.builder().bucket(bucket).recursive(true).includeVersions(true).build());
         for (Result<Item> r : results) {
             Item it = r.get();
-            mclient.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(it.objectName()).build());
+            RemoveObjectArgs.Builder builder = RemoveObjectArgs.builder()
+                    .bucket(bucket).object(it.objectName());
+            if (it.versionId() != null && !it.versionId().isEmpty()) {
+                builder.versionId(it.versionId());
+            }
+            mclient.removeObject(builder.build());
         }
     }
 
     @Override
     public void closeStorage(final ParameterOptions params) throws IOException {
-        // MinioClient implements AutoCloseable in 9.x
+        IOException closeFailure = null;
+        if (config.cleanupCreatedBuckets && mclient != null) {
+            String bucket;
+            while ((bucket = createdBuckets.poll()) != null) {
+                try {
+                    mclient.removeBucket(RemoveBucketArgs.builder().bucket(bucket).build());
+                } catch (Exception ex) {
+                    if (closeFailure == null) {
+                        closeFailure = new IOException("Unable to remove generated benchmark bucket '"
+                                + bucket + "'", ex);
+                    }
+                }
+            }
+        }
+        if (asyncClient != null) {
+            try {
+                asyncClient.close();
+            } catch (Exception ex) {
+                if (closeFailure == null) {
+                    closeFailure = new IOException("Unable to close MinioAsyncClient", ex);
+                }
+            }
+        }
         if (mclient != null) {
             try {
                 mclient.close();
-            } catch (Exception ignored) {
+            } catch (Exception ex) {
+                if (closeFailure == null) {
+                    closeFailure = new IOException("Unable to close MinioClient", ex);
+                }
             }
+        }
+        if (closeFailure != null) {
+            throw closeFailure;
         }
     }
 
     @Override
     public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
-        return new MinIOWriter(id, params, config, mclient, dType);
+        return new MinIOWriter(id, params, config, writeOperation, mclient, asyncClient,
+                objectCatalog, bucketTargets, createdBuckets, runToken);
     }
 
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
-        return new MinIOReader(id, params, config, mclient);
+        return new MinIOReader(id, params, config, readOperation, mclient, asyncClient,
+                objectCatalog, bucketTargets);
     }
 
     @Override

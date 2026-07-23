@@ -10,9 +10,7 @@
 
 package io.sbk.driver.MinIO;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Generates per-write payload bytes with configurable
@@ -37,10 +35,6 @@ public final class S3DataGenerator {
     private static final int CHUNK_SIZE = 4 * 1024;
     private static final int STAMP_BYTES = 16;
 
-    /** Process-global unique object-id source. */
-    private static final AtomicLong OBJECT_ID_GEN = new AtomicLong(
-            System.nanoTime() ^ Thread.currentThread().threadId());
-
     private final int compressibility;
     private final boolean dedupable;
     private long objectId;
@@ -52,12 +46,12 @@ public final class S3DataGenerator {
         }
         this.compressibility = compressibility;
         this.dedupable = dedupable;
-        this.objectId = OBJECT_ID_GEN.incrementAndGet();
+        this.objectId = ThreadLocalRandom.current().nextLong();
     }
 
     /** Bump the object-id so the anti-dedup stamp varies between objects. */
     public void newObject() {
-        this.objectId = OBJECT_ID_GEN.incrementAndGet();
+        objectId++;
     }
 
     /**
@@ -91,19 +85,41 @@ public final class S3DataGenerator {
     private void fillChunk(byte[] dst, int off, int chunkLen) {
         int cursor = 0;
         if (!dedupable && chunkLen >= STAMP_BYTES) {
-            ByteBuffer stamp = ByteBuffer.allocate(STAMP_BYTES);
-            stamp.putLong(objectId);
-            stamp.putLong((long) off);
-            System.arraycopy(stamp.array(), 0, dst, off, STAMP_BYTES);
+            putLong(dst, off, objectId);
+            putLong(dst, off + Long.BYTES, off);
             cursor = STAMP_BYTES;
         }
         int payload = chunkLen - cursor;
         int randomBytes = (payload * (100 - compressibility)) / 100;
         // Zero portion: dst is already zero-initialised, nothing to do.
         if (randomBytes > 0) {
-            byte[] buf = new byte[randomBytes];
-            ThreadLocalRandom.current().nextBytes(buf);
-            System.arraycopy(buf, 0, dst, off + cursor, randomBytes);
+            fillRandom(dst, off + cursor, randomBytes);
+        }
+        int zeroOffset = off + cursor + randomBytes;
+        for (int i = zeroOffset; i < off + chunkLen; i++) {
+            dst[i] = 0;
+        }
+    }
+
+    private static void fillRandom(byte[] dst, int offset, int length) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int position = offset;
+        int end = offset + length;
+        while (position + Long.BYTES <= end) {
+            putLong(dst, position, random.nextLong());
+            position += Long.BYTES;
+        }
+        long tail = random.nextLong();
+        while (position < end) {
+            dst[position++] = (byte) tail;
+            tail >>>= Byte.SIZE;
+        }
+    }
+
+    private static void putLong(byte[] dst, int offset, long value) {
+        for (int i = Long.BYTES - 1; i >= 0; i--) {
+            dst[offset + i] = (byte) value;
+            value >>>= Byte.SIZE;
         }
     }
 }

@@ -10,7 +10,6 @@
 
 package io.sbk.driver.MinIO;
 
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -30,6 +29,12 @@ public final class S3ChecksumUtil {
     // CRC64-NVMe (polynomial 0xad93d23594c93659, reflected form used by AWS S3).
     private static final long CRC64_NVME_POLY = 0x9a6c9329ac4bc9b5L;
     private static final long[] CRC64_NVME_TABLE = buildCrc64Table(CRC64_NVME_POLY);
+    private static final ThreadLocal<CRC32> CRC32_DIGEST = ThreadLocal.withInitial(CRC32::new);
+    private static final ThreadLocal<CRC32C> CRC32C_DIGEST = ThreadLocal.withInitial(CRC32C::new);
+    private static final ThreadLocal<MessageDigest> SHA1_DIGEST =
+            ThreadLocal.withInitial(() -> messageDigest("SHA-1"));
+    private static final ThreadLocal<MessageDigest> SHA256_DIGEST =
+            ThreadLocal.withInitial(() -> messageDigest("SHA-256"));
 
     private S3ChecksumUtil() {
     }
@@ -113,23 +118,23 @@ public final class S3ChecksumUtil {
     }
 
     private static byte[] crc32(byte[] data) {
-        CRC32 c = new CRC32();
+        CRC32 c = CRC32_DIGEST.get();
+        c.reset();
         c.update(data);
-        return ByteBuffer.allocate(4).putInt((int) (c.getValue() & 0xFFFFFFFFL)).array();
+        return intBytes((int) (c.getValue() & 0xFFFFFFFFL));
     }
 
     private static byte[] crc32c(byte[] data) {
-        CRC32C c = new CRC32C();
+        CRC32C c = CRC32C_DIGEST.get();
+        c.reset();
         c.update(data);
-        return ByteBuffer.allocate(4).putInt((int) (c.getValue() & 0xFFFFFFFFL)).array();
+        return intBytes((int) (c.getValue() & 0xFFFFFFFFL));
     }
 
     private static byte[] digest(byte[] data, String alg) {
-        try {
-            return MessageDigest.getInstance(alg).digest(data);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(alg + " not available", e);
-        }
+        MessageDigest digest = "SHA-1".equals(alg) ? SHA1_DIGEST.get() : SHA256_DIGEST.get();
+        digest.reset();
+        return digest.digest(data);
     }
 
     private static long[] buildCrc64Table(long poly) {
@@ -153,6 +158,28 @@ public final class S3ChecksumUtil {
         for (byte b : data) {
             crc = CRC64_NVME_TABLE[(int) ((crc ^ b) & 0xFF)] ^ (crc >>> 8);
         }
-        return ByteBuffer.allocate(8).putLong(crc).array();
+        byte[] bytes = new byte[Long.BYTES];
+        for (int i = Long.BYTES - 1; i >= 0; i--) {
+            bytes[i] = (byte) crc;
+            crc >>>= Byte.SIZE;
+        }
+        return bytes;
+    }
+
+    private static byte[] intBytes(int value) {
+        return new byte[]{
+            (byte) (value >>> 24),
+            (byte) (value >>> 16),
+            (byte) (value >>> 8),
+            (byte) value
+        };
+    }
+
+    private static MessageDigest messageDigest(String algorithm) {
+        try {
+            return MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException(algorithm + " not available", ex);
+        }
     }
 }

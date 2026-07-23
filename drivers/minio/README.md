@@ -109,6 +109,12 @@ any S3-compatible storage system listed above. It supports:
 
 - **Concurrent writes and reads** — any number of writer / reader threads,
   one process or distributed across many (via SBK-GEM).
+- **Synchronous or bounded asynchronous clients** — use the MinIO SDK's
+  `MinioClient` for one operation per worker, or `MinioAsyncClient` for a
+  controlled number of in-flight operations per worker.
+- **Object operations** — PUT/create, full-object update, server-side copy,
+  delete, GET, ranged GET, stat/HEAD, tag set/get/delete, and list.
+- **Bucket operations** — create, delete, existence/stat, and list.
 - **Multipart upload** for large objects.
 - **S3 checksum validation** — CRC32 / CRC32C / SHA1 / SHA256 / CRC64-NVMe.
 - **Object tagging**, **bucket versioning**, **SSE-S3 encryption**.
@@ -222,8 +228,79 @@ Command-line flags override the properties file.
 
 | Flag | Default | Purpose |
 |---|---|---|
-| `-fs-access true|false` | `false` | Spread keys across a 2-level hex directory tree (`aa/bb/sbk-<uuid>`), mimicking how applications like Apache Hadoop S3A create paths. Helps test ListObjects / prefix-scan behavior. |
+| `-fs-access true|false` | `false` | Spread keys across a 2-level hex directory tree (`aa/bb/sbk-<run>-<writer>-<sequence>`), mimicking how applications like Apache Hadoop S3A create paths. Helps test ListObjects / prefix-scan behavior. |
 | `-prefix <p>` | `""` | Prepend `<p>/` to every generated object key |
+| `-copy-prefix <p>` | `sbk-copy` | Destination-key prefix for server-side COPY |
+
+### S3 operation selection
+
+Writers execute the operation selected by `-write-operation`; readers execute
+the operation selected by `-read-operation`. Each timed record is one logical
+operation. Every S3 request is constructed and executed by MinIO SDK builders
+and clients—the driver does not contain a separate S3 protocol implementation.
+
+| Flag/value | Worker | MinIO SDK operation | Existing objects required? |
+|---|---|---|---|
+| `-write-operation put` | writer | `putObject` with a new key | No |
+| `-write-operation update` | writer | `putObject` over an existing key | Yes |
+| `-write-operation copy` | writer | server-side `copyObject` | Yes |
+| `-write-operation delete` | writer | `removeObject`; each discovered object is claimed once | Yes |
+| `-write-operation tag-set` | writer | `setObjectTags` | Yes |
+| `-write-operation tag-delete` | writer | `deleteObjectTags` | Yes |
+| `-write-operation bucket-create` | writer | `makeBucket` with a unique generated name | No |
+| `-write-operation bucket-delete` | writer | `removeBucket` for explicit targets | No |
+| `-read-operation get` | reader | `getObject`; the body is completely consumed | Yes |
+| `-read-operation range-get` | reader | `getObject` with offset and length | Yes |
+| `-read-operation stat` | reader | `statObject` (S3 HEAD) | Yes |
+| `-read-operation tag-get` | reader | `getObjectTags` | Yes |
+| `-read-operation list` | reader | `listObjects` | No |
+| `-read-operation bucket-stat` | reader | `bucketExists` | No |
+| `-read-operation bucket-list` | reader | `listBuckets` | No |
+
+`create`, `overwrite`, `head`, and `range-read` are accepted aliases for
+`put`, `update`, `stat`, and `range-get`.
+
+The object catalog is loaded once when storage opens. This prevents an
+unmeasured LIST or HEAD request from being added before every timed GET. In a
+combined PUT/GET run, completed PUTs are published to readers through a
+blocking queue.
+
+### Bounded asynchronous mode
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `-async true|false` | `false` | Select `MinioAsyncClient` instead of synchronous operations |
+| `-async-depth <1..1024>` | `32` | Maximum in-flight SDK futures **per SBK worker** |
+
+Async mode applies backpressure before latency timing begins. Thus the
+reported latency measures the remote S3 operation rather than local waiting
+for a concurrency slot. Memory remains bounded: PUT has at most
+`writers × async-depth` payload buffers and GET has the same number of reusable
+64 KiB response buffers. Start with a small depth such as 4 or 8 and increase
+it until throughput stops improving or tail latency becomes unacceptable.
+
+The shared OkHttp dispatcher is also configurable:
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `-http-max-requests <n>` | `0` (auto) | Maximum total queued/running OkHttp async calls |
+| `-http-max-requests-per-host <n>` | `0` (auto) | Per-S3-endpoint maximum |
+| `-http-max-idle-connections <n>` | `32` | Connections retained in the pool |
+| `-http-keepalive-seconds <s>` | `300` | Idle connection retention |
+
+An automatic request limit is derived from worker count and async depth when
+either request-limit option is zero.
+
+### Range, list, and bucket controls
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `-range-offset <bytes>` | `0` | First byte of a ranged GET |
+| `-range-length <bytes>` | `0` | Bytes per ranged GET; zero uses SBK `-size` |
+| `-list-max-keys <1..1000>` | `1000` | Maximum entries consumed by each timed LIST |
+| `-bucket-targets <csv>` | empty | Explicit buckets for delete/stat; required for bucket delete |
+| `-bucket-prefix <p>` | `sbk-benchmark` | Prefix for unique bucket-create names |
+| `-cleanup-created-buckets true|false` | `true` | Remove successfully generated empty buckets at shutdown |
 
 ### Workload size & rate (inherited from SBK core)
 
@@ -286,6 +363,10 @@ Useful when benchmarking storage with inline compression or deduplication.
 | `-connect-timeout-ms <ms>` | `0` (SDK default) | HTTP connect timeout |
 | `-read-timeout-ms <ms>` | `0` (SDK default) | HTTP read timeout |
 | `-write-timeout-ms <ms>` | `0` (SDK default) | HTTP write timeout |
+| `-http-max-requests <n>` | `0` (auto) | Total OkHttp async request limit |
+| `-http-max-requests-per-host <n>` | `0` (auto) | Per-host OkHttp async request limit |
+| `-http-max-idle-connections <n>` | `32` | Idle connections retained |
+| `-http-keepalive-seconds <s>` | `300` | Idle connection retention |
 
 ---
 
@@ -565,6 +646,61 @@ for a deeper investigation (warm/cold cache effects, internal compaction, …).
 
 ## Advanced features
 
+### Operation examples
+
+The following examples assume the bucket has first been populated with a PUT
+run. They show the additional operation shapes without bypassing the MinIO
+SDK:
+
+```bash
+# Bounded asynchronous PUT: 8 workers × 16 in-flight requests
+./build/install/sbk/bin/sbk -class minio \
+  -writers 8 -size 65536 -seconds 60 \
+  -write-operation put -async true -async-depth 16
+
+# Full-object overwrite of keys discovered at startup
+./build/install/sbk/bin/sbk -class minio \
+  -writers 4 -size 65536 -seconds 60 -write-operation update
+
+# Server-side COPY (the object body does not pass through SBK)
+./build/install/sbk/bin/sbk -class minio \
+  -writers 4 -size 65536 -seconds 60 \
+  -write-operation copy -copy-prefix copied
+
+# Read 4 KiB beginning at byte 8192
+./build/install/sbk/bin/sbk -class minio \
+  -readers 8 -size 4096 -seconds 60 \
+  -read-operation range-get -range-offset 8192 -range-length 4096
+
+# Benchmark object metadata requests and listings
+./build/install/sbk/bin/sbk -class minio \
+  -readers 8 -size 1 -seconds 60 -read-operation stat
+./build/install/sbk/bin/sbk -class minio \
+  -readers 1 -size 1 -seconds 60 \
+  -read-operation list -list-max-keys 1000
+```
+
+Bucket creation uses unique, S3-valid names. Bucket deletion is deliberately
+restricted to an explicit list so a benchmark cannot accidentally delete its
+main data bucket:
+
+```bash
+# Create unique empty buckets and remove them when the run closes
+./build/install/sbk/bin/sbk -class minio \
+  -writers 1 -size 1 -records 10 \
+  -write-operation bucket-create -bucket-prefix sbk-create \
+  -cleanup-created-buckets true
+
+# Delete only these known-empty buckets
+./build/install/sbk/bin/sbk -class minio \
+  -writers 1 -size 1 -records 2 \
+  -write-operation bucket-delete \
+  -bucket-targets sbk-delete-1,sbk-delete-2
+```
+
+`bucket-delete` calls `MinioClient.removeBucket`; S3 rejects non-empty
+buckets. The driver does not recursively delete their contents.
+
 ### Multipart upload
 
 S3 multipart upload splits large objects into parts of 5 MiB to 5 GiB and
@@ -687,7 +823,8 @@ extending `MinIOWriter#sse` if needed.
 
 ### Object key layout (fsAccess + prefix)
 
-By default, keys are `<bucket>-<uuid>`. With `-fs-access true` the keys are
+By default, keys are `<bucket>-<run>-<writer>-<sequence>`. With
+`-fs-access true` the keys are
 spread across a 2-level hex tree (256 leaf "directories"), and `-prefix`
 prepends an arbitrary key prefix:
 
@@ -702,8 +839,8 @@ prepends an arbitrary key prefix:
 Sample keys produced:
 
 ```
-workload-1/01/00/sbk-3c2ca874-6b35-45bd-a94b-cdee44e862d9
-workload-1/02/00/sbk-9e8f0a1c-7d2a-43b1-90ee-1f53b8d3a2c1
+workload-1/01/00/sbk-m5h2x8-0-1
+workload-1/02/00/sbk-m5h2x8-0-2
 ...
 ```
 
@@ -756,16 +893,16 @@ bandwidth. Recommendations:
 |---|---|
 | **Higher write throughput** | Increase `-writers`. Start at `#CPUs`, scale to `4 × #CPUs` for small objects, `1 × #CPUs` for ≥ 1 MiB objects. |
 | **Higher read throughput** | Same as writers; the bottleneck is usually network bandwidth for ≥ 64 KiB objects. |
+| **More concurrency without more SBK threads** | Add `-async true -async-depth 4`, then increase depth gradually. |
 | **Saturate a single 10 GbE link** | `-size 4194304 -writers 16 -part-size 4194304` (or higher) |
 | **Tail-latency study** | Long run (`-seconds 1800`+) with moderate concurrency and CSV logging (see `-out csv`); look at p99, p99.9, p99.99 in the periodic dump. |
 | **Stress prefix-listing** | `-fs-access true -prefix benchN/` so the bucket has 256 hash directories. |
 | **Stress compression / dedup engines** | `-data-compressibility 30 -data-dedupable false`. |
 
-If `-writers` × `-readers` exceeds the SDK's default HTTP connection pool,
-you may see latency cliffs; bump the OkHttp pool by passing higher
-timeouts and consider patching `MinIOWriter` to share a single client
-instance (the driver already does — one `MinioClient` is shared across
-all threads).
+If concurrency exceeds the endpoint or client dispatcher limits, throughput
+will plateau and tail latency will climb. Keep a shared client (the driver
+already uses one client per mode), then tune `-async-depth`,
+`-http-max-requests`, and `-http-max-requests-per-host` together.
 
 ---
 
