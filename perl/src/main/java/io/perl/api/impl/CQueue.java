@@ -18,18 +18,66 @@ import java.lang.invoke.VarHandle;
 import java.util.Objects;
 
 /**
- * A non-blocking multiple-producer, single-consumer queue.
+ * An unbounded, non-blocking multiple-producer, single-consumer (MPSC) queue.
  *
- * <p>Producers publish a new node by atomically linking it to the current last
- * node. The sole consumer advances its thread-confined head and therefore does
- * not perform a compare-and-set operation while dequeuing. Padded cursor
- * holders prevent producer-tail and consumer-head cache-line contention. This
- * queue is intended for SBK's many-producer performance-event paths, where
- * exactly one recorder consumes the events.</p>
+ * <h2>Concurrency model</h2>
+ * <p>Any number of producer threads may call {@link #add(Object)}. Exactly one
+ * consumer thread owns {@link #poll()} and {@link #clear()}. A producer
+ * allocates one node, walks forward from the producer tail when that hint
+ * lags, and publishes the node by comparing and setting the last node's
+ * {@code next} reference. That successful compare-and-set is the enqueue
+ * linearization point. A best-effort tail update reduces later traversal but
+ * is not required for correctness.</p>
  *
- * <p>This class does not permit {@code null} elements. Only one thread may call
- * {@link #poll()} or {@link #clear()}; using multiple consumers violates the
- * queue contract.</p>
+ * <p>The consumer reads the successor of its thread-confined head with acquire
+ * semantics, clears the successor's item, and advances the head without a
+ * compare-and-set. Publication through the producer's compare-and-set and the
+ * consumer's acquire read establishes visibility of the queued element.
+ * Per-producer order and the global order of successful link operations are
+ * preserved. Empty {@code poll()} calls return {@code null}; consequently
+ * {@code null} elements are rejected.</p>
+ *
+ * <h2>Why it can be faster than the JDK queue</h2>
+ * <p>This class deliberately implements only the operations required by
+ * PerL. Unlike {@link java.util.concurrent.ConcurrentLinkedQueue}, it does not
+ * support multiple consumers, iterators, interior removal, size traversal, or
+ * bulk collection operations. The sole consumer therefore avoids the item
+ * compare-and-set and concurrent-head compare-and-set required by a
+ * multi-consumer queue. Separately padded head and tail holders reduce false
+ * sharing between consumer and producer cache lines. Use
+ * {@code ./gradlew :perl:cqueuePerformanceTest} to run the JDK 25 JMH
+ * comparison; results are host-specific.</p>
+ *
+ * <h2>Allocation and garbage collection</h2>
+ * <p>Every successful enqueue allocates one {@code Node}, just as JDK 25
+ * {@code ConcurrentLinkedQueue} does. The consumer clears the item reference
+ * before advancing the head, so a consumed node does not retain the user's
+ * payload. Under normal producer progress, retired predecessor nodes become
+ * unreachable as the consumer advances. The padded head and tail objects add
+ * constant per-queue memory overhead, not per-element overhead.</p>
+ *
+ * <p>This specialization does <strong>not</strong> provide better reclamation
+ * in every workload. JDK 25 {@code ConcurrentLinkedQueue} self-links retired
+ * heads and unlinks dead nodes to prevent a stalled traversal or iterator
+ * from retaining a long linked chain and to reduce cross-generational links.
+ * {@code CQueue} has no equivalent self-link recovery: a producer suspended
+ * while holding a stale node can keep consumed successor nodes reachable
+ * until that producer resumes or exits. The JDK queue is therefore the safer
+ * choice when threads may stall indefinitely or general-purpose collection
+ * operations are required. PerL's production queue array currently uses the
+ * JDK queue for this stronger GC-retention behavior; {@code CQueue} is intended
+ * for controlled MPSC deployments where lower coordination cost is the
+ * priority.</p>
+ *
+ * <h2>Usage constraints</h2>
+ * <ul>
+ *     <li>Do not call {@link #poll()} or {@link #clear()} from more than one
+ *     thread, concurrently or sequentially without external ownership
+ *     transfer.</li>
+ *     <li>Do not enqueue {@code null}.</li>
+ *     <li>Apply external backpressure if an unbounded producer backlog is not
+ *     acceptable.</li>
+ * </ul>
  *
  * @param <T> queued element type
  */
@@ -134,7 +182,7 @@ final public class CQueue<T> implements Queue<T> {
     }
 
     /**
-     * Creates an empty MPSC queue.
+     * Creates an empty MPSC queue with one sentinel node.
      */
     public CQueue() {
         final Node<T> sentinel = new Node<>(null);

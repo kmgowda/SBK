@@ -46,6 +46,40 @@ Workers submit records to `PerlChannel`; recorder logic drains the configured qu
 
 The measurement transport is designed to avoid explicit locks in the producer path. This statement does not imply that the JVM, vendor client, operating system, or storage system is lock-free.
 
+### CQueue and JDK 25 ConcurrentLinkedQueue
+
+`CQueue` is PerL's specialized unbounded multiple-producer, single-consumer
+(MPSC) linked queue. Producers publish a newly allocated node with a
+compare-and-set on the previous last node. Its only consumer owns the head, so
+dequeue does not need the item and head compare-and-set operations required by
+a queue that supports competing consumers. Head and tail state are padded to
+reduce false sharing.
+
+This narrower contract explains the lower latency and higher four-producer,
+one-consumer throughput measured by `cqueuePerformanceTest`. It does not mean
+that `CQueue` produces less garbage:
+
+| GC characteristic | `CQueue` | JDK 25 `ConcurrentLinkedQueue` |
+|---|---|---|
+| Allocation per enqueue | One linked node | One linked node |
+| Payload release after poll | Clears the consumed item | Clears the consumed item |
+| Retired-head handling | Becomes unreachable as the single consumer advances | CAS-advances the head and self-links the retired head |
+| Stalled traversal retention | A suspended producer holding a stale node can retain consumed successors temporarily | Self-links redirect stale traversals and prevent long-chain retention |
+| Interior dead-node cleanup | Not applicable; operation is unsupported | Traversals opportunistically unlink dead nodes |
+| Per-queue overhead | Padded head and tail holders | Unpadded head and tail references |
+
+Therefore, JDK 25 `ConcurrentLinkedQueue` has the stronger general-purpose GC
+handling and retention defenses. `CQueue` has lower coordination cost for a
+strictly controlled MPSC topology, but it still allocates one node for every
+record. A producer that may remain suspended indefinitely is a reason to
+prefer the JDK queue.
+
+Production `CQueuePerl` currently uses `ConcurrentLinkedQueueArray` for the
+stronger reclamation behavior. `CQueueArray` remains available for controlled
+experiments; it is not the default measurement transport. The complete
+algorithm, memory-ordering rules, and usage constraints are documented in the
+[`CQueue` Javadoc](src/main/java/io/perl/api/impl/CQueue.java).
+
 ## Configuration
 
 Defaults are in `src/main/resources/perl.properties` and `sbk-api/src/main/resources/sbk.properties`. They control queue counts, idle behavior, latency storage limits, and histogram fallback. Use `PerlBuilder` as the source-level entry point for understanding how a configuration selects implementations.
@@ -80,9 +114,12 @@ headers, and separate successful-producer throughput metrics. It passes only
 when `CQueue` has at least 5% lower enqueue/dequeue round-trip latency and at
 least 2% higher four-producer/one-consumer throughput, with non-overlapping
 99.9% confidence intervals. Its JSON report is written to
-`perl/build/reports/jmh/cqueue-performance.json`. This environment-sensitive
-test is intentionally separate from `check`; correctness and stress tests
-remain part of the normal build.
+`perl/build/reports/jmh/cqueue-performance.json`. The report also contains JMH
+GC-profiler metrics such as allocation rate and normalized bytes allocated.
+Compare normalized allocation for equivalent operations; a faster queue can
+show a higher allocation rate per second merely because it completes more
+operations. This environment-sensitive test is intentionally separate from
+`check`; correctness and stress tests remain part of the normal build.
 
 ## Use as a library
 
