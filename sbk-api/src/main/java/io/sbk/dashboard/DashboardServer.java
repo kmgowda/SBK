@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class DashboardServer implements AutoCloseable {
     /** Dashboard HTTP API version. */
-    public static final int API_VERSION = 4;
+    public static final int API_VERSION = 5;
     /** Time an unused dashboard remains available after its benchmark exits. */
     public static final Duration DEFAULT_IDLE_TIMEOUT = Duration.ofMinutes(1);
     private static final Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofSeconds(5);

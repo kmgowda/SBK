@@ -127,15 +127,9 @@ public final class DashboardLoggerSupport implements AutoCloseable {
     }
 
     /**
-     * Publishes one periodic snapshot without blocking the caller on HTTP I/O.
+     * Publishes one regular reporting-window snapshot without blocking the
+     * caller on HTTP I/O.
      *
-     * <p>Total snapshots are deliberately ignored. They contain cumulative data
-     * produced at benchmark shutdown or when the total latency buffer is
-     * flushed, whereas dashboard charts represent the regular reporting
-     * windows. Mixing both forms would add a cumulative point to an interval
-     * series and distort its graphs.</p>
-     *
-     * @param total                           whether this is a cumulative total to ignore
      * @param connections                     active connections
      * @param maxConnections                  maximum connections
      * @param writers                         active writers
@@ -176,7 +170,7 @@ public final class DashboardLoggerSupport implements AutoCloseable {
      * @param percentileLatencies             percentile values
      * @param percentileLatencyCounts         percentile counts
      */
-    public void publish(boolean total, int connections, int maxConnections, int writers, int maxWriters,
+    public void publish(int connections, int maxConnections, int writers, int maxWriters,
                         int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec,
                         long writeRequestRecords, double writeRequestRecordsPerSec, long readRequestBytes,
                         double readRequestMbPerSec, long readRequestRecords, double readRequestRecordsPerSec,
@@ -188,7 +182,7 @@ public final class DashboardLoggerSupport implements AutoCloseable {
                         double recordsPerSec, double mbPerSec, double averageLatency, long minimumLatency,
                         long maximumLatency, long invalid, long lowerDiscard, long higherDiscard,
                         long slc1, long slc2, long[] percentileLatencies, long[] percentileLatencyCounts) {
-        if (total || client == null) {
+        if (client == null) {
             return;
         }
         final DashboardSnapshot.WorkerMetrics workers = new DashboardSnapshot.WorkerMetrics(writers, maxWriters,
@@ -204,7 +198,7 @@ public final class DashboardLoggerSupport implements AutoCloseable {
         final DashboardSnapshot.LatencyMetrics latency = new DashboardSnapshot.LatencyMetrics(averageLatency,
                 minimumLatency, maximumLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentiles,
                 percentileLatencies, percentileLatencyCounts);
-        client.publish(new DashboardSnapshot(runId, System.currentTimeMillis(), false, workers, requests,
+        client.publish(new DashboardSnapshot(runId, System.currentTimeMillis(), workers, requests,
                 performance, latency));
     }
 

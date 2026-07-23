@@ -10,8 +10,9 @@
 package io.sbk.dashboard;
 
 import io.sbk.action.Action;
+import io.sbk.logger.impl.WebLogger;
 import io.sbk.params.impl.SbkParameters;
-import io.time.TimeUnit;
+import io.time.NanoSeconds;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -331,33 +332,37 @@ final class DashboardServerTest {
     }
 
     @Test
-    void loggerSupportPublishesOnlyRegularIntervalResults() throws Exception {
+    void webLoggerPublishesOnlyRegularIntervalResults() throws Exception {
         try (DashboardServer server = new DashboardServer("127.0.0.1", 0, 4)) {
             server.start();
             final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
-            final DashboardLoggerSupport support = new DashboardLoggerSupport();
+            final WebLogger logger = new WebLogger();
             final SbkParameters parameters = new SbkParameters("dashboard-test");
-            support.addArgs(parameters);
+            logger.addArgs(parameters);
             parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
                     "-dashboardhost", "127.0.0.1", "-dashboardport",
                     Integer.toString(server.getAddress().getPort()),
                     "-dashboardstart", "false", "-dashboardopen", "false"});
-            support.parseArgs(parameters);
+            logger.parseArgs(parameters);
 
-            support.open("SBK", "File", Action.Writing, TimeUnit.ns,
-                    new double[]{50, 99});
-            final String runId = activeRunId(baseUri);
-            publish(support, false, 10);
-            assertEquals(1, waitForHistory(baseUri, runId, 1).length);
-            publish(support, true, 1000);
-            support.close();
+            logger.open(parameters, "File", Action.Writing, new NanoSeconds());
+            final String runId;
+            try {
+                runId = activeRunId(baseUri);
+                emitResult(logger, false, 10);
+                assertEquals(1, waitForHistory(baseUri, runId, 1).length);
+                emitResult(logger, true, 1000);
+            } finally {
+                logger.close(parameters);
+            }
 
-            final DashboardSnapshot[] history = MAPPER.readValue(
-                    get(baseUri.resolve("/api/v1/runs/" + runId + "/history")).body(),
-                    DashboardSnapshot[].class);
+            final String historyJson =
+                    get(baseUri.resolve("/api/v1/runs/" + runId + "/history")).body();
+            final DashboardSnapshot[] history =
+                    MAPPER.readValue(historyJson, DashboardSnapshot[].class);
             assertEquals(1, history.length);
             assertEquals(10, history[0].performance().records());
-            assertFalse(history[0].total());
+            assertFalse(historyJson.contains("\"total\""));
         }
     }
 
@@ -402,7 +407,7 @@ final class DashboardServerTest {
     }
 
     private static DashboardSnapshot snapshot(String runId, long records) {
-        return new DashboardSnapshot(runId, records, false,
+        return new DashboardSnapshot(runId, records,
                 new DashboardSnapshot.WorkerMetrics(1, 1, 0, 0, 0, 0),
                 new DashboardSnapshot.RequestMetrics(100, records, 1, 1, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -420,14 +425,25 @@ final class DashboardServerTest {
         return run.get("runId").toString();
     }
 
-    private static void publish(DashboardLoggerSupport support, boolean total, long records) {
-        support.publish(total, 0, 0, 1, 1, 0, 0,
-                records * 100, 1, records, 1,
-                0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0,
-                5, records * 100, records, records, 1,
-                10, 1, 20, 0, 0, 0, 0, 0,
-                new long[]{10, 20}, new long[]{1, 1});
+    private static void emitResult(WebLogger logger, boolean total, long records) {
+        if (total) {
+            logger.printTotal(System.currentTimeMillis(), 1, 1, 0, 0,
+                    records * 100, 1, records, 1,
+                    0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0,
+                    5, records * 100, records, records, 1,
+                    10, 1, 20, 0, 0, 0, 0, 0,
+                    new long[]{10, 20}, new long[]{1, 1});
+        } else {
+            logger.print(System.currentTimeMillis(), 1, 1, 0, 0,
+                    records * 100, 1, records, 1,
+                    0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0,
+                    5, records * 100, records, records, 1,
+                    10, 1, 20, 0, 0, 0, 0, 0,
+                    new long[]{10, 20}, new long[]{1, 1});
+        }
     }
 }

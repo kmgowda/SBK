@@ -107,7 +107,7 @@ public class SbmWebLogger extends AbstractRamLogger {
                 recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard,
                 slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(output);
-        publish(false, connections, maxConnections, writers, maxWriters, readers, maxReaders, writeRequestBytes,
+        publish(connections, maxConnections, writers, maxWriters, readers, maxReaders, writeRequestBytes,
                 writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes,
                 readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords,
                 writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
@@ -142,17 +142,9 @@ public class SbmWebLogger extends AbstractRamLogger {
                 recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard,
                 slc1, slc2, percentileLatencies, percentileLatencyCounts);
         System.out.println(output);
-        publish(true, connections, maxConnections, writers, maxWriters, readers, maxReaders, writeRequestBytes,
-                writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes,
-                readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords,
-                writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,
-                writeReadRequestPendingRecords, writeReadRequestPendingBytes, writeTimeoutEvents,
-                writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec, seconds, bytes, records,
-                recsPerSec, mbPerSec, avgLatency, minLatency, maxLatency, invalid, lowerDiscard, higherDiscard,
-                slc1, slc2, percentileLatencies, percentileLatencyCounts);
     }
 
-    private void publish(boolean total, int connections, int maxConnections, int writers, int maxWriters,
+    private void publish(int connections, int maxConnections, int writers, int maxWriters,
                          int readers, int maxReaders, long writeRequestBytes, double writeRequestMbPerSec,
                          long writeRequestRecords, double writeRequestRecordsPerSec, long readRequestBytes,
                          double readRequestMbPerSec, long readRequestRecords, double readRequestRecordsPerSec,
@@ -164,7 +156,7 @@ public class SbmWebLogger extends AbstractRamLogger {
                          double recsPerSec, double mbPerSec, double avgLatency, long minLatency, long maxLatency,
                          long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
                          long[] percentileLatencies, long[] percentileLatencyCounts) {
-        dashboard.publish(total, connections, maxConnections, writers, maxWriters, readers, maxReaders,
+        dashboard.publish(connections, maxConnections, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,

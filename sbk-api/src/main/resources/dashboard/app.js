@@ -54,7 +54,6 @@ function duration(seconds) {
 }
 
 function elapsedSeconds(run, snapshot) {
-    if (snapshot.total) return snapshot.performance.seconds;
     return Math.max(0, (snapshot.timestamp - run.startedAt) / 1000);
 }
 
@@ -77,7 +76,7 @@ function update() {
         elements.status.className = `status ${state.abandoned ? 'abandoned' : 'waiting'}`;
         return;
     }
-    const status = state.abandoned ? 'ABANDONED' : state.completed || snapshot.total ? 'COMPLETE' : 'RUNNING';
+    const status = state.abandoned ? 'ABANDONED' : state.completed ? 'COMPLETE' : 'RUNNING';
     elements.status.textContent = status;
     elements.status.className = `status ${status.toLowerCase()}`;
     elements.elapsed.textContent = duration(elapsedSeconds(run, snapshot));
@@ -92,14 +91,13 @@ function update() {
     elements.timeouts.textContent = compact(snapshot.requests.writeTimeouts + snapshot.requests.readTimeouts);
     elements.invalid.textContent = compact(snapshot.latency.invalid);
     elements.discarded.textContent = compact(snapshot.latency.lowerDiscard + snapshot.latency.higherDiscard);
-    elements.totalRecords.textContent = compact(snapshot.performance.records);
-    elements.totalBytes.textContent = bytes(snapshot.performance.bytes);
+    elements.windowRecords.textContent = compact(snapshot.performance.records);
+    elements.windowBytes.textContent = bytes(snapshot.performance.bytes);
     drawAll();
 }
 
 function mergeSnapshot(snapshot) {
-    const existing = state.snapshots.findIndex(item => item.timestamp === snapshot.timestamp
-        && item.total === snapshot.total);
+    const existing = state.snapshots.findIndex(item => item.timestamp === snapshot.timestamp);
     if (existing >= 0) {
         state.snapshots[existing] = snapshot;
     } else {
@@ -115,7 +113,6 @@ async function refreshHistory(runId) {
     const snapshots = await response.json();
     if (!state.run || state.run.runId !== runId) return;
     snapshots.forEach(mergeSnapshot);
-    if (snapshots.some(snapshot => snapshot.total)) state.completed = true;
     update();
 }
 
