@@ -170,6 +170,23 @@ tasks.register('cqueuePerformanceTest') {
     }
 }
 
+tasks.register('cqueueGcTest', JavaExec) {
+    group = 'verification'
+    description = 'Verifies CQueue reclamation and payload release in a constrained 32 MB JVM.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.perl.api.impl.CQueueGcSoak'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('cqueueGcTest')
+}
+
 tasks.register('updateDocs') {
     dependsOn javadoc
     doLast {

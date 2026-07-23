@@ -101,6 +101,19 @@ The normal project build also checks PerL:
 
 Use JMH for performance claims and deterministic unit tests for percentile/window correctness. Avoid wall-clock assertions where a fake or explicit `Time` implementation can make the test stable.
 
+The normal `:perl:check` task also starts a dedicated JVM with a fixed 32 MB
+heap for `cqueueGcTest`. That process enqueues and consumes 20 million records
+while a producer is paused on a stale queue node. The test fails if the retired
+chain reaches the 16-node batch size, the producer cannot recover, the process
+runs out of heap, or a consumed node retains a 4 MiB payload. Unit coverage
+also pauses several producers at different retirement generations and verifies
+that every producer recovers without record loss.
+
+These tests establish bounded retired-node retention and prompt payload release
+for the documented multiple-producer, single-consumer contract. They do not
+claim equivalence with every general-purpose operation or every possible GC
+schedule supported by JDK `ConcurrentLinkedQueue`.
+
 To verify the MPSC queue performance claim against JDK 25
 `ConcurrentLinkedQueue`, run the dedicated JMH performance test on an otherwise
 idle system:
