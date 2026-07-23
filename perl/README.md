@@ -67,6 +67,23 @@ The normal project build also checks PerL:
 
 Use JMH for performance claims and deterministic unit tests for percentile/window correctness. Avoid wall-clock assertions where a fake or explicit `Time` implementation can make the test stable.
 
+To verify the MPSC queue performance claim against JDK 25
+`ConcurrentLinkedQueue`, run the dedicated JMH performance test on an otherwise
+idle system:
+
+```bash
+./gradlew :perl:cqueuePerformanceTest
+```
+
+The task uses warmup iterations, three isolated JVM forks, compact object
+headers, and separate successful-producer throughput metrics. It passes only
+when `CQueue` has at least 5% lower enqueue/dequeue round-trip latency and at
+least 2% higher four-producer/one-consumer throughput, with non-overlapping
+99.9% confidence intervals. Its JSON report is written to
+`perl/build/reports/jmh/cqueue-performance.json`. This environment-sensitive
+test is intentionally separate from `check`; correctness and stress tests
+remain part of the normal build.
+
 ## Use as a library
 
 Published coordinates use the project group and version defined in `gradle.properties`. Refer to [Maven Central](https://central.sonatype.com/), the repository's GitHub Packages configuration, or a locally published build for the currently available version instead of copying a version from this README.

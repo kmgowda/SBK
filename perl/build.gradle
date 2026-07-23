@@ -62,6 +62,95 @@ jmh {
     excludes = ['org.openjdk.jmh.benchmarks',]
 }
 
+def cqueuePerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/cqueue-performance.json")
+
+tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Runs the isolated JDK 25 CQueue versus ConcurrentLinkedQueue benchmarks.'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.perl.benchmark.QueueBenchmark.*',
+            '-wi', '3',
+            '-i', '5',
+            '-f', '3',
+            '-w', '1s',
+            '-r', '1s',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', cqueuePerformanceReport.get().asFile.absolutePath
+    outputs.file(cqueuePerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        cqueuePerformanceReport.get().asFile.parentFile.mkdirs()
+        delete cqueuePerformanceReport
+    }
+}
+
+tasks.register('cqueuePerformanceTest') {
+    group = 'verification'
+    description = 'Verifies lower CQueue latency and higher 4P/1C throughput on JDK 25.'
+    dependsOn tasks.named('runCQueuePerformanceBenchmark')
+
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(cqueuePerformanceReport.get().asFile)
+        def byBenchmark = results.collectEntries { [(it.benchmark): it] }
+        def result = { String benchmark ->
+            def value = byBenchmark[benchmark]
+            if (value == null) {
+                throw new GradleException("Missing JMH result: ${benchmark}")
+            }
+            if (!value.jdkVersion.toString().startsWith('25')) {
+                throw new GradleException(
+                        "CQueue performance verification requires JDK 25; found ${value.jdkVersion}")
+            }
+            value
+        }
+
+        def cqueueLatency = result(
+                'io.perl.benchmark.QueueBenchmark.cqueueRoundTrip').primaryMetric
+        def jdkLatency = result(
+                'io.perl.benchmark.QueueBenchmark.jdkQueueRoundTrip').primaryMetric
+        def cqueueMpsc = result(
+                'io.perl.benchmark.QueueBenchmark.cqueueFourProducersOneConsumer')
+                .secondaryMetrics.cqueueMpscProducer
+        def jdkMpsc = result(
+                'io.perl.benchmark.QueueBenchmark.jdkFourProducersOneConsumer')
+                .secondaryMetrics.jdkMpscProducer
+
+        if (cqueueLatency.score >= jdkLatency.score * 0.95) {
+            throw new GradleException(String.format(
+                    'CQueue latency %.3f ns/op is not at least 5%% lower than JDK latency %.3f ns/op',
+                    cqueueLatency.score, jdkLatency.score))
+        }
+        if (cqueueLatency.scoreConfidence[1] >= jdkLatency.scoreConfidence[0]) {
+            throw new GradleException(
+                    'CQueue and JDK latency confidence intervals overlap')
+        }
+        if (cqueueMpsc.score <= jdkMpsc.score * 1.02) {
+            throw new GradleException(String.format(
+                    'CQueue throughput %.0f ops/s is not at least 2%% higher than JDK throughput %.0f ops/s',
+                    cqueueMpsc.score, jdkMpsc.score))
+        }
+        if (cqueueMpsc.scoreConfidence[0] <= jdkMpsc.scoreConfidence[1]) {
+            throw new GradleException(
+                    'CQueue and JDK MPSC throughput confidence intervals overlap')
+        }
+
+        logger.lifecycle(String.format(
+                'CQueue performance verified: %.3f versus %.3f ns/op; %.0f versus %.0f MPSC ops/s',
+                cqueueLatency.score, jdkLatency.score, cqueueMpsc.score, jdkMpsc.score))
+        logger.lifecycle("JMH report: ${cqueuePerformanceReport.get().asFile}")
+    }
+}
+
 tasks.register('updateDocs') {
     dependsOn javadoc
     doLast {
