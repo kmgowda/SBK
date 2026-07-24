@@ -16,13 +16,20 @@ import io.sbk.params.impl.SbkDriversParameters;
 import io.sbk.config.Config;
 import io.sbk.system.Printer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +43,9 @@ public class FileTest {
     final String benchmarkName = Config.NAME + " -class file";
     private File file;
     private InputParameterOptions params;
+
+    @TempDir
+    private Path tempDir;
 
     @Test
     public void testParseArgs() {
@@ -385,6 +395,79 @@ public class FileTest {
         } catch (IOException ex) {
             ex.printStackTrace();
             fail("Reader Failed");
+        }
+    }
+
+    @Test
+    public void testSynchronousWriterReaderTenRecordDataIntegrity() throws Exception {
+        final int recordCount = 10;
+        final int recordSize = 100;
+        final Path benchmarkFile = tempDir.resolve("file-sync-round-trip.sbk");
+        final List<byte[]> expectedRecords = new ArrayList<>(recordCount);
+        final String[] writeArgs = {
+                "-class", "file",
+                "-file", benchmarkFile.toString(),
+                "-size", Integer.toString(recordSize),
+                "-writers", "1",
+                "-records", Integer.toString(recordCount),
+                "-asyncthreads", "0"
+        };
+
+        params = new SbkDriversParameters(benchmarkName, drivers, loggers);
+        file = new File();
+        file.addArgs(params);
+        params.parseArgs(writeArgs);
+        file.parseArgs(params);
+        file.openStorage(params);
+
+        final Writer<ByteBuffer> writer = (Writer<ByteBuffer>) file.createWriter(0, params);
+        try {
+            for (int recordId = 0; recordId < recordCount; recordId++) {
+                final byte[] expectedRecord = new byte[recordSize];
+                for (int byteIndex = 0; byteIndex < recordSize; byteIndex++) {
+                    expectedRecord[byteIndex] = (byte) (recordId * recordSize + byteIndex);
+                }
+                expectedRecords.add(expectedRecord.clone());
+                writer.writeAsync(ByteBuffer.wrap(expectedRecord));
+            }
+            writer.sync();
+        } finally {
+            writer.close();
+            file.closeStorage(params);
+        }
+
+        assertEquals((long) recordCount * recordSize, Files.size(benchmarkFile));
+
+        final String[] readArgs = {
+                "-class", "file",
+                "-file", benchmarkFile.toString(),
+                "-size", Integer.toString(recordSize),
+                "-readers", "1",
+                "-records", Integer.toString(recordCount),
+                "-asyncthreads", "0"
+        };
+        params = new SbkDriversParameters(benchmarkName, drivers, loggers);
+        file = new File();
+        file.addArgs(params);
+        params.parseArgs(readArgs);
+        file.parseArgs(params);
+        file.getDataType();
+        file.openStorage(params);
+
+        final Reader<ByteBuffer> reader = (Reader<ByteBuffer>) file.createReader(0, params);
+        assertInstanceOf(FileReader.class, reader);
+        try {
+            for (int recordId = 0; recordId < recordCount; recordId++) {
+                final ByteBuffer readBuffer = reader.read();
+                final byte[] actualRecord = new byte[readBuffer.remaining()];
+                readBuffer.get(actualRecord);
+                assertArrayEquals(expectedRecords.get(recordId), actualRecord,
+                        "Record " + recordId + " should match the synchronous file write");
+            }
+            assertThrows(EOFException.class, reader::read);
+        } finally {
+            reader.close();
+            file.closeStorage(params);
         }
     }
 }

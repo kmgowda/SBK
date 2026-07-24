@@ -12,9 +12,15 @@ package io.perl.api.impl;
 import io.perl.api.QueueArray;
 
 /**
- * Concurrent Queue Array based on CQueue Implementation.
- * DON'T USE THIS CLASS.
- * Use ConcurrentLinkedQueueArray, because the ConcurrentLinkedQueue does better Garbage collection.
+ * Array of MPSC queues backed by {@link CQueue}.
+ *
+ * <p>This implementation is retained for controlled performance experiments.
+ * Production PerL uses {@link ConcurrentLinkedQueueArray}: although both
+ * implementations allocate one node per enqueue and both recover from stale
+ * retired heads, the JDK queue also covers multiple consumers, iterators, and
+ * interior dead-node removal. {@code CQueue} instead amortizes self-linking over
+ * {@value CQueue#RETIRE_BATCH_SIZE} dequeues for its narrower MPSC contract.
+ * Each index in this array must still have exactly one consumer.</p>
  *
  * @param <T> queued element type
  */
