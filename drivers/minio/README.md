@@ -128,9 +128,10 @@ any S3-compatible storage system listed above. It supports:
 
 What it does **not** do:
 
-- End-to-end (write → read) latency. The numbers reported are per-PUT and
-  per-GET, not "time from when a writer put an object to when a reader
-  could observe it".
+- Byte-for-byte content validation. `-verify-read-size` validates the number
+  of returned bytes, while `-checksum` validates PUT transport integrity on
+  backends that implement the requested checksum. Neither option compares a
+  later GET body with the original generated payload.
 - SigV2 (legacy S3 signing). Only SigV4 is implemented.
 - Username / password login. S3 protocol has no such concept — only access
   key + secret key. If you have an admin username (e.g. ObjectScale
@@ -142,7 +143,9 @@ What it does **not** do:
 ## Table of contents
 
 - [Quick start](#quick-start)
+- [Prerequisites and safety](#prerequisites-and-safety)
 - [Full CLI flag reference](#full-cli-flag-reference)
+- [What each option proves](#what-each-option-proves)
 - [Benchmark scenarios](#benchmark-scenarios)
   - [1. play.min.io (public sandbox)](#1-playminio-public-sandbox)
   - [2. Local MinIO server in Docker](#2-local-minio-server-in-docker)
@@ -207,11 +210,66 @@ view so you can spot warm-up effects, GC pauses, etc.
 
 ---
 
+## Prerequisites and safety
+
+Before using any option, confirm the following:
+
+1. **JDK 25 and a current SBK distribution** are available. Build with
+   `./gradlew installDist`, then use `./build/install/sbk/bin/sbk`.
+2. **The endpoint is the S3 data-plane endpoint**, not a management UI.
+   Include `http://` or `https://` explicitly when transport security matters.
+3. **The access key and secret key belong to an S3 user** with permissions for
+   every operation being tested. Read-only credentials cannot run PUT, DELETE,
+   tagging, versioning, or bucket lifecycle tests.
+4. **Use a dedicated benchmark bucket and prefix.** PUT creates data; UPDATE,
+   COPY, tagging, GET, range GET, stat, and DELETE need existing objects;
+   `-recreate true`, DELETE, and bucket deletion are destructive.
+5. **Provide backend-specific configuration.** For example, Dell ECS /
+   ObjectScale commonly needs `-extra-headers
+   'x-emc-namespace=<namespace>'`.
+6. **Provision client resources for the requested concurrency.** Async PUT
+   retains a payload per in-flight operation. Multipart tests need enough heap,
+   network bandwidth, and backend capacity for the selected object and part
+   sizes.
+7. **Run a correctness pass before a performance pass.** Start with one worker,
+   a short, rate-controlled run and `-verify-read-size true`; then increase
+   concurrency and duration.
+
+### What a successful SBK run confirms
+
+A completed record means the corresponding MinIO SDK future or synchronous SDK
+call completed successfully and SBK recorded its latency. A successful run
+therefore confirms client-to-endpoint connectivity, authentication,
+authorization, request compatibility, and completion of the selected API
+operation under the configured workload.
+
+It does **not** automatically prove every server-side property. For example,
+`-sse-enabled true` proves that the backend accepted SSE-S3 PUT requests, but
+an administrator should inspect backend metadata or policy when an independent
+at-rest-encryption audit is required. `-verify-read-size true` checks returned
+byte counts, not byte-for-byte content. Checksum-enabled PUT verifies transport
+integrity only when the target backend implements the requested S3 checksum.
+
+For a trustworthy performance result, require all of the following:
+
+- the process exits with code zero and prints `SBK Benchmark Shutdown`;
+- the final result has nonzero records;
+- `invalid latencies`, discarded latencies, and timeout events are zero;
+- there are no `ERROR`, SDK exception, HTTP failure, or I/O failure messages;
+- a follow-up read/stat/list or backend inspection confirms the expected state
+  when the test changes objects or buckets.
+
+---
+
 ## Full CLI flag reference
 
 Every option also has a default in
 [`src/main/resources/minio.properties`](src/main/resources/minio.properties).
 Command-line flags override the properties file.
+
+The tables below distinguish **what an option changes** from **what a passing
+run confirms**. Options do not create independent assertions unless the
+description explicitly says they validate something.
 
 ### Connection & credentials
 
@@ -222,7 +280,7 @@ Command-line flags override the properties file.
 | `-bucket <name>` | `sbk` | Bucket to read / write |
 | `-key <access-key>` | (play.min.io sandbox key) | S3 access key |
 | `-secret <secret-key>` | (play.min.io sandbox secret) | S3 secret key. The value is never echoed by `-help`. |
-| `-region <region>` | `us-east-1` (driver default) | AWS region for SigV4 signing. **Always set** so the SDK skips `GetBucketLocation`, which many non-AWS backends mishandle. |
+| `-region <region>` | empty; effective `us-east-1` | AWS region for SigV4 signing. An empty value uses `us-east-1`, so the SDK skips `GetBucketLocation`, which many non-AWS backends mishandle. Set the actual bucket region for AWS or any backend that requires another region. |
 | `-recreate true|false` | `false` | Destructively empty and recreate the bucket before a writer run. Mixed writer/reader runs do not override this safety setting. |
 | `-insecure true|false` | `false` | Skip certificate validation for explicit HTTPS endpoints. This does not select HTTP; transport is controlled by each endpoint URL scheme. |
 | `-auth-version 2|4` | `4` | S3 signature version. The MinIO SDK is **always SigV4**; `2` is accepted but logs a warning and falls back to SigV4. |
@@ -248,23 +306,23 @@ need not add to 100. Each worker follows an exact repeating weighted cycle,
 with a worker-specific starting position; writer mixes may contain only
 mutating operations and reader mixes only read operations.
 
-| Flag/value | Worker | MinIO SDK operation | Existing objects required? |
+| Flag/value | SDK operation and measured work | Prerequisite | What a successful record confirms |
 |---|---|---|---|
-| `-write-operation put` | writer | `putObject` with a new key | No |
-| `-write-operation update` | writer | `putObject` over an existing key | Yes |
-| `-write-operation copy` | writer | server-side `copyObject` | Yes |
-| `-write-operation delete` | writer | `removeObject`; each discovered object is claimed once | Yes |
-| `-write-operation tag-set` | writer | `setObjectTags` | Yes |
-| `-write-operation tag-delete` | writer | `deleteObjectTags` | Yes |
-| `-write-operation bucket-create` | writer | `makeBucket` with a unique generated name | No |
-| `-write-operation bucket-delete` | writer | `removeBucket` for explicit targets | No |
-| `-read-operation get` | reader | `getObject`; the body is completely consumed | Yes |
-| `-read-operation range-get` | reader | `getObject` with offset and length | Yes |
-| `-read-operation stat` | reader | `statObject` (S3 HEAD) | Yes |
-| `-read-operation tag-get` | reader | `getObjectTags` | Yes |
-| `-read-operation list` | reader | `listObjects` | No |
-| `-read-operation bucket-stat` | reader | `bucketExists` | No |
-| `-read-operation bucket-list` | reader | `listBuckets` | No |
+| `-write-operation put` | `putObject` uploads one newly generated key and payload | Write permission; bucket exists or credentials can create it | The backend accepted and completed an object PUT of `-size` bytes |
+| `-write-operation update` | `putObject` replaces a catalog-selected key with a new payload | Existing objects and overwrite permission | Full-object overwrite completed for an existing key |
+| `-write-operation copy` | `copyObject` creates a destination under `-copy-prefix`; bytes stay server-side | Existing source objects and copy/read/write permission | The backend completed a server-side object copy |
+| `-write-operation delete` | `removeObject`; each catalog entry is claimed once | Existing objects and delete permission | The backend accepted deletion of a discovered key; use LIST to independently confirm absence |
+| `-write-operation tag-set` | `setObjectTags` replaces tags on a catalog-selected object | Existing objects, tag permission, nonempty `-tagging-tags` | A standalone object-tag update completed |
+| `-write-operation tag-delete` | `deleteObjectTags` removes tags from a catalog-selected object | Existing tagged objects and tag permission | A standalone tag-delete request completed |
+| `-write-operation bucket-create` | `makeBucket` creates a unique generated name | Account-level create-bucket permission | Bucket creation completed; cleanup behavior is controlled separately |
+| `-write-operation bucket-delete` | `removeBucket` deletes each explicit target once | Explicit `-bucket-targets`; targets must be empty; delete-bucket permission | The named empty bucket was removed |
+| `-read-operation get` | `getObject`; SBK drains the complete response body | Existing objects and read permission | The full object response was consumed; byte count is checked only with `-verify-read-size true` |
+| `-read-operation range-get` | `getObject` with byte offset and length; SBK drains the response | An object larger than `-range-offset`; ranged-read support | The requested byte range was returned; byte count is checked only with `-verify-read-size true` |
+| `-read-operation stat` | `statObject` (S3 HEAD) | Existing objects and metadata/read permission | Object metadata was resolved without downloading the body |
+| `-read-operation tag-get` | `getObjectTags` | Existing objects and tag-read permission | The backend returned the object's tag set |
+| `-read-operation list` | `listObjects`, consuming at most `-list-max-keys` entries | List-bucket permission | A prefix listing completed and its returned entries were consumed |
+| `-read-operation bucket-stat` | `bucketExists` | Bucket visibility permission; optional explicit targets | Bucket-existence API latency was measured; the current implementation measures completion, not a required `true` result |
+| `-read-operation bucket-list` | `listBuckets` | Account-level list-buckets permission | The account's bucket-list API completed |
 
 `create`, `overwrite`, `head`, and `range-read` are accepted aliases for
 `put`, `update`, `stat`, and `range-get`.
@@ -323,16 +381,40 @@ either request-limit option is zero.
 | `-bucket-prefix <p>` | `sbk-benchmark` | Prefix for unique bucket-create names |
 | `-cleanup-created-buckets true|false` | `true` | Remove successfully generated empty buckets at shutdown |
 
-### Workload size & rate (inherited from SBK core)
+### SBK core options accepted by the MinIO driver
 
-| Flag | Purpose |
-|---|---|
-| `-writers <n>` | Number of concurrent writer threads |
-| `-readers <n>` | Number of concurrent reader threads |
-| `-size <bytes>` | Object size in bytes |
-| `-seconds <s>` | Run duration |
-| `-records <n>` | Alternative to `-seconds`: fixed record count |
-| `-throughput <rps>` | Cap on records/sec (use `0` for unlimited) |
+These options come from the common SBK harness, but they materially change an
+S3 test and are therefore part of the MinIO command-line contract.
+
+| Flag | Default | Effect and what it tests or confirms |
+|---|---:|---|
+| `-class minio` | required | Selects this driver. Its startup banner confirms that `io.sbk.driver.MinIO.MinIO` was discovered. |
+| `-writers <n>` | none | Starts `n` concurrent mutating workers. A scaling series confirms how PUT or other writer throughput and tail latency change with client concurrency. |
+| `-readers <n>` | none | Starts `n` concurrent read-only workers. Existing-object operations require a populated catalog. |
+| `-size <bytes>` | required | Sets generated PUT/UPDATE payload size and the default range length. Metadata, tag, list, and bucket operations transfer zero payload bytes even though SBK still requires a positive size. |
+| `-seconds <s>` | unlimited | Runs for a duration. When supplied with `-records`, records become the per-second workload rate rather than a fixed total. |
+| `-records <n>` | `0` | Without `-seconds`, requests a fixed operation count. With `-seconds`, sets the target records per second used by the workers. |
+| `-throughput <MB/s>` | `-1` | `> 0` limits aggregate data throughput in MB/s; `0` uses the `-records` rate; `-1` requests maximum throughput. This tests a controlled load level rather than saturation only. |
+| `-thread p|f|v` | `p` | Selects platform, fork-join, or virtual worker threads. Compare runs to isolate client scheduling overhead; it does not change the MinIO SDK API. |
+| `-sync <n>` | `0` | Drains pending MinIO async futures after each group of `n` submissions. In synchronous mode it adds no S3 durability guarantee. Use it to test burst-and-drain behavior; leave it `0` for a continuously full async pipeline. |
+| `-ro true|false` | `false` | Common mixed-workload “benchmark reads only” mode. It is not an S3 permission control. For a clean MinIO read-only result, a separate `-readers` run over a pre-populated bucket is preferred. |
+| `-wstep <n>` | `1` | Adds writers in increments of `n`; use with `-wsec` to generate a stepped write-concurrency curve in one run. |
+| `-wsec <s>` | `0` | Holds each writer step for `s` seconds. A passing series shows the throughput/latency knee as write concurrency rises. |
+| `-rstep <n>` | `1` | Adds readers in increments of `n`; use with `-rsec` for a stepped read-concurrency curve. |
+| `-rsec <s>` | `0` | Holds each reader step for `s` seconds. |
+| `-millisecsleep <ms>` | `0` | Adds an idle sleep to the common recorder path. This lowers client CPU usage but can perturb fine-grained latency, so leave it zero for peak-performance tests. |
+| `-time ms|mcs|ns` | `ms` | Selects the display and histogram unit. Use `mcs` or `ns` only when the configured latency range has enough memory and the S3 operation is fast enough to benefit. |
+| `-minlatency <value>` | `0` | Sets the lowest histogram latency in the unit selected by `-time`; samples below it are reported as discarded. |
+| `-maxlatency <value>` | `180000 ms` | Sets the highest histogram latency in the selected unit; samples above it are reported as discarded. Increase it above HTTP timeouts for slow S3 or multipart tests. |
+| `-wq true|false` | `false` | Includes write-request counters in logger output. This confirms request submission rate separately from completed-operation rate. |
+| `-rq true|false` | `false` | Includes read-request counters in logger output. Useful for observing async in-flight/pending work. |
+| `-out <logger>` | `SystemLogger` | Selects result output, for example `SystemLogger`, `CSVLogger`, `PrometheusLogger`, or `WebLogger`. It changes presentation, not S3 traffic. |
+| `-csvfile <path>` | `no` | With a CSV-capable logger, stores periodic results for later comparison and regression analysis. |
+| `-help` | off | Prints the effective common and MinIO driver options without starting a benchmark. |
+
+At least one of `-writers` or `-readers` must be greater than zero. Prefer
+`-seconds` for sustained performance measurements and fixed `-records` for
+small correctness/lifecycle checks.
 
 ### Multipart upload (large objects)
 
@@ -388,7 +470,7 @@ you need raw single-request service latency.
 
 | Flag | Default | Purpose |
 |---|---|---|
-| `-sse-enabled true|false` | `false` | Encrypt at rest with S3-managed keys (SSE-S3 / `aws:kms` equivalent). |
+| `-sse-enabled true|false` | `false` | Request SSE-S3 (`AES256`) encryption with S3-managed keys for PUT and COPY. This is not SSE-KMS and does not use `aws:kms`. |
 
 ### Vendor-specific headers and HTTP tuning
 
@@ -402,6 +484,88 @@ you need raw single-request service latency.
 | `-http-max-requests-per-host <n>` | `0` (auto) | Per-host OkHttp async request limit |
 | `-http-max-idle-connections <n>` | `32` | Idle connections retained |
 | `-http-keepalive-seconds <s>` | `300` | Idle connection retention |
+
+---
+
+## What each option proves
+
+This section is a test-planning checklist. “Confirms” means the configured run
+completed through the MinIO SDK without an error; use the independent check in
+the last column when the backend state itself must be proven.
+
+### Endpoint, identity, and bucket options
+
+| Option | Prerequisite | A successful run confirms | Independent check or limitation |
+|---|---|---|---|
+| `-url` | Reachable S3 data-plane URL | DNS/IP routing, selected HTTP/HTTPS transport, and S3 protocol compatibility | `curl` should return S3 XML, not a management page |
+| `-endpoints` | Every CSV endpoint serves the same S3 namespace/buckets | Workers can operate through the round-robin endpoint pool | Compare per-node server metrics; SBK reports the aggregate |
+| `-key` | Valid S3 access key | The supplied identity can authenticate | Does not prove permissions for operations not run |
+| `-secret` | Secret paired with `-key` | SigV4 request signing succeeds | Keep it out of shell history and committed YAML |
+| `-region` | Region accepted by the target | Requests are accepted with the selected SigV4 scope | For AWS, use the bucket's actual region |
+| `-bucket` | S3-valid name and required permissions | Main-bucket setup and selected object workload complete | Writer runs may create a missing bucket |
+| `-recreate` | Dedicated disposable bucket; delete/create permission | Existing contents/versions can be emptied and the bucket recreated before timing | **Destructive**; never use on shared data |
+| `-insecure` | Explicit HTTPS endpoint with an untrusted certificate | TLS traffic works without certificate verification | Does not make HTTP secure and must not be used as a production security test |
+| `-auth-version` | Value `2` or `4` | `4` confirms SigV4; `2` only confirms fallback because SDK 8.5.17 is SigV4-only | SigV2 is not implemented |
+| `-extra-headers` | Backend documents the header and signing behavior | Requests with injected vendor/tenant headers are accepted | Confirm tenant routing in backend audit logs |
+
+### Operation, catalog, and key-layout options
+
+| Option | Prerequisite | A successful run confirms | Independent check or limitation |
+|---|---|---|---|
+| `-write-operation` | Permissions and objects required by the selected operation | The exact mutating API named in the operation table completes | Follow with LIST/GET/tag inspection for state verification |
+| `-read-operation` | Permissions and objects required by the selected operation | The exact read-only API named in the operation table completes | GET byte count is asserted only with `-verify-read-size` |
+| `-write-mix` | Only writer operations; existing objects if any component needs them | The deterministic weighted writer cycle completes | Compare per-operation backend metrics; SBK aggregates the mix |
+| `-read-mix` | Only reader operations; existing objects where required | The deterministic weighted reader cycle completes | SBK reports aggregate mix latency |
+| `-prefix` | Keys exist under the prefix for existing-object workloads | Generated PUT keys use the prefix or discovery is restricted to it | LIST the prefix to inspect keys |
+| `-fs-access` | No special prerequisite | Hierarchical two-level generated keys are accepted | LIST to confirm distribution across leaf prefixes |
+| `-copy-prefix` | Existing source objects and copy permission | COPY destinations under the configured prefix are accepted | LIST the destination prefix |
+| `-object-file` | Readable local `key,size[,versionId]` CSV matching the target bucket | Operations can run from a supplied catalog without startup LIST discovery | Stale/missing entries fail when used |
+| `-catalog-max-objects` | Positive value; enough heap for retained references | Discovery or manifest loading remains bounded at the selected count | It caps client coverage; it does not cap bucket size |
+| `-partition-count` | Same count on all distributed clients | Stable key-hash partitioning is enabled | Use one unique index for every process |
+| `-partition-index` | Value from zero through `count - 1` | This process operates only on its assigned catalog/key partition | Duplicate indices duplicate work; missing indices leave gaps |
+| `-run-manifest` | Writable local parent directory | A credential-free JSON record of the effective run is written | The manifest is configuration evidence, not an object result manifest |
+
+### Async, multipart, HTTP, retry, and warm-up options
+
+| Option | Prerequisite | A successful run confirms | Independent check or limitation |
+|---|---|---|---|
+| `-async` | Backend and client resources support requested concurrency | Native `MinioAsyncClient` futures complete under bounded backpressure | Compare against sync mode using identical workload settings |
+| `-async-depth` | `1..1024`; sufficient heap and sockets | Each worker sustains up to the configured in-flight depth | It is a ceiling, not proof that depth was continuously saturated |
+| `-async-max-inflight` | Nonnegative process limit | All workers obey a shared in-flight ceiling | `0` derives workers × depth |
+| `-async-max-memory-mb` | Nonnegative MiB budget | Startup's conservative async-buffer estimate fits the budget | It is a guard estimate, not a heap profiler |
+| `-part-size` | `0`, or 5 MiB through 5 GiB; object large enough to split | SDK multipart PUT completes with the selected stream part size | Inspect backend multipart metrics if exact part behavior matters |
+| `-mpu-concurrent-parts` | Nonnegative value | The option is parsed and reported | SDK 8.5.17 exposes no public per-object concurrency control; information-only |
+| `-connect-timeout-ms` | Nonnegative milliseconds | Connections complete inside the configured client timeout | `0` uses the SDK/OkHttp default |
+| `-read-timeout-ms` | Nonnegative milliseconds | Response reads avoid the configured inactivity timeout | This is not an end-to-end operation deadline |
+| `-write-timeout-ms` | Nonnegative milliseconds | Request-body writes avoid the configured inactivity timeout | This is not an end-to-end operation deadline |
+| `-http-max-requests` | Nonnegative dispatcher limit | Async work completes under the process-wide OkHttp request ceiling | `0` selects an automatically derived value |
+| `-http-max-requests-per-host` | Nonnegative per-host limit | Work completes under the endpoint-specific dispatcher ceiling | Keep it aligned with async depth and endpoint count |
+| `-http-max-idle-connections` | Nonnegative pool size | Work completes with the selected reusable idle-connection pool | Zero intentionally disables idle retention |
+| `-http-keepalive-seconds` | Positive seconds | Reused connections remain eligible for the selected idle period | Server/load-balancer idle timeout may be lower |
+| `-retry-max-attempts` | Positive total attempt count | Transient I/O, HTTP 429, or HTTP 5xx failures can be retried within one measured operation | Retries inflate application-observed latency; use `1` for raw service latency |
+| `-retry-backoff-ms` | Nonnegative delay | Retry delay is included in logical operation latency | Fixed delay only; not exponential backoff |
+| `-warmup-requests` | Nonnegative count and bucket-exists permission | Untimed endpoint connection/TLS warm-up requests complete before measurement | Does not warm object data caches |
+
+### Range, listing, buckets, integrity, and data options
+
+| Option | Prerequisite | A successful run confirms | Independent check or limitation |
+|---|---|---|---|
+| `-range-offset` | Nonnegative offset and at least one larger object | The backend serves a GET beginning at that byte | Used only by `range-get` |
+| `-range-length` | Nonnegative length | The backend serves the requested range length | `0` uses `-size`; enable read-size verification |
+| `-list-max-keys` | `1..1000` | Each timed LIST consumes up to the configured number of entries | A short prefix may return fewer |
+| `-list-prefixes` | CSV prefixes visible to the credentials | LIST readers can be distributed over distinct namespaces | Used by LIST only |
+| `-bucket-targets` | Explicit existing buckets and permission | Bucket-stat or bucket-delete can address known targets | Required for delete; delete targets must be empty |
+| `-bucket-prefix` | S3-valid prefix and create permission | Unique generated bucket names under the prefix are accepted | Used by bucket-create only |
+| `-cleanup-created-buckets` | Generated buckets remain empty and delete permission exists | Driver shutdown can remove buckets created by this run | `false` intentionally preserves them for inspection |
+| `-checksum` | Backend supports the selected checksum header | PUT payload digest is accepted and server-side checksum validation succeeds | Unsupported backends can reject the request |
+| `-tagging-enabled` | Nonempty tags and tag permission | PUT with native `PutObjectArgs.tags(...)` succeeds | Inspect tags using `tag-get` |
+| `-tagging-tags` | Valid comma-separated key/value tags | Configured tags are accepted by PUT or tag-set | Values are reused for every operation |
+| `-versioning-enabled` | Bucket versioning permission and backend support | Enabling versioning succeeds and discovery includes versions | Inspect bucket versioning state independently |
+| `-sse-enabled` | Backend supports SSE-S3 and identity may request it | PUT/COPY with an `AES256` SSE-S3 request succeeds | It is SSE-S3, not SSE-KMS or SSE-C |
+| `-data-compressibility` | Value `0..100` | Generated PUT data has the selected random/zero-byte shape | This controls client data; storage reduction must be checked server-side |
+| `-data-dedupable` | No special prerequisite | PUT data either permits repetition or receives anti-dedup stamps | Verify physical reduction in backend telemetry |
+| `-data-seed` | Any `long`; nonzero for reproducibility | Payload generation can be repeated across comparable runs | It does not make generated object keys identical |
+| `-verify-read-size` | Correct catalog size; for range GET, correct range metadata | A GET fails if consumed bytes do not equal the expected length | It does not compare byte contents or checksums |
 
 ---
 
@@ -464,8 +628,12 @@ pre-populate the bucket):
   -readers 8 -size 1048576 -seconds 120
 ```
 
-Combined write/read in one invocation. Completed PUTs are handed to readers;
-the bucket is recreated only when `-recreate true` is explicitly supplied:
+Combined write/read in one invocation. Completed PUTs are handed to readers.
+With the default `-ro false`, MinIO carries the PUT start timestamp into the
+reader and reports write-start-to-GET-completion latency. This includes PUT,
+handoff/queue delay, and GET; it is intentionally different from a standalone
+GET latency. The bucket is recreated only when `-recreate true` is explicitly
+supplied:
 
 ```bash
 ./build/install/sbk/bin/sbk -class minio \
@@ -687,6 +855,184 @@ for a deeper investigation (warm/cold cache effects, internal compaction, …).
 
 ## Advanced features
 
+### End-to-end correctness workflow
+
+Run this small workflow before a long saturation test. It uses a dedicated
+bucket and prefix, verifies response lengths, and exercises both sync and async
+paths. Replace the endpoint and credentials; do not use a production bucket.
+
+```bash
+SBK=./build/install/sbk/bin/sbk
+ENDPOINT=http://127.0.0.1:9000
+ACCESS_KEY=minioadmin
+SECRET_KEY=minioadmin
+BUCKET=sbk-minio-guide
+
+# 1. Create/recreate the dedicated bucket and PUT at 20 objects/second.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -recreate true -prefix guide/base \
+  -writers 1 -seconds 10 -records 20 -size 65536 \
+  -data-seed 103 -data-compressibility 25 -data-dedupable false \
+  -checksum crc32c -tagging-enabled true -tagging-tags purpose=sbk-guide \
+  -run-manifest /tmp/sbk-minio-guide.json
+
+# 2. Read the complete objects and assert the expected byte count.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base \
+  -readers 2 -seconds 10 -records 20 -size 65536 \
+  -read-operation get -verify-read-size true
+
+# 3. Exercise native async ranged GET with bounded memory/concurrency.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base \
+  -readers 2 -seconds 10 -records 20 -size 4096 \
+  -read-operation range-get -range-offset 1024 -range-length 4096 \
+  -verify-read-size true -async true -async-depth 4 \
+  -async-max-inflight 8 -async-max-memory-mb 32
+
+# 4. Check metadata, tags, and prefix listing independently.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base \
+  -readers 1 -records 20 -size 1 -read-operation stat
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base \
+  -readers 1 -records 20 -size 1 -read-operation tag-get
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -readers 1 -records 1 -size 1 \
+  -read-operation list -list-prefixes guide/base -list-max-keys 100
+```
+
+Expected evidence:
+
+- Step 1 reports completed writes at approximately the configured rate and
+  writes a JSON manifest that contains no credentials.
+- Step 2 reports completed GET records, nonzero read MB, and zero invalid
+  latencies.
+- Step 3 reports completed ranged reads with no size-verification failure.
+- Step 4 reports successful metadata/tag/list records. Metadata operations
+  correctly report zero payload MB because they do not transfer object bodies.
+
+### Complete S3 operation cookbook
+
+The commands below assume `SBK`, `ENDPOINT`, `ACCESS_KEY`, `SECRET_KEY`, and
+`BUCKET` are set as in the workflow above and that `guide/base` contains
+objects.
+
+```bash
+# UPDATE: overwrite existing keys with new 64 KiB payloads.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base -writers 2 -records 20 -size 65536 \
+  -write-operation update
+
+# COPY: server-side copy existing keys under guide/copied.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base -copy-prefix guide/copied \
+  -writers 2 -records 20 -size 1 -write-operation copy
+
+# TAG-SET, TAG-GET, and TAG-DELETE as separately timed API operations.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base -writers 1 -records 20 -size 1 \
+  -write-operation tag-set -tagging-tags stage=verified,owner=storage
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base -readers 1 -records 20 -size 1 \
+  -read-operation tag-get
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base -writers 1 -records 20 -size 1 \
+  -write-operation tag-delete
+
+# Weighted API mixes. Weights form a deterministic repeating cycle.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base -writers 4 -seconds 60 -size 65536 \
+  -write-mix put=80,copy=20 -copy-prefix guide/mix-copy
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/base -readers 4 -seconds 60 -size 65536 \
+  -read-mix get=80,stat=15,tag-get=5 -verify-read-size true
+
+# Bucket existence and account bucket-list API latency.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -bucket-targets "$BUCKET" \
+  -readers 1 -records 10 -size 1 -read-operation bucket-stat
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -readers 1 -records 10 -size 1 -read-operation bucket-list
+
+# DELETE discovered objects only after all read/update/copy tests are done.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -prefix guide/ -writers 4 -seconds 30 -size 1 \
+  -write-operation delete -catalog-max-objects 10000
+```
+
+Bucket lifecycle tests require create/delete-bucket permission. Creation uses
+unique names; automatic cleanup is the safest default:
+
+```bash
+# Measure creation of 10 unique empty buckets and delete them at shutdown.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -writers 1 -records 10 -size 1 -write-operation bucket-create \
+  -bucket-prefix sbk-guide-create -cleanup-created-buckets true
+
+# Delete only explicitly named, already-empty disposable buckets.
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -writers 1 -records 2 -size 1 -write-operation bucket-delete \
+  -bucket-targets sbk-delete-1,sbk-delete-2
+```
+
+For bucket deletion, a zero exit code confirms `removeBucket` completed.
+Non-empty buckets are intentionally rejected by S3; the driver never
+recursively erases them as part of `bucket-delete`.
+
+### Multiple endpoints, distributed partitions, and object manifests
+
+Use `-endpoints` only when every address exposes the same S3 cluster,
+credentials, bucket, and namespace. SBK assigns workers round-robin:
+
+```bash
+$SBK -class minio \
+  -endpoints 'http://s3-node-1:9000,http://s3-node-2:9000,http://s3-node-3:9000' \
+  -key "$ACCESS_KEY" -secret "$SECRET_KEY" -bucket "$BUCKET" \
+  -writers 12 -size 1048576 -seconds 180 \
+  -async true -async-depth 4 \
+  -http-max-requests 64 -http-max-requests-per-host 32
+```
+
+This confirms that the client can execute through all configured endpoints,
+but the result is aggregate. Use load-balancer or per-node server telemetry to
+prove traffic distribution.
+
+For independent SBK/SBK-GEM processes, give every process the same
+`-partition-count` and a different `-partition-index`:
+
+```bash
+# Node/process 0
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -readers 4 -seconds 120 -size 65536 \
+  -partition-count 2 -partition-index 0
+
+# Node/process 1
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -readers 4 -seconds 120 -size 65536 \
+  -partition-count 2 -partition-index 1
+```
+
+When startup LIST would be too expensive, prepare a local catalog:
+
+```text
+# /tmp/sbk-objects.csv: key,size[,versionId]
+guide/base/object-0001,65536
+guide/base/object-0002,65536
+guide/base/object-0003,65536,3HL4kqtJlcpXroDTDmJ+rmSpXd3dIbrHY
+```
+
+```bash
+$SBK -class minio -url "$ENDPOINT" -key "$ACCESS_KEY" -secret "$SECRET_KEY" \
+  -bucket "$BUCKET" -object-file /tmp/sbk-objects.csv \
+  -catalog-max-objects 100000 -readers 4 -seconds 60 -size 65536 \
+  -read-operation get -verify-read-size true
+```
+
+The manifest must describe objects that really exist. SBK validates file
+syntax at startup and validates response length when requested; it does not
+preflight every key with an untimed HEAD.
+
 ### Operation examples
 
 The following examples assume the bucket has first been populated with a PUT
@@ -744,8 +1090,8 @@ buckets. The driver does not recursively delete their contents.
 
 ### Multipart upload
 
-S3 multipart upload splits large objects into parts of 5 MiB to 5 GiB and
-uploads them in parallel. Enable by setting `-part-size`:
+S3 multipart upload splits large objects into parts of 5 MiB to 5 GiB.
+Enable it by setting `-part-size`:
 
 ```bash
 ./build/install/sbk/bin/sbk -class minio \
@@ -755,10 +1101,11 @@ uploads them in parallel. Enable by setting `-part-size`:
   -part-size 8388608     # 8 MiB parts, ~32 parts per 256-MiB object
 ```
 
-The SDK chunks the upload and uploads parts in parallel internally. There is
-no per-object parallelism knob in the SDK version this driver uses; the
-`-mpu-concurrent-parts` flag is accepted for forward compatibility but logged
-as info-only.
+MinIO SDK 8.5.17 controls the multipart sequence inside one `putObject` call
+and does not expose a public per-object concurrent-parts setting. Obtain
+parallelism with multiple `-writers`, or with multiple bounded async object
+operations. The `-mpu-concurrent-parts` flag is accepted for forward
+compatibility but is logged as information-only.
 
 ### S3 checksum validation
 
@@ -805,8 +1152,10 @@ Tag every written object:
   -writers 1 -size 1024 -seconds 30
 ```
 
-Tags are issued via a follow-up `SetObjectTags` after each PUT, which works
-on backends that don't accept `x-amz-tagging` on PUT.
+For ordinary PUT, tags are attached through the MinIO SDK's native
+`PutObjectArgs.tags(...)` request. To measure tagging as a separate API call,
+populate the bucket first and run `-write-operation tag-set`; that path uses
+`setObjectTags`.
 
 ### Bucket versioning
 
@@ -935,7 +1284,7 @@ bandwidth. Recommendations:
 | **Higher write throughput** | Increase `-writers`. Start at `#CPUs`, scale to `4 × #CPUs` for small objects, `1 × #CPUs` for ≥ 1 MiB objects. |
 | **Higher read throughput** | Same as writers; the bottleneck is usually network bandwidth for ≥ 64 KiB objects. |
 | **More concurrency without more SBK threads** | Add `-async true -async-depth 4`, then increase depth gradually. |
-| **Saturate a single 10 GbE link** | `-size 4194304 -writers 16 -part-size 4194304` (or higher) |
+| **Saturate a single 10 GbE link** | `-size 67108864 -writers 16 -part-size 8388608` (64 MiB objects, 8 MiB parts) |
 | **Tail-latency study** | Long run (`-seconds 1800`+) with moderate concurrency and CSV logging (see `-out csv`); look at p99, p99.9, p99.99 in the periodic dump. |
 | **Stress prefix-listing** | `-fs-access true -prefix benchN/` so the bucket has 256 hash directories. |
 | **Stress compression / dedup engines** | `-data-compressibility 30 -data-dedupable false`. |
@@ -1009,8 +1358,11 @@ notes.
 
 ## Known constraints
 
-- **End-to-end latency** (write → propagation-to-read) is **not** supported.
-  The driver reports per-PUT and per-GET latencies only.
+- **Mixed-run latency differs from standalone latency.** With both writers and
+  readers and the default `-ro false`, the driver reports write-start-to-GET
+  completion latency for objects published by completed PUT/COPY operations.
+  Run writers and readers separately when you need isolated PUT and GET
+  service latency.
 - **SigV2** is not supported (the MinIO SDK is SigV4-only). The
   `-auth-version 2` flag is accepted but logs a warning and falls back.
 - **`-mpu-concurrent-parts`** is accepted but is info-only with the current
