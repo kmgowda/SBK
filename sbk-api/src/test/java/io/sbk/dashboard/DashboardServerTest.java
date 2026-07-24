@@ -218,7 +218,9 @@ final class DashboardServerTest {
             second.publish(snapshot("second-grace-run", 2));
             assertEquals(1, waitForHistory(baseUri, "second-grace-run", 1).length);
         }
-        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+        // The shutdown cannot begin before idleTimeout elapses. Allow time for
+        // the scheduler and HttpServer executor to finish on slower platforms.
+        assertTimeoutPreemptively(idleTimeout.plusSeconds(2), server::awaitTermination);
     }
 
     @Test
