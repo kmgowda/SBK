@@ -33,6 +33,7 @@ PerL does not know which storage backend produced an operation. `sbk-api` depend
 | `Perl` | Built measurement pipeline and lifecycle |
 | `PerlChannel` | Producer-facing submission and exception interface |
 | `TimeStamp` | Start/end time, record count, and byte count |
+| `TimeStampNode` | Intrusive timestamp and MPSC link in one allocation |
 | `LatencyRecordWindow` | Latency accumulation and reporting contract |
 | `PeriodicRecorder` | Periodic-window processing |
 | `PerformanceRecorder` | Queue-draining recorder lifecycle |
@@ -46,7 +47,32 @@ Workers submit records to `PerlChannel`; recorder logic drains the configured qu
 
 The measurement transport is designed to avoid explicit locks in the producer path. This statement does not imply that the JVM, vendor client, operating system, or storage system is lock-free.
 
-### CQueue and JDK 25 ConcurrentLinkedQueue
+### Production timestamp queue
+
+By default, `CQueuePerl` uses `TimeStampMpscQueueArray`. Each submitted
+measurement is one `TimeStampNode`: the object inherits the timestamp payload
+and contains its own queue link. Enqueue therefore performs no wrapper-node
+allocation. Multiple producers publish with a CAS on the last node; the single
+recorder owns the head and dequeues without a head CAS.
+
+The consumer accumulates 16 retired predecessors, release-publishes a recovery
+head, and then self-links every node in that batch. A producer suspended on any
+retired node detects the self-link and resumes from the recovery head. This
+keeps stale-producer retention bounded while grouping reclamation stores.
+Nodes are not pooled because pooling retains heap and introduces ownership and
+ABA hazards.
+
+Set the following in `perl.properties` to restore the previous JDK path:
+
+```properties
+MpscQueueEnable=false
+```
+
+The fallback creates a `TimeStamp` and lets
+`ConcurrentLinkedQueue` create its private node. It remains useful for
+compatibility and comparative validation.
+
+### Generic CQueue and JDK 25 ConcurrentLinkedQueue
 
 `CQueue` is PerL's specialized unbounded multiple-producer, single-consumer
 (MPSC) linked queue. Producers publish a newly allocated node with a
@@ -74,10 +100,10 @@ interior dead-node removal. `CQueue` amortizes its reclamation work over
 16 dequeues and allows a suspended producer to recover without adding a
 consumer compare-and-set. It still allocates one node for every record.
 
-Production `CQueuePerl` currently uses `ConcurrentLinkedQueueArray` for the
-stronger reclamation behavior. `CQueueArray` remains available for controlled
-experiments; it is not the default measurement transport. The complete
-algorithm, memory-ordering rules, and usage constraints are documented in the
+The generic `CQueueArray` remains available for controlled experiments; the
+production path uses the specialized intrusive timestamp queue described
+above. The complete generic algorithm, memory-ordering rules, and usage
+constraints are documented in the
 [`CQueue` Javadoc](src/main/java/io/perl/api/impl/CQueue.java).
 
 ## Configuration
@@ -137,6 +163,22 @@ for equivalent operations; a faster queue can show a higher allocation rate
 per second merely because it completes more operations. This
 environment-sensitive test is intentionally separate from `check`;
 correctness and stress tests remain part of the normal build.
+
+The intrusive production queue has equivalent correctness and constrained-heap
+coverage. Run its dedicated JMH comparison with:
+
+```bash
+./gradlew :perl:runTimeStampQueuePerformanceBenchmark
+```
+
+The comparison includes the complete allocation performed by PerL. On JDK 25
+with compact object headers, inspect `gc.alloc.rate.norm` to confirm that the
+intrusive round trip allocates one 40-byte `TimeStampNode`, while the JDK path
+allocates a 32-byte `TimeStamp` plus its queue node (56 bytes total on the
+tested runtime). The report is written to
+`perl/build/reports/jmh/timestamp-queue-performance.json`. Results are
+host-specific; preserve the same JVM flags and an otherwise idle host when
+comparing changes.
 
 ## Use as a library
 

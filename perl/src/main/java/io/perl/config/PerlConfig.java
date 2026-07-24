@@ -9,6 +9,7 @@
  */
 package io.perl.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.time.Time;
@@ -103,6 +104,16 @@ final public class PerlConfig extends LatencyConfig {
      * <code>int maxQs</code>.
      */
     public int maxQs;
+
+    /**
+     * Enables the intrusive, allocation-efficient MPSC timestamp queue.
+     *
+     * <p>The external property retains its documented
+     * {@code MpscQueueEnable} spelling. When disabled, PerL uses the JDK
+     * {@link java.util.concurrent.ConcurrentLinkedQueue} implementation.</p>
+     */
+    @JsonProperty("MpscQueueEnable")
+    public boolean mpscQueueEnable = true;
 
     /** Creates an empty PerL configuration for property binding. */
     public PerlConfig() {

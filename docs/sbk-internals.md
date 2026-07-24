@@ -195,14 +195,15 @@ In practice that means:
    precision. Invalid and out-of-range values are counted separately rather
    than silently treated as valid samples (§3).
 
-2. **Measurement hand-off uses non-blocking queues.** Worker threads submit
-   timestamp records through Java `ConcurrentLinkedQueue` instances. There is
-   no application-level mutex in this producer/consumer hand-off. PerL shards
-   traffic across an array of queues to reduce contention, while a single
-   recorder owns each latency window. Lock-free does not mean zero cost:
-   enqueue/dequeue operations can retry CAS instructions, and queue nodes plus
-   `TimeStamp` records allocate. It does mean that progress does not depend on
-   another thread releasing a lock (§3).
+2. **Measurement hand-off uses intrusive non-blocking queues.** By default,
+   worker threads submit `TimeStampNode` records through PerL's specialized
+   multiple-producer, single-consumer queues. One object is both timestamp and
+   linked node, avoiding the separate wrapper allocated by a general-purpose
+   `ConcurrentLinkedQueue`. PerL shards traffic across an array of queues to
+   reduce contention, while a single recorder owns each latency window.
+   `MpscQueueEnable=false` restores the JDK queue path for compatibility and
+   comparison. Lock-free does not mean zero cost: enqueue can retry a CAS, but
+   progress does not depend on another thread releasing a lock (§3).
 
 3. **The framework is its own ecosystem.** **PerL** (Performance Logger,
    the latency library) is a reusable Java library independent of SBK;
@@ -386,7 +387,7 @@ flowchart LR
         WN["Worker N"]
     end
 
-    subgraph QUEUES["Lock-free concurrent queues<br/>ConcurrentLinkedQueueArray"]
+    subgraph QUEUES["Lock-free concurrent queues<br/>TimeStampMpscQueueArray"]
         Q1["Queue 0"]
         Q2["Queue 1"]
         QN["Queue M-1"]
@@ -442,13 +443,13 @@ proxy)** to each newly-spawned worker, rotating round-robin through the
 array. A worker calls `perlChannel.send(startTime, endTime, records,
 bytes)` on its hot path — that's the *only* thing it has to do.
 
-Each `CQueueChannel` is implemented as a
-`ConcurrentLinkedQueueArray` — an array of Java
-`ConcurrentLinkedQueue` instances. Enqueue and dequeue are
-**non-blocking queue operations**: the hand-off does not acquire an
-application mutex or monitor. The JDK implementation uses CAS and can retry
-under contention, so “lock-free” is a progress guarantee rather than a claim
-that each call executes exactly one atomic instruction.
+Each `CQueueChannel` selects a `TimeStampMpscQueueArray` by default. Every
+element is a `TimeStampNode`, derived from `TimeStamp`, with its queue link in
+the same object. Enqueue and dequeue are **non-blocking queue operations**: the
+hand-off does not acquire an application mutex or monitor. Producers publish
+with CAS; the sole recorder owns the head and needs no dequeue CAS.
+`MpscQueueEnable=false` selects `ConcurrentLinkedQueueArray`, preserving the
+previous general-purpose JDK implementation as a fallback.
 
 The array-of-queues design is the scaling layer. `CQueuePerl` normally
 creates one channel per configured worker. Each channel contains
@@ -459,9 +460,10 @@ tail locations as worker count grows and reduces the chance that many cores
 continually update one queue. `maxQs`, when non-zero, changes the topology to
 a configured total queue count instead of the per-worker default.
 
-The producer still allocates a `TimeStamp`, and `ConcurrentLinkedQueue` may
-allocate an internal node. This is a deliberate exchange: small short-lived
-objects and non-blocking hand-off keep percentile calculation, sorting, and
+The default producer allocates exactly one `TimeStampNode` per measurement.
+The fallback allocates a `TimeStamp`, and `ConcurrentLinkedQueue` allocates
+its internal node. The intrusive path therefore removes one young-generation
+object per operation while keeping percentile calculation, sorting, and
 logger I/O out of the storage-operation call path.
 
 The two-level topology is easy to miss in code. With two workers and the
@@ -808,6 +810,7 @@ The defaults in
 maxArraySizeMB=64           # Use Array backend if latency range fits
 maxHashMapSizeMB=192        # Periodic window HashMap budget
 totalMaxHashMapSizeMB=256   # Total window HashMap budget
+MpscQueueEnable=true        # One-object intrusive MPSC timestamp hand-off
 histogram=false             # Optional HdrHistogram for total window
 csv=false                   # Optional raw-CSV total backend
 csvFileSizeGB=1
@@ -873,12 +876,12 @@ at the end, and may also be flushed/reset if its configured storage fills.
 
 Six concrete reasons, traceable to specific code:
 
-1. **Non-blocking hand-off.** `CQueueChannel.send()` delegates to a
-   `ConcurrentLinkedQueue`; progress does not depend on a mutex owner, though
-   CAS retries and allocation are still possible.
-2. **Small producer-side record.** The producer creates a `TimeStamp`, and
-   the JDK queue may create a node. Percentile computation and logger I/O stay
-   on the recorder side.
+1. **Non-blocking hand-off.** `CQueueChannel.send()` delegates to an intrusive
+   `TimeStampMpscQueue`; progress does not depend on a mutex owner, though CAS
+   retries are still possible.
+2. **One producer-side allocation.** The producer creates a
+   `TimeStampNode`, which is also the queue node. Percentile computation and
+   logger I/O stay on the recorder side.
 3. **One consumer.** A single recorder thread eliminates contention on
    the windows; no synchronisation is needed because only one thread
    ever reads the queue and writes to the histogram.
@@ -1888,16 +1891,17 @@ acknowledged, committed, flushed, or end-to-end consumed).
 See the two-level channel/queue topology in §3.3 Pillar 1. It shows why adding
 workers also adds queue shards instead of directing every worker to one queue.
 
-`ConcurrentLinkedQueue` removes application-level mutex ownership from the
-worker-to-recorder hand-off. `ConcurrentLinkedQueueArray` then distributes
-traffic over several queues instead of one shared head/tail pair. With the
-default topology, worker count increases the number of channels and each
-channel contains 10 queues. This is how PerL avoids turning one central queue
-into the first point of contention as more producer tasks run on more cores.
+`TimeStampMpscQueue` removes application-level mutex ownership from the
+worker-to-recorder hand-off and combines timestamp plus link in one object.
+`TimeStampMpscQueueArray` distributes traffic over several queues instead of
+one shared head/tail pair. With the default topology, worker count increases
+the number of channels and each channel contains 10 queues. This is how PerL
+avoids turning one central queue into the first point of contention as more
+producer tasks run on more cores.
 
-This is not cost-free: `TimeStamp` and queue-node allocation add GC pressure,
-and CAS may retry. Queue sharding reduces contention; it does not abolish CPU,
-memory, or scheduler limits.
+This is not cost-free: one `TimeStampNode` still allocates for every
+measurement, and CAS may retry. Queue sharding reduces contention; it does not
+abolish CPU, memory, or scheduler limits.
 
 ### 8.3 Scale the worker stage with CPU and I/O concurrency
 
@@ -2771,7 +2775,7 @@ SBK is the right substrate.
 | Property | What it gives you | Code evidence |
 |---|---|---|
 | **No reservoir sampling** | Every completed operation submitted to PerL contributes its count; invalid and out-of-range values remain visible as counters. Precision still depends on time unit, range, and backend. | `HashMapLatencyRecorder` and `ArrayLatencyRecorder` implement exact integer buckets; HDR uses three significant digits. |
-| **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `CQueueChannel.send()` delegates to `ConcurrentLinkedQueueArray.add()`. |
+| **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `CQueueChannel.send()` delegates to `TimeStampMpscQueueArray.add()` by default; `MpscQueueEnable=false` selects the JDK fallback. |
 | **Single-owner recording** | One consumer owns each direction's non-thread-safe windows, avoiding concurrent bucket updates. Its drain rate remains a capacity limit to monitor. | `PerformanceRecorderIdleBusyWait.run()` reads all channels for one PerL instance. |
 | **Amortised recorder clock checks** | Records carry worker timestamps; the empty path parks and checks time after an adaptive batch instead of on every poll. | `ElasticWait` plus `PerformanceRecorderIdleBusyWait`. |
 | **Shared harness across vendors** | Driver comparisons reuse orchestration, timing interfaces, PerL, and logger contracts. Equivalent durability/completion and SDK settings still require experimental control. | `Sbk`, `SbkBenchmark`, `SbkWriter`, and `SbkReader`. |

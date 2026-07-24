@@ -21,10 +21,14 @@ import io.time.NanoSeconds;
 import io.time.Time;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -137,6 +141,30 @@ public class PerlTest {
         config.sleepMS = PERL_SLEEP_MS;
         Perl perl = PerlBuilder.build(logger, null, config, null);
         runPerlRecords(logger, perl);
+    }
+
+    @Test
+    public void testJdkConcurrentQueueFallback() throws IOException,
+            ExecutionException, InterruptedException, TimeoutException {
+        final TestLogger logger = new TestLogger();
+        final PerlConfig config = PerlConfig.build();
+        config.mpscQueueEnable = false;
+        final Perl perl = PerlBuilder.build(logger, null, config, null);
+
+        runPerlRecords(logger, perl);
+    }
+
+    @Test
+    public void testMpscQueueEnablePropertyBinding() throws IOException {
+        assertTrue(PerlConfig.build().mpscQueueEnable,
+                "The optimized MPSC queue should be enabled by default");
+
+        final byte[] disabled =
+                "MpscQueueEnable=false\n".getBytes(StandardCharsets.UTF_8);
+        final PerlConfig fallback = PerlConfig.build(
+                new ByteArrayInputStream(disabled));
+        assertFalse(fallback.mpscQueueEnable,
+                "The property must select the JDK queue fallback");
     }
 
     @Test

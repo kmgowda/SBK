@@ -64,6 +64,96 @@ jmh {
 
 def cqueuePerformanceReport = layout.buildDirectory.file(
         "reports/jmh/cqueue-performance.json")
+def timeStampQueuePerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/timestamp-queue-performance.json")
+
+tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks the intrusive TimeStamp MPSC queue against the JDK 25 queue.'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.perl.benchmark.TimeStampQueueBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', timeStampQueuePerformanceReport.get().asFile.absolutePath
+    outputs.file(timeStampQueuePerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        timeStampQueuePerformanceReport.get().asFile.parentFile.mkdirs()
+        delete timeStampQueuePerformanceReport
+    }
+}
+
+tasks.register('timeStampQueuePerformanceTest') {
+    group = 'verification'
+    description = 'Verifies intrusive timestamp latency, allocation, and MPSC progress on JDK 25.'
+    dependsOn tasks.named('runTimeStampQueuePerformanceBenchmark')
+
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                timeStampQueuePerformanceReport.get().asFile)
+        def byBenchmark = results.collectEntries { [(it.benchmark): it] }
+        def result = { String benchmark ->
+            def value = byBenchmark[benchmark]
+            if (value == null) {
+                throw new GradleException("Missing JMH result: ${benchmark}")
+            }
+            if (!value.jdkVersion.toString().startsWith('25')) {
+                throw new GradleException(
+                        "Timestamp queue verification requires JDK 25; found ${value.jdkVersion}")
+            }
+            value
+        }
+
+        def intrusiveRoundTrip = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark.intrusiveRoundTrip')
+        def jdkRoundTrip = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark.jdkRoundTrip')
+        def intrusiveLatency = intrusiveRoundTrip.primaryMetric
+        def jdkLatency = jdkRoundTrip.primaryMetric
+        def intrusiveAllocation =
+                intrusiveRoundTrip.secondaryMetrics['gc.alloc.rate.norm']
+        def jdkAllocation =
+                jdkRoundTrip.secondaryMetrics['gc.alloc.rate.norm']
+        def intrusiveMpsc = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark'
+                        + '.intrusiveFourProducersOneConsumer')
+        def jdkMpsc = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark'
+                        + '.jdkFourProducersOneConsumer')
+
+        if (intrusiveLatency.score >= jdkLatency.score) {
+            throw new GradleException(String.format(
+                    'Intrusive latency %.3f ns/op is not below JDK latency %.3f ns/op',
+                    intrusiveLatency.score, jdkLatency.score))
+        }
+        if (intrusiveAllocation.score > jdkAllocation.score - 8.0) {
+            throw new GradleException(String.format(
+                    'Intrusive allocation %.3f B/op does not remove a JDK queue node from %.3f B/op',
+                    intrusiveAllocation.score, jdkAllocation.score))
+        }
+        if (intrusiveMpsc.secondaryMetrics.records.score <= 0
+                || jdkMpsc.secondaryMetrics.records.score <= 0) {
+            throw new GradleException(
+                    'A four-producer/one-consumer benchmark made no progress')
+        }
+
+        logger.lifecycle(String.format(
+                'Timestamp queue verified: %.3f versus %.3f ns/op; '
+                        + '%.3f versus %.3f B/op; both 4P/1C paths made progress',
+                intrusiveLatency.score, jdkLatency.score,
+                intrusiveAllocation.score, jdkAllocation.score))
+        logger.lifecycle(
+                "JMH report: ${timeStampQueuePerformanceReport.get().asFile}")
+    }
+}
 
 tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'
@@ -183,8 +273,23 @@ tasks.register('cqueueGcTest', JavaExec) {
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError'
 }
 
+tasks.register('timeStampMpscQueueGcTest', JavaExec) {
+    group = 'verification'
+    description = 'Verifies intrusive TimeStamp MPSC reclamation in a constrained 32 MB JVM.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.perl.api.impl.TimeStampMpscQueueGcSoak'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError',
+            '-XX:-DisableExplicitGC'
+}
+
 tasks.named('check') {
     dependsOn tasks.named('cqueueGcTest')
+    dependsOn tasks.named('timeStampMpscQueueGcTest')
 }
 
 tasks.register('updateDocs') {

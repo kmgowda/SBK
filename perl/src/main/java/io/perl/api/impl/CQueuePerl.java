@@ -14,9 +14,10 @@ import io.perl.api.PerformanceRecorder;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
+import io.perl.api.QueueArray;
+import io.perl.api.TimeStamp;
 import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
-import io.perl.api.TimeStamp;
 import io.state.State;
 import io.time.Time;
 import lombok.Synchronized;
@@ -74,8 +75,13 @@ final public class CQueuePerl implements Perl {
         }
         this.channels = new CQueueChannel[this.index];
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new CQueueChannel(maxQs, new OnError());
+            channels[i] = new CQueueChannel(
+                    maxQs, new OnError(), perlConfig.mpscQueueEnable);
         }
+        PerlPrinter.log.info("PerL timestamp queue: {}",
+                perlConfig.mpscQueueEnable
+                        ? "intrusive TimeStampNode MPSC"
+                        : "JDK ConcurrentLinkedQueue");
         if (perlConfig.sleepMS > 0) {
             this.perlReceiver = new PerformanceRecorderIdleSleep(periodicRecorder, channels, time, reportingIntervalMS,
                     Math.min(perlConfig.sleepMS, reportingIntervalMS));
@@ -172,16 +178,22 @@ final public class CQueuePerl implements Perl {
 
 
     @NotThreadSafe
-    static final class CQueueChannel extends ConcurrentLinkedQueueArray<TimeStamp> implements Channel {
+    static final class CQueueChannel implements Channel {
         final private int maxQs;
         final private Throw eThrow;
+        final private QueueArray<TimeStamp> queues;
+        final private boolean mpscQueueEnabled;
         private int rIndex;
 
-        public CQueueChannel(int maxQs, Throw eThrow) {
-            super(maxQs);
+        public CQueueChannel(
+                int maxQs, Throw eThrow, boolean mpscQueueEnabled) {
             this.rIndex = maxQs;
             this.maxQs = maxQs;
             this.eThrow = eThrow;
+            this.mpscQueueEnabled = mpscQueueEnabled;
+            this.queues = mpscQueueEnabled
+                    ? new TimeStampMpscQueueArray(maxQs)
+                    : new ConcurrentLinkedQueueArray<>(maxQs);
         }
 
         public TimeStamp receive(int timeout) {
@@ -189,11 +201,18 @@ final public class CQueuePerl implements Perl {
             if (rIndex >= maxQs) {
                 rIndex = 0;
             }
-            return poll(rIndex);
+            return queues.poll(rIndex);
         }
 
         public void sendEndTime(long endTime) {
-            add(0, new TimeStamp(endTime));
+            queues.add(0, mpscQueueEnabled
+                    ? new TimeStampNode(endTime)
+                    : new TimeStamp(endTime));
+        }
+
+        @Override
+        public void clear() {
+            queues.clear();
         }
 
         @Override
@@ -214,12 +233,15 @@ final public class CQueuePerl implements Perl {
             }
 
             @Override
-            public void send(long startTime, long endTime, int records, int bytes) {
+            public void send(
+                    long startTime, long endTime, int records, int bytes) {
                 this.wIndex += 1;
                 if (this.wIndex >= maxQs) {
                     this.wIndex = 0;
                 }
-                add(this.wIndex, new TimeStamp(startTime, endTime, records, bytes));
+                queues.add(this.wIndex, mpscQueueEnabled
+                        ? new TimeStampNode(startTime, endTime, records, bytes)
+                        : new TimeStamp(startTime, endTime, records, bytes));
             }
 
             @Override
