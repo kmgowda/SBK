@@ -122,6 +122,16 @@ goto fail
                 if (!scriptTask.windowsScript.text.contains('%SBK_JAVA_HOME%/bin/java.exe')) {
                     throw new GradleException("${scriptTask.path} Windows launcher does not honor SBK_JAVA_HOME")
                 }
+                rootProject.ext.sbkRuntimeJvmArgs.each { option ->
+                    if (!scriptTask.unixScript.text.contains(option)) {
+                        throw new GradleException(
+                                "${scriptTask.path} Unix launcher is missing runtime JVM option ${option}")
+                    }
+                    if (!scriptTask.windowsScript.text.contains(option)) {
+                        throw new GradleException(
+                                "${scriptTask.path} Windows launcher is missing runtime JVM option ${option}")
+                    }
+                }
             }
         }
     }

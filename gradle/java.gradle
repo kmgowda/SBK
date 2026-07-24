@@ -10,10 +10,25 @@
  */
 
 if (project == rootProject) {
-    // JVM options shared by every SBK runtime, generated launcher, and container.
-    ext.sbkRuntimeJvmArgs = [
-            '-XX:+UseCompactObjectHeaders'
+    // JDK 25 runtime profile shared by every SBK executable, generated
+    // launcher, benchmark fork, and dashboard child process.
+    //
+    // ZGC keeps collection pauses independent of heap size and scales its
+    // worker counts to the available CPUs. A 50% heap ceiling doubles the
+    // default server-class heap allowance while preserving memory for native
+    // SDK buffers, thread stacks, direct buffers, and the operating system.
+    // Host-specific options such as AlwaysPreTouch, large pages, and fixed GC
+    // thread counts intentionally remain operator overrides.
+    def sbkPerformanceJvmArgs = [
+            '-XX:+UseZGC',
+            '-XX:+UseCompactObjectHeaders',
+            '-XX:MaxRAMPercentage=50.0',
+            '-XX:+DisableExplicitGC',
+            '-XX:+ExitOnOutOfMemoryError'
     ]
+    ext.sbkRuntimeJvmArgs = (sbkPerformanceJvmArgs + [
+            '-Dsbk.runtimeJvmArgs=' + sbkPerformanceJvmArgs.join(',')
+    ]).asImmutable()
 }
 
 plugins.withId('java') {

@@ -46,6 +46,7 @@ public final class DashboardClient implements AutoCloseable {
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
     private static final Duration START_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration LEASE_HEARTBEAT_INTERVAL = Duration.ofSeconds(15);
+    private static final String RUNTIME_JVM_ARGS_PROPERTY = "sbk.runtimeJvmArgs";
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final HttpClient httpClient;
     private final URI baseUri;
@@ -282,14 +283,38 @@ public final class DashboardClient implements AutoCloseable {
 
     private static void startServer(DashboardConfig config) throws IOException {
         final String javaExecutable = resolveJavaExecutable();
-        final ProcessBuilder builder = new ProcessBuilder(javaExecutable, "-XX:+UseCompactObjectHeaders", "-cp",
-                System.getProperty("java.class.path"), SbkDashboardServerMain.class.getName(),
-                "-host", config.host, "-port", Integer.toString(config.port),
-                "-minutes", Integer.toString(config.minutes));
+        final List<String> command = new ArrayList<>();
+        command.add(javaExecutable);
+        command.addAll(runtimeJvmArgs());
+        command.add("-cp");
+        command.add(System.getProperty("java.class.path"));
+        command.add(SbkDashboardServerMain.class.getName());
+        command.add("-host");
+        command.add(config.host);
+        command.add("-port");
+        command.add(Integer.toString(config.port));
+        command.add("-minutes");
+        command.add(Integer.toString(config.minutes));
+        final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);
         builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
         builder.redirectError(ProcessBuilder.Redirect.DISCARD);
         builder.start();
+    }
+
+    private static List<String> runtimeJvmArgs() {
+        final String configured = System.getProperty(RUNTIME_JVM_ARGS_PROPERTY, "");
+        if (configured.isBlank()) {
+            return List.of();
+        }
+        final List<String> arguments = new ArrayList<>();
+        for (String value : configured.split(",")) {
+            final String argument = value.trim();
+            if (!argument.isEmpty()) {
+                arguments.add(argument);
+            }
+        }
+        return List.copyOf(arguments);
     }
 
     private static String localHostname() {

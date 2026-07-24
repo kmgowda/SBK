@@ -83,6 +83,59 @@ java -version
 
 `SBK_JAVA_HOME` takes precedence over `JAVA_HOME` when the build selects its Java installation.
 
+### Runtime JVM and garbage collector defaults
+
+Every generated SBK launcher uses one consolidated JDK 25 runtime profile from
+[`gradle/java.gradle`](gradle/java.gradle):
+
+```text
+-XX:+UseZGC
+-XX:+UseCompactObjectHeaders
+-XX:MaxRAMPercentage=50.0
+-XX:+DisableExplicitGC
+-XX:+ExitOnOutOfMemoryError
+```
+
+- **Generational ZGC** performs expensive collection work concurrently and
+  dynamically scales generation sizes and GC threads. This keeps GC pauses
+  small as benchmark concurrency, CPU count, and live heap grow.
+- **Compact object headers** reduce per-object heap overhead and improve cache
+  density for queues and measurement records.
+- **50% maximum RAM** gives large benchmark processes more heap than the JVM's
+  default server sizing while retaining half of detected memory for SDK native
+  buffers, direct buffers, thread stacks, filesystem cache, and the operating
+  system.
+- **Disabled explicit GC** prevents a driver or dependency from injecting a
+  benchmark-distorting `System.gc()` collection. Necessary collections still
+  run normally.
+- **Exit on OOM** prevents a memory-exhausted benchmark from continuing and
+  publishing misleading results.
+
+The same options are applied to `sbk`, `sbk-yal`, `sbm`, `sbk-gem`,
+`sbk-gem-yal`, module launchers, and the WebLogger dashboard process.
+
+ZGC reserves address space using many memory mappings. On large-memory Linux
+hosts, check `sysctl vm.max_map_count`; if it is too small, JDK 25 prints the
+minimum required value at startup. Configure that operating-system limit
+before a production benchmark.
+
+These are safe cross-host defaults, not a substitute for capacity planning.
+For a dedicated benchmark host, `JAVA_OPTS` can override heap sizing. For
+example, a fixed heap removes resizing and commit/uncommit variation:
+
+```bash
+export JAVA_OPTS='-Xms32g -Xmx32g -XX:+AlwaysPreTouch'
+```
+
+Use fixed pre-touched heaps only when that memory is reserved for the process.
+Large pages are not enabled automatically because they require operating-system
+provisioning. To compare G1 with ZGC, explicitly disable ZGC before selecting
+G1:
+
+```bash
+export JAVA_OPTS='-XX:-UseZGC -XX:+UseG1GC'
+```
+
 ## Build
 
 Clone and build the project:
