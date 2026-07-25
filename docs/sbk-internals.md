@@ -642,69 +642,81 @@ interval.
 ##### The mechanism
 
 `ElasticWait.waitAndCheck()`, called inside the recorder's idle path,
-does just three things:
+does just two things:
 
 ```java
 public boolean waitAndCheck() {
-    LockSupport.parkNanos(idleNS);   // park for ~idleNS ns
+    idleStrategy.accept(idleNS);     // production strategy: LockSupport.parkNanos
     idleCount++;
-    totalCount++;
-    return idleCount > elasticCount; // true ⇒ "now it's time to check the clock"
+    return idleCount >= elasticCount; // true means: sample the clock now
 }
 ```
 
-No clock call. Just a park and two counter increments. The recorder's
+No clock call and no processor-speed-dependent instruction loop. Just a park
+and a counter increment. The recorder's
 idle loop becomes:
 
 ```java
 while (queueEmpty()) {
-    if (idleWait.waitAndCheck()) {                  // park + count
-        long now = time.getCurrentTime();           // <-- ONE clock call per batch
+    if (idleWait.waitAndCheck()) {            // park + count
+        long now = time.getCurrentTime();      // one clock call per batch
         long elapsed = now - windowStart;
-        if (elapsed > windowIntervalMS) {
+        if (elapsed >= windowIntervalMS) {
             rotateWindow();
-            idleWait.setElastic(elapsed);           // recalibrate elasticCount
+            idleWait.setElastic(elapsed);      // calibrate and start a new window
         } else {
-            idleWait.updateElastic(elapsed);        // refine
+            idleWait.updateElastic(elapsed);  // calibrate and clear this batch
         }
-        idleWait.reset();                           // restart batch
     }
 }
 ```
 
 So instead of *N* clock calls for *N* empty-queue parks, PerL normally makes
-one clock call after an adaptive batch. At construction:
+one clock call after an adaptive batch. At construction it computes only a
+safe upper bound for bootstrap calibration:
 
 ```text
-countRatio    = 1_000_000 ns per ms / idleNS
-minIdleCount  = countRatio * minIntervalMS
-elasticCount  = minIdleCount
+nominalWaitsPerMillisecond = 1_000_000 ns per ms / idleNS
+maximumCalibrationCount   = nominalWaitsPerMillisecond * calibrationIntervalMS
+elasticCount              = 1
 ```
 
-With the configured `idleNS=1_000_000`, `countRatio` starts at `1`. With the
-minimum `idleNS=1_000`, it starts at `1_000`. These are target counts derived
-from requested park time; `LockSupport.parkNanos` may oversleep, so the code
-later calibrates from observed elapsed time rather than assuming ideal timer
-resolution.
+The first clock check therefore occurs after one park. If a coarse clock has
+not advanced, the probe grows as `1, 2, 4, 8, ...` up to the bootstrap bound.
+This needs only logarithmically many clock checks and avoids assuming that a
+requested 1 microsecond or 1 millisecond park really consumes that duration.
 
 ##### The calibration loop
 
-`elasticCount` adapts to reality at runtime. The two updater methods
-work like this:
+`elasticCount` adapts to measured wait throughput at runtime. A successful
+sample computes:
+
+```text
+observedWaitsPerMillisecond = parksInThisBatch / elapsedMilliseconds
+```
+
+Later observations use a weighted moving average so that a temporary
+scheduler pause does not completely replace the established estimate. The
+two updater methods work like this:
 
 | Method | When called | What it does |
 |---|---|---|
-| `setElastic(actualElapsedMs)` | After a window rotation | Sets `elasticCount = (totalCount × windowIntervalMS) / actualElapsedMs`. I.e., "given we managed `totalCount` parks in `actualElapsedMs` ms, how many parks would fit in `windowIntervalMS`?" |
-| `updateElastic(elapsedMs)` | After a clock check that did *not* rotate the window | Sets `elasticCount = countRatio × (windowIntervalMS - elapsedMs)`. I.e., "we're partway through the window; aim the next check at the remaining time." |
+| `setElastic(actualElapsedMs)` | After a window rotation | Learns from only the just-completed batch, clears all window-local counters, and schedules the next check using `measuredRate × windowIntervalMS`. |
+| `updateElastic(elapsedMs)` | After a clock check that did *not* rotate the window | Learns from only the parks since the previous clock check, clears that batch, and schedules the next check using `measuredRate × remainingWindowMs`. |
 
-The `countRatio = NS_PER_MS / idleNS` is constant for a given configuration;
-its numeric value is not constant across configurations. The calibration is
-self-correcting: if `LockSupport` oversleeps, `setElastic` uses the observed
-park throughput to estimate the next batch size.
+The learned rate, rather than the requested park duration, is retained across
+reporting windows. Batch counters and elapsed-window state are never retained
+across a rotation. This prevents a busy or partially idle old window from
+inflating the next window's threshold.
 
-There is also a floor — `minIdleCount` — so that pathological
-clock-resolution issues can never make `elasticCount` collapse to
-zero (which would re-introduce the megahertz clock-query loop).
+Every computed threshold is clamped to at least one and saturates at
+`Long.MAX_VALUE`. Consequently, unusual clock resolution, very slow hosts,
+very fast hosts, and arithmetic overflow cannot create a zero-count
+clock-query loop.
+
+This design does not use a CPU frequency, MIPS value, or a fixed number of
+Java instructions. It measures the behavior that matters: how many configured
+parks this JVM completes per millisecond on the current OS and hardware.
 
 ##### The second optimisation: reuse worker timestamps
 
@@ -716,7 +728,7 @@ for (Channel ch : channels) {
     if (t != null) {
         ctime = t.endTime;              // <-- the WORKER's timestamp, NOT a new clock call
         recorder.record(t.startTime, t.endTime, ...);
-        if (recorder.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
+        if (recorder.elapsedMilliSecondsWindow(ctime) >= windowIntervalMS) {
             recorder.stopWindow(ctime); ...
         }
     }
@@ -755,9 +767,9 @@ sequenceDiagram
     participant C as System clock
 
     Note over W,C: Phase 1 - queue has work
-    W->>C: now() — start
+    W->>C: now() -- start
     W->>W: do I/O
-    W->>C: now() — end
+    W->>C: now() -- end
     W->>Q: TimeStamp(start, end, ...)
     Q-->>R: poll() returns TimeStamp
     Note over R: ctime = t.endTime<br/>(NO clock call here)
