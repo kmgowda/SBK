@@ -32,11 +32,13 @@ import java.util.concurrent.ExecutionException;
 public class AsyncFileWriter implements Writer<ByteBuffer> {
     final private String fileName;
     final private AsynchronousFileChannel out;
+    final private AsyncFileOperations operations;
     private long pos;
 
     public AsyncFileWriter(int id, ParameterOptions params, String fileName) throws IOException {
         this.fileName = fileName;
         this.out = AsynchronousFileChannel.open(Paths.get(fileName), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        this.operations = new AsyncFileOperations();
         this.pos = 0;
     }
 
@@ -49,19 +51,31 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
         status.startTime = ctime;
         status.bytes = size;
         status.records = 1;
-        out.write(buffer, pos, buffer,
-                new CompletionHandler<Integer, ByteBuffer>() {
+        operations.submitted();
+        try {
+            out.write(buffer, pos, buffer,
+                    new CompletionHandler<Integer, ByteBuffer>() {
 
-                    @Override
-                    public void completed(Integer result, ByteBuffer attachment) {
-                        final long endTime = time.getCurrentTime();
-                        record.send(ctime, endTime, 1, result);
-                    }
+                        @Override
+                        public void completed(Integer result, ByteBuffer attachment) {
+                            try {
+                                final long endTime = time.getCurrentTime();
+                                record.send(ctime, endTime, 1, result);
+                            } finally {
+                                operations.completed();
+                            }
+                        }
 
-                    @Override
-                    public void failed(Throwable exc, ByteBuffer attachment) {
-                    }
-                });
+                        @Override
+                        public void failed(Throwable exc, ByteBuffer attachment) {
+                            operations.failed(exc);
+                            record.throwException(exc);
+                        }
+                    });
+        } catch (RuntimeException ex) {
+            operations.failed(ex);
+            throw ex;
+        }
         pos += data.capacity();
     }
 
@@ -79,11 +93,13 @@ public class AsyncFileWriter implements Writer<ByteBuffer> {
 
     @Override
     public void sync() throws IOException {
+        operations.awaitCompletion();
         out.force(true);
     }
 
     @Override
     public void close() throws IOException {
+        operations.awaitCompletion();
         out.close();
     }
 }

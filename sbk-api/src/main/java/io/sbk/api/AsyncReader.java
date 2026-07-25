@@ -90,13 +90,14 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             throw new IOException();
         } else {
             final long beginTime = status.startTime;
-            ret.exceptionally(ex -> {
-                perlChannel.throwException(ex);
-                return null;
-            });
-            ret.thenAccept(d -> {
-                final long endTime = time.getCurrentTime();
-                perlChannel.send(beginTime, endTime, status.records, dType.length(d));
+            final int completedRecords = status.records;
+            ret.whenComplete((data, ex) -> {
+                if (ex == null) {
+                    final long endTime = time.getCurrentTime();
+                    perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
+                } else {
+                    perlChannel.throwException(ex);
+                }
             });
         }
     }
@@ -133,17 +134,16 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             throw new IOException();
         } else {
             final long beginTime = status.startTime;
-            ret.exceptionally(ex -> {
-                if (ex instanceof TimeoutException) {
-                    logger.recordReadTimeoutEvents(id, status.startTime, 1);
+            final int completedRecords = status.records;
+            ret.whenComplete((data, ex) -> {
+                if (ex == null) {
+                    final long endTime = time.getCurrentTime();
+                    perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
+                } else if (ex instanceof TimeoutException) {
+                    logger.recordReadTimeoutEvents(id, beginTime, 1);
                 } else {
                     perlChannel.throwException(ex);
                 }
-                return null;
-            });
-            ret.thenAccept(d -> {
-                final long endTime = time.getCurrentTime();
-                perlChannel.send(beginTime, endTime, status.records, dType.length(d));
             });
         }
     }
@@ -177,14 +177,14 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         if (ret == null) {
             throw new IOException();
         } else {
-            ret.exceptionally(ex -> {
-                perlChannel.throwException(ex);
-                return null;
-            });
-            ret.thenAccept(d -> {
-                final long endTime = time.getCurrentTime();
-                perlChannel.send(dType.getTime(d), endTime, status.records, dType.length(d));
-
+            final int completedRecords = status.records;
+            ret.whenComplete((data, ex) -> {
+                if (ex == null) {
+                    final long endTime = time.getCurrentTime();
+                    perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
+                } else {
+                    perlChannel.throwException(ex);
+                }
             });
         }
     }
@@ -220,17 +220,17 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
         if (ret == null) {
             throw new IOException();
         } else {
-            ret.exceptionally(ex -> {
-                if (ex instanceof TimeoutException) {
-                    logger.recordReadTimeoutEvents(id, status.startTime, 1);
+            final long requestTime = status.startTime;
+            final int completedRecords = status.records;
+            ret.whenComplete((data, ex) -> {
+                if (ex == null) {
+                    final long endTime = time.getCurrentTime();
+                    perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
+                } else if (ex instanceof TimeoutException) {
+                    logger.recordReadTimeoutEvents(id, requestTime, 1);
                 } else {
                     perlChannel.throwException(ex);
                 }
-                return null;
-            });
-            ret.thenAccept(d -> {
-                final long endTime = time.getCurrentTime();
-                perlChannel.send(dType.getTime(d), endTime, status.records, dType.length(d));
             });
         }
     }
