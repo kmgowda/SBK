@@ -1113,10 +1113,10 @@ Three things to notice:
    readers are configured. Each instance owns its channels, recorder, and
    windows, while both use the same `RWLogger` and the benchmark's shared
    five-thread `perlExecutor`.
-2. **Thread model is selectable at runtime.** `-thread v` selects a fixed
-   executor whose workers are virtual threads; `-thread f` selects a
-   `ForkJoinPool`; `-thread p` (the default) selects a fixed platform-thread
-   pool. The pool size is `writers + readers + 23`, providing capacity for
+2. **Thread model is selectable at runtime.** Virtual worker threads are used
+   by default. `-thread v` selects them explicitly; `-thread f` selects a
+   `ForkJoinPool`; and `-thread p` selects a fixed platform-thread pool. The
+   pool size is `writers + readers + 23`, providing capacity for
    worker and coordination tasks. More workers can expose more storage and
    CPU parallelism, but useful scaling ends when the driver, storage target,
    recorder, network, memory allocator, or CPU becomes saturated.
