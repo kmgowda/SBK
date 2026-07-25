@@ -19,7 +19,7 @@ import io.perl.api.TimeStamp;
  * single-use {@link TimeStampNode}. Each indexed queue accepts multiple
  * producers and has exactly one consumer.</p>
  */
-public final class TimeStampMpscQueueArray implements QueueArray<TimeStamp> {
+public class TimeStampMpscQueueArray implements QueueArray<TimeStamp> {
     private final TimeStampMpscQueue[] queues;
 
     /**

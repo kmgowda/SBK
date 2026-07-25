@@ -9,6 +9,7 @@
  */
 package io.perl.api.impl;
 
+import io.perl.api.PerlChannel;
 import io.perl.api.TimeStamp;
 import org.junit.jupiter.api.Test;
 
@@ -68,6 +69,38 @@ public class TimeStampMpscQueueTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> queues.add(0, new TimeStamp()));
+    }
+
+    @Test
+    public void originalChannelRetainsJdkQueueAndTimestampPath() {
+        final CQueuePerl.CQueueChannel channel =
+                new CQueuePerl.CQueueChannel(1, throwable -> {
+                    throw new AssertionError(throwable);
+                });
+        final PerlChannel producer = channel.getPerlChannel();
+
+        producer.send(10, 20, 1, 100);
+
+        final TimeStamp received = channel.receive(0);
+        assertEquals(TimeStamp.class, received.getClass());
+        assertEquals(10, received.startTime);
+        assertEquals(20, received.endTime);
+    }
+
+    @Test
+    public void intrusiveChannelUsesTimestampNodePath() {
+        final CQueuePerl.TimeStampMpscQueueChannel channel =
+                new CQueuePerl.TimeStampMpscQueueChannel(1, throwable -> {
+                    throw new AssertionError(throwable);
+                });
+        final PerlChannel producer = channel.getPerlChannel();
+
+        producer.send(10, 20, 1, 100);
+
+        final TimeStamp received = channel.receive(0);
+        assertEquals(TimeStampNode.class, received.getClass());
+        assertEquals(10, received.startTime);
+        assertEquals(20, received.endTime);
     }
 
     @Test

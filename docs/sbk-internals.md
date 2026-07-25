@@ -430,9 +430,11 @@ flowchart LR
 ties everything together. On construction it:
 
 ```java
-this.channels = new CQueueChannel[this.index];   // N concurrent channels
+this.channels = new Channel[this.index];   // N concurrent channels
 for (int i = 0; i < channels.length; i++) {
-    channels[i] = new CQueueChannel(maxQs, new OnError());
+    channels[i] = perlConfig.mpscQueueEnable
+            ? new TimeStampMpscQueueChannel(maxQs, new OnError())
+            : new CQueueChannel(maxQs, new OnError());
 }
 this.perlReceiver = new PerformanceRecorderIdleBusyWait(   // ...or *IdleSleep
         periodicRecorder, channels, time, reportingIntervalMS, idleNS);
@@ -443,13 +445,13 @@ proxy)** to each newly-spawned worker, rotating round-robin through the
 array. A worker calls `perlChannel.send(startTime, endTime, records,
 bytes)` on its hot path — that's the *only* thing it has to do.
 
-Each `CQueueChannel` selects a `TimeStampMpscQueueArray` by default. Every
-element is a `TimeStampNode`, derived from `TimeStamp`, with its queue link in
-the same object. Enqueue and dequeue are **non-blocking queue operations**: the
-hand-off does not acquire an application mutex or monitor. Producers publish
-with CAS; the sole recorder owns the head and needs no dequeue CAS.
-`MpscQueueEnable=false` selects `ConcurrentLinkedQueueArray`, preserving the
-previous general-purpose JDK implementation as a fallback.
+The two channel implementations remain independent.
+`TimeStampMpscQueueChannel` extends `TimeStampMpscQueueArray`; every element is
+a `TimeStampNode`, derived from `TimeStamp`, with its queue link in the same
+object. The original `CQueueChannel` continues to extend
+`ConcurrentLinkedQueueArray<TimeStamp>` unchanged. `MpscQueueEnable` selects
+which channel class is constructed. Both provide **non-blocking queue
+operations** without an application mutex or monitor.
 
 The array-of-queues design is the scaling layer. `CQueuePerl` normally
 creates one channel per configured worker. Each channel contains
@@ -471,8 +473,8 @@ default `qPerWorker=10`, the conceptual layout is:
 
 ```mermaid
 flowchart LR
-    W1["Worker 1<br/>private PerlChannel"] --> C1["CQueueChannel 1"]
-    W2["Worker 2<br/>private PerlChannel"] --> C2["CQueueChannel 2"]
+    W1["Worker 1<br/>private PerlChannel"] --> C1["Queue Channel 1"]
+    W2["Worker 2<br/>private PerlChannel"] --> C2["Queue Channel 2"]
 
     subgraph A1["Queue array inside channel 1"]
         Q10["q0"]
@@ -838,7 +840,7 @@ results.
 sequenceDiagram
     autonumber
     participant Worker as Worker thread<br/>(producer)
-    participant Channel as CQueueChannel<br/>(lock-free queue)
+    participant Channel as "Selected Queue Channel<br/>(lock-free queue)"
     participant Rec as PerformanceRecorder<br/>(single consumer)
     participant Per as Periodic window<br/>(every 5s)
     participant Tot as Total window<br/>(whole run)
@@ -876,9 +878,10 @@ at the end, and may also be flushed/reset if its configured storage fills.
 
 Six concrete reasons, traceable to specific code:
 
-1. **Non-blocking hand-off.** `CQueueChannel.send()` delegates to an intrusive
-   `TimeStampMpscQueue`; progress does not depend on a mutex owner, though CAS
-   retries are still possible.
+1. **Non-blocking hand-off.** `TimeStampMpscQueueChannel.send()` delegates to
+   an intrusive `TimeStampMpscQueue`; progress does not depend on a mutex
+   owner, though CAS retries are still possible. The original
+   `CQueueChannel` remains the JDK fallback.
 2. **One producer-side allocation.** The producer creates a
    `TimeStampNode`, which is also the queue node. Percentile computation and
    logger I/O stay on the recorder side.
@@ -2473,7 +2476,7 @@ sequenceDiagram
     Note over Bench: timeoutExecutor fires at t=60s
     Bench->>Bench: stop()
     Bench->>PerlW: writePerl.stop()
-    PerlW->>PerlW: shutdown() -- send END sentinel<br/>to all CQueueChannels
+    PerlW->>PerlW: shutdown() -- send END sentinel<br/>to all queue channels
     Note over PerlW: recorder loop sees TimeStamp.isEnd()<br/>then exits while(doWork) loop
     PerlW->>Win: periodicRecorder.stop(tN)
     Win->>Log: printTotal(...)<br/>(final aggregated line)
@@ -2775,7 +2778,7 @@ SBK is the right substrate.
 | Property | What it gives you | Code evidence |
 |---|---|---|
 | **No reservoir sampling** | Every completed operation submitted to PerL contributes its count; invalid and out-of-range values remain visible as counters. Precision still depends on time unit, range, and backend. | `HashMapLatencyRecorder` and `ArrayLatencyRecorder` implement exact integer buckets; HDR uses three significant digits. |
-| **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `CQueueChannel.send()` delegates to `TimeStampMpscQueueArray.add()` by default; `MpscQueueEnable=false` selects the JDK fallback. |
+| **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `TimeStampMpscQueueChannel` uses `TimeStampMpscQueueArray`; the original `CQueueChannel` uses `ConcurrentLinkedQueueArray`. |
 | **Single-owner recording** | One consumer owns each direction's non-thread-safe windows, avoiding concurrent bucket updates. Its drain rate remains a capacity limit to monitor. | `PerformanceRecorderIdleBusyWait.run()` reads all channels for one PerL instance. |
 | **Amortised recorder clock checks** | Records carry worker timestamps; the empty path parks and checks time after an adaptive batch instead of on every poll. | `ElasticWait` plus `PerformanceRecorderIdleBusyWait`. |
 | **Shared harness across vendors** | Driver comparisons reuse orchestration, timing interfaces, PerL, and logger contracts. Equivalent durability/completion and SDK settings still require experimental control. | `Sbk`, `SbkBenchmark`, `SbkWriter`, and `SbkReader`. |
