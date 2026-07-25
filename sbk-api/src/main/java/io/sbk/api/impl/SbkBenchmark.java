@@ -381,7 +381,16 @@ final public class SbkBenchmark implements Benchmark {
         }
         rwLogger.setExceptionHandler(this::requestShutdown);
         assert chainFuture != null;
-        chainFuture.whenComplete((ignored, ex) -> requestShutdown(ex));
+        List<CompletableFuture<?>> completionFutures = new ArrayList<>();
+        completionFutures.add(chainFuture);
+        if (wStatFuture != null) {
+            completionFutures.add(wStatFuture);
+        }
+        if (rStatFuture != null) {
+            completionFutures.add(rStatFuture);
+        }
+        CompletableFuture.allOf(completionFutures.toArray(CompletableFuture[]::new))
+                .whenComplete((ignored, ex) -> requestShutdown(ex));
 
         return retFuture.toCompletableFuture();
     }

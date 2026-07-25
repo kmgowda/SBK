@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 /**
  * Per-worker bounded async-operation tracker.
@@ -113,6 +114,23 @@ public final class S3AsyncExecutor {
             }
         });
         return future;
+    }
+
+    /**
+     * Attach a completion action and track the complete callback chain.
+     *
+     * <p>The returned future does not complete, and the async slot is not released,
+     * until {@code completion} returns. This guarantees that {@link #await()} cannot
+     * finish before a successful operation has published its performance measurement.
+     *
+     * @param future MinIO SDK operation future
+     * @param completion action that publishes the operation result
+     * @param <T> operation result type
+     * @return future representing both the SDK operation and completion action
+     */
+    public <T> CompletableFuture<T> track(CompletableFuture<T> future,
+                                          BiConsumer<? super T, ? super Throwable> completion) {
+        return track(future.whenComplete(completion));
     }
 
     /**

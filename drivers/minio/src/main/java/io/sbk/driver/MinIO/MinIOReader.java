@@ -189,8 +189,7 @@ public class MinIOReader implements Reader<byte[]> {
 
         final long startTime = measurementStartTime;
         try {
-            CompletableFuture<Integer> future = asyncExecutor.track(executeAsync(prepared));
-            future.whenComplete((bytes, thrown) -> {
+            asyncExecutor.track(executeAsync(prepared), (bytes, thrown) -> {
                 if (thrown != null && !S3AsyncExecutor.isCleanShutdown(thrown)) {
                     channel.throwException(thrown);
                 } else if (thrown == null) {

@@ -178,8 +178,7 @@ public class MinIOWriter implements Writer<byte[]> {
 
         final long startTime = status.startTime;
         try {
-            CompletableFuture<OperationResult> future = asyncExecutor.track(executeAsync(prepared));
-            future.whenComplete((result, thrown) -> {
+            asyncExecutor.track(executeAsync(prepared), (result, thrown) -> {
                 if (thrown != null && !S3AsyncExecutor.isCleanShutdown(thrown)) {
                     channel.throwException(thrown);
                 } else if (thrown == null) {

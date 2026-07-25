@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
@@ -138,6 +139,42 @@ public class S3OperationSupportTest {
                 new InterruptedIOException("benchmark stopped")));
 
         executor.await();
+        assertEquals(0, executor.pendingCount());
+    }
+
+    @Test
+    public void asyncExecutorAwaitsTheMeasurementCallback() throws Exception {
+        S3AsyncExecutor executor = new S3AsyncExecutor(1);
+        CompletableFuture<String> sdkFuture = new CompletableFuture<>();
+        CountDownLatch callbackStarted = new CountDownLatch(1);
+        CountDownLatch releaseCallback = new CountDownLatch(1);
+        executor.acquire();
+        executor.track(sdkFuture, (result, thrown) -> {
+            callbackStarted.countDown();
+            try {
+                releaseCallback.await();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new java.util.concurrent.CompletionException(ex);
+            }
+        });
+
+        CompletableFuture<Void> sdkCompletion = CompletableFuture.runAsync(() -> sdkFuture.complete("done"));
+        assertTrue(callbackStarted.await(5, TimeUnit.SECONDS));
+        CompletableFuture<Void> awaitCompletion = CompletableFuture.runAsync(() -> {
+            try {
+                executor.await();
+            } catch (IOException ex) {
+                throw new java.util.concurrent.CompletionException(ex);
+            }
+        });
+
+        assertThrows(TimeoutException.class,
+                () -> awaitCompletion.get(50, TimeUnit.MILLISECONDS));
+        assertEquals(1, executor.pendingCount());
+        releaseCallback.countDown();
+        sdkCompletion.get(5, TimeUnit.SECONDS);
+        awaitCompletion.get(5, TimeUnit.SECONDS);
         assertEquals(0, executor.pendingCount());
     }
 
