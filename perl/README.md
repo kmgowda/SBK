@@ -49,11 +49,12 @@ The measurement transport is designed to avoid explicit locks in the producer pa
 
 ### Production timestamp queue
 
-By default, `CQueuePerl` uses `TimeStampMpscQueueArray`. Each submitted
-measurement is one `TimeStampNode`: the object inherits the timestamp payload
-and contains its own queue link. Enqueue therefore performs no wrapper-node
-allocation. Multiple producers publish with a CAS on the last node; the single
-recorder owns the head and dequeues without a head CAS.
+By default, `CQueuePerl` uses `TimeStampMpscQueueChannel`, backed by
+`TimeStampMpscQueueArray`. Each submitted measurement is one `TimeStampNode`:
+the object inherits the timestamp payload and contains its own queue link.
+Enqueue therefore performs no wrapper-node allocation. Multiple producers
+publish with a CAS on the last node; the single recorder owns the head and
+dequeues without a head CAS.
 
 The consumer accumulates 16 retired predecessors, release-publishes a recovery
 head, and then self-links every node in that batch. A producer suspended on any
@@ -127,13 +128,14 @@ The normal project build also checks PerL:
 
 Use JMH for performance claims and deterministic unit tests for percentile/window correctness. Avoid wall-clock assertions where a fake or explicit `Time` implementation can make the test stable.
 
-The normal `:perl:check` task also starts a dedicated JVM with a fixed 32 MB
-heap for `cqueueGcTest`. That process enqueues and consumes 20 million records
-while a producer is paused on a stale queue node. The test fails if the retired
-chain reaches the 16-node batch size, the producer cannot recover, the process
-runs out of heap, or a consumed node retains a 4 MiB payload. Unit coverage
-also pauses several producers at different retirement generations and verifies
-that every producer recovers without record loss.
+The normal `:perl:check` task starts dedicated JVMs with fixed 32 MB heaps for
+`cqueueGcTest` and `timeStampMpscQueueGcTest`. The timestamp test enqueues and
+consumes 20 million records while a producer is paused on a stale queue node.
+It fails if the retired chain reaches the 16-node batch size, the producer
+cannot recover, the process runs out of heap, or a consumed node remains
+strongly reachable. Unit coverage also verifies identity, FIFO order,
+multi-producer delivery, per-producer ordering, channel selection, clearing,
+and deterministic stale-producer recovery.
 
 These tests establish bounded retired-node retention and prompt payload release
 for the documented multiple-producer, single-consumer contract. They do not
@@ -165,17 +167,23 @@ environment-sensitive test is intentionally separate from `check`;
 correctness and stress tests remain part of the normal build.
 
 The intrusive production queue has equivalent correctness and constrained-heap
-coverage. Run its dedicated JMH comparison with:
+coverage. Run its dedicated JMH verification with:
 
 ```bash
-./gradlew :perl:runTimeStampQueuePerformanceBenchmark
+./gradlew :perl:timeStampQueuePerformanceTest
 ```
 
 The comparison includes the complete allocation performed by PerL. On JDK 25
 with compact object headers, inspect `gc.alloc.rate.norm` to confirm that the
 intrusive round trip allocates one 40-byte `TimeStampNode`, while the JDK path
 allocates a 32-byte `TimeStamp` plus its queue node (56 bytes total on the
-tested runtime). The report is written to
+tested runtime). The four-producer/one-consumer comparison parks briefly after
+an empty poll, matching PerL's `ElasticWait` behavior and preventing empty-poll
+speed from distorting producer throughput. The verification requires lower
+round-trip latency, removal of at least eight allocation bytes per operation,
+and at least 2% higher producer throughput. It also reports the 99.9% MPSC
+throughput confidence intervals as diagnostics; interval overlap is not a hard
+gate because host noise can widen an otherwise faster result. The report is written to
 `perl/build/reports/jmh/timestamp-queue-performance.json`. Results are
 host-specific; preserve the same JVM flags and an otherwise idle host when
 comparing changes.

@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -183,6 +185,77 @@ public class TimeStampMpscQueueTest {
                 assertNull(queue.poll());
             } finally {
                 resumeProducer.countDown();
+                executor.shutdownNow();
+            }
+        });
+    }
+
+    @Test
+    public void producersPausedAtDifferentRetirementGenerationsRecover() {
+        assertTimeoutPreemptively(Duration.ofSeconds(30), () -> {
+            final TimeStampMpscQueue queue = new TimeStampMpscQueue();
+            final int pausedProducerCount = 3;
+            final CountDownLatch[] producerPaused =
+                    new CountDownLatch[pausedProducerCount];
+            final CountDownLatch resumeProducers = new CountDownLatch(1);
+            final ExecutorService executor =
+                    Executors.newFixedThreadPool(pausedProducerCount);
+            final TimeStampNode[] pausedNodes =
+                    new TimeStampNode[pausedProducerCount];
+
+            try {
+                @SuppressWarnings("unchecked")
+                final Future<Boolean>[] pausedAdds =
+                        new Future[pausedProducerCount];
+                for (int producer = 0;
+                     producer < pausedProducerCount;
+                     producer++) {
+                    final int producerIndex = producer;
+                    producerPaused[producer] = new CountDownLatch(1);
+                    pausedNodes[producer] = node(-(producer + 1), producer);
+                    pausedAdds[producer] = executor.submit(() ->
+                            queue.add(pausedNodes[producerIndex], () -> {
+                                producerPaused[producerIndex].countDown();
+                                await(resumeProducers);
+                            }));
+                    producerPaused[producer].await();
+
+                    for (int record = 0;
+                         record < TimeStampMpscQueue.RETIRE_BATCH_SIZE;
+                         record++) {
+                        final TimeStampNode current =
+                                node(producer, record);
+                        assertTrue(queue.add(current));
+                        assertSame(current, queue.poll());
+                    }
+                }
+
+                for (int record = 0;
+                     record < RECLAMATION_RECORDS;
+                     record++) {
+                    final TimeStampNode current = node(0, record);
+                    assertTrue(queue.add(current));
+                    assertSame(current, queue.poll());
+                    assertTrue(queue.retainedRetiredNodeCount()
+                                    < TimeStampMpscQueue.RETIRE_BATCH_SIZE,
+                            "Retired-node chain exceeded the batch bound");
+                }
+
+                resumeProducers.countDown();
+                for (Future<Boolean> pausedAdd : pausedAdds) {
+                    assertTrue(pausedAdd.get());
+                }
+
+                final Set<TimeStampNode> recoveredNodes = new HashSet<>();
+                for (int producer = 0;
+                     producer < pausedProducerCount;
+                     producer++) {
+                    recoveredNodes.add(queue.poll());
+                }
+                assertEquals(Set.of(pausedNodes), recoveredNodes);
+                assertNull(queue.poll());
+            } finally {
+                resumeProducers.countDown();
                 executor.shutdownNow();
             }
         });

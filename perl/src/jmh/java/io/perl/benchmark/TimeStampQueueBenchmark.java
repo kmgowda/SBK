@@ -11,6 +11,7 @@
 package io.perl.benchmark;
 
 import io.perl.api.TimeStamp;
+import io.perl.api.impl.ElasticWait;
 import io.perl.api.impl.TimeStampMpscQueue;
 import io.perl.api.impl.TimeStampNode;
 import org.openjdk.jmh.annotations.AuxCounters;
@@ -32,6 +33,7 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Compares PerL's complete timestamp publication paths.
@@ -41,7 +43,9 @@ import java.util.concurrent.TimeUnit;
  * intrusive path allocates one {@link TimeStampNode}, which is both payload
  * and link. The round-trip benchmark exposes latency and normalized allocation
  * per measurement. The grouped benchmarks reproduce PerL's four-producer,
- * one-consumer topology and expose producer throughput under contention.</p>
+ * one-consumer topology and expose producer throughput under contention. An
+ * empty consumer parks briefly, as PerL's {@link ElasticWait} does, so empty
+ * polling speed cannot inflate group throughput or starve producers.</p>
  */
 @Fork(value = 3)
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
@@ -49,6 +53,11 @@ import java.util.concurrent.TimeUnit;
 @Timeout(time = 30, timeUnit = TimeUnit.SECONDS)
 public class TimeStampQueueBenchmark {
     private static final int MPSC_DRAIN_BATCH = 8;
+    /*
+     * PerL parks after an empty channel sweep. A short equal delay keeps this
+     * queue microbenchmark productive without rewarding empty-poll spinning.
+     */
+    private static final long MPSC_IDLE_NANOS = 1_000L;
 
     /**
      * Thread-private queues for end-to-end allocation and round-trip latency.
@@ -225,6 +234,8 @@ public class TimeStampQueueBenchmark {
         for (int index = 0; index < MPSC_DRAIN_BATCH; index++) {
             if (state.queue.poll() == null) {
                 counters.emptyPolls++;
+                LockSupport.parkNanos(MPSC_IDLE_NANOS);
+                break;
             } else {
                 counters.records++;
                 drained++;
@@ -239,6 +250,8 @@ public class TimeStampQueueBenchmark {
         for (int index = 0; index < MPSC_DRAIN_BATCH; index++) {
             if (queue.poll() == null) {
                 counters.emptyPolls++;
+                LockSupport.parkNanos(MPSC_IDLE_NANOS);
+                break;
             } else {
                 counters.records++;
                 drained++;
