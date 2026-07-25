@@ -142,6 +142,32 @@ for the documented multiple-producer, single-consumer contract. They do not
 claim equivalence with every general-purpose operation or every possible GC
 schedule supported by JDK `ConcurrentLinkedQueue`.
 
+Use the dedicated concurrency tools to validate properties that ordinary unit
+tests cannot prove:
+
+```bash
+./gradlew :perl:lincheckTest
+./gradlew :perl:jcstress
+./gradlew :perl:concurrencyCheck
+```
+
+`lincheckTest` checks `add` and `poll` histories against a sequential FIFO
+model using both controlled model checking and scheduler stress. Its operation
+model permits concurrent producers and places `poll` in a non-parallel group,
+so the test enforces the queue's real multiple-producer, single-consumer
+contract rather than accidentally testing unsupported multiple consumers.
+
+`jcstress` runs Java Memory Model outcome tests. One test races publication
+against consumption and forbids lost, duplicated, or partially visible
+timestamp fields. A second test races two producers and accepts only complete
+four-node histories that preserve each producer's FIFO order. Reports are
+written to `perl/build/reports/jcstress/`.
+
+`concurrencyCheck` is the complete queue-correctness gate. It serializes unit
+tests, the constrained-heap reclamation test, Lincheck, and JCStress so that
+the CPU-intensive tools do not interfere with one another. It also applies
+Checkstyle to both dedicated test source sets.
+
 To verify the MPSC queue performance claim against JDK 25
 `ConcurrentLinkedQueue`, run the dedicated JMH performance test on an otherwise
 idle system:

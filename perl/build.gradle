@@ -32,6 +32,24 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
+sourceSets {
+    lincheck {
+        java.srcDir 'src/lincheck/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    jcstress {
+        java.srcDir 'src/jcstress/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    lincheckImplementation.extendsFrom testImplementation
+    lincheckRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     api "jakarta.annotation:jakarta.annotation-api:$javaxAnnotationVersion"
@@ -55,6 +73,9 @@ dependencies {
     testImplementation "org.openjdk.jmh:jmh-core:$jmhVersion"
     annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
     testImplementation "org.openjdk.jmh:jmh-core-benchmarks:$jmhVersion"
+    lincheckImplementation "org.jetbrains.lincheck:lincheck:$lincheckVersion"
+    jcstressImplementation "org.openjdk.jcstress:jcstress-core:$jcstressVersion"
+    jcstressAnnotationProcessor "org.openjdk.jcstress:jcstress-core:$jcstressVersion"
 }
 
 jmh {
@@ -327,11 +348,83 @@ tasks.register('timeStampMpscQueueGcTest', JavaExec) {
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError',
             '-XX:-DisableExplicitGC'
+    shouldRunAfter tasks.named('test')
 }
 
 tasks.named('check') {
     dependsOn tasks.named('cqueueGcTest')
     dependsOn tasks.named('timeStampMpscQueueGcTest')
+}
+
+tasks.register('lincheckTest', Test) {
+    group = 'verification'
+    description = 'Checks TimeStampMpscQueue linearizability with Lincheck.'
+    testClassesDirs = sourceSets.lincheck.output.classesDirs
+    classpath = sourceSets.lincheck.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
+    shouldRunAfter tasks.named('timeStampMpscQueueGcTest')
+}
+
+def jcstressWorkDirectory = layout.buildDirectory.dir('jcstress')
+def jcstressReportDirectory = layout.buildDirectory.dir(
+        'reports/jcstress')
+
+tasks.register('jcstressJar', Jar) {
+    group = 'build'
+    description = 'Builds the self-contained JCStress test harness.'
+    dependsOn tasks.named('jcstressClasses')
+    archiveClassifier = 'jcstress'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'org.openjdk.jcstress.Main'
+    }
+    from sourceSets.main.output
+    from sourceSets.jcstress.output
+    from {
+        configurations.jcstressRuntimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+}
+
+tasks.register('jcstress', JavaExec) {
+    group = 'verification'
+    description = 'Checks TimeStampMpscQueue Java Memory Model outcomes with JCStress.'
+    dependsOn tasks.named('jcstressJar')
+    classpath = files(tasks.named('jcstressJar').flatMap {
+        it.archiveFile
+    })
+    mainClass = 'org.openjdk.jcstress.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    args '-m', 'quick',
+            '-t', 'io.perl.api.impl.TimeStampMpscQueue.*Stress',
+            '-r', jcstressReportDirectory.get().asFile.absolutePath
+    workingDir jcstressWorkDirectory
+    outputs.dir(jcstressReportDirectory)
+    outputs.upToDateWhen { false }
+    doFirst {
+        jcstressWorkDirectory.get().asFile.mkdirs()
+        delete jcstressReportDirectory
+    }
+    shouldRunAfter tasks.named('lincheckTest')
+    shouldRunAfter tasks.named('test')
+    shouldRunAfter tasks.named('timeStampMpscQueueGcTest')
+}
+
+tasks.register('concurrencyCheck') {
+    group = 'verification'
+    description = 'Runs unit, reclamation, Lincheck, and JCStress queue verification.'
+    dependsOn tasks.named('test')
+    dependsOn tasks.named('timeStampMpscQueueGcTest')
+    dependsOn tasks.named('lincheckTest')
+    dependsOn tasks.named('jcstress')
+    dependsOn tasks.named('checkstyleLincheck')
+    dependsOn tasks.named('checkstyleJcstress')
 }
 
 tasks.register('updateDocs') {

@@ -78,6 +78,7 @@
     <allow pkg="net.rubyeye" />
     <allow pkg="software.amazon"/>
     <allow pkg="org.openjdk.jmh"/>
+    <allow pkg="org.openjdk.jcstress"/>
     <allow pkg="co.elastic.clients" />
     <allow pkg="org.elasticsearch.client" />
     <allow pkg="com.oath.halodb" />
