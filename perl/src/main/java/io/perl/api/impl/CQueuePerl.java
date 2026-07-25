@@ -78,10 +78,6 @@ final public class CQueuePerl implements Perl {
                     ? new TimeStampMpscQueueChannel(maxQs, new OnError())
                     : new CQueueChannel(maxQs, new OnError());
         }
-        PerlPrinter.log.info("PerL timestamp queue: {}",
-                perlConfig.mpscQueueEnable
-                        ? "intrusive TimeStampNode MPSC"
-                        : "JDK ConcurrentLinkedQueue");
         if (perlConfig.sleepMS > 0) {
             this.perlReceiver = new PerformanceRecorderIdleSleep(periodicRecorder, channels, time, reportingIntervalMS,
                     Math.min(perlConfig.sleepMS, reportingIntervalMS));
