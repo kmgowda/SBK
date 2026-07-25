@@ -165,6 +165,13 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         this.tailRef.tail = sentinel;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method must be called by only one consumer thread.</p>
+     *
+     * @return the next producer-supplied node, or {@code null} when empty
+     */
     @Override
     public TimeStampNode poll() {
         final TimeStampNode currentHead = headRef.head;
@@ -184,6 +191,13 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         return next;
     }
 
+    /**
+     * Adds a single-use timestamp node without allocating a queue wrapper.
+     *
+     * @param node producer-owned node to enqueue
+     * @return {@code true} after the node is linked
+     * @throws NullPointerException if {@code node} is {@code null}
+     */
     @Override
     public boolean add(TimeStampNode node) {
         return add(node, null);
@@ -209,10 +223,8 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
             final TimeStampNode next = (TimeStampNode) NEXT.getAcquire(current);
             if (next == null) {
                 if (NEXT.compareAndSet(current, null, newNode)) {
-                    if (current != tailNode) {
-                        TAIL.weakCompareAndSetRelease(
-                                tailRef, tailNode, newNode);
-                    }
+                    TAIL.weakCompareAndSetRelease(
+                            tailRef, tailNode, newNode);
                     return true;
                 }
             } else if (next == current) {
@@ -234,6 +246,12 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         }
     }
 
+    /**
+     * Drains all queued nodes and completes retirement of the remaining
+     * predecessor batch so the queue can be reused.
+     *
+     * <p>This method must be called by only one consumer thread.</p>
+     */
     @Override
     public void clear() {
         while (poll() != null) {

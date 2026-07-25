@@ -244,6 +244,13 @@ final public class CQueuePerl implements Perl {
         final private Throw eThrow;
         private int rIndex;
 
+        /**
+         * Creates an intrusive timestamp channel with the requested queue
+         * count.
+         *
+         * @param maxQs number of queues distributed across producer sends
+         * @param eThrow callback that propagates producer failures to PerL
+         */
         public TimeStampMpscQueueChannel(int maxQs, Throw eThrow) {
             super(maxQs);
             this.rIndex = maxQs;
@@ -251,6 +258,14 @@ final public class CQueuePerl implements Perl {
             this.eThrow = eThrow;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @param timeout unused polling timeout retained by the
+         *                {@link Channel} contract
+         * @return the next available timestamp, or {@code null}
+         */
+        @Override
         public TimeStamp receive(int timeout) {
             rIndex += 1;
             if (rIndex >= maxQs) {
@@ -259,6 +274,12 @@ final public class CQueuePerl implements Perl {
             return poll(rIndex);
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @param endTime benchmark completion time
+         */
+        @Override
         public void sendEndTime(long endTime) {
             add(0, new TimeStampNode(endTime));
         }
@@ -268,6 +289,12 @@ final public class CQueuePerl implements Perl {
             return new TimeStampMpscPerlChannel();
         }
 
+        /**
+         * Propagates a producer exception to the owning PerL instance.
+         *
+         * @param id producer identifier reserved for channel implementations
+         * @param ex producer failure
+         */
         public void sendException(int id, Throwable ex) {
             eThrow.onException(ex);
         }

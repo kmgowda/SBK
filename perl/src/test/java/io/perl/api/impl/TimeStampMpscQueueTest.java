@@ -42,6 +42,9 @@ public class TimeStampMpscQueueTest {
     private static final int RECORDS_PER_PRODUCER = 25_000;
     private static final int RECLAMATION_RECORDS = 250_000;
 
+    /**
+     * Verifies wrapper-free identity and FIFO delivery.
+     */
     @Test
     public void returnsTheSameNodeInFifoOrderWithoutAWrapper() {
         final TimeStampMpscQueue queue = new TimeStampMpscQueue();
@@ -57,6 +60,9 @@ public class TimeStampMpscQueueTest {
         assertNull(queue.poll());
     }
 
+    /**
+     * Verifies that null nodes cannot enter the intrusive queue.
+     */
     @Test
     public void rejectsNullNodes() {
         final TimeStampMpscQueue queue = new TimeStampMpscQueue();
@@ -64,6 +70,9 @@ public class TimeStampMpscQueueTest {
         assertThrows(NullPointerException.class, () -> queue.add(null));
     }
 
+    /**
+     * Verifies that the queue array rejects non-intrusive timestamps.
+     */
     @Test
     public void queueArrayRejectsNonIntrusiveTimestamp() {
         final TimeStampMpscQueueArray queues =
@@ -73,6 +82,9 @@ public class TimeStampMpscQueueTest {
                 () -> queues.add(0, new TimeStamp()));
     }
 
+    /**
+     * Verifies that the fallback channel retains the JDK queue data path.
+     */
     @Test
     public void originalChannelRetainsJdkQueueAndTimestampPath() {
         final CQueuePerl.CQueueChannel channel =
@@ -89,6 +101,9 @@ public class TimeStampMpscQueueTest {
         assertEquals(20, received.endTime);
     }
 
+    /**
+     * Verifies that the optimized channel transports intrusive nodes.
+     */
     @Test
     public void intrusiveChannelUsesTimestampNodePath() {
         final CQueuePerl.TimeStampMpscQueueChannel channel =
@@ -105,6 +120,9 @@ public class TimeStampMpscQueueTest {
         assertEquals(20, received.endTime);
     }
 
+    /**
+     * Verifies that clearing drains and leaves the queue reusable.
+     */
     @Test
     public void clearDrainsAndKeepsQueueReusable() {
         final TimeStampMpscQueue queue = new TimeStampMpscQueue();
@@ -121,6 +139,9 @@ public class TimeStampMpscQueueTest {
         assertNull(queue.poll());
     }
 
+    /**
+     * Verifies loss-free MPSC delivery and per-producer FIFO ordering.
+     */
     @Test
     public void multipleProducersDeliverEveryRecordInProducerOrder() {
         assertTimeoutPreemptively(Duration.ofSeconds(30), () -> {
@@ -151,6 +172,9 @@ public class TimeStampMpscQueueTest {
         });
     }
 
+    /**
+     * Verifies recovery when a producer retains a retired tail reference.
+     */
     @Test
     public void pausedProducerRecoversAfterConsumerRetiresItsStaleTail() {
         assertTimeoutPreemptively(Duration.ofSeconds(30), () -> {
@@ -190,6 +214,9 @@ public class TimeStampMpscQueueTest {
         });
     }
 
+    /**
+     * Verifies stale producers recover across several retirement generations.
+     */
     @Test
     public void producersPausedAtDifferentRetirementGenerationsRecover() {
         assertTimeoutPreemptively(Duration.ofSeconds(30), () -> {

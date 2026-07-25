@@ -34,11 +34,26 @@ public class TimeStampMpscQueueArray implements QueueArray<TimeStamp> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param index index of the intrusive queue to poll
+     * @return the next timestamp node, or {@code null} when the queue is empty
+     */
     @Override
     public TimeStamp poll(int index) {
         return queues[index].poll();
     }
 
+    /**
+     * Adds a timestamp node to an indexed intrusive queue.
+     *
+     * @param index index of the queue receiving the node
+     * @param data single-use {@link TimeStampNode} to enqueue
+     * @return {@code true} after the node is linked
+     * @throws IllegalArgumentException if {@code data} is not a
+     *         {@link TimeStampNode}
+     */
     @Override
     public boolean add(int index, TimeStamp data) {
         if (!(data instanceof TimeStampNode node)) {
@@ -48,11 +63,19 @@ public class TimeStampMpscQueueArray implements QueueArray<TimeStamp> {
         return queues[index].add(node);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param index index of the queue to drain
+     */
     @Override
     public void clear(int index) {
         queues[index].clear();
     }
 
+    /**
+     * Drains every intrusive queue in this array.
+     */
     @Override
     public void clear() {
         for (TimeStampMpscQueue queue : queues) {

@@ -143,6 +143,14 @@ public class PerlTest {
         runPerlRecords(logger, perl);
     }
 
+    /**
+     * Verifies record processing through the JDK concurrent-queue fallback.
+     *
+     * @throws IOException if PerL configuration cannot be loaded
+     * @throws ExecutionException if asynchronous recording fails
+     * @throws InterruptedException if the test thread is interrupted
+     * @throws TimeoutException if recording does not finish in time
+     */
     @Test
     public void testJdkConcurrentQueueFallback() throws IOException,
             ExecutionException, InterruptedException, TimeoutException {
@@ -154,6 +162,12 @@ public class PerlTest {
         runPerlRecords(logger, perl);
     }
 
+    /**
+     * Verifies the default and explicit fallback values of
+     * {@code MpscQueueEnable}.
+     *
+     * @throws IOException if the supplied properties cannot be loaded
+     */
     @Test
     public void testMpscQueueEnablePropertyBinding() throws IOException {
         assertTrue(PerlConfig.build().mpscQueueEnable,
