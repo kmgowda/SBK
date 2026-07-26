@@ -25,7 +25,7 @@ package io.perl.api;
  *     reporting latencies.</li>
  * </ul>
  */
-public class TimeStamp {
+public sealed class TimeStamp permits TimeStampNode {
 
     /**
      * Event start time (caller-defined time unit).

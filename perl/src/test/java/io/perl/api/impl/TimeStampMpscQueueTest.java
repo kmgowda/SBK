@@ -11,6 +11,7 @@ package io.perl.api.impl;
 
 import io.perl.api.PerlChannel;
 import io.perl.api.TimeStamp;
+import io.perl.api.TimeStampNode;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -41,6 +42,18 @@ public class TimeStampMpscQueueTest {
     private static final int PRODUCERS = 4;
     private static final int RECORDS_PER_PRODUCER = 25_000;
     private static final int RECLAMATION_RECORDS = 250_000;
+
+    /**
+     * Verifies that timestamp specialization is restricted to the intrusive
+     * queue node.
+     */
+    @Test
+    public void timeStampPermitsOnlyTimeStampNode() {
+        assertTrue(TimeStamp.class.isSealed());
+        assertArrayEquals(
+                new Class<?>[]{TimeStampNode.class},
+                TimeStamp.class.getPermittedSubclasses());
+    }
 
     /**
      * Verifies wrapper-free identity and FIFO delivery.

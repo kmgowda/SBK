@@ -11,6 +11,7 @@ package io.perl.api.impl;
 
 import io.perl.api.QueueArray;
 import io.perl.api.TimeStamp;
+import io.perl.api.TimeStampNode;
 
 /**
  * Array of intrusive MPSC queues used by optimized PerL channels.

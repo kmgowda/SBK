@@ -11,6 +11,7 @@ package io.perl.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.Queue;
+import io.perl.api.TimeStampNode;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -145,7 +146,8 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         try {
             final MethodHandles.Lookup lookup = MethodHandles.lookup();
             TAIL = lookup.findVarHandle(TailRef.class, "tail", TimeStampNode.class);
-            NEXT = lookup.findVarHandle(TimeStampNode.class, "next", TimeStampNode.class);
+            NEXT = MethodHandles.privateLookupIn(TimeStampNode.class, lookup)
+                    .findVarHandle(TimeStampNode.class, "next", TimeStampNode.class);
             RECOVERY_HEAD = lookup.findVarHandle(
                     HeadRef.class, "recoveryHead", TimeStampNode.class);
         } catch (ReflectiveOperationException exception) {
@@ -157,7 +159,7 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
      * Creates an empty queue with one constant-cost sentinel node.
      */
     public TimeStampMpscQueue() {
-        final TimeStampNode sentinel = new TimeStampNode();
+        final TimeStampNode sentinel = new TimeStampNode(0, 0, 0, 0);
         this.headRef = new HeadRef();
         this.tailRef = new TailRef();
         this.headRef.head = sentinel;

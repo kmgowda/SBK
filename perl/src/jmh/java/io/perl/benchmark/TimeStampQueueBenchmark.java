@@ -13,7 +13,7 @@ package io.perl.benchmark;
 import io.perl.api.TimeStamp;
 import io.perl.api.impl.ElasticWait;
 import io.perl.api.impl.TimeStampMpscQueue;
-import io.perl.api.impl.TimeStampNode;
+import io.perl.api.TimeStampNode;
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;

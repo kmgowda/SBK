@@ -7,9 +7,9 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.perl.api.impl;
+package io.perl.api;
 
-import io.perl.api.TimeStamp;
+import io.perl.api.impl.TimeStampMpscQueue;
 
 /**
  * Intrusive queue node that is also the PerL timestamp payload.
@@ -32,7 +32,7 @@ public final class TimeStampNode extends TimeStamp {
      * TimeStampMpscQueue. It is intentionally package-private so the linkage
      * is unavailable to PerL users.
      */
-    TimeStampNode next;
+    private TimeStampNode next;
 
     /**
      * Creates a timestamp queue node.
@@ -53,12 +53,5 @@ public final class TimeStampNode extends TimeStamp {
      */
     public TimeStampNode(long endTime) {
         super(endTime);
-    }
-
-    /**
-     * Creates the queue's private sentinel node.
-     */
-    TimeStampNode() {
-        super();
     }
 }

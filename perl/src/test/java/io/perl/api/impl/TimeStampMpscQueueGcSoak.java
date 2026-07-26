@@ -10,6 +10,7 @@
 package io.perl.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.perl.api.TimeStampNode;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;

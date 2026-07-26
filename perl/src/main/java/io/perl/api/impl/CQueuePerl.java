@@ -15,6 +15,7 @@ import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
 import io.perl.api.TimeStamp;
+import io.perl.api.TimeStampNode;
 import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
 import io.state.State;

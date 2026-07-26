@@ -9,6 +9,7 @@
  */
 package io.perl.api.impl;
 
+import io.perl.api.TimeStampNode;
 import org.jetbrains.lincheck.datastructures.IntGen;
 import org.jetbrains.lincheck.datastructures.ModelCheckingOptions;
 import org.jetbrains.lincheck.datastructures.Operation;

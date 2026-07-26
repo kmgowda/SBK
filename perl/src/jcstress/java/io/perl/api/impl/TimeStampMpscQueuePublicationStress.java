@@ -9,6 +9,7 @@
  */
 package io.perl.api.impl;
 
+import io.perl.api.TimeStampNode;
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
 import org.openjdk.jcstress.annotations.Expect;
