@@ -81,7 +81,7 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
                             doWork = false;
                         }
                     }
-                    if (periodicRecorder.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
+                    if (periodicRecorder.elapsedMilliSecondsWindow(ctime) >= windowIntervalMS) {
                         periodicRecorder.stopWindow(ctime);
                         periodicRecorder.startWindow(ctime);
                         idleWait.reset();
@@ -93,10 +93,9 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
                     if (idleWait.waitAndCheck()) {
                         ctime = time.getCurrentTime();
                         final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
-                        if (diffTime > windowIntervalMS) {
+                        if (diffTime >= windowIntervalMS) {
                             periodicRecorder.stopWindow(ctime);
                             periodicRecorder.startWindow(ctime);
-                            idleWait.reset();
                             idleWait.setElastic(diffTime);
                         } else {
                             idleWait.updateElastic(diffTime);

@@ -131,7 +131,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                            Applicable only if both writers and readers are set; default: false""");
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: 0 ms");
         addOption("thread", true,
-                "Thread Type [p: platform, f: fork-join, v:virtual], default: p");
+                "Thread Type [p: platform, f: fork-join, v: virtual], default: v");
     }
 
     /**
@@ -223,7 +223,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             action = Action.Writing;
         }
 
-        String threadString = getOptionValue("thread", "p");
+        String threadString = getOptionValue("thread", "v");
         threadType = switch (threadString.toLowerCase()) {
             case "f" -> ThreadType.ForkJoin;
             case "v" -> ThreadType.Virtual;

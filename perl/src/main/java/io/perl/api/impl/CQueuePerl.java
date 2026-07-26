@@ -14,9 +14,9 @@ import io.perl.api.PerformanceRecorder;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
+import io.perl.api.TimeStamp;
 import io.perl.config.PerlConfig;
 import io.perl.system.PerlPrinter;
-import io.perl.api.TimeStamp;
 import io.state.State;
 import io.time.Time;
 import lombok.Synchronized;
@@ -72,9 +72,11 @@ final public class CQueuePerl implements Perl {
             maxQs = Math.max(PerlConfig.MIN_Q_PER_WORKER, perlConfig.qPerWorker);
             this.index = Math.max(perlConfig.workers, PerlConfig.MIN_WORKERS);
         }
-        this.channels = new CQueueChannel[this.index];
+        this.channels = new Channel[this.index];
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new CQueueChannel(maxQs, new OnError());
+            channels[i] = perlConfig.mpscQueueEnable
+                    ? new TimeStampMpscQueueChannel(maxQs, new OnError())
+                    : new CQueueChannel(maxQs, new OnError());
         }
         if (perlConfig.sleepMS > 0) {
             this.perlReceiver = new PerformanceRecorderIdleSleep(periodicRecorder, channels, time, reportingIntervalMS,
@@ -172,7 +174,9 @@ final public class CQueuePerl implements Perl {
 
 
     @NotThreadSafe
-    static final class CQueueChannel extends ConcurrentLinkedQueueArray<TimeStamp> implements Channel {
+    static final class CQueueChannel
+            extends ConcurrentLinkedQueueArray<TimeStamp>
+            implements Channel {
         final private int maxQs;
         final private Throw eThrow;
         private int rIndex;
@@ -214,12 +218,14 @@ final public class CQueuePerl implements Perl {
             }
 
             @Override
-            public void send(long startTime, long endTime, int records, int bytes) {
+            public void send(
+                    long startTime, long endTime, int records, int bytes) {
                 this.wIndex += 1;
                 if (this.wIndex >= maxQs) {
                     this.wIndex = 0;
                 }
-                add(this.wIndex, new TimeStamp(startTime, endTime, records, bytes));
+                add(this.wIndex,
+                        new TimeStamp(startTime, endTime, records, bytes));
             }
 
             @Override
@@ -228,6 +234,97 @@ final public class CQueuePerl implements Perl {
             }
         }
 
+    }
+
+    @NotThreadSafe
+    static final class TimeStampMpscQueueChannel
+            extends TimeStampMpscQueueArray
+            implements Channel {
+        final private int maxQs;
+        final private Throw eThrow;
+        private int rIndex;
+
+        /**
+         * Creates an intrusive timestamp channel with the requested queue
+         * count.
+         *
+         * @param maxQs number of queues distributed across producer sends
+         * @param eThrow callback that propagates producer failures to PerL
+         */
+        public TimeStampMpscQueueChannel(int maxQs, Throw eThrow) {
+            super(maxQs);
+            this.rIndex = maxQs;
+            this.maxQs = maxQs;
+            this.eThrow = eThrow;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @param timeout unused polling timeout retained by the
+         *                {@link Channel} contract
+         * @return the next available timestamp, or {@code null}
+         */
+        @Override
+        public TimeStamp receive(int timeout) {
+            rIndex += 1;
+            if (rIndex >= maxQs) {
+                rIndex = 0;
+            }
+            return poll(rIndex);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @param endTime benchmark completion time
+         */
+        @Override
+        public void sendEndTime(long endTime) {
+            add(0, new TimeStampNode(endTime));
+        }
+
+        @Override
+        public PerlChannel getPerlChannel() {
+            return new TimeStampMpscPerlChannel();
+        }
+
+        /**
+         * Propagates a producer exception to the owning PerL instance.
+         *
+         * @param id producer identifier reserved for channel implementations
+         * @param ex producer failure
+         */
+        public void sendException(int id, Throwable ex) {
+            eThrow.onException(ex);
+        }
+
+        @NotThreadSafe
+        private final class TimeStampMpscPerlChannel
+                implements PerlChannel {
+            private int wIndex;
+
+            private TimeStampMpscPerlChannel() {
+                this.wIndex = 0;
+            }
+
+            @Override
+            public void send(
+                    long startTime, long endTime, int records, int bytes) {
+                this.wIndex += 1;
+                if (this.wIndex >= maxQs) {
+                    this.wIndex = 0;
+                }
+                add(this.wIndex,
+                        new TimeStampNode(
+                                startTime, endTime, records, bytes));
+            }
+
+            @Override
+            public void throwException(Throwable ex) {
+                eThrow.onException(ex);
+            }
+        }
     }
 
     final private class OnError implements Throw {

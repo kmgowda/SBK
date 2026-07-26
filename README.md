@@ -220,7 +220,7 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-throughput MBPS` | Throughput target; `-1` requests maximum throughput |
 | `-sync N` | Records per flush/sync or transaction |
 | `-ro true` | With readers and writers configured, read without writing new records |
-| `-thread p\|f\|v` | Platform, fork-join, or virtual worker executor |
+| `-thread p\|f\|v` | Platform, fork-join, or virtual worker executor; default: virtual (`v`) |
 | `-out NAME` | Output logger, such as `SystemLogger`, `CSVLogger`, `WebLogger`, `PrometheusLogger`, or `GrpcLogger` |
 
 Always treat `-help` as authoritative because drivers and loggers add their own options at runtime.

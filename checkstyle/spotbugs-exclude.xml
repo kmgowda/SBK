@@ -57,6 +57,9 @@
             <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE" />
         </Or>
     </Match>
+    <Match> <!-- JCStress annotation processor output; handwritten stress states remain analyzed -->
+        <Class name="~.*_jcstress.*" />
+    </Match>
     <Match> <!-- due to JDK 21 and spot bugs version : 4.9.3 -->
         <Bug pattern="PA_PUBLIC_PRIMITIVE_ATTRIBUTE" />
     </Match>

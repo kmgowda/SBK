@@ -11,6 +11,7 @@ package io.sbk.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.micrometer.core.instrument.util.IOUtils;
+import io.perl.config.PerlConfig;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Benchmark;
@@ -70,6 +71,7 @@ import java.util.concurrent.TimeoutException;
  */
 final public class Sbk {
     final static String BANNERFILE = "banner.txt";
+    final static String CONFIGFILE = "sbk.properties";
 
     /**
      * Creates an SBK bootstrap helper.
@@ -166,6 +168,8 @@ final public class Sbk {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final RWLoggerPackage loggerStore = new RWLoggerPackage(sbkLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
+        final PerlConfig perlConfig = PerlConfig.build(
+                Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE));
         final Storage<Object> storageDevice;
         final InputParameterOptions params;
         final RWLogger rwLogger;
@@ -180,6 +184,7 @@ final public class Sbk {
         Printer.log.info("{} Website: " + Config.SBK_WEBSITE_NAME, Config.NAME.toUpperCase());
         Printer.log.info("Arguments List: {}", Arrays.toString(args));
         Printer.log.info("Java Runtime Version: {}", System.getProperty("java.runtime.version"));
+        Printer.log.info("PerL Timestamp Queue: {}", perlConfig.getTimestampQueueName());
         Printer.log.info("SBP Version Major: {}, Minor: {}", sbpVersion.major, sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: {}", sbkStoragePackageName);
         Printer.log.info("Logger Package: {}", sbkLoggerPackageName);

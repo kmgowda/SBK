@@ -23,6 +23,7 @@ import io.gem.logger.impl.GemPrometheusLogger;
 import io.gem.params.GemParameterOptions;
 import io.gem.params.impl.SbkGemParameters;
 import io.micrometer.core.instrument.util.IOUtils;
+import io.perl.config.PerlConfig;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
@@ -79,6 +80,7 @@ import java.util.concurrent.TimeoutException;
 final public class SbkGem {
     final static String CONFIG_FILE = "gem.properties";
     final static String SBM_CONFIG_FILE = "sbm.properties";
+    final static String SBK_CONFIG_FILE = "sbk.properties";
 
     final static String BANNER_FILE = "gem-banner.txt";
 
@@ -184,6 +186,8 @@ final public class SbkGem {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final GemLoggerPackage loggerStore = new GemLoggerPackage(gemLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
+        final PerlConfig perlConfig = PerlConfig.build(
+                SbkGem.class.getClassLoader().getResourceAsStream(SBK_CONFIG_FILE));
         final Storage<?> storageDevice;
         final String[] storageDrivers;
         final String[] nextArgs;
@@ -197,6 +201,7 @@ final public class SbkGem {
         Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactOptionValues(args,
                 new String[]{GemConfig.GEM_PASS_OPTION})));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        Printer.log.info("Remote SBK PerL Timestamp Queue: " + perlConfig.getTimestampQueueName());
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: " + sbkStoragePackageName);
         Printer.log.info(Config.SBK_APP_NAME + ": " + Objects.requireNonNullElse(sbkAppName, ""));

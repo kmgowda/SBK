@@ -32,6 +32,24 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
+sourceSets {
+    lincheck {
+        java.srcDir 'src/lincheck/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    jcstress {
+        java.srcDir 'src/jcstress/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    lincheckImplementation.extendsFrom testImplementation
+    lincheckRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     api "jakarta.annotation:jakarta.annotation-api:$javaxAnnotationVersion"
@@ -55,6 +73,9 @@ dependencies {
     testImplementation "org.openjdk.jmh:jmh-core:$jmhVersion"
     annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
     testImplementation "org.openjdk.jmh:jmh-core-benchmarks:$jmhVersion"
+    lincheckImplementation "org.jetbrains.lincheck:lincheck:$lincheckVersion"
+    jcstressImplementation "org.openjdk.jcstress:jcstress-core:$jcstressVersion"
+    jcstressAnnotationProcessor "org.openjdk.jcstress:jcstress-core:$jcstressVersion"
 }
 
 jmh {
@@ -64,6 +85,138 @@ jmh {
 
 def cqueuePerformanceReport = layout.buildDirectory.file(
         "reports/jmh/cqueue-performance.json")
+def timeStampQueuePerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/timestamp-queue-performance.json")
+
+tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks the intrusive TimeStamp MPSC queue against the JDK 25 queue.'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.perl.benchmark.TimeStampQueueBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', timeStampQueuePerformanceReport.get().asFile.absolutePath
+    outputs.file(timeStampQueuePerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        timeStampQueuePerformanceReport.get().asFile.parentFile.mkdirs()
+        delete timeStampQueuePerformanceReport
+    }
+}
+
+tasks.register('timeStampQueuePerformanceTest') {
+    group = 'verification'
+    description = 'Verifies intrusive timestamp latency, allocation, and MPSC progress on JDK 25.'
+    dependsOn tasks.named('runTimeStampQueuePerformanceBenchmark')
+
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                timeStampQueuePerformanceReport.get().asFile)
+        def byBenchmark = results.collectEntries { [(it.benchmark): it] }
+        def result = { String benchmark ->
+            def value = byBenchmark[benchmark]
+            if (value == null) {
+                throw new GradleException("Missing JMH result: ${benchmark}")
+            }
+            if (!value.jdkVersion.toString().startsWith('25')) {
+                throw new GradleException(
+                        "Timestamp queue verification requires JDK 25; found ${value.jdkVersion}")
+            }
+            value
+        }
+
+        def intrusiveRoundTrip = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark.intrusiveRoundTrip')
+        def jdkRoundTrip = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark.jdkRoundTrip')
+        def intrusiveLatency = intrusiveRoundTrip.primaryMetric
+        def jdkLatency = jdkRoundTrip.primaryMetric
+        def intrusiveAllocation =
+                intrusiveRoundTrip.secondaryMetrics['gc.alloc.rate.norm']
+        def jdkAllocation =
+                jdkRoundTrip.secondaryMetrics['gc.alloc.rate.norm']
+        def intrusiveMpsc = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark'
+                        + '.intrusiveFourProducersOneConsumer')
+                .secondaryMetrics.intrusiveProducer
+        def jdkMpsc = result(
+                'io.perl.benchmark.TimeStampQueueBenchmark'
+                        + '.jdkFourProducersOneConsumer')
+                .secondaryMetrics.jdkProducer
+
+        def latencyReduction = jdkLatency.score - intrusiveLatency.score
+        def latencyReductionPercent =
+                latencyReduction * 100.0 / jdkLatency.score
+        def allocationReduction =
+                jdkAllocation.score - intrusiveAllocation.score
+        def allocationReductionPercent =
+                allocationReduction * 100.0 / jdkAllocation.score
+        def throughputIncrease = intrusiveMpsc.score - jdkMpsc.score
+        def throughputIncreasePercent =
+                throughputIncrease * 100.0 / jdkMpsc.score
+
+        logger.lifecycle('Timestamp queue performance comparison '
+                + '(TimeStampMpscQueue vs JDK 25 ConcurrentLinkedQueue):')
+        logger.lifecycle(String.format(
+                '  Round-trip latency : %.3f vs %.3f ns/op'
+                        + ' -- TimeStampMpscQueue is %.3f ns/op (%.2f%%) %s',
+                intrusiveLatency.score, jdkLatency.score,
+                Math.abs(latencyReduction), Math.abs(latencyReductionPercent),
+                latencyReduction >= 0 ? 'lower (better)' : 'higher (worse)'))
+        logger.lifecycle(String.format(
+                '  Allocation        : %.3f vs %.3f B/op'
+                        + ' -- TimeStampMpscQueue allocates %.3f B/op (%.2f%%) %s',
+                intrusiveAllocation.score, jdkAllocation.score,
+                Math.abs(allocationReduction),
+                Math.abs(allocationReductionPercent),
+                allocationReduction >= 0 ? 'less (better)' : 'more (worse)'))
+        logger.lifecycle(String.format(
+                '  MPSC throughput   : %.0f vs %.0f ops/s'
+                        + ' -- TimeStampMpscQueue is %.0f ops/s (%.2f%%) %s',
+                intrusiveMpsc.score, jdkMpsc.score,
+                Math.abs(throughputIncrease),
+                Math.abs(throughputIncreasePercent),
+                throughputIncrease >= 0 ? 'higher (better)' : 'lower (worse)'))
+        logger.lifecycle(String.format(
+                '  MPSC 99.9%% CI     : [%.0f, %.0f] vs [%.0f, %.0f] ops/s'
+                        + ' (diagnostic; host noise can make intervals overlap)',
+                intrusiveMpsc.scoreConfidence[0],
+                intrusiveMpsc.scoreConfidence[1],
+                jdkMpsc.scoreConfidence[0],
+                jdkMpsc.scoreConfidence[1]))
+        logger.lifecycle(
+                "JMH report: ${timeStampQueuePerformanceReport.get().asFile}")
+
+        if (intrusiveLatency.score >= jdkLatency.score) {
+            throw new GradleException(String.format(
+                    'TimeStampMpscQueue latency %.3f ns/op is not below '
+                            + 'ConcurrentLinkedQueue latency %.3f ns/op',
+                    intrusiveLatency.score, jdkLatency.score))
+        }
+        if (intrusiveAllocation.score > jdkAllocation.score - 8.0) {
+            throw new GradleException(String.format(
+                    'TimeStampMpscQueue allocation %.3f B/op does not remove '
+                            + 'a ConcurrentLinkedQueue node from %.3f B/op',
+                    intrusiveAllocation.score, jdkAllocation.score))
+        }
+        if (intrusiveMpsc.score <= jdkMpsc.score * 1.02) {
+            throw new GradleException(String.format(
+                    'TimeStampMpscQueue MPSC throughput %.0f ops/s is not at '
+                            + 'least 2%% higher than ConcurrentLinkedQueue '
+                            + 'throughput %.0f ops/s',
+                    intrusiveMpsc.score, jdkMpsc.score))
+        }
+        logger.lifecycle('Timestamp queue performance verification: PASSED')
+    }
+}
 
 tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'
@@ -183,8 +336,95 @@ tasks.register('cqueueGcTest', JavaExec) {
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError'
 }
 
+tasks.register('timeStampMpscQueueGcTest', JavaExec) {
+    group = 'verification'
+    description = 'Verifies intrusive TimeStamp MPSC reclamation in a constrained 32 MB JVM.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.perl.api.impl.TimeStampMpscQueueGcSoak'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError',
+            '-XX:-DisableExplicitGC'
+    shouldRunAfter tasks.named('test')
+}
+
 tasks.named('check') {
     dependsOn tasks.named('cqueueGcTest')
+    dependsOn tasks.named('timeStampMpscQueueGcTest')
+}
+
+tasks.register('lincheckTest', Test) {
+    group = 'verification'
+    description = 'Checks TimeStampMpscQueue linearizability with Lincheck.'
+    testClassesDirs = sourceSets.lincheck.output.classesDirs
+    classpath = sourceSets.lincheck.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
+    shouldRunAfter tasks.named('timeStampMpscQueueGcTest')
+}
+
+def jcstressWorkDirectory = layout.buildDirectory.dir('jcstress')
+def jcstressReportDirectory = layout.buildDirectory.dir(
+        'reports/jcstress')
+
+tasks.register('jcstressJar', Jar) {
+    group = 'build'
+    description = 'Builds the self-contained JCStress test harness.'
+    dependsOn tasks.named('jcstressClasses')
+    archiveClassifier = 'jcstress'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'org.openjdk.jcstress.Main'
+    }
+    from sourceSets.main.output
+    from sourceSets.jcstress.output
+    from {
+        configurations.jcstressRuntimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+}
+
+tasks.register('jcstress', JavaExec) {
+    group = 'verification'
+    description = 'Checks TimeStampMpscQueue Java Memory Model outcomes with JCStress.'
+    dependsOn tasks.named('jcstressJar')
+    classpath = files(tasks.named('jcstressJar').flatMap {
+        it.archiveFile
+    })
+    mainClass = 'org.openjdk.jcstress.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    args '-m', 'quick',
+            '-t', 'io.perl.api.impl.TimeStampMpscQueue.*Stress',
+            '-r', jcstressReportDirectory.get().asFile.absolutePath
+    workingDir jcstressWorkDirectory
+    outputs.dir(jcstressReportDirectory)
+    outputs.upToDateWhen { false }
+    doFirst {
+        jcstressWorkDirectory.get().asFile.mkdirs()
+        delete jcstressReportDirectory
+    }
+    shouldRunAfter tasks.named('lincheckTest')
+    shouldRunAfter tasks.named('test')
+    shouldRunAfter tasks.named('timeStampMpscQueueGcTest')
+}
+
+tasks.register('concurrencyCheck') {
+    group = 'verification'
+    description = 'Runs unit, reclamation, Lincheck, and JCStress queue verification.'
+    dependsOn tasks.named('test')
+    dependsOn tasks.named('timeStampMpscQueueGcTest')
+    dependsOn tasks.named('lincheckTest')
+    dependsOn tasks.named('jcstress')
+    dependsOn tasks.named('checkstyleLincheck')
+    dependsOn tasks.named('checkstyleJcstress')
 }
 
 tasks.register('updateDocs') {

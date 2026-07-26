@@ -195,14 +195,15 @@ In practice that means:
    precision. Invalid and out-of-range values are counted separately rather
    than silently treated as valid samples (§3).
 
-2. **Measurement hand-off uses non-blocking queues.** Worker threads submit
-   timestamp records through Java `ConcurrentLinkedQueue` instances. There is
-   no application-level mutex in this producer/consumer hand-off. PerL shards
-   traffic across an array of queues to reduce contention, while a single
-   recorder owns each latency window. Lock-free does not mean zero cost:
-   enqueue/dequeue operations can retry CAS instructions, and queue nodes plus
-   `TimeStamp` records allocate. It does mean that progress does not depend on
-   another thread releasing a lock (§3).
+2. **Measurement hand-off uses intrusive non-blocking queues.** By default,
+   worker threads submit `TimeStampNode` records through PerL's specialized
+   multiple-producer, single-consumer queues. One object is both timestamp and
+   linked node, avoiding the separate wrapper allocated by a general-purpose
+   `ConcurrentLinkedQueue`. PerL shards traffic across an array of queues to
+   reduce contention, while a single recorder owns each latency window.
+   `MpscQueueEnable=false` restores the JDK queue path for compatibility and
+   comparison. Lock-free does not mean zero cost: enqueue can retry a CAS, but
+   progress does not depend on another thread releasing a lock (§3).
 
 3. **The framework is its own ecosystem.** **PerL** (Performance Logger,
    the latency library) is a reusable Java library independent of SBK;
@@ -386,7 +387,7 @@ flowchart LR
         WN["Worker N"]
     end
 
-    subgraph QUEUES["Lock-free concurrent queues<br/>ConcurrentLinkedQueueArray"]
+    subgraph QUEUES["Lock-free concurrent queues<br/>TimeStampMpscQueueArray"]
         Q1["Queue 0"]
         Q2["Queue 1"]
         QN["Queue M-1"]
@@ -429,9 +430,11 @@ flowchart LR
 ties everything together. On construction it:
 
 ```java
-this.channels = new CQueueChannel[this.index];   // N concurrent channels
+this.channels = new Channel[this.index];   // N concurrent channels
 for (int i = 0; i < channels.length; i++) {
-    channels[i] = new CQueueChannel(maxQs, new OnError());
+    channels[i] = perlConfig.mpscQueueEnable
+            ? new TimeStampMpscQueueChannel(maxQs, new OnError())
+            : new CQueueChannel(maxQs, new OnError());
 }
 this.perlReceiver = new PerformanceRecorderIdleBusyWait(   // ...or *IdleSleep
         periodicRecorder, channels, time, reportingIntervalMS, idleNS);
@@ -442,13 +445,13 @@ proxy)** to each newly-spawned worker, rotating round-robin through the
 array. A worker calls `perlChannel.send(startTime, endTime, records,
 bytes)` on its hot path — that's the *only* thing it has to do.
 
-Each `CQueueChannel` is implemented as a
-`ConcurrentLinkedQueueArray` — an array of Java
-`ConcurrentLinkedQueue` instances. Enqueue and dequeue are
-**non-blocking queue operations**: the hand-off does not acquire an
-application mutex or monitor. The JDK implementation uses CAS and can retry
-under contention, so “lock-free” is a progress guarantee rather than a claim
-that each call executes exactly one atomic instruction.
+The two channel implementations remain independent.
+`TimeStampMpscQueueChannel` extends `TimeStampMpscQueueArray`; every element is
+a `TimeStampNode`, derived from `TimeStamp`, with its queue link in the same
+object. The original `CQueueChannel` continues to extend
+`ConcurrentLinkedQueueArray<TimeStamp>` unchanged. `MpscQueueEnable` selects
+which channel class is constructed. Both provide **non-blocking queue
+operations** without an application mutex or monitor.
 
 The array-of-queues design is the scaling layer. `CQueuePerl` normally
 creates one channel per configured worker. Each channel contains
@@ -459,9 +462,10 @@ tail locations as worker count grows and reduces the chance that many cores
 continually update one queue. `maxQs`, when non-zero, changes the topology to
 a configured total queue count instead of the per-worker default.
 
-The producer still allocates a `TimeStamp`, and `ConcurrentLinkedQueue` may
-allocate an internal node. This is a deliberate exchange: small short-lived
-objects and non-blocking hand-off keep percentile calculation, sorting, and
+The default producer allocates exactly one `TimeStampNode` per measurement.
+The fallback allocates a `TimeStamp`, and `ConcurrentLinkedQueue` allocates
+its internal node. The intrusive path therefore removes one young-generation
+object per operation while keeping percentile calculation, sorting, and
 logger I/O out of the storage-operation call path.
 
 The two-level topology is easy to miss in code. With two workers and the
@@ -469,8 +473,8 @@ default `qPerWorker=10`, the conceptual layout is:
 
 ```mermaid
 flowchart LR
-    W1["Worker 1<br/>private PerlChannel"] --> C1["CQueueChannel 1"]
-    W2["Worker 2<br/>private PerlChannel"] --> C2["CQueueChannel 2"]
+    W1["Worker 1<br/>private PerlChannel"] --> C1["Queue Channel 1"]
+    W2["Worker 2<br/>private PerlChannel"] --> C2["Queue Channel 2"]
 
     subgraph A1["Queue array inside channel 1"]
         Q10["q0"]
@@ -638,69 +642,81 @@ interval.
 ##### The mechanism
 
 `ElasticWait.waitAndCheck()`, called inside the recorder's idle path,
-does just three things:
+does just two things:
 
 ```java
 public boolean waitAndCheck() {
-    LockSupport.parkNanos(idleNS);   // park for ~idleNS ns
+    idleStrategy.accept(idleNS);     // production strategy: LockSupport.parkNanos
     idleCount++;
-    totalCount++;
-    return idleCount > elasticCount; // true ⇒ "now it's time to check the clock"
+    return idleCount >= elasticCount; // true means: sample the clock now
 }
 ```
 
-No clock call. Just a park and two counter increments. The recorder's
+No clock call and no processor-speed-dependent instruction loop. Just a park
+and a counter increment. The recorder's
 idle loop becomes:
 
 ```java
 while (queueEmpty()) {
-    if (idleWait.waitAndCheck()) {                  // park + count
-        long now = time.getCurrentTime();           // <-- ONE clock call per batch
+    if (idleWait.waitAndCheck()) {            // park + count
+        long now = time.getCurrentTime();      // one clock call per batch
         long elapsed = now - windowStart;
-        if (elapsed > windowIntervalMS) {
+        if (elapsed >= windowIntervalMS) {
             rotateWindow();
-            idleWait.setElastic(elapsed);           // recalibrate elasticCount
+            idleWait.setElastic(elapsed);      // calibrate and start a new window
         } else {
-            idleWait.updateElastic(elapsed);        // refine
+            idleWait.updateElastic(elapsed);  // calibrate and clear this batch
         }
-        idleWait.reset();                           // restart batch
     }
 }
 ```
 
 So instead of *N* clock calls for *N* empty-queue parks, PerL normally makes
-one clock call after an adaptive batch. At construction:
+one clock call after an adaptive batch. At construction it computes only a
+safe upper bound for bootstrap calibration:
 
 ```text
-countRatio    = 1_000_000 ns per ms / idleNS
-minIdleCount  = countRatio * minIntervalMS
-elasticCount  = minIdleCount
+nominalWaitsPerMillisecond = 1_000_000 ns per ms / idleNS
+maximumCalibrationCount   = nominalWaitsPerMillisecond * calibrationIntervalMS
+elasticCount              = 1
 ```
 
-With the configured `idleNS=1_000_000`, `countRatio` starts at `1`. With the
-minimum `idleNS=1_000`, it starts at `1_000`. These are target counts derived
-from requested park time; `LockSupport.parkNanos` may oversleep, so the code
-later calibrates from observed elapsed time rather than assuming ideal timer
-resolution.
+The first clock check therefore occurs after one park. If a coarse clock has
+not advanced, the probe grows as `1, 2, 4, 8, ...` up to the bootstrap bound.
+This needs only logarithmically many clock checks and avoids assuming that a
+requested 1 microsecond or 1 millisecond park really consumes that duration.
 
 ##### The calibration loop
 
-`elasticCount` adapts to reality at runtime. The two updater methods
-work like this:
+`elasticCount` adapts to measured wait throughput at runtime. A successful
+sample computes:
+
+```text
+observedWaitsPerMillisecond = parksInThisBatch / elapsedMilliseconds
+```
+
+Later observations use a weighted moving average so that a temporary
+scheduler pause does not completely replace the established estimate. The
+two updater methods work like this:
 
 | Method | When called | What it does |
 |---|---|---|
-| `setElastic(actualElapsedMs)` | After a window rotation | Sets `elasticCount = (totalCount × windowIntervalMS) / actualElapsedMs`. I.e., "given we managed `totalCount` parks in `actualElapsedMs` ms, how many parks would fit in `windowIntervalMS`?" |
-| `updateElastic(elapsedMs)` | After a clock check that did *not* rotate the window | Sets `elasticCount = countRatio × (windowIntervalMS - elapsedMs)`. I.e., "we're partway through the window; aim the next check at the remaining time." |
+| `setElastic(actualElapsedMs)` | After a window rotation | Learns from only the just-completed batch, clears all window-local counters, and schedules the next check using `measuredRate × windowIntervalMS`. |
+| `updateElastic(elapsedMs)` | After a clock check that did *not* rotate the window | Learns from only the parks since the previous clock check, clears that batch, and schedules the next check using `measuredRate × remainingWindowMs`. |
 
-The `countRatio = NS_PER_MS / idleNS` is constant for a given configuration;
-its numeric value is not constant across configurations. The calibration is
-self-correcting: if `LockSupport` oversleeps, `setElastic` uses the observed
-park throughput to estimate the next batch size.
+The learned rate, rather than the requested park duration, is retained across
+reporting windows. Batch counters and elapsed-window state are never retained
+across a rotation. This prevents a busy or partially idle old window from
+inflating the next window's threshold.
 
-There is also a floor — `minIdleCount` — so that pathological
-clock-resolution issues can never make `elasticCount` collapse to
-zero (which would re-introduce the megahertz clock-query loop).
+Every computed threshold is clamped to at least one and saturates at
+`Long.MAX_VALUE`. Consequently, unusual clock resolution, very slow hosts,
+very fast hosts, and arithmetic overflow cannot create a zero-count
+clock-query loop.
+
+This design does not use a CPU frequency, MIPS value, or a fixed number of
+Java instructions. It measures the behavior that matters: how many configured
+parks this JVM completes per millisecond on the current OS and hardware.
 
 ##### The second optimisation: reuse worker timestamps
 
@@ -712,7 +728,7 @@ for (Channel ch : channels) {
     if (t != null) {
         ctime = t.endTime;              // <-- the WORKER's timestamp, NOT a new clock call
         recorder.record(t.startTime, t.endTime, ...);
-        if (recorder.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
+        if (recorder.elapsedMilliSecondsWindow(ctime) >= windowIntervalMS) {
             recorder.stopWindow(ctime); ...
         }
     }
@@ -751,9 +767,9 @@ sequenceDiagram
     participant C as System clock
 
     Note over W,C: Phase 1 - queue has work
-    W->>C: now() — start
+    W->>C: now() -- start
     W->>W: do I/O
-    W->>C: now() — end
+    W->>C: now() -- end
     W->>Q: TimeStamp(start, end, ...)
     Q-->>R: poll() returns TimeStamp
     Note over R: ctime = t.endTime<br/>(NO clock call here)
@@ -808,6 +824,7 @@ The defaults in
 maxArraySizeMB=64           # Use Array backend if latency range fits
 maxHashMapSizeMB=192        # Periodic window HashMap budget
 totalMaxHashMapSizeMB=256   # Total window HashMap budget
+MpscQueueEnable=true        # One-object intrusive MPSC timestamp hand-off
 histogram=false             # Optional HdrHistogram for total window
 csv=false                   # Optional raw-CSV total backend
 csvFileSizeGB=1
@@ -835,7 +852,7 @@ results.
 sequenceDiagram
     autonumber
     participant Worker as Worker thread<br/>(producer)
-    participant Channel as CQueueChannel<br/>(lock-free queue)
+    participant Channel as "Selected Queue Channel<br/>(lock-free queue)"
     participant Rec as PerformanceRecorder<br/>(single consumer)
     participant Per as Periodic window<br/>(every 5s)
     participant Tot as Total window<br/>(whole run)
@@ -873,12 +890,13 @@ at the end, and may also be flushed/reset if its configured storage fills.
 
 Six concrete reasons, traceable to specific code:
 
-1. **Non-blocking hand-off.** `CQueueChannel.send()` delegates to a
-   `ConcurrentLinkedQueue`; progress does not depend on a mutex owner, though
-   CAS retries and allocation are still possible.
-2. **Small producer-side record.** The producer creates a `TimeStamp`, and
-   the JDK queue may create a node. Percentile computation and logger I/O stay
-   on the recorder side.
+1. **Non-blocking hand-off.** `TimeStampMpscQueueChannel.send()` delegates to
+   an intrusive `TimeStampMpscQueue`; progress does not depend on a mutex
+   owner, though CAS retries are still possible. The original
+   `CQueueChannel` remains the JDK fallback.
+2. **One producer-side allocation.** The producer creates a
+   `TimeStampNode`, which is also the queue node. Percentile computation and
+   logger I/O stay on the recorder side.
 3. **One consumer.** A single recorder thread eliminates contention on
    the windows; no synchronisation is needed because only one thread
    ever reads the queue and writes to the histogram.
@@ -1095,10 +1113,10 @@ Three things to notice:
    readers are configured. Each instance owns its channels, recorder, and
    windows, while both use the same `RWLogger` and the benchmark's shared
    five-thread `perlExecutor`.
-2. **Thread model is selectable at runtime.** `-thread v` selects a fixed
-   executor whose workers are virtual threads; `-thread f` selects a
-   `ForkJoinPool`; `-thread p` (the default) selects a fixed platform-thread
-   pool. The pool size is `writers + readers + 23`, providing capacity for
+2. **Thread model is selectable at runtime.** Virtual worker threads are used
+   by default. `-thread v` selects them explicitly; `-thread f` selects a
+   `ForkJoinPool`; and `-thread p` selects a fixed platform-thread pool. The
+   pool size is `writers + readers + 23`, providing capacity for
    worker and coordination tasks. More workers can expose more storage and
    CPU parallelism, but useful scaling ends when the driver, storage target,
    recorder, network, memory allocator, or CPU becomes saturated.
@@ -1888,16 +1906,17 @@ acknowledged, committed, flushed, or end-to-end consumed).
 See the two-level channel/queue topology in §3.3 Pillar 1. It shows why adding
 workers also adds queue shards instead of directing every worker to one queue.
 
-`ConcurrentLinkedQueue` removes application-level mutex ownership from the
-worker-to-recorder hand-off. `ConcurrentLinkedQueueArray` then distributes
-traffic over several queues instead of one shared head/tail pair. With the
-default topology, worker count increases the number of channels and each
-channel contains 10 queues. This is how PerL avoids turning one central queue
-into the first point of contention as more producer tasks run on more cores.
+`TimeStampMpscQueue` removes application-level mutex ownership from the
+worker-to-recorder hand-off and combines timestamp plus link in one object.
+`TimeStampMpscQueueArray` distributes traffic over several queues instead of
+one shared head/tail pair. With the default topology, worker count increases
+the number of channels and each channel contains 10 queues. This is how PerL
+avoids turning one central queue into the first point of contention as more
+producer tasks run on more cores.
 
-This is not cost-free: `TimeStamp` and queue-node allocation add GC pressure,
-and CAS may retry. Queue sharding reduces contention; it does not abolish CPU,
-memory, or scheduler limits.
+This is not cost-free: one `TimeStampNode` still allocates for every
+measurement, and CAS may retry. Queue sharding reduces contention; it does not
+abolish CPU, memory, or scheduler limits.
 
 ### 8.3 Scale the worker stage with CPU and I/O concurrency
 
@@ -2469,7 +2488,7 @@ sequenceDiagram
     Note over Bench: timeoutExecutor fires at t=60s
     Bench->>Bench: stop()
     Bench->>PerlW: writePerl.stop()
-    PerlW->>PerlW: shutdown() -- send END sentinel<br/>to all CQueueChannels
+    PerlW->>PerlW: shutdown() -- send END sentinel<br/>to all queue channels
     Note over PerlW: recorder loop sees TimeStamp.isEnd()<br/>then exits while(doWork) loop
     PerlW->>Win: periodicRecorder.stop(tN)
     Win->>Log: printTotal(...)<br/>(final aggregated line)
@@ -2771,7 +2790,7 @@ SBK is the right substrate.
 | Property | What it gives you | Code evidence |
 |---|---|---|
 | **No reservoir sampling** | Every completed operation submitted to PerL contributes its count; invalid and out-of-range values remain visible as counters. Precision still depends on time unit, range, and backend. | `HashMapLatencyRecorder` and `ArrayLatencyRecorder` implement exact integer buckets; HDR uses three significant digits. |
-| **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `CQueueChannel.send()` delegates to `ConcurrentLinkedQueueArray.add()`. |
+| **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `TimeStampMpscQueueChannel` uses `TimeStampMpscQueueArray`; the original `CQueueChannel` uses `ConcurrentLinkedQueueArray`. |
 | **Single-owner recording** | One consumer owns each direction's non-thread-safe windows, avoiding concurrent bucket updates. Its drain rate remains a capacity limit to monitor. | `PerformanceRecorderIdleBusyWait.run()` reads all channels for one PerL instance. |
 | **Amortised recorder clock checks** | Records carry worker timestamps; the empty path parks and checks time after an adaptive batch instead of on every poll. | `ElasticWait` plus `PerformanceRecorderIdleBusyWait`. |
 | **Shared harness across vendors** | Driver comparisons reuse orchestration, timing interfaces, PerL, and logger contracts. Equivalent durability/completion and SDK settings still require experimental control. | `Sbk`, `SbkBenchmark`, `SbkWriter`, and `SbkReader`. |
