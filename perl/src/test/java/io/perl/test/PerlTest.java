@@ -179,6 +179,10 @@ public class PerlTest {
                 new ByteArrayInputStream(disabled));
         assertFalse(fallback.mpscQueueEnable,
                 "The property must select the JDK queue fallback");
+        assertEquals("TimeStampMpscQueue (MPSC)",
+                PerlConfig.build().getTimestampQueueName());
+        assertEquals("ConcurrentLinkedQueue (JDK)",
+                fallback.getTimestampQueueName());
     }
 
     @Test

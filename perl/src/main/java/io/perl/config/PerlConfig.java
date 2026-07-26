@@ -120,6 +120,17 @@ final public class PerlConfig extends LatencyConfig {
     }
 
     /**
+     * Return the timestamp queue selected by this configuration.
+     *
+     * @return human-readable queue implementation and concurrency model
+     */
+    public String getTimestampQueueName() {
+        return mpscQueueEnable
+                ? "TimeStampMpscQueue (MPSC)"
+                : "ConcurrentLinkedQueue (JDK)";
+    }
+
+    /**
      * Build configuration by loading the default {@code perl.properties} from the classpath.
      *
      * @return PerlConfig - build(PerlConfig.class.getClassLoader().getResourceAsStream(CONFIGFILE));
