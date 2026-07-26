@@ -69,6 +69,7 @@ import java.util.stream.IntStream;
  */
 final public class SbkBenchmark implements Benchmark {
     final private static String CONFIGFILE = "sbk.properties";
+    final private static long FORCED_SHUTDOWN_GRACE_SECONDS = 3;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
     final private Time time;
@@ -86,6 +87,9 @@ final public class SbkBenchmark implements Benchmark {
 
     @GuardedBy("this")
     private State state;
+
+    @GuardedBy("this")
+    private boolean shutdownRequested;
 
     /**
      * Create SBK Benchmark.
@@ -138,11 +142,13 @@ final public class SbkBenchmark implements Benchmark {
             readPerl = null;
         }
 
-        timeoutExecutor = Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
+        timeoutExecutor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+                .name("sbk-benchmark-deadline").daemon(true).factory());
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();
         readers = new ArrayList<>();
         state = State.BEGIN;
+        shutdownRequested = false;
     }
 
     /**
@@ -245,11 +251,6 @@ final public class SbkBenchmark implements Benchmark {
         if (sbkWriters != null) {
             writeFutures = new ArrayList<>();
 
-            final long recordsPerWriter = params.getTotalSecondsToRun() <= 0 ?
-                    params.getTotalRecords() / params.getWritersCount() : 0;
-            final long delta = recordsPerWriter > 0 ?
-                    params.getTotalRecords() - (recordsPerWriter * params.getWritersCount()) : 0;
-
             writersCB = CompletableFuture.runAsync(() -> {
                 long secondsToRun = params.getTotalSecondsToRun();
                 boolean doWork = true;
@@ -259,8 +260,8 @@ final public class SbkBenchmark implements Benchmark {
                     for (int j = 0; j < stepCnt; j++) {
                         try {
                             CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
-                                    i + j + 1 == params.getWritersCount() ?
-                                            recordsPerWriter + delta : recordsPerWriter);
+                                    recordsForWorker(params.getTotalRecords(),
+                                            params.getWritersCount(), i + j));
                             writeFutures.add(ret);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -277,7 +278,9 @@ final public class SbkBenchmark implements Benchmark {
                                 }
                             }
                         } catch (InterruptedException ex) {
-                            ex.printStackTrace();
+                            Thread.currentThread().interrupt();
+                            Printer.log.info("Writer ramp-up interrupted at benchmark deadline");
+                            return;
                         }
                     }
                 }
@@ -301,11 +304,6 @@ final public class SbkBenchmark implements Benchmark {
         if (sbkReaders != null) {
             readFutures = new ArrayList<>();
 
-            final long recordsPerReader = params.getTotalSecondsToRun() <= 0 ?
-                    params.getTotalRecords() / params.getReadersCount() : 0;
-            final long delta = recordsPerReader > 0 ?
-                    params.getTotalRecords() - (recordsPerReader * params.getReadersCount()) : 0;
-
             readersCB = CompletableFuture.runAsync(() -> {
                 long secondsToRun = params.getTotalSecondsToRun();
                 boolean doWork = true;
@@ -314,8 +312,9 @@ final public class SbkBenchmark implements Benchmark {
                     int stepCnt = Math.min(params.getReadersStep(), params.getReadersCount() - i);
                     for (int j = 0; j < stepCnt; j++) {
                         try {
-                            CompletableFuture<Void> ret = sbkReaders.get(i + j).run(secondsToRun, i + j + 1 == params.getReadersCount() ?
-                                    recordsPerReader + delta : recordsPerReader);
+                            CompletableFuture<Void> ret = sbkReaders.get(i + j).run(secondsToRun,
+                                    recordsForWorker(params.getTotalRecords(),
+                                            params.getReadersCount(), i + j));
                             readFutures.add(ret);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -332,7 +331,9 @@ final public class SbkBenchmark implements Benchmark {
                                 }
                             }
                         } catch (InterruptedException ex) {
-                            ex.printStackTrace();
+                            Thread.currentThread().interrupt();
+                            Printer.log.info("Reader ramp-up interrupted at benchmark deadline");
+                            return;
                         }
                     }
                 }
@@ -362,8 +363,10 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (params.getTotalSecondsToRun() > 0) {
-            timeoutExecutor.schedule(() -> requestShutdown(null),
-                    params.getTotalSecondsToRun() + 1, TimeUnit.SECONDS);
+            timeoutExecutor.schedule(this::requestTimedShutdown,
+                    params.getTotalSecondsToRun(), TimeUnit.SECONDS);
+            timeoutExecutor.schedule(this::forceTimedCompletion,
+                    params.getTotalSecondsToRun() + FORCED_SHUTDOWN_GRACE_SECONDS, TimeUnit.SECONDS);
         }
 
         if (wStatFuture != null && !wStatFuture.isDone()) {
@@ -405,10 +408,35 @@ final public class SbkBenchmark implements Benchmark {
      */
     @Synchronized
     private void requestShutdown(Throwable ex) {
-        if (state == State.END || lifecycleExecutor.isShutdown()) {
+        if (state == State.END || shutdownRequested || lifecycleExecutor.isShutdown()) {
             return;
         }
+        shutdownRequested = true;
         lifecycleExecutor.execute(() -> shutdown(ex));
+    }
+
+    /**
+     * Stops worker admission at the configured deadline and starts bounded cleanup.
+     */
+    private void requestTimedShutdown() {
+        executor.shutdownNow();
+        requestShutdown(null);
+    }
+
+    /**
+     * Releases the application after the timed-run cleanup grace period.
+     *
+     * <p>The executable main methods call {@code System.exit} after this future completes,
+     * so a driver or SDK blocked in close cannot extend a timed run indefinitely.
+     */
+    private void forceTimedCompletion() {
+        if (retFuture.complete(null)) {
+            Printer.log.warn("SBK timed benchmark cleanup exceeded "
+                    + FORCED_SHUTDOWN_GRACE_SECONDS + " seconds; forcing application exit");
+            executor.shutdownNow();
+            perlExecutor.shutdownNow();
+            lifecycleExecutor.shutdownNow();
+        }
     }
 
     /**
@@ -425,8 +453,10 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         state = State.END;
-        timeoutExecutor.shutdownNow();
         executor.shutdownNow();
+        if (params.getTotalSecondsToRun() > 0) {
+            stopPerformanceRecorders();
+        }
         readers.forEach(c -> {
             try {
                 c.close();
@@ -441,11 +471,8 @@ final public class SbkBenchmark implements Benchmark {
                 Printer.log.warn("Unable to close an SBK writer during shutdown", e);
             }
         });
-        if (writePerl != null) {
-            writePerl.stop();
-        }
-        if (readPerl != null) {
-            readPerl.stop();
+        if (params.getTotalSecondsToRun() <= 0) {
+            stopPerformanceRecorders();
         }
         try {
             storage.closeStorage(params);
@@ -467,8 +494,40 @@ final public class SbkBenchmark implements Benchmark {
             Printer.log.info("SBK Benchmark Shutdown");
             retFuture.complete(null);
         }
+        timeoutExecutor.shutdownNow();
         lifecycleExecutor.shutdown();
 
+    }
+
+    private void stopPerformanceRecorders() {
+        if (writePerl != null) {
+            writePerl.stop();
+        }
+        if (readPerl != null) {
+            readPerl.stop();
+        }
+    }
+
+    /**
+     * Returns the fixed-count share assigned to one worker.
+     *
+     * <p>The first {@code totalRecords % workersCount} workers receive one additional
+     * record, so every requested record is assigned exactly once, including when there
+     * are fewer records than workers.
+     *
+     * @param totalRecords total records requested by the user
+     * @param workersCount number of workers
+     * @param workerIndex zero-based worker index
+     * @return this worker's record count
+     * @throws IllegalArgumentException if the worker count or index is invalid
+     */
+    static long recordsForWorker(long totalRecords, int workersCount, int workerIndex) {
+        if (workersCount <= 0 || workerIndex < 0 || workerIndex >= workersCount) {
+            throw new IllegalArgumentException("Invalid worker count or index");
+        }
+        long recordsPerWorker = totalRecords / workersCount;
+        long remainder = totalRecords % workersCount;
+        return recordsPerWorker + (workerIndex < remainder ? 1 : 0);
     }
 
 

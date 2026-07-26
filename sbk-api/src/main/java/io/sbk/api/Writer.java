@@ -193,13 +193,15 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
             perlChannel.send(status.startTime, status.endTime, status.records, size);
         } else {
             final long beginTime = status.startTime;
-            ret.exceptionally(ex -> {
-                perlChannel.throwException(ex);
-                return null;
-            });
-            ret.thenAccept(d -> {
-                final long endTime = time.getCurrentTime();
-                perlChannel.send(beginTime, endTime, status.records, size);
+            final int completedRecords = status.records;
+            final int completedBytes = status.bytes;
+            ret.whenComplete((ignored, ex) -> {
+                if (ex == null) {
+                    final long endTime = time.getCurrentTime();
+                    perlChannel.send(beginTime, endTime, completedRecords, completedBytes);
+                } else {
+                    perlChannel.throwException(ex);
+                }
             });
         }
     }
@@ -233,17 +235,17 @@ public non-sealed interface Writer<T> extends DataRecordsWriter<T> {
             perlChannel.send(status.startTime, status.endTime, status.records, size);
         } else {
             final long beginTime = status.startTime;
-            ret.exceptionally(ex -> {
-                if (ex instanceof TimeoutException) {
-                    logger.recordWriteTimeoutEvents(id, status.startTime, 1);
+            final int completedRecords = status.records;
+            final int completedBytes = status.bytes;
+            ret.whenComplete((ignored, ex) -> {
+                if (ex == null) {
+                    final long endTime = time.getCurrentTime();
+                    perlChannel.send(beginTime, endTime, completedRecords, completedBytes);
+                } else if (ex instanceof TimeoutException) {
+                    logger.recordWriteTimeoutEvents(id, beginTime, 1);
                 } else {
                     perlChannel.throwException(ex);
                 }
-                return null;
-            });
-            ret.thenAccept(d -> {
-                final long endTime = time.getCurrentTime();
-                perlChannel.send(beginTime, endTime, status.records, size);
             });
         }
     }

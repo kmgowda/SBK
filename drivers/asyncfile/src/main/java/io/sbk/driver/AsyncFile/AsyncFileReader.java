@@ -33,6 +33,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
     final private ParameterOptions params;
     final private AsynchronousFileChannel in;
     final private AtomicBoolean isEOF;
+    final private AsyncFileOperations operations;
     private long pos;
 
     public AsyncFileReader(int id, ParameterOptions params, String fileName) throws IOException {
@@ -41,6 +42,7 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
         this.in = AsynchronousFileChannel.open(Paths.get(fileName), StandardOpenOption.READ);
         this.pos = 0;
         this.isEOF = new AtomicBoolean(false);
+        this.operations = new AsyncFileOperations();
     }
 
     @Override
@@ -53,26 +55,41 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
     public void recordRead(DataType<ByteBuffer> dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final long ctime = time.getCurrentTime();
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
-        in.read(buffer, pos, buffer,
-                new CompletionHandler<Integer, ByteBuffer>() {
+        status.startTime = ctime;
+        status.endTime = ctime;
+        status.bytes = size;
+        status.records = 1;
+        operations.submitted();
+        try {
+            in.read(buffer, pos, buffer,
+                    new CompletionHandler<Integer, ByteBuffer>() {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
-                        final long endTime = time.getCurrentTime();
-                        if (result <= 0 && !isEOF.get()) {
-                            isEOF.set(true);
-                            perlChannel.throwException(new EOFException());
-                        } else {
-                            perlChannel.send(ctime, endTime, 1, result);
+                        try {
+                            final long endTime = time.getCurrentTime();
+                            if (result <= 0 && !isEOF.get()) {
+                                isEOF.set(true);
+                                perlChannel.throwException(new EOFException());
+                            } else {
+                                perlChannel.send(ctime, endTime, 1, result);
+                            }
+                        } finally {
+                            operations.completed();
                         }
                     }
 
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
+                        operations.failed(ex);
                         if (!isEOF.get()) {
                             perlChannel.throwException(ex);
                         }
                     }
-                });
+                    });
+        } catch (RuntimeException ex) {
+            operations.failed(ex);
+            throw ex;
+        }
         pos += dType.length(buffer);
     }
 
@@ -80,32 +97,48 @@ public class AsyncFileReader implements Reader<ByteBuffer> {
     @Override
     public void recordReadTime(DataType<ByteBuffer> dType, int size, Time time, Status status, PerlChannel perlChannel) throws IOException {
         final ByteBuffer buffer = dType.allocate(params.getRecordSize());
-        in.read(buffer, pos, buffer,
-                new CompletionHandler<Integer, ByteBuffer>() {
+        status.startTime = time.getCurrentTime();
+        status.endTime = status.startTime;
+        status.bytes = size;
+        status.records = 1;
+        operations.submitted();
+        try {
+            in.read(buffer, pos, buffer,
+                    new CompletionHandler<Integer, ByteBuffer>() {
 
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
-                        final long endTime = time.getCurrentTime();
-                        if (result <= 0 && !isEOF.get()) {
-                            isEOF.set(true);
-                            perlChannel.throwException(new EOFException());
-                        } else {
-                            perlChannel.send(dType.getTime(attachment), endTime, 1, result);
+                        try {
+                            final long endTime = time.getCurrentTime();
+                            if (result <= 0 && !isEOF.get()) {
+                                isEOF.set(true);
+                                perlChannel.throwException(new EOFException());
+                            } else {
+                                perlChannel.send(dType.getTime(attachment), endTime, 1, result);
+                            }
+                        } finally {
+                            operations.completed();
                         }
                     }
 
                     @Override
                     public void failed(Throwable ex, ByteBuffer attachment) {
+                        operations.failed(ex);
                         if (!isEOF.get()) {
                             perlChannel.throwException(ex);
                         }
                     }
-                });
+                    });
+        } catch (RuntimeException ex) {
+            operations.failed(ex);
+            throw ex;
+        }
         pos += dType.length(buffer);
     }
 
     @Override
     public void close() throws IOException {
+        operations.awaitCompletion();
         in.close();
     }
 }
