@@ -1141,17 +1141,162 @@ flowchart TB
 
 ### 9.3 Complexity and contention model
 
+#### 9.3.1 How to read the complexity claims
+
+The following symbols are used:
+
+| Symbol | Meaning |
+|---|---|
+| `n` | Number of nodes reachable during the operation |
+| `m` | Number of elements in an input collection |
+| `k` | Number of stale, retired, or logically deleted nodes skipped before reaching the desired node; `0 <= k <= n` in a quiescent finite queue |
+| `b` | Number of elements copied by one spliterator batch |
+| `B` | `TimeStampMpscQueue` retirement batch size; currently the fixed constant 16 |
+| `C(m)` | Cost of one `contains` call on an input collection of size `m` |
+
+Three different bounds must not be confused:
+
+1. **Fast path** describes an operation whose starting hint is current and whose
+   compare-and-set is not defeated by another thread.
+2. **Quiescent worst case** assumes that concurrent modifications stop, so a
+   call eventually traverses a finite chain.
+3. **Concurrent worst case** includes adversarial scheduling and continued
+   interference.
+
+Both queues are **lock-free**, not wait-free. System-wide progress is
+guaranteed, but a particular producer can repeatedly lose compare-and-set
+races. Consequently, neither implementation has a finite per-thread
+worst-case completion bound while other threads continue to modify the queue.
+Writing only "enqueue is O(1)" would hide this important property.
+The JDK entries below follow the Java SE 25 API contract and the JDK 25 GA
+implementation in references 3 and 4; they are not inferred only from the
+Michael-Scott paper.
+
+```mermaid
+flowchart LR
+    CALL["Queue operation"]
+    FAST{"Current pointer<br/>and no lost CAS?"}
+    DONE["Constant fast path<br/>O(1)"]
+    WALK["Follow stale or<br/>deleted links"]
+    QUIET{"Concurrent changes<br/>eventually stop?"}
+    FINITE["Finite traversal<br/>up to O(n)"]
+    RETRY["Retry may continue<br/>no per-thread bound"]
+
+    CALL --> FAST
+    FAST -->|"yes"| DONE
+    FAST -->|"no"| WALK
+    WALK --> QUIET
+    QUIET -->|"yes"| FINITE
+    QUIET -->|"no"| RETRY
+
+    classDef good fill:#dcfce7,stroke:#166534,color:#111
+    classDef work fill:#fef3c7,stroke:#a16207,color:#111
+    classDef warning fill:#fee2e2,stroke:#991b1b,color:#111
+    class DONE good
+    class WALK,FINITE work
+    class RETRY warning
+```
+
+#### 9.3.2 Core operation complexity
+
+These are the operations relevant to PerL. "Unsupported" means the operation
+is intentionally absent from SBK's minimal
+[`io.perl.api.Queue`](../perl/src/main/java/io/perl/api/Queue.java), not that it
+has an expensive hidden implementation.
+
+| Operation | `TimeStampMpscQueue` | JDK 25 `ConcurrentLinkedQueue` | Explanation |
+|---|---:|---:|---|
+| Construct an empty queue | Time O(1), space O(1) | Time O(1), space O(1) | Each creates a sentinel. The SBK queue also creates one fixed `B`-entry retirement array. |
+| `add(node)` / `offer(element)` fast path | O(1) | O(1) | Allocate or receive a node, read the tail hint, read `next`, and CAS the null terminal link. |
+| Enqueue, amortized | O(1) | O(1) | Tail slack avoids a shared tail CAS on every insertion. Successful terminal-link CAS is the linearization point. |
+| Enqueue after a stale hint, quiescent | O(n) worst case | O(n) worst case | A producer may have to walk from a stale tail or recovery point to the terminal node. |
+| Enqueue under continuing contention | No finite per-thread bound | No finite per-thread bound | A failed CAS proves that some producer progressed, but the same producer may repeatedly lose. |
+| Successful `poll()` fast path | O(1) | O(1) when the head points at a live item | SBK performs one acquire link read and advances its consumer-owned head. CLQ must CAS the live node's `item` to null. |
+| Successful `poll()`, quiescent worst case | O(1), because only the single consumer retires the head | O(k + 1), therefore O(n) worst case | CLQ can skip a prefix of logically deleted nodes. SBK cannot have competing consumers create such a prefix. |
+| Every `B`th SBK `poll()` | O(B), therefore O(1) for fixed `B = 16` | Not applicable | SBK release-publishes a recovery point and self-links up to 16 retired predecessors. Spread over 16 polls, retirement remains amortized O(1). |
+| Empty `poll()` | O(1) | O(k + 1), therefore O(n) worst case | SBK reads `head.next` once. CLQ may scan and help unlink deleted nodes before proving emptiness. |
+| `peek()` | Unsupported | O(k + 1), therefore O(n) worst case | CLQ finds the first live item and may update `head`; PerL never requires a non-removing read. |
+| `element()` | Unsupported | Same as `peek()`, plus an O(1) empty-queue exception path | `AbstractQueue.element()` delegates to `peek()`. |
+| No-argument `remove()` | Unsupported | Same as `poll()`, plus an O(1) empty-queue exception path | `AbstractQueue.remove()` delegates to `poll()`. |
+| `isEmpty()` | Unsupported | O(k + 1), therefore O(n) worst case | CLQ calls its `first()` traversal. PerL detects emptiness through `poll() == null`. |
+| `clear()` | O(n) time, O(1) auxiliary space | O(n) time, O(1) auxiliary space | SBK drains through `poll()` and retires the final partial batch. CLQ traverses nodes, nulls live items, and periodically collapses dead chains. |
+| Queue-capacity check | Not applicable | Not applicable | Both queues are unbounded and therefore provide neither an O(1) full check nor backpressure. |
+
+`TimeStampMpscQueue.poll()` has a stronger constant-time bound only because its
+contract allows exactly one consumer and FIFO head removal only. Calling it
+from multiple consumers violates the contract and invalidates both the
+correctness and complexity claims.
+
+#### 9.3.3 JDK Collection operations
+
+JDK CLQ provides general-purpose traversal, search, bulk mutation, arrays,
+iterators, and spliterators. `TimeStampMpscQueue` intentionally provides none
+of these operations, so they add no code, branches, or coordination to PerL's
+hot path.
+
+| JDK CLQ operation | Time complexity | Auxiliary space | Notes |
+|---|---:|---:|---|
+| `size()` | O(n) | O(1) | Traverses the queue and counts live items. The result is observational and may be inaccurate during concurrent modification. |
+| `contains(object)` | O(n) | O(1) | Linear search; may also help unlink dead-node runs. |
+| `remove(object)` | O(n) | O(1) | Linear search followed by an item CAS and optional dead-node collapse. |
+| `addAll(collection)` | O(m) expected; O(m + n) quiescent worst case after a stale tail | O(m) | Builds `m` private wrapper nodes, then atomically splices the chain at the terminal link. Continued interference gives no finite per-thread bound. |
+| `containsAll(collection)` | O(mn) worst case | O(1) | The inherited implementation performs up to `m` linear `contains` searches. |
+| `removeIf(predicate)` | O(n) plus predicate cost | O(1) | Visits each reachable node and may logically delete matching items. |
+| `removeAll(collection)` | O(n * C(m)) | O(1) | O(nm) with a linear-search collection such as `ArrayList`; expected O(n) when membership is expected O(1), such as a well-sized `HashSet`. |
+| `retainAll(collection)` | O(n * C(m)) | O(1) | Has the same dependency on the input collection's membership complexity as `removeAll`. |
+| `iterator()` construction | O(k + 1), O(n) worst case | O(1) | Finds the first live node and may advance `head`. |
+| Iterator `hasNext()` | O(1) | O(1) | Reads the iterator's cached next item. |
+| Iterator `next()` | O(k + 1), O(n) worst case | O(1) | May skip and help unlink deleted nodes. A complete iteration is O(n) when concurrent restarts are excluded. |
+| Iterator `remove()` | O(1) | O(1) | Logically deletes the last returned item; later traversal performs structural cleanup. |
+| `toArray()` / `toArray(T[])` | O(n) | O(n) if a new/growing array is needed | Concurrent self-link detection can restart traversal. |
+| `toString()` | O(n + characters) | O(n + characters) | Traverses live items and materializes strings/output storage. |
+| `spliterator()` construction | O(1) | O(1) | Traversal is deferred. |
+| Spliterator `tryAdvance()` | O(k + 1), O(n) worst case | O(1) | Skips deleted nodes before yielding one element. |
+| Spliterator `trySplit()` | O(b + k) | O(b) | Copies a bounded batch into a temporary array. |
+| Spliterator `forEachRemaining()` | O(n) plus action cost | O(1) | Weakly consistent traversal. |
+| Serialization | O(n) plus element serialization | Serialization-dependent | Writes every live element in FIFO order. |
+
+For traversal methods, O(n) is the useful quiescent bound. Under concurrent
+self-link detection, a traversal may restart; as with enqueue, sustained
+interference removes a finite per-invocation upper bound.
+
+#### 9.3.4 Allocation and retained-space complexity
+
+| Storage property | `TimeStampMpscQueue` | JDK CLQ used with `TimeStamp` |
+|---|---:|---:|
+| Queue metadata | O(1) | O(1) |
+| Storage for `n` pending measurements | O(n) `TimeStampNode` objects | O(n) `TimeStamp` objects plus O(n) private CLQ wrapper nodes |
+| Per-enqueue queue allocation | **Zero** additional objects and bytes | One O(1)-size CLQ wrapper node |
+| Per-poll auxiliary allocation | **Zero** | **Zero** |
+| Retirement bookkeeping | O(B) references, which is O(1) because `B = 16` | No fixed retirement array; dead wrappers are collapsed during traversal |
+| `clear()` auxiliary storage | O(1) | O(1) |
+
+Both representations therefore have O(n) asymptotic live storage. Big-O alone
+does not expose the practical difference: CLQ needs approximately twice as
+many measurement-related objects in this use case because the timestamp and
+the structural node are separate. The intrusive queue stores the timestamp
+payload and `next` link in one `TimeStampNode`.
+
+The table describes queue-owned reachable storage. Transiently retired nodes
+can add more references. SBK bounds its consumer retirement batch by `B` plus
+the current head; CLQ can retain logically deleted wrappers until a traversal
+advances the head or collapses the dead chain. In either implementation, a
+suspended thread's local variable can independently keep an otherwise retired
+node reachable until that thread resumes or terminates.
+
+#### 9.3.5 Summary for the PerL workload
+
 | Operation/property | JDK CLQ | `TimeStampMpscQueue` |
 |---|---|---|
 | Successful enqueue | Amortized O(1), lock-free | Amortized O(1), lock-free |
-| Successful dequeue | Amortized O(1), lock-free MPMC | O(1) owner-only, plus amortized retirement |
-| Empty poll | Traverses/updates head as required | One acquire read of `head.next` |
-| Enqueue allocation | O(1) wrapper allocation | zero queue allocation |
+| Successful dequeue | Fast-path/amortized O(1), O(n) quiescent worst case, lock-free MPMC | O(1) owner-only, including amortized retirement |
+| Empty poll | O(k + 1), O(n) worst case | O(1): one acquire read of `head.next` |
+| Enqueue allocation | O(1) time and one wrapper object | O(1) time and zero queue allocation |
 | `size` | O(n), observational | unsupported |
-| Worst-case individual retry | Unbounded | unbounded |
+| Worst-case individual retry under interference | Unbounded | unbounded |
 | Capacity | Unbounded | unbounded |
-| Primary producer contention | final-node `next`, tail hint | final-node `next`, padded tail hint |
-| Primary consumer contention | `item` and head with other consumers/helpers | none with another consumer by contract |
+| Primary producer contention | Terminal `next`, tail hint | Terminal `next`, padded tail hint |
+| Primary consumer contention | `item` and head with other consumers/helpers | None with another consumer by contract |
 
 The two classes sharing the name `Queue` can be confusing.
 `TimeStampMpscQueue` implements SBK's minimal
