@@ -468,6 +468,13 @@ its internal node. The intrusive path therefore removes one young-generation
 object per operation while keeping percentile calculation, sorting, and
 logger I/O out of the storage-operation call path.
 
+For a research-oriented treatment of the queue algorithm, including its
+linearization points, Java Memory Model edges, stale-producer recovery,
+batched reclamation, feature-by-feature comparison with JDK 25
+`ConcurrentLinkedQueue`, reproducible JMH results, threats to validity, and
+primary references, see
+[TimeStampMpscQueue: architecture, correctness, and performance](TIMESTAMP_MPSC_QUEUE.md).
+
 The two-level topology is easy to miss in code. With two workers and the
 default `qPerWorker=10`, the conceptual layout is:
 

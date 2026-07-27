@@ -214,6 +214,15 @@ gate because host noise can widen an otherwise faster result. The report is writ
 host-specific; preserve the same JVM flags and an otherwise idle host when
 comparing changes.
 
+The detailed
+[TimeStampMpscQueue research guide](../docs/TIMESTAMP_MPSC_QUEUE.md) explains
+the linearization points, acquire/release edges, batched retired-head
+reclamation, stale-producer recovery, JDK 25 `ConcurrentLinkedQueue`
+differences, correctness evidence, and performance methodology. It also records
+an environment where the intrusive path reduced latency and allocation but did
+not win the contended producer-throughput point estimate; throughput is not a
+universal property of the algorithm.
+
 ## Use as a library
 
 Published coordinates use the project group and version defined in `gradle.properties`. Refer to [Maven Central](https://central.sonatype.com/), the repository's GitHub Packages configuration, or a locally published build for the currently available version instead of copying a version from this README.
