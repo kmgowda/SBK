@@ -11,11 +11,14 @@
 package io.sbk.api.impl;
 
 import io.perl.config.PerlConfig;
+import io.sbk.params.impl.SbkParameters;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,5 +41,54 @@ public class SbkPerlConfigTest {
             assertTrue(PerlConfig.build(inputStream).mpscQueueEnable,
                     "SBK must enable the optimized timestamp MPSC queue");
         }
+    }
+
+    /**
+     * Verifies that command-line options override all timestamp queue
+     * properties for one benchmark without rebuilding the distribution.
+     *
+     * @throws Exception if parameters or configuration cannot be parsed
+    */
+    @Test
+    public void commandLineOverridesTimestampQueueImplementation()
+            throws Exception {
+        final PerlConfig expected = SbkParameters.loadPerlConfig();
+        final SbkParameters parameters =
+                new SbkParameters("queue-config-test");
+        parameters.parseArgs(new String[]{
+                "-writers", "1", "-size", "1",
+                "-mpscqueue", "false"
+        });
+
+        final PerlConfig config = SbkBenchmark.buildPerlConfig(parameters);
+
+        assertFalse(config.mpscQueueEnable);
+        assertEquals(expected.maxQs, config.maxQs);
+        assertEquals(expected.qPerWorker, config.qPerWorker);
+        assertEquals("ConcurrentLinkedQueue (JDK)",
+                config.getTimestampQueueName());
+    }
+
+    /**
+     * Verifies that omitting queue options preserves every value loaded from
+     * {@code sbk.properties} in the effective benchmark configuration.
+     *
+     * @throws Exception if parameters or configuration cannot be loaded
+     */
+    @Test
+    public void propertyDefaultsReachBenchmarkConfiguration()
+            throws Exception {
+        final PerlConfig expected = SbkParameters.loadPerlConfig();
+        final SbkParameters parameters =
+                new SbkParameters("queue-default-test");
+        parameters.parseArgs(new String[]{
+                "-writers", "1", "-size", "1"
+        });
+
+        final PerlConfig actual = SbkBenchmark.buildPerlConfig(parameters);
+
+        assertEquals(expected.mpscQueueEnable, actual.mpscQueueEnable);
+        assertEquals(expected.maxQs, actual.maxQs);
+        assertEquals(expected.qPerWorker, actual.qPerWorker);
     }
 }

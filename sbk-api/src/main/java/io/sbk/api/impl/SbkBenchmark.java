@@ -20,6 +20,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.logger.ReadRequestsLogger;
 import io.sbk.logger.WriteRequestsLogger;
 import io.sbk.params.ParameterOptions;
+import io.sbk.params.impl.SbkParameters;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.logger.RWLogger;
@@ -68,7 +69,6 @@ import java.util.stream.IntStream;
  * </ul>
  */
 final public class SbkBenchmark implements Benchmark {
-    final private static String CONFIGFILE = "sbk.properties";
     final private static long FORCED_SHUTDOWN_GRACE_SECONDS = 3;
     final private Storage<Object> storage;
     final private DataType<Object> dType;
@@ -123,7 +123,7 @@ final public class SbkBenchmark implements Benchmark {
                 .name("sbk-benchmark-lifecycle").factory());
 
         if (params.getWritersCount() > 0 && params.getAction() == Action.Writing) {
-            PerlConfig wConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
+            PerlConfig wConfig = buildPerlConfig(params);
             wConfig.workers = params.getWritersCount();
             wConfig.sleepMS = params.getIdleSleepMilliSeconds();
             wConfig.csv = false;
@@ -133,7 +133,7 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (params.getReadersCount() > 0) {
-            PerlConfig rConfig = PerlConfig.build(SbkBenchmark.class.getClassLoader().getResourceAsStream(CONFIGFILE));
+            PerlConfig rConfig = buildPerlConfig(params);
             rConfig.workers = params.getReadersCount();
             rConfig.sleepMS = params.getIdleSleepMilliSeconds();
             rConfig.csv = false;
@@ -149,6 +149,32 @@ final public class SbkBenchmark implements Benchmark {
         readers = new ArrayList<>();
         state = State.BEGIN;
         shutdownRequested = false;
+    }
+
+    /**
+     * Build the bundled PerL configuration and apply command-line queue
+     * overrides.
+     *
+     * @param params parsed SBK parameters
+     * @return effective PerL configuration
+     * @throws IOException if the bundled configuration cannot be loaded
+     */
+    static PerlConfig buildPerlConfig(ParameterOptions params)
+            throws IOException {
+        final PerlConfig config = SbkParameters.loadPerlConfig();
+        applyMpscQueueOption(params, config);
+        return config;
+    }
+
+    /**
+     * Apply the optional timestamp queue implementation override.
+     *
+     * @param params parsed SBK parameters
+     * @param config PerL configuration to update
+     */
+    static void applyMpscQueueOption(ParameterOptions params,
+                                     PerlConfig config) {
+        config.mpscQueueEnable = params.isMpscQueueEnabled();
     }
 
     /**

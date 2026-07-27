@@ -35,6 +35,7 @@ include 'drivers:rocksdb'
 include 'drivers:couchdb'
 include 'drivers:hive'
 include 'drivers:null'
+include 'drivers:perlbench'
 include 'drivers:sqlite'
 include 'drivers:mysql'
 include 'drivers:mariadb'
@@ -66,4 +67,3 @@ include 'drivers:chromadb'
 include 'drivers:solr'
 /* include 'drivers:sbktemplate' */
 /* above line is a signature */
-

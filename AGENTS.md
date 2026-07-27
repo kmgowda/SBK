@@ -32,7 +32,7 @@ driver SPI.
 
 - **Languages.** Java only (no Kotlin, no Scala). Build with Gradle (wrapper
   in tree: `./gradlew`). JDK 25 required.
-- **Modules.** 6 core modules + 52 enabled storage drivers. The source tree also
+- **Modules.** 6 core modules + 53 enabled storage drivers. The source tree also
   contains disabled drivers and a driver template. Each module is a
   Gradle subproject.
 - **License.** Apache 2.0.
@@ -48,7 +48,7 @@ driver SPI.
 | `sbk-yal/` | YML-driven launcher (single-node). | Rarely. |
 | `sbk-gem/` | **SBK-GEM** — SSH-based distributed launcher. | When changing the multi-host orchestration. |
 | `sbk-gem-yal/` | YML-driven SBK-GEM. | Rarely. |
-| `drivers/<name>/` | One subdirectory per storage backend. **52 are enabled in the aggregate build**; disabled drivers and a template also remain in tree. | When adding or fixing a driver. **This is the most common change.** |
+| `drivers/<name>/` | One subdirectory per storage backend. **53 are enabled in the aggregate build**; disabled drivers and a template also remain in tree. | When adding or fixing a driver. **This is the most common change.** |
 
 **For new drivers, see <ref_file file="/root/projects/SBK/docs/DRIVER_SPECIFICATION.md" />
 (spec template + worked example) and

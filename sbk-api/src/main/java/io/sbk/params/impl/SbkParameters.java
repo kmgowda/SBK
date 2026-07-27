@@ -19,6 +19,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Parses and exposes common SBK benchmark parameters.
  *
@@ -37,6 +40,11 @@ import org.apache.commons.cli.ParseException;
 @Slf4j
 public sealed class SbkParameters extends SbkInputOptions implements InputParameterOptions
         permits SbkDriversParameters {
+
+    /** CLI option selecting the intrusive or JDK timestamp queue. */
+    public static final String MPSC_QUEUE_OPTION = "mpscqueue";
+
+    private static final String CONFIG_FILE = "sbk.properties";
 
     @Getter
     final private int timeoutMS;
@@ -83,6 +91,8 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     @Getter
     private int idleSleepMilliSeconds;
 
+    @Getter
+    private boolean mpscQueueEnabled;
 
     /**
      * Construct parameters with the given benchmark name and description.
@@ -95,6 +105,9 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         super(name, desc);
         this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
         this.action = Action.Reading;
+        final PerlConfig perlDefaults = loadPerlDefaults();
+        this.mpscQueueEnabled = perlDefaults.mpscQueueEnable;
+        validatePerlQueueTopology(perlDefaults);
 
         addOption("writers", true, "Number of writers");
         addOption("readers", true, "Number of readers");
@@ -132,6 +145,10 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: 0 ms");
         addOption("thread", true,
                 "Thread Type [p: platform, f: fork-join, v: virtual], default: v");
+        addOption(MPSC_QUEUE_OPTION, true,
+                ("PerL timestamp queue [true: TimeStampMpscQueue,%n"
+                        + "false: JDK ConcurrentLinkedQueue];%n"
+                        + "default: %s").formatted(this.mpscQueueEnabled));
     }
 
     /**
@@ -189,6 +206,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         readersStep = Integer.parseInt(getOptionValue("rstep", "1"));
         readersStepSeconds = Integer.parseInt(getOptionValue("rsec", "0"));
         idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep", "0"));
+        parseMpscQueueOption();
 
         int workersCnt = writersCount;
         if (workersCnt == 0) {
@@ -230,5 +248,56 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             default -> ThreadType.Platform;
         };
 
+    }
+
+    private void parseMpscQueueOption() {
+        final String queueEnabled = getOptionValue(MPSC_QUEUE_OPTION,
+                Boolean.toString(mpscQueueEnabled));
+        if (!"true".equalsIgnoreCase(queueEnabled)
+                && !"false".equalsIgnoreCase(queueEnabled)) {
+            throw new IllegalArgumentException("Error: The option '-"
+                    + MPSC_QUEUE_OPTION + "' must be true or false");
+        }
+        mpscQueueEnabled = Boolean.parseBoolean(queueEnabled);
+    }
+
+    private static void validatePerlQueueTopology(PerlConfig config) {
+        if (config.maxQs < 0) {
+            throw new IllegalArgumentException(
+                    "Error: sbk.properties maxQs must be zero or greater");
+        }
+
+        if (config.qPerWorker < PerlConfig.MIN_Q_PER_WORKER) {
+            throw new IllegalArgumentException(
+                    "Error: sbk.properties qPerWorker must be at least "
+                    + PerlConfig.MIN_Q_PER_WORKER);
+        }
+    }
+
+    private static PerlConfig loadPerlDefaults() {
+        try {
+            return loadPerlConfig();
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Unable to load PerL defaults from " + CONFIG_FILE,
+                    exception);
+        }
+    }
+
+    /**
+     * Load the PerL defaults bundled with the SBK application.
+     *
+     * @return property-backed PerL configuration
+     * @throws IOException if {@code sbk.properties} is missing or invalid
+     */
+    public static PerlConfig loadPerlConfig() throws IOException {
+        final InputStream inputStream = SbkParameters.class.getClassLoader()
+                .getResourceAsStream(CONFIG_FILE);
+        if (inputStream == null) {
+            throw new IOException("Missing classpath resource: " + CONFIG_FILE);
+        }
+        try (inputStream) {
+            return PerlConfig.build(inputStream);
+        }
     }
 }

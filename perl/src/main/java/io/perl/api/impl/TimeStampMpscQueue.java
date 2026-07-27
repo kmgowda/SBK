@@ -48,9 +48,18 @@ import java.util.Objects;
  * {@value #RETIRE_BATCH_SIZE}. The consumer release-publishes a recovery head
  * before self-linking every retired predecessor in the completed batch. A
  * producer suspended with any stale pointer detects that self-link and resumes
- * from the recovery head. This bounds obsolete linked-node retention while
- * grouping retirement stores. Nodes are deliberately not pooled: pooling
- * would retain heap, complicate ownership, and introduce ABA risks.</p>
+ * from the recovery head. Unlike JDK
+ * {@link java.util.concurrent.ConcurrentLinkedQueue}, an intrusive node cannot
+ * null a separate item reference while retaining its structural wrapper.
+ * Self-linking each retired timestamp therefore guarantees prompt payload
+ * reclamation. Nodes are deliberately not pooled: pooling would retain heap,
+ * complicate ownership, and introduce ABA risks.</p>
+ *
+ * <p>Like JDK {@link java.util.concurrent.ConcurrentLinkedQueue}, the producer
+ * tail is allowed to lag by one node. Updating the shared tail only after a
+ * producer has traversed away from its initial tail candidate avoids a tail
+ * compare-and-set on every enqueue while preserving the linked-node
+ * compare-and-set as the linearization point.</p>
  *
  * <h2>Usage constraints</h2>
  * <ul>
@@ -225,16 +234,28 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
             final TimeStampNode next = (TimeStampNode) NEXT.getAcquire(current);
             if (next == null) {
                 if (NEXT.compareAndSet(current, null, newNode)) {
-                    TAIL.weakCompareAndSetRelease(
-                            tailRef, tailNode, newNode);
+                    // JDK-style slack: avoid touching the shared tail when the
+                    // initial tail candidate was already the trailing node.
+                    if (current != tailNode) {
+                        TAIL.weakCompareAndSetRelease(
+                                tailRef, tailNode, newNode);
+                    }
                     return true;
                 }
             } else if (next == current) {
-                final TimeStampNode recoveryHead =
-                        (TimeStampNode) RECOVERY_HEAD.getAcquire(headRef);
-                TAIL.weakCompareAndSetRelease(tailRef, tailNode, recoveryHead);
-                tailNode = recoveryHead;
-                current = recoveryHead;
+                final TimeStampNode latestTail =
+                        (TimeStampNode) TAIL.getAcquire(tailRef);
+                if (tailNode != latestTail) {
+                    tailNode = latestTail;
+                    current = latestTail;
+                } else {
+                    final TimeStampNode recoveryHead =
+                            (TimeStampNode) RECOVERY_HEAD.getAcquire(headRef);
+                    TAIL.weakCompareAndSetRelease(
+                            tailRef, tailNode, recoveryHead);
+                    tailNode = recoveryHead;
+                    current = recoveryHead;
+                }
             } else {
                 final TimeStampNode latestTail =
                         (TimeStampNode) TAIL.getAcquire(tailRef);

@@ -25,6 +25,7 @@ dependencies {
     api project(':drivers:couchdb')
     api project(':drivers:hive')
     api project(':drivers:null')
+    api project(':drivers:perlbench')
     api project(':drivers:sqlite')
     api project(':drivers:mysql')
     api project(':drivers:mariadb')

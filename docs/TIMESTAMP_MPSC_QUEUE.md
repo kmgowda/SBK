@@ -16,6 +16,16 @@ limitations under the License.
 
 # TimeStampMpscQueue: architecture, correctness, and performance
 
+**System:** Storage Benchmark Kit (SBK) 10.4, Performance Logger (PerL)
+
+**Implementation baseline:** JDK 25 `ConcurrentLinkedQueue`
+
+**Evaluation date:** 2026-07-27
+
+**Keywords:** MPSC queue, lock-free queue, intrusive data structure, Java
+Memory Model, VarHandle, garbage collection, low latency, throughput,
+microbenchmarking
+
 ## Abstract
 
 `TimeStampMpscQueue` is the specialized hand-off queue used by SBK's
@@ -31,6 +41,13 @@ both the measurement and its linked-queue node. The JDK fallback stores a
 25 runtime measured in this repository, the complete intrusive round trip
 allocates 40 bytes instead of 56 bytes per measurement.
 
+On the declared 16-vCPU JDK 25 host, the intrusive queue measured 30.55% lower
+round-trip latency and 14.35% higher four-producer enqueue throughput than the
+CLQ path. End-to-end PerlBench runs also showed higher saturation throughput
+and lower peak resident memory. These are environment-specific observations,
+not claims of universal superiority; the structural removal of one wrapper
+object per record is the portable design result.
+
 This document is intended for graduate students, researchers, performance
 engineers, and reviewers of concurrent algorithms. It distinguishes:
 
@@ -38,6 +55,17 @@ engineers, and reviewers of concurrent algorithms. It distinguishes:
 - safety arguments from empirical testing;
 - deterministic allocation differences from environment-sensitive throughput;
 - implementation evidence from general performance claims.
+
+The paper makes four concrete contributions:
+
+1. it derives a minimal queue contract from PerL's actual producer-consumer
+   topology instead of beginning with the Java Collections API;
+2. it presents a field-level and operation-level comparison with the JDK 25
+   `ConcurrentLinkedQueue` implementation;
+3. it explains which CLQ mechanisms were retained, specialized, or rejected,
+   including the one-node tail-slack optimization;
+4. it reports correctness, reclamation, allocation, latency, throughput, and
+   end-to-end SBK evidence with explicit threats to validity.
 
 The authoritative implementation is
 [`TimeStampMpscQueue.java`](../perl/src/main/java/io/perl/api/impl/TimeStampMpscQueue.java).
@@ -66,7 +94,62 @@ JDK `ConcurrentLinkedQueue` is a general-purpose, unbounded, non-blocking FIFO
 collection with multiple consumers, weakly consistent iterators, bulk
 operations, interior-node deletion, serialization, and the complete Java
 Collections `Queue` contract. `TimeStampMpscQueue` deliberately does not
-provide those features.
+provide those features [3, 4].
+
+### 1.1 Hypotheses
+
+The implementation and evaluation test three hypotheses:
+
+- **H1 -- allocation:** representing the measurement and queue link with one
+  intrusive object removes the JDK queue's private wrapper allocation;
+- **H2 -- latency:** specializing dequeue for one consumer and reducing shared
+  metadata updates lowers queue round-trip latency;
+- **H3 -- throughput:** fewer allocations and less producer/consumer cache
+  coherence traffic increase sustainable MPSC publication throughput.
+
+H1 follows structurally from the object graphs and is verified with JMH
+normalized allocation. H2 and H3 are empirical and must be re-measured on each
+relevant JVM and machine.
+
+### 1.2 Terminology and observation boundary
+
+```mermaid
+flowchart LR
+    OP["Storage operation completes"]
+    PAY["Timestamp payload is initialized"]
+    ENQ["Queue enqueue"]
+    QW["Waiting in queue"]
+    DEQ["Recorder dequeue"]
+    AGG["Latency-window aggregation"]
+
+    OP --> PAY --> ENQ --> QW --> DEQ --> AGG
+
+    subgraph QUEUE["Queue study boundary"]
+        ENQ
+        QW
+        DEQ
+    end
+
+    classDef operation fill:#fef3c7,stroke:#a16207,color:#111
+    classDef queue fill:#dbeafe,stroke:#1d4ed8,color:#111
+    classDef recorder fill:#dcfce7,stroke:#166534,color:#111
+    class OP,PAY operation
+    class ENQ,QW,DEQ queue
+    class AGG recorder
+```
+
+In this document:
+
+- **payload** means the four measurement fields;
+- **wrapper node** means CLQ's private structural `Node`;
+- **intrusive node** means a payload object that also contains its queue link;
+- **live node** means reachable queue state not yet consumed;
+- **retired node** means a consumed predecessor awaiting or completing
+  detachment;
+- **linearization point** means the single atomic event at which an operation
+  appears to take effect;
+- **storage allocation** means heap storage allocated by the timestamp hand-off
+  path, not bytes written to the benchmarked storage system.
 
 ## 2. Position in the PerL measurement pipeline
 
@@ -207,6 +290,105 @@ The 40 and 56 byte values are observations from the controlled JMH run
 documented in Section 10. Object size depends on VM layout, alignment, pointer
 compression, and flags; it is not a Java language constant.
 
+### 3.3 Field-level storage model
+
+The following table describes logical fields rather than promising a fixed
+physical layout. HotSpot may change headers, alignment, and reference width.
+
+| Object | Logical content | Intrusive path | JDK path |
+|---|---|---:|---:|
+| Timestamp payload | two `long` values and two `int` values | one instance | one instance |
+| Queue link | one node reference | inside `TimeStampNode` | inside private CLQ `Node` |
+| Payload indirection | reference from wrapper to payload | none | one `item` reference |
+| Structural object header | header for queue node object | shared with payload | additional header |
+| Enqueue-time queue allocation | allocation performed inside queue | none | one private CLQ `Node` |
+
+For `n` measurements, ignoring the one-time sentinel and VM alignment:
+
+```text
+intrusive object count(n) = n
+JDK path object count(n)  = 2n
+object-count reduction    = n, or 50% of the JDK path's per-record objects
+```
+
+The measured byte model on the declared JDK 25 configuration is:
+
+```text
+intrusive allocation(n) = 40n bytes
+JDK path allocation(n)  = 56n bytes
+saved allocation(n)     = 16n bytes
+```
+
+At one million records per second this corresponds to approximately 16 MB/s
+less normalized allocation; at ten million records per second it corresponds
+to approximately 160 MB/s less. These are decimal-rate illustrations derived
+from the measured 16 B/op difference, not universal object sizes.
+
+```mermaid
+flowchart TB
+    subgraph M["TimeStampMpscQueue: one record"]
+        MN["TimeStampNode<br/>header + payload + next"]
+    end
+
+    subgraph J["ConcurrentLinkedQueue path: one record"]
+        JN["CLQ Node<br/>header + item + next"]
+        JT["TimeStamp<br/>header + payload"]
+        JN -->|"item reference"| JT
+    end
+
+    subgraph COST["Per million completed records"]
+        MO["MPSC: 1,000,000 objects<br/>40 MB measured allocation"]
+        JO["JDK path: 2,000,000 objects<br/>56 MB measured allocation"]
+        SV["Difference: 1,000,000 objects<br/>16 MB measured allocation"]
+    end
+
+    MN --> MO
+    JN --> JO
+    MO --> SV
+    JO --> SV
+
+    classDef intrusive fill:#dcfce7,stroke:#166534,color:#111
+    classDef jdk fill:#e0e7ff,stroke:#4338ca,color:#111
+    classDef result fill:#fef3c7,stroke:#a16207,color:#111
+    class MN,MO intrusive
+    class JN,JT,JO jdk
+    class SV result
+```
+
+### 3.4 Why object count matters to a latency recorder
+
+Allocation in a thread-local allocation buffer is usually cheap, but the
+allocated objects are not free over their complete lifetime. More objects
+consume allocation bandwidth, increase the rate at which allocation regions
+fill, add references for the collector to trace or relocate, and increase
+memory traffic. A linked wrapper also adds a pointer dereference from
+`Node.item` to `TimeStamp`.
+
+```mermaid
+flowchart LR
+    RATE["Higher completion rate"] --> OBJ["More timestamp objects"]
+    OBJ --> BW["More allocation and memory bandwidth"]
+    OBJ --> GC["More objects for GC lifecycle"]
+    OBJ --> PTR["More pointer chasing"]
+    BW --> TAIL["Potential latency-tail interference"]
+    GC --> TAIL
+    PTR --> CACHE["Additional cache/TLB pressure"]
+    CACHE --> TAIL
+
+    CUT["Intrusive node removes wrapper"] -. "reduces" .-> OBJ
+    CUT -. "removes one indirection" .-> PTR
+
+    classDef pressure fill:#fee2e2,stroke:#991b1b,color:#111
+    classDef mitigation fill:#dcfce7,stroke:#166534,color:#111
+    class RATE,OBJ,BW,GC,PTR,CACHE,TAIL pressure
+    class CUT mitigation
+```
+
+This does not mean every allocation immediately triggers a stop-the-world
+collection, nor that allocation alone determines latency. It means the wrapper
+is avoidable work in PerL's fixed data model, so removing it lowers the amount
+of work presented to the allocator, memory hierarchy, and collector.
+
 ## 4. State and ownership
 
 ```mermaid
@@ -258,6 +440,75 @@ The queue starts with one sentinel. The sentinel simplifies empty/non-empty
 transitions because `head` always identifies a node and the first real element
 is `head.next`.
 
+### 4.1 JDK CLQ internal state
+
+JDK 25 CLQ is a modified Michael-Scott queue adapted to garbage collection and
+interior deletion. Each private node has a volatile `item` and volatile
+`next`. The queue has independently advancing volatile `head` and `tail`
+pointers. A node may remain structurally linked after its item has been
+logically removed by changing `item` to `null` [1, 4].
+
+```mermaid
+stateDiagram-v2
+    [*] --> Live: Node(item = E, next = successor)
+    Live --> LogicallyDeleted: CAS item from E to null
+    LogicallyDeleted --> StructurallyLinked: unlink not yet performed
+    StructurallyLinked --> Detached: head advance or predecessor unlink
+    Detached --> SelfLinked: old head next points to itself
+    SelfLinked --> [*]: no external references remain
+```
+
+The separate `item` field is essential to CLQ's multi-consumer and arbitrary
+removal contract: a successful CAS from a non-null item to `null` decides which
+consumer or remover owns the element. It is also the source of the structural
+wrapper that PerL can eliminate.
+
+```mermaid
+flowchart LR
+    subgraph CLQ["JDK CLQ shared state"]
+        CH["volatile head"]
+        CT["volatile tail"]
+        CN1["Node<br/>volatile item<br/>volatile next"]
+        CN2["Node<br/>volatile item<br/>volatile next"]
+        CH --> CN1 --> CN2
+        CT --> CN2
+    end
+
+    subgraph MPSC["TimeStampMpscQueue split state"]
+        MH["HeadRef<br/>consumer owned"]
+        MT["TailRef<br/>producer shared"]
+        MN1["TimeStampNode<br/>payload + next"]
+        MN2["TimeStampNode<br/>payload + next"]
+        MH --> MN1 --> MN2
+        MT --> MN2
+    end
+
+    classDef jdk fill:#e0e7ff,stroke:#4338ca,color:#111
+    classDef mpsc fill:#dcfce7,stroke:#166534,color:#111
+    class CH,CT,CN1,CN2 jdk
+    class MH,MT,MN1,MN2 mpsc
+```
+
+CLQ places `head` and `tail` as fields of the same queue object and relies on
+the JVM's layout decisions. `TimeStampMpscQueue` places producer-shared and
+consumer-owned state in separately padded holder objects. Padding reduces the
+chance of false sharing but is deliberately described as a heuristic because
+the Java language does not guarantee cache-line placement.
+
+### 4.2 Ownership specialization
+
+| State transition | JDK CLQ reason | PerL specialization |
+|---|---|---|
+| Claim an item | Multiple consumers/removers may race | Exactly one consumer; no claim CAS |
+| Advance head | Multiple threads may update head | Consumer-owned plain head write |
+| Update tail | Producers race; tail is a hint | Same principle, with one-node slack |
+| Remove interior item | Required by Collection APIs | Unsupported and unnecessary |
+| Traverse dead nodes | Required by iteration, removal, and MPMC polling | FIFO consumer sees only the next link |
+| Recover stale traversal | Self-link means restart from head | Self-link means use newer tail or published recovery head |
+
+The specialization does not make CLQ's mechanisms defective. It removes
+mechanisms whose preconditions cannot occur in the PerL topology.
+
 ## 5. Producer algorithm and linearization
 
 ### 5.1 Normal enqueue
@@ -275,14 +526,23 @@ sequenceDiagram
     L-->>P: null
     P->>L: CAS candidate.next from null to N
     Note over P,L: Successful CAS is the enqueue linearization point
-    P->>T: weak release-CAS tail hint to N
+    alt producer traversed beyond initial tail
+        P->>T: weak release-CAS tail hint to N
+    else initial tail was the trailing node
+        P-->>T: leave one-node tail slack
+    end
     Note over P,T: Tail update is an optimization, not publication correctness
 ```
 
 The successful `NEXT.compareAndSet(current, null, newNode)` is the enqueue
 linearization point. Before that CAS, another thread cannot reach the new node
 from the queue. After it succeeds, the node is in the FIFO chain even if the
-best-effort tail update fails.
+best-effort tail update fails. Following JDK 25 `ConcurrentLinkedQueue`, the
+queue deliberately leaves one-node tail slack when the producer appended
+directly to its initial tail candidate. The next producer traverses that one
+node and then advances the tail. This approximately halves tail compare-and-set
+traffic in the uncontended path and reduces cache-line invalidation among
+producers [2, 4].
 
 ### 5.2 Contended enqueue
 
@@ -291,20 +551,27 @@ flowchart TD
     A["Acquire-read tail hint"] --> B["Acquire-read current.next"]
     B --> C{"next is null?"}
     C -->|yes| D{"CAS link succeeds?"}
-    D -->|yes| E["Best-effort release update of tail"]
-    E --> F["Return true"]
+    D -->|yes| E{"Traversed beyond initial tail?"}
+    E -->|yes| K["Best-effort release update of tail"]
+    E -->|no| F["Keep one-node tail slack"]
+    K --> L
+    F --> L
+    L["Return true"]
     D -->|no| B
     C -->|no| G{"next self-links?"}
     G -->|no| H["Follow next or refresh newer tail"]
     H --> B
-    G -->|yes| I["Acquire-read recoveryHead"]
+    G -->|yes| M{"A newer tail is visible?"}
+    M -->|yes| N["Resume from newer tail"]
+    M -->|no| I["Acquire-read recoveryHead"]
     I --> J["Best-effort move tail hint to recoveryHead"]
+    N --> B
     J --> B
 
     classDef decision fill:#fef3c7,stroke:#a16207,color:#111
     classDef progress fill:#dcfce7,stroke:#166534,color:#111
-    class C,D,G decision
-    class E,F,H,I,J progress
+    class C,D,E,G,M decision
+    class F,H,I,J,K,L,N progress
 ```
 
 If a producer loses the link CAS, some other producer has linked a node and
@@ -312,6 +579,81 @@ therefore the system has made progress. The losing producer follows the chain
 or refreshes the tail hint and retries. This is a lock-free system-progress
 argument; it is not a wait-free per-thread bound. One producer may retry
 indefinitely under adversarial scheduling.
+
+### 5.3 Enqueue comparison and adopted CLQ optimization
+
+Both implementations publish a new node by CASing the final node's `next`
+from `null` to the new node. Both treat `tail` as a traversal hint rather than
+the source of correctness. The important differences occur before and after
+that shared linearization point.
+
+```mermaid
+flowchart TB
+    START["Caller has completed timestamp payload"]
+
+    subgraph J["JDK ConcurrentLinkedQueue.offer"]
+        JA["Allocate private Node"]
+        JB["Store payload reference in Node.item"]
+        JC["Read tail and traverse next links"]
+        JD["CAS final.next from null to new Node"]
+        JE{"Traversed beyond original tail?"}
+        JF["Weak CAS tail to new Node"]
+        JG["Return"]
+        JA --> JB --> JC --> JD --> JE
+        JE -->|yes| JF --> JG
+        JE -->|no| JG
+    end
+
+    subgraph M["TimeStampMpscQueue.add"]
+        MA["Use caller's TimeStampNode directly"]
+        MC["Read padded tail holder and traverse next links"]
+        MD["CAS final.next from null to TimeStampNode"]
+        ME{"Traversed beyond original tail?"}
+        MF["Weak release-CAS tail to node"]
+        MG["Return"]
+        MA --> MC --> MD --> ME
+        ME -->|yes| MF --> MG
+        ME -->|no| MG
+    end
+
+    START --> JA
+    START --> MA
+
+    classDef jdk fill:#e0e7ff,stroke:#4338ca,color:#111
+    classDef mpsc fill:#dcfce7,stroke:#166534,color:#111
+    class JA,JB,JC,JD,JE,JF,JG jdk
+    class MA,MC,MD,ME,MF,MG mpsc
+```
+
+The **one-node tail-slack** mechanism was taken from JDK 25 CLQ because it is
+independent of the MPMC Collection features:
+
+```mermaid
+sequenceDiagram
+    participant P1 as Producer 1
+    participant P2 as Producer 2
+    participant T as Tail hint
+    participant A as Last node A
+    participant B as New node B
+    participant C as New node C
+
+    P1->>T: read tail = A
+    P1->>A: CAS A.next = B
+    Note over P1,T: P1 does not update tail because A was its initial tail
+    P2->>T: read tail = A
+    P2->>A: read A.next = B
+    P2->>B: CAS B.next = C
+    P2->>T: weak CAS tail from A to C
+    Note over T: One tail CAS covers two successful links
+```
+
+The former SBK implementation attempted a shared tail update after every
+successful link. Tail slack changes the common sequence from approximately one
+link CAS plus one tail CAS per record to one link CAS per record plus one
+best-effort tail CAS for approximately every two links. The exact hardware cost
+depends on contention and architecture, but removing atomic writes to a
+producer-shared cache line gives a direct mechanism for the observed throughput
+improvement.
 
 ## 6. Consumer algorithm
 
@@ -347,6 +689,81 @@ the producer before publication.
 
 The node returned by `poll` becomes the new head sentinel while also carrying
 the returned timestamp. It must never be enqueued again.
+
+### 6.1 Why CLQ poll performs more coordination
+
+CLQ must allow several consumers, iterator removal, and `remove(Object)` to
+race safely. Its element-removal linearization point is therefore a CAS of
+`Node.item` from the payload reference to `null`. A polling thread may
+encounter null-item nodes, lose the item CAS to another consumer, traverse
+forward, attempt to advance `head`, or restart after seeing a self-link.
+
+PerL has one recorder. It reads `head.next`, moves its owner-only head to that
+node, and returns the same `TimeStampNode`. It does not atomically claim an item
+because no second consumer exists.
+
+```mermaid
+flowchart TB
+    subgraph JP["JDK CLQ poll"]
+        J0["Read shared head"]
+        J1{"Current item non-null?"}
+        J2{"CAS item to null succeeds?"}
+        J3["Return payload"]
+        J4{"next is null?"}
+        J5["Best-effort CAS head"]
+        J6{"self-link observed?"}
+        J7["Restart from head"]
+        J8["Advance traversal"]
+        J0 --> J1
+        J1 -->|yes| J2
+        J2 -->|yes| J5 --> J3
+        J2 -->|no| J4
+        J1 -->|no| J4
+        J4 -->|yes| J5
+        J4 -->|no| J6
+        J6 -->|yes| J7 --> J0
+        J6 -->|no| J8 --> J1
+    end
+
+    subgraph MP["TimeStampMpscQueue poll"]
+        M0["Read consumer-owned head"]
+        M1["Acquire-read head.next"]
+        M2{"next is null?"}
+        M3["Return null"]
+        M4["Plain-write head = next"]
+        M5["Stage old head for batched retirement"]
+        M6["Return next TimeStampNode"]
+        M0 --> M1 --> M2
+        M2 -->|yes| M3
+        M2 -->|no| M4 --> M5 --> M6
+    end
+
+    classDef jdk fill:#e0e7ff,stroke:#4338ca,color:#111
+    classDef mpsc fill:#dcfce7,stroke:#166534,color:#111
+    class J0,J1,J2,J3,J4,J5,J6,J7,J8 jdk
+    class M0,M1,M2,M3,M4,M5,M6 mpsc
+```
+
+### 6.2 Hot-path operation budget
+
+The following is a qualitative budget for successful, non-empty operations.
+It is not an instruction count: retries, compiler transformations, cache
+misses, and collector barriers vary.
+
+| Hot-path work | JDK CLQ path | `TimeStampMpscQueue` |
+|---|---|---|
+| Producer payload allocation | `TimeStamp` | `TimeStampNode` |
+| Producer structural allocation | private `Node` | none |
+| Producer publication CAS | `Node.next` | `TimeStampNode.next` |
+| Producer tail policy | one-node slack | one-node slack |
+| Consumer payload-claim CAS | required on `Node.item` | none |
+| Consumer head update | shared CAS when advanced | plain owner write |
+| Consumer payload indirection | `Node.item -> TimeStamp` | returned node is payload |
+| Consumer retirement | general dead-node/head logic | amortized batch of 16 |
+
+The MPSC path shifts some retirement work into every sixteenth dequeue. This
+reduces the average release-store count but introduces a small periodic burst;
+Section 7 explains why the batch remains bounded.
 
 ## 7. Batched retirement and stale-producer recovery
 
@@ -413,6 +830,109 @@ The implementation clears each `retiredNodes` array slot after self-linking.
 This avoids retaining the retired object through the helper array. At most 15
 not-yet-retired predecessors remain in the current partial batch.
 
+### 7.1 Reclamation differs because the payload placement differs
+
+CLQ can logically delete an element by nulling `Node.item` while keeping the
+wrapper node reachable for traversal safety. The payload may become
+collectable even when the structural node remains. That distinction is useful
+for MPMC traversal and interior deletion.
+
+An intrusive node has no separate item reference to clear. If a consumed
+`TimeStampNode` remains linked to the live suffix, the node itself—and
+therefore its timestamp payload—remains reachable. `TimeStampMpscQueue` must
+detach or self-link consumed nodes promptly rather than directly copying CLQ's
+payload-nulling policy.
+
+```mermaid
+flowchart TB
+    subgraph J["JDK CLQ after logical removal"]
+        JP["predecessor"] --> JN["wrapper Node<br/>item = null"]
+        JN --> JL["live successor"]
+        JT["TimeStamp payload"]
+        JN -. "former item reference cleared" .-> JT
+        JT --> JGC["payload eligible for GC<br/>if no other references"]
+        JN --> JKEEP["wrapper may remain for traversal"]
+    end
+
+    subgraph M["Intrusive queue after consumption"]
+        MP["retired TimeStampNode<br/>payload is inside node"]
+        MP --> ML["live successor"]
+        MP --> MR["must sever live-chain retention"]
+        MR --> MS["self-link retired node"]
+        MS --> MGC["whole timestamp node eligible for GC<br/>when producer references disappear"]
+    end
+
+    classDef jdk fill:#e0e7ff,stroke:#4338ca,color:#111
+    classDef mpsc fill:#dcfce7,stroke:#166534,color:#111
+    class JP,JN,JL,JT,JGC,JKEEP jdk
+    class MP,ML,MR,MS,MGC mpsc
+```
+
+### 7.2 Why the retirement batch is 16
+
+Batching balances two opposing costs:
+
+- a batch of one performs a release self-link and helper cleanup on every
+  dequeue;
+- a very large batch retains a longer consumed prefix and creates a larger
+  periodic cleanup burst;
+- a batch of 16 bounds the partial retired set at 15 nodes while amortizing
+  retirement stores.
+
+```mermaid
+flowchart LR
+    SMALL["Small batch"]
+    MID["Batch 16<br/>implemented point"]
+    LARGE["Large batch"]
+
+    SMALL --> S1["More frequent release stores"]
+    SMALL --> S2["Shorter partial retention"]
+    MID --> M1["One retirement pass per 16 polls"]
+    MID --> M2["At most 15 partial retired nodes"]
+    LARGE --> L1["Less frequent retirement passes"]
+    LARGE --> L2["Longer retention and larger cleanup burst"]
+
+    classDef tradeoff fill:#fef3c7,stroke:#a16207,color:#111
+    classDef chosen fill:#dcfce7,stroke:#166534,color:#111
+    class SMALL,LARGE,S1,S2,L1,L2 tradeoff
+    class MID,M1,M2 chosen
+```
+
+The chart is conceptual, not benchmark data. Sixteen is the implemented and
+tested engineering point. Changing it requires repeating GC retention,
+stale-producer, latency, and throughput tests rather than optimizing only one
+metric.
+
+### 7.3 Node lifetime comparison
+
+```mermaid
+sequenceDiagram
+    participant P as Producer
+    participant Q as Queue
+    participant C as Consumer
+    participant G as Garbage collector
+
+    rect rgb(224, 231, 255)
+        Note over P,G: JDK CLQ path
+        P->>P: allocate TimeStamp
+        P->>Q: offer allocates wrapper Node
+        C->>Q: CAS wrapper.item to null
+        Q-->>C: return TimeStamp
+        Note over Q: wrapper may remain structurally reachable
+        G->>G: reclaim payload and wrapper when separately unreachable
+    end
+
+    rect rgb(220, 252, 231)
+        Note over P,G: Intrusive MPSC path
+        P->>P: allocate TimeStampNode
+        P->>Q: link same node
+        C->>Q: owner-only head advance
+        Q-->>C: return same TimeStampNode
+        C->>Q: batch self-link consumed predecessor
+        G->>G: reclaim whole node when unreachable
+    end
+```
+
 ## 8. Java Memory Model argument
 
 ```mermaid
@@ -445,8 +965,8 @@ The queue uses JDK `VarHandle`, not `sun.misc.Unsafe`:
 | `headRef.head` | none | plain read/write | Single-consumer ownership |
 
 The argument relies on the JDK 25 `VarHandle` acquire/release and
-compare-and-set semantics cited in the references. Tests can find violations;
-they are not a substitute for a complete mechanized proof.
+compare-and-set semantics and the Java Memory Model [5, 6, 8]. Tests can find
+violations; they are not a substitute for a complete mechanized proof.
 
 ## 9. Feature comparison with JDK ConcurrentLinkedQueue
 
@@ -461,7 +981,7 @@ they are not a substitute for a complete mechanized proof.
 | Queue allocation during enqueue | None after caller creates intrusive node | Private JDK node per offered element |
 | Measurement objects per operation | One `TimeStampNode` | One `TimeStamp` plus one private node |
 | Consumer head update | Plain owner write | General multi-consumer coordination |
-| Tail | Best-effort traversal hint | Best-effort traversal hint |
+| Tail | Best-effort hint with one-node slack | Best-effort hint with one-node slack |
 | Stale traversal recovery | Batched self-links plus published recovery head | Self-links and JDK traversal recovery |
 | Retired-node policy | Batch of 16 predecessors | General-purpose head advancement and unlinking |
 | Interior dead-node cleanup | Not needed; removal is unsupported | Supported by traversal/unlink behavior |
@@ -471,6 +991,167 @@ they are not a substitute for a complete mechanized proof.
 | Serialization | Unsupported | Supported |
 | Public interface | PerL's three-method `io.perl.api.Queue` | Java Collections `java.util.Queue` |
 | Portability risk | Custom algorithm must be revalidated on JVM changes | Maintained and tested with the JDK |
+
+### 9.1 CLQ limitations for PerL's timestamp hand-off
+
+The word **limitation** here means "cost or semantic mismatch for this specific
+PerL workload." It does not mean a defect in CLQ.
+
+#### 9.1.1 Mandatory wrapper allocation
+
+CLQ owns a private `Node<E>` and therefore must allocate one node for each
+ordinary `offer(E)`. A caller cannot supply an intrusive node or reuse the
+payload object as CLQ's structural node. PerL consequently creates a
+`TimeStamp`, and CLQ creates the second object. This is the most deterministic
+disadvantage because it follows directly from the public API and private node
+representation.
+
+#### 9.1.2 Multi-consumer item claiming
+
+CLQ's `poll` must CAS a non-null `item` to `null` so only one of multiple
+consumers or removers obtains it. PerL has exactly one recorder, so this
+read-modify-write operation provides no additional correctness. The specialized
+queue replaces it with a consumer-owned head advance.
+
+#### 9.1.3 General traversal and interior deletion
+
+CLQ supports weakly consistent iterators, `contains`, `remove(Object)`,
+`removeIf`, `forEach`, spliterators, and bulk operations. Supporting these
+operations requires:
+
+- distinguishing live nodes from null-item dead nodes;
+- traversing and opportunistically collapsing dead-node chains;
+- recovering from self-linked stale traversal positions;
+- preserving reachability for concurrent iterators and removers.
+
+PerL performs strict FIFO `poll` only and never removes an interior timestamp.
+Its hot path does not need these states.
+
+#### 9.1.4 Shared general-purpose head coordination
+
+CLQ cannot assign `head` to one owner because consumers, traversal methods, and
+removal methods may all help advance it. `TimeStampMpscQueue` separates
+consumer-owned head state from producer-shared tail state and uses a plain head
+write. This reduces atomic coordination and reduces the probability of
+producer-consumer false sharing.
+
+#### 9.1.5 O(n), observational `size`
+
+The Java SE 25 API explicitly states that CLQ `size()` traverses the queue,
+takes O(n) time, and may be inaccurate during concurrent modification. This is
+appropriate for its weakly consistent Collection contract but unsuitable as
+hot-path flow control. PerL does not expose `size`; it drains until `poll`
+returns `null`.
+
+#### 9.1.6 No capacity bound or backpressure
+
+Both queues are unbounded. CLQ does not solve overload when producers
+permanently outrun the consumer, and neither does the intrusive queue. PerL
+addresses contention with configurable queue topology, but queue sharding does
+not impose a memory bound.
+
+#### 9.1.7 Genericity prevents payload-aware layout
+
+CLQ must accept arbitrary non-null reference types. It cannot know that every
+element contains exactly two times, a record count, and a byte count, or that
+the element is single-use. `TimeStampMpscQueue` can encode those invariants in
+the type and eliminate the `item` indirection.
+
+```mermaid
+flowchart LR
+    subgraph REQUIRED["What CLQ must support"]
+        MC["Multiple consumers"]
+        IT["Iterators and spliterators"]
+        IR["Interior removal"]
+        GE["Generic element type"]
+        CO["Collection operations"]
+    end
+
+    subgraph MECHANISM["Resulting mechanisms"]
+        IC["CAS item to null"]
+        WR["Private wrapper node"]
+        DN["Dead-node traversal"]
+        HC["Shared head coordination"]
+        BI["Bulk and iteration paths"]
+    end
+
+    subgraph PERL["PerL fixed contract"]
+        SC["One consumer"]
+        FO["FIFO add and poll only"]
+        TT["TimeStampNode only"]
+    end
+
+    MC --> IC
+    GE --> WR
+    IT --> DN
+    IR --> DN
+    MC --> HC
+    CO --> BI
+
+    SC -. "removes need for" .-> IC
+    FO -. "removes need for" .-> DN
+    FO -. "removes need for" .-> BI
+    TT -. "removes need for" .-> WR
+
+    classDef requirement fill:#e0e7ff,stroke:#4338ca,color:#111
+    classDef mechanism fill:#fee2e2,stroke:#991b1b,color:#111
+    classDef specialization fill:#dcfce7,stroke:#166534,color:#111
+    class MC,IT,IR,GE,CO requirement
+    class IC,WR,DN,HC,BI mechanism
+    class SC,FO,TT specialization
+```
+
+### 9.2 What SBK borrowed, specialized, and did not copy
+
+| JDK CLQ concept | SBK decision | Reason |
+|---|---|---|
+| CAS the final `next` from null | **Retained** | Simple lock-free publication and FIFO linearization |
+| Tail is only a hint | **Retained** | Correctness remains in the linked chain |
+| One-node pointer slack | **Retained** | Fewer shared tail CAS operations |
+| Self-link marks an off-list node | **Retained and specialized** | Stale producers need a recognizable recovery condition |
+| Jump to a live point after self-link | **Specialized** | Prefer newer tail, otherwise use release-published `recoveryHead` |
+| Separate wrapper and item | **Rejected** | Intrusive timestamp removes allocation and indirection |
+| CAS item to null on poll | **Rejected** | Only one consumer exists |
+| Shared CAS head advancement | **Rejected** | Head is consumer-owned |
+| Interior deletion and iterators | **Rejected** | Not part of the PerL contract |
+| Immediate old-head self-link only | **Not copied directly** | Intrusive payload requires prompt whole-node detachment |
+| Node pooling/reuse | **Rejected** | Retention, ownership complexity, and ABA/reuse hazards |
+
+```mermaid
+flowchart TB
+    CLQ["JDK 25 CLQ engineering"]
+    KEEP["Retain<br/>link CAS, tail hint,<br/>tail slack, self-link marker"]
+    SPEC["Specialize<br/>single-consumer head,<br/>recoveryHead, batch retirement"]
+    DROP["Remove from hot path<br/>wrapper item, item CAS,<br/>iteration, interior removal"]
+    RESULT["TimeStampMpscQueue"]
+
+    CLQ --> KEEP --> RESULT
+    CLQ --> SPEC --> RESULT
+    CLQ --> DROP --> RESULT
+
+    classDef source fill:#e0e7ff,stroke:#4338ca,color:#111
+    classDef keep fill:#dbeafe,stroke:#1d4ed8,color:#111
+    classDef specialize fill:#dcfce7,stroke:#166534,color:#111
+    classDef remove fill:#fee2e2,stroke:#991b1b,color:#111
+    class CLQ source
+    class KEEP keep
+    class SPEC,RESULT specialize
+    class DROP remove
+```
+
+### 9.3 Complexity and contention model
+
+| Operation/property | JDK CLQ | `TimeStampMpscQueue` |
+|---|---|---|
+| Successful enqueue | Amortized O(1), lock-free | Amortized O(1), lock-free |
+| Successful dequeue | Amortized O(1), lock-free MPMC | O(1) owner-only, plus amortized retirement |
+| Empty poll | Traverses/updates head as required | One acquire read of `head.next` |
+| Enqueue allocation | O(1) wrapper allocation | zero queue allocation |
+| `size` | O(n), observational | unsupported |
+| Worst-case individual retry | Unbounded | unbounded |
+| Capacity | Unbounded | unbounded |
+| Primary producer contention | final-node `next`, tail hint | final-node `next`, padded tail hint |
+| Primary consumer contention | `item` and head with other consumers/helpers | none with another consumer by contract |
 
 The two classes sharing the name `Queue` can be confusing.
 `TimeStampMpscQueue` implements SBK's minimal
@@ -508,7 +1189,31 @@ contains two complementary experiments:
 
 The verification task uses three isolated JVM forks, three one-second warm-up
 iterations, five one-second measurement iterations, JMH's GC profiler, and
-99.9% confidence intervals.
+99.9% confidence intervals [10, 13, 14].
+
+```mermaid
+flowchart LR
+    SRC["Same timestamp values"]
+    A["Intrusive benchmark path"]
+    B["JDK CLQ benchmark path"]
+    FORK["3 isolated JVM forks"]
+    WARM["3 warm-up iterations"]
+    MEAS["5 measurement iterations"]
+    GC["JMH GC profiler"]
+    OUT["ns/op, B/op, ops/s,<br/>99.9% confidence interval"]
+
+    SRC --> A --> FORK
+    SRC --> B --> FORK
+    FORK --> WARM --> MEAS
+    MEAS --> GC --> OUT
+
+    classDef input fill:#fef3c7,stroke:#a16207,color:#111
+    classDef path fill:#dbeafe,stroke:#1d4ed8,color:#111
+    classDef output fill:#dcfce7,stroke:#166534,color:#111
+    class SRC input
+    class A,B,FORK,WARM,MEAS,GC path
+    class OUT output
+```
 
 ### 10.2 Reproducible run on 2026-07-27
 
@@ -535,17 +1240,17 @@ Results:
 
 | Metric | `TimeStampMpscQueue` | JDK `ConcurrentLinkedQueue` path | Relative result |
 |---|---:|---:|---:|
-| Round-trip latency | 34.208 ns/op | 47.107 ns/op | 27.38% lower |
+| Round-trip latency | 33.107 ns/op | 47.673 ns/op | 30.55% lower |
 | Round-trip normalized allocation | 40.000 B/op | 56.000 B/op | 28.57% lower |
-| Four-producer producer throughput | 5,406,094 ops/s | 5,557,486 ops/s | 2.72% lower |
-| Producer-throughput 99.9% CI | 5,317,109 to 5,495,078 | 5,248,995 to 5,865,977 | intervals overlap |
+| Four-producer producer throughput | 5,904,509 ops/s | 5,163,359 ops/s | 14.35% higher |
+| Producer-throughput 99.9% CI | 5,819,992 to 5,989,025 | 5,047,306 to 5,279,412 | intervals do not overlap |
 
 ```mermaid
 xychart-beta
     title "Round-trip latency: lower is better"
     x-axis ["TimeStampMpscQueue", "JDK CLQ path"]
     y-axis "nanoseconds per operation" 0 --> 60
-    bar [34.208, 47.107]
+    bar [33.107, 47.673]
 ```
 
 ```mermaid
@@ -561,7 +1266,7 @@ xychart-beta
     title "Four-producer throughput: higher is better"
     x-axis ["TimeStampMpscQueue", "JDK CLQ"]
     y-axis "producer operations per second" 0 --> 6000000
-    bar [5406094, 5557486]
+    bar [5904509, 5163359]
 ```
 
 ### 10.3 Interpretation
@@ -575,21 +1280,64 @@ a narrower API, a single-consumer head, and separated head/tail state are
 plausible contributing mechanisms. The benchmark establishes correlation
 under this setup; it does not isolate the contribution of each mechanism.
 
-The contended producer-throughput result did **not** favor the intrusive queue.
-The JDK path was 2.72% faster by point estimate, but the wide, overlapping
-99.9% confidence intervals do not resolve a statistically clear winner. The
-Gradle verification consequently failed its policy gate requiring the
+The contended producer-throughput result favored the intrusive queue by
+14.35%. Its 99.9% confidence interval was entirely above the JDK path's
+interval, and the Gradle verification passed its policy gate requiring the
 intrusive producer metric to exceed the JDK metric by at least 2%.
+
+The improvement came from adopting CLQ's tail-slack strategy. The earlier
+implementation attempted to update the producer-shared tail after every
+successful link. The optimized implementation skips that update when the
+producer appended directly to its initial tail candidate and advances tail
+after a later producer traverses beyond it. This retains the intrusive
+representation and MPSC consumer specialization while removing unnecessary
+tail cache-line traffic.
 
 This outcome is important:
 
 - lower allocation is a stable structural advantage for the compared paths;
 - lower round-trip latency was observed on this host;
-- higher MPSC throughput must not be presented as universal;
+- higher MPSC throughput was demonstrated for this controlled topology;
 - virtualization, scheduling, NUMA placement, CPU frequency, JIT decisions,
   GC phase, and producer/consumer balance can change throughput;
 - a successful verification run is evidence for that environment, not proof
   that one implementation dominates all environments.
+
+```mermaid
+flowchart LR
+    IR["Intrusive representation"] --> OA["One object per record"]
+    OA --> BA["16 B/op measured saving"]
+    OA --> GI["No wrapper item indirection"]
+
+    SC["Single-consumer specialization"] --> NC["No item-claim CAS"]
+    SC --> PH["Plain owner head write"]
+
+    TS["JDK-derived tail slack"] --> TC["Fewer tail CAS updates"]
+    TC --> CC["Less shared cache-line traffic"]
+
+    BR["Batched retirement"] --> AR["Amortized release stores"]
+    BR --> BD["At most 15 partial retired nodes"]
+
+    BA --> LAT["Lower measured round-trip latency"]
+    GI --> LAT
+    NC --> LAT
+    PH --> LAT
+    CC --> THR["Higher measured MPSC throughput"]
+    AR --> THR
+    BD --> MEM["Lower observed memory pressure"]
+
+    classDef design fill:#dbeafe,stroke:#1d4ed8,color:#111
+    classDef mechanism fill:#fef3c7,stroke:#a16207,color:#111
+    classDef evidence fill:#dcfce7,stroke:#166534,color:#111
+    class IR,SC,TS,BR design
+    class OA,GI,NC,PH,TC,CC,AR,BD mechanism
+    class BA,LAT,THR,MEM evidence
+```
+
+Arrows in this causal map identify plausible mechanisms supported by source
+inspection and aggregate measurements. They do not claim that the experiment
+independently estimates every arrow. A factorial benchmark would be required
+to isolate each mechanism's effect.
 
 ### 10.4 Recommended experimental protocol
 
@@ -610,6 +1358,61 @@ For publishable comparisons:
 9. Run end-to-end SBK workloads in addition to microbenchmarks. A nanosecond
    queue result may be immaterial for a millisecond storage operation.
 10. Retain correctness gates independently of performance outcomes.
+
+### 10.5 End-to-end SBK evaluation with PerlBench
+
+The queue JMH benchmark isolates add/poll latency and allocation. The
+[`PerlBench` driver](../drivers/perlbench/README.md) answers a different
+question: how do the queue paths affect the complete SBK worker, clock,
+timestamp publication, recorder, latency-window, and reporting pipeline?
+
+```mermaid
+flowchart LR
+    PB["PerlBench no-op operation"]
+    TS["Start and end timestamp"]
+    SEL{"-mpscqueue"}
+    MQ["TimeStampMpscQueue"]
+    JQ["JDK ConcurrentLinkedQueue"]
+    REC["One PerL recorder"]
+    RES["Throughput, latency,<br/>count, process memory"]
+
+    PB --> TS --> SEL
+    SEL -->|"true"| MQ
+    SEL -->|"false"| JQ
+    MQ --> REC
+    JQ --> REC
+    REC --> RES
+
+    classDef intrusive fill:#dcfce7,stroke:#166534,color:#111
+    classDef fallback fill:#e0e7ff,stroke:#4338ca,color:#111
+    class MQ intrusive
+    class JQ fallback
+```
+
+For a deliberate all-producers-to-one-queue experiment, set `maxQs=1` in
+`sbk-api/src/main/resources/sbk.properties` and rebuild SBK. Queue topology is
+not exposed as a command-line option because an unsuitable shared-queue count
+can add benchmark-harness contention. Use `-records` to verify exact delivery
+and complete draining, `-seconds` for maximum timed throughput, and `-seconds`
+with `-throughput` to compare latency and stability at the same offered MB/s.
+Startup logs identify the effective queue implementation and topology.
+
+The operation's end timestamp is captured before queue insertion. PerlBench
+latency percentiles therefore measure the no-op operation and clock path, not
+direct enqueue latency. Queue effects appear in sustainable record rate,
+allocation, garbage collection, memory, and drain behavior. This separation
+is why JMH and PerlBench are complementary rather than interchangeable.
+
+On the Section 10.2 host, three 20-million-record runs with four producers and
+one shared queue had median rates of 5.53 M records/s for the intrusive queue
+and 5.19 M records/s for the JDK path, a 6.6% advantage. Median peak resident
+memory was about 1.24 GiB and 1.54 GiB respectively. A one-producer timed run
+favored the intrusive queue by 26.9%. Fresh six-second saturation checks after
+the tail-slack change measured 5.61 M records/s versus 4.47 M with four writers
+and 8.11 M records/s versus 6.16 M with one reader. All runs reported zero
+invalid latencies. These observations support both the microbenchmark mechanism
+and the end-to-end benefit, while remaining specific to the declared host,
+JVM, topology, and workload.
 
 ## 11. Correctness and reclamation evidence
 
@@ -661,9 +1464,11 @@ Commands:
 Lincheck and JCStress are complementary. Lincheck searches operation histories
 for violations of a sequential FIFO model. JCStress samples Java Memory Model
 outcomes and can expose publication or reordering errors. Neither can enumerate
-all executions of an unbounded concurrent system.
+all executions of an unbounded concurrent system [11, 12].
 
 ## 12. Limitations and threats to validity
+
+### 12.1 TimeStampMpscQueue limitations
 
 1. **Single-consumer requirement.** A second consumer creates a data race on
    `head` and invalidates the design.
@@ -688,7 +1493,114 @@ all executions of an unbounded concurrent system.
     `ConcurrentLinkedQueue` implementation details may change. Re-run the full
     evidence suite for each supported JDK.
 
-## 13. References
+### 12.2 Comparison limitations
+
+1. **Specialized versus general-purpose API.** The performance comparison is
+   intentionally asymmetric: CLQ provides substantially more functionality.
+   Results must not be generalized to workloads requiring multiple consumers,
+   iteration, or arbitrary removal.
+2. **Object-size dependence.** The observed 40 B/op and 56 B/op values depend
+   on JDK 25, compact headers, alignment, and the benchmark path. The
+   one-object-versus-two-object distinction is structural; exact bytes are not.
+3. **JMH topology.** Four producers and one consumer represent an important
+   PerL case but do not cover every producer count, queue depth, NUMA placement,
+   or consumer service rate.
+4. **End-to-end coupling.** PerlBench includes timestamp capture, worker
+   scheduling, recorder work, reporting, JVM warm-up, and shutdown. Its
+   throughput difference cannot be assigned only to the queue.
+5. **Short saturation observations.** Six-second SBK runs are smoke-level
+   evidence. Publication-quality results need longer alternating runs,
+   multiple process forks, affinity control, and preserved raw data.
+6. **No formal proof.** Linearization arguments, JCStress, Lincheck, unit
+   tests, and GC soaks provide complementary confidence but are not a
+   machine-checked proof over all executions.
+7. **Collector dependence.** ZGC was used for the reported measurement.
+   Generational ZGC, G1, Shenandoah, and other collectors can respond
+   differently to allocation rate and cross-generational links.
+8. **Hardware dependence.** CAS cost, cache-coherence behavior, memory
+   bandwidth, SMT, and frequency scaling differ across architectures.
+
+```mermaid
+flowchart TB
+    CLAIM["Measured result on declared host"]
+    JVM["JVM and GC"]
+    HW["CPU, NUMA, cache hierarchy"]
+    LOAD["Producer count and queue depth"]
+    OS["Scheduler and virtualization"]
+    API["Required queue semantics"]
+    GENERAL["Valid conclusion"]
+
+    JVM --> CLAIM
+    HW --> CLAIM
+    LOAD --> CLAIM
+    OS --> CLAIM
+    API --> CLAIM
+    CLAIM --> GENERAL
+    GENERAL --> TEXT["For PerL's MPSC contract, this implementation<br/>showed lower allocation and better measured performance"]
+    GENERAL -. "does not establish" .-> UNIVERSAL["Universal dominance over CLQ"]
+
+    classDef factor fill:#fef3c7,stroke:#a16207,color:#111
+    classDef evidence fill:#dcfce7,stroke:#166534,color:#111
+    classDef warning fill:#fee2e2,stroke:#991b1b,color:#111
+    class JVM,HW,LOAD,OS,API factor
+    class CLAIM,GENERAL,TEXT evidence
+    class UNIVERSAL warning
+```
+
+### 12.3 When CLQ remains the better engineering choice
+
+Use JDK `ConcurrentLinkedQueue` when any of the following is required:
+
+- more than one consumer;
+- a general `Queue<E>` usable by unrelated element types;
+- weakly consistent iteration or spliteration;
+- arbitrary element removal or Collection bulk operations;
+- JDK-maintained implementation and compatibility are more important than
+  PerL-specific allocation savings;
+- the workload has not justified the verification burden of custom lock-free
+  code.
+
+Use neither unbounded linked queue when a hard memory limit or explicit
+backpressure is required.
+
+## 13. Conclusion
+
+JDK 25 `ConcurrentLinkedQueue` is a mature, lock-free, general-purpose MPMC
+collection. Its private wrapper node, item-claim CAS, shared head coordination,
+dead-node traversal, and Collection operations are consequences of that broad
+contract. They are useful when the application needs them.
+
+PerL has a narrower topology: many timestamp producers, exactly one recorder,
+FIFO hand-off, single-use elements, and no iteration or arbitrary removal.
+`TimeStampMpscQueue` converts those restrictions into implementation
+advantages:
+
+- `TimeStampNode` combines payload and link, removing one object and one
+  indirection per measurement;
+- the consumer owns `head`, eliminating an MPMC item-claim CAS and shared head
+  CAS;
+- separately padded head and tail state reduce likely producer-consumer cache
+  interference;
+- the queue retains CLQ's successful final-link CAS, tail-as-hint invariant,
+  self-link recovery concept, and one-node tail slack;
+- batched self-link retirement is adapted to the fact that an intrusive node
+  cannot discard a separate payload reference.
+
+The resulting implementation allocated 40 B/op rather than 56 B/op in the
+declared JDK 25 experiment, measured 30.55% lower round-trip latency, and
+measured 14.35% higher four-producer throughput. End-to-end PerlBench evidence
+was consistent with the microbenchmark and showed lower observed process
+memory. Correctness and reclamation are covered by deterministic tests,
+constrained-heap GC tests, Lincheck, and JCStress.
+
+The defensible conclusion is therefore specific: for SBK PerL's declared MPSC
+timestamp contract, the intrusive specialization removes unnecessary storage
+allocation and coordination and performs better in the reported environment.
+It is not a replacement for CLQ's general MPMC Collection semantics, and its
+performance and correctness evidence must continue to be rerun as the JDK,
+hardware, and queue implementation evolve.
+
+## 14. References
 
 ### Foundational research
 
@@ -710,20 +1622,29 @@ all executions of an unbounded concurrent system.
 5. OpenJDK, [JEP 193: Variable Handles](https://openjdk.org/jeps/193).
 6. Oracle, [`VarHandle`, Java SE 25 API](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/invoke/VarHandle.html).
 7. OpenJDK, [JEP 519: Compact Object Headers](https://openjdk.org/jeps/519).
+8. Oracle, [Java Language Specification, Chapter 17: Threads and
+   Locks](https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html).
+9. OpenJDK, [Java Object Layout](https://openjdk.org/projects/code-tools/jol/).
 
 ### Evaluation and concurrency testing
 
-8. OpenJDK, [Java Microbenchmark Harness](https://github.com/openjdk/jmh).
-9. OpenJDK, [Java Concurrency Stress tests](https://openjdk.org/projects/code-tools/jcstress/).
-10. JetBrains, [Lincheck](https://github.com/JetBrains/lincheck) and
+10. OpenJDK, [Java Microbenchmark Harness](https://github.com/openjdk/jmh).
+11. OpenJDK, [Java Concurrency Stress tests](https://openjdk.org/projects/code-tools/jcstress/).
+12. JetBrains, [Lincheck](https://github.com/JetBrains/lincheck) and
     [result validation](https://kotlinlang.org/docs/lincheck-results-validation.html).
+13. A. Georges, D. Buytaert, and L. Eeckhout, "Statistically Rigorous
+    Java Performance Evaluation," *Proceedings of OOPSLA*, 2007.
+    [DOI: 10.1145/1297027.1297033](https://doi.org/10.1145/1297027.1297033).
+14. T. Kalibera and R. Jones, "Rigorous Benchmarking in Reasonable
+    Time," *Proceedings of ISMM*, 2013.
+    [DOI: 10.1145/2464157.2464160](https://doi.org/10.1145/2464157.2464160).
 
 ### SBK implementation evidence
 
-11. [`TimeStampNode`](../perl/src/main/java/io/perl/api/TimeStampNode.java).
-12. [`TimeStampMpscQueue`](../perl/src/main/java/io/perl/api/impl/TimeStampMpscQueue.java).
-13. [`TimeStampQueueBenchmark`](../perl/src/jmh/java/io/perl/benchmark/TimeStampQueueBenchmark.java).
-14. [`TimeStampMpscQueueTest`](../perl/src/test/java/io/perl/api/impl/TimeStampMpscQueueTest.java).
-15. [`TimeStampMpscQueueLincheckTest`](../perl/src/lincheck/java/io/perl/api/impl/TimeStampMpscQueueLincheckTest.java).
-16. [`TimeStampMpscQueuePublicationStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueuePublicationStress.java).
-17. [`TimeStampMpscQueueProducerOrderStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueueProducerOrderStress.java).
+15. [`TimeStampNode`](../perl/src/main/java/io/perl/api/TimeStampNode.java).
+16. [`TimeStampMpscQueue`](../perl/src/main/java/io/perl/api/impl/TimeStampMpscQueue.java).
+17. [`TimeStampQueueBenchmark`](../perl/src/jmh/java/io/perl/benchmark/TimeStampQueueBenchmark.java).
+18. [`TimeStampMpscQueueTest`](../perl/src/test/java/io/perl/api/impl/TimeStampMpscQueueTest.java).
+19. [`TimeStampMpscQueueLincheckTest`](../perl/src/lincheck/java/io/perl/api/impl/TimeStampMpscQueueLincheckTest.java).
+20. [`TimeStampMpscQueuePublicationStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueuePublicationStress.java).
+21. [`TimeStampMpscQueueProducerOrderStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueueProducerOrderStress.java).

@@ -64,6 +64,7 @@ This directory contains the authoritative engineering documentation for Storage 
 | [WEB_LOGGER.md](WEB_LOGGER.md) | Local live dashboard usage, lifecycle, options, security, and troubleshooting |
 | [sbk-internals.md](sbk-internals.md) | Detailed design rationale and research-oriented treatment |
 | [TIMESTAMP_MPSC_QUEUE.md](TIMESTAMP_MPSC_QUEUE.md) | Intrusive timestamp queue architecture, JDK comparison, correctness evidence, and research methodology |
+| [PerlBench driver](../drivers/perlbench/README.md) | End-to-end timestamp-queue comparison using exact-count, timed, and rate-controlled SBK workloads |
 | Component READMEs | Component operation and component-specific examples |
 | Driver READMEs | Backend prerequisites, properties, limitations, and example commands |
 

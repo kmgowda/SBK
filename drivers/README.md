@@ -38,6 +38,11 @@ The per-driver README describes backend prerequisites and examples. Always confi
 ./build/install/sbk/bin/sbk -class <driver> -help
 ```
 
+For measurement-pipeline experiments rather than storage I/O, use the
+[`PerlBench` synthetic driver](perlbench/README.md). It provides reproducible
+commands for comparing `TimeStampMpscQueue` and the JDK
+`ConcurrentLinkedQueue` path.
+
 ## Status distinctions
 
 - Enabled: present in both `settings-drivers.gradle` and `build-drivers.gradle`.
