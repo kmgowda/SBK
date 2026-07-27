@@ -108,10 +108,15 @@ Discovery uses simple Java class names. Keep directory, package, public class, r
 | Relational operations | `drivers/jdbc` and a concrete SQL driver |
 | Custom payload type | `drivers/file`, `drivers/csv`, or `drivers/fdbrecord` |
 | Callback reader | Search for implementations of `AbstractCallbackReader` |
-| Minimal no-op storage baseline | `drivers/null` |
-| End-to-end SBK/PerL queue comparison | `drivers/perlbench` |
+| Idle windows, pending futures, timeout, and shutdown | `drivers/null` |
+| Immediate synthetic completions and end-to-end SBK/PerL queue comparison | `drivers/perlbench` |
 
 Prefer the driver whose SDK and completion semantics resemble the new backend, not merely the driver with the shortest source.
+
+`null` and `perlbench` are not interchangeable no-op baselines. The default
+Null write intentionally remains incomplete, whereas every PerlBench operation
+completes immediately and feeds a timestamp into PerL. Use their READMEs to
+avoid interpreting an idle-control result as measurement-pipeline throughput.
 
 ## Add a driver
 

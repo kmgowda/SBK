@@ -63,7 +63,18 @@ keeps stale-producer retention bounded while grouping reclamation stores.
 Nodes are not pooled because pooling retains heap and introduces ownership and
 ABA hazards.
 
-Set the following in `perl.properties` to restore the previous JDK path:
+For an SBK command, select the fallback at runtime:
+
+```bash
+./build/install/sbk/bin/sbk \
+  -class perlbench -writers 4 -size 1024 -records 1000000 \
+  -mpscqueue false
+```
+
+`-mpscqueue true` selects the intrusive queue. If the option is absent, SBK
+uses `MpscQueueEnable` from
+`sbk-api/src/main/resources/sbk.properties`. Standalone PerL users instead set
+the same property in `perl/src/main/resources/perl.properties`:
 
 ```properties
 MpscQueueEnable=false
@@ -109,7 +120,22 @@ constraints are documented in the
 
 ## Configuration
 
-Defaults are in `src/main/resources/perl.properties` and `sbk-api/src/main/resources/sbk.properties`. They control queue counts, idle behavior, latency storage limits, and histogram fallback. Use `PerlBuilder` as the source-level entry point for understanding how a configuration selects implementations.
+Standalone PerL defaults are in `src/main/resources/perl.properties`. SBK
+launches use `sbk-api/src/main/resources/sbk.properties`, which contains the
+equivalent queue, idle, latency-storage, and histogram defaults.
+
+For SBK:
+
+- `-mpscqueue true|false` overrides only `MpscQueueEnable`;
+- `qPerWorker` and `maxQs` determine queue topology and remain property-backed;
+- invalid negative `maxQs` or `qPerWorker` below the supported minimum is
+  rejected while common parameters are constructed;
+- startup logs show the effective queue implementation and topology.
+
+Use `SbkParameters.loadPerlConfig()` and
+`SbkBenchmark.buildPerlConfig()` to follow SBK's property-to-runtime path.
+Use `PerlBuilder` as the source-level entry point for standalone PerL
+construction.
 
 ## Build and test
 

@@ -201,9 +201,10 @@ In practice that means:
    linked node, avoiding the separate wrapper allocated by a general-purpose
    `ConcurrentLinkedQueue`. PerL shards traffic across an array of queues to
    reduce contention, while a single recorder owns each latency window.
-   `MpscQueueEnable=false` restores the JDK queue path for compatibility and
-   comparison. Lock-free does not mean zero cost: enqueue can retry a CAS, but
-   progress does not depend on another thread releasing a lock (§3).
+   `MpscQueueEnable=false` supplies a property-level JDK fallback, while the
+   common `-mpscqueue false` option can select that path for one SBK run.
+   Lock-free does not mean zero cost: enqueue can retry a CAS, but progress
+   does not depend on another thread releasing a lock (§3).
 
 3. **The framework is its own ecosystem.** **PerL** (Performance Logger,
    the latency library) is a reusable Java library independent of SBK;
@@ -449,9 +450,11 @@ The two channel implementations remain independent.
 `TimeStampMpscQueueChannel` extends `TimeStampMpscQueueArray`; every element is
 a `TimeStampNode`, derived from `TimeStamp`, with its queue link in the same
 object. The original `CQueueChannel` continues to extend
-`ConcurrentLinkedQueueArray<TimeStamp>` unchanged. `MpscQueueEnable` selects
-which channel class is constructed. Both provide **non-blocking queue
-operations** without an application mutex or monitor.
+`ConcurrentLinkedQueueArray<TimeStamp>` unchanged. `MpscQueueEnable` supplies
+the property default, and SBK's common `-mpscqueue true|false` option overrides
+that selection before either writer or reader PerL instance is built. Both
+provide **non-blocking queue operations** without an application mutex or
+monitor.
 
 The array-of-queues design is the scaling layer. `CQueuePerl` normally
 creates one channel per configured worker. Each channel contains
@@ -824,8 +827,11 @@ flowchart LR
     class HDR,CSV bounded
 ```
 
-The defaults in
-[perl.properties](../perl/src/main/resources/perl.properties):
+Standalone PerL defaults are in
+[perl.properties](../perl/src/main/resources/perl.properties). SBK applications
+load the equivalent values from
+[`sbk.properties`](../sbk-api/src/main/resources/sbk.properties), then apply
+the optional `-mpscqueue` override:
 
 ```properties
 maxArraySizeMB=64           # Use Array backend if latency range fits
@@ -836,6 +842,12 @@ histogram=false             # Optional HdrHistogram for total window
 csv=false                   # Optional raw-CSV total backend
 csvFileSizeGB=1
 ```
+
+`qPerWorker` and `maxQs` are topology properties, not public command-line
+options. SBK validates them while loading `sbk.properties` and prints the
+effective queue name and topology at startup. Keeping topology fixed while
+changing only `-mpscqueue` makes JDK-versus-intrusive comparisons less prone
+to accidental configuration drift.
 
 **How available memory changes the design:** an array has predictable memory
 and direct indexing, but its size is proportional to the configured latency
@@ -2846,8 +2858,11 @@ your "Experimental Setup" section makes the study fully reproducible:
 
 1. **SBK version and commit hash** from the exact build under test.
 2. **Driver** used (e.g. `minio`, `cassandra`, `kafka`).
-3. **PerL configuration**: `qPerWorker`, `idleNS`, `maxArraySizeMB`,
-   `maxHashMapSizeMB`, `histogram` (yes/no). Defaults are in
+3. **PerL configuration**: effective `-mpscqueue` selection,
+   `qPerWorker`, `maxQs`, `idleNS`, `maxArraySizeMB`, `maxHashMapSizeMB`, and
+   `histogram` (yes/no). SBK defaults are in
+   [`sbk.properties`](../sbk-api/src/main/resources/sbk.properties);
+   standalone PerL defaults are in
    [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
    `-records`, `-throughput`, and any driver-specific flags.

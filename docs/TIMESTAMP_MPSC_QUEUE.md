@@ -1511,6 +1511,12 @@ The queue JMH benchmark isolates add/poll latency and allocation. The
 question: how do the queue paths affect the complete SBK worker, clock,
 timestamp publication, recorder, latency-window, and reporting pipeline?
 
+The [`Null` driver](../drivers/null/README.md) is not a substitute for this
+experiment. Its default write deliberately remains incomplete, so it exercises
+idle reporting, timeout, interruption, and shutdown without publishing a
+completed timestamp. PerlBench deliberately does the opposite: every
+operation completes immediately and enters the selected timestamp queue.
+
 ```mermaid
 flowchart LR
     PB["PerlBench no-op operation"]

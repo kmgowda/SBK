@@ -28,6 +28,22 @@ This is not a storage benchmark. Use it to compare PerL configurations,
 estimate the measurement ceiling of a machine, and check whether timestamp
 collection can keep up with a proposed storage workload.
 
+## Why PerlBench is not the Null driver
+
+Both drivers avoid external storage, but they test different parts of SBK:
+
+| Property | `PerlBench` | [`Null`](../null/README.md) |
+|---|---|---|
+| Default write | Immediate synchronous completion | Incomplete future that remains pending until timeout or shutdown |
+| Read | Immediate, preallocated payload | Sleeps for the configured timeout and returns `null` |
+| Timestamp production | One completed measurement per operation | No completed measurement on the default path |
+| Main question | How fast can SBK and PerL process completed operations? | Does idle reporting, timeout, interruption, and shutdown work correctly? |
+
+Using `Null` for queue throughput would mostly measure an idle or blocked
+worker. Using `PerlBench` for timeout behavior would never create the required
+pending operation. Keeping separate driver identities prevents these results
+from being confused.
+
 ## What the driver measures
 
 ```mermaid

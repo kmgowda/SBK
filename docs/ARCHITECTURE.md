@@ -201,7 +201,7 @@ flowchart LR
     W1[Worker 1] --> C[PerlChannel]
     W2[Worker 2] --> C
     WN[Worker N] --> C
-    C --> Q[Concurrent queue array]
+    C --> Q[Selected timestamp queue array]
     Q --> R[Performance recorder]
     R --> P[Periodic window]
     R --> T[Total window]
@@ -211,11 +211,34 @@ flowchart LR
 
 Each measurement contains start time, end time, record count, and byte count. PerL records all submitted operations rather than sampling them. The recorder drains concurrent queues and updates latency storage and counters away from the I/O worker.
 
+By default, the selected array contains intrusive
+`TimeStampMpscQueue` instances. Each submitted `TimeStampNode` is both the
+measurement payload and its linked-queue node, so enqueue does not allocate a
+second wrapper. `-mpscqueue false` selects the compatibility path based on JDK
+`ConcurrentLinkedQueue<TimeStamp>`; `-mpscqueue true` selects the intrusive
+path. The default comes from `MpscQueueEnable` in
+`sbk-api/src/main/resources/sbk.properties`.
+
+Queue topology is a separate concern. `qPerWorker` and `maxQs` remain
+property-backed settings rather than public CLI options. SBK prints both the
+effective queue implementation and topology after argument parsing, before the
+benchmark starts.
+
+The timestamp queues have a multiple-producer, single-consumer workload:
+worker threads produce measurements and the PerL recorder consumes them.
+`TimeStampMpscQueue` specializes for that contract; the JDK fallback retains
+general MPMC Collection behavior. See
+[the queue research guide](TIMESTAMP_MPSC_QUEUE.md) for linearization,
+memory-ordering, reclamation, complexity, and benchmark evidence.
+
 The phrase “lock-free hot path” applies to harness measurement transport. It does not promise that a vendor SDK, filesystem, JVM scheduler, allocator, or backend is lock-free. Driver wrappers should avoid adding their own locks to the per-operation path.
 
 Primary sources:
 
 - `perl/src/main/java/io/perl/api/PerlChannel.java`
+- `perl/src/main/java/io/perl/api/TimeStampNode.java`
+- `perl/src/main/java/io/perl/api/impl/TimeStampMpscQueue.java`
+- `perl/src/main/java/io/perl/api/impl/TimeStampMpscQueueArray.java`
 - `perl/src/main/java/io/perl/api/impl/ConcurrentLinkedQueueArray.java`
 - `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java`
 - `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleSleep.java`
@@ -275,6 +298,13 @@ Configuration comes from several layers:
 5. Parsed CLI values override applicable defaults.
 6. YAL variants translate YML entries into the same argument model; they do not bypass normal validation.
 
+For the PerL transport, `MpscQueueEnable` supplies the default and the common
+`-mpscqueue true|false` option overrides it for that benchmark. The topology
+properties `qPerWorker` and `maxQs` are validated when `SbkParameters` loads
+`sbk.properties`, but are not exposed as command-line options. This keeps an
+A/B queue comparison to one explicit runtime switch while preventing
+accidental topology changes between runs.
+
 Use generated `-help` output as the authority for accepted options. Use the relevant resource property file as the authority for defaults that are not printed in help.
 
 ## Packaging and class loading
@@ -298,6 +328,7 @@ A driver can compile successfully yet be unavailable at runtime if either regist
 | Add a payload representation | `io.sbk.data` implementation |
 | Add result output | `io.sbk.logger` implementation |
 | Change latency storage or percentile behavior | `perl` |
+| Change timestamp queue selection or topology | `perl`, `SbkParameters`, and `SbkBenchmark` |
 | Change distributed aggregation | `sbm` and protobuf compatibility review |
 | Change remote launch | `sbk-gem` |
 | Change YML mapping | the applicable YAL module |
@@ -326,8 +357,10 @@ For a practical code walkthrough:
 6. `SbkWriter`, `SbkReader`, `Writer`, and `Reader`
 7. `perl/src/main/java/io/perl/api/impl/PerlBuilder.java`
 8. The PerL queue and recorder selected by that builder
-9. `GrpcLogger` and `SbmGrpcService` for distributed reporting
-10. `SbkGem` and `SbkGemBenchmark` for remote orchestration
+9. `drivers/perlbench/` and [the queue research guide](TIMESTAMP_MPSC_QUEUE.md)
+   for a controlled end-to-end queue comparison
+10. `GrpcLogger` and `SbmGrpcService` for distributed reporting
+11. `SbkGem` and `SbkGemBenchmark` for remote orchestration
 
 ## Architectural invariants
 

@@ -218,7 +218,7 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-seconds N` | Time-based run duration |
 | `-records N` | Total records in count mode, or the per-second target in timed mode |
 | `-throughput MBPS` | Throughput target; `-1` requests maximum throughput |
-| `-mpscqueue true\|false` | Select intrusive `TimeStampMpscQueue` or the JDK `ConcurrentLinkedQueue` fallback |
+| `-mpscqueue true\|false` | Select intrusive `TimeStampMpscQueue` or the JDK `ConcurrentLinkedQueue` fallback; default comes from `sbk.properties` |
 | `-sync N` | Records per flush/sync or transaction |
 | `-ro true` | With readers and writers configured, read without writing new records |
 | `-thread p\|f\|v` | Platform, fork-join, or virtual worker executor; default: virtual (`v`) |
@@ -248,7 +248,9 @@ Use the synthetic [`PerlBench` driver](drivers/perlbench/README.md) to compare
 the intrusive PerL timestamp queue with the JDK fallback under exact-count,
 timed-saturation, and rate-controlled workloads. It performs no storage I/O,
 so its results describe harness and measurement-pipeline behavior rather than
-a storage device.
+a storage device. Do not confuse it with the [`Null` driver](drivers/null/README.md):
+Null's default operation deliberately remains pending for idle, timeout, and
+shutdown tests, while PerlBench completes every operation immediately.
 
 SBK currently ships these logger implementations:
 
