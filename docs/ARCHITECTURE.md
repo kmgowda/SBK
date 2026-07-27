@@ -231,6 +231,26 @@ general MPMC Collection behavior. See
 [the queue research guide](TIMESTAMP_MPSC_QUEUE.md) for linearization,
 memory-ordering, reclamation, complexity, and benchmark evidence.
 
+`TimeStampMpscQueue` uses one single-use `TimeStampNode` as both payload and
+link. Producers publish through a CAS on the predecessor's `next` reference;
+the single consumer owns `head`. Every 16 dequeues, the consumer
+release-publishes a recovery head and self-links the retired predecessor
+batch. A producer paused on an old node detects that self-link and resumes
+from the recovery head. This bounds stale-chain retention without pooling
+nodes or adding a consumer-side head CAS. The specialization is appropriate
+only for PerL's many-producer/one-consumer hand-off; it is not intended for
+multiple consumers, iterators, arbitrary removals, or general collection use.
+
+The default recorder also avoids querying the clock on every queue scan.
+While records are available it reuses `TimeStamp.endTime`. While all queues
+are empty, `ElasticWait` parks and checks the clock only after an adaptively
+calibrated batch. The learned parks-per-millisecond rate is retained in an
+exponential moving average. When activity briefly interrupts idleness, the
+first subsequent empty scan starts a clean idle sample from the last record
+timestamp while retaining that learned rate. This prevents active time from
+diluting calibration and adds no new clock read. Setting `sleepMS > 0`
+selects the simpler sleeping recorder and bypasses `ElasticWait`.
+
 The phrase “lock-free hot path” applies to harness measurement transport. It does not promise that a vendor SDK, filesystem, JVM scheduler, allocator, or backend is lock-free. Driver wrappers should avoid adding their own locks to the per-operation path.
 
 Primary sources:
@@ -242,6 +262,7 @@ Primary sources:
 - `perl/src/main/java/io/perl/api/impl/ConcurrentLinkedQueueArray.java`
 - `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java`
 - `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleSleep.java`
+- `perl/src/main/java/io/perl/api/impl/ElasticWait.java`
 - `perl/src/main/java/io/perl/api/impl/PerlBuilder.java`
 
 ## Output boundary

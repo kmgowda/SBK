@@ -137,6 +137,48 @@ Use `SbkParameters.loadPerlConfig()` and
 Use `PerlBuilder` as the source-level entry point for standalone PerL
 construction.
 
+## Elastic idle waiting
+
+With the default `sleepMS=0`, `PerformanceRecorderIdleBusyWait` is the sole
+consumer of the timestamp queues. The historical class name does not mean a
+tight spin: after a complete scan finds no data, the recorder calls
+`LockSupport.parkNanos(idleNS)`. `ElasticWait` learns the number of completed
+parks per millisecond and uses that rate to decide how many parks may occur
+before the recorder samples the clock again.
+
+```text
+records available -> reuse TimeStamp.endTime -> no recorder clock call
+queues empty       -> park and count         -> no clock call within batch
+batch complete     -> sample clock once      -> update EMA and next threshold
+```
+
+Calibration begins conservatively with a clock check after one park. If the
+clock has not advanced, the bootstrap batch grows exponentially up to a
+bounded threshold. Once measurable elapsed time exists, the observed park
+rate is folded into an exponential moving average. This adapts to operating
+system timer granularity, scheduling, CPU speed, and platform versus virtual
+thread behavior instead of assuming that `parkNanos` sleeps for precisely the
+requested duration.
+
+A window may alternate between idle and active periods. On the first empty
+scan after consuming data, the recorder calls `ElasticWait.startIdle()` with
+elapsed time derived from the last record's `endTime`. It discards the
+previous idle-period counters but retains the learned EMA rate. Active
+processing time therefore cannot dilute the next idle-rate sample, and the
+transition introduces no additional clock query. The sample origin never
+moves backwards if producer completion timestamps arrive out of order.
+
+`ElasticWait` applies only to the default idle-parking recorder.
+Setting `sleepMS > 0` selects `PerformanceRecorderIdleSleep`, which sleeps for
+the configured interval and does not use adaptive calibration. `idleNS`
+controls the responsiveness/idle-CPU tradeoff; its SBK default is 1 ms and its
+enforced minimum is 1 µs. Neither setting changes the operation latency
+already captured by the worker, but a longer idle delay can temporarily grow
+the queue backlog after new data arrives.
+
+The complete recorder state and timing diagrams are in
+[the internal design guide](../docs/sbk-internals.md#pillar-3--elasticwait-amortising-clock-queries).
+
 ## Build and test
 
 From the repository root:

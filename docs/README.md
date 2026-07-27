@@ -37,7 +37,8 @@ This directory contains the authoritative engineering documentation for Storage 
 ### Maintainer or reviewer
 
 1. [Architecture and code flow](ARCHITECTURE.md): ownership boundaries and lifecycle.
-2. [Internal design](sbk-internals.md): detailed PerL, SBM, SBP, and measurement design.
+2. [Internal design](sbk-internals.md): detailed PerL measurement flow,
+   `ElasticWait`, timestamp queues, SBM, and SBP design.
 3. [TimeStampMpscQueue research guide](TIMESTAMP_MPSC_QUEUE.md): intrusive MPSC queue architecture, correctness evidence, JDK comparison, and reproducible performance methodology.
 4. [Documentation maintenance](DOCUMENTATION_GUIDE.md): how to keep examples and links current.
 5. [Agent-documentation distribution](AGENT_DOCUMENTATION_DISTRIBUTION.md): how documentation enters release artifacts.
