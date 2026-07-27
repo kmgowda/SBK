@@ -38,6 +38,16 @@ The per-driver README describes backend prerequisites and examples. Always confi
 ./build/install/sbk/bin/sbk -class <driver> -help
 ```
 
+Two synthetic drivers intentionally cover different harness states:
+
+| Driver | Use |
+|---|---|
+| [`Null`](null/README.md) | Pending operations, zero-record periodic windows, timeout, interruption, and shutdown |
+| [`PerlBench`](perlbench/README.md) | High-rate completed operations and reproducible `TimeStampMpscQueue` versus JDK `ConcurrentLinkedQueue` comparisons |
+
+Neither produces storage-system results. Do not use `Null` as the queue
+throughput baseline: its default operation deliberately remains incomplete.
+
 ## Status distinctions
 
 - Enabled: present in both `settings-drivers.gradle` and `build-drivers.gradle`.

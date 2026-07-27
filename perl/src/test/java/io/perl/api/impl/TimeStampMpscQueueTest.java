@@ -84,6 +84,15 @@ public class TimeStampMpscQueueTest {
     }
 
     /**
+     * Verifies that concurrency tests cannot inject an invalid batch size.
+     */
+    @Test
+    public void rejectsNonPositiveRetirementBatchSize() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new TimeStampMpscQueue(0));
+    }
+
+    /**
      * Verifies that the queue array rejects non-intrusive timestamps.
      */
     @Test

@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies time-driven reporting when the Null driver completes no writes.
@@ -30,8 +31,14 @@ public class NullIdleReportingTest {
     private static final int RUN_SECONDS = 3;
 
     /**
-     * A default Null write remains incomplete, yet PerL must print a zero-value
-     * result at every configured reporting interval.
+     * A default Null write remains incomplete, yet PerL must print zero-value
+     * results for completed reporting intervals.
+     *
+     * <p>The run deadline and the third one-second window share a boundary.
+     * Scheduler delay may make that last window partial; PerL deliberately
+     * excludes partial empty windows from regular interval output. Therefore
+     * a three-second run must produce the first two complete windows and may
+     * produce the boundary-aligned third window.</p>
      *
      * @throws Exception if the timed PerL run cannot complete
      */
@@ -47,8 +54,11 @@ public class NullIdleReportingTest {
                     "The default Null writer must not produce a completed timestamp");
             perl.run(RUN_SECONDS, 0).get(RUN_SECONDS + 5L, TimeUnit.SECONDS);
 
-            assertEquals(RUN_SECONDS, logger.windowPrints.get(),
-                    "PerL must print one empty result per configured interval");
+            final int windowPrints = logger.windowPrints.get();
+            assertTrue(windowPrints >= RUN_SECONDS - 1,
+                    "PerL must print every fully completed empty interval");
+            assertTrue(windowPrints <= RUN_SECONDS,
+                    "PerL must not print beyond the timed run boundary");
             assertEquals(0, logger.windowRecords.get(),
                     "An incomplete Null write must not be counted as completed");
             assertEquals(0, logger.totalRecords.get(),

@@ -37,9 +37,11 @@ This directory contains the authoritative engineering documentation for Storage 
 ### Maintainer or reviewer
 
 1. [Architecture and code flow](ARCHITECTURE.md): ownership boundaries and lifecycle.
-2. [Internal design](sbk-internals.md): detailed PerL, SBM, SBP, and measurement design.
-3. [Documentation maintenance](DOCUMENTATION_GUIDE.md): how to keep examples and links current.
-4. [Agent-documentation distribution](AGENT_DOCUMENTATION_DISTRIBUTION.md): how documentation enters release artifacts.
+2. [Internal design](sbk-internals.md): detailed PerL measurement flow,
+   `ElasticWait`, timestamp queues, SBM, and SBP design.
+3. [TimeStampMpscQueue research guide](TIMESTAMP_MPSC_QUEUE.md): intrusive MPSC queue architecture, correctness evidence, JDK comparison, and reproducible performance methodology.
+4. [Documentation maintenance](DOCUMENTATION_GUIDE.md): how to keep examples and links current.
+5. [Agent-documentation distribution](AGENT_DOCUMENTATION_DISTRIBUTION.md): how documentation enters release artifacts.
 
 ### Coding agent
 
@@ -62,6 +64,8 @@ This directory contains the authoritative engineering documentation for Storage 
 | [DRIVER_SPECIFICATION.md](DRIVER_SPECIFICATION.md) | Fillable design template for new drivers |
 | [WEB_LOGGER.md](WEB_LOGGER.md) | Local live dashboard usage, lifecycle, options, security, and troubleshooting |
 | [sbk-internals.md](sbk-internals.md) | Detailed design rationale and research-oriented treatment |
+| [TIMESTAMP_MPSC_QUEUE.md](TIMESTAMP_MPSC_QUEUE.md) | Intrusive timestamp queue architecture, JDK comparison, correctness evidence, and research methodology |
+| [PerlBench driver](../drivers/perlbench/README.md) | End-to-end timestamp-queue comparison using exact-count, timed, and rate-controlled SBK workloads |
 | Component READMEs | Component operation and component-specific examples |
 | Driver READMEs | Backend prerequisites, properties, limitations, and example commands |
 

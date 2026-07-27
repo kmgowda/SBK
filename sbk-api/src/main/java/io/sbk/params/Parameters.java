@@ -113,4 +113,12 @@ public interface Parameters extends ActionParameter, ThreadTypeParameter {
      * @return get idle sleep in milliseconds .
      */
     int getIdleSleepMilliSeconds();
+
+    /**
+     * Return whether PerL uses the intrusive timestamp MPSC queue.
+     *
+     * @return {@code true} for {@code TimeStampMpscQueue}; {@code false}
+     *         for the JDK concurrent linked queue
+     */
+    boolean isMpscQueueEnabled();
 }

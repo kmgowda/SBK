@@ -26,12 +26,14 @@ import java.util.Queue;
  * <p>Lincheck normally permits every operation to run on every worker. The
  * queue contract permits multiple concurrent {@link #offer(int)} calls but
  * only one consumer, so {@link #poll()} belongs to a non-parallel operation
- * group. The sequential specification is a conventional FIFO queue.</p>
+ * group. The sequential specification is a conventional FIFO queue. A
+ * test-only retirement batch of two makes short generated histories exercise
+ * retired-head self-linking and stale traversal recovery.</p>
  */
 @Param(name = "value", gen = IntGen.class, conf = "1:4")
 public class TimeStampMpscQueueLincheckTest {
     private static final String CONSUMER_GROUP = "single-consumer";
-    private final TimeStampMpscQueue queue = new TimeStampMpscQueue();
+    private final TimeStampMpscQueue queue = new TimeStampMpscQueue(2);
 
     /**
      * Enqueues a timestamp whose start time carries the model value.

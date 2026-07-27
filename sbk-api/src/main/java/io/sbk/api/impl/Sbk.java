@@ -71,7 +71,6 @@ import java.util.concurrent.TimeoutException;
  */
 final public class Sbk {
     final static String BANNERFILE = "banner.txt";
-    final static String CONFIGFILE = "sbk.properties";
 
     /**
      * Creates an SBK bootstrap helper.
@@ -168,8 +167,6 @@ final public class Sbk {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final RWLoggerPackage loggerStore = new RWLoggerPackage(sbkLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
-        final PerlConfig perlConfig = PerlConfig.build(
-                Sbk.class.getClassLoader().getResourceAsStream(CONFIGFILE));
         final Storage<Object> storageDevice;
         final InputParameterOptions params;
         final RWLogger rwLogger;
@@ -184,7 +181,6 @@ final public class Sbk {
         Printer.log.info("{} Website: " + Config.SBK_WEBSITE_NAME, Config.NAME.toUpperCase());
         Printer.log.info("Arguments List: {}", Arrays.toString(args));
         Printer.log.info("Java Runtime Version: {}", System.getProperty("java.runtime.version"));
-        Printer.log.info("PerL Timestamp Queue: {}", perlConfig.getTimestampQueueName());
         Printer.log.info("SBP Version Major: {}, Minor: {}", sbpVersion.major, sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: {}", sbkStoragePackageName);
         Printer.log.info("Logger Package: {}", sbkLoggerPackageName);
@@ -290,6 +286,18 @@ final public class Sbk {
 
         Printer.log.info("Action : {}", params.getAction().toString());
         Printer.log.info("Threads Type: {}", params.getThreadType().toString());
+        final PerlConfig perlConfig = SbkBenchmark.buildPerlConfig(params);
+        Printer.log.info("PerL Timestamp Queue: {}",
+                perlConfig.getTimestampQueueName());
+        if (perlConfig.maxQs > 0) {
+            Printer.log.info("PerL Timestamp Queue Topology: {} shared queue(s)",
+                    perlConfig.maxQs);
+        } else {
+            Printer.log.info(
+                    "PerL Timestamp Queue Topology: {} queue(s) per worker",
+                    Math.max(PerlConfig.MIN_Q_PER_WORKER,
+                            perlConfig.qPerWorker));
+        }
 
         final DataType<Object> dType = (DataType<Object>) storageDevice.getDataType();
         if (dType == null) {

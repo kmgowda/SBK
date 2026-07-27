@@ -175,7 +175,7 @@ The framework's stated design principle, quoted verbatim from
 
 In practice that means:
 
-- **Storage agnostic.** 52 drivers are enabled in the aggregate build today (Kafka,
+- **Storage agnostic.** 53 drivers are enabled in the aggregate build today (Kafka,
   Pulsar, Pravega, BookKeeper, S3, HDFS, Cassandra, MongoDB, Redis,
   RocksDB, PostgreSQL, …). Adding a new one is a matter of implementing
   one Java interface with seven methods.
@@ -201,9 +201,10 @@ In practice that means:
    linked node, avoiding the separate wrapper allocated by a general-purpose
    `ConcurrentLinkedQueue`. PerL shards traffic across an array of queues to
    reduce contention, while a single recorder owns each latency window.
-   `MpscQueueEnable=false` restores the JDK queue path for compatibility and
-   comparison. Lock-free does not mean zero cost: enqueue can retry a CAS, but
-   progress does not depend on another thread releasing a lock (§3).
+   `MpscQueueEnable=false` supplies a property-level JDK fallback, while the
+   common `-mpscqueue false` option can select that path for one SBK run.
+   Lock-free does not mean zero cost: enqueue can retry a CAS, but progress
+   does not depend on another thread releasing a lock (§3).
 
 3. **The framework is its own ecosystem.** **PerL** (Performance Logger,
    the latency library) is a reusable Java library independent of SBK;
@@ -241,7 +242,7 @@ flowchart TB
         GYAL["<b>SBK-GEM-YAL</b><br/>YML + SSH<br/>SbkGemYalMain.main()"]
     end
 
-    subgraph DRIVERS["🔌 Drivers (52 enabled)"]
+    subgraph DRIVERS["🔌 Drivers (53 enabled)"]
         DRV["Kafka · Pulsar · Pravega · S3<br/>HDFS · Cassandra · MongoDB · Redis<br/>JDBC · RocksDB · File · …"]
     end
 
@@ -447,11 +448,13 @@ bytes)` on its hot path — that's the *only* thing it has to do.
 
 The two channel implementations remain independent.
 `TimeStampMpscQueueChannel` extends `TimeStampMpscQueueArray`; every element is
-a `TimeStampNode`, derived from `TimeStamp`, with its queue link in the same
-object. The original `CQueueChannel` continues to extend
-`ConcurrentLinkedQueueArray<TimeStamp>` unchanged. `MpscQueueEnable` selects
-which channel class is constructed. Both provide **non-blocking queue
-operations** without an application mutex or monitor.
+a single-use `TimeStampNode`, the only permitted subclass of `TimeStamp`, with
+its queue link in the same object. The original `CQueueChannel` continues to
+extend `ConcurrentLinkedQueueArray<TimeStamp>` unchanged. `MpscQueueEnable` supplies
+the property default, and SBK's common `-mpscqueue true|false` option overrides
+that selection before either writer or reader PerL instance is built. Both
+provide **non-blocking queue operations** without an application mutex or
+monitor.
 
 The array-of-queues design is the scaling layer. `CQueuePerl` normally
 creates one channel per configured worker. Each channel contains
@@ -467,6 +470,74 @@ The fallback allocates a `TimeStamp`, and `ConcurrentLinkedQueue` allocates
 its internal node. The intrusive path therefore removes one young-generation
 object per operation while keeping percentile calculation, sorting, and
 logger I/O out of the storage-operation call path.
+
+`TimeStampMpscQueue` is specialized for the topology PerL actually has:
+**many worker producers and exactly one recorder consumer**. That restriction
+is what permits the recorder to own `head` without a consumer CAS and permits
+the timestamp itself to be the linked node. It is not a general replacement
+for `ConcurrentLinkedQueue`: use the JDK queue when multiple consumers,
+iterators, arbitrary element types, removal, or collection APIs are required.
+
+```mermaid
+flowchart TD
+    NEED["Queue requirement"] --> TYPE{"PerL timestamp hand-off?"}
+    TYPE -->|"yes"| CARD{"Many producers and<br/>exactly one consumer?"}
+    CARD -->|"yes"| MPSC["TimeStampMpscQueue<br/>intrusive, one object<br/>default: -mpscqueue true"]
+    CARD -->|"no"| JDK["JDK ConcurrentLinkedQueue<br/>general MPMC collection"]
+    TYPE -->|"no"| JDK
+    MPSC --> RULES["Single-use TimeStampNode<br/>unbounded queue<br/>no iterator/remove API"]
+    JDK --> FEATURES["Arbitrary element type<br/>multiple consumers<br/>collection operations"]
+
+    classDef decision fill:#fef3c7,stroke:#a16207,color:#000
+    classDef optimized fill:#dcfce7,stroke:#166534,color:#000
+    classDef general fill:#dbeafe,stroke:#1e40af,color:#000
+    class TYPE,CARD decision
+    class MPSC,RULES optimized
+    class JDK,FEATURES general
+```
+
+The current queue algorithm has four important steps:
+
+```mermaid
+flowchart LR
+    P["Producer creates<br/>one TimeStampNode"] --> L["CAS predecessor.next<br/>linearization point"]
+    L --> A["Consumer acquire-reads next<br/>and advances owned head"]
+    A --> B{"16 predecessors<br/>retired?"}
+    B -->|"no"| HOLD["Keep bounded partial batch"]
+    B -->|"yes"| PUB["Release-publish<br/>recovery head"]
+    PUB --> SELF["Self-link retired nodes<br/>clear batch references"]
+    SELF --> GC["Consumed payloads become<br/>eligible for reclamation"]
+    STALE["Paused producer sees<br/>a self-linked node"] --> REC["Acquire recovery head<br/>resume traversal"]
+    REC --> L
+
+    classDef producer fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef consumer fill:#dcfce7,stroke:#166534,color:#000
+    classDef recovery fill:#f3e8ff,stroke:#7e22ce,color:#000
+    classDef decision fill:#fef3c7,stroke:#a16207,color:#000
+    class P,L producer
+    class A,HOLD,PUB,SELF,GC consumer
+    class STALE,REC recovery
+    class B decision
+```
+
+The successful `predecessor.next` CAS publishes the immutable timestamp fields
+to the consumer. The consumer's acquire read observes that publication.
+Retirement is batched at 16 in production to group reclamation stores.
+Before self-linking a batch, the consumer release-publishes a live recovery
+head. A producer paused on an old predecessor can therefore detect the
+self-link and restart without retaining or traversing an unbounded consumed
+chain. Nodes are not pooled: pooling would retain heap, complicate ownership,
+and introduce reuse/ABA hazards. Producer and consumer state are held in
+separate manually padded objects as a best-effort false-sharing reduction;
+Java does not guarantee cache-line placement, and the padding is not part of
+the correctness argument.
+
+For a research-oriented treatment of the queue algorithm, including its
+linearization points, Java Memory Model edges, stale-producer recovery,
+batched reclamation, feature-by-feature comparison with JDK 25
+`ConcurrentLinkedQueue`, reproducible JMH results, threats to validity, and
+primary references, see
+[TimeStampMpscQueue: architecture, correctness, and performance](TIMESTAMP_MPSC_QUEUE.md).
 
 The two-level topology is easy to miss in code. With two workers and the
 default `qPerWorker=10`, the conceptual layout is:
@@ -534,6 +605,7 @@ while (doWork) {
         t = channels[i].receive(windowIntervalMS);
         if (t != null) {
             notFound = false;
+            dataSinceIdle = true;
             ctime = t.endTime;
             if (t.isEnd()) { doWork = false; }
             else {
@@ -541,14 +613,20 @@ while (doWork) {
                 periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                 ...
             }
-            if (periodicRecorder.elapsedMilliSecondsWindow(ctime) > windowIntervalMS) {
+            if (periodicRecorder.elapsedMilliSecondsWindow(ctime) >= windowIntervalMS) {
                 periodicRecorder.stopWindow(ctime);  // emit periodic report
                 periodicRecorder.startWindow(ctime);
                 idleWait.reset();
+                dataSinceIdle = false;
             }
         }
     }
     if (doWork && notFound) {
+        if (dataSinceIdle) {
+            idleWait.startIdle(
+                    periodicRecorder.elapsedMilliSecondsWindow(ctime));
+            dataSinceIdle = false;
+        }
         if (idleWait.waitAndCheck()) { /* elastic back-off */ }
     }
 }
@@ -576,9 +654,13 @@ flowchart TD
     END -->|no| RECORD["Compute elapsed latency<br/>update periodic window"]
     RECORD --> ROTATE{"Window interval passed?"}
     ROTATE -->|yes| REPORT["Print/copy periodic window<br/>reset periodic window"]
-    ROTATE -->|no| SCAN
+    ROTATE -->|no| ACTIVE["Mark data consumed<br/>reuse record endTime"]
+    ACTIVE --> SCAN
     REPORT --> SCAN
-    FOUND -->|no| IDLE["ElasticWait park + count<br/>or configured sleep"]
+    FOUND -->|no| TRANS{"Data consumed since<br/>previous idle period?"}
+    TRANS -->|yes| RESETIDLE["ElasticWait.startIdle<br/>reset sample, retain EMA"]
+    TRANS -->|no| IDLE["ElasticWait park + count<br/>or configured sleep"]
+    RESETIDLE --> IDLE
     IDLE --> CHECK{"Time-check batch reached?"}
     CHECK -->|no| SCAN
     CHECK -->|yes| CLOCK["Query clock once<br/>rotate if due"]
@@ -587,9 +669,9 @@ flowchart TD
     classDef decision fill:#fef3c7,stroke:#a16207,color:#000
     classDef work fill:#dcfce7,stroke:#166534,color:#000
     classDef idle fill:#dbeafe,stroke:#1e40af,color:#000
-    class FOUND,END,ROTATE,CHECK decision
-    class START,SCAN,RECORD,REPORT,FINAL work
-    class IDLE,CLOCK idle
+    class FOUND,END,ROTATE,TRANS,CHECK decision
+    class START,SCAN,RECORD,REPORT,FINAL,ACTIVE work
+    class RESETIDLE,IDLE,CLOCK idle
 ```
 
 This diagram explains why the class has two responsibilities: it drains work
@@ -697,17 +779,53 @@ observedWaitsPerMillisecond = parksInThisBatch / elapsedMilliseconds
 
 Later observations use a weighted moving average so that a temporary
 scheduler pause does not completely replace the established estimate. The
-two updater methods work like this:
+calibration and transition methods work like this:
 
 | Method | When called | What it does |
 |---|---|---|
 | `setElastic(actualElapsedMs)` | After a window rotation | Learns from only the just-completed batch, clears all window-local counters, and schedules the next check using `measuredRate × windowIntervalMS`. |
 | `updateElastic(elapsedMs)` | After a clock check that did *not* rotate the window | Learns from only the parks since the previous clock check, clears that batch, and schedules the next check using `measuredRate × remainingWindowMs`. |
+| `startIdle(elapsedMs)` | On the first empty scan after one or more records were consumed | Retains the established moving-average park rate, discards parks from the earlier idle period, advances the sample origin to the greater of its previous value and the last record's elapsed-window time, and schedules a check for the remaining window. During bootstrap it conservatively checks after one park. |
+| `reset()` | After a record timestamp rotates the reporting window | Retains the measured park rate but clears all counters and elapsed state belonging to the old window. |
 
 The learned rate, rather than the requested park duration, is retained across
 reporting windows. Batch counters and elapsed-window state are never retained
 across a rotation. This prevents a busy or partially idle old window from
 inflating the next window's threshold.
+
+A reporting window can alternate between empty and active periods. Without an
+active-to-idle reset, parks accumulated before a brief burst of records would
+be divided by elapsed time that also includes the active burst. That would
+underestimate the measured park rate and cause more frequent clock checks.
+`PerformanceRecorderIdleBusyWait` therefore remembers whether data has been
+consumed. On the first subsequent empty scan it calls `startIdle()` with the
+elapsed time derived from the last consumed `TimeStamp.endTime`. This starts a
+clean idle sample **without a new clock query** and without delaying a window
+boundary. The learned exponential moving average (EMA) survives, so a brief
+data burst does not throw away calibration. Taking the maximum of the prior
+sample origin and the supplied elapsed time also prevents an out-of-order
+completion timestamp from moving calibration backwards.
+
+```mermaid
+stateDiagram-v2
+    [*] --> IdleSampling
+    IdleSampling --> ClockCheck: elasticCount parks complete
+    ClockCheck --> IdleSampling: window not due / updateElastic
+    ClockCheck --> IdleSampling: window rotated / setElastic
+    IdleSampling --> Active: record received
+    Active --> Active: more records / reuse endTime
+    Active --> IdleSampling: first empty scan / startIdle
+    Active --> IdleSampling: record rotates window / reset
+
+    note right of Active
+      No recorder clock call
+      while records are available
+    end note
+    note right of IdleSampling
+      Park count is local to
+      this uninterrupted idle period
+    end note
+```
 
 Every computed threshold is clamped to at least one and saturates at
 `Long.MAX_VALUE`. Consequently, unusual clock resolution, very slow hosts,
@@ -776,6 +894,8 @@ sequenceDiagram
     R->>R: record / window check
 
     Note over W,C: Phase 2 - queue empty, back-off begins
+    R->>E: startIdle(elapsed from last endTime)
+    Note over E: clear prior idle sample<br/>retain learned EMA rate
     R->>E: waitAndCheck()
     E->>E: park idleNS, increment count
     E-->>R: false (not yet)
@@ -817,8 +937,11 @@ flowchart LR
     class HDR,CSV bounded
 ```
 
-The defaults in
-[perl.properties](../perl/src/main/resources/perl.properties):
+Standalone PerL defaults are in
+[perl.properties](../perl/src/main/resources/perl.properties). SBK applications
+load the equivalent values from
+[`sbk.properties`](../sbk-api/src/main/resources/sbk.properties), then apply
+the optional `-mpscqueue` override:
 
 ```properties
 maxArraySizeMB=64           # Use Array backend if latency range fits
@@ -829,6 +952,12 @@ histogram=false             # Optional HdrHistogram for total window
 csv=false                   # Optional raw-CSV total backend
 csvFileSizeGB=1
 ```
+
+`qPerWorker` and `maxQs` are topology properties, not public command-line
+options. SBK validates them while loading `sbk.properties` and prints the
+effective queue name and topology at startup. Keeping topology fixed while
+changing only `-mpscqueue` makes JDK-versus-intrusive comparisons less prone
+to accidental configuration drift.
 
 **How available memory changes the design:** an array has predictable memory
 and direct indexing, but its size is proportional to the configured latency
@@ -2028,6 +2157,12 @@ calibrates the next batch from observed elapsed time, compensating for
 `parkNanos` oversleep. This reduces clock-query and empty-poll overhead without
 changing the operation latency already captured by the worker.
 
+If records briefly interrupt an idle period, the recorder calls `startIdle`
+on the first following empty scan. The call discards the old idle-period
+counters, retains the EMA park-rate estimate, and uses the most recent record
+timestamp as the new sample origin. Active processing time therefore does not
+dilute the measured park rate, and the transition adds no clock call.
+
 The configured default is 1 ms and the enforced minimum is 1 µs. Operators
 can instead set `sleepMS` to select the simpler sleeping recorder. Lower idle
 values favor prompt draining at the cost of more wake-ups; higher values favor
@@ -2839,8 +2974,11 @@ your "Experimental Setup" section makes the study fully reproducible:
 
 1. **SBK version and commit hash** from the exact build under test.
 2. **Driver** used (e.g. `minio`, `cassandra`, `kafka`).
-3. **PerL configuration**: `qPerWorker`, `idleNS`, `maxArraySizeMB`,
-   `maxHashMapSizeMB`, `histogram` (yes/no). Defaults are in
+3. **PerL configuration**: effective `-mpscqueue` selection,
+   `qPerWorker`, `maxQs`, `idleNS`, `maxArraySizeMB`, `maxHashMapSizeMB`, and
+   `histogram` (yes/no). SBK defaults are in
+   [`sbk.properties`](../sbk-api/src/main/resources/sbk.properties);
+   standalone PerL defaults are in
    [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
    `-records`, `-throughput`, and any driver-specific flags.

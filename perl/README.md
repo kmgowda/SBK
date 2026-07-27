@@ -63,7 +63,18 @@ keeps stale-producer retention bounded while grouping reclamation stores.
 Nodes are not pooled because pooling retains heap and introduces ownership and
 ABA hazards.
 
-Set the following in `perl.properties` to restore the previous JDK path:
+For an SBK command, select the fallback at runtime:
+
+```bash
+./build/install/sbk/bin/sbk \
+  -class perlbench -writers 4 -size 1024 -records 1000000 \
+  -mpscqueue false
+```
+
+`-mpscqueue true` selects the intrusive queue. If the option is absent, SBK
+uses `MpscQueueEnable` from
+`sbk-api/src/main/resources/sbk.properties`. Standalone PerL users instead set
+the same property in `perl/src/main/resources/perl.properties`:
 
 ```properties
 MpscQueueEnable=false
@@ -109,7 +120,64 @@ constraints are documented in the
 
 ## Configuration
 
-Defaults are in `src/main/resources/perl.properties` and `sbk-api/src/main/resources/sbk.properties`. They control queue counts, idle behavior, latency storage limits, and histogram fallback. Use `PerlBuilder` as the source-level entry point for understanding how a configuration selects implementations.
+Standalone PerL defaults are in `src/main/resources/perl.properties`. SBK
+launches use `sbk-api/src/main/resources/sbk.properties`, which contains the
+equivalent queue, idle, latency-storage, and histogram defaults.
+
+For SBK:
+
+- `-mpscqueue true|false` overrides only `MpscQueueEnable`;
+- `qPerWorker` and `maxQs` determine queue topology and remain property-backed;
+- invalid negative `maxQs` or `qPerWorker` below the supported minimum is
+  rejected while common parameters are constructed;
+- startup logs show the effective queue implementation and topology.
+
+Use `SbkParameters.loadPerlConfig()` and
+`SbkBenchmark.buildPerlConfig()` to follow SBK's property-to-runtime path.
+Use `PerlBuilder` as the source-level entry point for standalone PerL
+construction.
+
+## Elastic idle waiting
+
+With the default `sleepMS=0`, `PerformanceRecorderIdleBusyWait` is the sole
+consumer of the timestamp queues. The historical class name does not mean a
+tight spin: after a complete scan finds no data, the recorder calls
+`LockSupport.parkNanos(idleNS)`. `ElasticWait` learns the number of completed
+parks per millisecond and uses that rate to decide how many parks may occur
+before the recorder samples the clock again.
+
+```text
+records available -> reuse TimeStamp.endTime -> no recorder clock call
+queues empty       -> park and count         -> no clock call within batch
+batch complete     -> sample clock once      -> update EMA and next threshold
+```
+
+Calibration begins conservatively with a clock check after one park. If the
+clock has not advanced, the bootstrap batch grows exponentially up to a
+bounded threshold. Once measurable elapsed time exists, the observed park
+rate is folded into an exponential moving average. This adapts to operating
+system timer granularity, scheduling, CPU speed, and platform versus virtual
+thread behavior instead of assuming that `parkNanos` sleeps for precisely the
+requested duration.
+
+A window may alternate between idle and active periods. On the first empty
+scan after consuming data, the recorder calls `ElasticWait.startIdle()` with
+elapsed time derived from the last record's `endTime`. It discards the
+previous idle-period counters but retains the learned EMA rate. Active
+processing time therefore cannot dilute the next idle-rate sample, and the
+transition introduces no additional clock query. The sample origin never
+moves backwards if producer completion timestamps arrive out of order.
+
+`ElasticWait` applies only to the default idle-parking recorder.
+Setting `sleepMS > 0` selects `PerformanceRecorderIdleSleep`, which sleeps for
+the configured interval and does not use adaptive calibration. `idleNS`
+controls the responsiveness/idle-CPU tradeoff; its SBK default is 1 ms and its
+enforced minimum is 1 µs. Neither setting changes the operation latency
+already captured by the worker, but a longer idle delay can temporarily grow
+the queue backlog after new data arrives.
+
+The complete recorder state and timing diagrams are in
+[the internal design guide](../docs/sbk-internals.md#pillar-3--elasticwait-amortising-clock-queries).
 
 ## Build and test
 
@@ -209,10 +277,31 @@ speed from distorting producer throughput. The verification requires lower
 round-trip latency, removal of at least eight allocation bytes per operation,
 and at least 2% higher producer throughput. It also reports the 99.9% MPSC
 throughput confidence intervals as diagnostics; interval overlap is not a hard
-gate because host noise can widen an otherwise faster result. The report is written to
+gate because host noise can widen an otherwise faster result. For a firm
+throughput comparison, use multiple forks and pin the producer and consumer
+threads to dedicated physical cores; latency and the structural allocation
+reduction are more stable signals. The report is written to
 `perl/build/reports/jmh/timestamp-queue-performance.json`. Results are
 host-specific; preserve the same JVM flags and an otherwise idle host when
 comparing changes.
+
+The production retirement batch remains 16. Concurrency-model tests inject
+smaller batches: Lincheck uses 2 so short histories cross the retirement
+boundary, while JCStress forces both stale-tail recovery and the
+release/acquire recovery-head fallback. Manual padding around the separate
+producer and consumer holders is a best-effort false-sharing heuristic, not a
+correctness requirement; Java does not guarantee field order or cache-line
+placement.
+
+The detailed
+[TimeStampMpscQueue research guide](../docs/TIMESTAMP_MPSC_QUEUE.md) explains
+the linearization points, acquire/release edges, batched retired-head
+reclamation, stale-producer recovery, JDK 25 `ConcurrentLinkedQueue`
+differences, correctness evidence, and performance methodology. It also records
+one environment where the intrusive path reduced latency and allocation and
+passed the point-estimate throughput gate, while the producer-throughput
+confidence intervals overlapped. Throughput is not a universal property of the
+algorithm.
 
 ## Use as a library
 

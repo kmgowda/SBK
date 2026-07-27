@@ -20,7 +20,7 @@ Drivers are the primary SBK extension point. A driver converts the harness's gen
 
 ## Runtime inventory
 
-The aggregate distribution currently enables 52 driver projects. The source tree also contains disabled drivers and a template.
+The aggregate distribution currently enables 53 driver projects. The source tree also contains disabled drivers and a template.
 
 | Category | Enabled drivers |
 |---|---|
@@ -30,7 +30,7 @@ The aggregate distribution currently enables 52 driver projects. The source tree
 | Relational and SQL systems | `db2`, `derby`, `exasol`, `h2`, `hive`, `jdbc`, `mariadb`, `mssql`, `mysql`, `postgresql`, `sqlite` |
 | Document, search, and analytical systems | `chromadb`, `couchbase`, `couchdb`, `dynamodb`, `elasticsearch`, `mongodb`, `solr` |
 | Key-value and embedded stores | `fdbrecord`, `foundationdb`, `leveldb`, `memcached`, `redis`, `rocksdb` |
-| Harness and local data structures | `atomicq`, `cassandra`, `concurrentq`, `conqueue`, `csv`, `linkedbq`, `null`, `syncq` |
+| Harness and local data structures | `atomicq`, `cassandra`, `concurrentq`, `conqueue`, `csv`, `linkedbq`, `null`, `perlbench`, `syncq` |
 
 `ignite` is disabled in the Gradle registration files. `halodb` is disabled because its GitHub Packages dependency can be unavailable without credentials or package quota. `sbktemplate` is intentionally excluded because it is a scaffold.
 
@@ -108,9 +108,15 @@ Discovery uses simple Java class names. Keep directory, package, public class, r
 | Relational operations | `drivers/jdbc` and a concrete SQL driver |
 | Custom payload type | `drivers/file`, `drivers/csv`, or `drivers/fdbrecord` |
 | Callback reader | Search for implementations of `AbstractCallbackReader` |
-| Minimal no-op baseline | `drivers/null` |
+| Idle windows, pending futures, timeout, and shutdown | `drivers/null` |
+| Immediate synthetic completions and end-to-end SBK/PerL queue comparison | `drivers/perlbench` |
 
 Prefer the driver whose SDK and completion semantics resemble the new backend, not merely the driver with the shortest source.
+
+`null` and `perlbench` are not interchangeable no-op baselines. The default
+Null write intentionally remains incomplete, whereas every PerlBench operation
+completes immediately and feeds a timestamp into PerL. Use their READMEs to
+avoid interpreting an idle-control result as measurement-pipeline throughput.
 
 ## Add a driver
 

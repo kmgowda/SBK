@@ -29,8 +29,9 @@ import io.perl.api.impl.TimeStampMpscQueue;
 public final class TimeStampNode extends TimeStamp {
     /*
      * Accessed with VarHandle acquire/release operations by
-     * TimeStampMpscQueue. It is intentionally package-private so the linkage
-     * is unavailable to PerL users.
+     * TimeStampMpscQueue. It is intentionally private so the linkage is
+     * unavailable to PerL users; the queue obtains a VarHandle through a
+     * private lookup.
      */
     private TimeStampNode next;
 

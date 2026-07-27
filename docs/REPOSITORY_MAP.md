@@ -42,14 +42,27 @@ Important packages:
 
 | Package | Responsibility |
 |---|---|
-| `io.perl.api` | Public measurement contracts, records, windows, and channels |
-| `io.perl.api.impl` | Queue arrays, recorder loops, histogram/window implementations, builder |
+| `io.perl.api` | Public measurement contracts, `TimeStamp`, intrusive `TimeStampNode`, windows, and channels |
+| `io.perl.api.impl` | Intrusive and JDK queue paths, queue arrays, recorder loops, histogram/window implementations, builder |
 | `io.perl.config` | Measurement defaults |
 | `io.perl.logger` | PerL-level reporting interfaces and implementations |
 | `io.time` | Millisecond, microsecond, and nanosecond clock abstractions |
 | `io.state` | Shared lifecycle states |
 
-Start at `io.perl.api.impl.PerlBuilder` to see which implementation is selected from configuration.
+Start at `io.perl.api.impl.PerlBuilder` to see how configuration constructs
+the recorder. For SBK launches, `SbkParameters` loads the PerL defaults and
+`SbkBenchmark` applies the common `-mpscqueue` override before invoking that
+builder. The specialized queue algorithm is documented in
+[TIMESTAMP_MPSC_QUEUE.md](TIMESTAMP_MPSC_QUEUE.md).
+
+For recorder clock-query behavior, follow
+`PerformanceRecorderIdleBusyWait` into `ElasticWait`. Records provide the
+current time through their existing `endTime`; empty scans park and use an
+adaptive counter before querying the clock. `ElasticWait.startIdle()` resets
+only the current idle sample after an active interval while retaining the
+learned moving-average park rate. Its deterministic transition and overflow
+tests are in `ElasticWaitTest`; the Null driver supplies an end-to-end idle
+reporting test.
 
 ## `sbk-api/`
 
@@ -87,6 +100,17 @@ drivers/<name>/
 ```
 
 Some drivers legitimately differ: they may share a JDBC implementation, provide callback or asynchronous readers, omit unsupported read/write directions, or use a custom payload type.
+
+The synthetic drivers have no backend:
+
+| Driver | Location | Purpose |
+|---|---|---|
+| `Null` | `drivers/null` | Pending operations, idle windows, timeout, interruption, and shutdown |
+| `PerlBench` | `drivers/perlbench` | Immediate completions for end-to-end SBK/PerL queue throughput and allocation comparison |
+
+They are intentionally separate. The default Null write does not produce a
+completed timestamp; PerlBench is designed to produce timestamps as fast as
+the harness permits.
 
 ## Distributed modules
 
@@ -130,6 +154,9 @@ Because many vendor drivers require external services, their strongest verificat
 | New driver | `drivers/sbktemplate`, similar driver, both registration files | New driver `check` |
 | Common CLI | `SbkParameters`, `ParameterOptions`, worker consumers | `./gradlew :sbk-api:check` |
 | Timing or percentiles | `Writer`/`Reader`, PerL builder/window/recorder | `./gradlew :perl:check :sbk-api:check` |
+| Elastic idle calibration | `ElasticWait`, `PerformanceRecorderIdleBusyWait`, `ElasticWaitTest`, Null idle test | `./gradlew :perl:test :drivers:null:test` |
+| Timestamp queue algorithm | `TimeStampNode`, `TimeStampMpscQueue`, queue arrays/channels | `./gradlew :perl:concurrencyCheck :perl:timeStampQueuePerformanceTest` |
+| End-to-end queue comparison | `drivers/perlbench`, `SbkParameters`, `SbkBenchmark` | `./gradlew :drivers:perlbench:check :sbk-api:check` |
 | Logger | `RWLogger`, `AbstractRWLogger`, similar implementation | `./gradlew :sbk-api:check` |
 | gRPC aggregation | Proto definitions, `GrpcLogger`, `SbmGrpcService` | `./gradlew :sbm:check` |
 | Remote launch | `SbkGem`, `SbkGemBenchmark`, SSH classes | `./gradlew :sbk-gem:check` |

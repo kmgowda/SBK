@@ -92,6 +92,32 @@ public final class ElasticWait {
     }
 
     /**
+     * Starts a fresh idle calibration sample after data was consumed.
+     *
+     * <p>The established moving-average park rate is retained, but parks from
+     * the earlier idle period are discarded so active processing time is not
+     * included in the next observed park rate. The elapsed value comes from
+     * the timestamp already consumed by the recorder, avoiding another
+     * wall-clock read.</p>
+     *
+     * @param elapsedIntervalMS elapsed milliseconds in the current window
+     */
+    void startIdle(long elapsedIntervalMS) {
+        final long elapsed = Math.max(
+                previousElapsedIntervalMS, Math.max(0, elapsedIntervalMS));
+        previousElapsedIntervalMS = elapsed;
+        idleCount = 0;
+        if (calibrated) {
+            final long remainingIntervalMS =
+                    Math.max(1, windowIntervalMS - elapsed);
+            elasticCount = waitCount(
+                    waitsPerMillisecond, remainingIntervalMS);
+        } else {
+            elasticCount = 1;
+        }
+    }
+
+    /**
      * Updates calibration after a clock check within the current window.
      *
      * <p>The completed batch is always cleared. If the clock has not advanced
@@ -113,7 +139,9 @@ public final class ElasticWait {
             final long remainingIntervalMS = Math.max(1, windowIntervalMS - elapsed);
             elasticCount = waitCount(waitsPerMillisecond, remainingIntervalMS);
         } else {
-            elasticCount = Math.min(saturatedDouble(elasticCount), maximumCalibrationCount);
+            elasticCount = Math.min(
+                    saturatingMultiplyByTwo(elasticCount),
+                    maximumCalibrationCount);
         }
     }
 
@@ -153,7 +181,7 @@ public final class ElasticWait {
         return Math.max(1, (long) count);
     }
 
-    private static long saturatedDouble(long value) {
+    private static long saturatingMultiplyByTwo(long value) {
         return value > Long.MAX_VALUE / 2 ? Long.MAX_VALUE : value * 2;
     }
 }

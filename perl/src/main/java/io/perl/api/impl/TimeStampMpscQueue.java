@@ -48,9 +48,29 @@ import java.util.Objects;
  * {@value #RETIRE_BATCH_SIZE}. The consumer release-publishes a recovery head
  * before self-linking every retired predecessor in the completed batch. A
  * producer suspended with any stale pointer detects that self-link and resumes
- * from the recovery head. This bounds obsolete linked-node retention while
- * grouping retirement stores. Nodes are deliberately not pooled: pooling
- * would retain heap, complicate ownership, and introduce ABA risks.</p>
+ * from the recovery head. Unlike JDK
+ * {@link java.util.concurrent.ConcurrentLinkedQueue}, an intrusive node cannot
+ * null a separate item reference while retaining its structural wrapper.
+ * Self-linking removes each retired timestamp from the live queue chain and
+ * enables its payload and node to be reclaimed after stale producer,
+ * tail-hint, consumer, and caller references have also disappeared. It cannot
+ * make an object collectible while any such strong reference remains. Nodes
+ * are deliberately not pooled: pooling would retain heap, complicate
+ * ownership, and introduce ABA risks.</p>
+ *
+ * <p>Like JDK {@link java.util.concurrent.ConcurrentLinkedQueue}, the producer
+ * tail is allowed to lag by one node. Updating the shared tail only after a
+ * producer has traversed away from its initial tail candidate avoids a tail
+ * compare-and-set on every enqueue while preserving the linked-node
+ * compare-and-set as the linearization point.</p>
+ *
+ * <p>Producer and consumer state live in separate, manually padded holder
+ * objects to reduce false sharing. This is a best-effort layout optimization:
+ * the Java language and HotSpot do not guarantee field order or cache-line
+ * placement. The implementation deliberately avoids the internal
+ * {@code @Contended} annotation because using it would require internal-module
+ * access and JVM flags in every embedding application. Padding is not part of
+ * the correctness argument.</p>
  *
  * <h2>Usage constraints</h2>
  * <ul>
@@ -81,8 +101,7 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         private long pad06;
         private TimeStampNode head;
         private TimeStampNode recoveryHead;
-        private final TimeStampNode[] retiredNodes =
-                new TimeStampNode[RETIRE_BATCH_SIZE];
+        private final TimeStampNode[] retiredNodes;
         private int retiredNodeCount;
         @SuppressWarnings("unused")
         private long pad10;
@@ -98,6 +117,10 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         private long pad15;
         @SuppressWarnings("unused")
         private long pad16;
+
+        private HeadRef(int retireBatchSize) {
+            retiredNodes = new TimeStampNode[retireBatchSize];
+        }
     }
 
     @SuppressFBWarnings(value = "UUF_UNUSED_FIELD",
@@ -141,6 +164,7 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
 
     private final HeadRef headRef;
     private final TailRef tailRef;
+    private final int retireBatchSize;
 
     static {
         try {
@@ -159,9 +183,26 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
      * Creates an empty queue with one constant-cost sentinel node.
      */
     public TimeStampMpscQueue() {
+        this(RETIRE_BATCH_SIZE);
+    }
+
+    /**
+     * Creates an empty queue with an injectable retirement batch for
+     * concurrency-model tests.
+     *
+     * @param retireBatchSize number of consumed predecessors retired together
+     * @throws IllegalArgumentException when {@code retireBatchSize} is less
+     *                                  than one
+     */
+    TimeStampMpscQueue(int retireBatchSize) {
+        if (retireBatchSize < 1) {
+            throw new IllegalArgumentException(
+                    "Retirement batch size must be positive");
+        }
         final TimeStampNode sentinel = new TimeStampNode(0, 0, 0, 0);
-        this.headRef = new HeadRef();
+        this.headRef = new HeadRef(retireBatchSize);
         this.tailRef = new TailRef();
+        this.retireBatchSize = retireBatchSize;
         this.headRef.head = sentinel;
         this.headRef.recoveryHead = sentinel;
         this.tailRef.tail = sentinel;
@@ -185,8 +226,8 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         headRef.head = next;
         final int retiredNodeCount = headRef.retiredNodeCount;
         headRef.retiredNodes[retiredNodeCount] = currentHead;
-        if (retiredNodeCount + 1 == RETIRE_BATCH_SIZE) {
-            retireBatch(next, RETIRE_BATCH_SIZE);
+        if (retiredNodeCount + 1 == retireBatchSize) {
+            retireBatch(next, retireBatchSize);
         } else {
             headRef.retiredNodeCount = retiredNodeCount + 1;
         }
@@ -225,16 +266,28 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
             final TimeStampNode next = (TimeStampNode) NEXT.getAcquire(current);
             if (next == null) {
                 if (NEXT.compareAndSet(current, null, newNode)) {
-                    TAIL.weakCompareAndSetRelease(
-                            tailRef, tailNode, newNode);
+                    // JDK-style slack: avoid touching the shared tail when the
+                    // initial tail candidate was already the trailing node.
+                    if (current != tailNode) {
+                        TAIL.weakCompareAndSetRelease(
+                                tailRef, tailNode, newNode);
+                    }
                     return true;
                 }
             } else if (next == current) {
-                final TimeStampNode recoveryHead =
-                        (TimeStampNode) RECOVERY_HEAD.getAcquire(headRef);
-                TAIL.weakCompareAndSetRelease(tailRef, tailNode, recoveryHead);
-                tailNode = recoveryHead;
-                current = recoveryHead;
+                final TimeStampNode latestTail =
+                        (TimeStampNode) TAIL.getAcquire(tailRef);
+                if (tailNode != latestTail) {
+                    tailNode = latestTail;
+                    current = latestTail;
+                } else {
+                    final TimeStampNode recoveryHead =
+                            (TimeStampNode) RECOVERY_HEAD.getAcquire(headRef);
+                    TAIL.weakCompareAndSetRelease(
+                            tailRef, tailNode, recoveryHead);
+                    tailNode = recoveryHead;
+                    current = recoveryHead;
+                }
             } else {
                 final TimeStampNode latestTail =
                         (TimeStampNode) TAIL.getAcquire(tailRef);
