@@ -1151,7 +1151,7 @@ The following symbols are used:
 | `m` | Number of elements in an input collection |
 | `k` | Number of stale, retired, or logically deleted nodes skipped before reaching the desired node; `0 <= k <= n` in a quiescent finite queue |
 | `b` | Number of elements copied by one spliterator batch |
-| `B` | `TimeStampMpscQueue` retirement batch size; currently the fixed constant 16 |
+| `B` | `TimeStampMpscQueue` retirement batch size; 16 in production and injectable only through a package-private constructor for concurrency-model tests |
 | `C(m)` | Cost of one `contains` call on an input collection of size `m` |
 
 Three different bounds must not be confused:
@@ -1430,6 +1430,14 @@ The contended producer-throughput result favored the intrusive queue by
 interval, and the Gradle verification passed its policy gate requiring the
 intrusive producer metric to exceed the JDK metric by at least 2%.
 
+That interval separation belongs to the recorded run, not to every rerun.
+Producer-throughput confidence intervals can overlap on a noisy or
+oversubscribed host even when the point-estimate gate passes. A publication
+claim about throughput should therefore use multiple forks, an otherwise idle
+machine, fixed CPU-frequency policy, and producer/consumer affinity to
+dedicated physical cores. The latency and allocation results are the more
+repeatable evidence; the allocation reduction is structural.
+
 The improvement came from adopting CLQ's tail-slack strategy. The earlier
 implementation attempted to update the producer-shared tail after every
 successful link. The optimized implementation skips that update when the
@@ -1595,8 +1603,9 @@ flowchart LR
 | Per-producer ordering | Unit, Lincheck, and JCStress tests |
 | Publication visibility | `TimeStampMpscQueuePublicationStress` |
 | Two-producer ordering outcomes | `TimeStampMpscQueueProducerOrderStress` |
-| Linearizable MPSC histories | `TimeStampMpscQueueLincheckTest` |
-| Stale producer recovery | Deterministic paused-producer unit tests |
+| Linearizable MPSC histories, including batch retirement | `TimeStampMpscQueueLincheckTest` with test batch size 2 |
+| Stale producer recovery | Deterministic paused-producer tests and `TimeStampMpscQueueRetirementRecoveryStress` |
+| Recovery-head acquire/release ordering | `TimeStampMpscQueueRecoveryHeadStress` with test batch size 1 |
 | Bounded partial retired batch | Reclamation tests and constrained-heap soak |
 | Prompt release of consumed nodes | Weak-reference and constrained-heap tests |
 | Relative latency and allocation | JMH `timeStampQueuePerformanceTest` |
@@ -1616,6 +1625,15 @@ Lincheck and JCStress are complementary. Lincheck searches operation histories
 for violations of a sequential FIFO model. JCStress samples Java Memory Model
 outcomes and can expose publication or reordering errors. Neither can enumerate
 all executions of an unbounded concurrent system [11, 12].
+
+Production retires predecessors in batches of 16. Short Lincheck histories and
+the basic publication tests cannot naturally cross that boundary, so the queue
+has a package-private constructor for test injection. Lincheck uses a batch of
+2 to repeatedly model-check self-link retirement. JCStress separately forces a
+producer to retain a pointer across a two-node retired batch, and uses a batch
+of 1 in a focused test to force the fallback acquire-read of the
+release-published recovery head. The public constructor and production path
+remain fixed at 16.
 
 ## 12. Limitations and threats to validity
 
@@ -1799,3 +1817,5 @@ hardware, and queue implementation evolve.
 19. [`TimeStampMpscQueueLincheckTest`](../perl/src/lincheck/java/io/perl/api/impl/TimeStampMpscQueueLincheckTest.java).
 20. [`TimeStampMpscQueuePublicationStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueuePublicationStress.java).
 21. [`TimeStampMpscQueueProducerOrderStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueueProducerOrderStress.java).
+22. [`TimeStampMpscQueueRetirementRecoveryStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueueRetirementRecoveryStress.java).
+23. [`TimeStampMpscQueueRecoveryHeadStress`](../perl/src/jcstress/java/io/perl/api/impl/TimeStampMpscQueueRecoveryHeadStress.java).

@@ -235,10 +235,21 @@ speed from distorting producer throughput. The verification requires lower
 round-trip latency, removal of at least eight allocation bytes per operation,
 and at least 2% higher producer throughput. It also reports the 99.9% MPSC
 throughput confidence intervals as diagnostics; interval overlap is not a hard
-gate because host noise can widen an otherwise faster result. The report is written to
+gate because host noise can widen an otherwise faster result. For a firm
+throughput comparison, use multiple forks and pin the producer and consumer
+threads to dedicated physical cores; latency and the structural allocation
+reduction are more stable signals. The report is written to
 `perl/build/reports/jmh/timestamp-queue-performance.json`. Results are
 host-specific; preserve the same JVM flags and an otherwise idle host when
 comparing changes.
+
+The production retirement batch remains 16. Concurrency-model tests inject
+smaller batches: Lincheck uses 2 so short histories cross the retirement
+boundary, while JCStress forces both stale-tail recovery and the
+release/acquire recovery-head fallback. Manual padding around the separate
+producer and consumer holders is a best-effort false-sharing heuristic, not a
+correctness requirement; Java does not guarantee field order or cache-line
+placement.
 
 The detailed
 [TimeStampMpscQueue research guide](../docs/TIMESTAMP_MPSC_QUEUE.md) explains

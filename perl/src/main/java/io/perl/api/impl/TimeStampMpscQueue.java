@@ -61,6 +61,14 @@ import java.util.Objects;
  * compare-and-set on every enqueue while preserving the linked-node
  * compare-and-set as the linearization point.</p>
  *
+ * <p>Producer and consumer state live in separate, manually padded holder
+ * objects to reduce false sharing. This is a best-effort layout optimization:
+ * the Java language and HotSpot do not guarantee field order or cache-line
+ * placement. The implementation deliberately avoids the internal
+ * {@code @Contended} annotation because using it would require internal-module
+ * access and JVM flags in every embedding application. Padding is not part of
+ * the correctness argument.</p>
+ *
  * <h2>Usage constraints</h2>
  * <ul>
  *     <li>Only one thread may invoke {@code poll} or {@code clear}.</li>
@@ -90,8 +98,7 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         private long pad06;
         private TimeStampNode head;
         private TimeStampNode recoveryHead;
-        private final TimeStampNode[] retiredNodes =
-                new TimeStampNode[RETIRE_BATCH_SIZE];
+        private final TimeStampNode[] retiredNodes;
         private int retiredNodeCount;
         @SuppressWarnings("unused")
         private long pad10;
@@ -107,6 +114,10 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         private long pad15;
         @SuppressWarnings("unused")
         private long pad16;
+
+        private HeadRef(int retireBatchSize) {
+            retiredNodes = new TimeStampNode[retireBatchSize];
+        }
     }
 
     @SuppressFBWarnings(value = "UUF_UNUSED_FIELD",
@@ -150,6 +161,7 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
 
     private final HeadRef headRef;
     private final TailRef tailRef;
+    private final int retireBatchSize;
 
     static {
         try {
@@ -168,9 +180,26 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
      * Creates an empty queue with one constant-cost sentinel node.
      */
     public TimeStampMpscQueue() {
+        this(RETIRE_BATCH_SIZE);
+    }
+
+    /**
+     * Creates an empty queue with an injectable retirement batch for
+     * concurrency-model tests.
+     *
+     * @param retireBatchSize number of consumed predecessors retired together
+     * @throws IllegalArgumentException when {@code retireBatchSize} is less
+     *                                  than one
+     */
+    TimeStampMpscQueue(int retireBatchSize) {
+        if (retireBatchSize < 1) {
+            throw new IllegalArgumentException(
+                    "Retirement batch size must be positive");
+        }
         final TimeStampNode sentinel = new TimeStampNode(0, 0, 0, 0);
-        this.headRef = new HeadRef();
+        this.headRef = new HeadRef(retireBatchSize);
         this.tailRef = new TailRef();
+        this.retireBatchSize = retireBatchSize;
         this.headRef.head = sentinel;
         this.headRef.recoveryHead = sentinel;
         this.tailRef.tail = sentinel;
@@ -194,8 +223,8 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
         headRef.head = next;
         final int retiredNodeCount = headRef.retiredNodeCount;
         headRef.retiredNodes[retiredNodeCount] = currentHead;
-        if (retiredNodeCount + 1 == RETIRE_BATCH_SIZE) {
-            retireBatch(next, RETIRE_BATCH_SIZE);
+        if (retiredNodeCount + 1 == retireBatchSize) {
+            retireBatch(next, retireBatchSize);
         } else {
             headRef.retiredNodeCount = retiredNodeCount + 1;
         }
