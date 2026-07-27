@@ -41,8 +41,8 @@ both the measurement and its linked-queue node. The JDK fallback stores a
 25 runtime measured in this repository, the complete intrusive round trip
 allocates 40 bytes instead of 56 bytes per measurement.
 
-On the declared 16-vCPU JDK 25 host, the intrusive queue measured 30.55% lower
-round-trip latency and 14.35% higher four-producer enqueue throughput than the
+On the declared 16-vCPU JDK 25 host, the intrusive queue measured 30.36% lower
+round-trip latency and 6.74% higher four-producer enqueue throughput than the
 CLQ path. End-to-end PerlBench runs also showed higher saturation throughput
 and lower peak resident memory. These are environment-specific observations,
 not claims of universal superiority; the structural removal of one wrapper
@@ -1385,17 +1385,17 @@ Results:
 
 | Metric | `TimeStampMpscQueue` | JDK `ConcurrentLinkedQueue` path | Relative result |
 |---|---:|---:|---:|
-| Round-trip latency | 33.107 ns/op | 47.673 ns/op | 30.55% lower |
+| Round-trip latency | 32.732 ns/op | 47.000 ns/op | 30.36% lower |
 | Round-trip normalized allocation | 40.000 B/op | 56.000 B/op | 28.57% lower |
-| Four-producer producer throughput | 5,904,509 ops/s | 5,163,359 ops/s | 14.35% higher |
-| Producer-throughput 99.9% CI | 5,819,992 to 5,989,025 | 5,047,306 to 5,279,412 | intervals do not overlap |
+| Four-producer producer throughput | 5,853,294 ops/s | 5,483,912 ops/s | 6.74% higher |
+| Producer-throughput 99.9% CI | 5,763,602 to 5,942,986 | 5,025,833 to 5,941,990 | intervals overlap |
 
 ```mermaid
 xychart-beta
     title "Round-trip latency: lower is better"
     x-axis ["TimeStampMpscQueue", "JDK CLQ path"]
     y-axis "nanoseconds per operation" 0 --> 60
-    bar [33.107, 47.673]
+    bar [32.732, 47.000]
 ```
 
 ```mermaid
@@ -1411,7 +1411,7 @@ xychart-beta
     title "Four-producer throughput: higher is better"
     x-axis ["TimeStampMpscQueue", "JDK CLQ"]
     y-axis "producer operations per second" 0 --> 6000000
-    bar [5904509, 5163359]
+    bar [5853294, 5483912]
 ```
 
 ### 10.3 Interpretation
@@ -1425,10 +1425,11 @@ a narrower API, a single-consumer head, and separated head/tail state are
 plausible contributing mechanisms. The benchmark establishes correlation
 under this setup; it does not isolate the contribution of each mechanism.
 
-The contended producer-throughput result favored the intrusive queue by
-14.35%. Its 99.9% confidence interval was entirely above the JDK path's
-interval, and the Gradle verification passed its policy gate requiring the
-intrusive producer metric to exceed the JDK metric by at least 2%.
+The contended producer-throughput point estimate favored the intrusive queue
+by 6.74%, and the Gradle verification passed its policy gate requiring the
+intrusive producer metric to exceed the JDK metric by at least 2%. The 99.9%
+confidence intervals overlapped, so this run does not establish interval-level
+separation for producer throughput.
 
 That interval separation belongs to the recorded run, not to every rerun.
 Producer-throughput confidence intervals can overlap on a noisy or
@@ -1756,8 +1757,8 @@ advantages:
   cannot discard a separate payload reference.
 
 The resulting implementation allocated 40 B/op rather than 56 B/op in the
-declared JDK 25 experiment, measured 30.55% lower round-trip latency, and
-measured 14.35% higher four-producer throughput. End-to-end PerlBench evidence
+declared JDK 25 experiment, measured 30.36% lower round-trip latency, and
+measured 6.74% higher four-producer throughput. End-to-end PerlBench evidence
 was consistent with the microbenchmark and showed lower observed process
 memory. Correctness and reclamation are covered by deterministic tests,
 constrained-heap GC tests, Lincheck, and JCStress.

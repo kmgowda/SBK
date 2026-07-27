@@ -51,9 +51,12 @@ import java.util.Objects;
  * from the recovery head. Unlike JDK
  * {@link java.util.concurrent.ConcurrentLinkedQueue}, an intrusive node cannot
  * null a separate item reference while retaining its structural wrapper.
- * Self-linking each retired timestamp therefore guarantees prompt payload
- * reclamation. Nodes are deliberately not pooled: pooling would retain heap,
- * complicate ownership, and introduce ABA risks.</p>
+ * Self-linking removes each retired timestamp from the live queue chain and
+ * enables its payload and node to be reclaimed after stale producer,
+ * tail-hint, consumer, and caller references have also disappeared. It cannot
+ * make an object collectible while any such strong reference remains. Nodes
+ * are deliberately not pooled: pooling would retain heap, complicate
+ * ownership, and introduce ABA risks.</p>
  *
  * <p>Like JDK {@link java.util.concurrent.ConcurrentLinkedQueue}, the producer
  * tail is allowed to lag by one node. Updating the shared tail only after a

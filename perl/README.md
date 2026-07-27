@@ -298,9 +298,10 @@ The detailed
 the linearization points, acquire/release edges, batched retired-head
 reclamation, stale-producer recovery, JDK 25 `ConcurrentLinkedQueue`
 differences, correctness evidence, and performance methodology. It also records
-an environment where the intrusive path reduced latency and allocation but did
-not win the contended producer-throughput point estimate; throughput is not a
-universal property of the algorithm.
+one environment where the intrusive path reduced latency and allocation and
+passed the point-estimate throughput gate, while the producer-throughput
+confidence intervals overlapped. Throughput is not a universal property of the
+algorithm.
 
 ## Use as a library
 

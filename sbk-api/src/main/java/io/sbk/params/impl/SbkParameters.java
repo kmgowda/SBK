@@ -160,13 +160,17 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         this(name, Config.DESC);
     }
 
-
-    @Override
     /**
      * Parse SBK core options and compute derived values (e.g., recordsPerSec, totalSecondsToRun).
      * Validates required combinations (e.g., at least one of writers/readers must be > 0).
      * May throw {@link HelpException} via the superclass when help is requested.
+     *
+     * @param args command-line arguments to parse
+     * @throws ParseException if an option cannot be parsed
+     * @throws IllegalArgumentException if an option value or combination is invalid
+     * @throws HelpException if help was requested
      */
+    @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
         final boolean writeReadOnly = Boolean.parseBoolean(getOptionValue("ro", "false"));
@@ -179,6 +183,10 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
 
         totalRecords = Long.parseLong(getOptionValue("records", "0"));
         recordSize = Integer.parseInt(getOptionValue("size", "0"));
+        if (recordSize <= 0) {
+            throw new IllegalArgumentException(
+                    "Error: The record 'size' must be greater than zero");
+        }
         int syncRecords = Integer.parseInt(getOptionValue("sync", "0"));
         if (syncRecords > 0) {
             recordsPerSync = syncRecords;
@@ -223,12 +231,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             recordsPerSec = (int) (((throughput * 1024 * 1024) / recordSize) / workersCnt);
         } else {
             recordsPerSec = 0;
-        }
-
-        if (workersCnt > 0) {
-            if (recordSize == 0) {
-                throw new IllegalArgumentException("Error: Must specify the record 'size'");
-            }
         }
 
         if (writersCount > 0 && readersCount > 0) {

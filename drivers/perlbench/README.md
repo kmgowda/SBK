@@ -221,14 +221,17 @@ collected on 2026-07-27 on a 16-vCPU VMware guest with an Intel Xeon Platinum
 
 | Metric | `TimeStampMpscQueue` | JDK queue path | Observed difference |
 |---|---:|---:|---:|
-| Add/poll round trip | 33.107 ns/op | 47.673 ns/op | MPSC 30.55% lower |
+| Add/poll round trip | 32.732 ns/op | 47.000 ns/op | MPSC 30.36% lower |
 | Normalized allocation | 40 B/op | 56 B/op | MPSC 28.57% lower |
-| Four-producer enqueue throughput | 5.90 M ops/s | 5.16 M ops/s | MPSC 14.35% higher; 99.9% confidence intervals did not overlap |
+| Four-producer enqueue throughput | 5.85 M ops/s | 5.48 M ops/s | MPSC 6.74% higher; 99.9% confidence intervals overlapped |
 
 The allocation difference is structural: the intrusive
 `TimeStampNode` is both payload and link, whereas the JDK path allocates a
 `TimeStamp` plus a private queue node. Throughput remains dependent on
-contention, scheduling, and consumer service rate.
+contention, scheduling, and consumer service rate. The canonical exact values,
+confidence intervals, environment, and interpretation are maintained in
+[the queue research guide](../../docs/TIMESTAMP_MPSC_QUEUE.md#102-recorded-environment-and-results);
+this summary must not be interpreted as a universal throughput ranking.
 
 ### PerlBench end-to-end observations
 
