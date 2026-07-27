@@ -108,6 +108,46 @@ public class ElasticWaitTest {
     }
 
     /**
+     * Active processing between idle periods cannot dilute the measured park
+     * rate or carry completed parks into the new idle sample.
+     */
+    @Test
+    public void dataBlipStartsIndependentIdleSample() {
+        final ElasticWait wait =
+                new ElasticWait(1000, 1000, 100, ignored -> { });
+
+        assertTrue(wait.waitAndCheck());
+        wait.updateElastic(1);
+        for (int index = 0; index < 10; index++) {
+            assertFalse(wait.waitAndCheck());
+        }
+
+        wait.startIdle(101);
+
+        assertEquals(899, waitsUntilCheck(wait),
+                "Only parks after the data blip must count toward calibration");
+    }
+
+    /**
+     * An active transition during bootstrap returns to a one-park clock
+     * sample instead of retaining an incomplete exponential batch.
+     */
+    @Test
+    public void dataBlipRestartsUncalibratedSampleConservatively() {
+        final ElasticWait wait =
+                new ElasticWait(1000, 1000, 100, ignored -> { });
+
+        assertTrue(wait.waitAndCheck());
+        wait.updateElastic(0);
+        assertFalse(wait.waitAndCheck());
+
+        wait.startIdle(10);
+
+        assertTrue(wait.waitAndCheck(),
+                "Uncalibrated idle must sample the clock after one park");
+    }
+
+    /**
      * Window rotation retains the measured rate but clears all window-local
      * counters.
      */

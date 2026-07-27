@@ -57,6 +57,7 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
         long ctime = startTime;
         long recordsCnt = 0;
         boolean notFound;
+        boolean dataSinceIdle = false;
         TimeStamp t;
         PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Started : {} nanoseconds idle busy wait", this.idleNS);
         periodicRecorder.start(startTime);
@@ -67,6 +68,7 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
                 t = channels[i].receive(windowIntervalMS);
                 if (t != null) {
                     notFound = false;
+                    dataSinceIdle = true;
                     ctime = t.endTime;
                     if (t.isEnd()) {
                         doWork = false;
@@ -85,11 +87,18 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
                         periodicRecorder.stopWindow(ctime);
                         periodicRecorder.startWindow(ctime);
                         idleWait.reset();
+                        dataSinceIdle = false;
                     }
                 }
             }
             if (doWork) {
                 if (notFound) {
+                    if (dataSinceIdle) {
+                        idleWait.startIdle(
+                                periodicRecorder.elapsedMilliSecondsWindow(
+                                        ctime));
+                        dataSinceIdle = false;
+                    }
                     if (idleWait.waitAndCheck()) {
                         ctime = time.getCurrentTime();
                         final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
