@@ -89,19 +89,28 @@ recorder, and logger pipeline:
 ./gradlew :drivers:perlbench:perlBenchMpscPerformanceTest
 ./gradlew :drivers:perlbench:perlBenchJdkClqPerformanceTest
 
-# Run both and require a functional TimeStampMpscQueue throughput advantage
+# Run both, classify throughput, and verify allocation and correctness
 ./gradlew :drivers:perlbench:perlBenchQueuePerformanceTest
 ```
 
 These are intentionally separate from `./gradlew check`. The individual
-tasks execute five exact-record measurement runs after warmup. The comparison
-task warms both implementations in one JVM and alternates their execution
-order for five measured pairs, reducing JIT, thermal, and first-run bias. Each
-mode must complete every requested record with zero invalid latencies. The
-comparison uses the median of the paired records/second gains and requires the
-MPSC path to be at least 2% faster by default. Performance tests remain
-sensitive to CPU scheduling, frequency scaling, virtualization, and other
-host activity.
+tasks execute seven independently warmed JVM forks. The comparison randomizes
+the queue order and uses a test-only `maxQs=1` resource, so all writers publish
+to one shared queue and the functional workload is genuinely MPSC. Each mode
+must complete every requested record with zero invalid latencies.
+
+The comparison reports the median, a 95% confidence interval for the mean, and
+one of three throughput classifications:
+
+- `MPSC_FASTER` when the MPSC interval is entirely above the JDK interval;
+- `JDK_CLQ_FASTER` when the JDK interval is entirely above the MPSC interval;
+- `INCONCLUSIVE` when the intervals overlap.
+
+Throughput classification is deliberately not a build gate because CPU
+scheduling, frequency scaling, virtualization, and concurrent host activity
+can change it. Exact counts, zero invalid latencies, and the structural
+allocation reduction remain hard gates. The task runs the queue JMH benchmark
+and includes its measured normalized allocation in the final comparison.
 
 The workload can be adjusted without modifying source:
 
@@ -110,16 +119,15 @@ The workload can be adjusted without modifying source:
   -PperlBenchPerformanceWriters=8 \
   -PperlBenchPerformanceRecords=10000000 \
   -PperlBenchPerformanceWarmupRecords=10000000 \
-  -PperlBenchPerformanceRuns=7 \
-  -PperlBenchMinimumThroughputGain=2.0
+  -PperlBenchPerformanceRuns=9
 ```
 
 Reports are written to
 `drivers/perlbench/build/reports/perlbench-performance/`. The displayed
 operation latency is diagnostic only: SBK captures the operation end time
-before enqueueing the timestamp. Therefore the functional comparison gates
-end-to-end completed-record throughput, while the JMH task remains the
-authoritative direct queue-latency and allocation test.
+before enqueueing the timestamp. Therefore the functional comparison
+characterizes end-to-end completed-record throughput, while the JMH result
+provides the direct queue-latency and normalized-allocation measurements.
 
 ## Queue selection
 
