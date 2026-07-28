@@ -80,6 +80,47 @@ add/poll latency and normalized bytes allocated per operation:
 ./gradlew :perl:timeStampQueuePerformanceTest
 ```
 
+Use the PerlBench functional tasks when the question is whether that queue
+advantage remains visible through the complete SBK worker, clock, queue,
+recorder, and logger pipeline:
+
+```bash
+# Validate and measure each complete SBK path independently
+./gradlew :drivers:perlbench:perlBenchMpscPerformanceTest
+./gradlew :drivers:perlbench:perlBenchJdkClqPerformanceTest
+
+# Run both and require a functional TimeStampMpscQueue throughput advantage
+./gradlew :drivers:perlbench:perlBenchQueuePerformanceTest
+```
+
+These are intentionally separate from `./gradlew check`. The individual
+tasks execute five exact-record measurement runs after warmup. The comparison
+task warms both implementations in one JVM and alternates their execution
+order for five measured pairs, reducing JIT, thermal, and first-run bias. Each
+mode must complete every requested record with zero invalid latencies. The
+comparison uses the median of the paired records/second gains and requires the
+MPSC path to be at least 2% faster by default. Performance tests remain
+sensitive to CPU scheduling, frequency scaling, virtualization, and other
+host activity.
+
+The workload can be adjusted without modifying source:
+
+```bash
+./gradlew :drivers:perlbench:perlBenchQueuePerformanceTest \
+  -PperlBenchPerformanceWriters=8 \
+  -PperlBenchPerformanceRecords=10000000 \
+  -PperlBenchPerformanceWarmupRecords=10000000 \
+  -PperlBenchPerformanceRuns=7 \
+  -PperlBenchMinimumThroughputGain=2.0
+```
+
+Reports are written to
+`drivers/perlbench/build/reports/perlbench-performance/`. The displayed
+operation latency is diagnostic only: SBK captures the operation end time
+before enqueueing the timestamp. Therefore the functional comparison gates
+end-to-end completed-record throughput, while the JMH task remains the
+authoritative direct queue-latency and allocation test.
+
 ## Queue selection
 
 The common `-mpscqueue` SBK option works with real storage drivers and is
