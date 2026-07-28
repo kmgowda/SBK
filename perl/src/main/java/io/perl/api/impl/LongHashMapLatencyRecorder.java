@@ -55,7 +55,9 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
     @Override
     public void reset(long startTime) {
         super.reset(startTime);
-        this.latencies.clear();
+        if (this.latencies.notEmpty()) {
+            this.latencies.clear();
+        }
         this.mapBytesCount = 0;
     }
 
