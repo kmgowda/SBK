@@ -282,7 +282,7 @@ final public class CQueuePerl implements Perl {
          */
         @Override
         public void sendEndTime(long endTime) {
-            add(0, new TimeStampNode(endTime));
+            addNode(0, new TimeStampNode(endTime));
         }
 
         @Override
@@ -316,7 +316,7 @@ final public class CQueuePerl implements Perl {
                 if (this.wIndex >= maxQs) {
                     this.wIndex = 0;
                 }
-                add(this.wIndex,
+                addNode(this.wIndex,
                         new TimeStampNode(
                                 startTime, endTime, records, bytes));
             }

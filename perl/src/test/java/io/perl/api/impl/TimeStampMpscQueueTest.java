@@ -105,6 +105,20 @@ public class TimeStampMpscQueueTest {
     }
 
     /**
+     * Verifies that the typed queue-array path accepts and returns the same
+     * intrusive timestamp node.
+     */
+    @Test
+    public void queueArrayTypedPathReturnsSameNode() {
+        final TimeStampMpscQueueArray queues =
+                new TimeStampMpscQueueArray(1);
+        final TimeStampNode node = node(1, 2);
+
+        assertTrue(queues.addNode(0, node));
+        assertSame(node, queues.poll(0));
+    }
+
+    /**
      * Verifies that the fallback channel retains the JDK queue data path.
      */
     @Test
