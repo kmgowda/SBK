@@ -43,7 +43,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     final private CompletableFuture<Void> ret;
     final private Callback<Object> callback;
     final private AtomicLong readCnt;
-    final private double msToRun;
+    final private long msToRun;
     final private long totalRecords;
     private long beginTime;
 
@@ -90,11 +90,11 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
 
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
-        final long cnt = readCnt.incrementAndGet();
+        final long cnt = readCnt.addAndGet(events);
         perlChannel.send(startTime, endTime, events, dataSize);
         if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun)) {
             ret.complete(null);
-        } else if (this.totalRecords > cnt) {
+        } else if (this.totalRecords > 0 && cnt >= this.totalRecords) {
             ret.complete(null);
         }
     }
