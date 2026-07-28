@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -120,6 +121,99 @@ public class LatencyMapRecorderTest {
                 primitivePercentiles.latencies);
         assertArrayEquals(boxedPercentiles.latenciesCount,
                 primitivePercentiles.latenciesCount);
+    }
+
+    /**
+     * Verifies that growing and reusing the primitive sorting buffer does not
+     * retain stale latency keys from a larger preceding window.
+     */
+    @Test
+    public void primitiveRecorderReusesSortingBufferWithoutStaleLatencies() {
+        final LongHashMapLatencyRecorder primitive =
+                (LongHashMapLatencyRecorder) newRecorder(false);
+        final LatencyPercentiles percentiles =
+                new LatencyPercentiles(FRACTIONS);
+        final LatencyCollector firstWindow = new LatencyCollector();
+        final LatencyCollector secondWindow = new LatencyCollector();
+
+        primitive.recordLatency(0, 1, 100, 9);
+        primitive.recordLatency(0, 2, 200, 1);
+        primitive.recordLatency(0, 3, 300, 5);
+        primitive.recordLatency(0, 4, 400, 0);
+        primitive.copyPercentiles(percentiles, firstWindow);
+
+        assertEquals(List.of(0L, 1L, 5L, 9L), firstWindow.latencies);
+        assertEquals(List.of(4L, 2L, 3L, 1L), firstWindow.counts);
+        assertArrayEquals(new long[]{1, 9, 9}, percentiles.latencies);
+        assertArrayEquals(new long[]{2, 1, 1}, percentiles.latenciesCount);
+        assertEquals(1, percentiles.medianLatency);
+
+        primitive.reset(1);
+        primitive.recordLatency(1, 2, 200, 7);
+        primitive.recordLatency(1, 1, 100, 2);
+        primitive.copyPercentiles(percentiles, secondWindow);
+
+        assertEquals(List.of(2L, 7L), secondWindow.latencies);
+        assertEquals(List.of(1L, 2L), secondWindow.counts);
+        assertArrayEquals(new long[]{7, 7, 7}, percentiles.latencies);
+        assertArrayEquals(new long[]{2, 2, 2}, percentiles.latenciesCount);
+        assertEquals(7, percentiles.medianLatency);
+    }
+
+    /**
+     * Compares repeated empty, growing, and shrinking windows against the
+     * boxed reference implementation using deterministic random samples.
+     */
+    @Test
+    public void reusableSortingBufferMatchesBoxedRecorderAcrossWindows() {
+        final LatencyRecordWindow boxed = newRecorder(true);
+        final LatencyRecordWindow primitive = newRecorder(false);
+        final Random random = new Random(7_241_993L);
+        final int[] windowSizes =
+                new int[]{0, 1, 2, 17, 257, 31, 1_024, 3, 0, 513};
+
+        for (int window = 0; window < windowSizes.length; window++) {
+            boxed.reset(window);
+            primitive.reset(window);
+            for (int sample = 0; sample < windowSizes[window]; sample++) {
+                final long latency;
+                if (sample == 0) {
+                    latency = 0;
+                } else if (sample == 1) {
+                    latency = 1;
+                } else {
+                    latency = random.nextInt(1_000_000);
+                }
+                final int records = random.nextInt(7) + 1;
+                final int bytes = records * 100;
+                boxed.recordLatency(sample, records, bytes, latency);
+                primitive.recordLatency(sample, records, bytes, latency);
+            }
+            assertExtractionEquals(boxed, primitive);
+        }
+    }
+
+    private void assertExtractionEquals(LatencyRecordWindow boxed,
+                                        LatencyRecordWindow primitive) {
+        final LatencyPercentiles boxedPercentiles =
+                new LatencyPercentiles(FRACTIONS);
+        final LatencyPercentiles primitivePercentiles =
+                new LatencyPercentiles(FRACTIONS);
+        final LatencyCollector boxedLatencies = new LatencyCollector();
+        final LatencyCollector primitiveLatencies = new LatencyCollector();
+
+        boxed.copyPercentiles(boxedPercentiles, boxedLatencies);
+        primitive.copyPercentiles(primitivePercentiles, primitiveLatencies);
+
+        assertRecordEquals(boxed, primitive);
+        assertEquals(boxedLatencies.latencies, primitiveLatencies.latencies);
+        assertEquals(boxedLatencies.counts, primitiveLatencies.counts);
+        assertArrayEquals(boxedPercentiles.latencies,
+                primitivePercentiles.latencies);
+        assertArrayEquals(boxedPercentiles.latenciesCount,
+                primitivePercentiles.latenciesCount);
+        assertEquals(boxedPercentiles.medianLatency,
+                primitivePercentiles.medianLatency);
     }
 
     private LatencyRecordWindow newRecorder(boolean boxed) {

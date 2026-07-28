@@ -19,12 +19,16 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
+import org.eclipse.collections.api.iterator.MutableLongIterator;
+import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -72,6 +76,38 @@ public class LatencyMapBenchmark {
     }
 
     /**
+     * Thread-private state comparing transient sorted-list extraction with a
+     * reusable primitive sorting array.
+     */
+    @State(Scope.Thread)
+    public static class ExtractionState {
+        /**
+         * Number of distinct latency keys copied and sorted per extraction.
+         */
+        @Param({"65536"})
+        public int distinctLatencies;
+
+        private LongLongHashMap allocatedMap;
+        private LongLongHashMap reusableMap;
+        private long[] reusableBuffer;
+
+        /**
+         * Populates identical primitive maps and allocates the reusable buffer.
+         */
+        @Setup(Level.Trial)
+        public void setUp() {
+            allocatedMap = new LongLongHashMap(distinctLatencies);
+            reusableMap = new LongLongHashMap(distinctLatencies);
+            reusableBuffer = new long[distinctLatencies];
+            for (int index = 0; index < distinctLatencies; index++) {
+                final long latency = BASE_LATENCY + index;
+                allocatedMap.put(latency, index + 1L);
+                reusableMap.put(latency, index + 1L);
+            }
+        }
+    }
+
+    /**
      * Measures the primitive frequency-update path.
      *
      * @param state thread-private recorder state
@@ -97,5 +133,47 @@ public class LatencyMapBenchmark {
         final long latency = BASE_LATENCY
                 + (state.boxedSequence++ & LATENCY_MASK);
         state.boxed.reportLatency(latency, 1);
+    }
+
+    /**
+     * Measures the former extraction mechanism that allocates a sorted list.
+     *
+     * @param state thread-private extraction state
+     * @return checksum that consumes all sorted keys and counts
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public long allocatedSortedListExtraction(ExtractionState state) {
+        final MutableLongIterator keys =
+                state.allocatedMap.keySet().toSortedList().longIterator();
+        long checksum = 0;
+        while (keys.hasNext()) {
+            final long latency = keys.next();
+            checksum += latency ^ state.allocatedMap.get(latency);
+        }
+        return checksum;
+    }
+
+    /**
+     * Measures extraction through a retained primitive sorting array.
+     *
+     * @param state thread-private extraction state
+     * @return checksum that consumes all sorted keys and counts
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public long reusableArrayExtraction(ExtractionState state) {
+        final int size = state.reusableMap.size();
+        state.reusableBuffer =
+                state.reusableMap.keySet().toArray(state.reusableBuffer);
+        Arrays.sort(state.reusableBuffer, 0, size);
+        long checksum = 0;
+        for (int index = 0; index < size; index++) {
+            final long latency = state.reusableBuffer[index];
+            checksum += latency ^ state.reusableMap.get(latency);
+        }
+        return checksum;
     }
 }

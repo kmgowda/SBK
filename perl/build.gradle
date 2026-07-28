@@ -289,6 +289,18 @@ tasks.register('latencyMapPerformanceTest') {
         def primitiveAllocation =
                 primitive.secondaryMetrics['gc.alloc.rate.norm']
         def boxedAllocation = boxed.secondaryMetrics['gc.alloc.rate.norm']
+        def allocatedExtraction = result(
+                'io.perl.benchmark.LatencyMapBenchmark'
+                        + '.allocatedSortedListExtraction')
+        def reusableExtraction = result(
+                'io.perl.benchmark.LatencyMapBenchmark'
+                        + '.reusableArrayExtraction')
+        def allocatedExtractionTime = allocatedExtraction.primaryMetric
+        def reusableExtractionTime = reusableExtraction.primaryMetric
+        def allocatedExtractionAllocation =
+                allocatedExtraction.secondaryMetrics['gc.alloc.rate.norm']
+        def reusableExtractionAllocation =
+                reusableExtraction.secondaryMetrics['gc.alloc.rate.norm']
         def throughputDifference = (primitiveThroughput.score
                 - boxedThroughput.score)
         def throughputChange = (throughputDifference * 100.0) /
@@ -340,6 +352,23 @@ tasks.register('latencyMapPerformanceTest') {
         logger.lifecycle(
                 "  Statistical conclusion     : ${confidenceConclusion}")
         logger.lifecycle(
+                'Percentile key-extraction JMH comparison (65,536 keys):')
+        logger.lifecycle(String.format(
+                '  Allocating sorted list : %,.3f us/op, %,.3f B/op',
+                allocatedExtractionTime.score,
+                allocatedExtractionAllocation.score))
+        logger.lifecycle(String.format(
+                '  Reusable primitive array: %,.3f us/op, %,.3f B/op',
+                reusableExtractionTime.score,
+                reusableExtractionAllocation.score))
+        logger.lifecycle(String.format(
+                '  Extraction allocation reduction: %,.3f B/op (%.2f%%)',
+                allocatedExtractionAllocation.score
+                        - reusableExtractionAllocation.score,
+                (allocatedExtractionAllocation.score
+                        - reusableExtractionAllocation.score) * 100.0
+                        / allocatedExtractionAllocation.score))
+        logger.lifecycle(
                 "JMH report: ${latencyMapPerformanceReport.get().asFile}")
 
         if (primitiveAllocation.score >= boxedAllocation.score) {
@@ -347,6 +376,14 @@ tasks.register('latencyMapPerformanceTest') {
                     'Primitive latency map allocation %.3f B/op is not below '
                             + 'boxed map allocation %.3f B/op',
                     primitiveAllocation.score, boxedAllocation.score))
+        }
+        if (reusableExtractionAllocation.score
+                >= allocatedExtractionAllocation.score) {
+            throw new GradleException(String.format(
+                    'Reusable extraction allocation %.3f B/op is not below '
+                            + 'sorted-list extraction allocation %.3f B/op',
+                    reusableExtractionAllocation.score,
+                    allocatedExtractionAllocation.score))
         }
     }
 }

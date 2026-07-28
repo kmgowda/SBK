@@ -17,17 +17,20 @@ import io.perl.api.ReportLatencies;
 import io.perl.config.LatencyConfig;
 import io.perl.data.Bytes;
 import io.time.Time;
-import org.eclipse.collections.api.iterator.MutableLongIterator;
 import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
+
+import java.util.Arrays;
 
 /**
  * Records latency frequencies in a primitive long-to-long hash map.
  */
 final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
+    private static final long[] EMPTY_SORTED_LATENCIES = new long[0];
     final private LongLongHashMap latencies;
     final private long maxMapSizeBytes;
     final private int incBytes;
     private long mapBytesCount;
+    private long[] sortedLatencies;
 
     /**
      * Constructor  LongHashMapLatencyRecorder initializing all values.
@@ -49,6 +52,7 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
         this.maxMapSizeBytes = (long) maxMapSizeMB * Bytes.BYTES_PER_MB;
         this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * 2;
         this.mapBytesCount = 0;
+        this.sortedLatencies = EMPTY_SORTED_LATENCIES;
     }
 
 
@@ -78,10 +82,15 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
             copyLatencies.reportLatencyRecord(this);
         }
         percentiles.reset(validLatencyRecords);
-        MutableLongIterator keys = latencies.keySet().toSortedList().longIterator();
+        final int size = latencies.size();
+        if (sortedLatencies.length < size) {
+            sortedLatencies = new long[size];
+        }
+        sortedLatencies = latencies.keySet().toArray(sortedLatencies);
+        Arrays.sort(sortedLatencies, 0, size);
         long curIndex = 0;
-        while (keys.hasNext()) {
-            final long latency = keys.next();
+        for (int index = 0; index < size; index++) {
+            final long latency = sortedLatencies[index];
             final long count = latencies.get(latency);
             final long nextIndex = curIndex + count;
 
