@@ -16,9 +16,11 @@ import io.perl.api.TimeStampNode;
 /**
  * Array of intrusive MPSC queues used by optimized PerL channels.
  *
- * <p>Every element supplied to {@link #add(int, TimeStamp)} must be a
- * single-use {@link TimeStampNode}. Each indexed queue accepts multiple
- * producers and has exactly one consumer.</p>
+ * <p>The measurement hot path supplies single-use nodes through
+ * {@link #addNode(int, TimeStampNode)}. The generic
+ * {@link #add(int, TimeStamp)} method retains the {@link QueueArray}
+ * compatibility contract and validates its input type. Each indexed queue
+ * accepts multiple producers and has exactly one consumer.</p>
  */
 public class TimeStampMpscQueueArray implements QueueArray<TimeStamp> {
     private final TimeStampMpscQueue[] queues;
@@ -61,6 +63,21 @@ public class TimeStampMpscQueueArray implements QueueArray<TimeStamp> {
             throw new IllegalArgumentException(
                     "TimeStampMpscQueueArray accepts only TimeStampNode");
         }
+        return addNode(index, node);
+    }
+
+    /**
+     * Adds a timestamp node without a runtime type check.
+     *
+     * <p>PerL measurement producers use this typed path because they construct
+     * {@link TimeStampNode} instances directly.</p>
+     *
+     * @param index index of the queue receiving the node
+     * @param node single-use timestamp node to enqueue
+     * @return {@code true} after the node is linked
+     * @throws NullPointerException if {@code node} is {@code null}
+     */
+    public boolean addNode(int index, TimeStampNode node) {
         return queues[index].add(node);
     }
 
