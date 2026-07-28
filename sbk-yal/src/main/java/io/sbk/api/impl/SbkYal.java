@@ -93,7 +93,7 @@ public final class SbkYal {
         Printer.log.info(IOUtils.toString(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkYal.DESC);
         Printer.log.info(SbkYal.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
-        Printer.log.info("Arguments List: " + Arrays.toString(args));
+        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
@@ -138,7 +138,8 @@ public final class SbkYal {
             throw new HelpException(ex.toString());
         }
         final String[] mergeArgs = SbkUtils.mergeArgs(yalArgs, nextArgs);
-        Printer.log.info("SBK-YAL: Merged YAML and command-line arguments: " + Arrays.toString(mergeArgs));
+        Printer.log.info("SBK-YAL: Merged YAML and command-line arguments: "
+                + Arrays.toString(SbkUtils.redactSensitiveOptionValues(mergeArgs)));
         String[] sbkArgs = mergeArgs;
         if (isPrintOption) {
             sbkArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);

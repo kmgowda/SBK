@@ -141,4 +141,15 @@ public class SbkUtilsTest {
                 "--GEMPASS=******"}, SbkUtils.redactOptionValues(args, new String[]{"gempass"}));
         assertEquals("secret", args[3]);
     }
+
+    @Test
+    public void testRedactSensitiveOptionValues() {
+        final String[] args = {"-class", "minio", "-key", "access",
+                "-secret", "secret", "--password=database-password",
+                "-size", "100"};
+
+        assertArrayEquals(new String[]{"-class", "minio", "-key", "******",
+                "-secret", "******", "--password=******", "-size", "100"},
+                SbkUtils.redactSensitiveOptionValues(args));
+    }
 }

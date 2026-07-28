@@ -32,6 +32,11 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
+def timeStampQueueMinimumAllocationReductionBytes = providers.gradleProperty(
+        'timeStampQueueMinimumAllocationReductionBytes').map {
+    it.toDouble()
+}
+
 sourceSets {
     lincheck {
         java.srcDir 'src/lincheck/java'
@@ -212,7 +217,8 @@ tasks.register('timeStampQueuePerformanceTest') {
                             + 'ConcurrentLinkedQueue latency %.3f ns/op',
                     intrusiveLatency.score, jdkLatency.score))
         }
-        if (intrusiveAllocation.score > jdkAllocation.score - 8.0) {
+        if (intrusiveAllocation.score > jdkAllocation.score
+                - timeStampQueueMinimumAllocationReductionBytes.get()) {
             throw new GradleException(String.format(
                     'TimeStampMpscQueue allocation %.3f B/op does not remove '
                             + 'a ConcurrentLinkedQueue node from %.3f B/op',

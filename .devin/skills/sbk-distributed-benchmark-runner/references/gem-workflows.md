@@ -21,6 +21,10 @@ For every node, under the exact local account running GEM:
 ssh -o BatchMode=yes <gem-user>@<node> true
 ```
 
+This command validates passwordless public-key or SSH-agent authentication
+only: `BatchMode=yes` disables password prompting. It does not validate a
+password later supplied through `-gempass` or `SBK_GEM_SSH_PASSWD`.
+
 Verify the host key out of band before adding it to `known_hosts`. Passwordless
 public-key authentication through the SSH agent or configured identity files is
 preferred. If password authentication is required, supply `-gempass` at runtime

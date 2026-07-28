@@ -13,7 +13,6 @@ package io.gem.api.impl;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
-import io.gem.config.GemConfig;
 import io.gem.params.impl.SbkGemYmlMap;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.config.Config;
@@ -100,8 +99,7 @@ final public class SbkGemYal {
         Printer.log.info(IOUtils.toString(SbkGemYal.class.getClassLoader().getResourceAsStream(BANNER_FILE)));
         Printer.log.info(SbkGemYal.DESC);
         Printer.log.info(SbkGemYal.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
-        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactOptionValues(args,
-                new String[]{GemConfig.GEM_PASS_OPTION})));
+        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
 
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
@@ -148,9 +146,8 @@ final public class SbkGemYal {
         }
 
         final String[] mergeArgs = SbkUtils.mergeArgs(gemArgs, nextArgs);
-        Printer.log.info("SBK-GEM-YAL: Merged YAML and command-line arguments: " +
-                Arrays.toString(SbkUtils.redactOptionValues(mergeArgs,
-                        new String[]{GemConfig.GEM_PASS_OPTION})));
+        Printer.log.info("SBK-GEM-YAL: Merged YAML and command-line arguments: "
+                + Arrays.toString(SbkUtils.redactSensitiveOptionValues(mergeArgs)));
         String[] sbkGemArgs = mergeArgs;
         if (isPrintOption) {
             sbkGemArgs = Arrays.copyOf(mergeArgs, mergeArgs.length + 1);

@@ -92,6 +92,15 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     }
 
 
+    /**
+     * Records a completed callback batch and completes the benchmark when its
+     * configured duration or record target is reached.
+     *
+     * @param startTime operation start time in the configured time unit
+     * @param endTime operation completion time in the configured time unit
+     * @param dataSize total bytes represented by the callback batch
+     * @param events number of records represented by the callback batch
+     */
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.addAndGet(events);

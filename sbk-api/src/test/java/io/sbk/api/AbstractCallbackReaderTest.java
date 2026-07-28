@@ -91,10 +91,18 @@ final class AbstractCallbackReaderTest {
 
     private static final class TestCallbackReader
             extends AbstractCallbackReader<byte[]> {
+        /**
+         * Accepts the callback without starting an external consumer.
+         *
+         * @param callback callback supplied by the abstract reader
+         */
         @Override
         public void start(Callback<byte[]> callback) {
         }
 
+        /**
+         * Stops the test reader; no external resource requires cleanup.
+         */
         @Override
         public void stop() {
         }
@@ -110,6 +118,14 @@ final class AbstractCallbackReaderTest {
         private final AtomicInteger records = new AtomicInteger();
         private final AtomicInteger bytes = new AtomicInteger();
 
+        /**
+         * Accumulates records and bytes sent by the callback reader.
+         *
+         * @param startTime operation start time
+         * @param endTime operation completion time
+         * @param events completed record count
+         * @param dataSize completed byte count
+         */
         @Override
         public void send(long startTime, long endTime, int events,
                          int dataSize) {
@@ -117,6 +133,11 @@ final class AbstractCallbackReaderTest {
             bytes.addAndGet(dataSize);
         }
 
+        /**
+         * Converts an unexpected channel failure into a test failure.
+         *
+         * @param ex unexpected channel failure
+         */
         @Override
         public void throwException(Throwable ex) {
             throw new IllegalStateException(ex);

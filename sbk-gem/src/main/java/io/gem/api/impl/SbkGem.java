@@ -198,8 +198,8 @@ final public class SbkGem {
         Printer.log.info(GemConfig.DESC);
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
-        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactOptionValues(args,
-                new String[]{GemConfig.GEM_PASS_OPTION})));
+        Printer.log.info("Arguments List: "
+                + Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Remote SBK PerL Timestamp Queue: " + perlConfig.getTimestampQueueName());
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
@@ -332,8 +332,7 @@ final public class SbkGem {
 
         while (processArgs != null) {
             Printer.log.info("SBK-GEM [" + i + "]: Arguments to process : " +
-                    Arrays.toString(SbkUtils.redactOptionValues(processArgs,
-                            new String[]{GemConfig.GEM_PASS_OPTION})));
+                    Arrays.toString(SbkUtils.redactSensitiveOptionValues(processArgs)));
             i++;
             try {
                 params.parseArgs(processArgs);
@@ -411,7 +410,9 @@ final public class SbkGem {
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());
-        Printer.log.info("Arguments to remote SBK command: " + sbkCommandArgs);
+        Printer.log.info("Arguments to remote SBK command: "
+                + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
+                        sbkCommandArgs.toArray(String[]::new))));
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
         sbmConfig.maxConnections = params.getConnections().length;

@@ -14,6 +14,12 @@ def perlBenchModePerformanceTag = 'perlbench-functional-mode'
 def perlBenchComparisonPerformanceTag = 'perlbench-functional-comparison'
 def perlBenchPerformanceDirectory = layout.buildDirectory.dir(
         'reports/perlbench-performance')
+def perlBenchMpscModeReport = perlBenchPerformanceDirectory.map {
+    it.file('mpsc-mode.properties')
+}
+def perlBenchJdkClqModeReport = perlBenchPerformanceDirectory.map {
+    it.file('jdk-clq-mode.properties')
+}
 def perlBenchMpscReport = perlBenchPerformanceDirectory.map {
     it.file('mpsc.properties')
 }
@@ -32,6 +38,10 @@ def perlBenchPerformanceRuns = providers.gradleProperty(
 def perlBenchPerformanceWriters = providers.gradleProperty(
         'perlBenchPerformanceWriters').orElse(
         Math.min(4, Runtime.runtime.availableProcessors()).toString())
+def timeStampQueueMinimumAllocationReductionBytes = providers.gradleProperty(
+        'timeStampQueueMinimumAllocationReductionBytes').map {
+    it.toDouble()
+}
 def timeStampQueuePerformanceReport = project(':perl').layout.buildDirectory.file(
         'reports/jmh/timestamp-queue-performance.json')
 def performanceJavaLauncher = javaToolchains.launcherFor {
@@ -75,6 +85,11 @@ def registerPerlBenchPerformanceTask = {
                 performanceJavaLauncher.get().executablePath.asFile.absolutePath
         systemProperty 'perlbench.testClasspath',
                 sourceSets.test.runtimeClasspath.asPath
+        systemProperty 'perlbench.runtimeJvmArgCount',
+                rootProject.ext.sbkRuntimeJvmArgs.size()
+        rootProject.ext.sbkRuntimeJvmArgs.eachWithIndex { argument, index ->
+            systemProperty "perlbench.runtimeJvmArg.${index}", argument
+        }
         jvmArgs rootProject.ext.sbkRuntimeJvmArgs
         minHeapSize = '1g'
         maxHeapSize = '2g'
@@ -115,9 +130,9 @@ def registerPerlBenchPerformanceTask = {
 }
 
 def perlBenchMpscPerformanceTest = registerPerlBenchPerformanceTask(
-        'perlBenchMpscPerformanceTest', true, perlBenchMpscReport)
+        'perlBenchMpscPerformanceTest', true, perlBenchMpscModeReport)
 def perlBenchJdkClqPerformanceTest = registerPerlBenchPerformanceTask(
-        'perlBenchJdkClqPerformanceTest', false, perlBenchJdkClqReport)
+        'perlBenchJdkClqPerformanceTest', false, perlBenchJdkClqModeReport)
 
 perlBenchJdkClqPerformanceTest.configure {
     shouldRunAfter perlBenchMpscPerformanceTest
@@ -152,6 +167,11 @@ tasks.register('perlBenchQueuePerformanceTest', Test) {
             performanceJavaLauncher.get().executablePath.asFile.absolutePath
     systemProperty 'perlbench.testClasspath',
             sourceSets.test.runtimeClasspath.asPath
+    systemProperty 'perlbench.runtimeJvmArgCount',
+            rootProject.ext.sbkRuntimeJvmArgs.size()
+    rootProject.ext.sbkRuntimeJvmArgs.eachWithIndex { argument, index ->
+        systemProperty "perlbench.runtimeJvmArg.${index}", argument
+    }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     minHeapSize = '1g'
     maxHeapSize = '2g'
@@ -257,7 +277,8 @@ tasks.register('perlBenchQueuePerformanceTest', Test) {
         logger.lifecycle(
                 "  Comparison report: ${perlBenchComparisonReport.get().asFile}")
 
-        if (allocationReduction < 8.0) {
+        if (allocationReduction
+                < timeStampQueueMinimumAllocationReductionBytes.get()) {
             throw new GradleException(String.format(
                     'TimeStampMpscQueue allocation %.3f B/op does not '
                             + 'eliminate a JDK queue node from %.3f B/op',

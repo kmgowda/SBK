@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -168,12 +167,11 @@ public final class PerlBenchFunctionalPerformanceTest {
 
         final List<String> command = new ArrayList<>();
         command.add(requiredProperty("perlbench.javaExecutable"));
-        for (String argument : ManagementFactory.getRuntimeMXBean()
-                .getInputArguments()) {
-            if (argument.startsWith("-X")
-                    || argument.startsWith("--enable-native-access")) {
-                command.add(argument);
-            }
+        final int runtimeArgumentCount = Integer.parseInt(
+                requiredProperty("perlbench.runtimeJvmArgCount"));
+        for (int index = 0; index < runtimeArgumentCount; index++) {
+            command.add(requiredProperty(
+                    "perlbench.runtimeJvmArg." + index));
         }
         command.add("-cp");
         command.add(requiredProperty("perlbench.testClasspath"));

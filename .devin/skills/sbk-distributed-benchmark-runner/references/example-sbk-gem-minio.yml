@@ -18,7 +18,9 @@ sbkGemArgs:
   javacopy: true
   javaversion: 25
   class: minio
-  url: http://REPLACE_S3_ENDPOINT
+  # Use https:// for credential-bearing remote endpoints. Plain http:// is
+  # appropriate only for an isolated local/trusted-lab endpoint without TLS.
+  url: https://REPLACE_S3_ENDPOINT
   bucket: REPLACE_DEDICATED_BUCKET
   prefix: sbk-distributed-trial-001/
   key: REPLACE_AT_RUNTIME

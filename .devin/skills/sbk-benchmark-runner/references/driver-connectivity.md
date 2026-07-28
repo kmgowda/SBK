@@ -15,7 +15,8 @@ load generation itself must run on multiple hosts.
 |---|---:|---|
 | In-process or local host | 1 | SBK or SBK-YAL |
 | Remote storage service | 1 | SBK or SBK-YAL |
-| Any storage reachable by several load hosts | 2+ | SBK-GEM or SBK-GEM-YAL |
+| Any storage reachable from several possible load hosts, but generating load from one | 1 | SBK or SBK-YAL |
+| Any storage where load generation from several hosts is desired | 2+ | SBK-GEM or SBK-GEM-YAL |
 | Manually launched SBK clients needing one aggregate | 2+ | standalone SBM plus SBK `GrpcLogger` clients |
 
 ## Drivers that do not require an external storage service

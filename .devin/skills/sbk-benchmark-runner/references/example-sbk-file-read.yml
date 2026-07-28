@@ -1,10 +1,13 @@
 # Copyright (c) KMG. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0.
+#
+# TEMPLATE ONLY. Override REPLACE_WITH_UNIQUE_DISPOSABLE_FILE with the same
+# per-run path used by the matching write workload.
 
 sbkArgs:
   class: file
-  file: /tmp/sbk-agent-benchmark.dat
+  file: REPLACE_WITH_UNIQUE_DISPOSABLE_FILE
   readers: 1
   size: 4096
   records: 256

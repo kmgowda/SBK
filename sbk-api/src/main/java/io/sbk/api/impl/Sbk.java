@@ -179,7 +179,8 @@ final public class Sbk {
         Printer.log.info(Config.DESC);
         Printer.log.info("{} Version: {}", Config.NAME.toUpperCase(), version);
         Printer.log.info("{} Website: " + Config.SBK_WEBSITE_NAME, Config.NAME.toUpperCase());
-        Printer.log.info("Arguments List: {}", Arrays.toString(args));
+        Printer.log.info("Arguments List: {}",
+                Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
         Printer.log.info("Java Runtime Version: {}", System.getProperty("java.runtime.version"));
         Printer.log.info("SBP Version Major: {}, Minor: {}", sbpVersion.major, sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: {}", sbkStoragePackageName);
@@ -259,7 +260,8 @@ final public class Sbk {
             }
         }
 
-        Printer.log.info("Arguments to Driver '{}' : {}", storageDevice.getClass().getSimpleName(), Arrays.toString(nextArgs));
+        Printer.log.info("Arguments to Driver '{}' : {}", storageDevice.getClass().getSimpleName(),
+                Arrays.toString(SbkUtils.redactSensitiveOptionValues(nextArgs)));
 
         params = new SbkParameters(usageLine);
         rwLogger.addArgs(params);

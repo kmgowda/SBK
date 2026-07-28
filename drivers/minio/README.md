@@ -221,6 +221,8 @@ Before using any option, confirm the following:
 3. **The access key and secret key belong to an S3 user** with permissions for
    every operation being tested. Read-only credentials cannot run PUT, DELETE,
    tagging, versioning, or bucket lifecycle tests.
+   Prefer injecting them as `SBK_S3_ACCESS_KEY` and `SBK_S3_SECRET_KEY`; this
+   keeps credentials out of the operating-system process argument list.
 4. **Use a dedicated benchmark bucket and prefix.** PUT creates data; UPDATE,
    COPY, tagging, GET, range GET, stat, and DELETE need existing objects;
    `-recreate true`, DELETE, and bucket deletion are destructive.
@@ -278,12 +280,17 @@ description explicitly says they validate something.
 | `-url <url>` | `http://play.min.io` | S3 endpoint URL. Plain HTTP is the default; a value without a scheme is prefixed with `http://`. Use an explicit `https://` URL to enable TLS. |
 | `-endpoints <csv>` | empty | Optional endpoint pool. Values without schemes use plain HTTP. Workers are assigned round-robin; setup and catalog discovery use the first endpoint. |
 | `-bucket <name>` | `sbk` | Bucket to read / write |
-| `-key <access-key>` | (play.min.io sandbox key) | S3 access key |
-| `-secret <secret-key>` | (play.min.io sandbox secret) | S3 secret key. The value is never echoed by `-help`. |
+| `-key <access-key>` | `SBK_S3_ACCESS_KEY`, then properties default | S3 access key. An explicit option takes precedence over the environment. |
+| `-secret <secret-key>` | `SBK_S3_SECRET_KEY`, then properties default | S3 secret key. An explicit option takes precedence over the environment. The value is never echoed by `-help`. |
 | `-region <region>` | empty; effective `us-east-1` | AWS region for SigV4 signing. An empty value uses `us-east-1`, so the SDK skips `GetBucketLocation`, which many non-AWS backends mishandle. Set the actual bucket region for AWS or any backend that requires another region. |
 | `-recreate true|false` | `false` | Destructively empty and recreate the bucket before a writer run. Mixed writer/reader runs do not override this safety setting. |
 | `-insecure true|false` | `false` | Skip certificate validation for explicit HTTPS endpoints. This does not select HTTP; transport is controlled by each endpoint URL scheme. |
 | `-auth-version 2|4` | `4` | S3 signature version. The MinIO SDK is **always SigV4**; `2` is accepted but logs a warning and falls back to SigV4. |
+
+SBK masks `-key`, `-secret`, and other common credential options in its own
+argument logs. Explicit CLI values can still be visible to operating-system
+process inspection, so environment injection is preferred for ordinary
+single-host MinIO runs.
 
 ### Object naming
 

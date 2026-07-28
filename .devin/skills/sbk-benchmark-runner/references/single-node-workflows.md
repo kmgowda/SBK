@@ -1,6 +1,7 @@
 # SBK and SBK-YAL workflows
 
-All examples assume `./gradlew installDist` has produced
+JDK 25 is required for both Gradle and the generated applications. Confirm
+`java -version` reports JDK 25, then run `./gradlew installDist` to produce
 `./build/install/sbk/bin/`.
 
 ## Discover, then run
@@ -56,9 +57,25 @@ YML uses the top-level `sbkArgs` map. Run a bundled example:
   -f .devin/skills/sbk-benchmark-runner/references/example-sbk-file-write.yml
 ```
 
-The bundled write creates exactly 256 records; the matching read consumes
-exactly 256 records from the same file. This makes the examples quick and
-deterministic. Use the timed CLI examples above for throughput measurement.
+Create one unique directory and override the template path for both commands:
+
+```bash
+SBK_EXAMPLE_DIR=$(mktemp -d /tmp/sbk-agent-benchmark.XXXXXX)
+SBK_EXAMPLE_FILE="$SBK_EXAMPLE_DIR/data.dat"
+
+./build/install/sbk/bin/sbk-yal \
+  -f .devin/skills/sbk-benchmark-runner/references/example-sbk-file-write.yml \
+  -file "$SBK_EXAMPLE_FILE"
+
+./build/install/sbk/bin/sbk-yal \
+  -f .devin/skills/sbk-benchmark-runner/references/example-sbk-file-read.yml \
+  -file "$SBK_EXAMPLE_FILE"
+```
+
+The write creates exactly 256 records; the matching read consumes exactly 256
+records from the same per-run file. Remove the directory only after confirming
+the path is disposable. Use the timed CLI examples above for throughput
+measurement.
 
 Command-line values override YML values without duplicating the option:
 
@@ -80,22 +97,27 @@ Generate current options and read `drivers/minio/README.md` first:
 ./build/install/sbk/bin/sbk -class minio -help
 ```
 
-Use runtime-provided secrets and a dedicated bucket/prefix:
+Use an approved secret manager or protected launcher to populate
+`SBK_S3_ACCESS_KEY` and `SBK_S3_SECRET_KEY` in the process environment. When
+`-key` or `-secret` is explicitly supplied it takes precedence, but placing
+credentials in command arguments exposes them through the process argument
+list.
+
+Use HTTPS for credential-bearing remote endpoints and a dedicated
+bucket/prefix:
 
 ```bash
 ./build/install/sbk/bin/sbk \
   -class minio \
-  -url http://s3-benchmark.example.com:9000 \
+  -url https://s3-benchmark.example.com:9000 \
   -bucket sbk-agent-isolated \
-  -key "$SBK_S3_ACCESS_KEY" \
-  -secret "$SBK_S3_SECRET_KEY" \
   -prefix trial-001/ \
   -writers 1 -size 4096 -records 100 -time mcs
 ```
 
-Do not copy this command into a script where shell expansion or command logging
-would expose secrets. Prefer the environment's approved secret-injection
-mechanism. Confirm bucket creation, recreation, versioning, cleanup, and delete
+Plain HTTP remains supported for local or isolated trusted-lab endpoints where
+TLS is deliberately unavailable; do not send credentials over an untrusted
+network. Confirm bucket creation, recreation, versioning, cleanup, and delete
 options before enabling them.
 
 ## Choose workload termination

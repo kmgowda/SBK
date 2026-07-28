@@ -100,6 +100,16 @@ public class MinIOOptionsTest {
         assertEquals("https://node3:9443", MinIO.normalizeEndpoint("https://node3:9443"));
     }
 
+    @Test
+    public void environmentCredentialsOverrideConfiguredDefaults() {
+        assertEquals("environment-access",
+                MinIO.credentialDefault("environment-access", "configured-access"));
+        assertEquals("configured-access",
+                MinIO.credentialDefault("", "configured-access"));
+        assertEquals("configured-access",
+                MinIO.credentialDefault(null, "configured-access"));
+    }
+
     private static void parse(String... args) throws Exception {
         InputParameterOptions parameters = new SbkDriversParameters(
                 "SBK MinIO option test", DRIVERS, LOGGERS);
