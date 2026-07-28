@@ -1426,10 +1426,10 @@ plausible contributing mechanisms. The benchmark establishes correlation
 under this setup; it does not isolate the contribution of each mechanism.
 
 The contended producer-throughput point estimate favored the intrusive queue
-by 6.74%, and the Gradle verification passed its policy gate requiring the
-intrusive producer metric to exceed the JDK metric by at least 2%. The 99.9%
-confidence intervals overlapped, so this run does not establish interval-level
-separation for producer throughput.
+by 6.74%. The 99.9% confidence intervals overlapped, so the automated
+throughput verdict is `INCONCLUSIVE`: this run does not establish
+interval-level separation for producer throughput. Throughput is
+characterized rather than used as a build gate.
 
 That interval separation belongs to the recorded run, not to every rerun.
 Producer-throughput confidence intervals can overlap on a noisy or
@@ -1550,12 +1550,15 @@ flowchart LR
 ```
 
 For a deliberate all-producers-to-one-queue experiment, set `maxQs=1` in
-`sbk-api/src/main/resources/sbk.properties` and rebuild SBK. Queue topology is
-not exposed as a command-line option because an unsuitable shared-queue count
-can add benchmark-harness contention. Use `-records` to verify exact delivery
-and complete draining, `-seconds` for maximum timed throughput, and `-seconds`
-with `-throughput` to compare latency and stability at the same offered MB/s.
-Startup logs identify the effective queue implementation and topology.
+`sbk-api/src/main/resources/sbk.properties` and rebuild SBK. The automated
+`perlBenchQueuePerformanceTest` instead supplies the same setting through a
+test-only resource, leaving the production default unchanged. Queue topology
+is not exposed as a command-line option because an unsuitable shared-queue
+count can add benchmark-harness contention. Use `-records` to verify exact
+delivery and complete draining, `-seconds` for maximum timed throughput, and
+`-seconds` with `-throughput` to compare latency and stability at the same
+offered MB/s. Startup logs identify the effective queue implementation and
+topology.
 
 The operation's end timestamp is captured before queue insertion. PerlBench
 latency percentiles therefore measure the no-op operation and clock path, not
@@ -1573,6 +1576,21 @@ and 8.11 M records/s versus 6.16 M with one reader. All runs reported zero
 invalid latencies. These observations support both the microbenchmark mechanism
 and the end-to-end benefit, while remaining specific to the declared host,
 JVM, topology, and workload.
+
+The reproducible functional comparison is:
+
+```bash
+./gradlew :drivers:perlbench:perlBenchQueuePerformanceTest
+```
+
+It executes each sample in a separately warmed JVM, randomizes the order of
+the two implementations, and uses one shared queue for all producers. Exact
+record counts and zero invalid latencies are hard correctness assertions. The
+task reports mean 95% confidence intervals and classifies throughput as
+`MPSC_FASTER`, `JDK_CLQ_FASTER`, or `INCONCLUSIVE`; overlapping intervals are
+inconclusive rather than a build failure. The same report includes JMH
+normalized allocation, for which eliminating the CLQ wrapper node remains a
+hard architectural check.
 
 ## 11. Correctness and reclamation evidence
 

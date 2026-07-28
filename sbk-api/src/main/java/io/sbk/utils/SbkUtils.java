@@ -26,6 +26,9 @@ import java.util.stream.Stream;
 
 /** Utility methods for inspecting, filtering, and merging SBK arguments. */
 public final class SbkUtils {
+    private static final String[] SENSITIVE_OPTIONS = {
+        "gempass", "key", "password", "passwd", "secret", "token"
+    };
 
     /**
      * Creates an SBK argument utility.
@@ -76,6 +79,17 @@ public final class SbkUtils {
             }
         }
         return redacted;
+    }
+
+    /**
+     * Return a copy of SBK arguments with values for commonly used credential
+     * options replaced by a fixed mask.
+     *
+     * @param args command-line arguments
+     * @return copied arguments with credential values redacted
+     */
+    public static @NotNull String[] redactSensitiveOptionValues(String[] args) {
+        return redactOptionValues(args, SENSITIVE_OPTIONS);
     }
 
     /**

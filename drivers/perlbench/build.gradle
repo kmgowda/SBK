@@ -9,3 +9,294 @@ repositories {
 dependencies {
     api project(":sbk-api")
 }
+
+def perlBenchModePerformanceTag = 'perlbench-functional-mode'
+def perlBenchComparisonPerformanceTag = 'perlbench-functional-comparison'
+def perlBenchPerformanceDirectory = layout.buildDirectory.dir(
+        'reports/perlbench-performance')
+def perlBenchMpscModeReport = perlBenchPerformanceDirectory.map {
+    it.file('mpsc-mode.properties')
+}
+def perlBenchJdkClqModeReport = perlBenchPerformanceDirectory.map {
+    it.file('jdk-clq-mode.properties')
+}
+def perlBenchMpscReport = perlBenchPerformanceDirectory.map {
+    it.file('mpsc.properties')
+}
+def perlBenchJdkClqReport = perlBenchPerformanceDirectory.map {
+    it.file('jdk-clq.properties')
+}
+def perlBenchComparisonReport = perlBenchPerformanceDirectory.map {
+    it.file('comparison.properties')
+}
+def perlBenchPerformanceRecords = providers.gradleProperty(
+        'perlBenchPerformanceRecords').orElse('10000000')
+def perlBenchPerformanceWarmupRecords = providers.gradleProperty(
+        'perlBenchPerformanceWarmupRecords').orElse('10000000')
+def perlBenchPerformanceRuns = providers.gradleProperty(
+        'perlBenchPerformanceRuns').orElse('7')
+def perlBenchPerformanceWriters = providers.gradleProperty(
+        'perlBenchPerformanceWriters').orElse(
+        Math.min(4, Runtime.runtime.availableProcessors()).toString())
+def timeStampQueueMinimumAllocationReductionBytes = providers.gradleProperty(
+        'timeStampQueueMinimumAllocationReductionBytes').map {
+    it.toDouble()
+}
+def timeStampQueuePerformanceReport = project(':perl').layout.buildDirectory.file(
+        'reports/jmh/timestamp-queue-performance.json')
+def performanceJavaLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(25)
+}
+
+tasks.named('test') {
+    useJUnitPlatform {
+        excludeTags perlBenchModePerformanceTag
+        excludeTags perlBenchComparisonPerformanceTag
+    }
+}
+
+def registerPerlBenchPerformanceTask = {
+    String taskName, boolean mpscQueue, Provider<RegularFile> report ->
+    tasks.register(taskName, Test) {
+        group = 'verification'
+        description = mpscQueue
+                ? 'Runs the full SBK PerlBench path with TimeStampMpscQueue.'
+                : 'Runs the full SBK PerlBench path with JDK ConcurrentLinkedQueue.'
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+        useJUnitPlatform {
+            includeTags perlBenchModePerformanceTag
+        }
+        filter {
+            includeTestsMatching(
+                    'io.sbk.driver.PerlBench.PerlBenchFunctionalPerformanceTest')
+        }
+        systemProperty 'perlbench.mpscQueue', mpscQueue.toString()
+        systemProperty 'perlbench.records',
+                perlBenchPerformanceRecords.get()
+        systemProperty 'perlbench.warmupRecords',
+                perlBenchPerformanceWarmupRecords.get()
+        systemProperty 'perlbench.runs', perlBenchPerformanceRuns.get()
+        systemProperty 'perlbench.writers',
+                perlBenchPerformanceWriters.get()
+        systemProperty 'perlbench.report',
+                report.get().asFile.absolutePath
+        systemProperty 'perlbench.javaExecutable',
+                performanceJavaLauncher.get().executablePath.asFile.absolutePath
+        systemProperty 'perlbench.testClasspath',
+                sourceSets.test.runtimeClasspath.asPath
+        systemProperty 'perlbench.runtimeJvmArgCount',
+                rootProject.ext.sbkRuntimeJvmArgs.size()
+        rootProject.ext.sbkRuntimeJvmArgs.eachWithIndex { argument, index ->
+            systemProperty "perlbench.runtimeJvmArg.${index}", argument
+        }
+        jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+        minHeapSize = '1g'
+        maxHeapSize = '2g'
+        outputs.file(report)
+        outputs.upToDateWhen { false }
+        doFirst {
+            report.get().asFile.parentFile.mkdirs()
+            delete report
+        }
+        doLast {
+            def values = new Properties()
+            report.get().asFile.withInputStream {
+                values.load(it)
+            }
+            logger.lifecycle(String.format(
+                    '%s full-SBK PerlBench verification: '
+                            + 'median %,.0f records/s, mean 95%% CI '
+                            + '[%,.0f, %,.0f], %.1f ns measured operation '
+                            + 'latency; samples [%s]; %,d exact records/fork '
+                            + 'x %s independent JVM forks; zero invalid '
+                            + 'latencies',
+                    values.getProperty('queue'),
+                    values.getProperty(
+                            'medianRecordsPerSecond').toDouble(),
+                    values.getProperty(
+                            'mean95ConfidenceLower').toDouble(),
+                    values.getProperty(
+                            'mean95ConfidenceUpper').toDouble(),
+                    values.getProperty(
+                            'medianAverageLatencyNs').toDouble(),
+                    values.getProperty('recordsPerSecondSamples'),
+                    values.getProperty('recordsPerRun').toLong(),
+                    values.getProperty('measuredRuns')))
+            logger.lifecycle(
+                    "PerlBench report: ${report.get().asFile}")
+        }
+    }
+}
+
+def perlBenchMpscPerformanceTest = registerPerlBenchPerformanceTask(
+        'perlBenchMpscPerformanceTest', true, perlBenchMpscModeReport)
+def perlBenchJdkClqPerformanceTest = registerPerlBenchPerformanceTask(
+        'perlBenchJdkClqPerformanceTest', false, perlBenchJdkClqModeReport)
+
+perlBenchJdkClqPerformanceTest.configure {
+    shouldRunAfter perlBenchMpscPerformanceTest
+}
+
+tasks.register('perlBenchQueuePerformanceTest', Test) {
+    group = 'verification'
+    description = 'Compares full SBK PerlBench MPSC and JDK CLQ throughput.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags perlBenchComparisonPerformanceTag
+    }
+    filter {
+        includeTestsMatching(
+                'io.sbk.driver.PerlBench.PerlBenchFunctionalPerformanceTest')
+    }
+    systemProperty 'perlbench.records',
+            perlBenchPerformanceRecords.get()
+    systemProperty 'perlbench.warmupRecords',
+            perlBenchPerformanceWarmupRecords.get()
+    systemProperty 'perlbench.runs', perlBenchPerformanceRuns.get()
+    systemProperty 'perlbench.writers',
+            perlBenchPerformanceWriters.get()
+    systemProperty 'perlbench.mpscReport',
+            perlBenchMpscReport.get().asFile.absolutePath
+    systemProperty 'perlbench.jdkClqReport',
+            perlBenchJdkClqReport.get().asFile.absolutePath
+    systemProperty 'perlbench.comparisonReport',
+            perlBenchComparisonReport.get().asFile.absolutePath
+    systemProperty 'perlbench.javaExecutable',
+            performanceJavaLauncher.get().executablePath.asFile.absolutePath
+    systemProperty 'perlbench.testClasspath',
+            sourceSets.test.runtimeClasspath.asPath
+    systemProperty 'perlbench.runtimeJvmArgCount',
+            rootProject.ext.sbkRuntimeJvmArgs.size()
+    rootProject.ext.sbkRuntimeJvmArgs.eachWithIndex { argument, index ->
+        systemProperty "perlbench.runtimeJvmArg.${index}", argument
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    minHeapSize = '1g'
+    maxHeapSize = '2g'
+    dependsOn ':perl:runTimeStampQueuePerformanceBenchmark'
+    inputs.file(timeStampQueuePerformanceReport)
+    outputs.files(perlBenchMpscReport, perlBenchJdkClqReport,
+            perlBenchComparisonReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        perlBenchPerformanceDirectory.get().asFile.mkdirs()
+        delete perlBenchMpscReport
+        delete perlBenchJdkClqReport
+        delete perlBenchComparisonReport
+    }
+
+    doLast {
+        def readReport = { Provider<RegularFile> report ->
+            def values = new Properties()
+            report.get().asFile.withInputStream {
+                values.load(it)
+            }
+            values
+        }
+        def mpsc = readReport(perlBenchMpscReport)
+        def jdkClq = readReport(perlBenchJdkClqReport)
+        def comparison = readReport(perlBenchComparisonReport)
+        def jmhResults = new groovy.json.JsonSlurper().parse(
+                timeStampQueuePerformanceReport.get().asFile)
+        def byBenchmark = jmhResults.collectEntries {
+            [(it.benchmark): it]
+        }
+        def mpscRoundTrip = byBenchmark[
+                'io.perl.benchmark.TimeStampQueueBenchmark.intrusiveRoundTrip']
+        def jdkClqRoundTrip = byBenchmark[
+                'io.perl.benchmark.TimeStampQueueBenchmark.jdkRoundTrip']
+        if (mpscRoundTrip == null || jdkClqRoundTrip == null) {
+            throw new GradleException(
+                    'Timestamp queue JMH allocation results are missing')
+        }
+        def mpscAllocation = mpscRoundTrip.secondaryMetrics[
+                'gc.alloc.rate.norm'].score
+        def jdkClqAllocation = jdkClqRoundTrip.secondaryMetrics[
+                'gc.alloc.rate.norm'].score
+        def allocationReduction = jdkClqAllocation - mpscAllocation
+        def allocationReductionPercent =
+                allocationReduction * 100.0 / jdkClqAllocation
+        ['writers', 'recordsPerRun', 'measuredRuns'].each { property ->
+            if (mpsc.getProperty(property)
+                    != jdkClq.getProperty(property)) {
+                throw new GradleException(
+                        "PerlBench reports use different ${property} values")
+            }
+        }
+        def mpscThroughput =
+                mpsc.getProperty('medianRecordsPerSecond').toDouble()
+        def jdkClqThroughput =
+                jdkClq.getProperty('medianRecordsPerSecond').toDouble()
+        def throughputGain = comparison.getProperty(
+                'medianThroughputDifferencePercent').toDouble()
+        def mpscLatency =
+                mpsc.getProperty('medianAverageLatencyNs').toDouble()
+        def jdkClqLatency =
+                jdkClq.getProperty('medianAverageLatencyNs').toDouble()
+
+        logger.lifecycle('SBK PerlBench functional performance comparison:')
+        logger.lifecycle(String.format(
+                "  TimeStampMpscQueue       : %,.0f records/s; "
+                        + "median measured operation latency %.1f ns",
+                mpscThroughput, mpscLatency))
+        logger.lifecycle(String.format(
+                "  JDK ConcurrentLinkedQueue: %,.0f records/s; "
+                        + "median measured operation latency %.1f ns",
+                jdkClqThroughput, jdkClqLatency))
+        logger.lifecycle(String.format(
+                '  Median throughput difference: %.2f%%', throughputGain))
+        logger.lifecycle(String.format(
+                '  MPSC mean 95%% CI          : [%,.0f, %,.0f] records/s',
+                mpsc.getProperty('mean95ConfidenceLower').toDouble(),
+                mpsc.getProperty('mean95ConfidenceUpper').toDouble()))
+        logger.lifecycle(String.format(
+                '  JDK CLQ mean 95%% CI        : [%,.0f, %,.0f] records/s',
+                jdkClq.getProperty('mean95ConfidenceLower').toDouble(),
+                jdkClq.getProperty('mean95ConfidenceUpper').toDouble()))
+        logger.lifecycle(
+                "  Statistical verdict        : ${comparison.getProperty('verdict')}")
+        logger.lifecycle(String.format(
+                '  Functional validation      : %,d records/fork x %s '
+                        + 'independent JVM forks; exact counts and zero '
+                        + 'invalid latencies in both modes',
+                mpsc.getProperty('recordsPerRun').toLong(),
+                mpsc.getProperty('measuredRuns')))
+        logger.lifecycle('  Queue topology             : one shared queue, '
+                + "${mpsc.getProperty('writers')} producers, one consumer")
+        logger.lifecycle(String.format(
+                '  Normalized allocation       : %.3f vs %.3f B/op; '
+                        + 'MPSC saves %.3f B/op (%.2f%%)',
+                mpscAllocation, jdkClqAllocation, allocationReduction,
+                allocationReductionPercent))
+        logger.lifecycle('  Note: SBK operation latency ends before queue '
+                + 'insertion; throughput is the functional queue-path metric.')
+        logger.lifecycle("  MPSC report: ${perlBenchMpscReport.get().asFile}")
+        logger.lifecycle("  JDK CLQ report: ${perlBenchJdkClqReport.get().asFile}")
+        logger.lifecycle(
+                "  Comparison report: ${perlBenchComparisonReport.get().asFile}")
+
+        if (allocationReduction
+                < timeStampQueueMinimumAllocationReductionBytes.get()) {
+            throw new GradleException(String.format(
+                    'TimeStampMpscQueue allocation %.3f B/op does not '
+                            + 'eliminate a JDK queue node from %.3f B/op',
+                    mpscAllocation, jdkClqAllocation))
+        }
+        comparison.setProperty('mpscNormalizedAllocationBytesPerOperation',
+                Double.toString(mpscAllocation))
+        comparison.setProperty('jdkClqNormalizedAllocationBytesPerOperation',
+                Double.toString(jdkClqAllocation))
+        comparison.setProperty('allocationReductionBytesPerOperation',
+                Double.toString(allocationReduction))
+        comparison.setProperty('allocationReductionPercent',
+                Double.toString(allocationReductionPercent))
+        perlBenchComparisonReport.get().asFile.withOutputStream {
+            comparison.store(it,
+                    'SBK PerlBench functional and allocation comparison')
+        }
+        logger.lifecycle('SBK PerlBench correctness and allocation '
+                + 'verification: PASSED')
+    }
+}

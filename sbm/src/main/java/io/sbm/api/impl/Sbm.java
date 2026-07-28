@@ -137,7 +137,7 @@ final public class Sbm {
         Printer.log.info(SbmConfig.DESC);
         Printer.log.info(SbmConfig.NAME.toUpperCase() + " Version: " + version);
         Printer.log.info(SbmConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
-        Printer.log.info("Arguments List: " + Arrays.toString(args));
+        Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         loggerStore.printClasses("Logger");

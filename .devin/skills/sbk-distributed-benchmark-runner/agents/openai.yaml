@@ -1,0 +1,4 @@
+interface:
+  display_name: "SBK Distributed Benchmark Runner"
+  short_description: "Run distributed SBK benchmarks safely"
+  default_prompt: "Use $sbk-distributed-benchmark-runner to plan, validate, and run a reproducible distributed SBK benchmark."

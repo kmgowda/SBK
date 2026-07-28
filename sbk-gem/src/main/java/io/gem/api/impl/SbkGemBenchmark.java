@@ -20,6 +20,7 @@ import io.gem.api.ConnectionConfig;
 import io.gem.params.GemParameters;
 import io.sbk.api.Benchmark;
 import io.sbk.system.Printer;
+import io.sbk.utils.SbkUtils;
 import io.state.State;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
@@ -188,8 +189,12 @@ final public class SbkGemBenchmark implements GemBenchmark {
             commandTokens.addAll(sbkArgs);
             final String command = RemoteJavaDeployment.launchCommand(javaHomes[i],
                     RemoteSbkDeployment.shellJoin(commandTokens));
+            final String redactedCommand = RemoteJavaDeployment.launchCommand(javaHomes[i],
+                    RemoteSbkDeployment.shellJoin(List.of(
+                            SbkUtils.redactSensitiveOptionValues(
+                                    commandTokens.toArray(String[]::new)))));
             Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                    "' remote SBK command: " + command);
+                    "' remote SBK command: " + redactedCommand);
             cfResults[i] = nodes[i].runCommandAsync(command, false, benchmarkTimeoutSeconds());
         }
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfResults);

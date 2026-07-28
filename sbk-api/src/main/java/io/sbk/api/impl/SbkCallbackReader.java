@@ -43,7 +43,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     final private CompletableFuture<Void> ret;
     final private Callback<Object> callback;
     final private AtomicLong readCnt;
-    final private double msToRun;
+    final private long timeUnitsToRun;
     final private long totalRecords;
     private long beginTime;
 
@@ -66,7 +66,11 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
         this.ret = new CompletableFuture<>();
         this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
-        this.msToRun = params.getTotalSecondsToRun() * Time.MS_PER_SEC;
+        this.timeUnitsToRun = switch (time.getTimeUnit()) {
+            case ms -> params.getTotalSecondsToRun() * Time.MS_PER_SEC;
+            case mcs -> params.getTotalSecondsToRun() * Time.MICROS_PER_SEC;
+            case ns -> params.getTotalSecondsToRun() * Time.NS_PER_SEC;
+        };
         this.totalRecords = params.getTotalRecords();
 
         if (params.getAction() == Action.Write_Reading) {
@@ -88,13 +92,22 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     }
 
 
+    /**
+     * Records a completed callback batch and completes the benchmark when its
+     * configured duration or record target is reached.
+     *
+     * @param startTime operation start time in the configured time unit
+     * @param endTime operation completion time in the configured time unit
+     * @param dataSize total bytes represented by the callback batch
+     * @param events number of records represented by the callback batch
+     */
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
-        final long cnt = readCnt.incrementAndGet();
+        final long cnt = readCnt.addAndGet(events);
         perlChannel.send(startTime, endTime, events, dataSize);
-        if (this.msToRun > 0 && (time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun)) {
+        if (this.timeUnitsToRun > 0 && time.elapsed(endTime, beginTime) >= this.timeUnitsToRun) {
             ret.complete(null);
-        } else if (this.totalRecords > cnt) {
+        } else if (this.totalRecords > 0 && cnt >= this.totalRecords) {
             ret.complete(null);
         }
     }

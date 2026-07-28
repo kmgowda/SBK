@@ -592,11 +592,9 @@ public final class DashboardServer implements AutoCloseable {
         public void close() {
             open = false;
             offer(WAKE_EVENT);
-            try {
-                output.close();
-            } catch (IOException ignored) {
-                // The browser may have already closed the connection.
-            }
+            // The HTTP handler owns and closes the exchange after run()
+            // returns. Closing its output here races with that cleanup and
+            // can trip an assertion inside JDK HttpServer.
         }
     }
 

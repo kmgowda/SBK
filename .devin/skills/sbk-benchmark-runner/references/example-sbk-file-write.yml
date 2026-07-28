@@ -1,0 +1,15 @@
+# Copyright (c) KMG. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# TEMPLATE ONLY. Override REPLACE_WITH_UNIQUE_DISPOSABLE_FILE with the same
+# per-run path in this write and the matching read workload.
+
+sbkArgs:
+  class: file
+  file: REPLACE_WITH_UNIQUE_DISPOSABLE_FILE
+  writers: 1
+  size: 4096
+  records: 256
+  time: mcs
+  out: SystemLogger

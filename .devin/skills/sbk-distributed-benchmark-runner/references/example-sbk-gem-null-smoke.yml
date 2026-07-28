@@ -1,0 +1,25 @@
+# Copyright (c) KMG. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# Replace hostnames and paths. This validates distributed orchestration and
+# aggregation only; Null performs no storage I/O.
+
+sbkGemArgs:
+  nodes: loadgen-a.example.com,loadgen-b.example.com
+  gemuser: sbk
+  hostkeycheck: true
+  localhost: gem-controller.example.com
+  sbmport: 9717
+  sbkdir: /absolute/path/to/SBK/build/install/sbk
+  copy: true
+  delete: true
+  deleteafter: false
+  javacopy: true
+  javaversion: 25
+  class: null
+  writers: 1
+  size: 100
+  records: 10000
+  time: ns
+  out: GemPrometheusLogger

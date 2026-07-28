@@ -63,6 +63,8 @@ import java.util.concurrent.TimeUnit;
  * keys, data shaping, SSE-S3 encryption, and HTTP-client tuning.
  */
 public class MinIO implements Storage<byte[]> {
+    private static final String ACCESS_KEY_ENV = "SBK_S3_ACCESS_KEY";
+    private static final String SECRET_KEY_ENV = "SBK_S3_SECRET_KEY";
 
     private static final String CONFIGFILE = "minio.properties";
     private static final long MIN_PART_SIZE = 5L * 1024 * 1024;            // 5 MiB
@@ -107,9 +109,12 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("endpoints", true, "Comma-separated S3 endpoints distributed across workers,"
                 + " default: '" + nullToEmpty(config.endpoints) + "'");
         params.addOption("bucket",   true, "Bucket name, default: " + config.bucketName);
-        params.addOption("key",      true, "Access key, default: " + config.accessKey);
+        params.addOption("key",      true, "Access key, default: "
+                + (nullToEmpty(config.accessKey).isEmpty() ? "not configured" : "configured")
+                + "; fallback environment: " + ACCESS_KEY_ENV);
         params.addOption("secret",   true, "Secret key (value is never printed), default: "
-                + (nullToEmpty(config.secretKey).isEmpty() ? "not configured" : "configured"));
+                + (nullToEmpty(config.secretKey).isEmpty() ? "not configured" : "configured")
+                + "; fallback environment: " + SECRET_KEY_ENV);
         params.addOption("region",   true, "AWS region (SigV4), default: '" + nullToEmpty(config.region) + "'");
         params.addOption("recreate", true, "Recreate bucket if present, default: " + config.reCreate);
         params.addOption("insecure", true, "Skip certificate validation for explicit HTTPS endpoints,"
@@ -235,8 +240,10 @@ public class MinIO implements Storage<byte[]> {
         config.url        = params.getOptionValue("url",      config.url);
         config.endpoints = params.getOptionValue("endpoints", nullToEmpty(config.endpoints));
         config.bucketName = params.getOptionValue("bucket",   config.bucketName);
-        config.accessKey  = params.getOptionValue("key",      config.accessKey);
-        config.secretKey  = params.getOptionValue("secret",   config.secretKey);
+        config.accessKey = params.getOptionValue("key",
+                credentialDefault(System.getenv(ACCESS_KEY_ENV), config.accessKey));
+        config.secretKey = params.getOptionValue("secret",
+                credentialDefault(System.getenv(SECRET_KEY_ENV), config.secretKey));
         config.region     = params.getOptionValue("region",   nullToEmpty(config.region));
         config.reCreate = Boolean.parseBoolean(
                 params.getOptionValue("recreate", String.valueOf(config.reCreate)));
@@ -919,6 +926,11 @@ public class MinIO implements Storage<byte[]> {
             return value;
         }
         return "http://" + value;
+    }
+
+    static String credentialDefault(String environmentValue, String configuredValue) {
+        return environmentValue == null || environmentValue.isBlank()
+                ? configuredValue : environmentValue;
     }
 
     private int globalAsyncLimit() {
