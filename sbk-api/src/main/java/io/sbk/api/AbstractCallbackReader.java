@@ -38,7 +38,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     private AtomicLong readCnt;
     private long beginTime;
     private Worker reader;
-    private long msToRun;
+    private long timeUnitsToRun;
     private long recordsCount;
 
     /**
@@ -87,7 +87,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     public void recordBenchmark(long startTime, long endTime, int dataSize, int events) {
         final long cnt = readCnt.addAndGet(events);
         reader.perlChannel.send(startTime, endTime, events, dataSize);
-        if (this.msToRun > 0 && time.elapsedMilliSeconds(endTime, beginTime) >= this.msToRun) {
+        if (this.timeUnitsToRun > 0 && time.elapsed(endTime, beginTime) >= this.timeUnitsToRun) {
             complete();
         } else if (this.recordsCount > 0 && cnt >= this.recordsCount) {
             complete();
@@ -113,7 +113,11 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
         this.time = time;
         this.readCnt = new AtomicLong(0);
         this.beginTime = time.getCurrentTime();
-        this.msToRun = secondsToRun * Time.MS_PER_SEC;
+        this.timeUnitsToRun = switch (time.getTimeUnit()) {
+            case ms -> secondsToRun * Time.MS_PER_SEC;
+            case mcs -> secondsToRun * Time.MICROS_PER_SEC;
+            case ns -> secondsToRun * Time.NS_PER_SEC;
+        };
         this.recordsCount = recordsCount;
         this.ret = new CompletableFuture<>();
         start(callback);

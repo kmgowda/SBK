@@ -12,6 +12,8 @@ package io.sbk.api.impl;
 import io.perl.api.PerlChannel;
 import io.sbk.data.DataType;
 import io.sbk.params.impl.SbkParameters;
+import io.time.MicroSeconds;
+import io.time.MilliSeconds;
 import io.time.NanoSeconds;
 import io.time.Time;
 import org.junit.jupiter.api.Test;
@@ -52,23 +54,29 @@ final class SbkCallbackReaderTest {
     }
 
     @Test
-    void convertsNanosecondsBeforeCheckingDuration() throws Exception {
+    void checksDurationInTheConfiguredTimeUnit() throws Exception {
+        verifyDuration(new MilliSeconds(), Time.MS_PER_SEC);
+        verifyDuration(new MicroSeconds(), Time.MICROS_PER_SEC);
+        verifyDuration(new NanoSeconds(), Time.NS_PER_SEC);
+    }
+
+    private static void verifyDuration(Time time, long unitsPerSecond)
+            throws Exception {
         SbkParameters parameters = parameters("-readers", "1", "-size",
                 "8", "-seconds", "1");
         CapturingChannel channel = new CapturingChannel();
-        NanoSeconds time = new NanoSeconds();
         SbkCallbackReader reader = new SbkCallbackReader(0, parameters,
                 channel, 1, new TestDataType(), time);
         CompletableFuture<Void> completion = reader.start();
         long currentTime = time.getCurrentTime();
 
         reader.record(currentTime,
-                currentTime + 10L * Time.NS_PER_MS, 1, 1);
+                currentTime + unitsPerSecond / 100, 1, 1);
 
         assertFalse(completion.isDone());
 
         reader.record(currentTime,
-                currentTime + Time.NS_PER_SEC, 1, 1);
+                currentTime + unitsPerSecond, 1, 1);
 
         completion.get(1, TimeUnit.SECONDS);
     }
