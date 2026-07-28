@@ -139,9 +139,9 @@ construction.
 
 ## Elastic idle waiting
 
-With the default `sleepMS=0`, `PerformanceRecorderIdleBusyWait` is the sole
-consumer of the timestamp queues. The historical class name does not mean a
-tight spin: after a complete scan finds no data, the recorder calls
+With the default `sleepMS=0`, `PerformanceRecorderElasticWait` is the sole
+consumer of the timestamp queues. The class name describes its adaptive idle
+policy rather than a tight spin: after a complete scan finds no data, the recorder calls
 `LockSupport.parkNanos(idleNS)`. `ElasticWait` learns the number of completed
 parks per millisecond and uses that rate to decide how many parks may occur
 before the recorder samples the clock again.

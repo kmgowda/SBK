@@ -21,32 +21,36 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- * Class for Performance Recording.
+ * Single-consumer performance recorder with adaptive idle parking.
+ *
+ * <p>Available timestamps are drained without an additional recorder clock
+ * read. When every channel is empty, {@link ElasticWait} parks for the
+ * configured idle duration and amortizes subsequent clock checks.</p>
  */
 @NotThreadSafe
-public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
+public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
     final private int idleNS;
 
     /**
-     * Constructor to initialize values.
+     * Creates an elastic-wait performance recorder.
      *
-     * @param periodicRecorder      PeriodicRecorder
-     * @param channels              Channel[]
-     * @param time                  Time
-     * @param reportingIntervalMS   int
-     * @param idleNS                int
+     * @param periodicRecorder periodic result recorder
+     * @param channels timestamp channels to consume
+     * @param time benchmark clock
+     * @param reportingIntervalMS reporting-window duration in milliseconds
+     * @param idleNS duration of each empty-channel park in nanoseconds
      */
-    public PerformanceRecorderIdleBusyWait(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
-                                           int reportingIntervalMS, int idleNS) {
+    public PerformanceRecorderElasticWait(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
+                                          int reportingIntervalMS, int idleNS) {
         super(periodicRecorder, channels, time, reportingIntervalMS);
         this.idleNS = idleNS;
     }
 
     /**
-     * Method run.
+     * Consumes timestamps until the configured duration or record count ends.
      *
-     * @param secondsToRun      final long.
-     * @param totalRecords      final long.
+     * @param secondsToRun benchmark duration, or zero for record-count mode
+     * @param totalRecords target record count, or zero for duration mode
      */
     public void run(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
@@ -59,7 +63,8 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
         boolean notFound;
         boolean dataSinceIdle = false;
         TimeStamp t;
-        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Started : {} nanoseconds idle busy wait", this.idleNS);
+        PerlPrinter.log.info("PerformanceRecorderElasticWait Started : {} nanoseconds adaptive idle park",
+                this.idleNS);
         periodicRecorder.start(startTime);
         periodicRecorder.startWindow(startTime);
         while (doWork) {
@@ -117,7 +122,7 @@ public final class PerformanceRecorderIdleBusyWait extends PerformanceRecorder {
             }
         }
         periodicRecorder.stop(ctime);
-        PerlPrinter.log.info("PerformanceRecorderIdleBusyWait Exited");
+        PerlPrinter.log.info("PerformanceRecorderElasticWait Exited");
     }
 
 }

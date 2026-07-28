@@ -260,7 +260,7 @@ Primary sources:
 - `perl/src/main/java/io/perl/api/impl/TimeStampMpscQueue.java`
 - `perl/src/main/java/io/perl/api/impl/TimeStampMpscQueueArray.java`
 - `perl/src/main/java/io/perl/api/impl/ConcurrentLinkedQueueArray.java`
-- `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java`
+- `perl/src/main/java/io/perl/api/impl/PerformanceRecorderElasticWait.java`
 - `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleSleep.java`
 - `perl/src/main/java/io/perl/api/impl/ElasticWait.java`
 - `perl/src/main/java/io/perl/api/impl/PerlBuilder.java`

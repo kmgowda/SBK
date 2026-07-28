@@ -395,7 +395,7 @@ flowchart LR
     end
 
     subgraph RECORDER["PerformanceRecorder thread (1 consumer)"]
-        RUN["PerformanceRecorderIdleBusyWait.run()<br/>(or *IdleSleep)"]
+        RUN["PerformanceRecorderElasticWait.run()<br/>(or *IdleSleep)"]
     end
 
     subgraph WINDOWS["Latency windows (per recorder)"]
@@ -437,7 +437,7 @@ for (int i = 0; i < channels.length; i++) {
             ? new TimeStampMpscQueueChannel(maxQs, new OnError())
             : new CQueueChannel(maxQs, new OnError());
 }
-this.perlReceiver = new PerformanceRecorderIdleBusyWait(   // ...or *IdleSleep
+this.perlReceiver = new PerformanceRecorderElasticWait(   // ...or *IdleSleep
         periodicRecorder, channels, time, reportingIntervalMS, idleNS);
 ```
 
@@ -593,10 +593,10 @@ uses each channel's `rIndex` to inspect those queues in turn. Queue sharding
 reduces shared-location contention; the one recorder still defines the drain
 capacity of this PerL instance.
 
-#### Pillar 2 — `PerformanceRecorderIdleBusyWait`: the single consumer
+#### Pillar 2 — `PerformanceRecorderElasticWait`: the single consumer
 
 The recorder thread runs the loop in
-[PerformanceRecorderIdleBusyWait.java](../perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java):
+[PerformanceRecorderElasticWait.java](../perl/src/main/java/io/perl/api/impl/PerformanceRecorderElasticWait.java):
 
 ```java
 while (doWork) {
@@ -636,11 +636,11 @@ There are **two variants** of the recorder, chosen by config:
 
 | Variant | When chosen | Behavior on empty queue |
 |---|---|---|
-| `PerformanceRecorderIdleBusyWait` | `sleepMS = 0` (default) | Calls `LockSupport.parkNanos(idleNS)` between empty scans and uses `ElasticWait` to decide when to check the clock. The configured default is **1 ms**; the enforced minimum is **1 µs**. |
+| `PerformanceRecorderElasticWait` | `sleepMS = 0` (default) | Calls `LockSupport.parkNanos(idleNS)` between empty scans and uses `ElasticWait` to decide when to check the clock. The configured default is **1 ms**; the enforced minimum is **1 µs**. |
 | `PerformanceRecorderIdleSleep` | `sleepMS > 0` | Thread sleeps for `min(sleepMS, windowIntervalMS)`. |
 
-Despite the historical class name, `PerformanceRecorderIdleBusyWait` is not a
-tight CPU spin: it parks with `LockSupport`. The delay affects how quickly the
+`PerformanceRecorderElasticWait` is not a tight CPU spin: it parks with
+`LockSupport`. The delay affects how quickly the
 recorder drains a newly non-empty queue and how much temporary queue backlog
 can build. It does **not** add directly to the measured operation latency,
 because workers capture `endTime` before enqueueing the record.
@@ -797,7 +797,7 @@ A reporting window can alternate between empty and active periods. Without an
 active-to-idle reset, parks accumulated before a brief burst of records would
 be divided by elapsed time that also includes the active burst. That would
 underestimate the measured park rate and cause more frequent clock checks.
-`PerformanceRecorderIdleBusyWait` therefore remembers whether data has been
+`PerformanceRecorderElasticWait` therefore remembers whether data has been
 consumed. On the first subsequent empty scan it calls `startIdle()` with the
 elapsed time derived from the last consumed `TimeStamp.endTime`. This starts a
 clean idle sample **without a new clock query** and without delaying a window
@@ -2926,8 +2926,8 @@ SBK is the right substrate.
 |---|---|---|
 | **No reservoir sampling** | Every completed operation submitted to PerL contributes its count; invalid and out-of-range values remain visible as counters. Precision still depends on time unit, range, and backend. | `HashMapLatencyRecorder` and `ArrayLatencyRecorder` implement exact integer buckets; HDR uses three significant digits. |
 | **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `TimeStampMpscQueueChannel` uses `TimeStampMpscQueueArray`; the original `CQueueChannel` uses `ConcurrentLinkedQueueArray`. |
-| **Single-owner recording** | One consumer owns each direction's non-thread-safe windows, avoiding concurrent bucket updates. Its drain rate remains a capacity limit to monitor. | `PerformanceRecorderIdleBusyWait.run()` reads all channels for one PerL instance. |
-| **Amortised recorder clock checks** | Records carry worker timestamps; the empty path parks and checks time after an adaptive batch instead of on every poll. | `ElasticWait` plus `PerformanceRecorderIdleBusyWait`. |
+| **Single-owner recording** | One consumer owns each direction's non-thread-safe windows, avoiding concurrent bucket updates. Its drain rate remains a capacity limit to monitor. | `PerformanceRecorderElasticWait.run()` reads all channels for one PerL instance. |
+| **Amortised recorder clock checks** | Records carry worker timestamps; the empty path parks and checks time after an adaptive batch instead of on every poll. | `ElasticWait` plus `PerformanceRecorderElasticWait`. |
 | **Shared harness across vendors** | Driver comparisons reuse orchestration, timing interfaces, PerL, and logger contracts. Equivalent durability/completion and SDK settings still require experimental control. | `Sbk`, `SbkBenchmark`, `SbkWriter`, and `SbkReader`. |
 | **Mergeable distributed distributions** | SBM adds latency counts and recomputes combined percentiles instead of averaging per-client percentiles. The result covers accepted SBP records, not missing or duplicated transport data. | `SbmTotalWindowLatencyPeriodicRecorder.addLatenciesRecord()`. |
 
@@ -3068,7 +3068,7 @@ deeper:
 ### Source-code reading order suggested for new contributors
 
 1. `perl/src/main/java/io/perl/api/impl/CQueuePerl.java` — the heart
-2. `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java` — the consumer
+2. `perl/src/main/java/io/perl/api/impl/PerformanceRecorderElasticWait.java` — the consumer
 3. `perl/src/main/java/io/perl/api/impl/PerlBuilder.java` — the wiring
 4. `sbk-api/src/main/java/io/sbk/api/Storage.java` — the SPI
 5. `sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java` — the orchestrator

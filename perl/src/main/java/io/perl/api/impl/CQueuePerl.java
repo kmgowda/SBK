@@ -83,7 +83,7 @@ final public class CQueuePerl implements Perl {
             this.perlReceiver = new PerformanceRecorderIdleSleep(periodicRecorder, channels, time, reportingIntervalMS,
                     Math.min(perlConfig.sleepMS, reportingIntervalMS));
         } else {
-            this.perlReceiver = new PerformanceRecorderIdleBusyWait(periodicRecorder, channels, time, reportingIntervalMS,
+            this.perlReceiver = new PerformanceRecorderElasticWait(periodicRecorder, channels, time, reportingIntervalMS,
                     Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
         }
     }

@@ -208,7 +208,7 @@ Source trail:
    selects the intrusive or JDK-backed channel.
 2. [`TimeStampMpscQueueArray`](../perl/src/main/java/io/perl/api/impl/TimeStampMpscQueueArray.java)
    owns the indexed queues.
-3. [`PerformanceRecorderIdleBusyWait`](../perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleBusyWait.java)
+3. [`PerformanceRecorderElasticWait`](../perl/src/main/java/io/perl/api/impl/PerformanceRecorderElasticWait.java)
    is the single queue consumer.
 
 ## 3. Data representation: one object versus two
