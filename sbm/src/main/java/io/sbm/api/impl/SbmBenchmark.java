@@ -16,7 +16,7 @@ import io.perl.data.Bytes;
 import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.api.impl.CSVExtendedLatencyRecorder;
-import io.perl.api.impl.HashMapLatencyRecorder;
+import io.perl.api.impl.LongHashMapLatencyRecorder;
 import io.perl.api.impl.HdrExtendedLatencyRecorder;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
@@ -122,10 +122,10 @@ final public class SbmBenchmark implements Benchmark {
         final LatencyRecordWindow totalWindowExtension;
         final Random random = new Random();
 
-        totalWindow = new HashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
+        totalWindow = new LongHashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                 LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions,
                 time, sbmConfig.totalMaxHashMapSizeMB);
-        Printer.log.info("Total Window Latency Store: HashMap, Size: " +
+        Printer.log.info("Total Window Latency Store: PrimitiveLongMap, Size: " +
                 totalWindow.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
 
         if (sbmConfig.histogram) {

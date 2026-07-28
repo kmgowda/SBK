@@ -88,8 +88,8 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
             }
             percentiles.copyLatency(latency, count, curIndex, nextIndex);
             curIndex = nextIndex;
-            latencies.remove(latency);
         }
+        latencies.clear();
         mapBytesCount = 0;
     }
 

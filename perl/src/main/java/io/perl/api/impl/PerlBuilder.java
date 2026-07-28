@@ -86,10 +86,10 @@ public final class PerlBuilder {
             PerlPrinter.log.info("Window Latency Store: Array, Size: " +
                     window.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
         } else {
-            window = new HashMapLatencyRecorder(minLatency, maxLatency,
+            window = new LongHashMapLatencyRecorder(minLatency, maxLatency,
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions,
                     time, config.maxHashMapSizeMB);
-            PerlPrinter.log.info("Window Latency Store: HashMap, Size: " +
+            PerlPrinter.log.info("Window Latency Store: PrimitiveLongMap, Size: " +
                     window.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
         }
         return window;
@@ -123,10 +123,10 @@ public final class PerlBuilder {
 
         window = buildLatencyRecordWindow(config, time, minLatency, maxLatency, percentileFractions);
 
-        totalWindow = new HashMapLatencyRecorder(minLatency, maxLatency,
+        totalWindow = new LongHashMapLatencyRecorder(minLatency, maxLatency,
                 LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions,
                 time, config.totalMaxHashMapSizeMB);
-        PerlPrinter.log.info("Total Window Latency Store: HashMap, Size: " +
+        PerlPrinter.log.info("Total Window Latency Store: PrimitiveLongMap, Size: " +
                 totalWindow.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
 
         if (config.histogram) {

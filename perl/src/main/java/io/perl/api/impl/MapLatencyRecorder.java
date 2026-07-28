@@ -94,8 +94,8 @@ public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashM
             }
             percentiles.copyLatency(latency, count, curIndex, nextIndex);
             curIndex = nextIndex;
-            latencies.remove(latency);
         }
+        latencies.clear();
         mapBytesCount = 0;
     }
 

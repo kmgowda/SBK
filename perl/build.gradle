@@ -92,6 +92,8 @@ def cqueuePerformanceReport = layout.buildDirectory.file(
         "reports/jmh/cqueue-performance.json")
 def timeStampQueuePerformanceReport = layout.buildDirectory.file(
         "reports/jmh/timestamp-queue-performance.json")
+def latencyMapPerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/latency-map-performance.json")
 
 tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'
@@ -226,6 +228,126 @@ tasks.register('timeStampQueuePerformanceTest') {
         }
         logger.lifecycle('Timestamp queue latency and allocation '
                 + 'verification: PASSED; throughput is classified, not gated')
+    }
+}
+
+tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks primitive and boxed sparse latency maps on JDK 25.'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.perl.benchmark.LatencyMapBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', latencyMapPerformanceReport.get().asFile.absolutePath
+    outputs.file(latencyMapPerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        latencyMapPerformanceReport.get().asFile.parentFile.mkdirs()
+        delete latencyMapPerformanceReport
+    }
+}
+
+tasks.register('latencyMapPerformanceTest') {
+    group = 'verification'
+    description = 'Compares primitive-map throughput and allocation with the boxed map.'
+    dependsOn tasks.named('runLatencyMapPerformanceBenchmark')
+
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                latencyMapPerformanceReport.get().asFile)
+        def byBenchmark = results.collectEntries { [(it.benchmark): it] }
+        def result = { String benchmark ->
+            def value = byBenchmark[benchmark]
+            if (value == null) {
+                throw new GradleException(
+                        "Missing latency-map JMH result: ${benchmark}")
+            }
+            if (!value.jdkVersion.toString().startsWith('25')) {
+                throw new GradleException(
+                        "Latency-map comparison requires JDK 25; found "
+                                + value.jdkVersion)
+            }
+            value
+        }
+
+        def primitive = result(
+                'io.perl.benchmark.LatencyMapBenchmark'
+                        + '.primitiveRecordLatency')
+        def boxed = result(
+                'io.perl.benchmark.LatencyMapBenchmark'
+                        + '.boxedRecordLatency')
+        def primitiveThroughput = primitive.primaryMetric
+        def boxedThroughput = boxed.primaryMetric
+        def primitiveAllocation =
+                primitive.secondaryMetrics['gc.alloc.rate.norm']
+        def boxedAllocation = boxed.secondaryMetrics['gc.alloc.rate.norm']
+        def throughputDifference = (primitiveThroughput.score
+                - boxedThroughput.score)
+        def throughputChange = (throughputDifference * 100.0) /
+                boxedThroughput.score
+        def allocationDifference = (boxedAllocation.score
+                - primitiveAllocation.score)
+        def allocationReduction = (boxedAllocation.score
+                - primitiveAllocation.score) * 100.0 / boxedAllocation.score
+        def confidenceConclusion
+        if (primitiveThroughput.scoreConfidence[0]
+                > boxedThroughput.scoreConfidence[1]) {
+            confidenceConclusion = (
+                    'LongHashMapLatencyRecorder is faster; '
+                            + 'the 99.9% confidence intervals do not overlap')
+        } else if (boxedThroughput.scoreConfidence[0]
+                > primitiveThroughput.scoreConfidence[1]) {
+            confidenceConclusion = (
+                    'HashMapLatencyRecorder is faster; '
+                            + 'the 99.9% confidence intervals do not overlap')
+        } else {
+            confidenceConclusion = (
+                    'inconclusive; the 99.9% confidence intervals overlap')
+        }
+
+        logger.lifecycle(
+                'Sparse latency-map JMH comparison:')
+        logger.lifecycle(String.format(
+                '  LongHashMapLatencyRecorder : %,.0f ops/s, %.3f B/op',
+                primitiveThroughput.score, primitiveAllocation.score))
+        logger.lifecycle(String.format(
+                '  HashMapLatencyRecorder     : %,.0f ops/s, %.3f B/op',
+                boxedThroughput.score, boxedAllocation.score))
+        if (throughputDifference >= 0) {
+            logger.lifecycle(String.format(
+                    '  Throughput result          : LongHashMapLatencyRecorder'
+                            + ' is %.2f%% faster (+%,.0f ops/s)',
+                    throughputChange, throughputDifference))
+        } else {
+            logger.lifecycle(String.format(
+                    '  Throughput result          : LongHashMapLatencyRecorder'
+                            + ' is %.2f%% slower (%,.0f ops/s)',
+                    Math.abs(throughputChange), throughputDifference))
+        }
+        logger.lifecycle(String.format(
+                '  Allocation result          : LongHashMapLatencyRecorder'
+                        + ' uses %.3f fewer B/op (%.2f%% reduction)',
+                allocationDifference,
+                allocationReduction))
+        logger.lifecycle(
+                "  Statistical conclusion     : ${confidenceConclusion}")
+        logger.lifecycle(
+                "JMH report: ${latencyMapPerformanceReport.get().asFile}")
+
+        if (primitiveAllocation.score >= boxedAllocation.score) {
+            throw new GradleException(String.format(
+                    'Primitive latency map allocation %.3f B/op is not below '
+                            + 'boxed map allocation %.3f B/op',
+                    primitiveAllocation.score, boxedAllocation.score))
+        }
     }
 }
 
