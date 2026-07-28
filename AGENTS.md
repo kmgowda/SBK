@@ -16,6 +16,9 @@ Licensed under the Apache License, Version 2.0.
 > - Devin: See `.devin/skills/` for executable skills
 > - Cursor: See `.cursorrules` for Cursor-specific rules
 > - Aider: See `.aider.conf.yml` for Aider configuration
+> - Benchmark execution: any agent may use the portable
+>   `.devin/skills/sbk-benchmark-runner/` and
+>   `.devin/skills/sbk-distributed-benchmark-runner/` knowledge packs
 >
 > **Humans:** see <ref_file file="/root/projects/SBK/README.md" /> for the
 > end-user manual, and <ref_file file="/root/projects/SBK/docs/sbk-internals.md" />

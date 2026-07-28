@@ -1,0 +1,30 @@
+# Copyright (c) KMG. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# TEMPLATE ONLY. Replace every REPLACE_* value in an untracked runtime copy.
+# Never commit real credentials or a production host inventory.
+
+sbkGemArgs:
+  nodes: REPLACE_LOADGEN_A,REPLACE_LOADGEN_B
+  gemuser: REPLACE_SSH_USER
+  hostkeycheck: true
+  localhost: REPLACE_GEM_CONTROLLER_REACHABLE_ADDRESS
+  sbmport: 9717
+  sbkdir: /absolute/path/to/SBK/build/install/sbk
+  copy: true
+  delete: true
+  deleteafter: false
+  javacopy: true
+  javaversion: 25
+  class: minio
+  url: http://REPLACE_S3_ENDPOINT
+  bucket: REPLACE_DEDICATED_BUCKET
+  prefix: sbk-distributed-trial-001/
+  key: REPLACE_AT_RUNTIME
+  secret: REPLACE_AT_RUNTIME
+  writers: 1
+  size: 4096
+  records: 100
+  time: mcs
+  out: GemPrometheusLogger

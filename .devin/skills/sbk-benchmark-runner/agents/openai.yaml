@@ -1,0 +1,4 @@
+interface:
+  display_name: "SBK Benchmark Runner"
+  short_description: "Run reproducible single-host SBK benchmarks"
+  default_prompt: "Use $sbk-benchmark-runner to plan, validate, and run a reproducible SBK benchmark."

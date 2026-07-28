@@ -32,6 +32,22 @@ SBK exposes one shared body of repository knowledge to coding agents while allow
 
 An agent should read only the relevant deeper guides after the universal entry point, but it must read the complete instructions it selects.
 
+## Benchmark-execution knowledge packs
+
+The executable skills under `.devin/skills/` use the portable `SKILL.md` format.
+Agents that do not load Devin configuration automatically may still read and
+follow these files directly:
+
+| Skill | Use |
+|---|---|
+| [SBK benchmark runner](../.devin/skills/sbk-benchmark-runner/SKILL.md) | Select a driver and run reproducible single-load-generator benchmarks with SBK or SBK-YAL |
+| [SBK distributed benchmark runner](../.devin/skills/sbk-distributed-benchmark-runner/SKILL.md) | Run standalone SBM aggregation or multi-host SBK-GEM/SBK-GEM-YAL benchmarks |
+
+Each skill keeps detailed operational knowledge and sanitized examples in its
+`references/` directory. The selection rule is important: connecting one SBK
+process to a remote storage service is still a single-load-generator benchmark;
+SBK-GEM is for distributing load generation across hosts.
+
 ## Tool-specific files
 
 The repository may include configuration for individual coding tools, such as `.devin/skills/`, `.cursorrules`, or `.aider.conf.yml`. These files should:
@@ -68,6 +84,8 @@ Availability of a tool-specific file does not mean that every installation of th
 | Logger | `RWLogger`, existing implementation, recipe 3 |
 | Distributed aggregation | Architecture distributed flow, SBM README and source |
 | Remote orchestration | SBK-GEM README, GEM source, failure-domain section |
+| Run SBK or SBK-YAL benchmark | `sbk-benchmark-runner` skill and selected driver README |
+| Run SBM, SBK-GEM, or SBK-GEM-YAL | `sbk-distributed-benchmark-runner` skill, SBM/GEM README |
 | Documentation | `DOCUMENTATION_GUIDE.md`, recipe 6 |
 
 ## Permissions and safety
