@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -36,6 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<MessageLatenciesRecord> implements Benchmark,
         SbmRegistry {
+    static final String CONSUMER_THREAD_NAME = "sbm-latency-consumer";
     private final int maxQs;
     private final int idleMS;
     private final Time time;
@@ -43,6 +46,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     private final SbmPeriodicRecorder window;
     private final AtomicLong counter;
     private final CompletableFuture<Void> retFuture;
+    private final ExecutorService executor;
 
     @GuardedBy("this")
     private State state;
@@ -68,6 +72,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         this.reportingIntervalMS = reportingIntervalMS;
         this.counter = new AtomicLong(BASE_CLIENT_ID_VALUE);
         this.retFuture = new CompletableFuture<>();
+        this.executor = Executors.newSingleThreadExecutor(
+                Thread.ofPlatform().name(CONSUMER_THREAD_NAME).factory());
         this.state = State.BEGIN;
         this.qFuture = null;
     }
@@ -147,6 +153,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                 }
                 qFuture = null;
             }
+            executor.shutdown();
             if (ex != null) {
                 Printer.log.warn("SbmLatencyBenchmark with Exception:" + ex);
                 retFuture.completeExceptionally(ex);
@@ -169,7 +176,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            });
+            }, executor);
             qFuture.whenComplete((ret, ex) -> {
                 shutdown(ex);
             });
@@ -183,5 +190,4 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     }
 
 }
-
 
