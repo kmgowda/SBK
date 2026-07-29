@@ -189,8 +189,8 @@ In practice that means:
 
 1. **Operations are recorded without reservoir sampling.** Each completed
    operation submitted to PerL contributes its latency and record count to a
-   latency distribution. Array and HashMap windows preserve exact integer
-   latency values within the configured range; the optional HdrHistogram
+   latency distribution. Array and primitive-map windows preserve exact
+   integer latency values within the configured range; the optional HdrHistogram
    extension trades exact values for bounded, three-significant-digit
    precision. Invalid and out-of-range values are counted separately rather
    than silently treated as valid samples (§3).
@@ -270,7 +270,7 @@ flowchart TB
 
 | Module | Full name | Purpose |
 |---|---|---|
-| `perl` | **PerL** — Performance Logger | Storage-agnostic latency-recording library: lock-free queues, sliding windows, HdrHistogram / HashMap / Array storage backends. |
+| `perl` | **PerL** — Performance Logger | Storage-agnostic latency-recording library: lock-free queues, sliding windows, and exact primitive-map / array latency recorders. |
 | `sbk-api` | **SBK** — Storage Benchmark Kit (harness layer) | The benchmarking harness: defines the `Storage<T>` SPI for drivers, orchestrates writers and readers, parses CLI args, integrates loggers. |
 | `sbk-yal` | **SBK-YAL** — SBK YML Arguments Loader | YML-driven launcher; converts a `.yml` benchmark spec into `sbk-api` args. |
 | `sbm` | **SBM** — Storage Benchmark Monitor | Standalone gRPC server that *aggregates* latency histograms from many SBK clients into a cluster-wide view. Listens on port 9717. Speaks the **SBP** (Storage Benchmark Protocol). |
@@ -913,19 +913,22 @@ sequenceDiagram
 #### Pillar 4 — Memory-aware latency storage
 
 The recorder writes to a `LatencyRecordWindow`. For each periodic window,
-`PerlBuilder.buildLatencyRecordWindow()` chooses either an array or a HashMap
-from the configured latency range and memory budget. The whole-run window is
-a HashMap buffer with an optional HDR or CSV overflow/extension strategy.
+`PerlBuilder.buildLatencyRecordWindow()` chooses either a dense primitive
+array or a sparse primitive long-to-long map from the configured latency range
+and memory budget. The whole-run window is a primitive-map buffer with an
+optional HDR or CSV overflow/extension strategy. The boxed
+`HashMapLatencyRecorder` remains only as a correctness and benchmark baseline;
+see the complete [latency-recorder research guide](LATENCY_RECORDERS.md).
 
 ```mermaid
 flowchart LR
     CFG["Latency range + memory limits"] --> PERIODIC{"Periodic window<br/>range * 8 bytes fits?"}
     PERIODIC -->|yes| ARRAY["ArrayLatencyRecorder<br/>direct integer index<br/>exact values in range"]
-    PERIODIC -->|no| MAP["HashMapLatencyRecorder<br/>stores observed values<br/>bounded by configured estimate"]
+    PERIODIC -->|no| MAP["LongHashMapLatencyRecorder<br/>primitive exact keys/counts<br/>bounded by configured estimate"]
 
-    CFG --> TOTAL["Total-window HashMap buffer"]
+    CFG --> TOTAL["Total-window primitive-map buffer"]
     TOTAL --> MODE{"Optional extension"}
-    MODE -->|histogram=false, csv=false| MAPTOTAL["HashMap total<br/>prints/resets when full"]
+    MODE -->|histogram=false, csv=false| MAPTOTAL["Primitive-map total<br/>prints/resets when full"]
     MODE -->|histogram=true| HDR["HdrExtendedLatencyRecorder<br/>flushes a full buffer into HDR<br/>3 significant digits"]
     MODE -->|csv=true| CSV["CSVExtendedLatencyRecorder<br/>streams extension data to file<br/>bounded by csvFileSizeGB"]
 
@@ -945,8 +948,8 @@ the optional `-mpscqueue` override:
 
 ```properties
 maxArraySizeMB=64           # Use Array backend if latency range fits
-maxHashMapSizeMB=192        # Periodic window HashMap budget
-totalMaxHashMapSizeMB=256   # Total window HashMap budget
+maxHashMapSizeMB=192        # Periodic primitive-map logical budget
+totalMaxHashMapSizeMB=256   # Total primitive-map logical budget
 MpscQueueEnable=true        # One-object intrusive MPSC timestamp hand-off
 histogram=false             # Optional HdrHistogram for total window
 csv=false                   # Optional raw-CSV total backend
@@ -961,9 +964,10 @@ to accidental configuration drift.
 
 **How available memory changes the design:** an array has predictable memory
 and direct indexing, but its size is proportional to the configured latency
-range, whether or not every value occurs. A HashMap stores only observed
-integer latency values, but each distinct value has object/table overhead and
-its configured limit is an estimate rather than an exact heap cap. Increasing
+range, whether or not every value occurs. The primitive map stores only
+observed integer latency values without boxing, but open-addressed table
+capacity and the reusable sorting buffer still add overhead. Its configured
+limit is a logical payload estimate rather than an exact heap cap. Increasing
 `maxArraySizeMB`, `maxHashMapSizeMB`, or `totalMaxHashMapSizeMB` lets PerL keep
 larger exact-value distributions before a window must be printed/reset or an
 extension must absorb it.
@@ -1036,7 +1040,7 @@ Six concrete reasons, traceable to specific code:
 5. **Clock-query amortisation via `ElasticWait`.** The recorder reuses
    `TimeStamp.endTime` while processing and checks the clock only after an
    adaptive batch of empty-queue parks.
-6. **Configurable memory and precision.** Array, HashMap, HDR, and CSV modes
+6. **Configurable memory and precision.** Array, primitive-map, HDR, and CSV modes
    let operators choose between direct indexing, sparse exact values, bounded
    approximate histograms, and offline raw output.
 
@@ -2109,8 +2113,9 @@ PerL's storage strategy turns heap capacity into a tunable measurement
 resource:
 
 - A wider exact array range consumes more memory even for unobserved values.
-- A HashMap consumes memory with the number of distinct observed integer
-  latency values and has per-entry overhead.
+- A primitive map consumes memory with the number of distinct observed
+  integer latency values and has table-capacity plus reusable-sort-buffer
+  overhead.
 - A larger periodic/total map budget reduces how often full windows must be
   printed and reset.
 - HdrHistogram bounds a wide distribution with three-significant-digit
@@ -2126,11 +2131,11 @@ and lower/higher discard counts with the benchmark result.
 ```mermaid
 flowchart TD
     HEAP["Available JVM heap"] --> QUEUE["Queue objects<br/>in-flight TimeStamp records"]
-    HEAP --> PERIODIC["Periodic window<br/>array or HashMap"]
-    HEAP --> TOTAL["Total-window<br/>HashMap buffer"]
+    HEAP --> PERIODIC["Periodic window<br/>array or primitive map"]
+    HEAP --> TOTAL["Total-window<br/>primitive-map buffer"]
     DISK["Available disk"] --> CSV["Optional CSV extension"]
     TOTAL --> MODE{"When exact buffer fills"}
-    MODE -->|plain HashMap| FLUSH["Print / reset total segment"]
+    MODE -->|plain primitive map| FLUSH["Print / reset total segment"]
     MODE -->|HDR enabled| HDR["Fold counts into<br/>3-digit HDR representation"]
     MODE -->|CSV enabled| CSV
     QUEUE --> PRESSURE["If recorder falls behind:<br/>backlog + allocation + GC pressure"]
@@ -2174,7 +2179,8 @@ The memory-strategy diagrams in §3.3 Pillar 4 and §8.5 show where exact
 integer buckets end and optional HDR quantization begins.
 
 PerL does not reservoir-sample completed records submitted to it. Exact array
-and HashMap modes retain integer latency buckets within the configured range.
+and primitive-map modes retain integer latency buckets within the configured
+range.
 HdrHistogram deliberately quantizes to three significant digits. Values below
 or above the configured range and invalid latencies are counted separately.
 Therefore, “no sampling” is accurate; “zero approximation under every
@@ -2924,7 +2930,7 @@ SBK is the right substrate.
 
 | Property | What it gives you | Code evidence |
 |---|---|---|
-| **No reservoir sampling** | Every completed operation submitted to PerL contributes its count; invalid and out-of-range values remain visible as counters. Precision still depends on time unit, range, and backend. | `HashMapLatencyRecorder` and `ArrayLatencyRecorder` implement exact integer buckets; HDR uses three significant digits. |
+| **No reservoir sampling** | Every completed operation submitted to PerL contributes its count; invalid and out-of-range values remain visible as counters. Precision still depends on time unit, range, and backend. | `LongHashMapLatencyRecorder` and `ArrayLatencyRecorder` implement exact integer buckets; HDR uses three significant digits. |
 | **Non-blocking measurement hand-off** | Workers do not wait for an application mutex to hand a record to PerL. Queue operations can still allocate and retry under contention. | `TimeStampMpscQueueChannel` uses `TimeStampMpscQueueArray`; the original `CQueueChannel` uses `ConcurrentLinkedQueueArray`. |
 | **Single-owner recording** | One consumer owns each direction's non-thread-safe windows, avoiding concurrent bucket updates. Its drain rate remains a capacity limit to monitor. | `PerformanceRecorderElasticWait.run()` reads all channels for one PerL instance. |
 | **Amortised recorder clock checks** | Records carry worker timestamps; the empty path parks and checks time after an adaptive batch instead of on every poll. | `ElasticWait` plus `PerformanceRecorderElasticWait`. |
@@ -3017,7 +3023,7 @@ Being explicit about scope strengthens any methodology section:
 
 | Tradeoff | Why SBK chooses this |
 |---|---|
-| **Memory grows with range or distinct latency values** | Array memory follows configured range; HashMap memory follows distinct values. Configured budgets bound selection/flush behavior. HDR offers bounded approximate precision when enabled; it is not an automatic exact fallback under every configuration. |
+| **Memory grows with range or distinct latency values** | Array memory follows configured range; primitive-map memory follows distinct values and retained table/sort-buffer capacity. Configured budgets control selection/flush policy but are not strict retained-heap limits. HDR offers bounded approximate precision when enabled; it is not an automatic exact fallback under every configuration. |
 | **One consumer owns each direction's windows** | This avoids synchronization in bucket updates but caps recorder throughput. Benchmark the intended event rate and watch CPU, GC, and queue growth instead of assuming a fixed operations/second limit. |
 | **JVM warm-up is workload- and JVM-dependent** | Use explicit warm-up runs or discard documented initial windows based on observed stabilization; do not assume a fixed 1–2-second warm-up. |
 | **End-to-end latency is per-driver** | The harness cannot know whether a driver's payload format supports embedding a timestamp. Drivers that do (e.g. Kafka, Pravega) measure true E2E; others measure per-operation. The driver README should make this explicit. |

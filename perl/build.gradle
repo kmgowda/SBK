@@ -233,7 +233,7 @@ tasks.register('timeStampQueuePerformanceTest') {
 
 tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Benchmarks primitive and boxed sparse latency maps on JDK 25.'
+    description = 'Benchmarks dense-array, primitive-map, and boxed-map latency recorders on JDK 25.'
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
@@ -257,7 +257,7 @@ tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
 
 tasks.register('latencyMapPerformanceTest') {
     group = 'verification'
-    description = 'Compares primitive-map throughput and allocation with the boxed map.'
+    description = 'Compares dense-array and primitive-map performance with the boxed map.'
     dependsOn tasks.named('runLatencyMapPerformanceBenchmark')
 
     doLast {
@@ -284,11 +284,23 @@ tasks.register('latencyMapPerformanceTest') {
         def boxed = result(
                 'io.perl.benchmark.LatencyMapBenchmark'
                         + '.boxedRecordLatency')
+        def array = result(
+                'io.perl.benchmark.LatencyMapBenchmark'
+                        + '.arrayRecordLatency')
         def primitiveThroughput = primitive.primaryMetric
         def boxedThroughput = boxed.primaryMetric
+        def arrayThroughput = array.primaryMetric
         def primitiveAllocation =
                 primitive.secondaryMetrics['gc.alloc.rate.norm']
         def boxedAllocation = boxed.secondaryMetrics['gc.alloc.rate.norm']
+        def arrayAllocation =
+                array.secondaryMetrics['gc.alloc.rate.norm']
+        def arrayWindow = result(
+                'io.perl.benchmark.LatencyMapBenchmark.arrayWindow')
+        def boxedWindow = result(
+                'io.perl.benchmark.LatencyMapBenchmark.boxedWindow')
+        def primitiveWindow = result(
+                'io.perl.benchmark.LatencyMapBenchmark.primitiveWindow')
         def allocatedExtraction = result(
                 'io.perl.benchmark.LatencyMapBenchmark'
                         + '.allocatedSortedListExtraction')
@@ -301,56 +313,176 @@ tasks.register('latencyMapPerformanceTest') {
                 allocatedExtraction.secondaryMetrics['gc.alloc.rate.norm']
         def reusableExtractionAllocation =
                 reusableExtraction.secondaryMetrics['gc.alloc.rate.norm']
-        def throughputDifference = (primitiveThroughput.score
-                - boxedThroughput.score)
-        def throughputChange = (throughputDifference * 100.0) /
-                boxedThroughput.score
-        def allocationDifference = (boxedAllocation.score
-                - primitiveAllocation.score)
-        def allocationReduction = (boxedAllocation.score
-                - primitiveAllocation.score) * 100.0 / boxedAllocation.score
-        def confidenceConclusion
-        if (primitiveThroughput.scoreConfidence[0]
-                > boxedThroughput.scoreConfidence[1]) {
-            confidenceConclusion = (
-                    'LongHashMapLatencyRecorder is faster; '
-                            + 'the 99.9% confidence intervals do not overlap')
-        } else if (boxedThroughput.scoreConfidence[0]
-                > primitiveThroughput.scoreConfidence[1]) {
-            confidenceConclusion = (
-                    'HashMapLatencyRecorder is faster; '
-                            + 'the 99.9% confidence intervals do not overlap')
-        } else {
-            confidenceConclusion = (
-                    'inconclusive; the 99.9% confidence intervals overlap')
+        def arrayWindowAllocation =
+                arrayWindow.secondaryMetrics['gc.alloc.rate.norm']
+        def primitiveWindowAllocation =
+                primitiveWindow.secondaryMetrics['gc.alloc.rate.norm']
+        def boxedWindowAllocation =
+                boxedWindow.secondaryMetrics['gc.alloc.rate.norm']
+        def recorderResults = [
+                [
+                        name: 'ArrayLatencyRecorder',
+                        throughput: arrayThroughput,
+                        updateAllocation: arrayAllocation,
+                        windowTime: arrayWindow.primaryMetric,
+                        windowAllocation: arrayWindowAllocation
+                ],
+                [
+                        name: 'LongHashMapLatencyRecorder',
+                        throughput: primitiveThroughput,
+                        updateAllocation: primitiveAllocation,
+                        windowTime: primitiveWindow.primaryMetric,
+                        windowAllocation: primitiveWindowAllocation
+                ],
+                [
+                        name: 'HashMapLatencyRecorder',
+                        throughput: boxedThroughput,
+                        updateAllocation: boxedAllocation,
+                        windowTime: boxedWindow.primaryMetric,
+                        windowAllocation: boxedWindowAllocation
+                ]
+        ]
+        def rankHigher = { String label, String unit, String metricName ->
+            logger.lifecycle("${label} (higher is better):")
+            recorderResults.toSorted {
+                left, right ->
+                    right[metricName].score <=> left[metricName].score
+                }.eachWithIndex { entry, index ->
+                    logger.lifecycle(String.format(
+                            '  %d. %-26s : %,.0f %s',
+                            index + 1, entry['name'],
+                            entry[metricName].score, unit))
+                }
         }
+        def rankLower = {
+            String label, String unit, String format, String metricName ->
+                logger.lifecycle("${label} (lower is better):")
+                recorderResults.toSorted {
+                    left, right ->
+                        left[metricName].score <=> right[metricName].score
+                }.eachWithIndex { entry, index ->
+                    logger.lifecycle(String.format(
+                            "  %d. %-26s : ${format} %s",
+                            index + 1, entry['name'],
+                            entry[metricName].score, unit))
+                }
+        }
+        def compareHigher = { left, right, String unit ->
+            def winner = left.score >= right.score ? left : right
+            def loser = left.score >= right.score ? right : left
+            def gain = (winner.score - loser.score) * 100.0 / loser.score
+            String.format('%s is %.2f%% higher than %s (+%,.0f %s)',
+                    winner['name'], gain, loser['name'],
+                    winner.score - loser.score, unit)
+        }
+        def compareLower = { left, right, String unit ->
+            def winner = left.score <= right.score ? left : right
+            def loser = left.score <= right.score ? right : left
+            def reduction =
+                    (loser.score - winner.score) * 100.0 / loser.score
+            def reductionText = unit.startsWith('memory')
+                    ? String.format('%.6f', reduction)
+                    : String.format('%.2f', reduction)
+            String.format('%s requires %s%% less %s than %s '
+                    + '(%,.3f vs %,.3f)',
+                    winner['name'], reductionText, unit, loser['name'],
+                    winner.score, loser.score)
+        }
+        def compareConfidence = { left, right, boolean higherIsBetter ->
+            def leftWins = higherIsBetter
+                    ? left.metric.scoreConfidence[0]
+                    > right.metric.scoreConfidence[1]
+                    : left.metric.scoreConfidence[1]
+                    < right.metric.scoreConfidence[0]
+            def rightWins = higherIsBetter
+                    ? right.metric.scoreConfidence[0]
+                    > left.metric.scoreConfidence[1]
+                    : right.metric.scoreConfidence[1]
+                    < left.metric.scoreConfidence[0]
+            if (leftWins) {
+                return String.format(
+                        '%s is statistically better than %s '
+                                + '(non-overlapping 99.9%% CIs)',
+                        left['name'], right['name'])
+            }
+            if (rightWins) {
+                return String.format(
+                        '%s is statistically better than %s '
+                                + '(non-overlapping 99.9%% CIs)',
+                        right['name'], left['name'])
+            }
+            String.format(
+                    '%s versus %s is INCONCLUSIVE '
+                            + '(overlapping 99.9%% CIs)',
+                    left['name'], right['name'])
+        }
+        def namedMetric = { entry, String metricName ->
+            [name: entry['name'], score: entry[metricName].score,
+             metric: entry[metricName]]
+        }
+        def arrayResult = recorderResults[0]
+        def primitiveResult = recorderResults[1]
+        def boxedResult = recorderResults[2]
+        def pairs = [
+                [arrayResult, primitiveResult],
+                [arrayResult, boxedResult],
+                [primitiveResult, boxedResult]
+        ]
 
         logger.lifecycle(
-                'Sparse latency-map JMH comparison:')
-        logger.lifecycle(String.format(
-                '  LongHashMapLatencyRecorder : %,.0f ops/s, %.3f B/op',
-                primitiveThroughput.score, primitiveAllocation.score))
-        logger.lifecycle(String.format(
-                '  HashMapLatencyRecorder     : %,.0f ops/s, %.3f B/op',
-                boxedThroughput.score, boxedAllocation.score))
-        if (throughputDifference >= 0) {
-            logger.lifecycle(String.format(
-                    '  Throughput result          : LongHashMapLatencyRecorder'
-                            + ' is %.2f%% faster (+%,.0f ops/s)',
-                    throughputChange, throughputDifference))
-        } else {
-            logger.lifecycle(String.format(
-                    '  Throughput result          : LongHashMapLatencyRecorder'
-                            + ' is %.2f%% slower (%,.0f ops/s)',
-                    Math.abs(throughputChange), throughputDifference))
+                'Latency-recorder JMH comparison (4,096 exact values)')
+        rankHigher('Hot-path throughput ranking', 'ops/s', 'throughput')
+        logger.lifecycle('  Pairwise mean-throughput comparison:')
+        pairs.each { pair ->
+            logger.lifecycle('    - ' + compareHigher(
+                    namedMetric(pair[0], 'throughput'),
+                    namedMetric(pair[1], 'throughput'), 'ops/s'))
         }
-        logger.lifecycle(String.format(
-                '  Allocation result          : LongHashMapLatencyRecorder'
-                        + ' uses %.3f fewer B/op (%.2f%% reduction)',
-                allocationDifference,
-                allocationReduction))
+        logger.lifecycle('  99.9% confidence-interval comparison:')
+        pairs.each { pair ->
+            logger.lifecycle('    - ' + compareConfidence(
+                    namedMetric(pair[0], 'throughput'),
+                    namedMetric(pair[1], 'throughput'), true))
+        }
+        rankLower('Hot-path allocation ranking', 'B/op', '%,.3f',
+                'updateAllocation')
         logger.lifecycle(
-                "  Statistical conclusion     : ${confidenceConclusion}")
+                '  Interpretation: ArrayLatencyRecorder and '
+                        + 'LongHashMapLatencyRecorder are effectively '
+                        + 'zero-allocation at JMH resolution.')
+        logger.lifecycle('  Material allocation comparisons:')
+        logger.lifecycle('    - ' + compareLower(
+                namedMetric(arrayResult, 'updateAllocation'),
+                namedMetric(boxedResult, 'updateAllocation'), 'memory/op'))
+        logger.lifecycle('    - ' + compareLower(
+                namedMetric(primitiveResult, 'updateAllocation'),
+                namedMetric(boxedResult, 'updateAllocation'), 'memory/op'))
+
+        logger.lifecycle(
+                'Complete 4,096-value window: record + percentile extraction')
+        rankLower('Window-time ranking', 'us/window', '%,.3f',
+                'windowTime')
+        logger.lifecycle('  Pairwise mean window-time comparison:')
+        pairs.each { pair ->
+            logger.lifecycle('    - ' + compareLower(
+                    namedMetric(pair[0], 'windowTime'),
+                    namedMetric(pair[1], 'windowTime'), 'time/window'))
+        }
+        logger.lifecycle('  99.9% confidence-interval comparison:')
+        pairs.each { pair ->
+            logger.lifecycle('    - ' + compareConfidence(
+                    namedMetric(pair[0], 'windowTime'),
+                    namedMetric(pair[1], 'windowTime'), false))
+        }
+        rankLower('Window-allocation ranking', 'B/window', '%,.3f',
+                'windowAllocation')
+        logger.lifecycle('  Pairwise mean window-allocation comparison:')
+        pairs.each { pair ->
+            logger.lifecycle('    - ' + compareLower(
+                    namedMetric(pair[0], 'windowAllocation'),
+                    namedMetric(pair[1], 'windowAllocation'),
+                    'memory/window'))
+        }
         logger.lifecycle(
                 'Percentile key-extraction JMH comparison (65,536 keys):')
         logger.lifecycle(String.format(

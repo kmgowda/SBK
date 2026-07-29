@@ -9,6 +9,8 @@
  */
 package io.perl.benchmark;
 
+import io.perl.api.LatencyPercentiles;
+import io.perl.api.impl.ArrayLatencyRecorder;
 import io.perl.api.impl.HashMapLatencyRecorder;
 import io.perl.api.impl.LongHashMapLatencyRecorder;
 import io.time.NanoSeconds;
@@ -32,7 +34,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Compares sparse-latency recording through primitive and boxed maps.
+ * Compares dense-array, primitive-map, and boxed-map latency recording.
  *
  * <p>The workload cycles over 4,096 exact latency values outside the JVM's
  * small boxed-{@link Long} cache. The GC profiler therefore exposes allocation
@@ -56,8 +58,10 @@ public class LatencyMapBenchmark {
     public static class RecorderState {
         private HashMapLatencyRecorder boxed;
         private LongHashMapLatencyRecorder primitive;
+        private ArrayLatencyRecorder array;
         private long boxedSequence;
         private long primitiveSequence;
+        private long arraySequence;
 
         /**
          * Creates empty recorders before each measurement iteration.
@@ -70,8 +74,13 @@ public class LatencyMapBenchmark {
             primitive = new LongHashMapLatencyRecorder(0, Long.MAX_VALUE,
                     Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
                     PERCENTILES, new NanoSeconds(), 64);
+            array = new ArrayLatencyRecorder(0,
+                    BASE_LATENCY + LATENCY_MASK,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds());
             boxedSequence = 0;
             primitiveSequence = 0;
+            arraySequence = 0;
         }
     }
 
@@ -108,6 +117,46 @@ public class LatencyMapBenchmark {
     }
 
     /**
+     * Thread-private state for a complete record-and-extract window.
+     */
+    @State(Scope.Thread)
+    public static class WindowState {
+        /**
+         * Number of distinct exact latency values in each window.
+         */
+        @Param({"4096"})
+        public int distinctLatencies;
+
+        private ArrayLatencyRecorder array;
+        private HashMapLatencyRecorder boxed;
+        private LongHashMapLatencyRecorder primitive;
+        private LatencyPercentiles arrayPercentiles;
+        private LatencyPercentiles boxedPercentiles;
+        private LatencyPercentiles primitivePercentiles;
+
+        /**
+         * Creates reusable recorders and percentile result holders.
+         */
+        @Setup(Level.Trial)
+        public void setUp() {
+            final long highLatency =
+                    BASE_LATENCY + distinctLatencies - 1L;
+            array = new ArrayLatencyRecorder(0, highLatency,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds());
+            boxed = new HashMapLatencyRecorder(0, highLatency,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds(), 64);
+            primitive = new LongHashMapLatencyRecorder(0, highLatency,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds(), 64);
+            arrayPercentiles = new LatencyPercentiles(PERCENTILES);
+            boxedPercentiles = new LatencyPercentiles(PERCENTILES);
+            primitivePercentiles = new LatencyPercentiles(PERCENTILES);
+        }
+    }
+
+    /**
      * Measures the primitive frequency-update path.
      *
      * @param state thread-private recorder state
@@ -133,6 +182,67 @@ public class LatencyMapBenchmark {
         final long latency = BASE_LATENCY
                 + (state.boxedSequence++ & LATENCY_MASK);
         state.boxed.reportLatency(latency, 1);
+    }
+
+    /**
+     * Measures the dense-array frequency-update path.
+     *
+     * @param state thread-private recorder state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.SECONDS)
+    public void arrayRecordLatency(RecorderState state) {
+        final long latency = BASE_LATENCY
+                + (state.arraySequence++ & LATENCY_MASK);
+        state.array.reportLatency(latency, 1);
+    }
+
+    /**
+     * Measures one complete dense-array window: record every distinct value,
+     * calculate percentiles, and clear the used counters.
+     *
+     * @param state thread-private window state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void arrayWindow(WindowState state) {
+        for (int index = 0; index < state.distinctLatencies; index++) {
+            state.array.reportLatency(BASE_LATENCY + index, 1);
+        }
+        state.array.copyPercentiles(state.arrayPercentiles, null);
+    }
+
+    /**
+     * Measures one complete boxed-map window.
+     *
+     * @param state thread-private window state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void boxedWindow(WindowState state) {
+        for (int index = 0; index < state.distinctLatencies; index++) {
+            state.boxed.reportLatency(BASE_LATENCY + index, 1);
+        }
+        state.boxed.copyPercentiles(state.boxedPercentiles, null);
+    }
+
+    /**
+     * Measures one complete primitive-map window.
+     *
+     * @param state thread-private window state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void primitiveWindow(WindowState state) {
+        for (int index = 0; index < state.distinctLatencies; index++) {
+            state.primitive.reportLatency(BASE_LATENCY + index, 1);
+        }
+        state.primitive.copyPercentiles(
+                state.primitivePercentiles, null);
     }
 
     /**

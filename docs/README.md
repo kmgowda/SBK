@@ -40,8 +40,9 @@ This directory contains the authoritative engineering documentation for Storage 
 2. [Internal design](sbk-internals.md): detailed PerL measurement flow,
    `ElasticWait`, timestamp queues, SBM, and SBP design.
 3. [TimeStampMpscQueue research guide](TIMESTAMP_MPSC_QUEUE.md): intrusive MPSC queue architecture, correctness evidence, JDK comparison, and reproducible performance methodology.
-4. [Documentation maintenance](DOCUMENTATION_GUIDE.md): how to keep examples and links current.
-5. [Agent-documentation distribution](AGENT_DOCUMENTATION_DISTRIBUTION.md): how documentation enters release artifacts.
+4. [Exact latency recorders research guide](LATENCY_RECORDERS.md): dense-array, boxed-map, and primitive-map algorithms, memory models, correctness, and JDK 25 JMH results.
+5. [Documentation maintenance](DOCUMENTATION_GUIDE.md): how to keep examples and links current.
+6. [Agent-documentation distribution](AGENT_DOCUMENTATION_DISTRIBUTION.md): how documentation enters release artifacts.
 
 ### Coding agent
 
@@ -65,6 +66,7 @@ This directory contains the authoritative engineering documentation for Storage 
 | [WEB_LOGGER.md](WEB_LOGGER.md) | Local live dashboard usage, lifecycle, options, security, and troubleshooting |
 | [sbk-internals.md](sbk-internals.md) | Detailed design rationale and research-oriented treatment |
 | [TIMESTAMP_MPSC_QUEUE.md](TIMESTAMP_MPSC_QUEUE.md) | Intrusive timestamp queue architecture, JDK comparison, correctness evidence, and research methodology |
+| [LATENCY_RECORDERS.md](LATENCY_RECORDERS.md) | Exact array and sparse-map latency storage, complexity, memory accounting, correctness, and reproducible JMH results |
 | [PerlBench driver](../drivers/perlbench/README.md) | End-to-end timestamp-queue comparison using exact-count, timed, and rate-controlled SBK workloads |
 | Component READMEs | Component operation and component-specific examples |
 | Driver READMEs | Backend prerequisites, properties, limitations, and example commands |
