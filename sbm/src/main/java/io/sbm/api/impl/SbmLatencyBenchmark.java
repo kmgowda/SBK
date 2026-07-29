@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -36,6 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<MessageLatenciesRecord> implements Benchmark,
         SbmRegistry {
+    static final String CONSUMER_THREAD_NAME = "sbm-latency-consumer";
     private final int maxQs;
     private final int idleMS;
     private final Time time;
@@ -43,6 +46,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     private final SbmPeriodicRecorder window;
     private final AtomicLong counter;
     private final CompletableFuture<Void> retFuture;
+    private final ExecutorService executor;
 
     @GuardedBy("this")
     private State state;
@@ -68,6 +72,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         this.reportingIntervalMS = reportingIntervalMS;
         this.counter = new AtomicLong(BASE_CLIENT_ID_VALUE);
         this.retFuture = new CompletableFuture<>();
+        this.executor = Executors.newSingleThreadExecutor(
+                Thread.ofPlatform().name(CONSUMER_THREAD_NAME).factory());
         this.state = State.BEGIN;
         this.qFuture = null;
     }
@@ -135,17 +141,28 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
+            boolean interrupted = false;
             if (qFuture != null) {
                 if (!qFuture.isDone()) {
                     try {
                         add(0, MessageLatenciesRecord.newBuilder().setSequenceNumber(-1).build());
-                        qFuture.get();
-                        clear();
-                    } catch (ExecutionException | InterruptedException e) {
+                        while (!qFuture.isDone()) {
+                            try {
+                                qFuture.get();
+                            } catch (InterruptedException e) {
+                                interrupted = true;
+                            }
+                        }
+                    } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
+                    clear();
                 }
                 qFuture = null;
+            }
+            executor.shutdown();
+            if (interrupted) {
+                Thread.currentThread().interrupt();
             }
             if (ex != null) {
                 Printer.log.warn("SbmLatencyBenchmark with Exception:" + ex);
@@ -158,6 +175,13 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     }
 
 
+    /**
+     * Starts the SBM latency consumer on its dedicated platform thread.
+     *
+     * @return future completed after the consumer has terminated
+     * @throws IllegalStateException if the benchmark cannot be started from
+     *                               its current state
+     */
     @Override
     @Synchronized
     public CompletableFuture<Void> start() throws IllegalStateException {
@@ -169,7 +193,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            });
+            }, executor);
             qFuture.whenComplete((ret, ex) -> {
                 shutdown(ex);
             });
@@ -183,5 +207,3 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     }
 
 }
-
-
