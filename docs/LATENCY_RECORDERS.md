@@ -567,9 +567,9 @@ The boxed representation retains:
 
 It additionally allocates temporary wrappers during updates. Exact retained
 bytes depend on JVM object layout, compressed references, table capacity,
-counts, and whether wrapper-cache values are reused. The JMH allocation result
-of 47.858 B/update is therefore a stronger observed statement than a universal
-retained-byte formula.
+counts, and whether wrapper-cache values are reused. The documented JMH run's
+allocation result of 47.855 B/update is therefore a stronger observed
+statement than a universal retained-byte formula.
 
 ### 9.4 Configured budget versus actual heap
 

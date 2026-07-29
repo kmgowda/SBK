@@ -109,6 +109,14 @@ public class LatencyMapRecorderTest {
         primitive.recordLatency(0, 1, 100, 1_000);
         boxed.copyPercentiles(boxedPercentiles, null);
         primitive.copyPercentiles(primitivePercentiles, null);
+        final LatencyCollector boxedAfterExtraction = new LatencyCollector();
+        final LatencyCollector primitiveAfterExtraction =
+                new LatencyCollector();
+        boxed.copyPercentiles(boxedPercentiles, boxedAfterExtraction);
+        primitive.copyPercentiles(primitivePercentiles,
+                primitiveAfterExtraction);
+        assertEquals(List.of(), boxedAfterExtraction.latencies);
+        assertEquals(List.of(), primitiveAfterExtraction.latencies);
         boxed.reset(1);
         primitive.reset(1);
         boxed.recordLatency(1, 3, 300, 2_000);
@@ -248,11 +256,22 @@ public class LatencyMapRecorderTest {
         private final List<Long> latencies = new ArrayList<>();
         private final List<Long> counts = new ArrayList<>();
 
+        /**
+         * Accepts aggregate recorder counters.
+         *
+         * @param record aggregate latency record
+         */
         @Override
         public void reportLatencyRecord(LatencyRecord record) {
             // Aggregate counters are compared directly by the enclosing test.
         }
 
+        /**
+         * Collects one exact latency bucket.
+         *
+         * @param latency latency value
+         * @param count   number of records with the latency
+         */
         @Override
         public void reportLatency(long latency, long count) {
             latencies.add(latency);

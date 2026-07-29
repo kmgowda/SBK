@@ -141,19 +141,29 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
+            boolean interrupted = false;
             if (qFuture != null) {
                 if (!qFuture.isDone()) {
                     try {
                         add(0, MessageLatenciesRecord.newBuilder().setSequenceNumber(-1).build());
-                        qFuture.get();
-                        clear();
-                    } catch (ExecutionException | InterruptedException e) {
+                        while (!qFuture.isDone()) {
+                            try {
+                                qFuture.get();
+                            } catch (InterruptedException e) {
+                                interrupted = true;
+                            }
+                        }
+                    } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
+                    clear();
                 }
                 qFuture = null;
             }
             executor.shutdown();
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
             if (ex != null) {
                 Printer.log.warn("SbmLatencyBenchmark with Exception:" + ex);
                 retFuture.completeExceptionally(ex);
@@ -165,6 +175,13 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     }
 
 
+    /**
+     * Starts the SBM latency consumer on its dedicated platform thread.
+     *
+     * @return future completed after the consumer has terminated
+     * @throws IllegalStateException if the benchmark cannot be started from
+     *                               its current state
+     */
     @Override
     @Synchronized
     public CompletableFuture<Void> start() throws IllegalStateException {
@@ -190,4 +207,3 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     }
 
 }
-

@@ -76,6 +76,13 @@ public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashM
     }
 
 
+    /**
+     * Calculates exact percentiles from the sorted boxed latency keys and
+     * clears the recorded buckets for reuse.
+     *
+     * @param percentiles   destination percentile values and bucket counts
+     * @param copyLatencies optional destination for aggregate and bucket data
+     */
     @Override
     public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
         if (copyLatencies != null) {

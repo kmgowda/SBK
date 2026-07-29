@@ -56,6 +56,12 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
     }
 
 
+    /**
+     * Resets counters and clears any latency buckets retained from the
+     * preceding reporting window.
+     *
+     * @param startTime start time of the new reporting window
+     */
     @Override
     public void reset(long startTime) {
         super.reset(startTime);
@@ -76,6 +82,13 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
     }
 
 
+    /**
+     * Calculates exact percentiles from the sorted primitive latency keys and
+     * clears the recorded buckets for reuse.
+     *
+     * @param percentiles   destination percentile values and bucket counts
+     * @param copyLatencies optional destination for aggregate and bucket data
+     */
     @Override
     public void copyPercentiles(LatencyPercentiles percentiles, ReportLatencies copyLatencies) {
         if (copyLatencies != null) {

@@ -370,7 +370,9 @@ tasks.register('latencyMapPerformanceTest') {
         def compareHigher = { left, right, String unit ->
             def winner = left.score >= right.score ? left : right
             def loser = left.score >= right.score ? right : left
-            def gain = (winner.score - loser.score) * 100.0 / loser.score
+            def gain = loser.score == 0.0d
+                    ? 0.0d
+                    : (winner.score - loser.score) * 100.0 / loser.score
             String.format('%s is %.2f%% higher than %s (+%,.0f %s)',
                     winner['name'], gain, loser['name'],
                     winner.score - loser.score, unit)
@@ -378,8 +380,9 @@ tasks.register('latencyMapPerformanceTest') {
         def compareLower = { left, right, String unit ->
             def winner = left.score <= right.score ? left : right
             def loser = left.score <= right.score ? right : left
-            def reduction =
-                    (loser.score - winner.score) * 100.0 / loser.score
+            def reduction = loser.score == 0.0d
+                    ? 0.0d
+                    : (loser.score - winner.score) * 100.0 / loser.score
             def reductionText = unit.startsWith('memory')
                     ? String.format('%.6f', reduction)
                     : String.format('%.2f', reduction)
@@ -497,9 +500,11 @@ tasks.register('latencyMapPerformanceTest') {
                 '  Extraction allocation reduction: %,.3f B/op (%.2f%%)',
                 allocatedExtractionAllocation.score
                         - reusableExtractionAllocation.score,
-                (allocatedExtractionAllocation.score
-                        - reusableExtractionAllocation.score) * 100.0
-                        / allocatedExtractionAllocation.score))
+                allocatedExtractionAllocation.score == 0.0d
+                        ? 0.0d
+                        : (allocatedExtractionAllocation.score
+                                - reusableExtractionAllocation.score) * 100.0
+                                / allocatedExtractionAllocation.score))
         logger.lifecycle(
                 "JMH report: ${latencyMapPerformanceReport.get().asFile}")
 

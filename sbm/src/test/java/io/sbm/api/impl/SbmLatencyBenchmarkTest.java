@@ -44,16 +44,19 @@ final class SbmLatencyBenchmarkTest {
                 1, 1, new MilliSeconds(), window, 5_000);
 
         final CompletableFuture<Void> completion = benchmark.start();
+        Thread consumer = null;
 
-        assertTrue(window.started.await(2, TimeUnit.SECONDS));
-        final Thread consumer = window.consumer.get();
-        assertNotNull(consumer);
-        assertEquals(SbmLatencyBenchmark.CONSUMER_THREAD_NAME,
-                consumer.getName());
-        assertFalse(consumer.isVirtual());
-        assertFalse(consumer instanceof ForkJoinWorkerThread);
-
-        assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
+        try {
+            assertTrue(window.started.await(2, TimeUnit.SECONDS));
+            consumer = window.consumer.get();
+            assertNotNull(consumer);
+            assertEquals(SbmLatencyBenchmark.CONSUMER_THREAD_NAME,
+                    consumer.getName());
+            assertFalse(consumer.isVirtual());
+            assertFalse(consumer instanceof ForkJoinWorkerThread);
+        } finally {
+            assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
+        }
         completion.get(2, TimeUnit.SECONDS);
         awaitThreadExit(consumer);
         assertFalse(consumer.isAlive());
@@ -73,29 +76,61 @@ final class SbmLatencyBenchmarkTest {
         private final AtomicReference<Thread> consumer =
                 new AtomicReference<>();
 
+        /**
+         * Accepts a latency record for the current reporting window.
+         *
+         * @param currentTime current time supplied by the consumer
+         * @param record      latency record being aggregated
+         */
         @Override
         public void record(long currentTime, MessageLatenciesRecord record) {
         }
 
+        /**
+         * Starts a reporting window.
+         *
+         * @param startTime reporting-window start time
+         */
         @Override
         public void startWindow(long startTime) {
         }
 
+        /**
+         * Returns the elapsed duration of the current reporting window.
+         *
+         * @param currentTime current time supplied by the consumer
+         * @return elapsed reporting-window duration in milliseconds
+         */
         @Override
         public long elapsedMilliSecondsWindow(long currentTime) {
             return 0;
         }
 
+        /**
+         * Stops the current reporting window.
+         *
+         * @param stopTime reporting-window stop time
+         */
         @Override
         public void stopWindow(long stopTime) {
         }
 
+        /**
+         * Records the consumer thread when aggregation starts.
+         *
+         * @param startTime benchmark start time
+         */
         @Override
         public void start(long startTime) {
             consumer.set(Thread.currentThread());
             started.countDown();
         }
 
+        /**
+         * Stops benchmark-wide aggregation.
+         *
+         * @param endTime benchmark end time
+         */
         @Override
         public void stop(long endTime) {
         }
