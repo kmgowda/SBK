@@ -25,7 +25,7 @@ obeys gRPC flow control, and waits for the final stream acknowledgment during
 shutdown. SBP 4.0 intentionally removes the earlier unary latency RPC and
 protobuf map field, so SBK and SBM must use the same SBP major version.
 SBM explicitly configures and advertises its inbound record limit
-(`maxRecordSizeMB`, 4 MiB by default); SBK sends no more than the smaller
+(`maxRecordSizeMB`, 16 MiB by default); SBK sends no more than the smaller
 client/server limit.
 
 SBM does not execute storage operations and does not launch remote processes. Use SBK for load generation and SBK-GEM for SSH orchestration.

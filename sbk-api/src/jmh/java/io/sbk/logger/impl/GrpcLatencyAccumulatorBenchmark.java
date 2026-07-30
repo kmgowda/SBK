@@ -53,7 +53,7 @@ public class GrpcLatencyAccumulatorBenchmark {
         /** Initializes both exact-frequency implementations. */
         @Setup(Level.Trial)
         public void setup() {
-            primitive = new GrpcLatencyAccumulator(4L * Bytes.BYTES_PER_MB);
+            primitive = new GrpcLatencyAccumulator(16L * Bytes.BYTES_PER_MB);
             boxedMap = new HashMap<>();
             sequence = 0;
         }
@@ -74,7 +74,7 @@ public class GrpcLatencyAccumulatorBenchmark {
         /** Creates the same deterministic exact distribution for each encoding. */
         @Setup(Level.Invocation)
         public void setup() {
-            accumulator = new GrpcLatencyAccumulator(4L * Bytes.BYTES_PER_MB);
+            accumulator = new GrpcLatencyAccumulator(16L * Bytes.BYTES_PER_MB);
             builder = MessageLatenciesRecord.newBuilder();
             for (int index = 0; index < DISTINCT_LATENCIES; index++) {
                 accumulator.record(1_000L + index, index + 1L);

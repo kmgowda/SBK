@@ -1596,7 +1596,7 @@ averaging client percentiles.
 `GrpcLogger` first accumulates exact counts in a primitive
 `LongLongHashMap`. It creates a protobuf message only when periodic output or
 the conservative message-size threshold requires a flush. The threshold uses
-75 percent of `maxRecordSizeMB` (4 MiB by default), reserves the worst-case
+75 percent of `maxRecordSizeMB` (16 MiB by default), reserves the worst-case
 varint size for every distinct key/count pair, and verifies the final
 serialized size before transmission. The network saving depends on the
 workload:

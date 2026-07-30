@@ -27,7 +27,7 @@ final class GrpcLatencyAccumulatorTest {
     @Test
     void preservesExactCountsInPackedRepresentation() {
         final GrpcLatencyAccumulator accumulator =
-                new GrpcLatencyAccumulator(4L * Bytes.BYTES_PER_MB);
+                new GrpcLatencyAccumulator(16L * Bytes.BYTES_PER_MB);
         accumulator.record(100, 2);
         accumulator.record(200, 3);
         accumulator.record(100, 5);
@@ -61,7 +61,7 @@ final class GrpcLatencyAccumulatorTest {
 
     @Test
     void conservativeThresholdKeepsWorstCasePackedRecordBelowTransportLimit() {
-        final long maximumMessageBytes = 4L * Bytes.BYTES_PER_MB;
+        final long maximumMessageBytes = 16L * Bytes.BYTES_PER_MB;
         final GrpcLatencyAccumulator accumulator =
                 new GrpcLatencyAccumulator(maximumMessageBytes);
         long latency = Long.MAX_VALUE;
