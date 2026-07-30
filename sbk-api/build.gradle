@@ -20,6 +20,7 @@ buildscript {
     dependencies {
         classpath "com.google.protobuf:protobuf-gradle-plugin:$protobufGradlePlugin"
         classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
+        classpath "me.champeau.jmh:jmh-gradle-plugin:$jmhGradleVersion"
     }
 }
 
@@ -27,6 +28,7 @@ apply plugin: 'java-library'
 apply plugin: "com.google.protobuf"
 apply plugin: "maven-publish"
 apply plugin: "com.github.spotbugs"
+apply plugin: "me.champeau.jmh"
 
 apply from: "$rootDir/gradle/protobuf.gradle"
 apply from: "$rootDir/gradle/rat.gradle"
@@ -40,7 +42,79 @@ dependencies {
     api "org.apache.commons:commons-configuration2:$apacheCommonsConfigVersion"
     api "org.apache.commons:commons-lang3:$apacheCommonsLang3Version" // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     implementation "commons-cli:commons-cli:$commonsCliVersion"
+    implementation "org.eclipse.collections:eclipse-collections:$eclipseCollectionVersion"
     implementation "org.jetbrains:annotations:$jetbrainVersion"
+    testImplementation "io.grpc:grpc-inprocess:$grpcVersion"
+}
+
+jmh {
+    jvmArgs = ["-Djmh.blackhole.autoDetect=false"]
+    includes = ['io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*']
+}
+
+def grpcLoggerPerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/grpc-logger-performance.json")
+
+tasks.register('runGrpcLoggerPerformanceBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks primitive gRPC latency batching against the protobuf map path.'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', grpcLoggerPerformanceReport.get().asFile.absolutePath
+    outputs.file(grpcLoggerPerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        grpcLoggerPerformanceReport.get().asFile.parentFile.mkdirs()
+        delete grpcLoggerPerformanceReport
+    }
+}
+
+tasks.register('grpcLoggerPerformanceTest') {
+    group = 'verification'
+    description = 'Reports gRPC logger latency-accumulation and protobuf-encoding performance.'
+    dependsOn tasks.named('runGrpcLoggerPerformanceBenchmark')
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                grpcLoggerPerformanceReport.get().asFile)
+        def byName = results.collectEntries {
+            [(it.benchmark.substring(it.benchmark.lastIndexOf('.') + 1)): it]
+        }
+        def allocation = { result ->
+            result.secondaryMetrics.find { key, value ->
+                key.endsWith('gc.alloc.rate.norm')
+            }?.value?.score ?: 0.0d
+        }
+        byName.each { name, result ->
+            println String.format(
+                    "%-24s : %,.3f %s; %,.3f B/op",
+                    name, result.primaryMetric.score, result.primaryMetric.scoreUnit,
+                    allocation(result))
+        }
+        def primitive = byName.recordPrimitive
+        def protobufMap = byName.recordProtobufMap
+        def packed = byName.encodePacked
+        def legacy = byName.encodeLegacyMap
+        println String.format(
+                "Hot-path observed mean   : primitive accumulation is %.2f%% faster and removes %.3f B/op",
+                (protobufMap.primaryMetric.score - primitive.primaryMetric.score)
+                        * 100.0d / protobufMap.primaryMetric.score,
+                allocation(protobufMap) - allocation(primitive))
+        println String.format(
+                "Batch observed mean      : packed primitive fields are %.2f%% faster and use %.2f%% less allocation",
+                (legacy.primaryMetric.score - packed.primaryMetric.score)
+                        * 100.0d / legacy.primaryMetric.score,
+                (allocation(legacy) - allocation(packed)) * 100.0d / allocation(legacy))
+    }
 }
 
 generateJavadoc {

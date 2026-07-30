@@ -18,6 +18,16 @@ limitations under the License.
 
 SBM is SBK's distributed measurement aggregator. SBK clients using `GrpcLogger` send SBP/gRPC latency records to SBM, which merges them into cluster-wide periodic and total statistics.
 
+SBP 3.1 uses one ordered client-streaming RPC per SBK process and packed
+primitive latency/count fields. `GrpcLogger` accumulates exact frequencies in
+a primitive map, submits immutable batches through a bounded sender queue,
+obeys gRPC flow control, and waits for the final stream acknowledgment during
+shutdown. The SBP 3.0 unary RPC and protobuf map remain available for
+backward compatibility.
+SBM explicitly configures and advertises its inbound record limit
+(`maxRecordSizeMB`, 4 MiB by default); SBK sends no more than the smaller
+client/server limit.
+
 SBM does not execute storage operations and does not launch remote processes. Use SBK for load generation and SBK-GEM for SSH orchestration.
 
 ## Data flow
@@ -90,7 +100,7 @@ Use a hostname or address reachable from every SBK client. Firewalls, containers
 | `io.sbm.main.SbmMain` | Executable entry point |
 | `io.sbm.api.impl.Sbm` | Logger discovery, arguments, and benchmark construction |
 | `SbmBenchmark` | gRPC server and aggregate-recorder lifecycle |
-| `SbmGrpcService` | SBP registration and latency-record endpoint |
+| `SbmGrpcService` | SBP registration, ordered stream validation, and latency-record endpoints |
 | `SbmLatencyBenchmark` | Concurrent queue ingestion and window dispatch |
 | `SbmTotalWindowLatencyPeriodicRecorder` | Periodic and total aggregate windows |
 | `SbmPrometheusLogger` | Aggregated output and metrics |
@@ -104,6 +114,7 @@ Protocol sources are under `sbk-api/src/main/proto`; generated Java/gRPC sources
 - Synchronize clocks when interpreting cross-host timestamps or correlated events.
 - Record client count, worker count, network topology, interval, and latency bounds.
 - Watch rejected registrations, disconnected clients, invalid latencies, and discarded lower/upper values.
+- Treat sequence-gap, stream-overload, and final-acknowledgment failures as invalid benchmark runs.
 - Do not combine already calculated client percentiles; SBM aggregates latency records/windows before reporting percentiles.
 
 ## Containers and dashboards

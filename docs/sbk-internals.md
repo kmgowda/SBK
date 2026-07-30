@@ -1551,7 +1551,7 @@ flowchart TB
 
 **SBP** — **Storage Benchmark Protocol** — is the wire protocol clients
 use to talk to SBM. It is a gRPC service defined in
-[`sbp.proto`](../sbk-api/src/main/proto/sbp.proto), with six RPCs:
+[`sbp.proto`](../sbk-api/src/main/proto/sbp.proto), with seven RPCs:
 
 | RPC | Request | Response | Purpose |
 |---|---|---|---|
@@ -1559,7 +1559,8 @@ use to talk to SBM. It is a gRPC service defined in
 | `isVersionSupported` | `Version` | `BoolValue` | Explicit version negotiation |
 | `getConfig` | Empty | `Config` | Client fetches SBM's run config |
 | `registerClient` | `Config` | `ClientID` | Returns a unique long ID |
-| `addLatenciesRecord` | `MessageLatenciesRecord` | Empty | **Hot path** — push a batch |
+| `addLatenciesRecord` | `MessageLatenciesRecord` | Empty | SBP 3.0-compatible unary batch submission |
+| `streamLatencies` | stream of `MessageLatenciesRecord` | Empty | **SBP 3.1 hot path** — ordered, flow-controlled batches |
 | `closeClient` | `ClientID` | Empty | Graceful disconnect |
 
 The critical message is `MessageLatenciesRecord`:
@@ -1577,32 +1578,79 @@ message MessageLatenciesRecord {
   int64 totalLatency     = 19;
   int64 minLatency       = 20;
   int64 maxLatency       = 21;
-  map<int64, int64> latency = 22;   // <-- the histogram: latency → count
+  map<int64, int64> latency = 22;   // SBP 3.0 compatibility
+  repeated uint64 latencyValues = 23 [packed = true];
+  repeated uint64 latencyCounts = 24 [packed = true];
 }
 ```
 
-The differentiating design choice is the `latency` map: a client sends one
-entry per **distinct recorded latency value**, with the number of operations
-that observed that value. It also sends totals, valid/invalid/discard counts,
-bytes, active/max reader and writer counts, and request/timeout counters.
-SBM therefore receives enough information to recompute a global percentile
+The differentiating design choice is still one exact count per **distinct
+recorded latency value**. SBP 3.1 represents those keys and counts as two
+same-length packed primitive arrays. This avoids the boxed `Long` keys,
+boxed values, per-entry map objects, and embedded protobuf map-entry messages
+required by field 22. It also sends totals, valid/invalid/discard counts,
+bytes, active/max reader and writer counts, and request/timeout counters. SBM
+therefore receives enough information to recompute a global percentile
 distribution; it does not attempt the mathematically invalid operation of
 averaging client percentiles.
 
-`GrpcLogger` batches this data at periodic logger output and also flushes when
-its estimated latency-map payload reaches `maxRecordSizeMB` (4 MiB by
-default). The network saving depends on the workload:
+`GrpcLogger` first accumulates exact counts in a primitive
+`LongLongHashMap`. It creates a protobuf message only when periodic output or
+the conservative message-size threshold requires a flush. The threshold uses
+75 percent of `maxRecordSizeMB` (4 MiB by default), reserves the worst-case
+varint size for every distinct key/count pair, and verifies the final
+serialized size before transmission. The network saving depends on the
+workload:
+
+SBM applies the same configured value to gRPC's inbound-message limit and
+advertises the byte limit through `getConfig`. SBK uses the smaller of its
+local limit and the server-advertised limit, so the producer cannot build
+batches that the receiving server is configured to reject.
 
 ```text
 raw representation       proportional to number of operations
-SBP latency map           proportional to number of distinct latency values
+SBP packed arrays         proportional to number of distinct latency values
 ```
 
 If a million operations occupy 200 integer latency values, the map is much
 smaller than a million raw samples. If nearly every operation has a distinct
 nanosecond value, the benefit is smaller and the size threshold creates more
-batches. Protobuf map entries also have encoding overhead, so entry count must
-not be described as byte count.
+batches.
+
+SBP 3.1 retains the unary RPC and map field so an updated client can
+interoperate with an SBP 3.0 server. `GrpcLogger` checks the server minor
+version: 3.1 or later uses streaming and packed arrays; 3.0 uses unary RPCs
+and populates the legacy map only while flushing.
+
+#### Client-side allocation and flow-control boundary
+
+```mermaid
+flowchart LR
+    P["PerL consumer<br/>one latency result"] --> A["Primitive LongLongHashMap<br/>exact latency to count"]
+    A -->|"5 s interval or safe size threshold"| B["Immutable protobuf batch<br/>packed primitive arrays"]
+    B --> Q["Bounded sender queue<br/>maximum 8 batches"]
+    Q --> T["Dedicated platform sender"]
+    T -->|"only while HTTP/2 isReady"| S["One client stream to SBM"]
+    S --> ACK["Final Empty acknowledgment<br/>after stream drain"]
+
+    FULL["Queue full"] --> FAIL["Fail benchmark explicitly<br/>never grow memory silently"]
+    Q -. capacity check .-> FULL
+
+    classDef hot fill:#fee2e2,stroke:#991b1b,color:#000
+    classDef batch fill:#fef3c7,stroke:#a16207,color:#000
+    classDef transport fill:#e0e7ff,stroke:#4338ca,color:#000
+    classDef safe fill:#dcfce7,stroke:#166534,color:#000
+    class P,A hot
+    class B,Q batch
+    class T,S transport
+    class ACK,FULL,FAIL safe
+```
+
+The bounded sender isolates network progress from PerL without creating an
+unbounded backlog. When HTTP/2 flow control is not ready, the sender parks;
+it does not spin. If eight completed batches are already pending, the logger
+reports overload through SBK's normal exception handler and initiates normal
+benchmark shutdown.
 
 #### SBP connection and data lifecycle
 
@@ -1623,25 +1671,33 @@ sequenceDiagram
     C->>S: registerClient(config)
     S-->>C: clientID
 
-    loop periodic output or size-triggered flush
-        C->>C: aggregate latency to count + counters
-        C->>S: addLatenciesRecord(clientID, sequence, map, totals)
+    C->>S: streamLatencies()
+
+    loop periodic output or safe size-triggered flush
+        C->>C: aggregate in primitive map
+        C->>C: build packed values and counts
+        C->>S: stream batch(clientID, sequence, packed fields, totals)
+        Note over C,S: sender obeys isReady flow control
         S->>Q: enqueue by clientID modulo maxQueues
         Q->>A: merge accepted record
-        S-->>C: Empty acknowledgment
     end
 
+    C->>S: complete stream after final queued batch
+    S-->>C: final Empty acknowledgment
     C->>S: closeClient(clientID)
     S-->>C: Empty acknowledgment
 ```
 
 The major SBP version is enforced by `GrpcLogger`. Storage name, action, and
 time unit must match the server configuration; latency-range and request-log
-differences currently produce warnings. `sequenceNumber` is populated by the
-client, but the current SBM implementation does not validate it, deduplicate
-records, or retry missing records. SBP therefore provides aggregation
-semantics, not exactly-once delivery. Treat transport failures, client exits,
+differences currently produce warnings. Every SBP 3.1 stream has one client
+ID and strictly increasing sequence numbers beginning at one. SBM rejects a
+client-ID change or sequence gap before the record reaches the aggregation
+queue. The stream preserves order and returns its final acknowledgment only
+after all submitted messages have reached the service. SBP does not retry a
+failed stream, so treat transport failures, client exits,
 invalid/discard counts, and connection logs as part of result validation.
+The retained SBP 3.0 unary endpoint does not promise cross-RPC ordering.
 
 ### 6.3 SBM's internal architecture
 
@@ -1696,12 +1752,13 @@ The important details are:
 
 - **Multiple inbound producers** deposit into the queue array. The queue index
   is `clientID % maxQueues`, so all records from one client use the same queue
-  and different clients are spread over the configured queues. This mapping
-  alone is not an ordering or exactly-once guarantee; the server currently
-  does not inspect `sequenceNumber`.
+  and different clients are spread over the configured queues. The SBP 3.1
+  stream validates client ID and sequence before enqueueing.
 - **A single background thread** drains all queues round-robin and
   feeds them into a `LatencyRecordWindow`, reusing PerL's latency-window
-  machinery. Single ownership means the non-thread-safe window does not need
+  machinery. It drains up to 64 records per queue visit, amortizing clock
+  reads and queue scans without allowing one queue to monopolize the
+  consumer. Single ownership means the non-thread-safe window does not need
   concurrent updates.
 - **Window rotation** — every 5 s by default — produces a combined
   periodic line on stdout and ticks the Prometheus gauges.
@@ -1742,7 +1799,11 @@ Concretely
 ([SbmTotalWindowLatencyPeriodicRecorder.java](../sbm/src/main/java/io/sbm/api/impl/SbmTotalWindowLatencyPeriodicRecorder.java)):
 
 ```java
-record.getLatencyMap().forEach(window::reportLatency);
+for (int index = 0; index < record.getLatencyValuesCount(); index++) {
+    window.reportLatency(
+        record.getLatencyValues(index),
+        record.getLatencyCounts(index));
+}
 ```
 
 `window.reportLatency(latency, count)` increments the bucket count by
@@ -1751,9 +1812,11 @@ from the combined counts exactly as for a single integer-bucket distribution.
 Addition of bucket counts is associative and commutative, so merge order does
 not alter the mathematical result.
 
-SBM tracks registered connections and per-client reader/writer maxima, but it
+SBM tracks registered connections and per-client reader/writer maxima in
+reusable primitive arrays indexed by client ID. It does not allocate boxed
+client IDs or rebuild a `HashMap<Long,RW>` every reporting interval, and it
 does not need each client's precomputed percentile. The merge is lossless
-relative to the latency/count maps that actually arrive. It cannot reconstruct
+relative to the latency/count pairs that actually arrive. It cannot reconstruct
 records lost in transport, discarded outside a configured range, quantized by
 an upstream representation, duplicated, or omitted by a failed client.
 
@@ -1882,8 +1945,8 @@ sequenceDiagram
     end
 
     loop during the run
-        N1-->>SBM: addLatenciesRecord (gRPC)
-        N2-->>SBM: addLatenciesRecord (gRPC)
+        N1-->>SBM: streamLatencies batch (gRPC)
+        N2-->>SBM: streamLatencies batch (gRPC)
     end
 
     Note over SBM: SBM prints aggregated stats every 5s

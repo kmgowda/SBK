@@ -102,9 +102,11 @@ final public class SbmBenchmark implements Benchmark {
         latencyRecorder = createLatencyRecorder();
         benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, params.getIdleSleepMilliSeconds(), time, latencyRecorder,
                 logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
+        final int maxRecordSizeBytes = Math.multiplyExact(sbmConfig.maxRecordSizeMB, Bytes.BYTES_PER_MB);
         service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark,
-                coordinatedStart);
-        server = ServerBuilder.forPort(params.getPort()).addService(service).directExecutor().build();
+                coordinatedStart, maxRecordSizeBytes);
+        server = ServerBuilder.forPort(params.getPort()).maxInboundMessageSize(maxRecordSizeBytes)
+                .addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
         state = State.BEGIN;
     }
@@ -147,7 +149,7 @@ final public class SbmBenchmark implements Benchmark {
         }
 
         return new SbmTotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
-                logger, logger, logger, logger);
+                logger, logger, logger, logger, params.getMaxConnections());
     }
 
     /**

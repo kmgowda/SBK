@@ -48,6 +48,10 @@ final public class SbmConfig extends LatencyConfig {
      * <code>int idleMS</code>.
      */
     public int idleMS;
+    /**
+     * Maximum inbound SBP latency-record size in MiB.
+     */
+    public int maxRecordSizeMB;
 
     /**
      * Creates an empty SBM configuration for property binding.
