@@ -77,7 +77,7 @@ public class GrpcLatencyAccumulatorBenchmark {
             accumulator = new GrpcLatencyAccumulator(16L * Bytes.BYTES_PER_MB);
             builder = MessageLatenciesRecord.newBuilder();
             for (int index = 0; index < DISTINCT_LATENCIES; index++) {
-                accumulator.record(1_000L + index, index + 1L);
+                accumulator.recordIfFits(1_000L + index, index + 1L);
             }
         }
     }
@@ -90,7 +90,7 @@ public class GrpcLatencyAccumulatorBenchmark {
      */
     @Benchmark
     public int recordPrimitive(RecordState state) {
-        state.primitive.record(state.nextLatency(), 1);
+        state.primitive.recordIfFits(state.nextLatency(), 1);
         return state.primitive.size();
     }
 

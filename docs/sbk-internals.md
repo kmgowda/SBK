@@ -1595,11 +1595,13 @@ averaging client percentiles.
 
 `GrpcLogger` first accumulates exact counts in a primitive
 `LongLongHashMap`. It creates a protobuf message only when periodic output or
-the conservative message-size threshold requires a flush. The threshold uses
-75 percent of `maxRecordSizeMB` (16 MiB by default), reserves the worst-case
-varint size for every distinct key/count pair, and verifies the final
-serialized size before transmission. The network saving depends on the
-workload:
+the configured message-size limit requires a flush. The accumulator calculates
+the actual unsigned-varint widths of the packed latency and count arrays. Before
+an addition would make the complete record exceed `maxRecordSizeMB` (16 MiB by
+default), SBK sends the current batch to SBM and starts a new batch. A small
+schema-derived bound covers the non-latency protobuf fields; no percentage of
+the configured capacity is withheld. SBK also verifies the final serialized
+size before transmission. The network saving depends on the workload:
 
 SBM applies the same configured value to gRPC's inbound-message limit and
 advertises the byte limit through `getConfig`. SBK uses the smaller of its
@@ -1626,7 +1628,7 @@ accidentally reused with a different meaning.
 ```mermaid
 flowchart LR
     P["PerL consumer<br/>one latency result"] --> A["Primitive LongLongHashMap<br/>exact latency to count"]
-    A -->|"5 s interval or safe size threshold"| B["Immutable protobuf batch<br/>packed primitive arrays"]
+    A -->|"5 s interval or configured size limit"| B["Immutable protobuf batch<br/>packed primitive arrays"]
     B --> Q["Bounded sender queue<br/>maximum 8 batches"]
     Q --> T["Dedicated platform sender"]
     T -->|"only while HTTP/2 isReady"| S["One client stream to SBM"]

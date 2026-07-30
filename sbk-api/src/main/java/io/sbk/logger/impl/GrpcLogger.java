@@ -314,12 +314,18 @@ public class GrpcLogger extends SystemLogger {
             return;
         }
 
-        if (latencyAccumulator.isFull()) {
-            sendLatenciesRecord(0, 0, 0, 0, 0, 0);
+        final boolean validLatency = latency >= 0
+                && latency >= getMinLatency() && latency <= getMaxLatency();
+        if (validLatency && !latencyAccumulator.recordIfFits(latency, events)) {
+            if (latencyAccumulator.size() > 0) {
+                sendLatenciesRecord(0, 0, 0, 0, 0, 0);
+            }
+            if (!latencyAccumulator.recordIfFits(latency, events)) {
+                reportTransportFailure(new IOException("SBK gRPC latency value cannot fit within configured maximum "
+                        + maxMessageBytes + " bytes"));
+            }
         }
-        if (recorder.record(events, bytes, latency)) {
-            latencyAccumulator.record(latency, events);
-        }
+        recorder.record(events, bytes, latency);
     }
 
     @Override

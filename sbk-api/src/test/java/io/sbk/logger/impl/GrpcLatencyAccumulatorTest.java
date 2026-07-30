@@ -28,9 +28,9 @@ final class GrpcLatencyAccumulatorTest {
     void preservesExactCountsInPackedRepresentation() {
         final GrpcLatencyAccumulator accumulator =
                 new GrpcLatencyAccumulator(16L * Bytes.BYTES_PER_MB);
-        accumulator.record(100, 2);
-        accumulator.record(200, 3);
-        accumulator.record(100, 5);
+        assertTrue(accumulator.recordIfFits(100, 2));
+        assertTrue(accumulator.recordIfFits(200, 3));
+        assertTrue(accumulator.recordIfFits(100, 5));
 
         final MessageLatenciesRecord.Builder packedBuilder =
                 MessageLatenciesRecord.newBuilder();
@@ -46,32 +46,67 @@ final class GrpcLatencyAccumulatorTest {
     }
 
     @Test
-    void appliesConservativeMessageHeadroomAndReusesStorageAfterClear() {
+    void usesConfiguredLimitAndReusesStorageAfterClear() {
         final GrpcLatencyAccumulator accumulator =
-                new GrpcLatencyAccumulator(100);
-        accumulator.record(1, 1);
-        accumulator.record(2, 1);
-        accumulator.record(3, 1);
-        accumulator.record(4, 1);
+                new GrpcLatencyAccumulator(512);
+        long latency = Long.MAX_VALUE;
+        while (accumulator.recordIfFits(latency, Long.MAX_VALUE)) {
+            latency--;
+        }
 
-        assertTrue(accumulator.isFull());
+        final MessageLatenciesRecord.Builder builder = maximumMetadataBuilder();
+        accumulator.writePacked(builder);
+        assertTrue(builder.build().getSerializedSize() > 512 * 3 / 4);
         accumulator.clear();
         assertEquals(0, accumulator.size());
     }
 
     @Test
-    void conservativeThresholdKeepsWorstCasePackedRecordBelowTransportLimit() {
+    void exactThresholdKeepsWorstCasePackedRecordBelowTransportLimit() {
         final long maximumMessageBytes = 16L * Bytes.BYTES_PER_MB;
         final GrpcLatencyAccumulator accumulator =
                 new GrpcLatencyAccumulator(maximumMessageBytes);
         long latency = Long.MAX_VALUE;
-        while (!accumulator.isFull()) {
-            accumulator.record(latency--, Long.MAX_VALUE);
+        while (accumulator.recordIfFits(latency, Long.MAX_VALUE)) {
+            latency--;
         }
-        final MessageLatenciesRecord.Builder builder =
-                MessageLatenciesRecord.newBuilder();
+        final MessageLatenciesRecord.Builder builder = maximumMetadataBuilder();
         accumulator.writePacked(builder);
 
-        assertFalse(builder.build().getSerializedSize() > maximumMessageBytes);
+        assertTrue(builder.build().getSerializedSize() <= maximumMessageBytes);
+        assertFalse(accumulator.recordIfFits(latency, Long.MAX_VALUE));
+    }
+
+    @Test
+    void countVarintGrowthParticipatesInExactLimit() {
+        final GrpcLatencyAccumulator accumulator = new GrpcLatencyAccumulator(245);
+        assertTrue(accumulator.recordIfFits(1, 127));
+
+        assertFalse(accumulator.recordIfFits(1, 1));
+    }
+
+    private static MessageLatenciesRecord.Builder maximumMetadataBuilder() {
+        return MessageLatenciesRecord.newBuilder()
+                .setClientID(-1)
+                .setSequenceNumber(-1)
+                .setWriters(-1)
+                .setReaders(-1)
+                .setMaxWriters(-1)
+                .setMaxReaders(-1)
+                .setWriteRequestBytes(-1)
+                .setWriteRequestRecords(-1)
+                .setReadRequestBytes(-1)
+                .setReadRequestRecords(-1)
+                .setWriteTimeoutEvents(-1)
+                .setReadTimeoutEvents(-1)
+                .setTotalRecords(-1)
+                .setValidLatencyRecords(-1)
+                .setLowerLatencyDiscardRecords(-1)
+                .setHigherLatencyDiscardRecords(-1)
+                .setInvalidLatencyRecords(-1)
+                .setTotalBytes(-1)
+                .setTotalLatency(-1)
+                .setMinLatency(-1)
+                .setMaxLatency(-1);
     }
 }
